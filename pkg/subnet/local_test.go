@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/avalanche-cli/internal/mocks"
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/config"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-network-runner/client"
-	"github.com/luxdefi/avalanche-network-runner/rpcpb"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/utils/perms"
+	"github.com/luxdefi/cli/internal/mocks"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/config"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/netrunner/rpcpb"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -89,15 +89,15 @@ func TestDeployToLocal(t *testing.T) {
 	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetNodeBinDir(), "avalanchego-"+avagoVersion)
+	binDir := filepath.Join(app.GetNodeBinDir(), "node-"+avagoVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}
 	err = os.MkdirAll(filepath.Join(binDir, "plugins"), perms.ReadWriteExecute)
 	require.NoError(err)
 
-	// create a dummy avalanchego file, deploy will check it exists
-	f, err := os.Create(filepath.Join(binDir, "avalanchego"))
+	// create a dummy node file, deploy will check it exists
+	f, err := os.Create(filepath.Join(binDir, "node"))
 	require.NoError(err)
 	defer func() {
 		_ = f.Close()

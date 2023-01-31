@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 

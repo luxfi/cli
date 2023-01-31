@@ -6,9 +6,9 @@ import (
 	"errors"
 	"regexp"
 
-	"github.com/luxdefi/avalanche-cli/pkg/key"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/key"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 

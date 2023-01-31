@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/ids"
-	avago_constants "github.com/luxdefi/avalanchego/utils/constants"
-	"github.com/luxdefi/avalanchego/utils/formatting/address"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/ids"
+	avago_constants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/formatting/address"
 	"github.com/ethereum/go-ethereum/common"
 )
 

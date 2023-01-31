@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package models
 
-import "github.com/luxdefi/avalanche-cli/pkg/constants"
+import "github.com/luxdefi/cli/pkg/constants"
 
 type VMType string
 

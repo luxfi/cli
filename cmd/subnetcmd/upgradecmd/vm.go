@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/plugins"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/plugins"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -286,7 +286,7 @@ func chooseManualOrAutomatic(sc models.Sidecar, targetVersion string, _ string) 
 		choiceAutomatic = "Automatic (Make sure your node isn't running)"
 	)
 	choice, err := app.Prompt.CaptureList(
-		"How would you like to update the avalanchego config?",
+		"How would you like to update the node config?",
 		[]string{choiceAutomatic, choiceManual},
 	)
 	if err != nil {

@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxdefi/avalanche-network-runner/rpcpb"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/netrunner/rpcpb"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/olekukonko/tablewriter"
 )
 

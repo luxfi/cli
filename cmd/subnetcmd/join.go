@@ -9,21 +9,21 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/cmd/flags"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/plugins"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/vms/platformvm"
+	"github.com/luxdefi/cli/cmd/flags"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/plugins"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm"
 	"github.com/spf13/cobra"
 )
 
 var (
-	// path to avalanchego config file
+	// path to node config file
 	avagoConfigPath string
-	// path to avalanchego plugin dir
+	// path to node plugin dir
 	pluginDir string
 	// if true, print the manual instructions to screen
 	printManual bool
@@ -52,15 +52,15 @@ the NodeID of your validator to the Subnet's allow list by calling addValidator 
 NodeID.
 
 After you update your validator's config, you need to restart your validator manually. If
-you provide the --avalanchego-config flag, this command attempts to edit the config file
+you provide the --node-config flag, this command attempts to edit the config file
 at that path.
 
 This command currently only supports Subnets deployed on the Fuji Testnet and Mainnet.`,
 		RunE: joinCmd,
 		Args: cobra.ExactArgs(1),
 	}
-	cmd.Flags().StringVar(&avagoConfigPath, "avalanchego-config", "", "file path of the avalanchego config file")
-	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of avalanchego's plugin directory")
+	cmd.Flags().StringVar(&avagoConfigPath, "node-config", "", "file path of the node config file")
+	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of node's plugin directory")
 	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "join on `fuji` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `fuji`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "join on `mainnet`")
@@ -75,7 +75,7 @@ This command currently only supports Subnets deployed on the Fuji Testnet and Ma
 
 func joinCmd(_ *cobra.Command, args []string) error {
 	if printManual && (avagoConfigPath != "" || pluginDir != "") {
-		return errors.New("--print cannot be used with --avalanchego-config or --plugin-dir")
+		return errors.New("--print cannot be used with --node-config or --plugin-dir")
 	}
 
 	chains, err := validateSubnetNameAndGetChains(args)
@@ -187,7 +187,7 @@ but until the node is whitelisted, it will not be able to validate this subnet.`
 			choiceAutomatic = "Automatic"
 		)
 		choice, err := app.Prompt.CaptureList(
-			"How would you like to update the avalanchego config?",
+			"How would you like to update the node config?",
 			[]string{choiceAutomatic, choiceManual},
 		)
 		if err != nil {
@@ -258,7 +258,7 @@ but until the node is whitelisted, it will not be able to validate this subnet.`
 			}
 		}
 		if pluginDir == "" {
-			pluginDir, err = app.Prompt.CaptureString("Path to your avalanchego plugin dir (likely avalanchego/build/plugins)")
+			pluginDir, err = app.Prompt.CaptureString("Path to your node plugin dir (likely node/build/plugins)")
 			if err != nil {
 				return err
 			}
@@ -292,7 +292,7 @@ func isNodeValidatingSubnet(subnetID ids.ID, network models.Network) (bool, erro
 	if nodeIDStr == "" {
 		ux.Logger.PrintToUser("Next, we need the NodeID of the validator you want to whitelist.")
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("Check https://docs.avax.network/apis/avalanchego/apis/info#infogetnodeid for instructions about how to query the NodeID from your node")
+		ux.Logger.PrintToUser("Check https://docs.avax.network/apis/node/apis/info#infogetnodeid for instructions about how to query the NodeID from your node")
 		ux.Logger.PrintToUser("(Edit host IP address and port to match your deployment, if needed).")
 
 		promptStr := "What is the NodeID of the validator you'd like to whitelist?"
@@ -369,8 +369,8 @@ To setup your node, you must do two things:
 
 To add the VM to your plugin directory, copy or scp from %s
 
-If you installed avalanchego with the install script, your plugin directory is likely
-~/.avalanchego/build/plugins.
+If you installed node with the install script, your plugin directory is likely
+~/.node/build/plugins.
 
 If you start your node from the command line WITHOUT a config file (e.g. via command
 line or systemd script), add the following flag to your node's startup command:
@@ -380,12 +380,12 @@ line or systemd script), add the following flag to your node's startup command:
 comma-separating it).
 
 For example:
-./build/avalanchego --network-id=%s --whitelisted-subnets=%s
+./build/node --network-id=%s --whitelisted-subnets=%s
 
 If you start the node via a JSON config file, add this to your config file:
 whitelisted-subnets: %s
 
-TIP: Try this command with the --avalanchego-config flag pointing to your config file,
+TIP: Try this command with the --node-config flag pointing to your config file,
 this tool will try to update the file automatically (make sure it can write to it).
 
 After you update your config, you will need to restart your node for the changes to

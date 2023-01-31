@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxdefi/avalanche-cli/internal/mocks"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/internal/mocks"
+	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +23,7 @@ type urlTest struct {
 
 func TestGetGithubLatestReleaseURL(t *testing.T) {
 	require := require.New(t)
-	expected := "https://api.github.com/repos/luxdefi/avalanchego/releases/latest"
+	expected := "https://api.github.com/repos/luxdefi/node/releases/latest"
 	url := GetGithubLatestReleaseURL(constants.AvaLabsOrg, constants.NodeRepoName)
 	require.Equal(expected, url)
 }
@@ -34,7 +34,7 @@ func TestGetDownloadURL_Node(t *testing.T) {
 			version:     "v1.17.1",
 			goarch:      "amd64",
 			goos:        "linux",
-			expectedURL: "https://github.com/luxdefi/avalanchego/releases/download/v1.17.1/avalanchego-linux-amd64-v1.17.1.tar.gz",
+			expectedURL: "https://github.com/luxdefi/node/releases/download/v1.17.1/node-linux-amd64-v1.17.1.tar.gz",
 			expectedExt: tarExtension,
 			expectedErr: nil,
 		},
@@ -42,7 +42,7 @@ func TestGetDownloadURL_Node(t *testing.T) {
 			version:     "v1.18.5",
 			goarch:      "arm64",
 			goos:        "darwin",
-			expectedURL: "https://github.com/luxdefi/avalanchego/releases/download/v1.18.5/avalanchego-macos-v1.18.5.zip",
+			expectedURL: "https://github.com/luxdefi/node/releases/download/v1.18.5/node-macos-v1.18.5.zip",
 			expectedExt: zipExtension,
 			expectedErr: nil,
 		},
@@ -50,7 +50,7 @@ func TestGetDownloadURL_Node(t *testing.T) {
 			version:     "v2.1.4",
 			goarch:      "amd64",
 			goos:        "windows",
-			expectedURL: "https://github.com/luxdefi/avalanchego/releases/download/v2.1.4/avalanchego-win-v2.1.4-experimental.zip",
+			expectedURL: "https://github.com/luxdefi/node/releases/download/v2.1.4/node-win-v2.1.4-experimental.zip",
 			expectedExt: zipExtension,
 			expectedErr: nil,
 		},

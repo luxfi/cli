@@ -8,8 +8,8 @@ import (
 
 	"github.com/luxdefi/apm/apm"
 	"github.com/luxdefi/apm/config"
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"

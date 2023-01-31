@@ -5,9 +5,9 @@ package subnetcmd
 import (
 	"testing"
 
-	"github.com/luxdefi/avalanche-cli/internal/mocks"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/vms/platformvm"
+	"github.com/luxdefi/cli/internal/mocks"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/vms/platformvm"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

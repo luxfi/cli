@@ -5,7 +5,7 @@ package networkcmd
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 

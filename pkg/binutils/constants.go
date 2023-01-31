@@ -10,7 +10,7 @@ const (
 	gRPCGatewayEndpoint = ":8098"
 	gRPCDialTimeout     = 10 * time.Second
 
-	avalanchegoBinPrefix = "avalanchego-"
+	nodeBinPrefix = "node-"
 	subnetEVMBinPrefix   = "subnet-evm-"
 	spacesVMBinPrefix    = "spacesvm-"
 	maxCopy              = 2147483648 // 2 GB

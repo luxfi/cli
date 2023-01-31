@@ -6,8 +6,8 @@ package packageman
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/cli/tests/e2e/commands"
+	"github.com/luxdefi/cli/tests/e2e/utils"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -113,7 +113,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(secondSubnetName)
 	})
 
-	ginkgo.It("can deploy with multiple avalanchego versions", func() {
+	ginkgo.It("can deploy with multiple node versions", func() {
 		// check avago install precondition
 		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeFalse())

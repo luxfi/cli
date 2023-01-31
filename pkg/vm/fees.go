@@ -4,9 +4,9 @@
 package vm
 
 import (
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/statemachine"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/subnet-evm/commontype"
 	"github.com/luxdefi/subnet-evm/params"
 )

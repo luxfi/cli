@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 

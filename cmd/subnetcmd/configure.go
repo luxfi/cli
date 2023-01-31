@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/utils"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/utils"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,7 @@ var (
 func newConfigureCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "configure [subnetName]",
-		Short: "Adds additional config files for the avalanchego nodes",
+		Short: "Adds additional config files for the node nodes",
 		Long: `Node nodes support several different configuration files. Subnets have their own
 Subnet config which applies to all chains/VMs in the Subnet. Each chain within the Subnet
 can have its own chain config. This command allows you to set both config files.`,

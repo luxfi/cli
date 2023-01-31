@@ -4,7 +4,7 @@
 package utils
 
 const (
-	baseDir      = ".avalanche-cli"
+	baseDir      = ".cli"
 	hardhatDir   = "./tests/e2e/hardhat"
 	confFilePath = hardhatDir + "/dynamic_conf.json"
 	greeterFile  = hardhatDir + "/greeter.json"

@@ -10,9 +10,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/ux"
 )
 
 // Edits an Node config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
@@ -38,7 +38,7 @@ func EditConfigFile(
 	}
 	fileBytes, err := os.ReadFile(configFile)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("failed to load avalanchego config file %s: %w", configFile, err)
+		return fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
 	if fileBytes == nil {
 		fileBytes = []byte("{}")
@@ -88,7 +88,7 @@ func EditConfigFile(
 	}
 	msg := `The config file has been edited. To use it, make sure to start the node with the '--config-file' option, e.g.
 
-./build/avalanchego --config-file %s
+./build/node --config-file %s
 
 (using your binary location). The node has to be restarted for the changes to take effect.`
 	ux.Logger.PrintToUser(msg, configFile)

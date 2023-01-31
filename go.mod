@@ -1,11 +1,11 @@
-module github.com/luxdefi/avalanche-cli
+module github.com/luxdefi/cli
 
 go 1.18
 
 require (
 	github.com/luxdefi/apm v0.0.4
-	github.com/luxdefi/avalanche-network-runner v1.3.6-0.20230127200434-e9fd4badfd66
-	github.com/luxdefi/avalanchego v1.9.7
+	github.com/luxdefi/netrunner v1.3.6-0.20230127200434-e9fd4badfd66
+	github.com/luxdefi/node v1.9.7
 	github.com/luxdefi/coreth v0.11.6
 	github.com/luxdefi/spacesvm v0.0.15
 	github.com/luxdefi/subnet-evm v0.4.8

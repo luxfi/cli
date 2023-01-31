@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/luxdefi/apm/types"
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/version"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/version"
 	"github.com/stretchr/testify/require"
 )
 

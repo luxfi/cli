@@ -6,7 +6,7 @@ They have been generated with `mockery`.
 There is a `scripts/regenerate_mocks.sh` script which can be executed to regenerate **most** mocks when required (interface change).
 
 However, there is an exception:
-Interfaces in another repository (e.g. `avalanchego`) seem to pose problems to `mockery`. We get 
+Interfaces in another repository (e.g. `node`) seem to pose problems to `mockery`. We get 
 
 `outside main module or its selected dependencies`
 

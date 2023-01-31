@@ -7,8 +7,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/statemachine"
 	"github.com/luxdefi/subnet-evm/core"
 	"github.com/ethereum/go-ethereum/common"
 )

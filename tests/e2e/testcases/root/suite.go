@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
+	"github.com/luxdefi/cli/tests/e2e/commands"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

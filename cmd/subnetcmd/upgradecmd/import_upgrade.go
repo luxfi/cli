@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/pkg/subnet/upgrades"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/subnet/upgrades"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 

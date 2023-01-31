@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanche-network-runner/utils"
-	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/netrunner/utils"
+	"github.com/luxdefi/node/ids"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

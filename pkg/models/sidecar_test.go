@@ -6,7 +6,7 @@ package models
 import (
 	"testing"
 
-	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/netrunner/utils"
 	"github.com/stretchr/testify/require"
 )
 

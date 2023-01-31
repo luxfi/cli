@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/constants"
 )
 
 func CopyFile(src, dest string) error {

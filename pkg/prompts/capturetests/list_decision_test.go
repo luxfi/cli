@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxdefi/avalanche-cli/internal/mocks"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/cli/internal/mocks"
+	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

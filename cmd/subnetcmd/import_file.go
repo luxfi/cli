@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/pkg/apmintegration"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/apmintegration"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 

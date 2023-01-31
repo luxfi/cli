@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	application "github.com/luxdefi/avalanche-cli/pkg/application"
+	application "github.com/luxdefi/cli/pkg/application"
 
 	mock "github.com/stretchr/testify/mock"
 )

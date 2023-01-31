@@ -8,8 +8,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanchego/api/info"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/node/api/info"
 )
 
 type StatusChecker interface {
@@ -34,7 +34,7 @@ func (networkStatusChecker) GetCurrentNetworkVersion() (string, int, bool, error
 	// version is in format avalanche/x.y.z, need to turn to semantic
 	splitVersion := strings.Split(versionResponse.Version, "/")
 	if len(splitVersion) != 2 {
-		return "", 0, false, errors.New("unable to parse avalanchego version " + versionResponse.Version)
+		return "", 0, false, errors.New("unable to parse node version " + versionResponse.Version)
 	}
 	// index 0 should be avalanche, index 1 will be version
 	parsedVersion := "v" + splitVersion[1]

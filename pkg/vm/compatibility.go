@@ -8,14 +8,14 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
 	"golang.org/x/mod/semver"
 )
 
-var ErrNoAvagoVersion = errors.New("unable to find a compatible avalanchego version")
+var ErrNoAvagoVersion = errors.New("unable to find a compatible node version")
 
 func GetRPCProtocolVersion(app *application.Lux, vmType models.VMType, vmVersion string) (int, error) {
 	var url string

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 

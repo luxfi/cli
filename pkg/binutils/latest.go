@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/utils/perms"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"go.uber.org/zap"
 )
 

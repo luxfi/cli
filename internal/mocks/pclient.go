@@ -5,19 +5,19 @@ package mocks
 import (
 	context "context"
 
-	api "github.com/luxdefi/avalanchego/api"
+	api "github.com/luxdefi/node/api"
 
-	crypto "github.com/luxdefi/avalanchego/utils/crypto"
+	crypto "github.com/luxdefi/node/utils/crypto"
 
-	ids "github.com/luxdefi/avalanchego/ids"
+	ids "github.com/luxdefi/node/ids"
 
 	mock "github.com/stretchr/testify/mock"
 
-	platformvm "github.com/luxdefi/avalanchego/vms/platformvm"
+	platformvm "github.com/luxdefi/node/vms/platformvm"
 
-	rpc "github.com/luxdefi/avalanchego/utils/rpc"
+	rpc "github.com/luxdefi/node/utils/rpc"
 
-	status "github.com/luxdefi/avalanchego/vms/platformvm/status"
+	status "github.com/luxdefi/node/vms/platformvm/status"
 
 	time "time"
 )

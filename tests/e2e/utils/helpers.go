@@ -18,21 +18,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/key"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-network-runner/client"
-	"github.com/luxdefi/avalanchego/api/info"
-	"github.com/luxdefi/avalanchego/ids"
-	avago_constants "github.com/luxdefi/avalanchego/utils/constants"
-	"github.com/luxdefi/avalanchego/utils/crypto/keychain"
-	ledger "github.com/luxdefi/avalanchego/utils/crypto/ledger"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/vms/components/avax"
-	"github.com/luxdefi/avalanchego/vms/platformvm"
-	"github.com/luxdefi/avalanchego/vms/secp256k1fx"
-	"github.com/luxdefi/avalanchego/wallet/subnet/primary"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/key"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/node/api/info"
+	"github.com/luxdefi/node/ids"
+	avago_constants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/crypto/keychain"
+	ledger "github.com/luxdefi/node/utils/crypto/ledger"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/components/avax"
+	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxdefi/node/wallet/subnet/primary"
 	"github.com/luxdefi/spacesvm/chain"
 	spacesvmclient "github.com/luxdefi/spacesvm/client"
 	"github.com/luxdefi/subnet-evm/ethclient"
@@ -447,7 +447,7 @@ func CheckSubnetEVMExists(version string) bool {
 }
 
 func CheckNodeExists(version string) bool {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.NodeInstallDir, "avalanchego-"+version)
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.NodeInstallDir, "node-"+version)
 	_, err := os.Stat(avagoPath)
 	return err == nil
 }
@@ -578,7 +578,7 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 func GetWhilelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	fileBytes, err := os.ReadFile(configFile)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("failed to load avalanchego config file %s: %w", configFile, err)
+		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
 	var avagoConfig map[string]interface{}
 	if err := json.Unmarshal(fileBytes, &avagoConfig); err != nil {

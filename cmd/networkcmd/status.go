@@ -3,9 +3,9 @@
 package networkcmd
 
 import (
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-network-runner/server"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/netrunner/server"
 	"github.com/spf13/cobra"
 )
 

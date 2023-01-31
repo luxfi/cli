@@ -9,16 +9,16 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/config"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/config"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/kardianos/osext"
 	"github.com/shirou/gopsutil/process"
 )
 
 var (
-	// env var for avalanchego data dir
+	// env var for node data dir
 	defaultUnexpandedDataDir = "$" + config.NodeDataDirVar
 	// expected file name for the config
 	// TODO should other file names be supported? e.g. conf.json, etc.
@@ -31,7 +31,7 @@ var (
 
 // This function needs to be called to initialize this package
 //
-// this init is partly "borrowed" from avalanchego/config/config.go
+// this init is partly "borrowed" from node/config/config.go
 func getScanConfigDirs() ([]string, error) {
 	folderPath, err := osext.ExecutableFolder()
 	scanConfigDirs := []string{}
@@ -55,7 +55,7 @@ func getScanConfigDirs() ([]string, error) {
 		home,
 		filepath.Join(home, constants.NodeRepoName),
 		filepath.Join(home, defaultNodeBuildDir),
-		filepath.Join(home, ".avalanchego"),
+		filepath.Join(home, ".node"),
 		defaultUnexpandedDataDir,
 	)
 	return scanConfigDirs, nil

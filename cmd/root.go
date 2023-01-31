@@ -8,20 +8,20 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/luxdefi/avalanche-cli/cmd/backendcmd"
-	"github.com/luxdefi/avalanche-cli/cmd/keycmd"
-	"github.com/luxdefi/avalanche-cli/cmd/networkcmd"
-	"github.com/luxdefi/avalanche-cli/cmd/subnetcmd"
-	"github.com/luxdefi/avalanche-cli/cmd/transactioncmd"
-	"github.com/luxdefi/avalanche-cli/internal/migrations"
-	"github.com/luxdefi/avalanche-cli/pkg/apmintegration"
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/config"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/utils/perms"
+	"github.com/luxdefi/cli/cmd/backendcmd"
+	"github.com/luxdefi/cli/cmd/keycmd"
+	"github.com/luxdefi/cli/cmd/networkcmd"
+	"github.com/luxdefi/cli/cmd/subnetcmd"
+	"github.com/luxdefi/cli/cmd/transactioncmd"
+	"github.com/luxdefi/cli/internal/migrations"
+	"github.com/luxdefi/cli/pkg/apmintegration"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/config"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -52,7 +52,7 @@ in with avalanche subnet create myNewSubnet.`,
 	// Disable printing the completion command
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.avalanche-cli.json)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli.json)")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "ERROR", "log level for the application")
 
 	// add sub commands

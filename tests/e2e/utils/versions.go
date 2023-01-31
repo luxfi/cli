@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/vm"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/vm"
+	"github.com/luxdefi/node/utils/logging"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"
 )
@@ -143,7 +143,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		return nil, err
 	}
 
-	// now get the avalanchego compatibility object
+	// now get the node compatibility object
 	avagoCompat, err := getAvagoCompatibility(mapper)
 	if err != nil {
 		return nil, err
@@ -166,9 +166,9 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	sort.Sort(sort.Reverse(sort.IntSlice(rpcs)))
 
 	// iterate the rpc versions
-	// evaluate two avalanchego versions which are consecutive
+	// evaluate two node versions which are consecutive
 	// and run with the same RPC version.
-	// This is required for the for the "can deploy with multiple avalanchego versions" test
+	// This is required for the for the "can deploy with multiple node versions" test
 	for _, rpcVersion := range rpcs {
 		versionAsString := strconv.Itoa(rpcVersion)
 		versionsForRPC := avagoCompat[versionAsString]
@@ -241,7 +241,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	// the assumption is that the latest SpacesVM ALWAYS has a compatible avalanchego already
+	// the assumption is that the latest SpacesVM ALWAYS has a compatible node already
 	latest := spacesVMversions[0]
 	rpc := spacesVMmapping[latest]
 	avago, err := mapper.GetLatestAvagoByProtoVersion(mapper.GetApp(), rpc, mapper.GetAvagoURL())
