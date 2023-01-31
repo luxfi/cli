@@ -13,14 +13,14 @@ import (
 	"path"
 	"syscall"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanche-network-runner/server"
-	"github.com/ava-labs/avalanche-network-runner/utils"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-network-runner/client"
+	"github.com/luxdefi/avalanche-network-runner/server"
+	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/utils/perms"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"
@@ -33,7 +33,7 @@ var errGRPCTimeout = errors.New("timed out trying to contact backend controller,
 type ProcessChecker interface {
 	// IsServerProcessRunning returns true if the gRPC server is running,
 	// or false if not
-	IsServerProcessRunning(app *application.Avalanche) (bool, error)
+	IsServerProcessRunning(app *application.Lux) (bool, error)
 }
 
 type realProcessRunner struct{}
@@ -88,7 +88,7 @@ func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 
 // IsServerProcessRunning returns true if the gRPC server is running,
 // or false if not
-func (*realProcessRunner) IsServerProcessRunning(app *application.Avalanche) (bool, error) {
+func (*realProcessRunner) IsServerProcessRunning(app *application.Lux) (bool, error) {
 	pid, err := GetServerPID(app)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
@@ -118,7 +118,7 @@ type runFile struct {
 	GRPCserverFileName string `json:"gRPCserverFileName"`
 }
 
-func GetServerPID(app *application.Avalanche) (int, error) {
+func GetServerPID(app *application.Lux) (int, error) {
 	var rf runFile
 	serverRunFilePath := app.GetRunFile()
 	run, err := os.ReadFile(serverRunFilePath)
@@ -137,7 +137,7 @@ func GetServerPID(app *application.Avalanche) (int, error) {
 
 // StartServerProcess starts the gRPC server as a reentrant process of this binary
 // it just executes `avalanche-cli backend start`
-func StartServerProcess(app *application.Avalanche) error {
+func StartServerProcess(app *application.Lux) error {
 	thisBin := reexec.Self()
 
 	args := []string{constants.BackendCmd}
@@ -192,7 +192,7 @@ func GetAsyncContext() context.Context {
 	return ctx
 }
 
-func KillgRPCServerProcess(app *application.Avalanche) error {
+func KillgRPCServerProcess(app *application.Lux) error {
 	cli, err := NewGRPCClient()
 	if err != nil {
 		return err

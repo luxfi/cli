@@ -11,26 +11,26 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/cmd/flags"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/key"
-	"github.com/ava-labs/avalanche-cli/pkg/localnetworkinterface"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-cli/pkg/txutils"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanche-cli/pkg/vm"
-	"github.com/ava-labs/avalanche-network-runner/utils"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	ledger "github.com/ava-labs/avalanchego/utils/crypto/ledger"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/coreth/core"
-	spacesvmchain "github.com/ava-labs/spacesvm/chain"
+	"github.com/luxdefi/avalanche-cli/cmd/flags"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/key"
+	"github.com/luxdefi/avalanche-cli/pkg/localnetworkinterface"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-cli/pkg/txutils"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/vm"
+	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/avalanchego/utils/crypto/keychain"
+	ledger "github.com/luxdefi/avalanchego/utils/crypto/ledger"
+	"github.com/luxdefi/avalanchego/utils/formatting/address"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/vms/platformvm/txs"
+	"github.com/luxdefi/coreth/core"
+	spacesvmchain "github.com/luxdefi/spacesvm/chain"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -68,7 +68,7 @@ func newDeployCmd() *cobra.Command {
 
 At the end of the call, the command prints the RPC URL you can use to interact with the Subnet.
 
-Avalanche-CLI only supports deploying an individual Subnet once per network. Subsequent
+Lux-CLI only supports deploying an individual Subnet once per network. Subsequent
 attempts to deploy the same Subnet to the same network (local, Fuji, Mainnet) aren't
 allowed. If you'd like to redeploy a Subnet locally for testing, you must first call
 avalanche network clean to reset all deployed chain state. Subsequent local deploys
@@ -774,7 +774,7 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 	// RPC Version was made available in the info API in avalanchego version v1.9.2. For prior versions,
 	// we will need to skip this check.
 	skipRPCCheck := false
-	if semver.Compare(runningAvagoVersion, constants.AvalancheGoCompatibilityVersionAdded) == -1 {
+	if semver.Compare(runningAvagoVersion, constants.NodeCompatibilityVersionAdded) == -1 {
 		skipRPCCheck = true
 	}
 
@@ -794,8 +794,8 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 		}
 	} else if userProvidedAvagoVersion == "latest" {
 		// find latest avago version for this rpc version
-		desiredAvagoVersion, err = vm.GetLatestAvalancheGoByProtocolVersion(
-			app, configuredRPCVersion, constants.AvalancheGoCompatibilityURL)
+		desiredAvagoVersion, err = vm.GetLatestNodeByProtocolVersion(
+			app, configuredRPCVersion, constants.NodeCompatibilityURL)
 		if err != nil {
 			return "", err
 		}

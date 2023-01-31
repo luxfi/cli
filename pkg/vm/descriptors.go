@@ -7,19 +7,19 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/statemachine"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 )
 
-func getChainID(app *application.Avalanche) (*big.Int, error) {
+func getChainID(app *application.Lux) (*big.Int, error) {
 	ux.Logger.PrintToUser("Enter your subnet's ChainId. It can be any positive integer.")
 	return app.Prompt.CapturePositiveBigInt("ChainId")
 }
 
-func getTokenName(app *application.Avalanche) (string, error) {
+func getTokenName(app *application.Lux) (string, error) {
 	ux.Logger.PrintToUser("Select a symbol for your subnet's native token")
 	tokenName, err := app.Prompt.CaptureString("Token symbol")
 	if err != nil {
@@ -30,7 +30,7 @@ func getTokenName(app *application.Avalanche) (string, error) {
 }
 
 func getVMVersion(
-	app *application.Avalanche,
+	app *application.Lux,
 	vmName string,
 	repoName string,
 	vmVersion string,
@@ -56,7 +56,7 @@ func getVMVersion(
 }
 
 func askForVMVersion(
-	app *application.Avalanche,
+	app *application.Lux,
 	vmName string,
 	repoName string,
 	addGoBackOption bool,
@@ -106,7 +106,7 @@ func askForVMVersion(
 	return version, statemachine.Forward, nil
 }
 
-func getDescriptors(app *application.Avalanche, subnetEVMVersion string) (
+func getDescriptors(app *application.Lux, subnetEVMVersion string) (
 	*big.Int,
 	string,
 	string,

@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ava-labs/avalanchego/utils/cb58"
-	"github.com/ava-labs/avalanchego/utils/crypto"
+	"github.com/luxdefi/avalanchego/utils/cb58"
+	"github.com/luxdefi/avalanchego/utils/crypto"
 )
 
 const (

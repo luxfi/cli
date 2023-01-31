@@ -5,14 +5,14 @@ package transactioncmd
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
-var app *application.Avalanche
+var app *application.Lux
 
 // avalanche subnet vm
-func NewCmd(injectedApp *application.Avalanche) *cobra.Command {
+func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transaction",
 		Short: "Sign and execute specific transactions",

@@ -9,22 +9,22 @@ import (
 	"path"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 )
 
 const gitExtension = ".git"
 
 // Returns alias
-func AddRepo(app *application.Avalanche, repoURL *url.URL, branch string) (string, error) {
+func AddRepo(app *application.Lux, repoURL *url.URL, branch string) (string, error) {
 	alias, err := getAlias(repoURL)
 	if err != nil {
 		return "", err
 	}
 
 	if alias == constants.DefaultAvaLabsPackage {
-		ux.Logger.PrintToUser("Avalanche Plugins Core already installed, skipping...")
+		ux.Logger.PrintToUser("Lux Plugins Core already installed, skipping...")
 		return "", nil
 	}
 
@@ -39,11 +39,11 @@ func AddRepo(app *application.Avalanche, repoURL *url.URL, branch string) (strin
 	return alias, app.Apm.AddRepository(alias, repoStr, branch)
 }
 
-func UpdateRepos(app *application.Avalanche) error {
+func UpdateRepos(app *application.Lux) error {
 	return app.Apm.Update()
 }
 
-func InstallVM(app *application.Avalanche, subnetKey string) error {
+func InstallVM(app *application.Lux, subnetKey string) error {
 	vms, err := getVMsInSubnet(app, subnetKey)
 	if err != nil {
 		return err

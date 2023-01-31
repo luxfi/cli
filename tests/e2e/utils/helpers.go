@@ -18,24 +18,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/key"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanchego/api/info"
-	"github.com/ava-labs/avalanchego/ids"
-	avago_constants "github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	ledger "github.com/ava-labs/avalanchego/utils/crypto/ledger"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
-	"github.com/ava-labs/spacesvm/chain"
-	spacesvmclient "github.com/ava-labs/spacesvm/client"
-	"github.com/ava-labs/subnet-evm/ethclient"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/key"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-network-runner/client"
+	"github.com/luxdefi/avalanchego/api/info"
+	"github.com/luxdefi/avalanchego/ids"
+	avago_constants "github.com/luxdefi/avalanchego/utils/constants"
+	"github.com/luxdefi/avalanchego/utils/crypto/keychain"
+	ledger "github.com/luxdefi/avalanchego/utils/crypto/ledger"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/vms/components/avax"
+	"github.com/luxdefi/avalanchego/vms/platformvm"
+	"github.com/luxdefi/avalanchego/vms/secp256k1fx"
+	"github.com/luxdefi/avalanchego/wallet/subnet/primary"
+	"github.com/luxdefi/spacesvm/chain"
+	spacesvmclient "github.com/luxdefi/spacesvm/client"
+	"github.com/luxdefi/subnet-evm/ethclient"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -257,7 +257,7 @@ func DeleteKey(keyName string) error {
 }
 
 func DeleteBins() error {
-	avagoPath := path.Join(GetBaseDir(), constants.AvalancheCliBinDir, constants.AvalancheGoInstallDir)
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.NodeInstallDir)
 	if _, err := os.Stat(avagoPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -266,7 +266,7 @@ func DeleteBins() error {
 	// ignore error, file may not exist
 	_ = os.RemoveAll(avagoPath)
 
-	subevmPath := path.Join(GetBaseDir(), constants.AvalancheCliBinDir, constants.SubnetEVMInstallDir)
+	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.SubnetEVMInstallDir)
 	if _, err := os.Stat(subevmPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -285,7 +285,7 @@ func DeleteCustomBinary(vmName string) {
 }
 
 func DeleteAPMBin(vmid string) {
-	vmPath := path.Join(GetBaseDir(), constants.AvalancheCliBinDir, constants.APMPluginDir, vmid)
+	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.APMPluginDir, vmid)
 
 	// ignore error, file may not exist
 	_ = os.RemoveAll(vmPath)
@@ -441,13 +441,13 @@ func CheckKeyEquality(keyPath1, keyPath2 string) (bool, error) {
 }
 
 func CheckSubnetEVMExists(version string) bool {
-	subevmPath := path.Join(GetBaseDir(), constants.AvalancheCliBinDir, constants.SubnetEVMInstallDir, "subnet-evm-"+version)
+	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.SubnetEVMInstallDir, "subnet-evm-"+version)
 	_, err := os.Stat(subevmPath)
 	return err == nil
 }
 
-func CheckAvalancheGoExists(version string) bool {
-	avagoPath := path.Join(GetBaseDir(), constants.AvalancheCliBinDir, constants.AvalancheGoInstallDir, "avalanchego-"+version)
+func CheckNodeExists(version string) bool {
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.NodeInstallDir, "avalanchego-"+version)
 	_, err := os.Stat(avagoPath)
 	return err == nil
 }

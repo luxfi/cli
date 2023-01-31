@@ -12,17 +12,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/avalanche-cli/internal/mocks"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/config"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanche-network-runner/rpcpb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/luxdefi/avalanche-cli/internal/mocks"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/config"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-network-runner/client"
+	"github.com/luxdefi/avalanche-network-runner/rpcpb"
+	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -86,10 +86,10 @@ func TestDeployToLocal(t *testing.T) {
 		require.NoError(err)
 	}()
 
-	app := &application.Avalanche{}
+	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetAvalanchegoBinDir(), "avalanchego-"+avagoVersion)
+	binDir := filepath.Join(app.GetNodeBinDir(), "avalanchego-"+avagoVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}

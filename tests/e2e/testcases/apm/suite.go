@@ -6,8 +6,8 @@ package apm
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/tests/e2e/commands"
-	"github.com/ava-labs/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
+	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -18,14 +18,14 @@ const (
 	vmid1   = "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
 	vmid2   = "sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm"
 
-	testRepo = "https://github.com/ava-labs/test-subnet-configs"
+	testRepo = "https://github.com/luxdefi/test-subnet-configs"
 )
 
 var _ = ginkgo.Describe("[APM]", func() {
 	ginkgo.BeforeEach(func() {
 		// TODO this is a bit coarse, but I'm not sure a better solution is possible
 		// without modifications to the APM.
-		// More details: https://github.com/ava-labs/avalanche-cli/issues/244
+		// More details: https://github.com/luxdefi/avalanche-cli/issues/244
 		utils.RemoveAPMRepo()
 	})
 
@@ -47,7 +47,7 @@ var _ = ginkgo.Describe("[APM]", func() {
 	})
 
 	ginkgo.It("can import from avalanche-core", func() {
-		repo := "ava-labs/avalanche-plugins-core"
+		repo := "luxdefi/avalanche-plugins-core"
 		commands.ImportSubnetConfig(repo, subnet1)
 	})
 

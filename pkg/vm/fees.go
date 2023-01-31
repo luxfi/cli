@@ -4,14 +4,14 @@
 package vm
 
 import (
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/statemachine"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/subnet-evm/commontype"
+	"github.com/luxdefi/subnet-evm/params"
 )
 
-func GetFeeConfig(config params.ChainConfig, app *application.Avalanche) (
+func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 	params.ChainConfig,
 	statemachine.StateDirection,
 	error,

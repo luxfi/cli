@@ -4,12 +4,12 @@
 package binutils
 
 import (
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 )
 
-func SetupAvalanchego(app *application.Avalanche, avagoVersion string) (string, error) {
-	binDir := app.GetAvalanchegoBinDir()
+func SetupNode(app *application.Lux, avagoVersion string) (string, error) {
+	binDir := app.GetNodeBinDir()
 
 	installer := NewInstaller()
 	downloader := NewAvagoDownloader()
@@ -20,7 +20,7 @@ func SetupAvalanchego(app *application.Avalanche, avagoVersion string) (string, 
 		binDir,
 		avalanchegoBinPrefix,
 		constants.AvaLabsOrg,
-		constants.AvalancheGoRepoName,
+		constants.NodeRepoName,
 		downloader,
 		installer,
 	)

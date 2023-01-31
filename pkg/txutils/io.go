@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/luxdefi/avalanchego/utils/formatting"
+	"github.com/luxdefi/avalanchego/vms/platformvm/txs"
 )
 
 // saves a given [tx] to [txPath]

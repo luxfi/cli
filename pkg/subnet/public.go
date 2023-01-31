@@ -8,20 +8,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanche-network-runner/utils"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/validator"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/avalanchego/utils/crypto/keychain"
+	"github.com/luxdefi/avalanchego/utils/formatting/address"
+	"github.com/luxdefi/avalanchego/utils/set"
+	"github.com/luxdefi/avalanchego/vms/platformvm/txs"
+	"github.com/luxdefi/avalanchego/vms/platformvm/validator"
+	"github.com/luxdefi/avalanchego/vms/secp256k1fx"
+	"github.com/luxdefi/avalanchego/wallet/subnet/primary"
+	"github.com/luxdefi/avalanchego/wallet/subnet/primary/common"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("wallet does not contain subnet auth keys")
@@ -31,10 +31,10 @@ type PublicDeployer struct {
 	usingLedger bool
 	kc          keychain.Keychain
 	network     models.Network
-	app         *application.Avalanche
+	app         *application.Lux
 }
 
-func NewPublicDeployer(app *application.Avalanche, usingLedger bool, kc keychain.Keychain, network models.Network) *PublicDeployer {
+func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keychain, network models.Network) *PublicDeployer {
 	return &PublicDeployer{
 		LocalDeployer: *NewLocalDeployer(app, "", ""),
 		app:           app,

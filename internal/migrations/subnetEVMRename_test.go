@@ -9,13 +9,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/config"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/config"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 
@@ -69,7 +69,7 @@ func TestSubnetEVMRenameMigration(t *testing.T) {
 			require := require.New(t)
 			testDir := t.TempDir()
 
-			app := &application.Avalanche{}
+			app := &application.Lux{}
 			app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 			err := app.CreateSidecar(tt.sc)
@@ -98,7 +98,7 @@ func TestSubnetEVMRenameMigration_EmptyDir(t *testing.T) {
 	require := require.New(t)
 	testDir := t.TempDir()
 
-	app := &application.Avalanche{}
+	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	emptySubnetName := "emptySubnet"

@@ -13,7 +13,7 @@ const (
 	LogDir      = "logs"
 
 	ServerRunFile      = "gRPCserver.run"
-	AvalancheCliBinDir = "bin"
+	LuxCliBinDir = "bin"
 	RunDir             = "runs"
 	UpgradeFilesDir    = "upgrades"
 
@@ -49,8 +49,8 @@ const (
 	DefaultSnapshotName          = "default-1654102509"
 	BootstrapSnapshotArchiveName = "bootstrapSnapshot.tar.gz"
 	BootstrapSnapshotLocalPath   = "assets/" + BootstrapSnapshotArchiveName
-	BootstrapSnapshotURL         = "https://github.com/ava-labs/avalanche-cli/raw/main/" + BootstrapSnapshotLocalPath
-	BootstrapSnapshotSHA256URL   = "https://github.com/ava-labs/avalanche-cli/raw/main/assets/sha256sum.txt"
+	BootstrapSnapshotURL         = "https://github.com/luxdefi/avalanche-cli/raw/main/" + BootstrapSnapshotLocalPath
+	BootstrapSnapshotSHA256URL   = "https://github.com/luxdefi/avalanche-cli/raw/main/assets/sha256sum.txt"
 
 	KeyDir     = "key"
 	KeySuffix  = ".pk"
@@ -73,12 +73,12 @@ const (
 
 	CustomVMDir = "vms"
 
-	AvaLabsOrg          = "ava-labs"
-	AvalancheGoRepoName = "avalanchego"
+	AvaLabsOrg          = "luxdefi"
+	NodeRepoName = "avalanchego"
 	SubnetEVMRepoName   = "subnet-evm"
 	SpacesVMRepoName    = "spacesvm"
 
-	AvalancheGoInstallDir = "avalanchego"
+	NodeInstallDir = "avalanchego"
 	SubnetEVMInstallDir   = "subnet-evm"
 	SpacesVMInstallDir    = "spacesvm"
 
@@ -90,7 +90,7 @@ const (
 
 	APMDir                = ".apm"
 	APMLogName            = "apm.log"
-	DefaultAvaLabsPackage = "ava-labs/avalanche-plugins-core"
+	DefaultAvaLabsPackage = "luxdefi/avalanche-plugins-core"
 	APMPluginDir          = "apm_plugins"
 
 	// #nosec G101
@@ -105,19 +105,19 @@ const (
 	ChainConfigFileName        = "chain.json"
 	PerNodeChainConfigFileName = "per-node-chain.json"
 
-	GitRepoCommitName  = "Avalanche-CLI"
+	GitRepoCommitName  = "Lux-CLI"
 	GitRepoCommitEmail = "info@avax.network"
 
-	AvaLabsMaintainers = "ava-labs"
+	AvaLabsMaintainers = "luxdefi"
 
 	UpdateBytesFileName = "upgrade.json"
 	NotAvailableLabel   = "Not available"
 	BackendCmd          = "avalanche-cli-backend"
 
-	AvalancheGoCompatibilityVersionAdded = "v1.9.2"
-	AvalancheGoCompatibilityURL          = "https://raw.githubusercontent.com/ava-labs/avalanchego/master/version/compatibility.json"
-	SubnetEVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/ava-labs/subnet-evm/master/compatibility.json"
-	SpacesVMRPCCompatibilityURL          = "https://raw.githubusercontent.com/ava-labs/spacesvm/master/compatibility.json"
+	NodeCompatibilityVersionAdded = "v1.9.2"
+	NodeCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/avalanchego/master/version/compatibility.json"
+	SubnetEVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxdefi/subnet-evm/master/compatibility.json"
+	SpacesVMRPCCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/spacesvm/master/compatibility.json"
 
 	YesLabel = "Yes"
 	NoLabel  = "No"

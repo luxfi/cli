@@ -8,16 +8,16 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
 	"golang.org/x/mod/semver"
 )
 
 var ErrNoAvagoVersion = errors.New("unable to find a compatible avalanchego version")
 
-func GetRPCProtocolVersion(app *application.Avalanche, vmType models.VMType, vmVersion string) (int, error) {
+func GetRPCProtocolVersion(app *application.Lux, vmType models.VMType, vmVersion string) (int, error) {
 	var url string
 
 	switch vmType {
@@ -47,7 +47,7 @@ func GetRPCProtocolVersion(app *application.Avalanche, vmType models.VMType, vmV
 	return version, nil
 }
 
-func GetLatestAvalancheGoByProtocolVersion(app *application.Avalanche, rpcVersion int, url string) (string, error) {
+func GetLatestNodeByProtocolVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
 	compatibilityBytes, err := app.Downloader.Download(url)
 	if err != nil {
 		return "", err
@@ -69,7 +69,7 @@ func GetLatestAvalancheGoByProtocolVersion(app *application.Avalanche, rpcVersio
 	// get latest avago release to make sure we're not picking a release currently in progress but not available for download
 	latestAvagoVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.AvaLabsOrg,
-		constants.AvalancheGoRepoName,
+		constants.NodeRepoName,
 	))
 	if err != nil {
 		return "", err

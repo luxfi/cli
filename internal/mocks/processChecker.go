@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	application "github.com/ava-labs/avalanche-cli/pkg/application"
+	application "github.com/luxdefi/avalanche-cli/pkg/application"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -14,18 +14,18 @@ type ProcessChecker struct {
 }
 
 // IsServerProcessRunning provides a mock function with given fields: app
-func (_m *ProcessChecker) IsServerProcessRunning(app *application.Avalanche) (bool, error) {
+func (_m *ProcessChecker) IsServerProcessRunning(app *application.Lux) (bool, error) {
 	ret := _m.Called(app)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(*application.Avalanche) bool); ok {
+	if rf, ok := ret.Get(0).(func(*application.Lux) bool); ok {
 		r0 = rf(app)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*application.Avalanche) error); ok {
+	if rf, ok := ret.Get(1).(func(*application.Lux) error); ok {
 		r1 = rf(app)
 	} else {
 		r1 = ret.Error(1)

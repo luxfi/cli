@@ -9,14 +9,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/ids"
-	avago_constants "github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/vms/platformvm"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/ids"
+	avago_constants "github.com/luxdefi/avalanchego/utils/constants"
+	"github.com/luxdefi/avalanchego/vms/platformvm"
 	"github.com/spf13/cobra"
 )
 

@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-network-runner/utils"
 )
 
 func SanitizePath(path string) (string, error) {
@@ -31,7 +31,7 @@ func SanitizePath(path string) (string, error) {
 }
 
 // Downloads the subnet's VM (if necessary) and copies it into the plugin directory
-func CreatePlugin(app *application.Avalanche, subnetName string, pluginDir string) (string, error) {
+func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (string, error) {
 	sc, err := app.LoadSidecar(subnetName)
 	if err != nil {
 		return "", fmt.Errorf("failed to load sidecar: %w", err)
@@ -74,7 +74,7 @@ func CreatePlugin(app *application.Avalanche, subnetName string, pluginDir strin
 
 // Downloads the target VM (if necessary) and copies it into the plugin directory
 func CreatePluginFromVersion(
-	app *application.Avalanche,
+	app *application.Lux,
 	subnetName string,
 	vm models.VMType,
 	version string,

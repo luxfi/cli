@@ -9,24 +9,24 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/config"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/config"
+	"github.com/luxdefi/avalanchego/utils/logging"
 	"github.com/kardianos/osext"
 	"github.com/shirou/gopsutil/process"
 )
 
 var (
 	// env var for avalanchego data dir
-	defaultUnexpandedDataDir = "$" + config.AvalancheGoDataDirVar
+	defaultUnexpandedDataDir = "$" + config.NodeDataDirVar
 	// expected file name for the config
 	// TODO should other file names be supported? e.g. conf.json, etc.
 	defaultConfigFileName = "config.json"
 	// expected name of the plugins dir
 	defaultPluginDir = "plugins"
 	// default dir where the binary is usually found
-	defaultAvalanchegoBuildDir = filepath.Join("go", "src", "github.com", constants.AvaLabsOrg, constants.AvalancheGoRepoName, "build")
+	defaultNodeBuildDir = filepath.Join("go", "src", "github.com", constants.AvaLabsOrg, constants.NodeRepoName, "build")
 )
 
 // This function needs to be called to initialize this package
@@ -49,12 +49,12 @@ func getScanConfigDirs() ([]string, error) {
 	}
 	// TODO: Any other dirs we want to scan?
 	scanConfigDirs = append(scanConfigDirs,
-		filepath.Join("/", "etc", constants.AvalancheGoRepoName),
-		filepath.Join("/", "usr", "local", "lib", constants.AvalancheGoRepoName),
+		filepath.Join("/", "etc", constants.NodeRepoName),
+		filepath.Join("/", "usr", "local", "lib", constants.NodeRepoName),
 		wd,
 		home,
-		filepath.Join(home, constants.AvalancheGoRepoName),
-		filepath.Join(home, defaultAvalanchegoBuildDir),
+		filepath.Join(home, constants.NodeRepoName),
+		filepath.Join(home, defaultNodeBuildDir),
 		filepath.Join(home, ".avalanchego"),
 		defaultUnexpandedDataDir,
 	)
@@ -79,7 +79,7 @@ func FindAvagoConfigPath() (string, error) {
 	ux.Logger.PrintToUser(logging.Yellow.Wrap("Scanning your system for existing files..."))
 	var path string
 	// Attempt 1: Try the admin API
-	if path = findByRunningProcesses(constants.AvalancheGoRepoName, config.ConfigFileKey); path != "" {
+	if path = findByRunningProcesses(constants.NodeRepoName, config.ConfigFileKey); path != "" {
 		return path, nil
 	}
 	// Attempt 2: find looking at some usual dirs

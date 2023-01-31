@@ -6,16 +6,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 	"github.com/spf13/cobra"
 )
 
-var app *application.Avalanche
+var app *application.Lux
 
 // backendCmd is the command to run the backend gRPC process
-func NewCmd(injectedApp *application.Avalanche) *cobra.Command {
+func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	return &cobra.Command{
 		Use:    constants.BackendCmd,

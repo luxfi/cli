@@ -6,10 +6,10 @@ package apmintegration
 import (
 	"os"
 
-	"github.com/ava-labs/apm/apm"
-	"github.com/ava-labs/apm/config"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/apm/apm"
+	"github.com/luxdefi/apm/config"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
@@ -22,7 +22,7 @@ const (
 )
 
 // Note, you can only call this method once per run
-func SetupApm(app *application.Avalanche, apmBaseDir string) error {
+func SetupApm(app *application.Lux, apmBaseDir string) error {
 	credentials, err := initCredentials()
 	if err != nil {
 		return err

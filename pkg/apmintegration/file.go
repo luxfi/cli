@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ava-labs/apm/types"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
+	"github.com/luxdefi/apm/types"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
 	"gopkg.in/yaml.v3"
 )
 
-func GetRepos(app *application.Avalanche) ([]string, error) {
+func GetRepos(app *application.Lux) ([]string, error) {
 	repositoryDir := filepath.Join(app.ApmDir, "repositories")
 	orgs, err := os.ReadDir(repositoryDir)
 	if err != nil {
@@ -36,7 +36,7 @@ func GetRepos(app *application.Avalanche) ([]string, error) {
 	return output, nil
 }
 
-func GetSubnets(app *application.Avalanche, repoAlias string) ([]string, error) {
+func GetSubnets(app *application.Lux, repoAlias string) ([]string, error) {
 	subnetDir := filepath.Join(app.ApmDir, "repositories", repoAlias, "subnets")
 	subnets, err := os.ReadDir(subnetDir)
 	if err != nil {
@@ -59,7 +59,7 @@ type VMWrapper struct {
 	VM types.VM `yaml:"vm"`
 }
 
-func LoadSubnetFile(app *application.Avalanche, subnetKey string) (types.Subnet, error) {
+func LoadSubnetFile(app *application.Lux, subnetKey string) (types.Subnet, error) {
 	repoAlias, subnetName, err := splitKey(subnetKey)
 	if err != nil {
 		return types.Subnet{}, err
@@ -81,7 +81,7 @@ func LoadSubnetFile(app *application.Avalanche, subnetKey string) (types.Subnet,
 	return subnetWrapper.Subnet, nil
 }
 
-func getVMsInSubnet(app *application.Avalanche, subnetKey string) ([]string, error) {
+func getVMsInSubnet(app *application.Lux, subnetKey string) ([]string, error) {
 	subnet, err := LoadSubnetFile(app, subnetKey)
 	if err != nil {
 		return []string{}, err
@@ -90,7 +90,7 @@ func getVMsInSubnet(app *application.Avalanche, subnetKey string) ([]string, err
 	return subnet.VMs, nil
 }
 
-func LoadVMFile(app *application.Avalanche, repo, vm string) (types.VM, error) {
+func LoadVMFile(app *application.Lux, repo, vm string) (types.VM, error) {
 	vmYamlPath := filepath.Join(app.ApmDir, "repositories", repo, "vms", vm+".yaml")
 	var vmWrapper VMWrapper
 

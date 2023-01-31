@@ -3,8 +3,8 @@
 package models
 
 import (
-	"github.com/ava-labs/avalanche-network-runner/utils"
-	"github.com/ava-labs/avalanchego/ids"
+	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanchego/ids"
 )
 
 type NetworkData struct {

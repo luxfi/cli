@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/ava-labs/avalanche-cli/pkg/apmintegration"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/apmintegration"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +50,7 @@ flag.`,
 		&repoOrURL,
 		"repo",
 		"",
-		"the repo to import (ex: ava-labs/avalanche-plugins-core) or url to download the repo from",
+		"the repo to import (ex: luxdefi/avalanche-plugins-core) or url to download the repo from",
 	)
 	cmd.Flags().StringVar(
 		&branch,

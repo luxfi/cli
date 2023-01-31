@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/avalanchego/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 
@@ -275,9 +275,9 @@ func Test_genesisExists(t *testing.T) {
 	require.NoError(err)
 }
 
-func newTestApp(t *testing.T) *Avalanche {
+func newTestApp(t *testing.T) *Lux {
 	tempDir := t.TempDir()
-	return &Avalanche{
+	return &Lux{
 		baseDir: tempDir,
 		Log:     logging.NoLog{},
 	}

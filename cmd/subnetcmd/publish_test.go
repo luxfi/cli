@@ -10,17 +10,17 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/ava-labs/avalanche-cli/internal/mocks"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/config"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/luxdefi/avalanche-cli/internal/mocks"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/config"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/version"
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -80,7 +80,7 @@ func TestInfoKnownVMs(t *testing.T) {
 		require.NoError(err)
 		// it's kinda useless to create the URL by building it via downloader -
 		// would defeat the purpose of the test
-		expectedURL := "https://github.com/ava-labs/" +
+		expectedURL := "https://github.com/luxdefi/" +
 			c.repoName + "/releases/download/" +
 			c.strVer + "/" + c.repoName + "_" + c.strVer[1:] + "_" +
 			runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
@@ -420,7 +420,7 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *mocks.Prompter) {
 	err := os.Mkdir(filepath.Join(testDir, "repos"), 0o755)
 	require.NoError(err)
 	ux.NewUserLog(logging.NoLog{}, io.Discard)
-	app = &application.Avalanche{}
+	app = &application.Lux{}
 	mockPrompt := mocks.NewPrompter(t)
 	app.Setup(testDir, logging.NoLog{}, config.New(), mockPrompt, application.NewDownloader())
 

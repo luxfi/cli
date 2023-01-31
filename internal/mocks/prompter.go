@@ -5,12 +5,12 @@ package mocks
 import (
 	big "math/big"
 
-	ids "github.com/ava-labs/avalanchego/ids"
+	ids "github.com/luxdefi/avalanchego/ids"
 	common "github.com/ethereum/go-ethereum/common"
 
 	mock "github.com/stretchr/testify/mock"
 
-	models "github.com/ava-labs/avalanche-cli/pkg/models"
+	models "github.com/luxdefi/avalanche-cli/pkg/models"
 
 	time "time"
 

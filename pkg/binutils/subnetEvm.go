@@ -6,11 +6,11 @@ package binutils
 import (
 	"path/filepath"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 )
 
-func SetupSubnetEVM(app *application.Avalanche, subnetEVMVersion string) (string, error) {
+func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, error) {
 	// Check if already installed
 	binDir := app.GetSubnetEVMBinDir()
 	subDir := filepath.Join(binDir, subnetEVMBinPrefix+subnetEVMVersion)

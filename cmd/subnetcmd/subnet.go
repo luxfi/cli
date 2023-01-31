@@ -5,15 +5,15 @@ package subnetcmd
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/cmd/subnetcmd/upgradecmd"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/cmd/subnetcmd/upgradecmd"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
-var app *application.Avalanche
+var app *application.Lux
 
 // avalanche subnet
-func NewCmd(injectedApp *application.Avalanche) *cobra.Command {
+func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subnet",
 		Short: "Create and deploy subnets",

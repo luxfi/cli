@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 	"github.com/shirou/gopsutil/process"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -56,7 +56,7 @@ func clean(*cobra.Command, []string) error {
 
 	if hard {
 		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded avalanchego and plugin binaries")
-		binDir := filepath.Join(app.GetBaseDir(), constants.AvalancheCliBinDir)
+		binDir := filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir)
 		cleanBins(binDir)
 		_ = killAllBackendsByName()
 	} else {
@@ -64,18 +64,18 @@ func clean(*cobra.Command, []string) error {
 		// plugin dirs except for the c-chain plugin
 
 		// Check if dir exists. If not, no work to be done
-		if _, err := os.Stat(app.GetAvalanchegoBinDir()); errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Stat(app.GetNodeBinDir()); errors.Is(err, os.ErrNotExist) {
 			// path/to/whatever does *not* exist
 			return nil
 		}
 
-		installedVersions, err := os.ReadDir(app.GetAvalanchegoBinDir())
+		installedVersions, err := os.ReadDir(app.GetNodeBinDir())
 		if err != nil {
 			return err
 		}
 
 		for _, avagoDir := range installedVersions {
-			pluginDir := filepath.Join(app.GetAvalanchegoBinDir(), avagoDir.Name(), "plugins")
+			pluginDir := filepath.Join(app.GetNodeBinDir(), avagoDir.Name(), "plugins")
 			installedPlugins, err := os.ReadDir(pluginDir)
 			if err != nil {
 				return err

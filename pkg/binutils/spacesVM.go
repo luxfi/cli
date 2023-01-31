@@ -6,11 +6,11 @@ package binutils
 import (
 	"path/filepath"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 )
 
-func SetupSpacesVM(app *application.Avalanche, spacesVMVersion string) (string, error) {
+func SetupSpacesVM(app *application.Lux, spacesVMVersion string) (string, error) {
 	// Check if already installed
 	binDir := app.GetSpacesVMBinDir()
 	subDir := filepath.Join(binDir, spacesVMBinPrefix+spacesVMVersion)

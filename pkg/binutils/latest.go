@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/utils/perms"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +36,7 @@ func DownloadReleaseVersion(
 	switch goos {
 	case "linux":
 		downloadURL = fmt.Sprintf(
-			"https://github.com/ava-labs/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
+			"https://github.com/luxdefi/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
 			repo,
 			version,
 			repo,
@@ -46,7 +46,7 @@ func DownloadReleaseVersion(
 		ext = "tar.gz"
 	case "darwin":
 		downloadURL = fmt.Sprintf(
-			"https://github.com/ava-labs/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
+			"https://github.com/luxdefi/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
 			repo,
 			version,
 			repo,

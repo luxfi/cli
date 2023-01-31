@@ -6,7 +6,7 @@ package binutils
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 )
 
 const (
@@ -54,7 +54,7 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 		avalanchegoURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/avalanchego-linux-%s-%s.tar.gz",
 			constants.AvaLabsOrg,
-			constants.AvalancheGoRepoName,
+			constants.NodeRepoName,
 			version,
 			goarch,
 			version,
@@ -64,7 +64,7 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 		avalanchegoURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/avalanchego-macos-%s.zip",
 			constants.AvaLabsOrg,
-			constants.AvalancheGoRepoName,
+			constants.NodeRepoName,
 			version,
 			version,
 		)
@@ -74,7 +74,7 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 		avalanchegoURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/avalanchego-win-%s-experimental.zip",
 			constants.AvaLabsOrg,
-			constants.AvalancheGoRepoName,
+			constants.NodeRepoName,
 			version,
 			version,
 		)
