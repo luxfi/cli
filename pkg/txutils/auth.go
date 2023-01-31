@@ -5,13 +5,13 @@ package txutils
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/utils/crypto"
-	"github.com/luxdefi/avalanchego/vms/components/verify"
-	"github.com/luxdefi/avalanchego/vms/platformvm/txs"
-	"github.com/luxdefi/avalanchego/vms/secp256k1fx"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/crypto"
+	"github.com/luxdefi/node/vms/components/verify"
+	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 )
 
 // get all subnet auth addresses that are required to sign a given tx

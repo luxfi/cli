@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/utils/storage"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/utils/storage"
 )
 
 func WriteUpgradeFile(jsonBytes []byte, subnetName, upgradeFilesDir string) error {

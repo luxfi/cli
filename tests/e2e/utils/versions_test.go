@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
 )
@@ -28,7 +28,7 @@ type testContext struct {
 	sourceEVM string
 	// fake versions set for the spacesvm binaries, faking github
 	sourceSpacesVM string
-	// fake versions set for the avalanchego binaries, faking github
+	// fake versions set for the node binaries, faking github
 	sourceAvago string
 	// should the test fail
 	shouldFail bool
@@ -119,7 +119,7 @@ func (m *testMapper) GetCompatURL(vmType models.VMType) string {
 }
 
 // GetAvagoURL fakes a github endpoint for
-// avalanchego releases
+// node releases
 // implement VersionMapper
 func (m *testMapper) GetAvagoURL() string {
 	return m.srv.URL + "/avago"

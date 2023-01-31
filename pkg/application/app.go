@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 
 	"github.com/luxdefi/apm/apm"
-	"github.com/luxdefi/avalanche-cli/pkg/config"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/cli/pkg/config"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/subnet-evm/core"
 )
 

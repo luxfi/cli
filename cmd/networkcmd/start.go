@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-network-runner/client"
-	"github.com/luxdefi/avalanche-network-runner/server"
-	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/netrunner/server"
+	"github.com/luxdefi/netrunner/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ already running.`,
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&avagoVersion, "avalanchego-version", "latest", "use this version of avalanchego (ex: v1.17.12)")
+	cmd.Flags().StringVar(&avagoVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 
 	return cmd

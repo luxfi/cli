@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/cli/tests/e2e/commands"
+	"github.com/luxdefi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -143,7 +143,7 @@ var _ = ginkgo.Describe("[Upgrade]", ginkgo.Ordered, func() {
 	// 		gomega.Expect(err).Should(gomega.BeNil())
 	// 	}
 
-	// 	// TODO: There is currently only one subnet-evm version compatible with avalanchego. These
+	// 	// TODO: There is currently only one subnet-evm version compatible with node. These
 	// 	// lines should be uncommented when a new version is released. The section below can be removed.
 	// 	// // restart to use the new vm version
 	// 	// err = utils.RestartNodesWithWhitelistedSubnets(whitelistedSubnets)

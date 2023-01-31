@@ -4,13 +4,13 @@ set -e
 usage() {
   this=$1
   cat <<EOF
-$this: download go binaries for luxdefi/avalanche-cli
+$this: download go binaries for luxdefi/cli
 
 Usage: $this [-b] bindir [-d] [tag]
   -b sets bindir or installation directory, Defaults to ~/bin
   -d turns on debug logging
    [tag] is a tag from
-   https://github.com/luxdefi/avalanche-cli/releases
+   https://github.com/luxdefi/cli/releases
    If tag is missing, then the latest will be used.
 
 EOF
@@ -329,9 +329,9 @@ End of functions from https://github.com/client9/shlib
 ------------------------------------------------------------------------
 EOF
 
-PROJECT_NAME=avalanche-cli
+PROJECT_NAME=cli
 OWNER=luxdefi
-REPO="avalanche-cli"
+REPO="cli"
 BINARY=avalanche
 FORMAT=tar.gz
 OS=$(uname_os)

@@ -3,12 +3,12 @@
 package transactioncmd
 
 import (
-	"github.com/luxdefi/avalanche-cli/cmd/subnetcmd"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanche-cli/pkg/txutils"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/vms/secp256k1fx"
+	"github.com/luxdefi/cli/cmd/subnetcmd"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/txutils"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 

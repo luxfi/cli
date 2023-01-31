@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
-	"github.com/luxdefi/avalanche-network-runner/api"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/tests/e2e/commands"
+	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxdefi/netrunner/api"
 	"github.com/ethereum/go-ethereum/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -24,7 +24,7 @@ import (
 const (
 	subnetName       = "e2eSubnetTest"
 	secondSubnetName = "e2eSecondSubnetTest"
-	confPath         = "tests/e2e/assets/test_avalanche-cli.json"
+	confPath         = "tests/e2e/assets/test_cli.json"
 )
 
 var (

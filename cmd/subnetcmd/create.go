@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-cli/pkg/vm"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/vm"
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
 )
@@ -165,7 +165,7 @@ func createSubnetConfig(_ *cobra.Command, args []string) error {
 }
 
 func checkInvalidSubnetNames(name string) error {
-	// this is currently exactly the same code as in avalanchego/vms/platformvm/create_chain_tx.go
+	// this is currently exactly the same code as in node/vms/platformvm/create_chain_tx.go
 	for _, r := range name {
 		if r > unicode.MaxASCII || !(unicode.IsLetter(r) || unicode.IsNumber(r) || r == ' ') {
 			return errIllegalNameCharacter

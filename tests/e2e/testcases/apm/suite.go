@@ -6,8 +6,8 @@ package apm
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/cli/tests/e2e/commands"
+	"github.com/luxdefi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe("[APM]", func() {
 	ginkgo.BeforeEach(func() {
 		// TODO this is a bit coarse, but I'm not sure a better solution is possible
 		// without modifications to the APM.
-		// More details: https://github.com/luxdefi/avalanche-cli/issues/244
+		// More details: https://github.com/luxdefi/cli/issues/244
 		utils.RemoveAPMRepo()
 	})
 

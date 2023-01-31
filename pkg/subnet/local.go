@@ -16,19 +16,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/utils"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-cli/pkg/vm"
-	"github.com/luxdefi/avalanche-network-runner/client"
-	"github.com/luxdefi/avalanche-network-runner/rpcpb"
-	"github.com/luxdefi/avalanche-network-runner/server"
-	anrutils "github.com/luxdefi/avalanche-network-runner/utils"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/utils/storage"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/utils"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/vm"
+	"github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/netrunner/rpcpb"
+	"github.com/luxdefi/netrunner/server"
+	anrutils "github.com/luxdefi/netrunner/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/storage"
 	"github.com/luxdefi/coreth/params"
 	spacesvmchain "github.com/luxdefi/spacesvm/chain"
 	"github.com/luxdefi/subnet-evm/core"
@@ -304,9 +304,9 @@ func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) err
 
 // SetupLocalEnv also does some heavy lifting:
 // * sets up default snapshot if not installed
-// * checks if avalanchego is installed in the local binary path
+// * checks if node is installed in the local binary path
 // * if not, it downloads it and installs it (os - and archive dependent)
-// * returns the location of the avalanchego path and plugin
+// * returns the location of the node path and plugin
 func (d *LocalDeployer) SetupLocalEnv() (string, string, error) {
 	err := d.setDefaultSnapshot(d.app.GetSnapshotsDir(), false)
 	if err != nil {
@@ -319,7 +319,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, string, error) {
 	}
 
 	pluginDir := filepath.Join(avagoDir, "plugins")
-	avalancheGoBinPath := filepath.Join(avagoDir, "avalanchego")
+	avalancheGoBinPath := filepath.Join(avagoDir, "node")
 
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
 		return "", "", fmt.Errorf("could not create pluginDir %s", pluginDir)

@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/luxdefi/avalanche-cli/cmd"
+	"github.com/luxdefi/cli/cmd"
 )
 
 func main() {

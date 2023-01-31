@@ -13,7 +13,7 @@ The tool has been tested on Linux and Mac. Windows is currently not supported.
 To download a binary for the latest release, run:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/luxdefi/avalanche-cli/main/scripts/install.sh | sh -s
+curl -sSfL https://raw.githubusercontent.com/luxdefi/cli/main/scripts/install.sh | sh -s
 ```
 
 The binary will be installed inside the `~/bin` directory.
@@ -31,7 +31,7 @@ To add it to your path permanently, add an export command to your shell initiali
 To download the binary into a specific directory, run:
 
 ```
-curl -sSfL https://raw.githubusercontent.com/luxdefi/avalanche-cli/main/scripts/install.sh | sh -s -- -b <relative directory>
+curl -sSfL https://raw.githubusercontent.com/luxdefi/cli/main/scripts/install.sh | sh -s -- -b <relative directory>
 ```
 
 ## Quickstart
@@ -66,7 +66,7 @@ avalanche network start
 
 ## Modifying your Subnet Deployment
 
-You can provide a global node config to edit the way your local avalanchego nodes perform under the hood. To provide such a config, you need to create an avalanche-cli config file. By default, a config file is read in from $HOME/.avalanche-cli.json. If none exists, no error will occur. To provide a config from a custom location, run any command with the flag `--config <pathToConfig>`.
+You can provide a global node config to edit the way your local node nodes perform under the hood. To provide such a config, you need to create an cli config file. By default, a config file is read in from $HOME/.cli.json. If none exists, no error will occur. To provide a config from a custom location, run any command with the flag `--config <pathToConfig>`.
 
 To specify the global node config, provide it as a body for the `node-config` key. Ex:
 
@@ -181,7 +181,7 @@ continue saving/restoring to it, if not, `default snapshot will be used`.
 
 ### Snapshots dir
 
-- `~/.avalanche-cli/snapshot` will contain all saved snapshots, which can for example be used to pass work around
+- `~/.cli/snapshot` will contain all saved snapshots, which can for example be used to pass work around
 
 ## Detailed Usage
 

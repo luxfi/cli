@@ -5,11 +5,11 @@ package mocks
 import (
 	context "context"
 
-	client "github.com/luxdefi/avalanche-network-runner/client"
+	client "github.com/luxdefi/netrunner/client"
 
 	mock "github.com/stretchr/testify/mock"
 
-	rpcpb "github.com/luxdefi/avalanche-network-runner/rpcpb"
+	rpcpb "github.com/luxdefi/netrunner/rpcpb"
 
 	time "time"
 )

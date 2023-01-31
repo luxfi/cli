@@ -5,8 +5,8 @@ package migrations
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/ux"
 )
 
 type migrationFunc func(*application.Lux, *migrationRunner) error

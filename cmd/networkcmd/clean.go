@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/shirou/gopsutil/process"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -35,7 +35,7 @@ configuration.`,
 		&hard,
 		"hard",
 		false,
-		"Also clean downloaded avalanchego and plugin binaries",
+		"Also clean downloaded node and plugin binaries",
 	)
 
 	return cmd
@@ -55,12 +55,12 @@ func clean(*cobra.Command, []string) error {
 	}
 
 	if hard {
-		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded avalanchego and plugin binaries")
+		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded node and plugin binaries")
 		binDir := filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir)
 		cleanBins(binDir)
 		_ = killAllBackendsByName()
 	} else {
-		// Iterate over all installed avalanchego versions and remove all plugins from their
+		// Iterate over all installed node versions and remove all plugins from their
 		// plugin dirs except for the c-chain plugin
 
 		// Check if dir exists. If not, no work to be done

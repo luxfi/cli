@@ -5,8 +5,8 @@ package models
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	avago_constants "github.com/luxdefi/avalanchego/utils/constants"
+	"github.com/luxdefi/cli/pkg/constants"
+	avago_constants "github.com/luxdefi/node/utils/constants"
 )
 
 type Network int64

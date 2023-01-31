@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/models"
 )
 
 const oldSubnetEVM = "SubnetEVM"

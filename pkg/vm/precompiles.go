@@ -7,9 +7,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
-	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/cli/pkg/statemachine"
 	"github.com/luxdefi/subnet-evm/params"
 	"github.com/luxdefi/subnet-evm/precompile"
 	"github.com/ethereum/go-ethereum/common"

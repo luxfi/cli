@@ -9,7 +9,7 @@ import (
 const (
 	DefaultPerms755 = 0o755
 
-	BaseDirName = ".avalanche-cli"
+	BaseDirName = ".cli"
 	LogDir      = "logs"
 
 	ServerRunFile      = "gRPCserver.run"
@@ -49,8 +49,8 @@ const (
 	DefaultSnapshotName          = "default-1654102509"
 	BootstrapSnapshotArchiveName = "bootstrapSnapshot.tar.gz"
 	BootstrapSnapshotLocalPath   = "assets/" + BootstrapSnapshotArchiveName
-	BootstrapSnapshotURL         = "https://github.com/luxdefi/avalanche-cli/raw/main/" + BootstrapSnapshotLocalPath
-	BootstrapSnapshotSHA256URL   = "https://github.com/luxdefi/avalanche-cli/raw/main/assets/sha256sum.txt"
+	BootstrapSnapshotURL         = "https://github.com/luxdefi/cli/raw/main/" + BootstrapSnapshotLocalPath
+	BootstrapSnapshotSHA256URL   = "https://github.com/luxdefi/cli/raw/main/assets/sha256sum.txt"
 
 	KeyDir     = "key"
 	KeySuffix  = ".pk"
@@ -68,17 +68,17 @@ const (
 	StakingStartLeadTime   = 1 * time.Minute
 	StakingMinimumLeadTime = 25 * time.Second
 
-	DefaultConfigFileName = ".avalanche-cli"
+	DefaultConfigFileName = ".cli"
 	DefaultConfigFileType = "json"
 
 	CustomVMDir = "vms"
 
 	AvaLabsOrg          = "luxdefi"
-	NodeRepoName = "avalanchego"
+	NodeRepoName = "node"
 	SubnetEVMRepoName   = "subnet-evm"
 	SpacesVMRepoName    = "spacesvm"
 
-	NodeInstallDir = "avalanchego"
+	NodeInstallDir = "node"
 	SubnetEVMInstallDir   = "subnet-evm"
 	SpacesVMInstallDir    = "spacesvm"
 
@@ -112,10 +112,10 @@ const (
 
 	UpdateBytesFileName = "upgrade.json"
 	NotAvailableLabel   = "Not available"
-	BackendCmd          = "avalanche-cli-backend"
+	BackendCmd          = "cli-backend"
 
 	NodeCompatibilityVersionAdded = "v1.9.2"
-	NodeCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/avalanchego/master/version/compatibility.json"
+	NodeCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/node/master/version/compatibility.json"
 	SubnetEVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxdefi/subnet-evm/master/compatibility.json"
 	SpacesVMRPCCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/spacesvm/master/compatibility.json"
 

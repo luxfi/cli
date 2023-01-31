@@ -8,10 +8,10 @@ import (
 	"io"
 	"testing"
 
-	"github.com/luxdefi/avalanche-cli/internal/mocks"
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/cli/internal/mocks"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

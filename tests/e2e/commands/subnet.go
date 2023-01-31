@@ -11,9 +11,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
 
@@ -240,7 +240,7 @@ func DeploySubnetLocallyWithArgs(subnetName string, version string, confPath str
 	// Deploy subnet locally
 	cmdArgs := []string{SubnetCmd, "deploy", "--local", subnetName}
 	if version != "" {
-		cmdArgs = append(cmdArgs, "--avalanchego-version", version)
+		cmdArgs = append(cmdArgs, "--node-version", version)
 	}
 	if confPath != "" {
 		cmdArgs = append(cmdArgs, "--config", confPath)
@@ -274,7 +274,7 @@ func DeploySubnetLocallyWithArgsExpectError(subnetName string, version string, c
 	// Deploy subnet locally
 	cmdArgs := []string{SubnetCmd, "deploy", "--local", subnetName}
 	if version != "" {
-		cmdArgs = append(cmdArgs, "--avalanchego-version", version)
+		cmdArgs = append(cmdArgs, "--node-version", version)
 	}
 	if confPath != "" {
 		cmdArgs = append(cmdArgs, "--config", confPath)
@@ -501,7 +501,7 @@ func SimulateMainnetAddValidator(
 // simulates fuji join execution path on a local network
 func SimulateFujiJoin(
 	subnetName string,
-	avalanchegoConfig string,
+	nodeConfig string,
 	pluginDir string,
 	nodeID string,
 ) string {
@@ -519,8 +519,8 @@ func SimulateFujiJoin(
 		SubnetCmd,
 		"join",
 		"--fuji",
-		"--avalanchego-config",
-		avalanchegoConfig,
+		"--node-config",
+		nodeConfig,
 		"--plugin-dir",
 		pluginDir,
 		"--force-whitelist-check",
@@ -547,7 +547,7 @@ func SimulateFujiJoin(
 // simulates mainnet join execution path on a local network
 func SimulateMainnetJoin(
 	subnetName string,
-	avalanchegoConfig string,
+	nodeConfig string,
 	pluginDir string,
 	nodeID string,
 ) string {
@@ -565,8 +565,8 @@ func SimulateMainnetJoin(
 		SubnetCmd,
 		"join",
 		"--mainnet",
-		"--avalanchego-config",
-		avalanchegoConfig,
+		"--node-config",
+		nodeConfig,
 		"--plugin-dir",
 		pluginDir,
 		"--force-whitelist-check",

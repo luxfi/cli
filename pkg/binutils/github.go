@@ -6,7 +6,7 @@ package binutils
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/constants"
 )
 
 const (
@@ -46,13 +46,13 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 	// NOTE: if any of the underlying URLs change (github changes, release file names, etc.) this fails
 	goarch, goos := installer.GetArch()
 
-	var avalanchegoURL string
+	var nodeURL string
 	var ext string
 
 	switch goos {
 	case linux:
-		avalanchegoURL = fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/%s/avalanchego-linux-%s-%s.tar.gz",
+		nodeURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/node-linux-%s-%s.tar.gz",
 			constants.AvaLabsOrg,
 			constants.NodeRepoName,
 			version,
@@ -61,8 +61,8 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 		)
 		ext = tarExtension
 	case darwin:
-		avalanchegoURL = fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/%s/avalanchego-macos-%s.zip",
+		nodeURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/node-macos-%s.zip",
 			constants.AvaLabsOrg,
 			constants.NodeRepoName,
 			version,
@@ -71,8 +71,8 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 		ext = zipExtension
 		// EXPERMENTAL WIN, no support
 	case windows:
-		avalanchegoURL = fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/%s/avalanchego-win-%s-experimental.zip",
+		nodeURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/node-win-%s-experimental.zip",
 			constants.AvaLabsOrg,
 			constants.NodeRepoName,
 			version,
@@ -83,7 +83,7 @@ func (avalancheGoDownloader) GetDownloadURL(version string, installer Installer)
 		return "", "", fmt.Errorf("OS not supported: %s", goos)
 	}
 
-	return avalanchegoURL, ext, nil
+	return nodeURL, ext, nil
 }
 
 func NewSubnetEVMDownloader() GithubDownloader {

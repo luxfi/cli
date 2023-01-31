@@ -4,8 +4,8 @@
 package binutils
 
 import (
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
 )
 
 func SetupNode(app *application.Lux, avagoVersion string) (string, error) {
@@ -18,7 +18,7 @@ func SetupNode(app *application.Lux, avagoVersion string) (string, error) {
 		avagoVersion,
 		binDir,
 		binDir,
-		avalanchegoBinPrefix,
+		nodeBinPrefix,
 		constants.AvaLabsOrg,
 		constants.NodeRepoName,
 		downloader,

@@ -13,14 +13,14 @@ import (
 	"path"
 	"syscall"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-network-runner/client"
-	"github.com/luxdefi/avalanche-network-runner/server"
-	"github.com/luxdefi/avalanche-network-runner/utils"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/utils/perms"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/netrunner/server"
+	"github.com/luxdefi/netrunner/utils"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"
@@ -136,7 +136,7 @@ func GetServerPID(app *application.Lux) (int, error) {
 }
 
 // StartServerProcess starts the gRPC server as a reentrant process of this binary
-// it just executes `avalanche-cli backend start`
+// it just executes `cli backend start`
 func StartServerProcess(app *application.Lux) error {
 	thisBin := reexec.Self()
 
@@ -149,7 +149,7 @@ func StartServerProcess(app *application.Lux) error {
 		return err
 	}
 
-	outputFile, err := os.Create(path.Join(outputDir, "avalanche-cli-backend"))
+	outputFile, err := os.Create(path.Join(outputDir, "cli-backend"))
 	if err != nil {
 		return err
 	}

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxdefi/apm/types"
-	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/application"
 	"gopkg.in/yaml.v3"
 )
 

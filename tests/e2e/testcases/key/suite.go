@@ -8,9 +8,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/commands"
-	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/tests/e2e/commands"
+	"github.com/luxdefi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

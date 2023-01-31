@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/netrunner/utils"
 )
 
 func SanitizePath(path string) (string, error) {

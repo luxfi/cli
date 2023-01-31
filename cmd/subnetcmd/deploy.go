@@ -11,24 +11,24 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/cmd/flags"
-	"github.com/luxdefi/avalanche-cli/pkg/binutils"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanche-cli/pkg/key"
-	"github.com/luxdefi/avalanche-cli/pkg/localnetworkinterface"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/prompts"
-	"github.com/luxdefi/avalanche-cli/pkg/subnet"
-	"github.com/luxdefi/avalanche-cli/pkg/txutils"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
-	"github.com/luxdefi/avalanche-cli/pkg/vm"
-	"github.com/luxdefi/avalanche-network-runner/utils"
-	"github.com/luxdefi/avalanchego/ids"
-	"github.com/luxdefi/avalanchego/utils/crypto/keychain"
-	ledger "github.com/luxdefi/avalanchego/utils/crypto/ledger"
-	"github.com/luxdefi/avalanchego/utils/formatting/address"
-	"github.com/luxdefi/avalanchego/utils/logging"
-	"github.com/luxdefi/avalanchego/vms/platformvm/txs"
+	"github.com/luxdefi/cli/cmd/flags"
+	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/key"
+	"github.com/luxdefi/cli/pkg/localnetworkinterface"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/txutils"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/vm"
+	"github.com/luxdefi/netrunner/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/crypto/keychain"
+	ledger "github.com/luxdefi/node/utils/crypto/ledger"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm/txs"
 	"github.com/luxdefi/coreth/core"
 	spacesvmchain "github.com/luxdefi/spacesvm/chain"
 	"github.com/olekukonko/tablewriter"
@@ -82,7 +82,7 @@ so you can take your locally tested Subnet and deploy it on Fuji or Mainnet.`,
 	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `fuji`)")
 	cmd.Flags().BoolVarP(&deployTestnet, "fuji", "f", false, "deploy to fuji (alias to `testnet`")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "deploy to mainnet")
-	cmd.Flags().StringVar(&userProvidedAvagoVersion, "avalanchego-version", "latest", "use this version of avalanchego (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedAvagoVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji deploy only]")
 	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use creation key as control key")
 	cmd.Flags().Uint32Var(&threshold, "threshold", 0, "required number of control key signatures to make subnet changes")
@@ -760,7 +760,7 @@ func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID, isFu
 	return nil
 }
 
-// Determines the appropriate version of avalanchego to run with. Returns an error if
+// Determines the appropriate version of node to run with. Returns an error if
 // that version conflicts with the current deployment.
 func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
 	// get current network
@@ -771,7 +771,7 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 
 	desiredAvagoVersion := userProvidedAvagoVersion
 
-	// RPC Version was made available in the info API in avalanchego version v1.9.2. For prior versions,
+	// RPC Version was made available in the info API in node version v1.9.2. For prior versions,
 	// we will need to skip this check.
 	skipRPCCheck := false
 	if semver.Compare(runningAvagoVersion, constants.NodeCompatibilityVersionAdded) == -1 {
@@ -782,7 +782,7 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 		if userProvidedAvagoVersion == "latest" {
 			if runningRPCVersion != configuredRPCVersion && !skipRPCCheck {
 				return "", fmt.Errorf(
-					"the current avalanchego deployment uses rpc version %d but your subnet has version %d and is not compatible",
+					"the current node deployment uses rpc version %d but your subnet has version %d and is not compatible",
 					runningRPCVersion,
 					configuredRPCVersion,
 				)
@@ -790,7 +790,7 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 			desiredAvagoVersion = runningAvagoVersion
 		} else if runningAvagoVersion != userProvidedAvagoVersion {
 			// user wants a specific version
-			return "", errors.New("incompatible avalanchego version selected")
+			return "", errors.New("incompatible node version selected")
 		}
 	} else if userProvidedAvagoVersion == "latest" {
 		// find latest avago version for this rpc version

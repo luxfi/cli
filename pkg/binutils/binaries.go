@@ -14,8 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
 )
 
 var (
@@ -139,7 +139,7 @@ func installTarGzArchive(targz []byte, binDir string) error {
 	byteReader := bytes.NewReader(targz)
 	uncompressedStream, err := gzip.NewReader(byteReader)
 	if err != nil {
-		return fmt.Errorf("failed creating gzip reader from avalanchego binary stream: %w", err)
+		return fmt.Errorf("failed creating gzip reader from node binary stream: %w", err)
 	}
 
 	tarReader := tar.NewReader(uncompressedStream)

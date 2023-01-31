@@ -5,8 +5,8 @@ package txutils
 import (
 	"fmt"
 
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanchego/vms/platformvm/txs"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/node/vms/platformvm/txs"
 )
 
 // get network model associated to tx

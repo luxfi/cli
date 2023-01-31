@@ -3,7 +3,7 @@
 
 package binutils
 
-import "github.com/luxdefi/avalanche-cli/pkg/application"
+import "github.com/luxdefi/cli/pkg/application"
 
 func SetupCustomBin(app *application.Lux, subnetName string) string {
 	// Just need to get the path of the vm

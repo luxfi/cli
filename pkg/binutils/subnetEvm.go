@@ -6,8 +6,8 @@ package binutils
 import (
 	"path/filepath"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
 )
 
 func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, error) {

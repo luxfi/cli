@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/avalanche-cli/pkg/constants"
-	"github.com/luxdefi/avalanchego/config"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/node/config"
 	"github.com/stretchr/testify/require"
 )
 
@@ -86,8 +86,8 @@ func TestFindDefaultFiles(t *testing.T) {
 
 	scanDirs := []string{
 		// firs indexes should succeed
-		filepath.Join(testDir, "etc", "avalanchego"),
-		filepath.Join(testDir, "home", ".avalanchego"),
+		filepath.Join(testDir, "etc", "node"),
+		filepath.Join(testDir, "home", ".node"),
 		testDir,
 		"$" + config.NodeDataDirVar,
 		// following indexes should fail (don't exist)

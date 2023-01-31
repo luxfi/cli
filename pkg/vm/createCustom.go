@@ -5,9 +5,9 @@ package vm
 import (
 	"os"
 
-	"github.com/luxdefi/avalanche-cli/pkg/application"
-	"github.com/luxdefi/avalanche-cli/pkg/models"
-	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/ux"
 )
 
 func CreateCustomSubnetConfig(app *application.Lux, subnetName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {
