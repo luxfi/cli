@@ -5,13 +5,13 @@ package transactioncmd
 import (
 	"errors"
 
-	"github.com/ava-labs/avalanche-cli/cmd/subnetcmd"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-cli/pkg/txutils"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/ids"
+	"github.com/luxdefi/avalanche-cli/cmd/subnetcmd"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-cli/pkg/txutils"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/ids"
 	"github.com/spf13/cobra"
 )
 

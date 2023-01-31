@@ -7,11 +7,11 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/statemachine"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/precompile"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/subnet-evm/params"
+	"github.com/luxdefi/subnet-evm/precompile"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -39,7 +39,7 @@ func PrecompileToUpgradeString(p Precompile) string {
 	}
 }
 
-func getAdminList(initialPrompt string, info string, app *application.Avalanche) ([]common.Address, bool, error) {
+func getAdminList(initialPrompt string, info string, app *application.Lux) ([]common.Address, bool, error) {
 	label := "Address"
 
 	return prompts.CaptureListDecision(
@@ -52,7 +52,7 @@ func getAdminList(initialPrompt string, info string, app *application.Avalanche)
 	)
 }
 
-func configureContractAllowList(app *application.Avalanche) (precompile.ContractDeployerAllowListConfig, bool, error) {
+func configureContractAllowList(app *application.Lux) (precompile.ContractDeployerAllowListConfig, bool, error) {
 	config := precompile.ContractDeployerAllowListConfig{}
 	prompt := "Configure contract deployment allow list"
 	info := "\nThis precompile restricts who has the ability to deploy contracts " +
@@ -74,7 +74,7 @@ func configureContractAllowList(app *application.Avalanche) (precompile.Contract
 	return config, cancelled, nil
 }
 
-func configureTransactionAllowList(app *application.Avalanche) (precompile.TxAllowListConfig, bool, error) {
+func configureTransactionAllowList(app *application.Lux) (precompile.TxAllowListConfig, bool, error) {
 	config := precompile.TxAllowListConfig{}
 	prompt := "Configure transaction allow list"
 	info := "\nThis precompile restricts who has the ability to issue transactions " +
@@ -96,7 +96,7 @@ func configureTransactionAllowList(app *application.Avalanche) (precompile.TxAll
 	return config, cancelled, nil
 }
 
-func configureMinterList(app *application.Avalanche) (precompile.ContractNativeMinterConfig, bool, error) {
+func configureMinterList(app *application.Lux) (precompile.ContractNativeMinterConfig, bool, error) {
 	config := precompile.ContractNativeMinterConfig{}
 	prompt := "Configure native minting allow list"
 	info := "\nThis precompile allows admins to permit designated contracts to mint the native token " +
@@ -118,7 +118,7 @@ func configureMinterList(app *application.Avalanche) (precompile.ContractNativeM
 	return config, cancelled, nil
 }
 
-func configureFeeConfigAllowList(app *application.Avalanche) (precompile.FeeConfigManagerConfig, bool, error) {
+func configureFeeConfigAllowList(app *application.Lux) (precompile.FeeConfigManagerConfig, bool, error) {
 	config := precompile.FeeConfigManagerConfig{}
 	prompt := "Configure fee manager allow list"
 	info := "\nThis precompile allows admins to adjust chain gas and fee parameters without " +
@@ -149,7 +149,7 @@ func removePrecompile(arr []string, s string) ([]string, error) {
 	return arr, errors.New("string not in array")
 }
 
-func getPrecompiles(config params.ChainConfig, app *application.Avalanche) (
+func getPrecompiles(config params.ChainConfig, app *application.Lux) (
 	params.ChainConfig,
 	statemachine.StateDirection,
 	error,

@@ -4,13 +4,13 @@
 package plugins
 
 import (
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/utils/logging"
 )
 
-func ManualUpgrade(app *application.Avalanche, sc models.Sidecar, targetVersion string) error {
+func ManualUpgrade(app *application.Lux, sc models.Sidecar, targetVersion string) error {
 	vmid, err := sc.GetVMID()
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func ManualUpgrade(app *application.Avalanche, sc models.Sidecar, targetVersion 
 	return nil
 }
 
-func AutomatedUpgrade(app *application.Avalanche, sc models.Sidecar, targetVersion string, pluginDir string) error {
+func AutomatedUpgrade(app *application.Lux, sc models.Sidecar, targetVersion string, pluginDir string) error {
 	// Attempt an automated update
 	var err error
 	if pluginDir == "" {

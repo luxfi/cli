@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanchego/utils/logging"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
 )
@@ -43,14 +43,14 @@ type testContext struct {
 // `GetVersionMapping` is able to correctly evaluate
 // the set of compatible versions for each test.
 type testMapper struct {
-	app            *application.Avalanche
+	app            *application.Lux
 	currentContext *testContext
 	srv            *httptest.Server
 	t              *testing.T
 }
 
 func newTestMapper(t *testing.T) *testMapper {
-	app := &application.Avalanche{
+	app := &application.Lux{
 		Downloader: application.NewDownloader(),
 		Log:        logging.NoLog{},
 	}
@@ -63,13 +63,13 @@ func newTestMapper(t *testing.T) *testMapper {
 }
 
 // implement VersionMapper
-func (*testMapper) GetEligibleVersions(sorted []string, _ string, _ *application.Avalanche) ([]string, error) {
+func (*testMapper) GetEligibleVersions(sorted []string, _ string, _ *application.Lux) ([]string, error) {
 	// tests were written with the assumption that the first version is always in progress
 	return sorted[1:], nil
 }
 
 // implement VersionMapper
-func (m *testMapper) GetLatestAvagoByProtoVersion(_ *application.Avalanche, rpcVersion int, _ string) (string, error) {
+func (m *testMapper) GetLatestAvagoByProtoVersion(_ *application.Lux, rpcVersion int, _ string) (string, error) {
 	cBytes := []byte(m.currentContext.sourceAvago)
 
 	var compat models.AvagoCompatiblity
@@ -99,7 +99,7 @@ func (m *testMapper) getVersionMapping(tc *testContext) (map[string]string, erro
 }
 
 // implement VersionMapper
-func (m *testMapper) GetApp() *application.Avalanche {
+func (m *testMapper) GetApp() *application.Lux {
 	return m.app
 }
 

@@ -10,14 +10,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 )
 
-// Edits an Avalanchego config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
+// Edits an Node config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
 func EditConfigFile(
-	app *application.Avalanche,
+	app *application.Lux,
 	subnetID string,
 	networkID string,
 	configFile string,

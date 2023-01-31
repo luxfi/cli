@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ava-labs/apm/types"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/luxdefi/apm/types"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/version"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,7 +59,7 @@ const (
 `
 )
 
-func newTestApp(t *testing.T, testDir string) *application.Avalanche {
+func newTestApp(t *testing.T, testDir string) *application.Lux {
 	tempDir := t.TempDir()
 	app := application.New()
 	app.Setup(tempDir, logging.NoLog{}, nil, prompts.NewPrompter(), application.NewDownloader())

@@ -7,11 +7,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/config"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/config"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +22,7 @@ func TestRunMigrations(t *testing.T) {
 	require := require.New(t)
 	testDir := t.TempDir()
 
-	app := &application.Avalanche{}
+	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	type migTest struct {
@@ -46,7 +46,7 @@ func TestRunMigrations(t *testing.T) {
 			name:      "migration fail",
 			shouldErr: true,
 			migs: map[int]migrationFunc{
-				0: func(app *application.Avalanche, r *migrationRunner) error {
+				0: func(app *application.Lux, r *migrationRunner) error {
 					return errors.New("bogus fail")
 				},
 			},
@@ -56,7 +56,7 @@ func TestRunMigrations(t *testing.T) {
 			name:      "1 mig, apply",
 			shouldErr: false,
 			migs: map[int]migrationFunc{
-				0: func(app *application.Avalanche, r *migrationRunner) error {
+				0: func(app *application.Lux, r *migrationRunner) error {
 					r.printMigrationMessage()
 					return nil
 				},
@@ -67,11 +67,11 @@ func TestRunMigrations(t *testing.T) {
 			name:      "2 mig, apply both",
 			shouldErr: false,
 			migs: map[int]migrationFunc{
-				0: func(app *application.Avalanche, r *migrationRunner) error {
+				0: func(app *application.Lux, r *migrationRunner) error {
 					r.printMigrationMessage()
 					return nil
 				},
-				1: func(app *application.Avalanche, r *migrationRunner) error {
+				1: func(app *application.Lux, r *migrationRunner) error {
 					r.printMigrationMessage()
 					return nil
 				},
@@ -82,10 +82,10 @@ func TestRunMigrations(t *testing.T) {
 			name:      "2 mig, apply 1",
 			shouldErr: false,
 			migs: map[int]migrationFunc{
-				0: func(app *application.Avalanche, r *migrationRunner) error {
+				0: func(app *application.Lux, r *migrationRunner) error {
 					return nil
 				},
-				1: func(app *application.Avalanche, r *migrationRunner) error {
+				1: func(app *application.Lux, r *migrationRunner) error {
 					r.printMigrationMessage()
 					return nil
 				},
@@ -96,10 +96,10 @@ func TestRunMigrations(t *testing.T) {
 			name:      "2 mig, first one fails",
 			shouldErr: true,
 			migs: map[int]migrationFunc{
-				0: func(app *application.Avalanche, r *migrationRunner) error {
+				0: func(app *application.Lux, r *migrationRunner) error {
 					return errors.New("bogus fail")
 				},
-				1: func(app *application.Avalanche, r *migrationRunner) error {
+				1: func(app *application.Lux, r *migrationRunner) error {
 					r.printMigrationMessage()
 					return nil
 				},
@@ -110,11 +110,11 @@ func TestRunMigrations(t *testing.T) {
 			name:      "2 mig, apply 1, second one fails",
 			shouldErr: true,
 			migs: map[int]migrationFunc{
-				0: func(app *application.Avalanche, r *migrationRunner) error {
+				0: func(app *application.Lux, r *migrationRunner) error {
 					r.printMigrationMessage()
 					return nil
 				},
-				1: func(app *application.Avalanche, r *migrationRunner) error {
+				1: func(app *application.Lux, r *migrationRunner) error {
 					return errors.New("bogus fail")
 				},
 			},

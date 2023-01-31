@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-network-runner/utils"
-	"github.com/ava-labs/avalanchego/ids"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanchego/ids"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -105,7 +105,7 @@ func listSubnets(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getSidecars(app *application.Avalanche) ([]*models.Sidecar, error) {
+func getSidecars(app *application.Lux) ([]*models.Sidecar, error) {
 	subnets, err := os.ReadDir(filepath.Join(app.GetBaseDir(), constants.SubnetDir))
 	if err != nil {
 		return nil, err

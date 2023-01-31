@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/vm"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/vm"
+	"github.com/luxdefi/avalanchego/utils/logging"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"
 )
@@ -29,20 +29,20 @@ var (
 
 // VersionMapper is an abstraction for retrieving version compatibility URLs
 // allowing unit tests without requiring external http calls.
-// The idea is to finally calculate which VM is compatible with which Avalanchego,
+// The idea is to finally calculate which VM is compatible with which Node,
 // so that the e2e tests can always download and run the latest compatible versions,
 // without having to manually update the e2e tests periodically.
 type VersionMapper interface {
 	GetCompatURL(vmType models.VMType) string
 	GetAvagoURL() string
-	GetApp() *application.Avalanche
-	GetLatestAvagoByProtoVersion(app *application.Avalanche, rpcVersion int, url string) (string, error)
-	GetEligibleVersions(sortedVersions []string, repoName string, app *application.Avalanche) ([]string, error)
+	GetApp() *application.Lux
+	GetLatestAvagoByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error)
+	GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error)
 }
 
 // NewVersionMapper returns the default VersionMapper for e2e tests
 func NewVersionMapper() VersionMapper {
-	app := &application.Avalanche{
+	app := &application.Lux{
 		Downloader: application.NewDownloader(),
 		Log:        logging.NoLog{},
 	}
@@ -54,18 +54,18 @@ func NewVersionMapper() VersionMapper {
 // versionMapper is the default implementation for version mapping.
 // It downloads compatibility URLs from the actual github endpoints
 type versionMapper struct {
-	app *application.Avalanche
+	app *application.Lux
 }
 
-// GetLatestAvagoByProtoVersion returns the latest Avalanchego version which
+// GetLatestAvagoByProtoVersion returns the latest Node version which
 // runs with the specified rpcVersion, or an error if it can't be found
 // (or other errors occurred)
-func (*versionMapper) GetLatestAvagoByProtoVersion(app *application.Avalanche, rpcVersion int, url string) (string, error) {
-	return vm.GetLatestAvalancheGoByProtocolVersion(app, rpcVersion, url)
+func (*versionMapper) GetLatestAvagoByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
+	return vm.GetLatestNodeByProtocolVersion(app, rpcVersion, url)
 }
 
-// GetApp returns the Avalanche application instance
-func (m *versionMapper) GetApp() *application.Avalanche {
+// GetApp returns the Lux application instance
+func (m *versionMapper) GetApp() *application.Lux {
 	return m.app
 }
 
@@ -84,12 +84,12 @@ func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	}
 }
 
-// GetAvagoURL returns the compatibility URL for Avalanchego
+// GetAvagoURL returns the compatibility URL for Node
 func (*versionMapper) GetAvagoURL() string {
-	return constants.AvalancheGoCompatibilityURL
+	return constants.NodeCompatibilityURL
 }
 
-func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName string, app *application.Avalanche) ([]string, error) {
+func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error) {
 	// get latest avago release to make sure we're not picking a release currently in progress but not available for download
 	latest, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.AvaLabsOrg,
@@ -112,7 +112,7 @@ func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName stri
 	return eligible, nil
 }
 
-// GetVersionMapping returns a map of specific VMs resp. Avalanchego e2e context keys
+// GetVersionMapping returns a map of specific VMs resp. Node e2e context keys
 // to the actual version which corresponds to that key.
 // This allows the e2e test to know what version to download and run.
 // Returns an error if there was a problem reading the URL compatibility json
@@ -202,10 +202,10 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// now let's look for subnet-evm versions which are fit for the
 	// "can deploy multiple subnet-evm versions" test.
 	// We need two subnet-evm versions which run the same RPC version,
-	// and then a compatible Avalanchego
+	// and then a compatible Node
 	//
 	// To avoid having to iterate again, we'll also fill the values
-	// for the **latest** compatible Avalanchego and Subnet-EVM
+	// for the **latest** compatible Node and Subnet-EVM
 	for i, ver := range subnetEVMversions {
 		// safety check, should not happen, as we already know
 		// compatible versions exist
@@ -215,7 +215,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		first := ver
 		second := subnetEVMversions[i+1]
 		// we should be able to safely assume that for a given subnet-evm RPC version,
-		// there exists at least one compatible Avalanchego.
+		// there exists at least one compatible Node.
 		// This means we can in any case use this to set the **latest** compatibility
 		soloAvago, err := mapper.GetLatestAvagoByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetAvagoURL())
 		if err != nil {
@@ -236,7 +236,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	}
 
 	// finally let's do the SpacesVM
-	// this is simpler, we just need the latest and its compatible Avalanchego
+	// this is simpler, we just need the latest and its compatible Node
 	spacesVMversions, spacesVMmapping, err := getVersions(mapper, models.SpacesVM)
 	if err != nil {
 		return nil, err
@@ -307,7 +307,7 @@ func getCompatibility(mapper VersionMapper, vmType models.VMType) (models.VMComp
 	return parsedCompat, nil
 }
 
-// getAvagoCompatibility returns the compatibility for Avalanchego
+// getAvagoCompatibility returns the compatibility for Node
 func getAvagoCompatibility(mapper VersionMapper) (models.AvagoCompatiblity, error) {
 	avagoBytes, err := mapper.GetApp().GetDownloader().Download(mapper.GetAvagoURL())
 	if err != nil {

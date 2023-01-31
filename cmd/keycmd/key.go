@@ -5,13 +5,13 @@ package keycmd
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
-var app *application.Avalanche
+var app *application.Lux
 
-func NewCmd(injectedApp *application.Avalanche) *cobra.Command {
+func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 
 	cmd := &cobra.Command{

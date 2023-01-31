@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
 	"github.com/spf13/cobra"
 )
 

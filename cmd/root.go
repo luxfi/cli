@@ -8,27 +8,27 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/ava-labs/avalanche-cli/cmd/backendcmd"
-	"github.com/ava-labs/avalanche-cli/cmd/keycmd"
-	"github.com/ava-labs/avalanche-cli/cmd/networkcmd"
-	"github.com/ava-labs/avalanche-cli/cmd/subnetcmd"
-	"github.com/ava-labs/avalanche-cli/cmd/transactioncmd"
-	"github.com/ava-labs/avalanche-cli/internal/migrations"
-	"github.com/ava-labs/avalanche-cli/pkg/apmintegration"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/config"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/prompts"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/luxdefi/avalanche-cli/cmd/backendcmd"
+	"github.com/luxdefi/avalanche-cli/cmd/keycmd"
+	"github.com/luxdefi/avalanche-cli/cmd/networkcmd"
+	"github.com/luxdefi/avalanche-cli/cmd/subnetcmd"
+	"github.com/luxdefi/avalanche-cli/cmd/transactioncmd"
+	"github.com/luxdefi/avalanche-cli/internal/migrations"
+	"github.com/luxdefi/avalanche-cli/pkg/apmintegration"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/config"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/prompts"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanchego/utils/logging"
+	"github.com/luxdefi/avalanchego/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 var (
-	app *application.Avalanche
+	app *application.Lux
 
 	logLevel string
 	Version  = ""
@@ -39,8 +39,8 @@ func NewRootCmd() *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
 		Use: "avalanche",
-		Long: `Avalanche-CLI is a command-line tool that gives developers access to
-everything Avalanche. This release specializes in helping developers
+		Long: `Lux-CLI is a command-line tool that gives developers access to
+everything Lux. This release specializes in helping developers
 build and test Subnets.
 
 To get started, look at the documentation for the subcommands or jump right

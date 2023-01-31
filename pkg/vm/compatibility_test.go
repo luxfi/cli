@@ -6,10 +6,10 @@ package vm
 import (
 	"testing"
 
-	"github.com/ava-labs/avalanche-cli/internal/mocks"
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/internal/mocks"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -82,7 +82,7 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	require.ErrorContains(err, "no RPC version found")
 }
 
-func TestGetLatestAvalancheGoByProtocolVersion(t *testing.T) {
+func TestGetLatestNodeByProtocolVersion(t *testing.T) {
 	type versionTest struct {
 		name            string
 		rpc             int
@@ -177,7 +177,7 @@ func TestGetLatestAvalancheGoByProtocolVersion(t *testing.T) {
 			app := application.New()
 			app.Downloader = mockDownloader
 
-			avagoVersion, err := GetLatestAvalancheGoByProtocolVersion(app, tt.rpc, constants.AvalancheGoCompatibilityURL)
+			avagoVersion, err := GetLatestNodeByProtocolVersion(app, tt.rpc, constants.NodeCompatibilityURL)
 			if tt.expectedErr == nil {
 				require.NoError(err)
 			} else {

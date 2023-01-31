@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"
 )
 
 func installBinaryWithVersion(
-	app *application.Avalanche,
+	app *application.Lux,
 	version string,
 	binDir string,
 	binPrefix string,
@@ -56,7 +56,7 @@ func installBinaryWithVersion(
 }
 
 func InstallBinary(
-	app *application.Avalanche,
+	app *application.Lux,
 	version string,
 	baseBinDir string,
 	installDir string,

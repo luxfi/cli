@@ -21,14 +21,14 @@ func TestGetGithubOrg(t *testing.T) {
 	tests := []test{
 		{
 			name:        "Success",
-			url:         "https://github.com/ava-labs/avalanche-plugins-core.git",
-			expectedOrg: "ava-labs",
+			url:         "https://github.com/luxdefi/avalanche-plugins-core.git",
+			expectedOrg: "luxdefi",
 			expectedErr: false,
 		},
 		{
 			name:        "Success",
-			url:         "https://github.com/ava-labs/avalanche-plugins-core",
-			expectedOrg: "ava-labs",
+			url:         "https://github.com/luxdefi/avalanche-plugins-core",
+			expectedOrg: "luxdefi",
 			expectedErr: false,
 		},
 		{
@@ -72,13 +72,13 @@ func TestGetGithubRepo(t *testing.T) {
 	tests := []test{
 		{
 			name:         "Success",
-			url:          "https://github.com/ava-labs/avalanche-plugins-core.git",
+			url:          "https://github.com/luxdefi/avalanche-plugins-core.git",
 			expectedRepo: "avalanche-plugins-core",
 			expectedErr:  false,
 		},
 		{
 			name:         "Success",
-			url:          "https://github.com/ava-labs/avalanche-plugins-core",
+			url:          "https://github.com/luxdefi/avalanche-plugins-core",
 			expectedRepo: "avalanche-plugins-core",
 			expectedErr:  false,
 		},
@@ -123,14 +123,14 @@ func TestGetAlias(t *testing.T) {
 	tests := []test{
 		{
 			name:          "Success",
-			url:           "https://github.com/ava-labs/avalanche-plugins-core.git",
-			expectedAlias: "ava-labs/avalanche-plugins-core",
+			url:           "https://github.com/luxdefi/avalanche-plugins-core.git",
+			expectedAlias: "luxdefi/avalanche-plugins-core",
 			expectedErr:   false,
 		},
 		{
 			name:          "Success",
-			url:           "https://github.com/ava-labs/avalanche-plugins-core",
-			expectedAlias: "ava-labs/avalanche-plugins-core",
+			url:           "https://github.com/luxdefi/avalanche-plugins-core",
+			expectedAlias: "luxdefi/avalanche-plugins-core",
 			expectedErr:   false,
 		},
 		{
@@ -166,8 +166,8 @@ func TestGetAlias(t *testing.T) {
 func TestSplitKey(t *testing.T) {
 	require := require.New(t)
 
-	key := "ava-labs/avalanche-plugins-core:wagmi"
-	expectedAlias := "ava-labs/avalanche-plugins-core"
+	key := "luxdefi/avalanche-plugins-core:wagmi"
+	expectedAlias := "luxdefi/avalanche-plugins-core"
 	expectedSubnet := "wagmi"
 
 	alias, subnet, err := splitKey(key)
@@ -179,7 +179,7 @@ func TestSplitKey(t *testing.T) {
 func TestSplitKey_Errpr(t *testing.T) {
 	require := require.New(t)
 
-	key := "ava-labs/avalanche-plugins-core_wagmi"
+	key := "luxdefi/avalanche-plugins-core_wagmi"
 
 	_, _, err := splitKey(key)
 	require.ErrorContains(err, "invalid subnet key:")

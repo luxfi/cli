@@ -1,6 +1,6 @@
-# Avalanche-CLI
+# Lux-CLI
 
-Avalanche CLI is a command line tool that gives developers access to everything Avalanche. This release specializes in helping developers develop and test subnets.
+Lux CLI is a command line tool that gives developers access to everything Lux. This release specializes in helping developers develop and test subnets.
 
 ## Installation
 
@@ -13,7 +13,7 @@ The tool has been tested on Linux and Mac. Windows is currently not supported.
 To download a binary for the latest release, run:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/ava-labs/avalanche-cli/main/scripts/install.sh | sh -s
+curl -sSfL https://raw.githubusercontent.com/luxdefi/avalanche-cli/main/scripts/install.sh | sh -s
 ```
 
 The binary will be installed inside the `~/bin` directory.
@@ -31,7 +31,7 @@ To add it to your path permanently, add an export command to your shell initiali
 To download the binary into a specific directory, run:
 
 ```
-curl -sSfL https://raw.githubusercontent.com/ava-labs/avalanche-cli/main/scripts/install.sh | sh -s -- -b <relative directory>
+curl -sSfL https://raw.githubusercontent.com/luxdefi/avalanche-cli/main/scripts/install.sh | sh -s -- -b <relative directory>
 ```
 
 ## Quickstart
@@ -60,9 +60,9 @@ avalanche network start
 - Creation of Subnet-EVM, SpacesVM, and custom virtual machine subnet configurations
 - Precompile integration and configuration
 - Local deployment of subnets for development and rapid prototyping
-- Fuji Testnet and Avalanche Mainnet deployment of subnets
+- Fuji Testnet and Lux Mainnet deployment of subnets
 - Ledger support
-- Avalanche Package Manager Integration
+- Lux Package Manager Integration
 
 ## Modifying your Subnet Deployment
 
@@ -96,7 +96,7 @@ You may wish to deploy your subnet on a cloud instance and access it remotely. I
 
 ## Building Locally
 
-To build Avalanche-CLI, you'll first need to install golang. Follow the instructions here: https://go.dev/doc/install.
+To build Lux-CLI, you'll first need to install golang. Follow the instructions here: https://go.dev/doc/install.
 
 Once golang is installed, run:
 
@@ -108,7 +108,7 @@ The binary will be called `./bin/avalanche`.
 
 ### Docker
 
-To make Avalanche CLI work in a docker container, add this
+To make Lux CLI work in a docker container, add this
 
 ```json
 {
@@ -185,4 +185,4 @@ continue saving/restoring to it, if not, `default snapshot will be used`.
 
 ## Detailed Usage
 
-More detailed information on how to use Avalanche CLI can be found at [here](https://docs.avax.network/subnets/create-a-local-subnet#subnet).
+More detailed information on how to use Lux CLI can be found at [here](https://docs.avax.network/subnets/create-a-local-subnet#subnet).

@@ -5,12 +5,12 @@ package vm
 import (
 	"os"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
 )
 
-func CreateCustomSubnetConfig(app *application.Avalanche, subnetName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {
+func CreateCustomSubnetConfig(app *application.Lux, subnetName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {
 	ux.Logger.PrintToUser("creating custom VM subnet %s", subnetName)
 
 	genesisBytes, err := loadCustomGenesis(app, genesisPath)
@@ -30,7 +30,7 @@ func CreateCustomSubnetConfig(app *application.Avalanche, subnetName string, gen
 	return genesisBytes, sc, err
 }
 
-func loadCustomGenesis(app *application.Avalanche, genesisPath string) ([]byte, error) {
+func loadCustomGenesis(app *application.Lux, genesisPath string) ([]byte, error) {
 	var err error
 	if genesisPath == "" {
 		genesisPath, err = app.Prompt.CaptureExistingFilepath("Enter path to custom genesis")
@@ -43,7 +43,7 @@ func loadCustomGenesis(app *application.Avalanche, genesisPath string) ([]byte, 
 	return genesisBytes, err
 }
 
-func copyCustomVM(app *application.Avalanche, subnetName string, vmPath string) error {
+func copyCustomVM(app *application.Lux, subnetName string, vmPath string) error {
 	var err error
 	if vmPath == "" {
 		vmPath, err = app.Prompt.CaptureExistingFilepath("Enter path to vm binary")

@@ -9,14 +9,14 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/statemachine"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/spacesvm/chain"
-	"github.com/ava-labs/subnet-evm/core"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/spacesvm/chain"
+	"github.com/luxdefi/subnet-evm/core"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 )
 
 func CreateSpacesVMSubnetConfig(
-	app *application.Avalanche,
+	app *application.Lux,
 	subnetName string,
 	genesisPath string,
 	spacesVMVersion string,
@@ -71,7 +71,7 @@ func CreateSpacesVMSubnetConfig(
 	return genesisBytes, sc, nil
 }
 
-func getMagic(app *application.Avalanche) (uint64, statemachine.StateDirection, error) {
+func getMagic(app *application.Lux) (uint64, statemachine.StateDirection, error) {
 	useDefault := fmt.Sprintf("Use default (%d)", defaultMagic)
 	useCustom := "Set custom"
 
@@ -93,7 +93,7 @@ func getMagic(app *application.Avalanche) (uint64, statemachine.StateDirection, 
 	return magic, statemachine.Forward, nil
 }
 
-func getDefaultGenesisValues(app *application.Avalanche) (uint64, string, core.GenesisAlloc, error) {
+func getDefaultGenesisValues(app *application.Lux) (uint64, string, core.GenesisAlloc, error) {
 	version, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.AvaLabsOrg,
 		constants.SpacesVMRepoName,
@@ -108,7 +108,7 @@ func getDefaultGenesisValues(app *application.Avalanche) (uint64, string, core.G
 	return defaultMagic, version, allocs, nil
 }
 
-func createSpacesVMGenesis(app *application.Avalanche, subnetName string, spacesVMVersion string) ([]byte, *models.Sidecar, error) {
+func createSpacesVMGenesis(app *application.Lux, subnetName string, spacesVMVersion string) ([]byte, *models.Sidecar, error) {
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	const (

@@ -14,8 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
 )
 
 var (
@@ -35,7 +35,7 @@ type BinaryChecker interface {
 type (
 	binaryChecker          struct{}
 	pluginBinaryDownloader struct {
-		app *application.Avalanche
+		app *application.Lux
 	}
 )
 
@@ -43,7 +43,7 @@ func NewBinaryChecker() BinaryChecker {
 	return &binaryChecker{}
 }
 
-func NewPluginBinaryDownloader(app *application.Avalanche) PluginBinaryDownloader {
+func NewPluginBinaryDownloader(app *application.Lux) PluginBinaryDownloader {
 	return &pluginBinaryDownloader{
 		app: app,
 	}

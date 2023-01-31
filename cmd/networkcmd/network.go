@@ -5,13 +5,13 @@ package networkcmd
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
-var app *application.Avalanche
+var app *application.Lux
 
-func NewCmd(injectedApp *application.Avalanche) *cobra.Command {
+func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
 		Use:   "network",
@@ -19,7 +19,7 @@ func NewCmd(injectedApp *application.Avalanche) *cobra.Command {
 		Long: `The network command suite provides a collection of tools for managing local Subnet
 deployments.
 
-When you deploy a Subnet locally, it runs on a local, multi-node Avalanche network. The
+When you deploy a Subnet locally, it runs on a local, multi-node Lux network. The
 subnet deploy command starts this network in the background. This command suite allows you
 to shutdown, restart, and clear that network.
 

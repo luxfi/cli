@@ -3,7 +3,7 @@
 ## Why Migrations
 
 The idea is to introduce a standardized process for internal changes of the
-`Avalanche` tool which usually require scripting.
+`Lux` tool which usually require scripting.
 
 By running these migrations, we don't require external scripting,
 encapsulating different subsequent internal changes in sort of a

@@ -11,9 +11,9 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
 

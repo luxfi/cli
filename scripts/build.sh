@@ -19,4 +19,4 @@ fi
 # to pass this flag to all child processes spawned by the shell.
 export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
 
-go build -v -ldflags="-X 'github.com/ava-labs/avalanche-cli/cmd.Version=$VERSION'" -o bin/avalanche
+go build -v -ldflags="-X 'github.com/luxdefi/avalanche-cli/cmd.Version=$VERSION'" -o bin/avalanche

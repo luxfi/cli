@@ -9,17 +9,17 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/statemachine"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/statemachine"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/subnet-evm/core"
+	"github.com/luxdefi/subnet-evm/params"
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func CreateEvmSubnetConfig(app *application.Avalanche, subnetName string, genesisPath string, subnetEVMVersion string) ([]byte, *models.Sidecar, error) {
+func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath string, subnetEVMVersion string) ([]byte, *models.Sidecar, error) {
 	var (
 		genesisBytes []byte
 		sc           *models.Sidecar
@@ -62,7 +62,7 @@ func CreateEvmSubnetConfig(app *application.Avalanche, subnetName string, genesi
 }
 
 func createEvmGenesis(
-	app *application.Avalanche,
+	app *application.Lux,
 	subnetName string,
 	subnetEVMVersion string,
 ) ([]byte, *models.Sidecar, error) {
@@ -170,6 +170,6 @@ func ensureAdminsHaveBalance(admins []common.Address, alloc core.GenesisAlloc) e
 }
 
 // In own function to facilitate testing
-func getEVMAllocation(app *application.Avalanche) (core.GenesisAlloc, statemachine.StateDirection, error) {
+func getEVMAllocation(app *application.Lux) (core.GenesisAlloc, statemachine.StateDirection, error) {
 	return getAllocation(app, defaultEvmAirdropAmount, oneAvax, "Amount to airdrop (in AVAX units)")
 }

@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/subnet"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanche-network-runner/server"
-	"github.com/ava-labs/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/subnet"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-network-runner/client"
+	"github.com/luxdefi/avalanche-network-runner/server"
+	"github.com/luxdefi/avalanche-network-runner/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Starts a local network",
-		Long: `The network start command starts a local, multi-node Avalanche network on your machine.
+		Long: `The network start command starts a local, multi-node Lux network on your machine.
 
 By default, the command loads the default snapshot. If you provide the --snapshot-name
 flag, the network loads that snapshot instead. The command fails if the local network is

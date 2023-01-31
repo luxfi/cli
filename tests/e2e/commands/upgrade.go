@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/ava-labs/avalanche-cli/tests/e2e/utils"
+	"github.com/luxdefi/avalanche-cli/tests/e2e/utils"
 )
 
 /* #nosec G204 */

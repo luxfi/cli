@@ -16,22 +16,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ava-labs/avalanche-cli/pkg/application"
-	"github.com/ava-labs/avalanche-cli/pkg/binutils"
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanche-cli/pkg/models"
-	"github.com/ava-labs/avalanche-cli/pkg/utils"
-	"github.com/ava-labs/avalanche-cli/pkg/ux"
-	"github.com/ava-labs/avalanche-cli/pkg/vm"
-	"github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanche-network-runner/rpcpb"
-	"github.com/ava-labs/avalanche-network-runner/server"
-	anrutils "github.com/ava-labs/avalanche-network-runner/utils"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/storage"
-	"github.com/ava-labs/coreth/params"
-	spacesvmchain "github.com/ava-labs/spacesvm/chain"
-	"github.com/ava-labs/subnet-evm/core"
+	"github.com/luxdefi/avalanche-cli/pkg/application"
+	"github.com/luxdefi/avalanche-cli/pkg/binutils"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanche-cli/pkg/models"
+	"github.com/luxdefi/avalanche-cli/pkg/utils"
+	"github.com/luxdefi/avalanche-cli/pkg/ux"
+	"github.com/luxdefi/avalanche-cli/pkg/vm"
+	"github.com/luxdefi/avalanche-network-runner/client"
+	"github.com/luxdefi/avalanche-network-runner/rpcpb"
+	"github.com/luxdefi/avalanche-network-runner/server"
+	anrutils "github.com/luxdefi/avalanche-network-runner/utils"
+	"github.com/luxdefi/avalanchego/ids"
+	"github.com/luxdefi/avalanchego/utils/storage"
+	"github.com/luxdefi/coreth/params"
+	spacesvmchain "github.com/luxdefi/spacesvm/chain"
+	"github.com/luxdefi/subnet-evm/core"
 	"go.uber.org/zap"
 )
 
@@ -45,14 +45,14 @@ type LocalDeployer struct {
 	getClientFunc       getGRPCClientFunc
 	binaryDownloader    binutils.PluginBinaryDownloader
 	healthCheckInterval time.Duration
-	app                 *application.Avalanche
+	app                 *application.Lux
 	backendStartedHere  bool
 	setDefaultSnapshot  setDefaultSnapshotFunc
 	avagoVersion        string
 	vmBin               string
 }
 
-func NewLocalDeployer(app *application.Avalanche, avagoVersion string, vmBin string) *LocalDeployer {
+func NewLocalDeployer(app *application.Lux, avagoVersion string, vmBin string) *LocalDeployer {
 	return &LocalDeployer{
 		procChecker:         binutils.NewProcessChecker(),
 		binChecker:          binutils.NewBinaryChecker(),
@@ -343,7 +343,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, string, error) {
 }
 
 func (d *LocalDeployer) setupLocalEnv() (string, error) {
-	return binutils.SetupAvalanchego(d.app, d.avagoVersion)
+	return binutils.SetupNode(d.app, d.avagoVersion)
 }
 
 // WaitForHealthy polls continuously until the network is ready to be used

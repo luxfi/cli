@@ -8,8 +8,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/ava-labs/avalanche-cli/pkg/constants"
-	"github.com/ava-labs/avalanchego/api/info"
+	"github.com/luxdefi/avalanche-cli/pkg/constants"
+	"github.com/luxdefi/avalanchego/api/info"
 )
 
 type StatusChecker interface {
