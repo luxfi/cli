@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -35,24 +35,23 @@ func getVMVersion(
 	repoName string,
 	vmVersion string,
 	addGoBackOption bool,
-) (string, statemachine.StateDirection, error) {
+) (string, error) {
 	var err error
-	direction := statemachine.Forward
 	if vmVersion == "latest" {
 		vmVersion, err = app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-			constants.AvaLabsOrg,
+			constants.LuxDeFiOrg,
 			repoName,
 		))
 		if err != nil {
-			return "", statemachine.Stop, err
+			return "", err
 		}
 	} else if vmVersion == "" {
-		vmVersion, direction, err = askForVMVersion(app, vmName, repoName, addGoBackOption)
+		vmVersion, _, err = askForVMVersion(app, vmName, repoName, addGoBackOption)
 		if err != nil {
-			return "", statemachine.Stop, err
+			return "", err
 		}
 	}
-	return vmVersion, direction, nil
+	return vmVersion, nil
 }
 
 func askForVMVersion(
@@ -87,14 +86,14 @@ func askForVMVersion(
 	if versionOption == useLatest {
 		// Get and return latest version
 		version, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-			constants.AvaLabsOrg,
+			constants.LuxDeFiOrg,
 			repoName,
 		))
 		return version, statemachine.Forward, err
 	}
 
 	// prompt for version
-	versions, err := app.Downloader.GetAllReleasesForRepo(constants.AvaLabsOrg, constants.SubnetEVMRepoName)
+	versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxDeFiOrg, constants.SubnetEVMRepoName)
 	if err != nil {
 		return "", statemachine.Stop, err
 	}
@@ -123,7 +122,7 @@ func getDescriptors(app *application.Lux, subnetEVMVersion string) (
 		return nil, "", "", statemachine.Stop, err
 	}
 
-	subnetEVMVersion, _, err = getVMVersion(app, "Subnet-EVM", constants.SubnetEVMRepoName, subnetEVMVersion, false)
+	subnetEVMVersion, err = getVMVersion(app, "Subnet-EVM", constants.SubnetEVMRepoName, subnetEVMVersion, false)
 	if err != nil {
 		return nil, "", "", statemachine.Stop, err
 	}

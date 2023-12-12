@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -7,7 +7,7 @@ import (
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 )
 
 func ManualUpgrade(app *application.Lux, sc models.Sidecar, targetVersion string) error {
@@ -45,7 +45,7 @@ func AutomatedUpgrade(app *application.Lux, sc models.Sidecar, targetVersion str
 			}
 		}
 		if pluginDir == "" {
-			pluginDir, err = app.Prompt.CaptureString("Path to your node plugin dir (likely ~/.node/build/plugins)")
+			pluginDir, err = app.Prompt.CaptureString("Path to your luxgo plugin dir (likely ~/.luxgo/build/plugins)")
 			if err != nil {
 				return err
 			}
@@ -81,8 +81,8 @@ To upgrade your node, you must do three things:
 
 To add the VM to your plugin directory, copy or scp from %s
 
-If you installed node with the install script, your plugin directory is likely
-~/.node/build/plugins.
+If you installed luxgo with the install script, your plugin directory is likely
+~/.luxgo/build/plugins.
 `
 
 	ux.Logger.PrintToUser(msg, vmPath)

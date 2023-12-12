@@ -2,7 +2,7 @@
 builds:
   - id: cli
     main: ./main.go
-    binary: avalanche
+    binary: lux
     flags:
       - -v
     # windows is ignored by default, as the `goos` field by default only

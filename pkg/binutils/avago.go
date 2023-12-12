@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -8,8 +8,8 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 )
 
-func SetupNode(app *application.Lux, avagoVersion string) (string, error) {
-	binDir := app.GetNodeBinDir()
+func SetupLuxgo(app *application.Lux, avagoVersion string) (string, error) {
+	binDir := app.GetLuxgoBinDir()
 
 	installer := NewInstaller()
 	downloader := NewAvagoDownloader()
@@ -18,9 +18,9 @@ func SetupNode(app *application.Lux, avagoVersion string) (string, error) {
 		avagoVersion,
 		binDir,
 		binDir,
-		nodeBinPrefix,
-		constants.AvaLabsOrg,
-		constants.NodeRepoName,
+		luxgoBinPrefix,
+		constants.LuxDeFiOrg,
+		constants.LuxGoRepoName,
 		downloader,
 		installer,
 	)

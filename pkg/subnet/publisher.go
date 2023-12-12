@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -87,7 +87,7 @@ func (p *publisherImpl) Publish(
 
 	ux.Logger.PrintToUser("Committing resources to local git repo...")
 	now := time.Now()
-	commitStr := fmt.Sprintf("avalanche-commit-%s", now.String())
+	commitStr := fmt.Sprintf("lux-commit-%s", now.String())
 
 	// use the global git config to try identifying the author
 	conf, err := config.LoadConfig(config.GlobalScope)

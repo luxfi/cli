@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Package key implements key manager and helper functions.
@@ -9,11 +9,11 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/constants"
-	"github.com/luxdefi/node/vms/components/avax"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/constants"
+	"github.com/luxdefi/luxgo/vms/components/lux"
+	"github.com/luxdefi/luxgo/vms/platformvm/txs"
+	"github.com/luxdefi/luxgo/vms/secp256k1fx"
 )
 
 var (
@@ -37,9 +37,9 @@ type Key interface {
 	// If target amount is specified, it only uses the
 	// outputs until the total spending is below the target
 	// amount.
-	Spends(outputs []*avax.UTXO, opts ...OpOption) (
+	Spends(outputs []*lux.UTXO, opts ...OpOption) (
 		totalBalanceToSpend uint64,
-		inputs []*avax.TransferableInput,
+		inputs []*lux.TransferableInput,
 		signers [][]ids.ShortID,
 	)
 	// Sign generates [numSigs] signatures and attaches them to [pTx].
@@ -73,7 +73,7 @@ func WithTargetAmount(ta uint64) OpOption {
 }
 
 // To deduct transfer fee from total spend (output).
-// e.g., "units.MilliAvax" for X/P-Chain transfer.
+// e.g., "units.MilliLux" for X/P-Chain transfer.
 func WithFeeDeduct(fee uint64) OpOption {
 	return func(op *Op) {
 		op.feeDeduct = fee
@@ -94,7 +94,7 @@ func GetHRP(networkID uint32) string {
 }
 
 type innerSortTransferableInputsWithSigners struct {
-	ins     []*avax.TransferableInput
+	ins     []*lux.TransferableInput
 	signers [][]ids.ShortID
 }
 
@@ -124,7 +124,7 @@ func (ins *innerSortTransferableInputsWithSigners) Swap(i, j int) {
 // SortTransferableInputsWithSigners sorts the inputs and signers based on the
 // input's utxo ID.
 //
-// This is based off of (generics?): https://github.com/luxdefi/node/blob/224c9fd23d41839201dd0275ac864a845de6e93e/vms/components/avax/transferables.go#L202
-func SortTransferableInputsWithSigners(ins []*avax.TransferableInput, signers [][]ids.ShortID) {
+// This is based off of (generics?): https://github.com/luxdefi/luxgo/blob/224c9fd23d41839201dd0275ac864a845de6e93e/vms/components/lux/transferables.go#L202
+func SortTransferableInputsWithSigners(ins []*lux.TransferableInput, signers [][]ids.ShortID) {
 	sort.Sort(&innerSortTransferableInputsWithSigners{ins: ins, signers: signers})
 }

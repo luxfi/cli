@@ -79,7 +79,7 @@ jobs:
         with:
           name: cli-logs-${{ matrix.os }}
           path: |
-            ~/.avalanche-cli/
-            !~/.avalanche-cli/bin/
-            !~/.avalanche-cli/snapshots
+            ~/.lux-cli/
+            !~/.lux-cli/bin/
+            !~/.lux-cli/snapshots
           retention-days: 5

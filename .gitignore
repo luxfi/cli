@@ -29,8 +29,8 @@
 
 bin/
 build/
-avalanche-cli
-avalanche
+lux-cli
+lux
 
 dist/
 bin/

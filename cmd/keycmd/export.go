@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/constants"
+
 	"github.com/spf13/cobra"
 )
 
@@ -49,5 +50,5 @@ func exportKey(_ *cobra.Command, args []string) error {
 		return nil
 	}
 
-	return os.WriteFile(filename, keyBytes, application.WriteReadReadPerms)
+	return os.WriteFile(filename, keyBytes, constants.WriteReadReadPerms)
 }

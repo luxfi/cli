@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package application
@@ -96,8 +96,8 @@ func (downloader) doAPIRequest(url, token string) (io.ReadCloser, error) {
 
 // GetLatestReleaseVersion returns the latest available version from github
 func (d downloader) GetLatestReleaseVersion(releaseURL string) (string, error) {
-	// TODO: Question if there is a less error prone (= simpler) way to install latest node
-	// Maybe the binary package manager should also allow the actual node binary for download
+	// TODO: Question if there is a less error prone (= simpler) way to install latest luxgo
+	// Maybe the binary package manager should also allow the actual luxgo binary for download
 	token := os.Getenv(constants.GithubAPITokenEnvVarName)
 	body, err := d.doAPIRequest(releaseURL, token)
 	if err != nil {

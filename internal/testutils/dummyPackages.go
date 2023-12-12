@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package testutils
@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	nodeBin = "node"
+	luxgoBin = "luxgo"
 	pluginDirName  = "plugins"
 	evmBin         = "evm"
 	buildDirName   = "build"
@@ -26,7 +26,7 @@ const (
 	readme         = "README.md"
 	license        = "LICENSE"
 
-	nodeBinPrefix = "node-"
+	luxgoBinPrefix = "luxgo-"
 
 	avagoTar     = "/tmp/avago.tar.gz"
 	avagoZip     = "/tmp/avago.zip"
@@ -40,8 +40,8 @@ var (
 )
 
 func verifyAvagoTarContents(require *require.Assertions, tarBytes []byte, version string) {
-	topDir := nodeBinPrefix + version
-	bin := filepath.Join(topDir, nodeBin)
+	topDir := luxgoBinPrefix + version
+	bin := filepath.Join(topDir, luxgoBin)
 	plugins := filepath.Join(topDir, pluginDirName)
 	evm := filepath.Join(plugins, evmBin)
 
@@ -114,7 +114,7 @@ func verifySubnetEVMTarContents(require *require.Assertions, tarBytes []byte) {
 
 func verifyAvagoZipContents(require *require.Assertions, zipFile string) {
 	topDir := buildDirName
-	bin := filepath.Join(topDir, nodeBin)
+	bin := filepath.Join(topDir, luxgoBin)
 	plugins := filepath.Join(topDir, pluginDirName)
 	evm := filepath.Join(plugins, evmBin)
 
@@ -156,7 +156,7 @@ func CreateDummyAvagoZip(require *require.Assertions, binary []byte) []byte {
 	err = os.Mkdir(topDir, 0o700)
 	require.NoError(err)
 
-	binPath := filepath.Join(topDir, nodeBin)
+	binPath := filepath.Join(topDir, luxgoBin)
 	err = os.WriteFile(binPath, binary, 0o600)
 	require.NoError(err)
 
@@ -184,11 +184,11 @@ func CreateDummyAvagoTar(require *require.Assertions, binary []byte, version str
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
 
-	topDir := filepath.Join(sourceDir, nodeBinPrefix+version)
+	topDir := filepath.Join(sourceDir, luxgoBinPrefix+version)
 	err = os.Mkdir(topDir, 0o700)
 	require.NoError(err)
 
-	binPath := filepath.Join(topDir, nodeBin)
+	binPath := filepath.Join(topDir, luxgoBin)
 	err = os.WriteFile(binPath, binary, 0o600)
 	require.NoError(err)
 

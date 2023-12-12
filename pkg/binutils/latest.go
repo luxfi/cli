@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package binutils
 
@@ -10,11 +10,53 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/luxgo/utils/perms"
 	"go.uber.org/zap"
 )
+
+// CheckReleaseVersion checks the latest available version from github for the given repo and version
+// and returns an http response for it in success case
+//
+// NOTE: If any of the underlying URLs change (github changes, release file names, etc.) this fails
+// The goal MUST be to have some sort of mature binary management
+func CheckReleaseVersion(
+	log logging.Logger,
+	repo string,
+	version string,
+) (*http.Response, error) {
+	arch := runtime.GOARCH
+	goos := runtime.GOOS
+	var downloadURL string
+
+	switch goos {
+	case "linux":
+		downloadURL = fmt.Sprintf(
+			"https://github.com/luxdefi/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
+			repo,
+			version,
+			repo,
+			version[1:], // WARN subnet-evm isn't consistent in its release naming, it's omitting the v in the file name...
+			arch,
+		)
+	case "darwin":
+		downloadURL = fmt.Sprintf(
+			"https://github.com/luxdefi/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
+			repo,
+			version,
+			repo,
+			version[1:],
+			arch,
+		)
+	default:
+		return nil, fmt.Errorf("OS not supported: %s", goos)
+	}
+
+	log.Debug("starting download...", zap.String("download-url", downloadURL))
+
+	return prompts.RequestURL(downloadURL)
+}
 
 // DownloadReleaseVersion returns the latest available version from github for
 // the given repo and version, and installs it into the apps `bin` dir.
@@ -28,58 +70,11 @@ func DownloadReleaseVersion(
 	version,
 	binDir string,
 ) (string, error) {
-	arch := runtime.GOARCH
-	goos := runtime.GOOS
-	var downloadURL string
-	var ext string
-
-	switch goos {
-	case "linux":
-		downloadURL = fmt.Sprintf(
-			"https://github.com/luxdefi/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
-			repo,
-			version,
-			repo,
-			version[1:], // WARN subnet-evm isn't consistent in its release naming, it's omitting the v in the file name...
-			arch,
-		)
-		ext = "tar.gz"
-	case "darwin":
-		downloadURL = fmt.Sprintf(
-			"https://github.com/luxdefi/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
-			repo,
-			version,
-			repo,
-			version[1:],
-			arch,
-		)
-		// subnet-evm supports darwin and linux only
-		ext = "tar.gz"
-	default:
-		return "", fmt.Errorf("OS not supported: %s", goos)
-	}
-
-	log.Debug("starting download...", zap.String("download-url", downloadURL))
-
-	request, err := http.NewRequest("GET", downloadURL, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to create request for latest version from %s: %w", downloadURL, err)
-	}
-	token := os.Getenv(constants.GithubAPITokenEnvVarName)
-	if token != "" {
-		// avoid rate limitation issues at CI
-		request.Header.Set("authorization", fmt.Sprintf("Bearer %s", token))
-	}
-	resp, err := http.DefaultClient.Do(request)
+	resp, err := CheckReleaseVersion(log, repo, version)
 	if err != nil {
 		return "", err
 	}
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected http status code: %d", resp.StatusCode)
-	}
+
 	defer resp.Body.Close()
 
 	archive, err := io.ReadAll(resp.Body)
@@ -93,7 +88,7 @@ func DownloadReleaseVersion(
 	}
 
 	log.Debug("download successful. installing archive...")
-	if err := InstallArchive(ext, archive, installDir); err != nil {
+	if err := InstallArchive("tar.gz", archive, installDir); err != nil {
 		return "", err
 	}
 	return installDir, nil

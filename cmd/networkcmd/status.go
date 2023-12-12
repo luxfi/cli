@@ -1,9 +1,10 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package networkcmd
 
 import (
 	"github.com/luxdefi/cli/pkg/binutils"
+	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/netrunner/server"
 	"github.com/spf13/cobra"
@@ -30,7 +31,8 @@ func networkStatus(*cobra.Command, []string) error {
 		return err
 	}
 
-	ctx := binutils.GetAsyncContext()
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
 	status, err := cli.Status(ctx)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {
@@ -50,7 +52,7 @@ func networkStatus(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("Number of custom VMs: %d", len(status.ClusterInfo.CustomChains))
 		ux.Logger.PrintToUser("======================================== Node information ========================================")
 		for n, nodeInfo := range status.ClusterInfo.NodeInfos {
-			ux.Logger.PrintToUser("%s has ID %s and endpoint %s: ", n, nodeInfo.Id, nodeInfo.Uri)
+			ux.Logger.PrintToUser("%s has ID %s and endpoint %s ", n, nodeInfo.Id, nodeInfo.Uri)
 		}
 		ux.Logger.PrintToUser("==================================== Custom VM information =======================================")
 		for _, nodeInfo := range status.ClusterInfo.NodeInfos {

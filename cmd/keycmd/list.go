@@ -1,9 +1,8 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
 import (
-	"context"
 	"fmt"
 	"math/big"
 	"os"
@@ -13,13 +12,12 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/key"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	ledger "github.com/luxdefi/node/utils/crypto/ledger"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/units"
-	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/cli/pkg/utils"
+	"github.com/luxdefi/luxgo/ids"
+	ledger "github.com/luxdefi/luxgo/utils/crypto/ledger"
+	"github.com/luxdefi/luxgo/utils/formatting/address"
+	"github.com/luxdefi/luxgo/utils/units"
+	"github.com/luxdefi/luxgo/vms/platformvm"
 	"github.com/luxdefi/coreth/ethclient"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/olekukonko/tablewriter"
@@ -34,6 +32,7 @@ const (
 	allFlag           = "all-networks"
 	cchainFlag        = "cchain"
 	ledgerIndicesFlag = "ledger"
+	useNanoLuxFlag   = "use-nano-lux"
 )
 
 var (
@@ -42,10 +41,11 @@ var (
 	mainnet       bool
 	all           bool
 	cchain        bool
+	useNanoLux   bool
 	ledgerIndices []uint
 )
 
-// avalanche subnet list
+// lux subnet list
 func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -97,6 +97,13 @@ keys or for the ledger addresses associated to certain indices.`,
 		true,
 		"list C-Chain addresses",
 	)
+	cmd.Flags().BoolVarP(
+		&useNanoLux,
+		useNanoLuxFlag,
+		"n",
+		false,
+		"use nano Lux for balances",
+	)
 	cmd.Flags().UintSliceVarP(
 		&ledgerIndices,
 		ledgerIndicesFlag,
@@ -112,18 +119,13 @@ func getClients(networks []models.Network, cchain bool) (
 	map[models.Network]ethclient.Client,
 	error,
 ) {
-	apiEndpoints := map[models.Network]string{
-		models.Fuji:    constants.FujiAPIEndpoint,
-		models.Mainnet: constants.MainnetAPIEndpoint,
-		models.Local:   constants.LocalAPIEndpoint,
-	}
 	var err error
 	pClients := map[models.Network]platformvm.Client{}
 	cClients := map[models.Network]ethclient.Client{}
 	for _, network := range networks {
-		pClients[network] = platformvm.NewClient(apiEndpoints[network])
+		pClients[network] = platformvm.NewClient(network.Endpoint)
 		if cchain {
-			cClients[network], err = ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoints[network], "C"))
+			cClients[network], err = ethclient.Dial(network.CChainEndpoint())
 			if err != nil {
 				return nil, nil, err
 			}
@@ -145,13 +147,13 @@ func listKeys(*cobra.Command, []string) error {
 	var addrInfos []addressInfo
 	networks := []models.Network{}
 	if local || all {
-		networks = append(networks, models.Local)
+		networks = append(networks, models.LocalNetwork)
 	}
 	if testnet || all {
-		networks = append(networks, models.Fuji)
+		networks = append(networks, models.FujiNetwork)
 	}
 	if mainnet || all {
-		networks = append(networks, models.Mainnet)
+		networks = append(networks, models.MainnetNetwork)
 	}
 	if len(networks) == 0 {
 		// no flag was set, prompt user
@@ -228,12 +230,8 @@ func getStoredKeyInfo(
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		networkID, err := network.NetworkID()
-		if err != nil {
-			return nil, err
-		}
 		keyName := strings.TrimSuffix(filepath.Base(keyPath), constants.KeySuffix)
-		sk, err := key.LoadSoft(networkID, keyPath)
+		sk, err := key.LoadSoft(network.ID, keyPath)
 		if err != nil {
 			return nil, err
 		}
@@ -264,12 +262,10 @@ func getLedgerIndicesInfo(
 ) ([]addressInfo, error) {
 	ledgerDevice, err := ledger.New()
 	if err != nil {
-		ux.Logger.PrintToUser(logging.LightRed.Wrap("Error accessing ledger device. Please update ledger app to >= v0.6.5."))
 		return nil, err
 	}
 	addresses, err := ledgerDevice.Addresses(ledgerIndices)
 	if err != nil {
-		ux.Logger.PrintToUser(logging.LightRed.Wrap("Error accessing ledger device. Please update ledger app to >= v0.6.5."))
 		return nil, err
 	}
 	if len(addresses) != len(ledgerIndices) {
@@ -295,11 +291,7 @@ func getLedgerIndexInfo(
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		networkID, err := network.NetworkID()
-		if err != nil {
-			return nil, err
-		}
-		pChainAddr, err := address.Format("P", key.GetHRP(networkID), addr[:])
+		pChainAddr, err := address.Format("P", key.GetHRP(network.ID), addr[:])
 		if err != nil {
 			return nil, err
 		}
@@ -325,10 +317,10 @@ func getPChainAddrInfo(
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	balance, err := getPChainBalanceStr(context.Background(), pClients[network], pChainAddr)
+	balance, err := getPChainBalanceStr(pClients[network], pChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network != models.Local {
+		if network.Kind != models.Local {
 			return addressInfo{}, err
 		}
 	}
@@ -338,7 +330,7 @@ func getPChainAddrInfo(
 		chain:   "P-Chain (Bech32 format)",
 		address: pChainAddr,
 		balance: balance,
-		network: network.String(),
+		network: network.Name(),
 	}, nil
 }
 
@@ -349,10 +341,10 @@ func getCChainAddrInfo(
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	cChainBalance, err := getCChainBalanceStr(context.Background(), cClients[network], cChainAddr)
+	cChainBalance, err := getCChainBalanceStr(cClients[network], cChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network != models.Local {
+		if network.Kind != models.Local {
 			return addressInfo{}, err
 		}
 	}
@@ -362,7 +354,7 @@ func getCChainAddrInfo(
 		chain:   "C-Chain (Ethereum hex format)",
 		address: cChainAddr,
 		balance: cChainBalance,
-		network: network.String(),
+		network: network.Name(),
 	}, nil
 }
 
@@ -385,28 +377,34 @@ func printAddrInfos(addrInfos []addressInfo) {
 	table.Render()
 }
 
-func getCChainBalanceStr(ctx context.Context, cClient ethclient.Client, addrStr string) (string, error) {
+func getCChainBalanceStr(cClient ethclient.Client, addrStr string) (string, error) {
 	addr := common.HexToAddress(addrStr)
-	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
 	cancel()
 	if err != nil {
 		return "", err
 	}
-	// convert to nAvax
-	balance = balance.Div(balance, big.NewInt(int64(units.Avax)))
+	// convert to nLux
+	balance = balance.Div(balance, big.NewInt(int64(units.Lux)))
 	if balance.Cmp(big.NewInt(0)) == 0 {
 		return "0", nil
 	}
-	return fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Avax)), nil
+	balanceStr := ""
+	if useNanoLux {
+		balanceStr = fmt.Sprintf("%9d", balance.Uint64())
+	} else {
+		balanceStr = fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Lux))
+	}
+	return balanceStr, nil
 }
 
-func getPChainBalanceStr(ctx context.Context, pClient platformvm.Client, addr string) (string, error) {
+func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error) {
 	pID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err
 	}
-	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	resp, err := pClient.GetBalance(ctx, []ids.ShortID{pID})
 	cancel()
 	if err != nil {
@@ -415,5 +413,11 @@ func getPChainBalanceStr(ctx context.Context, pClient platformvm.Client, addr st
 	if resp.Balance == 0 {
 		return "0", nil
 	}
-	return fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Avax)), nil
+	balanceStr := ""
+	if useNanoLux {
+		balanceStr = fmt.Sprintf("%9d", resp.Balance)
+	} else {
+		balanceStr = fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Lux))
+	}
+	return balanceStr, nil
 }

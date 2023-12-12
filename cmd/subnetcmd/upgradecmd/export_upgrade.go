@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -13,7 +13,7 @@ import (
 
 var force bool
 
-// avalanche subnet upgrade import
+// lux subnet upgrade import
 func newUpgradeExportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export [subnetName]",

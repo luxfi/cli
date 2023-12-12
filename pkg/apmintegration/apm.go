@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package apmintegration
@@ -23,7 +23,7 @@ func AddRepo(app *application.Lux, repoURL *url.URL, branch string) (string, err
 		return "", err
 	}
 
-	if alias == constants.DefaultAvaLabsPackage {
+	if alias == constants.DefaultLuxDeFiPackage {
 		ux.Logger.PrintToUser("Lux Plugins Core already installed, skipping...")
 		return "", nil
 	}

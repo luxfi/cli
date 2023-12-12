@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -23,7 +23,7 @@ func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, erro
 		binDir,
 		subDir,
 		subnetEVMBinPrefix,
-		constants.AvaLabsOrg,
+		constants.LuxDeFiOrg,
 		constants.SubnetEVMRepoName,
 		downloader,
 		installer,

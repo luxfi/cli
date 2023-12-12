@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -14,7 +14,7 @@ import (
 	"github.com/luxdefi/cli/pkg/config"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +23,7 @@ const (
 	version1 = "v1.17.1"
 	version2 = "v1.18.1"
 
-	nodeBin = "node"
+	luxgoBin = "luxgo"
 )
 
 var (
@@ -41,7 +41,7 @@ func setupInstallDir(require *require.Assertions) *application.Lux {
 	return app
 }
 
-func Test_installNodeWithVersion_Zip(t *testing.T) {
+func Test_installLuxGoWithVersion_Zip(t *testing.T) {
 	require := testutils.SetupTest(t)
 
 	zipBytes := testutils.CreateDummyAvagoZip(require, binary1)
@@ -56,19 +56,19 @@ func Test_installNodeWithVersion_Zip(t *testing.T) {
 	mockAppDownloader.On("Download", mock.Anything).Return(zipBytes, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir := filepath.Join(app.GetNodeBinDir(), nodeBinPrefix+version1)
+	expectedDir := filepath.Join(app.GetLuxgoBinDir(), luxgoBinPrefix+version1)
 
-	binDir, err := installBinaryWithVersion(app, version1, app.GetNodeBinDir(), nodeBinPrefix, githubDownloader, mockInstaller)
+	binDir, err := installBinaryWithVersion(app, version1, app.GetLuxgoBinDir(), luxgoBinPrefix, githubDownloader, mockInstaller)
 	require.Equal(expectedDir, binDir)
 	require.NoError(err)
 
 	// Check the installed binary
-	installedBin, err := os.ReadFile(filepath.Join(binDir, nodeBin))
+	installedBin, err := os.ReadFile(filepath.Join(binDir, luxgoBin))
 	require.NoError(err)
 	require.Equal(binary1, installedBin)
 }
 
-func Test_installNodeWithVersion_Tar(t *testing.T) {
+func Test_installLuxGoWithVersion_Tar(t *testing.T) {
 	require := testutils.SetupTest(t)
 
 	tarBytes := testutils.CreateDummyAvagoTar(require, binary1, version1)
@@ -84,19 +84,19 @@ func Test_installNodeWithVersion_Tar(t *testing.T) {
 	mockAppDownloader.On("Download", mock.Anything).Return(tarBytes, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir := filepath.Join(app.GetNodeBinDir(), nodeBinPrefix+version1)
+	expectedDir := filepath.Join(app.GetLuxgoBinDir(), luxgoBinPrefix+version1)
 
-	binDir, err := installBinaryWithVersion(app, version1, app.GetNodeBinDir(), nodeBinPrefix, downloader, mockInstaller)
+	binDir, err := installBinaryWithVersion(app, version1, app.GetLuxgoBinDir(), luxgoBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir, binDir)
 	require.NoError(err)
 
 	// Check the installed binary
-	installedBin, err := os.ReadFile(filepath.Join(binDir, nodeBin))
+	installedBin, err := os.ReadFile(filepath.Join(binDir, luxgoBin))
 	require.NoError(err)
 	require.Equal(binary1, installedBin)
 }
 
-func Test_installNodeWithVersion_MultipleCoinstalls(t *testing.T) {
+func Test_installLuxGoWithVersion_MultipleCoinstalls(t *testing.T) {
 	require := testutils.SetupTest(t)
 
 	zipBytes1 := testutils.CreateDummyAvagoZip(require, binary1)
@@ -119,25 +119,25 @@ func Test_installNodeWithVersion_MultipleCoinstalls(t *testing.T) {
 	mockAppDownloader.On("Download", url2).Return(zipBytes2, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir1 := filepath.Join(app.GetNodeBinDir(), nodeBinPrefix+version1)
-	expectedDir2 := filepath.Join(app.GetNodeBinDir(), nodeBinPrefix+version2)
+	expectedDir1 := filepath.Join(app.GetLuxgoBinDir(), luxgoBinPrefix+version1)
+	expectedDir2 := filepath.Join(app.GetLuxgoBinDir(), luxgoBinPrefix+version2)
 
-	binDir1, err := installBinaryWithVersion(app, version1, app.GetNodeBinDir(), nodeBinPrefix, downloader, mockInstaller)
+	binDir1, err := installBinaryWithVersion(app, version1, app.GetLuxgoBinDir(), luxgoBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir1, binDir1)
 	require.NoError(err)
 
-	binDir2, err := installBinaryWithVersion(app, version2, app.GetNodeBinDir(), nodeBinPrefix, downloader, mockInstaller)
+	binDir2, err := installBinaryWithVersion(app, version2, app.GetLuxgoBinDir(), luxgoBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir2, binDir2)
 	require.NoError(err)
 
 	require.NotEqual(binDir1, binDir2)
 
 	// Check the installed binary
-	installedBin1, err := os.ReadFile(filepath.Join(binDir1, nodeBin))
+	installedBin1, err := os.ReadFile(filepath.Join(binDir1, luxgoBin))
 	require.NoError(err)
 	require.Equal(binary1, installedBin1)
 
-	installedBin2, err := os.ReadFile(filepath.Join(binDir2, nodeBin))
+	installedBin2, err := os.ReadFile(filepath.Join(binDir2, luxgoBin))
 	require.NoError(err)
 	require.Equal(binary2, installedBin2)
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -21,8 +21,8 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/version"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/version"
 	"gopkg.in/yaml.v3"
 )
 
@@ -39,7 +39,7 @@ var (
 
 type newPublisherFunc func(string, string, string) subnet.Publisher
 
-// avalanche subnet publish
+// lux subnet publish
 func newPublishCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "publish [subnetName]",
@@ -64,7 +64,7 @@ func newPublishCmd() *cobra.Command {
 }
 
 func publish(_ *cobra.Command, args []string) error {
-	chains, err := validateSubnetNameAndGetChains(args)
+	chains, err := ValidateSubnetNameAndGetChains(args)
 	if err != nil {
 		return err
 	}
@@ -432,17 +432,6 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 			return nil, err
 		}
 
-	case sc.VM == models.SpacesVM:
-		vmID = models.SpacesVM
-		desc = "Authenticated, hierarchical storage of arbitrary keys/values using any EIP-712 compatible wallet."
-		dl := binutils.NewSpacesVMDownloader()
-		maintrs, ver, url, sha, err = getInfoForKnownVMs(
-			sc.VMVersion,
-			constants.SpacesVMRepoName,
-			app.GetSpacesVMBinDir(),
-			constants.SpacesVMBin,
-			dl,
-		)
 	case sc.VM == models.SubnetEvm:
 		vmID = models.SubnetEvm
 		dl := binutils.NewSubnetEVMDownloader()
@@ -493,7 +482,7 @@ func getInfoForKnownVMs(
 	strVer, repoName, vmBinDir, vmBin string,
 	dl binutils.GithubDownloader,
 ) ([]string, *version.Semantic, string, string, error) {
-	maintrs := []string{constants.AvaLabsMaintainers}
+	maintrs := []string{constants.LuxDeFiMaintainers}
 	binPath := filepath.Join(vmBinDir, repoName+"-"+strVer, vmBin)
 	sha, err := utils.GetSHA256FromDisk(binPath)
 	if err != nil {

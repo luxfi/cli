@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -12,7 +12,7 @@ import (
 
 var app *application.Lux
 
-// avalanche subnet
+// lux subnet
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subnet",
@@ -60,5 +60,15 @@ manage your Subnet configurations and live deployments.`,
 	cmd.AddCommand(newConfigureCmd())
 	// subnet import-running
 	cmd.AddCommand(newImportFromNetworkCmd())
+	// subnet VMID
+	cmd.AddCommand(vmidCmd())
+	// subnet removeValidator
+	cmd.AddCommand(newRemoveValidatorCmd())
+	// subnet elastic
+	cmd.AddCommand(newElasticCmd())
+	// subnet validators
+	cmd.AddCommand(newValidatorsCmd())
+	// subnet addPermissionlessDelegator
+	cmd.AddCommand(newAddPermissionlessDelegatorCmd())
 	return cmd
 }

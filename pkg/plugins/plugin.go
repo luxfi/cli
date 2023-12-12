@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -56,11 +56,6 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 			if err != nil {
 				return "", fmt.Errorf("failed to install subnet-evm: %w", err)
 			}
-		case models.SpacesVM:
-			vmSourcePath, err = binutils.SetupSpacesVM(app, sc.VMVersion)
-			if err != nil {
-				return "", fmt.Errorf("failed to install spaces-vm: %w", err)
-			}
 		case models.CustomVM:
 			vmSourcePath = binutils.SetupCustomBin(app, subnetName)
 		default:
@@ -90,11 +85,6 @@ func CreatePluginFromVersion(
 		vmSourcePath, err = binutils.SetupSubnetEVM(app, version)
 		if err != nil {
 			return "", fmt.Errorf("failed to install subnet-evm: %w", err)
-		}
-	case models.SpacesVM:
-		vmSourcePath, err = binutils.SetupSpacesVM(app, version)
-		if err != nil {
-			return "", fmt.Errorf("failed to install spaces-vm: %w", err)
 		}
 	case models.CustomVM:
 		vmSourcePath = binutils.SetupCustomBin(app, subnetName)

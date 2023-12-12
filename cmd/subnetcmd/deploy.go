@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -11,38 +11,34 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxdefi/cli/cmd/flags"
 	"github.com/luxdefi/cli/pkg/binutils"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/key"
+	"github.com/luxdefi/cli/pkg/keychain"
 	"github.com/luxdefi/cli/pkg/localnetworkinterface"
+	"github.com/luxdefi/cli/pkg/metrics"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/txutils"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/crypto/keychain"
-	ledger "github.com/luxdefi/node/utils/crypto/ledger"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/coreth/core"
-	spacesvmchain "github.com/luxdefi/spacesvm/chain"
+	anrutils "github.com/luxdefi/netrunner/utils"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/luxgo/vms/platformvm/txs"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"
 )
 
-const numLedgerAddressesToSearch = 1000
-
 var (
 	deployLocal              bool
+	deployDevnet             bool
 	deployTestnet            bool
 	deployMainnet            bool
+	endpoint                 string
 	sameControlKey           bool
 	keyName                  string
 	threshold                uint32
@@ -51,15 +47,21 @@ var (
 	userProvidedAvagoVersion string
 	outputTxPath             string
 	useLedger                bool
+	useEwoq                  bool
 	ledgerAddresses          []string
+	subnetIDStr              string
+	mainnetChainID           uint32
+	skipCreatePrompt         bool
 
-	errMutuallyExlusiveNetworks    = errors.New("--local, --fuji (resp. --testnet) and --mainnet are mutually exclusive")
+	errMutuallyExlusiveNetworks = errors.New("--local, --fuji/--testnet, --mainnet are mutually exclusive")
+
 	errMutuallyExlusiveControlKeys = errors.New("--control-keys and --same-control-key are mutually exclusive")
-	ErrMutuallyExlusiveKeyLedger   = errors.New("--key and --ledger,--ledger-addrs are mutually exclusive")
-	ErrStoredKeyOnMainnet          = errors.New("--key is not available for mainnet operations")
+
+	ErrMutuallyExlusiveKeyLedger = errors.New("key source flags --key, --ledger/--ledger-addrs are mutually exclusive")
+	ErrStoredKeyOnMainnet        = errors.New("key --key is not available for mainnet operations")
 )
 
-// avalanche subnet deploy
+// lux subnet deploy
 func newDeployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy [subnetName]",
@@ -71,27 +73,58 @@ At the end of the call, the command prints the RPC URL you can use to interact w
 Lux-CLI only supports deploying an individual Subnet once per network. Subsequent
 attempts to deploy the same Subnet to the same network (local, Fuji, Mainnet) aren't
 allowed. If you'd like to redeploy a Subnet locally for testing, you must first call
-avalanche network clean to reset all deployed chain state. Subsequent local deploys
+lux network clean to reset all deployed chain state. Subsequent local deploys
 redeploy the chain with fresh state. You can deploy the same Subnet to multiple networks,
 so you can take your locally tested Subnet and deploy it on Fuji or Mainnet.`,
-		SilenceUsage: true,
-		RunE:         deploySubnet,
-		Args:         cobra.ExactArgs(1),
+		SilenceUsage:      true,
+		RunE:              deploySubnet,
+		PersistentPostRun: handlePostRun,
+		Args:              cobra.ExactArgs(1),
 	}
+	cmd.Flags().StringVar(&endpoint, "endpoint", "", "use the given endpoint for network operations")
 	cmd.Flags().BoolVarP(&deployLocal, "local", "l", false, "deploy to a local network")
+	cmd.Flags().BoolVar(&deployDevnet, "devnet", false, "deploy to a devnet network")
 	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `fuji`)")
 	cmd.Flags().BoolVarP(&deployTestnet, "fuji", "f", false, "deploy to fuji (alias to `testnet`")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "deploy to mainnet")
-	cmd.Flags().StringVar(&userProvidedAvagoVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji deploy only]")
-	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use creation key as control key")
+	cmd.Flags().StringVar(&userProvidedAvagoVersion, "luxgo-version", "latest", "use this version of luxgo (ex: v1.17.12)")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji/devnet deploy only]")
+	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use the fee-paying key as control key")
 	cmd.Flags().Uint32Var(&threshold, "threshold", 0, "required number of control key signatures to make subnet changes")
 	cmd.Flags().StringSliceVar(&controlKeys, "control-keys", nil, "addresses that may make subnet changes")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "subnet-auth-keys", nil, "control keys that will be used to authenticate chain creation")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the blockchain creation tx")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [fuji/devnet deploy only]")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
+	cmd.Flags().StringVarP(&subnetIDStr, "subnet-id", "u", "", "deploy into given subnet id")
+	cmd.Flags().Uint32Var(&mainnetChainID, "mainnet-chain-id", 0, "use given ChainID for mainnet deployment")
 	return cmd
+}
+
+func CallDeploy(
+	cmd *cobra.Command,
+	subnetName string,
+	deployLocalParam bool,
+	deployDevnetParam bool,
+	deployTestnetParam bool,
+	deployMainnetParam bool,
+	endpointParam string,
+	keyNameParam string,
+	useLedgerParam bool,
+	useEwoqParam bool,
+	sameControlKeyParam bool,
+) error {
+	deployLocal = deployLocalParam
+	deployTestnet = deployTestnetParam
+	deployMainnet = deployMainnetParam
+	deployDevnet = deployDevnetParam
+	endpoint = endpointParam
+	sameControlKey = sameControlKeyParam
+	keyName = keyNameParam
+	useLedger = useLedgerParam
+	useEwoq = useEwoqParam
+	return deploySubnet(cmd, []string{subnetName})
 }
 
 func getChainsInSubnet(subnetName string) ([]string, error) {
@@ -103,6 +136,9 @@ func getChainsInSubnet(subnetName string) ([]string, error) {
 	chains := []string{}
 
 	for _, s := range subnets {
+		if !s.IsDir() {
+			continue
+		}
 		sidecarFile := filepath.Join(app.GetSubnetDir(), s.Name(), constants.SidecarFileName)
 		if _, err := os.Stat(sidecarFile); err == nil {
 			// read in sidecar file
@@ -124,29 +160,141 @@ func getChainsInSubnet(subnetName string) ([]string, error) {
 	return chains, nil
 }
 
-// deploySubnet is the cobra command run for deploying subnets
-func deploySubnet(_ *cobra.Command, args []string) error {
-	chains, err := validateSubnetNameAndGetChains(args)
+func checkSubnetEVMDefaultAddressNotInAlloc(network models.Network, chain string) error {
+	if network.Kind != models.Local && network.Kind != models.Devnet && os.Getenv(constants.SimulatePublicNetwork) == "" {
+		genesis, err := app.LoadEvmGenesis(chain)
+		if err != nil {
+			return err
+		}
+		allocAddressMap := genesis.Alloc
+		for address := range allocAddressMap {
+			if address.String() == vm.PrefundedEwoqAddress.String() {
+				return fmt.Errorf("can't airdrop to default address on public networks, please edit the genesis by calling `lux subnet create %s --force`", chain)
+			}
+		}
+	}
+	return nil
+}
+
+func runDeploy(cmd *cobra.Command, args []string) error {
+	skipCreatePrompt = true
+	return deploySubnet(cmd, args)
+}
+
+func updateSubnetEVMGenesisChainID(genesisBytes []byte, newChainID uint) ([]byte, error) {
+	var genesisMap map[string]interface{}
+	if err := json.Unmarshal(genesisBytes, &genesisMap); err != nil {
+		return nil, err
+	}
+	configI, ok := genesisMap["config"]
+	if !ok {
+		return nil, fmt.Errorf("config field not found on genesis")
+	}
+	config, ok := configI.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected genesis config field to be a map[string]interface, found %T", configI)
+	}
+	config["chainId"] = float64(newChainID)
+	return json.MarshalIndent(genesisMap, "", "  ")
+}
+
+// updates sidecar with genesis mainnet id to use
+// given either by cmdline flag, original genesis id, or id obtained from the user
+func getSubnetEVMMainnetChainID(sc *models.Sidecar, subnetName string) error {
+	// get original chain id
+	evmGenesis, err := app.LoadEvmGenesis(subnetName)
 	if err != nil {
 		return err
+	}
+	if evmGenesis.Config == nil {
+		return fmt.Errorf("invalid subnet evm genesis format: config is nil")
+	}
+	if evmGenesis.Config.ChainID == nil {
+		return fmt.Errorf("invalid subnet evm genesis format: config chain id is nil")
+	}
+	originalChainID := evmGenesis.Config.ChainID.Uint64()
+	// handle cmdline flag if given
+	if mainnetChainID != 0 {
+		sc.SubnetEVMMainnetChainID = uint(mainnetChainID)
+	}
+	// prompt the user
+	if sc.SubnetEVMMainnetChainID == 0 {
+		useSameChainID := "Use same ChainID"
+		useNewChainID := "Use new ChainID"
+		listOptions := []string{useNewChainID, useSameChainID}
+		newChainIDPrompt := "Using the same ChainID for both Fuji and Mainnet could lead to a replay attack. Do you want to use a different ChainID?"
+		var (
+			err      error
+			decision string
+		)
+		decision, err = app.Prompt.CaptureList(newChainIDPrompt, listOptions)
+		if err != nil {
+			return err
+		}
+		if decision == useSameChainID {
+			sc.SubnetEVMMainnetChainID = uint(originalChainID)
+		} else {
+			ux.Logger.PrintToUser("Enter your subnet's ChainID. It can be any positive integer != %d.", originalChainID)
+			newChainID, err := app.Prompt.CapturePositiveInt(
+				"ChainID",
+				[]prompts.Comparator{
+					{
+						Label: "Zero",
+						Type:  prompts.MoreThan,
+						Value: 0,
+					},
+					{
+						Label: "Original Chain ID",
+						Type:  prompts.NotEq,
+						Value: originalChainID,
+					},
+				},
+			)
+			if err != nil {
+				return err
+			}
+			sc.SubnetEVMMainnetChainID = uint(newChainID)
+		}
+	}
+	return app.UpdateSidecar(sc)
+}
+
+// deploySubnet is the cobra command run for deploying subnets
+func deploySubnet(cmd *cobra.Command, args []string) error {
+	chains, err := ValidateSubnetNameAndGetChains(args)
+	if err != nil {
+		if !strings.Contains(err.Error(), "Invalid subnet") {
+			return err
+		}
+		if !skipCreatePrompt {
+			yes, promptErr := app.Prompt.CaptureNoYes(fmt.Sprintf("Subnet %s is not found. Do you want to create it first?", args[0]))
+			if promptErr != nil {
+				return promptErr
+			}
+			if !yes {
+				return err
+			}
+		}
+		createErr := createSubnetConfig(cmd, args)
+		if createErr != nil {
+			return createErr
+		}
+		chains, err = ValidateSubnetNameAndGetChains(args)
+		if err != nil {
+			return err
+		}
+		ux.Logger.PrintToUser("Now deploying subnet %s", chains[0])
 	}
 
 	chain := chains[0]
 
-	sc, err := app.LoadSidecar(chain)
+	sidecar, err := app.LoadSidecar(chain)
 	if err != nil {
 		return fmt.Errorf("failed to load sidecar for later update: %w", err)
 	}
 
-	if sc.ImportedFromAPM {
+	if sidecar.ImportedFromAPM {
 		return errors.New("unable to deploy subnets imported from a repo")
-	}
-
-	// get the network to deploy to
-	var network models.Network
-
-	if !flags.EnsureMutuallyExclusive([]bool{deployLocal, deployTestnet, deployMainnet}) {
-		return errMutuallyExlusiveNetworks
 	}
 
 	if outputTxPath != "" {
@@ -155,65 +303,56 @@ func deploySubnet(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	switch {
-	case deployLocal:
-		network = models.Local
-	case deployTestnet:
-		network = models.Fuji
-	case deployMainnet:
-		network = models.Mainnet
+	network, err := GetNetworkFromCmdLineFlags(
+		deployLocal,
+		deployDevnet,
+		deployTestnet,
+		deployMainnet,
+		endpoint,
+		true,
+		[]models.NetworkKind{models.Local, models.Devnet, models.Fuji, models.Mainnet},
+	)
+	if err != nil {
+		return err
 	}
 
-	if network == models.Undefined {
-		// no flag was set, prompt user
-		networkStr, err := app.Prompt.CaptureList(
-			"Choose a network to deploy on",
-			[]string{models.Local.String(), models.Fuji.String(), models.Mainnet.String()},
-		)
-		if err != nil {
-			return err
-		}
-		network = models.NetworkFromString(networkStr)
+	isEVMGenesis, err := hasSubnetEVMGenesis(chain)
+	if err != nil {
+		return err
+	}
+	if sidecar.VM == models.SubnetEvm && !isEVMGenesis {
+		return fmt.Errorf("failed to validate SubnetEVM genesis format")
 	}
 
-	// deploy based on chosen network
-	ux.Logger.PrintToUser("Deploying %s to %s", chains, network.String())
 	chainGenesis, err := app.LoadRawGenesis(chain)
 	if err != nil {
 		return err
 	}
 
-	sidecar, err := app.LoadSidecar(chain)
-	if err != nil {
-		return err
+	if isEVMGenesis {
+		// is is a subnet evm or a custom vm based on subnet evm
+		if network.Kind == models.Mainnet {
+			err = getSubnetEVMMainnetChainID(&sidecar, chain)
+			if err != nil {
+				return err
+			}
+			chainGenesis, err = updateSubnetEVMGenesisChainID(chainGenesis, sidecar.SubnetEVMMainnetChainID)
+			if err != nil {
+				return err
+			}
+		}
+		err = checkSubnetEVMDefaultAddressNotInAlloc(network, chain)
+		if err != nil {
+			return err
+		}
 	}
 
-	// validate genesis as far as possible previous to deploy
-	switch sidecar.VM {
-	case models.SubnetEvm:
-		var genesis core.Genesis
-		err = json.Unmarshal(chainGenesis, &genesis)
-	case models.SpacesVM:
-		var genesis spacesvmchain.Genesis
-		err = json.Unmarshal(chainGenesis, &genesis)
-	}
-	if err != nil {
-		return fmt.Errorf("failed to validate genesis format: %w", err)
-	}
+	ux.Logger.PrintToUser("Deploying %s to %s", chains, network.Name())
 
-	genesisPath := app.GetGenesisPath(chain)
-
-	if len(ledgerAddresses) > 0 {
-		useLedger = true
-	}
-
-	if useLedger && keyName != "" {
-		return ErrMutuallyExlusiveKeyLedger
-	}
-
-	switch network {
-	case models.Local:
+	if network.Kind == models.Local {
 		app.Log.Debug("Deploy local")
+
+		genesisPath := app.GetGenesisPath(chain)
 
 		// copy vm binary to the expected location, first downloading it if necessary
 		var vmBin string
@@ -223,25 +362,17 @@ func deploySubnet(_ *cobra.Command, args []string) error {
 			if err != nil {
 				return fmt.Errorf("failed to install subnet-evm: %w", err)
 			}
-		case models.SpacesVM:
-			vmBin, err = binutils.SetupSpacesVM(app, sidecar.VMVersion)
-			if err != nil {
-				return fmt.Errorf("failed to install spacesvm: %w", err)
-			}
 		case models.CustomVM:
 			vmBin = binutils.SetupCustomBin(app, chain)
 		default:
 			return fmt.Errorf("unknown vm: %s", sidecar.VM)
 		}
 
-		// skip rpc check if using custom vm
-		if sidecar.VM != models.CustomVM {
-			// check if selected version matches what is currently running
-			nc := localnetworkinterface.NewStatusChecker()
-			userProvidedAvagoVersion, err = checkForInvalidDeployAndGetAvagoVersion(nc, sidecar.RPCVersion)
-			if err != nil {
-				return err
-			}
+		// check if selected version matches what is currently running
+		nc := localnetworkinterface.NewStatusChecker()
+		userProvidedAvagoVersion, err = CheckForInvalidDeployAndGetAvagoVersion(nc, sidecar.RPCVersion)
+		if err != nil {
+			return err
 		}
 
 		deployer := subnet.NewLocalDeployer(app, userProvidedAvagoVersion, vmBin)
@@ -254,88 +385,121 @@ func deploySubnet(_ *cobra.Command, args []string) error {
 			}
 			return err
 		}
+		flags := make(map[string]string)
+		flags[constants.Network] = network.Name()
+		metrics.HandleTracking(cmd, app, flags)
 		return app.UpdateSidecarNetworks(&sidecar, network, subnetID, blockchainID)
-
-	case models.Fuji:
-		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, app.GetKeyDir())
-			if err != nil {
-				return err
-			}
-		}
-
-	case models.Mainnet:
-		useLedger = true
-		if keyName != "" {
-			return ErrStoredKeyOnMainnet
-		}
-
-	default:
-		return errors.New("not implemented")
-	}
-
-	// used in E2E to simulate public network execution paths on a local network
-	if os.Getenv(constants.SimulatePublicNetwork) != "" {
-		network = models.Local
 	}
 
 	// from here on we are assuming a public deploy
 
-	// get keychain accesor
-	kc, err := GetKeychain(useLedger, ledgerAddresses, keyName, network)
+	createSubnet := true
+	var subnetID ids.ID
+	if subnetIDStr != "" {
+		subnetID, err = ids.FromString(subnetIDStr)
+		if err != nil {
+			return err
+		}
+		createSubnet = false
+	} else if sidecar.Networks != nil {
+		model, ok := sidecar.Networks[network.Name()]
+		if ok {
+			if model.SubnetID != ids.Empty && model.BlockchainID == ids.Empty {
+				subnetID = model.SubnetID
+				createSubnet = false
+			}
+		}
+	}
+
+	fee := network.GenesisParams().CreateBlockchainTxFee
+	if createSubnet {
+		fee += network.GenesisParams().CreateSubnetTxFee
+	}
+	kc, err := keychain.GetKeychainFromCmdLineFlags(
+		app,
+		constants.PayTxsFeesMsg,
+		network,
+		keyName,
+		useEwoq,
+		useLedger,
+		ledgerAddresses,
+		fee,
+	)
 	if err != nil {
 		return err
 	}
 
-	// accept only one control keys specification
-	if len(controlKeys) > 0 && sameControlKey {
-		return errMutuallyExlusiveControlKeys
-	}
+	network.HandlePublicNetworkSimulation()
 
-	// use creation key as control key
-	if sameControlKey {
-		controlKeys, err = loadCreationKeys(network, kc)
+	if createSubnet {
+		// accept only one control keys specification
+		if len(controlKeys) > 0 && sameControlKey {
+			return errMutuallyExlusiveControlKeys
+		}
+		// use first fee-paying key as control key
+		if sameControlKey {
+			kcKeys, err := kc.PChainFormattedStrAddresses()
+			if err != nil {
+				return err
+			}
+			if len(kcKeys) == 0 {
+				return fmt.Errorf("no keys found on keychain")
+			}
+			controlKeys = kcKeys[:1]
+		}
+		// prompt for control keys
+		if controlKeys == nil {
+			var cancelled bool
+			controlKeys, cancelled, err = getControlKeys(kc)
+			if err != nil {
+				return err
+			}
+			if cancelled {
+				ux.Logger.PrintToUser("User cancelled. No subnet deployed")
+				return nil
+			}
+		}
+		ux.Logger.PrintToUser("Your Subnet's control keys: %s", controlKeys)
+		// validate and prompt for threshold
+		if threshold == 0 && subnetAuthKeys != nil {
+			threshold = uint32(len(subnetAuthKeys))
+		}
+		if int(threshold) > len(controlKeys) {
+			return fmt.Errorf("given threshold is greater than number of control keys")
+		}
+		if threshold == 0 {
+			threshold, err = getThreshold(len(controlKeys))
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		ux.Logger.PrintToUser(logging.Green.Wrap(
+			fmt.Sprintf("Deploying into pre-existent subnet ID %s", subnetID.String()),
+		))
+		controlKeys, threshold, err = txutils.GetOwners(network, subnetID)
 		if err != nil {
 			return err
 		}
 	}
 
-	// prompt for control keys
-	if controlKeys == nil {
-		var cancelled bool
-		controlKeys, cancelled, err = getControlKeys(network, useLedger, kc)
-		if err != nil {
-			return err
-		}
-		if cancelled {
-			ux.Logger.PrintToUser("User cancelled. No subnet deployed")
-			return nil
-		}
+	// add control keys to the keychain whenever possible
+	if err := kc.AddAddresses(controlKeys); err != nil {
+		return err
 	}
 
-	ux.Logger.PrintToUser("Your Subnet's control keys: %s", controlKeys)
-
-	// validate and prompt for threshold
-	if threshold == 0 && subnetAuthKeys != nil {
-		threshold = uint32(len(subnetAuthKeys))
-	}
-	if int(threshold) > len(controlKeys) {
-		return fmt.Errorf("given threshold is greater than number of control keys")
-	}
-	if threshold == 0 {
-		threshold, err = getThreshold(len(controlKeys))
-		if err != nil {
-			return err
-		}
+	kcKeys, err := kc.PChainFormattedStrAddresses()
+	if err != nil {
+		return err
 	}
 
 	// get keys for blockchain tx signing
 	if subnetAuthKeys != nil {
-		if err := prompts.CheckSubnetAuthKeys(subnetAuthKeys, controlKeys, threshold); err != nil {
+		if err := prompts.CheckSubnetAuthKeys(kcKeys, subnetAuthKeys, controlKeys, threshold); err != nil {
 			return err
 		}
 	} else {
-		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, controlKeys, threshold)
+		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, kcKeys, controlKeys, threshold)
 		if err != nil {
 			return err
 		}
@@ -343,24 +507,40 @@ func deploySubnet(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Your subnet auth keys for chain creation: %s", subnetAuthKeys)
 
 	// deploy to public network
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc, network)
-	isFullySigned, subnetID, blockchainID, tx, err := deployer.Deploy(controlKeys, subnetAuthKeys, threshold, chain, chainGenesis)
+	deployer := subnet.NewPublicDeployer(app, kc, network)
+
+	if createSubnet {
+		subnetID, err = deployer.DeploySubnet(controlKeys, threshold)
+		if err != nil {
+			return err
+		}
+		// get the control keys in the same order as the tx
+		controlKeys, threshold, err = txutils.GetOwners(network, subnetID)
+		if err != nil {
+			return err
+		}
+	}
+
+	isFullySigned, blockchainID, tx, remainingSubnetAuthKeys, err := deployer.DeployBlockchain(controlKeys, subnetAuthKeys, subnetID, chain, chainGenesis)
 	if err != nil {
+		ux.Logger.PrintToUser(logging.Red.Wrap(
+			fmt.Sprintf("error deploying blockchain: %s. fix the issue and try again with a new deploy cmd", err),
+		))
+	}
+
+	savePartialTx := !isFullySigned && err == nil
+
+	if err := PrintDeployResults(chain, subnetID, blockchainID); err != nil {
 		return err
 	}
 
-	if err := PrintDeployResults(chain, subnetID, blockchainID, isFullySigned); err != nil {
-		return err
-	}
-
-	if !isFullySigned {
+	if savePartialTx {
 		if err := SaveNotFullySignedTx(
 			"Blockchain Creation",
 			tx,
-			network,
 			chain,
-			subnetID,
 			subnetAuthKeys,
+			remainingSubnetAuthKeys,
 			outputTxPath,
 			false,
 		); err != nil {
@@ -368,12 +548,16 @@ func deploySubnet(_ *cobra.Command, args []string) error {
 		}
 	}
 
+	flags := make(map[string]string)
+	flags[constants.Network] = network.Name()
+	metrics.HandleTracking(cmd, app, flags)
+
 	// update sidecar
 	// TODO: need to do something for backwards compatibility?
 	return app.UpdateSidecarNetworks(&sidecar, network, subnetID, blockchainID)
 }
 
-func getControlKeys(network models.Network, useLedger bool, kc keychain.Keychain) ([]string, bool, error) {
+func getControlKeys(kc *keychain.Keychain) ([]string, bool, error) {
 	controlKeysInitialPrompt := "Configure which addresses may make changes to the subnet.\n" +
 		"These addresses are known as your control keys. You will also\n" +
 		"set how many control keys are required to make a subnet change (the threshold)."
@@ -386,17 +570,17 @@ func getControlKeys(network models.Network, useLedger bool, kc keychain.Keychain
 		custom = "Custom list"
 	)
 
-	var creation string
+	var feePaying string
 	var listOptions []string
-	if useLedger {
-		creation = "Use ledger address"
+	if kc.UsesLedger {
+		feePaying = "Use ledger address"
 	} else {
-		creation = "Use creation key"
+		feePaying = "Use fee-paying key"
 	}
-	if network == models.Mainnet {
-		listOptions = []string{creation, custom}
+	if kc.Network.Kind == models.Mainnet {
+		listOptions = []string{feePaying, custom}
 	} else {
-		listOptions = []string{creation, useAll, custom}
+		listOptions = []string{feePaying, useAll, custom}
 	}
 
 	listDecision, err := app.Prompt.CaptureList(moreKeysPrompt, listOptions)
@@ -410,12 +594,20 @@ func getControlKeys(network models.Network, useLedger bool, kc keychain.Keychain
 	)
 
 	switch listDecision {
-	case creation:
-		keys, err = loadCreationKeys(network, kc)
+	case feePaying:
+		var kcKeys []string
+		kcKeys, err = kc.PChainFormattedStrAddresses()
+		if err != nil {
+			return nil, false, err
+		}
+		if len(kcKeys) == 0 {
+			return nil, false, fmt.Errorf("no keys found on keychain")
+		}
+		keys = kcKeys[:1]
 	case useAll:
-		keys, err = useAllKeys(network)
+		keys, err = useAllKeys(kc.Network)
 	case custom:
-		keys, cancelled, err = enterCustomKeys(network)
+		keys, cancelled, err = enterCustomKeys(kc.Network)
 	}
 	if err != nil {
 		return nil, false, err
@@ -427,11 +619,6 @@ func getControlKeys(network models.Network, useLedger bool, kc keychain.Keychain
 }
 
 func useAllKeys(network models.Network) ([]string, error) {
-	networkID, err := network.NetworkID()
-	if err != nil {
-		return nil, err
-	}
-
 	existing := []string{}
 
 	files, err := os.ReadDir(app.GetKeyDir())
@@ -448,7 +635,7 @@ func useAllKeys(network models.Network) ([]string, error) {
 	}
 
 	for _, kp := range keyPaths {
-		k, err := key.LoadSoft(networkID, kp)
+		k, err := key.LoadSoft(network.ID, kp)
 		if err != nil {
 			return nil, err
 		}
@@ -457,28 +644,6 @@ func useAllKeys(network models.Network) ([]string, error) {
 	}
 
 	return existing, nil
-}
-
-func loadCreationKeys(network models.Network, kc keychain.Keychain) ([]string, error) {
-	addrs := kc.Addresses().List()
-	if len(addrs) == 0 {
-		return nil, fmt.Errorf("no creation addresses found")
-	}
-	networkID, err := network.NetworkID()
-	if err != nil {
-		return nil, err
-	}
-	hrp := key.GetHRP(networkID)
-	addrsStr := []string{}
-	for _, addr := range addrs {
-		addrStr, err := address.Format("P", hrp, addr[:])
-		if err != nil {
-			return nil, err
-		}
-		addrsStr = append(addrsStr, addrStr)
-	}
-
-	return addrsStr, nil
 }
 
 func enterCustomKeys(network models.Network) ([]string, bool, error) {
@@ -526,7 +691,7 @@ func getThreshold(maxLen int) (uint32, error) {
 	if maxLen == 1 {
 		return uint32(1), nil
 	}
-	// create a list of indexes so the user only has the option to choose what is the theshold
+	// create a list of indexes so the user only has the option to choose what is the threshold
 	// instead of entering
 	indexList := make([]string, maxLen)
 	for i := 0; i < maxLen; i++ {
@@ -547,7 +712,7 @@ func getThreshold(maxLen int) (uint32, error) {
 	return uint32(intTh), err
 }
 
-func validateSubnetNameAndGetChains(args []string) ([]string, error) {
+func ValidateSubnetNameAndGetChains(args []string) ([]string, error) {
 	// this should not be necessary but some bright guy might just be creating
 	// the genesis by hand or something...
 	if err := checkInvalidSubnetNames(args[0]); err != nil {
@@ -570,17 +735,12 @@ func validateSubnetNameAndGetChains(args []string) ([]string, error) {
 func SaveNotFullySignedTx(
 	txName string,
 	tx *txs.Tx,
-	network models.Network,
 	chain string,
-	subnetID ids.ID,
 	subnetAuthKeys []string,
+	remainingSubnetAuthKeys []string,
 	outputTxPath string,
 	forceOverwrite bool,
 ) error {
-	remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, network, subnetID)
-	if err != nil {
-		return err
-	}
 	signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
 	ux.Logger.PrintToUser("")
 	if signedCount == len(subnetAuthKeys) {
@@ -604,7 +764,7 @@ func SaveNotFullySignedTx(
 	}
 	if forceOverwrite {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("Overwritting %s", outputTxPath)
+		ux.Logger.PrintToUser("Overwriting %s", outputTxPath)
 	}
 	if err := txutils.SaveToDisk(tx, outputTxPath, forceOverwrite); err != nil {
 		return err
@@ -625,7 +785,7 @@ func PrintReadyToSignMsg(
 	ux.Logger.PrintToUser("Tx is fully signed, and ready to be committed")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Commit command:")
-	ux.Logger.PrintToUser("  avalanche transaction commit %s --input-tx-filepath %s", chain, outputTxPath)
+	ux.Logger.PrintToUser("  lux transaction commit %s --input-tx-filepath %s", chain, outputTxPath)
 }
 
 func PrintRemainingToSignMsg(
@@ -643,103 +803,12 @@ func PrintRemainingToSignMsg(
 		"and run the signing command, or send %q to another user for signing.", outputTxPath)
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Signing command:")
-	ux.Logger.PrintToUser("  avalanche transaction sign %s --input-tx-filepath %s", chain, outputTxPath)
+	ux.Logger.PrintToUser("  lux transaction sign %s --input-tx-filepath %s", chain, outputTxPath)
+	ux.Logger.PrintToUser("")
 }
 
-func GetKeychain(
-	useLedger bool,
-	ledgerAddresses []string,
-	keyName string,
-	network models.Network,
-) (keychain.Keychain, error) {
-	// get keychain accesor
-	var kc keychain.Keychain
-	networkID, err := network.NetworkID()
-	if err != nil {
-		return kc, err
-	}
-	if useLedger {
-		ledgerDevice, err := ledger.New()
-		if err != nil {
-			ux.Logger.PrintToUser(logging.LightRed.Wrap("Error accessing ledger device. Please update ledger app to >= v0.6.5."))
-			return kc, err
-		}
-		// ask for addresses here to print user msg for ledger interaction
-		// set ledger indices
-		var ledgerIndices []uint32
-		if len(ledgerAddresses) == 0 {
-			ledgerIndices = []uint32{0}
-		} else {
-			ledgerIndices, err = getLedgerIndices(ledgerDevice, ledgerAddresses)
-			if err != nil {
-				return kc, err
-			}
-		}
-		// get formatted addresses for ux
-		addresses, err := ledgerDevice.Addresses(ledgerIndices)
-		if err != nil {
-			ux.Logger.PrintToUser(logging.LightRed.Wrap("Error accessing ledger device. Please update ledger app to >= v0.6.5."))
-			return kc, err
-		}
-		addrStrs := []string{}
-		for _, addr := range addresses {
-			addrStr, err := address.Format("P", key.GetHRP(networkID), addr[:])
-			if err != nil {
-				return kc, err
-			}
-			addrStrs = append(addrStrs, addrStr)
-		}
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Ledger addresses: "))
-		for _, addrStr := range addrStrs {
-			ux.Logger.PrintToUser(logging.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
-		}
-		return keychain.NewLedgerKeychainFromIndices(ledgerDevice, ledgerIndices)
-	}
-	sf, err := key.LoadSoft(networkID, app.GetKeyPath(keyName))
-	if err != nil {
-		return kc, err
-	}
-	return sf.KeyChain(), nil
-}
-
-func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]uint32, error) {
-	addresses, err := address.ParseToIDs(addressesStr)
-	if err != nil {
-		return []uint32{}, fmt.Errorf("failure parsing given ledger addresses: %w", err)
-	}
-	// maps the indices of addresses to their corresponding ledger indices
-	indexMap := map[int]uint32{}
-	// for all ledger indices to search for, find if the ledger address belongs to the input
-	// addresses and, if so, add the index pair to indexMap, breaking the loop if
-	// all addresses were found
-	for ledgerIndex := uint32(0); ledgerIndex < numLedgerAddressesToSearch; ledgerIndex++ {
-		ledgerAddress, err := ledgerDevice.Addresses([]uint32{ledgerIndex})
-		if err != nil {
-			return []uint32{}, err
-		}
-		for addressesIndex, addr := range addresses {
-			if addr == ledgerAddress[0] {
-				indexMap[addressesIndex] = ledgerIndex
-			}
-		}
-		if len(indexMap) == len(addresses) {
-			break
-		}
-	}
-	// create ledgerIndices from indexMap
-	ledgerIndices := []uint32{}
-	for addressesIndex := range addresses {
-		ledgerIndex, ok := indexMap[addressesIndex]
-		if !ok {
-			return []uint32{}, fmt.Errorf("address %s not found on ledger", addressesStr[addressesIndex])
-		}
-		ledgerIndices = append(ledgerIndices, ledgerIndex)
-	}
-	return ledgerIndices, nil
-}
-
-func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID, isFullySigned bool) error {
-	vmID, err := utils.VMID(chain)
+func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID) error {
+	vmID, err := anrutils.VMID(chain)
 	if err != nil {
 		return fmt.Errorf("failed to create VM ID from %s: %w", chain, err)
 	}
@@ -751,18 +820,17 @@ func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID, isFu
 	table.Append([]string{"Chain Name", chain})
 	table.Append([]string{"Subnet ID", subnetID.String()})
 	table.Append([]string{"VM ID", vmID.String()})
-	if isFullySigned {
+	if blockchainID != ids.Empty {
 		table.Append([]string{"Blockchain ID", blockchainID.String()})
-		table.Append([]string{"RPC URL", fmt.Sprintf("%s/ext/bc/%s/rpc", constants.DefaultNodeRunURL, blockchainID.String())})
 		table.Append([]string{"P-Chain TXID", blockchainID.String()})
 	}
 	table.Render()
 	return nil
 }
 
-// Determines the appropriate version of node to run with. Returns an error if
+// Determines the appropriate version of luxgo to run with. Returns an error if
 // that version conflicts with the current deployment.
-func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
+func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
 	// get current network
 	runningAvagoVersion, runningRPCVersion, networkRunning, err := network.GetCurrentNetworkVersion()
 	if err != nil {
@@ -771,10 +839,10 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 
 	desiredAvagoVersion := userProvidedAvagoVersion
 
-	// RPC Version was made available in the info API in node version v1.9.2. For prior versions,
+	// RPC Version was made available in the info API in luxgo version v1.9.2. For prior versions,
 	// we will need to skip this check.
 	skipRPCCheck := false
-	if semver.Compare(runningAvagoVersion, constants.NodeCompatibilityVersionAdded) == -1 {
+	if semver.Compare(runningAvagoVersion, constants.LuxGoCompatibilityVersionAdded) == -1 {
 		skipRPCCheck = true
 	}
 
@@ -782,7 +850,7 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 		if userProvidedAvagoVersion == "latest" {
 			if runningRPCVersion != configuredRPCVersion && !skipRPCCheck {
 				return "", fmt.Errorf(
-					"the current node deployment uses rpc version %d but your subnet has version %d and is not compatible",
+					"the current luxgo deployment uses rpc version %d but your subnet has version %d and is not compatible",
 					runningRPCVersion,
 					configuredRPCVersion,
 				)
@@ -790,15 +858,30 @@ func checkForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 			desiredAvagoVersion = runningAvagoVersion
 		} else if runningAvagoVersion != userProvidedAvagoVersion {
 			// user wants a specific version
-			return "", errors.New("incompatible node version selected")
+			return "", errors.New("incompatible luxgo version selected")
 		}
 	} else if userProvidedAvagoVersion == "latest" {
 		// find latest avago version for this rpc version
-		desiredAvagoVersion, err = vm.GetLatestNodeByProtocolVersion(
-			app, configuredRPCVersion, constants.NodeCompatibilityURL)
+		desiredAvagoVersion, err = vm.GetLatestLuxGoByProtocolVersion(
+			app, configuredRPCVersion, constants.LuxGoCompatibilityURL)
 		if err != nil {
 			return "", err
 		}
 	}
 	return desiredAvagoVersion, nil
+}
+
+func hasSubnetEVMGenesis(subnetName string) (bool, error) {
+	if _, err := app.LoadRawGenesis(subnetName); err != nil {
+		return false, err
+	}
+	// from here, we are sure to have a genesis file
+	genesis, err := app.LoadEvmGenesis(subnetName)
+	if err != nil {
+		return false, nil
+	}
+	if err := genesis.Verify(); err != nil {
+		return false, nil
+	}
+	return true, nil
 }

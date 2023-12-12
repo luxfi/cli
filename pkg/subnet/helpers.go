@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -9,9 +9,9 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/key"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/formatting/address"
+	"github.com/luxdefi/luxgo/vms/platformvm"
 )
 
 func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error) {

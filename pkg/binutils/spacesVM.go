@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -23,7 +23,7 @@ func SetupSpacesVM(app *application.Lux, spacesVMVersion string) (string, error)
 		binDir,
 		subDir,
 		spacesVMBinPrefix,
-		constants.AvaLabsOrg,
+		constants.LuxDeFiOrg,
 		constants.SpacesVMRepoName,
 		downloader,
 		installer,

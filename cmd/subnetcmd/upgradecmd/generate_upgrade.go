@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -14,7 +14,7 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet/upgrades"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/luxdefi/subnet-evm/commontype"
 	"github.com/luxdefi/subnet-evm/params"
 	"github.com/ethereum/go-ethereum/common"
@@ -59,7 +59,7 @@ const (
 	adminLabel   = "admin"
 )
 
-// avalanche subnet upgrade generate
+// lux subnet upgrade generate
 func newUpgradeGenerateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate [subnetName]",
@@ -94,7 +94,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 			"may cause the network to halt and recovering may be difficult.")))
 	ux.Logger.PrintToUser(logging.Reset.Wrap(
 		"Please consult " + logging.Cyan.Wrap(
-			"https://docs.avax.network/subnets/customize-a-subnet#network-upgrades-enabledisable-precompiles ") +
+			"https://docs.lux.network/subnets/customize-a-subnet#network-upgrades-enabledisable-precompiles ") +
 			logging.Reset.Wrap("for more information")))
 
 	txt := "Press [Enter] to continue, or abort by choosing 'no'"
@@ -116,7 +116,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	fmt.Println()
 	ux.Logger.PrintToUser(logging.Yellow.Wrap(
-		"Node and this tool support configuring multiple precompiles." +
+		"Luxgo and this tool support configuring multiple precompiles." +
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 
@@ -238,7 +238,7 @@ func (p *nativeMint) PromptParams() error {
 					if err != nil {
 						return "", err
 					}
-					amount, err := app.Prompt.CaptureUint64("Amount to airdrop (in AVAX units)")
+					amount, err := app.Prompt.CaptureUint64("Amount to airdrop (in LUX units)")
 					if err != nil {
 						return "", err
 					}

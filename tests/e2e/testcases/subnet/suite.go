@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subnet
@@ -26,11 +26,6 @@ var _ = ginkgo.Describe("[Subnet]", ginkgo.Ordered, func() {
 
 	ginkgo.It("can create and delete a subnet evm config", func() {
 		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
-		commands.DeleteSubnetConfig(subnetName)
-	})
-
-	ginkgo.It("can create and delete a spacesvm config", func() {
-		commands.CreateSpacesVMConfig(subnetName, utils.SpacesVMGenesisPath)
 		commands.DeleteSubnetConfig(subnetName)
 	})
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -18,9 +18,9 @@ import (
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/version"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/luxgo/version"
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -46,13 +46,6 @@ func TestInfoKnownVMs(t *testing.T) {
 	cases := []testCase{
 		{
 			strVer:   "v0.9.99",
-			repoName: "spacesvm",
-			vmBinDir: vmBinDir,
-			vmBin:    "mySpacesVM",
-			dl:       binutils.NewSpacesVMDownloader(),
-		},
-		{
-			strVer:   "v0.9.99",
 			repoName: "subnet-evm",
 			vmBinDir: vmBinDir,
 			vmBin:    "mySubnetEVM",
@@ -74,7 +67,7 @@ func TestInfoKnownVMs(t *testing.T) {
 			c.dl,
 		)
 		require.NoError(err)
-		require.ElementsMatch([]string{constants.AvaLabsMaintainers}, maintrs)
+		require.ElementsMatch([]string{constants.LuxDeFiMaintainers}, maintrs)
 		require.NoError(err)
 		_, err = url.Parse(resurl)
 		require.NoError(err)

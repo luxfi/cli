@@ -1,15 +1,17 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package networkcmd
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"regexp"
 
+	"github.com/luxdefi/cli/pkg/elasticsubnet"
+
 	"github.com/luxdefi/cli/pkg/binutils"
 	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/shirou/gopsutil/process"
@@ -35,7 +37,7 @@ configuration.`,
 		&hard,
 		"hard",
 		false,
-		"Also clean downloaded node and plugin binaries",
+		"Also clean downloaded luxgo and plugin binaries",
 	)
 
 	return cmd
@@ -44,7 +46,9 @@ configuration.`,
 func clean(*cobra.Command, []string) error {
 	app.Log.Info("killing gRPC server process...")
 
-	if err := subnet.SetDefaultSnapshot(app.GetSnapshotsDir(), true); err != nil {
+	configSingleNodeEnabled := app.Conf.GetConfigBoolValue(constants.ConfigSingleNodeEnabledKey)
+
+	if err := subnet.SetDefaultSnapshot(app.GetSnapshotsDir(), true, configSingleNodeEnabled); err != nil {
 		app.Log.Warn("failed resetting default snapshot", zap.Error(err))
 	}
 
@@ -55,41 +59,82 @@ func clean(*cobra.Command, []string) error {
 	}
 
 	if hard {
-		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded node and plugin binaries")
+		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded luxgo and plugin binaries")
 		binDir := filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir)
 		cleanBins(binDir)
 		_ = killAllBackendsByName()
-	} else {
-		// Iterate over all installed node versions and remove all plugins from their
-		// plugin dirs except for the c-chain plugin
+	}
 
-		// Check if dir exists. If not, no work to be done
-		if _, err := os.Stat(app.GetNodeBinDir()); errors.Is(err, os.ErrNotExist) {
-			// path/to/whatever does *not* exist
-			return nil
+	// Remove all plugins from plugin dir
+	pluginDir := app.GetPluginsDir()
+	installedPlugins, err := os.ReadDir(pluginDir)
+	if err != nil {
+		return err
+	}
+	for _, plugin := range installedPlugins {
+		if err = os.Remove(filepath.Join(pluginDir, plugin.Name())); err != nil {
+			return err
 		}
+	}
+	if err = removeLocalDeployInfoFromSidecars(); err != nil {
+		return err
+	}
+	if err = removeLocalElasticSubnetInfoFromSidecars(); err != nil {
+		return err
+	}
+	return nil
+}
 
-		installedVersions, err := os.ReadDir(app.GetNodeBinDir())
+func removeLocalDeployInfoFromSidecars() error {
+	// Remove all local deployment info from sidecar files
+	deployedSubnets, err := subnet.GetLocallyDeployedSubnetsFromFile(app)
+	if err != nil {
+		return err
+	}
+
+	for _, subnet := range deployedSubnets {
+		sc, err := app.LoadSidecar(subnet)
 		if err != nil {
 			return err
 		}
 
-		for _, avagoDir := range installedVersions {
-			pluginDir := filepath.Join(app.GetNodeBinDir(), avagoDir.Name(), "plugins")
-			installedPlugins, err := os.ReadDir(pluginDir)
-			if err != nil {
-				return err
-			}
-			for _, plugin := range installedPlugins {
-				if plugin.Name() != constants.EVMPlugin {
-					if err = os.Remove(filepath.Join(pluginDir, plugin.Name())); err != nil {
-						return err
-					}
-				}
-			}
+		delete(sc.Networks, models.Local.String())
+		if err = app.UpdateSidecar(&sc); err != nil {
+			return err
 		}
 	}
+	return nil
+}
 
+func removeLocalElasticSubnetInfoFromSidecars() error {
+	// Remove all local elastic subnet info from sidecar files
+	elasticSubnets, err := elasticsubnet.GetLocalElasticSubnetsFromFile(app)
+	if err != nil {
+		return err
+	}
+
+	for _, subnet := range elasticSubnets {
+		sc, err := app.LoadSidecar(subnet)
+		if err != nil {
+			return err
+		}
+
+		delete(sc.ElasticSubnet, models.Local.String())
+		if err = app.UpdateSidecar(&sc); err != nil {
+			return err
+		}
+		if err = deleteElasticSubnetConfigFile(subnet); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func deleteElasticSubnetConfigFile(subnetName string) error {
+	elasticSubetConfigPath := app.GetElasticSubnetConfigPath(subnetName)
+	if err := os.Remove(elasticSubetConfigPath); err != nil {
+		return err
+	}
 	return nil
 }
 
