@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/luxdefi/apm/types"
+	"github.com/luxdefi/lpm/types"
 	"github.com/luxdefi/cli/pkg/binutils"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"

@@ -152,8 +152,8 @@ const (
 	AnsibleSSHInventoryParams          = "-o StrictHostKeyChecking=no"
 	AnsibleExtraVarsFlag               = "--extra-vars"
 
-	ConfigAPMCredentialsFileKey  = "credentials-file"
-	ConfigAPMAdminAPIEndpointKey = "admin-api-endpoint"
+	ConfigLPMCredentialsFileKey  = "credentials-file"
+	ConfigLPMAdminAPIEndpointKey = "admin-api-endpoint"
 	ConfigNodeConfigKey          = "node-config"
 	ConfigMetricsEnabledKey      = "MetricsEnabled"
 	ConfigAutorizeCloudAccessKey = "AutorizeCloudAccess"
@@ -190,10 +190,10 @@ const (
 
 	DefaultNodeRunURL = "http://127.0.0.1:9650"
 
-	APMDir                = ".apm"
-	APMLogName            = "apm.log"
+	LPMDir                = ".lpm"
+	LPMLogName            = "lpm.log"
 	DefaultLuxDeFiPackage = "luxdefi/plugins-core"
-	APMPluginDir          = "apm_plugins"
+	LPMPluginDir          = "lpm_plugins"
 
 	// #nosec G101
 	GithubAPITokenEnvVarName = "LUX_CLI_GITHUB_TOKEN"

@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/apm/apm"
+	"github.com/luxdefi/lpm/lpm"
 	"github.com/luxdefi/cli/pkg/config"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
@@ -23,8 +23,8 @@ type Lux struct {
 	baseDir    string
 	Conf       *config.Config
 	Prompt     prompts.Prompter
-	Apm        *apm.APM
-	ApmDir     string
+	Lpm        *lpm.LPM
+	LpmDir     string
 	Downloader Downloader
 }
 
@@ -92,8 +92,8 @@ func (app *Lux) GetCustomVMPath(subnetName string) string {
 	return filepath.Join(app.GetCustomVMDir(), subnetName)
 }
 
-func (app *Lux) GetAPMVMPath(vmid string) string {
-	return filepath.Join(app.GetAPMPluginDir(), vmid)
+func (app *Lux) GetLPMVMPath(vmid string) string {
+	return filepath.Join(app.GetLPMPluginDir(), vmid)
 }
 
 func (app *Lux) GetGenesisPath(subnetName string) string {
@@ -196,16 +196,16 @@ func (*Lux) GetTmpPluginDir() string {
 	return os.TempDir()
 }
 
-func (app *Lux) GetAPMBaseDir() string {
-	return filepath.Join(app.baseDir, "apm")
+func (app *Lux) GetLPMBaseDir() string {
+	return filepath.Join(app.baseDir, "lpm")
 }
 
-func (app *Lux) GetAPMLog() string {
-	return filepath.Join(app.baseDir, constants.LogDir, constants.APMLogName)
+func (app *Lux) GetLPMLog() string {
+	return filepath.Join(app.baseDir, constants.LogDir, constants.LPMLogName)
 }
 
-func (app *Lux) GetAPMPluginDir() string {
-	return filepath.Join(app.baseDir, constants.APMPluginDir)
+func (app *Lux) GetLPMPluginDir() string {
+	return filepath.Join(app.baseDir, constants.LPMPluginDir)
 }
 
 func (app *Lux) GetKeyPath(keyName string) string {

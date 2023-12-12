@@ -3,7 +3,7 @@ module github.com/luxdefi/cli
 go 1.20
 
 require (
-	github.com/luxdefi/apm v0.0.4
+	github.com/luxdefi/lpm v0.0.4
 	github.com/luxdefi/netrunner v1.7.4-0.20231204182757-5309eeea932f
 	github.com/luxdefi/luxgo v1.10.16
 	github.com/luxdefi/coreth v0.12.9-rc.5

@@ -215,7 +215,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		TokenName:    constants.DefaultTokenName,
 		ImportedVMID: vmIDstr,
 		// signals that the VMID wasn't derived from the subnet name but through import
-		ImportedFromAPM: true,
+		ImportedFromLPM: true,
 	}
 
 	var versions []string

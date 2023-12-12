@@ -21,4 +21,4 @@ spec:
     - resource:posthog
     - component:subnet-evm
     - component:coreth
-    - component:apm
+    - component:lpm

@@ -11,7 +11,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/luxdefi/cli/pkg/apmintegration"
+	"github.com/luxdefi/cli/pkg/lpmintegration"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
@@ -78,8 +78,8 @@ func importSubnet(_ *cobra.Command, args []string) error {
 
 	if repoOrURL == "" && branch == "" && subnetAlias == "" {
 		fileOption := "File"
-		apmOption := "Repository"
-		typeOptions := []string{fileOption, apmOption}
+		lpmOption := "Repository"
+		typeOptions := []string{fileOption, lpmOption}
 		promptStr := "Would you like to import your subnet from a file or a repository?"
 		result, err := app.Prompt.CaptureList(promptStr, typeOptions)
 		if err != nil {
@@ -91,8 +91,8 @@ func importSubnet(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	// Option must be APM
-	return importFromAPM()
+	// Option must be LPM
+	return importFromLPM()
 }
 
 func importFromFile(importPath string) error {
@@ -195,17 +195,17 @@ func importFromFile(importPath string) error {
 	return nil
 }
 
-func importFromAPM() error {
-	// setup apm
+func importFromLPM() error {
+	// setup lpm
 	usr, err := user.Current()
 	if err != nil {
 		return err
 	}
-	apmBaseDir := filepath.Join(usr.HomeDir, constants.APMDir)
-	if err = apmintegration.SetupApm(app, apmBaseDir); err != nil {
+	lpmBaseDir := filepath.Join(usr.HomeDir, constants.LPMDir)
+	if err = lpmintegration.SetupLpm(app, lpmBaseDir); err != nil {
 		return err
 	}
-	installedRepos, err := apmintegration.GetRepos(app)
+	installedRepos, err := lpmintegration.GetRepos(app)
 	if err != nil {
 		return err
 	}
@@ -262,18 +262,18 @@ func importFromAPM() error {
 			}
 		}
 
-		repoAlias, err = apmintegration.AddRepo(app, repoURL, branch)
+		repoAlias, err = lpmintegration.AddRepo(app, repoURL, branch)
 		if err != nil {
 			return err
 		}
 
-		err = apmintegration.UpdateRepos(app)
+		err = lpmintegration.UpdateRepos(app)
 		if err != nil {
 			return err
 		}
 	}
 
-	subnets, err := apmintegration.GetSubnets(app, repoAlias)
+	subnets, err := lpmintegration.GetSubnets(app, repoAlias)
 	if err != nil {
 		return err
 	}
@@ -297,10 +297,10 @@ func importFromAPM() error {
 		}
 	}
 
-	subnetKey := apmintegration.MakeKey(repoAlias, subnet)
+	subnetKey := lpmintegration.MakeKey(repoAlias, subnet)
 
 	// Populate the sidecar and create a genesis
-	subnetDescr, err := apmintegration.LoadSubnetFile(app, subnetKey)
+	subnetDescr, err := lpmintegration.LoadSubnetFile(app, subnetKey)
 	if err != nil {
 		return err
 	}
@@ -313,7 +313,7 @@ func importFromAPM() error {
 		return errors.New("multiple vm subnets not supported")
 	}
 
-	vmDescr, err := apmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
+	vmDescr, err := lpmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
 	if err != nil {
 		return err
 	}
@@ -331,13 +331,13 @@ func importFromAPM() error {
 		Subnet:          subnetDescr.Alias,
 		TokenName:       constants.DefaultTokenName,
 		Version:         constants.SidecarVersion,
-		ImportedFromAPM: true,
+		ImportedFromLPM: true,
 		ImportedVMID:    vmDescr.ID,
 	}
 
 	ux.Logger.PrintToUser("Selected subnet, installing " + subnetKey)
 
-	if err = apmintegration.InstallVM(app, subnetKey); err != nil {
+	if err = lpmintegration.InstallVM(app, subnetKey); err != nil {
 		return err
 	}
 
