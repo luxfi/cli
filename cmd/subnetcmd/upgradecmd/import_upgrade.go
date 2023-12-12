@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -15,7 +15,7 @@ var upgradeBytesFilePath string
 
 const upgradeBytesFilePathKey = "upgrade-filepath"
 
-// avalanche subnet upgrade import
+// lux subnet upgrade import
 func newUpgradeImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import [subnetName]",

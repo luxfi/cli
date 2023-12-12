@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/user"
+	"path/filepath"
 
 	"github.com/luxdefi/cli/pkg/apmintegration"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/vm"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +26,7 @@ var (
 	branch          string
 )
 
-// avalanche subnet import
+// lux subnet import
 func newImportFileCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "file [subnetPath]",
@@ -50,7 +53,7 @@ flag.`,
 		&repoOrURL,
 		"repo",
 		"",
-		"the repo to import (ex: luxdefi/avalanche-plugins-core) or url to download the repo from",
+		"the repo to import (ex: luxdefi/plugins-core) or url to download the repo from",
 	)
 	cmd.Flags().StringVar(
 		&branch,
@@ -122,13 +125,68 @@ func importFromFile(importPath string) error {
 		return errors.New("subnet already exists. Use --" + forceFlag + " parameter to overwrite")
 	}
 
-	err = app.WriteGenesisFile(subnetName, importable.Genesis)
-	if err != nil {
+	if importable.Sidecar.VM == models.CustomVM {
+		if importable.Sidecar.CustomVMRepoURL == "" {
+			return fmt.Errorf("repository url must be defined for custom vm import")
+		}
+		if importable.Sidecar.CustomVMBranch == "" {
+			return fmt.Errorf("repository branch must be defined for custom vm import")
+		}
+		if importable.Sidecar.CustomVMBuildScript == "" {
+			return fmt.Errorf("build script must be defined for custom vm import")
+		}
+
+		if err := vm.BuildCustomVM(app, &importable.Sidecar); err != nil {
+			return err
+		}
+
+		vmPath := app.GetCustomVMPath(subnetName)
+		rpcVersion, err := vm.GetVMBinaryProtocolVersion(vmPath)
+		if err != nil {
+			return fmt.Errorf("unable to get custom binary RPC version: %w", err)
+		}
+		if rpcVersion != importable.Sidecar.RPCVersion {
+			return fmt.Errorf("RPC version mismatch between sidecar and vm binary (%d vs %d)", importable.Sidecar.RPCVersion, rpcVersion)
+		}
+	}
+
+	if err := app.WriteGenesisFile(subnetName, importable.Genesis); err != nil {
 		return err
 	}
 
-	err = app.CreateSidecar(&importable.Sidecar)
-	if err != nil {
+	if importable.NodeConfig != nil {
+		if err := app.WriteAvagoNodeConfigFile(subnetName, importable.NodeConfig); err != nil {
+			return err
+		}
+	} else {
+		_ = os.RemoveAll(app.GetAvagoNodeConfigPath(subnetName))
+	}
+
+	if importable.ChainConfig != nil {
+		if err := app.WriteChainConfigFile(subnetName, importable.ChainConfig); err != nil {
+			return err
+		}
+	} else {
+		_ = os.RemoveAll(app.GetChainConfigPath(subnetName))
+	}
+
+	if importable.SubnetConfig != nil {
+		if err := app.WriteAvagoSubnetConfigFile(subnetName, importable.SubnetConfig); err != nil {
+			return err
+		}
+	} else {
+		_ = os.RemoveAll(app.GetAvagoSubnetConfigPath(subnetName))
+	}
+
+	if importable.NetworkUpgrades != nil {
+		if err := app.WriteNetworkUpgradesFile(subnetName, importable.NetworkUpgrades); err != nil {
+			return err
+		}
+	} else {
+		_ = os.RemoveAll(app.GetUpgradeBytesFilepath(subnetName))
+	}
+
+	if err := app.CreateSidecar(&importable.Sidecar); err != nil {
 		return err
 	}
 
@@ -138,6 +196,15 @@ func importFromFile(importPath string) error {
 }
 
 func importFromAPM() error {
+	// setup apm
+	usr, err := user.Current()
+	if err != nil {
+		return err
+	}
+	apmBaseDir := filepath.Join(usr.HomeDir, constants.APMDir)
+	if err = apmintegration.SetupApm(app, apmBaseDir); err != nil {
+		return err
+	}
 	installedRepos, err := apmintegration.GetRepos(app)
 	if err != nil {
 		return err

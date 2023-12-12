@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package transactioncmd
 
@@ -11,7 +11,7 @@ import (
 
 var app *application.Lux
 
-// avalanche subnet vm
+// lux subnet vm
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transaction",

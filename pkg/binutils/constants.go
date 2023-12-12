@@ -1,17 +1,17 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package binutils
 
 import "time"
 
 const (
-	gRPCClientLogLevel  = "error"
-	gRPCServerEndpoint  = ":8097"
-	gRPCGatewayEndpoint = ":8098"
-	gRPCDialTimeout     = 10 * time.Second
+	gRPCClientLogLevel = "error"
+	gRPCServerPort     = ":8097"
+	gRPCGatewayPort    = ":8098"
+	gRPCServerEndpoint = "localhost" + gRPCServerPort
+	gRPCDialTimeout    = 10 * time.Second
 
-	nodeBinPrefix = "node-"
+	luxgoBinPrefix = "luxgo-"
 	subnetEVMBinPrefix   = "subnet-evm-"
-	spacesVMBinPrefix    = "spacesvm-"
 	maxCopy              = 2147483648 // 2 GB
 )

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
@@ -31,17 +31,20 @@ To get started, use the key create command.`,
 		},
 	}
 
-	// avalanche key create
+	// lux key create
 	cmd.AddCommand(newCreateCmd())
 
-	// avalanche key list
+	// lux key list
 	cmd.AddCommand(newListCmd())
 
-	// avalanche key delete
+	// lux key delete
 	cmd.AddCommand(newDeleteCmd())
 
-	// avalanche key export
+	// lux key export
 	cmd.AddCommand(newExportCmd())
+
+	// lux key transfer
+	cmd.AddCommand(newTransferCmd())
 
 	return cmd
 }

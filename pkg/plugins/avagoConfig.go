@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -12,16 +12,18 @@ import (
 
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
 )
 
-// Edits an Node config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
+// Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
 func EditConfigFile(
 	app *application.Lux,
 	subnetID string,
-	networkID string,
+	network models.Network,
 	configFile string,
 	forceWrite bool,
+	subnetAvagoConfigFile string,
 ) error {
 	if !forceWrite {
 		warn := "This will edit your existing config file. This edit is nondestructive,\n" +
@@ -38,7 +40,7 @@ func EditConfigFile(
 	}
 	fileBytes, err := os.ReadFile(configFile)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("failed to load node config file %s: %w", configFile, err)
+		return fmt.Errorf("failed to load luxgo config file %s: %w", configFile, err)
 	}
 	if fileBytes == nil {
 		fileBytes = []byte("{}")
@@ -48,8 +50,31 @@ func EditConfigFile(
 		return fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
 
-	// check the old entries in the config file for whitelisted subnets
-	oldVal := avagoConfig["whitelisted-subnets"]
+	if subnetAvagoConfigFile != "" {
+		subnetAvagoConfigFileBytes, err := os.ReadFile(subnetAvagoConfigFile)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("failed to load extra flags from subnet avago config file %s: %w", subnetAvagoConfigFile, err)
+		}
+		var subnetAvagoConfig map[string]interface{}
+		if err := json.Unmarshal(subnetAvagoConfigFileBytes, &subnetAvagoConfig); err != nil {
+			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", subnetAvagoConfigFile, err)
+		}
+		for k, v := range subnetAvagoConfig {
+			if k == "track-subnets" || k == "whitelisted-subnets" {
+				ux.Logger.PrintToUser("ignoring configuration setting for %q, a subnet's avago conf should not change it", k)
+				continue
+			}
+			avagoConfig[k] = v
+		}
+	}
+
+	// Banff.10: "track-subnets" instead of "whitelisted-subnets"
+	oldVal := avagoConfig["track-subnets"]
+	if oldVal == nil {
+		// check the old key in the config file for tracked-subnets
+		oldVal = avagoConfig["whitelisted-subnets"]
+	}
+
 	newVal := ""
 	if oldVal != nil {
 		// if an entry already exists, we check if the subnetID already is part
@@ -76,8 +101,11 @@ func EditConfigFile(
 		// there were no entries yet, so add this subnet as its new value
 		newVal = subnetID
 	}
-	avagoConfig["whitelisted-subnets"] = newVal
-	avagoConfig["network-id"] = networkID
+
+	// Banf.10 changes from "whitelisted-subnets" to "track-subnets"
+	delete(avagoConfig, "whitelisted-subnets")
+	avagoConfig["track-subnets"] = newVal
+	avagoConfig["network-id"] = network.NetworkIDFlagValue()
 
 	writeBytes, err := json.MarshalIndent(avagoConfig, "", "  ")
 	if err != nil {
@@ -88,7 +116,7 @@ func EditConfigFile(
 	}
 	msg := `The config file has been edited. To use it, make sure to start the node with the '--config-file' option, e.g.
 
-./build/node --config-file %s
+./build/luxgo --config-file %s
 
 (using your binary location). The node has to be restarted for the changes to take effect.`
 	ux.Logger.PrintToUser(msg, configFile)

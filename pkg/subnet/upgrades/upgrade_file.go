@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgrades
 
@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/storage"
+	"github.com/luxdefi/luxgo/utils/storage"
 )
 
 func WriteUpgradeFile(jsonBytes []byte, subnetName, upgradeFilesDir string) error {

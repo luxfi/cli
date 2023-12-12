@@ -1,9 +1,10 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -15,6 +16,7 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,28 +24,36 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/key"
 	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	avago_constants "github.com/luxdefi/node/utils/constants"
-	"github.com/luxdefi/node/utils/crypto/keychain"
-	ledger "github.com/luxdefi/node/utils/crypto/ledger"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/vms/components/avax"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/secp256k1fx"
-	"github.com/luxdefi/node/wallet/subnet/primary"
-	"github.com/luxdefi/spacesvm/chain"
-	spacesvmclient "github.com/luxdefi/spacesvm/client"
+	"github.com/luxdefi/luxgo/api/info"
+	"github.com/luxdefi/luxgo/ids"
+	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
+	"github.com/luxdefi/luxgo/utils/crypto/keychain"
+	ledger "github.com/luxdefi/luxgo/utils/crypto/ledger"
+	"github.com/luxdefi/luxgo/utils/formatting/address"
+	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/luxgo/vms/components/lux"
+	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/luxgo/wallet/subnet/primary"
 	"github.com/luxdefi/subnet-evm/ethclient"
-	"github.com/ethereum/go-ethereum/crypto"
+	ginkgo "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 )
 
 const (
-	expectedRPCComponentsLen = 7
-	blockchainIDPos          = 5
-	subnetEVMName            = "subnet-evm"
+	expectedKeyListLineComponents = 8
+	expectedRPCComponentsLen      = 7
+	blockchainIDPos               = 5
+	subnetEVMName                 = "subnet-evm"
 )
+
+var defaultLocalNetworkNodeIDs = []string{
+	"NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg", "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ",
+	"NodeID-NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN", "NodeID-GWPcbFJZFfZreETSoWjPimr846mXEKCtu", "NodeID-P7oB2McjBGgW2NXXWVYjV8JEDFoW9xDE5",
+}
 
 func GetBaseDir() string {
 	usr, err := user.Current()
@@ -51,6 +61,10 @@ func GetBaseDir() string {
 		panic(err)
 	}
 	return path.Join(usr.HomeDir, baseDir)
+}
+
+func GetSubnetDir() string {
+	return path.Join(GetBaseDir(), constants.SubnetDir)
 }
 
 func GetAPMDir() string {
@@ -113,6 +127,29 @@ func sidecarExists(subnetName string) (bool, error) {
 	return sidecarExists, nil
 }
 
+func ElasticSubnetConfigExists(subnetName string) (bool, error) {
+	elasticSubnetConfig := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.ElasticSubnetConfigFileName)
+	elasticSubnetConfigExists := true
+	if _, err := os.Stat(elasticSubnetConfig); errors.Is(err, os.ErrNotExist) {
+		// does *not* exist
+		elasticSubnetConfigExists = false
+	} else if err != nil {
+		// Schrodinger: file may or may not exist. See err for details.
+		return false, err
+	}
+	return elasticSubnetConfigExists, nil
+}
+
+func PermissionlessValidatorExistsInSidecar(subnetName string, nodeID string, network string) (bool, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return false, err
+	}
+	elasticSubnetValidators := sc.ElasticSubnet[network].Validators
+	_, ok := elasticSubnetValidators[nodeID]
+	return ok, nil
+}
+
 func SubnetConfigExists(subnetName string) (bool, error) {
 	gen, err := genesisExists(subnetName)
 	if err != nil {
@@ -157,7 +194,7 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 	if err != nil {
 		return err
 	}
-	sc.Networks[network.String()] = models.NetworkData{
+	sc.Networks[network.Name()] = models.NetworkData{
 		SubnetID: subnetIDstr,
 	}
 
@@ -257,7 +294,7 @@ func DeleteKey(keyName string) error {
 }
 
 func DeleteBins() error {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.NodeInstallDir)
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir)
 	if _, err := os.Stat(avagoPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -319,7 +356,7 @@ func ParseRPCsFromOutput(output string) ([]string, error) {
 		if startIndex == -1 {
 			return nil, fmt.Errorf("no url in RPC URL line: %s", line)
 		}
-		endIndex := strings.LastIndex(line, "rpc")
+		endIndex := strings.Index(line, "rpc")
 		rpc := line[startIndex : endIndex+3]
 		rpcComponents := strings.Split(rpc, "/")
 		if len(rpcComponents) != expectedRPCComponentsLen {
@@ -342,6 +379,31 @@ func ParseRPCsFromOutput(output string) ([]string, error) {
 	return rpcs, nil
 }
 
+func ParseAddrBalanceFromKeyListOutput(output string, keyName string) (string, uint64, error) {
+	lines := strings.Split(output, "\n")
+	for _, line := range lines {
+		if !strings.Contains(line, keyName) {
+			continue
+		}
+		components := strings.Split(line, "|")
+		if len(components) != expectedKeyListLineComponents {
+			return "", 0, fmt.Errorf("unexpected number of components in key list line %q: expected %d got %d",
+				line,
+				expectedKeyListLineComponents,
+				len(components),
+			)
+		}
+		addr := strings.TrimSpace(components[4])
+		balanceStr := strings.TrimSpace(components[5])
+		balance, err := strconv.ParseUint(balanceStr, 0, 64)
+		if err != nil {
+			return "", 0, fmt.Errorf("error parsing expected float %s", balanceStr)
+		}
+		return addr, balance, nil
+	}
+	return "", 0, fmt.Errorf("keyName %s not found in key list", keyName)
+}
+
 type greeterAddr struct {
 	Greeter string
 }
@@ -357,7 +419,7 @@ func ParseGreeterAddress(output string) error {
 		return err
 	}
 
-	return os.WriteFile(greeterFile, file, 0o600)
+	return os.WriteFile(greeterFile, file, constants.WriteReadUserOnlyPerms)
 }
 
 type confFile struct {
@@ -370,7 +432,7 @@ func SetHardhatRPC(rpc string) error {
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	chainIDBig, err := client.ChainID(ctx)
 	cancel()
 	if err != nil {
@@ -387,7 +449,97 @@ func SetHardhatRPC(rpc string) error {
 		return err
 	}
 
-	return os.WriteFile(confFilePath, file, 0o600)
+	return os.WriteFile(confFilePath, file, constants.WriteReadUserOnlyPerms)
+}
+
+func StartLedgerSim(
+	iters int,
+	seed string,
+	showStdout bool,
+) (chan struct{}, chan struct{}) {
+	ledgerSimReadyCh := make(chan struct{})
+	interactionEndCh := make(chan struct{})
+	ledgerSimEndCh := make(chan struct{})
+	go func() {
+		defer ginkgo.GinkgoRecover()
+		err := RunLedgerSim(iters, seed, ledgerSimReadyCh, interactionEndCh, ledgerSimEndCh, showStdout)
+		if err != nil {
+			fmt.Println(err)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+	}()
+	<-ledgerSimReadyCh
+	return interactionEndCh, ledgerSimEndCh
+}
+
+func RunLedgerSim(
+	iters int,
+	seed string,
+	ledgerSimReadyCh chan struct{},
+	interactionEndCh chan struct{},
+	ledgerSimEndCh chan struct{},
+	showStdout bool,
+) error {
+	cmd := exec.Command( //nolint:gosec
+		"ts-node",
+		basicLedgerSimScript,
+		fmt.Sprintf("%d", iters),
+		seed,
+	)
+	cmd.Dir = ledgerSimDir
+
+	stdinPipe, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	go func(p io.ReadCloser) {
+		reader := bufio.NewReader(p)
+		line, err := reader.ReadString('\n')
+		for err == nil {
+			line = strings.TrimSpace(line)
+			if line == "SIMULATED LEDGER DEV READY" {
+				close(ledgerSimReadyCh)
+			}
+			if line == "PRESS ENTER TO END SIMULATOR" {
+				<-interactionEndCh
+				_, _ = io.WriteString(stdinPipe, "\n")
+			}
+			if showStdout {
+				fmt.Println(line)
+			}
+			line, err = reader.ReadString('\n')
+		}
+	}(stdoutPipe)
+
+	stderr, err := io.ReadAll(stderrPipe)
+	if err != nil {
+		return err
+	}
+	if len(stderr) != 0 {
+		fmt.Println(string(stderr))
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	close(ledgerSimEndCh)
+
+	return err
 }
 
 func RunHardhatTests(test string) error {
@@ -446,8 +598,8 @@ func CheckSubnetEVMExists(version string) bool {
 	return err == nil
 }
 
-func CheckNodeExists(version string) bool {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.NodeInstallDir, "node-"+version)
+func CheckLuxGoExists(version string) bool {
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir, "luxgo-"+version)
 	_, err := os.Stat(avagoPath)
 	return err == nil
 }
@@ -468,30 +620,25 @@ func DownloadCustomVMBin(subnetEVMversion string) (string, error) {
 	return subnetEVMBin, nil
 }
 
-func ParsePublicDeployOutput(output string) (string, string, error) {
+func ParsePublicDeployOutput(output string) (string, error) {
 	lines := strings.Split(output, "\n")
-	var (
-		subnetID string
-		rpcURL   string
-	)
+	var subnetID string
 	for _, line := range lines {
 		if !strings.Contains(line, "Subnet ID") && !strings.Contains(line, "RPC URL") {
 			continue
 		}
 		words := strings.Split(line, "|")
 		if len(words) != 4 {
-			return "", "", errors.New("error parsing output: invalid number of words in line")
+			return "", errors.New("error parsing output: invalid number of words in line")
 		}
 		if strings.Contains(line, "Subnet ID") {
 			subnetID = strings.TrimSpace(words[2])
-		} else {
-			rpcURL = strings.TrimSpace(words[2])
 		}
 	}
-	if subnetID == "" || rpcURL == "" {
-		return "", "", errors.New("information not found in output")
+	if subnetID == "" {
+		return "", errors.New("information not found in output")
 	}
-	return subnetID, rpcURL, nil
+	return subnetID, nil
 }
 
 func RestartNodesWithWhitelistedSubnets(whitelistedSubnets string) error {
@@ -499,22 +646,21 @@ func RestartNodesWithWhitelistedSubnets(whitelistedSubnets string) error {
 	if err != nil {
 		return err
 	}
-	rootCtx := context.Background()
-	ctx, cancel := context.WithTimeout(rootCtx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	resp, err := cli.Status(ctx)
 	cancel()
 	if err != nil {
 		return err
 	}
 	for _, nodeName := range resp.ClusterInfo.NodeNames {
-		ctx, cancel := context.WithTimeout(rootCtx, constants.RequestTimeout)
+		ctx, cancel := utils.GetAPIContext()
 		_, err := cli.RestartNode(ctx, nodeName, client.WithWhitelistedSubnets(whitelistedSubnets))
 		cancel()
 		if err != nil {
 			return err
 		}
 	}
-	ctx, cancel = context.WithTimeout(rootCtx, constants.RequestTimeout)
+	ctx, cancel = utils.GetAPIContext()
 	_, err = cli.Health(ctx)
 	cancel()
 	if err != nil {
@@ -532,8 +678,7 @@ type NodeInfo struct {
 }
 
 func GetNodeVMVersion(nodeURI string, vmid string) (string, error) {
-	rootCtx := context.Background()
-	ctx, cancel := context.WithTimeout(rootCtx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 
 	client := info.NewClient(nodeURI)
 	versionInfo, err := client.GetNodeVersion(ctx)
@@ -555,8 +700,7 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	rootCtx := context.Background()
-	ctx, cancel := context.WithTimeout(rootCtx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	resp, err := cli.Status(ctx)
 	cancel()
 	if err != nil {
@@ -575,16 +719,16 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 	return nodesInfo, nil
 }
 
-func GetWhilelistedSubnetsFromConfigFile(configFile string) (string, error) {
+func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	fileBytes, err := os.ReadFile(configFile)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
+		return "", fmt.Errorf("failed to load luxgo config file %s: %w", configFile, err)
 	}
 	var avagoConfig map[string]interface{}
 	if err := json.Unmarshal(fileBytes, &avagoConfig); err != nil {
 		return "", fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
-	whitelistedSubnetsIntf := avagoConfig["whitelisted-subnets"]
+	whitelistedSubnetsIntf := avagoConfig["track-subnets"]
 	whitelistedSubnets, ok := whitelistedSubnetsIntf.(string)
 	if !ok {
 		return "", fmt.Errorf("expected a string value, but got %T", whitelistedSubnetsIntf)
@@ -603,11 +747,11 @@ func WaitSubnetValidators(subnetIDStr string, nodeInfos map[string]NodeInfo) err
 	if err != nil {
 		return err
 	}
-	mainCtx, mainCtxCancel := context.WithTimeout(context.Background(), time.Second*30)
+	mainCtx, mainCtxCancel := utils.GetAPIContext()
 	defer mainCtxCancel()
 	for {
 		ready := true
-		ctx, ctxCancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+		ctx, ctxCancel := utils.GetAPIContext()
 		vs, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
 		ctxCancel()
 		if err != nil {
@@ -633,71 +777,6 @@ func WaitSubnetValidators(subnetIDStr string, nodeInfos map[string]NodeInfo) err
 	}
 }
 
-func RunSpacesVMAPITest(rpc string) error {
-	privHexBytes, err := os.ReadFile(EwoqKeyPath)
-	if err != nil {
-		return err
-	}
-	priv, err := crypto.HexToECDSA(strings.TrimSpace(string(privHexBytes)))
-	if err != nil {
-		return err
-	}
-
-	cli := spacesvmclient.New(strings.ReplaceAll(rpc, "/rpc", ""), constants.RequestTimeout)
-
-	// claim a space
-	space := "clispace"
-	claimTx := &chain.ClaimTx{
-		BaseTx: &chain.BaseTx{},
-		Space:  space,
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
-	_, _, err = spacesvmclient.SignIssueRawTx(
-		ctx,
-		cli,
-		claimTx,
-		priv,
-		spacesvmclient.WithPollTx(),
-		spacesvmclient.WithInfo(space),
-	)
-	cancel()
-	if err != nil {
-		return err
-	}
-
-	// set key/val pair
-	k, v := "key", []byte("value")
-	setTx := &chain.SetTx{
-		BaseTx: &chain.BaseTx{},
-		Space:  space,
-		Key:    k,
-		Value:  v,
-	}
-	ctx, cancel = context.WithTimeout(context.Background(), constants.RequestTimeout)
-	_, _, err = spacesvmclient.SignIssueRawTx(
-		ctx,
-		cli,
-		setTx,
-		priv,
-		spacesvmclient.WithPollTx(),
-		spacesvmclient.WithInfo(space),
-	)
-	cancel()
-	if err != nil {
-		return err
-	}
-
-	// check key/val pair
-	_, rv, _, err := cli.Resolve(context.Background(), space+"/"+k)
-	if err != nil {
-		return err
-	}
-	if string(rv) != string(v) {
-		return fmt.Errorf("expected value to be %q, got %q", v, rv)
-	}
-	return nil
-}
-
 func GetFileHash(filename string) (string, error) {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -713,7 +792,30 @@ func GetFileHash(filename string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-func FundLedgerAddress() error {
+func GetLedgerAddress(network models.Network, index uint32) (string, error) {
+	// get ledger
+	ledgerDev, err := ledger.New()
+	if err != nil {
+		return "", err
+	}
+	// get ledger addr
+	ledgerAddrs, err := ledgerDev.Addresses([]uint32{index})
+	if err != nil {
+		return "", err
+	}
+	if len(ledgerAddrs) != 1 {
+		return "", fmt.Errorf("no ledger addresses available")
+	}
+	ledgerAddr := ledgerAddrs[0]
+	hrp := key.GetHRP(network.ID)
+	ledgerAddrStr, err := address.Format("P", hrp, ledgerAddr[:])
+	if err != nil {
+		return "", err
+	}
+	return ledgerAddrStr, nil
+}
+
+func FundLedgerAddress(amount uint64) error {
 	// get ledger
 	ledgerDev, err := ledger.New()
 	if err != nil {
@@ -737,7 +839,14 @@ func FundLedgerAddress() error {
 	}
 	var kc keychain.Keychain
 	kc = sk.KeyChain()
-	wallet, err := primary.NewWalletWithTxs(context.Background(), constants.LocalAPIEndpoint, kc)
+	wallet, err := primary.MakeWallet(
+		context.Background(),
+		&primary.WalletConfig{
+			URI:          constants.LocalAPIEndpoint,
+			LUXKeychain: kc,
+			EthKeychain:  secp256k1fx.NewKeychain(),
+		},
+	)
 	if err != nil {
 		return err
 	}
@@ -747,15 +856,15 @@ func FundLedgerAddress() error {
 		Threshold: 1,
 		Addrs:     []ids.ShortID{ledgerAddr},
 	}
-	output := &avax.TransferableOutput{
-		Asset: avax.Asset{ID: wallet.X().AVAXAssetID()},
+	output := &lux.TransferableOutput{
+		Asset: lux.Asset{ID: wallet.X().LUXAssetID()},
 		Out: &secp256k1fx.TransferOutput{
-			Amt:          1000000000,
+			Amt:          amount,
 			OutputOwners: to,
 		},
 	}
-	outputs := []*avax.TransferableOutput{output}
-	if _, err := wallet.X().IssueExportTx(avago_constants.PlatformChainID, outputs); err != nil {
+	outputs := []*lux.TransferableOutput{output}
+	if _, err := wallet.X().IssueExportTx(avagoconstants.PlatformChainID, outputs); err != nil {
 		return err
 	}
 
@@ -764,7 +873,14 @@ func FundLedgerAddress() error {
 	if err != nil {
 		return err
 	}
-	wallet, err = primary.NewWalletWithTxs(context.Background(), constants.LocalAPIEndpoint, kc)
+	wallet, err = primary.MakeWallet(
+		context.Background(),
+		&primary.WalletConfig{
+			URI:          constants.LocalAPIEndpoint,
+			LUXKeychain: kc,
+			EthKeychain:  secp256k1fx.NewKeychain(),
+		},
+	)
 	if err != nil {
 		return err
 	}
@@ -780,4 +896,201 @@ func FundLedgerAddress() error {
 	}
 
 	return nil
+}
+
+func GetPluginBinaries() ([]string, error) {
+	// load plugin files from the plugin directory
+	pluginDir := path.Join(GetBaseDir(), PluginDirExt)
+	files, err := os.ReadDir(pluginDir)
+	if err != nil {
+		return nil, err
+	}
+
+	pluginFiles := []string{}
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		pluginFiles = append(pluginFiles, filepath.Join(pluginDir, file.Name()))
+	}
+
+	return pluginFiles, nil
+}
+
+func getSideCar(subnetName string) (models.Sidecar, error) {
+	exists, err := sidecarExists(subnetName)
+	if err != nil {
+		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: %w", subnetName, err)
+	}
+	if !exists {
+		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: not found", subnetName)
+	}
+
+	sidecar := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
+
+	jsonBytes, err := os.ReadFile(sidecar)
+	if err != nil {
+		return models.Sidecar{}, err
+	}
+
+	var sc models.Sidecar
+	err = json.Unmarshal(jsonBytes, &sc)
+	if err != nil {
+		return models.Sidecar{}, err
+	}
+	return sc, nil
+}
+
+func GetSubnetEVMMainneChainID(subnetName string) (uint, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return 0, err
+	}
+	return sc.SubnetEVMMainnetChainID, nil
+}
+
+func IsCustomVM(subnetName string) (bool, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return false, err
+	}
+	return sc.VM == models.CustomVM, nil
+}
+
+func GetValidators(subnetName string) ([]string, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return nil, err
+	}
+	subnetID := sc.Networks[models.Local.String()].SubnetID
+	if subnetID == ids.Empty {
+		return nil, errors.New("no subnet id")
+	}
+	// Get NodeIDs of all validators on the subnet
+	validators, err := subnet.GetSubnetValidators(subnetID)
+	if err != nil {
+		return nil, err
+	}
+	nodeIDsList := []string{}
+	for _, validator := range validators {
+		nodeIDsList = append(nodeIDsList, validator.NodeID.String())
+	}
+	return nodeIDsList, nil
+}
+
+func GetCurrentSupply(subnetName string) error {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return err
+	}
+	subnetID := sc.Networks[models.Local.String()].SubnetID
+	return subnet.GetCurrentSupply(subnetID)
+}
+
+func IsNodeInPendingValidator(subnetName string, nodeID string) (bool, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return false, err
+	}
+	subnetID := sc.Networks[models.Local.String()].SubnetID
+	return subnet.CheckNodeIsInSubnetPendingValidators(subnetID, nodeID)
+}
+
+func CheckAllNodesAreCurrentValidators(subnetName string) (bool, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return false, err
+	}
+	subnetID := sc.Networks[models.Local.String()].SubnetID
+
+	api := constants.LocalAPIEndpoint
+	pClient := platformvm.NewClient(api)
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
+
+	validators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+	if err != nil {
+		return false, err
+	}
+
+	for _, nodeIDstr := range defaultLocalNetworkNodeIDs {
+		currentValidator := false
+		for _, validator := range validators {
+			if validator.NodeID.String() == nodeIDstr {
+				currentValidator = true
+			}
+		}
+		if !currentValidator {
+			return false, fmt.Errorf("%s is still not a current validator of the elastic subnet", nodeIDstr)
+		}
+	}
+	return true, nil
+}
+
+func AllPermissionlessValidatorExistsInSidecar(subnetName string, network string) (bool, error) {
+	sc, err := getSideCar(subnetName)
+	if err != nil {
+		return false, err
+	}
+	elasticSubnetValidators := sc.ElasticSubnet[network].Validators
+	for _, nodeIDstr := range defaultLocalNetworkNodeIDs {
+		_, ok := elasticSubnetValidators[nodeIDstr]
+		if !ok {
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func GetTmpFilePath(fnamePrefix string) (string, error) {
+	file, err := os.CreateTemp("", fnamePrefix+"*")
+	if err != nil {
+		return "", err
+	}
+	path := file.Name()
+	err = file.Close()
+	if err != nil {
+		return "", err
+	}
+	err = os.Remove(path)
+	return path, err
+}
+
+func ExecCommand(cmdName string, args []string, showStdout bool, errorIsExpected bool) string {
+	cmd := exec.Command(cmdName, args...)
+
+	stdoutPipe, err := cmd.StdoutPipe()
+	gomega.Expect(err).Should(gomega.BeNil())
+	stderrPipe, err := cmd.StderrPipe()
+	gomega.Expect(err).Should(gomega.BeNil())
+	err = cmd.Start()
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	stdout := ""
+	go func(p io.ReadCloser) {
+		reader := bufio.NewReader(p)
+		line, err := reader.ReadString('\n')
+		for err == nil {
+			stdout += line
+			if showStdout {
+				fmt.Print(line)
+			}
+			line, err = reader.ReadString('\n')
+		}
+	}(stdoutPipe)
+
+	stderr, err := io.ReadAll(stderrPipe)
+	gomega.Expect(err).Should(gomega.BeNil())
+	if len(stderr) != 0 {
+		fmt.Println(string(stderr))
+	}
+
+	err = cmd.Wait()
+	if errorIsExpected {
+		gomega.Expect(err).Should(gomega.HaveOccurred())
+	} else {
+		gomega.Expect(err).Should(gomega.BeNil())
+	}
+
+	return stdout + string(stderr)
 }

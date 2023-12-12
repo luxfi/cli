@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -16,7 +16,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
 	"github.com/luxdefi/cli/tests/e2e/utils"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -50,7 +50,7 @@ func TestExportImportSubnet(t *testing.T) {
 		exportOutput = ""
 		app = nil
 	}()
-
+	deployLocal = true
 	err = exportSubnet(nil, []string{"this-does-not-exist-should-fail"})
 	require.Error(err)
 

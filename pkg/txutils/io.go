@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package txutils
 
@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/node/utils/formatting"
-	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/luxgo/utils/formatting"
+	"github.com/luxdefi/luxgo/vms/platformvm/txs"
 )
 
 // saves a given [tx] to [txPath]

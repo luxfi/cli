@@ -1,18 +1,21 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package transactioncmd
 
 import (
+	"fmt"
+
 	"github.com/luxdefi/cli/cmd/subnetcmd"
+	"github.com/luxdefi/cli/pkg/keychain"
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/txutils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
-// avalanche transaction commit
+// lux transaction commit
 func newTransactionCommitCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "commit [subnetName]",
@@ -50,17 +53,16 @@ func commitTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.String()].SubnetID
+	subnetID := sc.Networks[network.Name()].SubnetID
 	if subnetID == ids.Empty {
 		return errNoSubnetID
 	}
 
-	subnetAuthKeys, err := txutils.GetAuthSigners(tx, network, subnetID)
+	controlKeys, _, err := txutils.GetOwners(network, subnetID)
 	if err != nil {
 		return err
 	}
-
-	remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, network, subnetID)
+	subnetAuthKeys, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return err
 	}
@@ -69,7 +71,7 @@ func commitTx(_ *cobra.Command, args []string) error {
 		signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
 		ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(subnetAuthKeys))
 		subnetcmd.PrintRemainingToSignMsg(subnetName, remainingSubnetAuthKeys, inputTxPath)
-		return nil
+		return fmt.Errorf("tx is not fully signed")
 	}
 
 	// get kc with some random address, to pass wallet creation checks
@@ -79,14 +81,14 @@ func commitTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployer := subnet.NewPublicDeployer(app, false, kc, network)
+	deployer := subnet.NewPublicDeployer(app, keychain.NewKeychain(network, kc, nil, nil), network)
 	txID, err := deployer.Commit(tx)
 	if err != nil {
 		return err
 	}
 
 	if txutils.IsCreateChainTx(tx) {
-		if err := subnetcmd.PrintDeployResults(subnetName, subnetID, txID, true); err != nil {
+		if err := subnetcmd.PrintDeployResults(subnetName, subnetID, txID); err != nil {
 			return err
 		}
 		return app.UpdateSidecarNetworks(&sc, network, subnetID, txID)

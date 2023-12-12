@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -9,12 +9,12 @@ import (
 
 	"github.com/luxdefi/cli/internal/mocks"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/json"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/api"
+	"github.com/luxdefi/luxgo/api/info"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/json"
+	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/luxgo/vms/platformvm/api"
 	"github.com/olekukonko/tablewriter"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestStats(t *testing.T) {
 				StartTime: uint64(startTime.Unix()),
 				EndTime:   uint64(endTime.Unix()),
 				NodeID:    localNodeID,
-				Weight:    &weight,
+				Weight:    weight,
 			},
 			Connected: &conn,
 		},
@@ -82,7 +82,7 @@ func TestStats(t *testing.T) {
 			StartTime: json.Uint64(uint64(startTime.Unix())),
 			EndTime:   json.Uint64(uint64(endTime.Unix())),
 			NodeID:    localNodeID,
-			Weight:    &jweight,
+			Weight:    jweight,
 		},
 	}
 

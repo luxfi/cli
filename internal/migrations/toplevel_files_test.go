@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package migrations
 
@@ -15,7 +15,7 @@ import (
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 

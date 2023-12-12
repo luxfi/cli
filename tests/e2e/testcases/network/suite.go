@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -74,6 +74,33 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 			fmt.Println(scriptOutput)
 			fmt.Println(scriptErr)
 		}
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		commands.DeleteSubnetConfig(subnetName)
+	})
+
+	ginkgo.It("clean hard deletes plugin binaries", func() {
+		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		deployOutput := commands.DeploySubnetLocally(subnetName)
+		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
+		if err != nil {
+			fmt.Println(deployOutput)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(rpcs).Should(gomega.HaveLen(1))
+
+		// check that plugin binaries exist
+		plugins, err := utils.GetPluginBinaries()
+		// should have only subnet-evm binary
+		gomega.Expect(len(plugins)).Should(gomega.Equal(1))
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		commands.CleanNetwork()
+
+		// check that plugin binaries exist
+		plugins, err = utils.GetPluginBinaries()
+		// should be empty
+		gomega.Expect(len(plugins)).Should(gomega.Equal(0))
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		commands.DeleteSubnetConfig(subnetName)

@@ -1,23 +1,28 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package prompts
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
+	"net/http"
 	"net/mail"
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/luxdefi/luxgo/genesis"
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	avago_constants "github.com/luxdefi/node/utils/constants"
-	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/luxgo/ids"
+	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
+	"github.com/luxdefi/luxgo/utils/formatting/address"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -38,16 +43,30 @@ func validatePositiveBigInt(input string) error {
 	return nil
 }
 
-func validateStakingDuration(input string) error {
+func validateMainnetStakingDuration(input string) error {
 	d, err := time.ParseDuration(input)
 	if err != nil {
 		return err
 	}
-	if d > constants.MaxStakeDuration {
-		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(constants.MaxStakeDuration))
+	if d > genesis.MainnetParams.MaxStakeDuration {
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(genesis.MainnetParams.MaxStakeDuration))
 	}
-	if d < constants.MinStakeDuration {
-		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(constants.MinStakeDuration))
+	if d < genesis.MainnetParams.MinStakeDuration {
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(genesis.MainnetParams.MinStakeDuration))
+	}
+	return nil
+}
+
+func validateFujiStakingDuration(input string) error {
+	d, err := time.ParseDuration(input)
+	if err != nil {
+		return err
+	}
+	if d > genesis.FujiParams.MaxStakeDuration {
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(genesis.FujiParams.MaxStakeDuration))
+	}
+	if d < genesis.FujiParams.MinStakeDuration {
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(genesis.FujiParams.MinStakeDuration))
 	}
 	return nil
 }
@@ -87,14 +106,14 @@ func validateWeight(input string) error {
 	if err != nil {
 		return err
 	}
-	if val < constants.MinStakeWeight || val > constants.MaxStakeWeight {
+	if val < constants.MinStakeWeight {
 		return errors.New("the weight must be an integer between 1 and 100")
 	}
 	return nil
 }
 
 func validateBiggerThanZero(input string) error {
-	val, err := strconv.ParseUint(input, 10, 64)
+	val, err := strconv.ParseUint(input, 0, 64)
 	if err != nil {
 		return err
 	}
@@ -104,7 +123,7 @@ func validateBiggerThanZero(input string) error {
 	return nil
 }
 
-func validateURL(input string) error {
+func validateURLFormat(input string) error {
 	_, err := url.ParseRequestURI(input)
 	if err != nil {
 		return err
@@ -129,7 +148,7 @@ func validatePChainFujiAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != avago_constants.FujiHRP {
+	if hrp != avagoconstants.FujiHRP {
 		return errors.New("this is not a fuji address")
 	}
 	return nil
@@ -140,7 +159,7 @@ func validatePChainMainAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != avago_constants.MainnetHRP {
+	if hrp != avagoconstants.MainnetHRP {
 		return errors.New("this is not a mainnet address")
 	}
 	return nil
@@ -153,14 +172,14 @@ func validatePChainLocalAddress(input string) error {
 	}
 	// ANR uses the `custom` HRP for local networks,
 	// but the `local` HRP also exists...
-	if hrp != avago_constants.LocalHRP && hrp != avago_constants.FallbackHRP {
+	if hrp != avagoconstants.LocalHRP && hrp != avagoconstants.FallbackHRP {
 		return errors.New("this is not a local nor custom address")
 	}
 	return nil
 }
 
 func getPChainValidationFunc(network models.Network) func(string) error {
-	switch network {
+	switch network.Kind {
 	case models.Fuji:
 		return validatePChainFujiAddress
 	case models.Mainnet:
@@ -184,4 +203,71 @@ func validateNewFilepath(input string) error {
 		return nil
 	}
 	return errors.New("file already exists")
+}
+
+func validateNonEmpty(input string) error {
+	if input == "" {
+		return errors.New("string cannot be empty")
+	}
+	return nil
+}
+
+func RequestURL(url string) (*http.Response, error) {
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for url %s: %w", url, err)
+	}
+	token := os.Getenv(constants.GithubAPITokenEnvVarName)
+	if token != "" {
+		// avoid rate limitation issues at CI
+		request.Header.Set("authorization", fmt.Sprintf("Bearer %s", token))
+	}
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected http status code: %d", resp.StatusCode)
+	}
+	return resp, nil
+}
+
+func ValidateURL(url string) error {
+	if err := validateURLFormat(url); err != nil {
+		return err
+	}
+	resp, err := RequestURL(url)
+	if err != nil {
+		return err
+	}
+	// will just ignore this error, url is already validated
+	_ = resp.Body.Close()
+	return nil
+}
+
+func ValidateRepoBranch(repo string, branch string) error {
+	url := repo + "/tree/" + branch
+	return ValidateURL(url)
+}
+
+func ValidateRepoFile(repo string, branch string, file string) error {
+	url := repo + "/blob/" + branch + "/" + file
+	return ValidateURL(url)
+}
+
+func ValidateHexa(input string) error {
+	if input == "" {
+		return errors.New("string cannot be empty")
+	}
+	if len(input) < 2 || strings.ToLower(input[:2]) != "0x" {
+		return errors.New("hexa string has not 0x prefix")
+	}
+	if len(input) == 2 {
+		return errors.New("no hexa digits in string")
+	}
+	_, err := hex.DecodeString(input[2:])
+	if err != nil {
+		return errors.New("string not in hexa format")
+	}
+	return err
 }

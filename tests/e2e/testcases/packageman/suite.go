@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package packageman
@@ -44,7 +44,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 	ginkgo.It("can deploy a subnet with subnet-evm version", func() {
 		// check subnet-evm install precondition
 		gomega.Expect(utils.CheckSubnetEVMExists(binaryToVersion[utils.SoloSubnetEVMKey1])).Should(gomega.BeFalse())
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.SoloAvagoKey])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.SoloAvagoKey])).Should(gomega.BeFalse())
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1])
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.SoloAvagoKey])
@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 
 		// check subnet-evm install
 		gomega.Expect(utils.CheckSubnetEVMExists(binaryToVersion[utils.SoloSubnetEVMKey1])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.SoloAvagoKey])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.SoloAvagoKey])).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})
@@ -113,10 +113,10 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(secondSubnetName)
 	})
 
-	ginkgo.It("can deploy with multiple node versions", func() {
+	ginkgo.It("can deploy with multiple luxgo versions", func() {
 		// check avago install precondition
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeFalse())
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeFalse())
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.MultiAvagoSubnetEVMKey])
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiAvago1Key])
@@ -145,8 +145,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// check avago install
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeFalse())
 
 		commands.CleanNetwork()
 
@@ -166,8 +166,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// check avago install
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckNodeExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiAvago1Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiAvago2Key])).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})

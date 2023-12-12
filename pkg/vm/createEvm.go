@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package vm
 
@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/big"
 	"os"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/subnet-evm/core"
 	"github.com/luxdefi/subnet-evm/params"
+	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -38,7 +40,7 @@ func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath 
 			return nil, &models.Sidecar{}, err
 		}
 
-		subnetEVMVersion, _, err = getVMVersion(app, "Subnet-EVM", constants.SubnetEVMRepoName, subnetEVMVersion, false)
+		subnetEVMVersion, err = getVMVersion(app, "Subnet-EVM", constants.SubnetEVMRepoName, subnetEVMVersion, false)
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}
@@ -112,8 +114,15 @@ func createEvmGenesis(
 		subnetEvmState.NextState(direction)
 	}
 
-	if conf != nil && conf.TxAllowListConfig != nil {
-		if err := ensureAdminsHaveBalance(conf.TxAllowListConfig.AllowListAdmins, allocation); err != nil {
+	if conf != nil && conf.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
+		allowListCfg, ok := conf.GenesisPrecompiles[txallowlist.ConfigKey].(*txallowlist.Config)
+		if !ok {
+			return nil, nil, fmt.Errorf("expected config of type txallowlist.AllowListConfig, but got %T", allowListCfg)
+		}
+
+		if err := ensureAdminsHaveBalance(
+			allowListCfg.AdminAddresses,
+			allocation); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -123,7 +132,11 @@ func createEvmGenesis(
 	genesis.Alloc = allocation
 	genesis.Config = conf
 	genesis.Difficulty = Difficulty
-	genesis.GasLimit = GasLimit
+	genesis.GasLimit = conf.FeeConfig.GasLimit.Uint64()
+
+	if err := genesis.Verify(); err != nil {
+		return nil, nil, err
+	}
 
 	jsonBytes, err := genesis.MarshalJSON()
 	if err != nil {
@@ -171,5 +184,5 @@ func ensureAdminsHaveBalance(admins []common.Address, alloc core.GenesisAlloc) e
 
 // In own function to facilitate testing
 func getEVMAllocation(app *application.Lux) (core.GenesisAlloc, statemachine.StateDirection, error) {
-	return getAllocation(app, defaultEvmAirdropAmount, oneAvax, "Amount to airdrop (in AVAX units)")
+	return getAllocation(app, defaultEvmAirdropAmount, oneLux, "Amount to airdrop (in LUX units)")
 }

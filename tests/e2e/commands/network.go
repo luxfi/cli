@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package commands
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
@@ -17,6 +18,7 @@ func CleanNetwork() {
 		CLIBinary,
 		NetworkCmd,
 		"clean",
+		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -34,6 +36,7 @@ func CleanNetworkHard() {
 		NetworkCmd,
 		"clean",
 		"--hard",
+		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -56,8 +59,13 @@ func StartNetwork() string {
 /* #nosec G204 */
 func StartNetworkWithVersion(version string) string {
 	cmdArgs := []string{NetworkCmd, "start"}
+	cmdArgs = append(cmdArgs, "--"+constants.SkipUpdateFlag)
 	if version != "" {
-		cmdArgs = append(cmdArgs, "--node-version", version)
+		cmdArgs = append(
+			cmdArgs,
+			"--luxgo-version",
+			version,
+		)
 	}
 	cmd := exec.Command(CLIBinary, cmdArgs...)
 	output, err := cmd.CombinedOutput()
@@ -76,6 +84,7 @@ func StopNetwork() {
 		CLIBinary,
 		NetworkCmd,
 		"stop",
+		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

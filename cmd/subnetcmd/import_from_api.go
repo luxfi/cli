@@ -1,33 +1,33 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/rpc"
-	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/luxgo/api/info"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/rpc"
+	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/luxgo/vms/platformvm/txs"
 	"github.com/luxdefi/coreth/core"
-	"github.com/luxdefi/spacesvm/chain"
 	"github.com/spf13/cobra"
 )
 
 var (
 	genesisFilePath string
-	subnetIDstr     string
+	blockchainIDstr string
 	nodeURL         string
 )
 
-// avalanche subnet import
+// lux subnet import
 func newImportFromNetworkCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "public [subnetPath]",
@@ -35,11 +35,11 @@ func newImportFromNetworkCmd() *cobra.Command {
 		RunE:         importRunningSubnet,
 		SilenceUsage: true,
 		Args:         cobra.MaximumNArgs(1),
-		Long: `The subnet import public command will import a subnet configuration from a running network.
+		Long: `The subnet import public command imports a Subnet configuration from a running network.
 
-The genesis file should be available from the disk for this to work. 
-By default, an imported subnet will not overwrite an existing subnet with the same name. 
-To allow overwrites, provide the --force flag.`,
+The genesis file should be available from the disk for this to work. By default, an imported Subnet
+doesn't overwrite an existing Subnet with the same name. To allow overwrites, provide the --force
+flag.`,
 	}
 
 	cmd.Flags().StringVar(&nodeURL, "node-url", "", "[optional] URL of an already running subnet validator")
@@ -48,7 +48,6 @@ To allow overwrites, provide the --force flag.`,
 	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `fuji`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "import from `mainnet`")
 	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "import a subnet-evm")
-	cmd.Flags().BoolVar(&useSpacesVM, "spacesvm", false, "use the SpacesVM as the base template")
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
 	cmd.Flags().BoolVarP(
 		&overwriteImport,
@@ -64,10 +63,10 @@ To allow overwrites, provide the --force flag.`,
 		"path to the genesis file",
 	)
 	cmd.Flags().StringVar(
-		&subnetIDstr,
-		"subnet-id",
+		&blockchainIDstr,
+		"blockchain-id",
 		"",
-		"the subnet ID",
+		"the blockchain ID",
 	)
 	return cmd
 }
@@ -75,15 +74,15 @@ To allow overwrites, provide the --force flag.`,
 func importRunningSubnet(*cobra.Command, []string) error {
 	var err error
 
-	var network models.Network
+	network := models.UndefinedNetwork
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.FujiNetwork
 	case deployMainnet:
-		network = models.Mainnet
+		network = models.MainnetNetwork
 	}
 
-	if network == models.Undefined {
+	if network.Kind == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to import from",
 			[]string{models.Fuji.String(), models.Mainnet.String()},
@@ -114,7 +113,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 			if err != nil {
 				return err
 			}
-			ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+			ctx, cancel := utils.GetAPIContext()
 			defer cancel()
 			infoAPI := info.NewClient(nodeURL)
 			options := []rpc.Option{}
@@ -125,59 +124,54 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		}
 	}
 
-	var subnetID ids.ID
-	if subnetIDstr == "" {
-		subnetID, err = app.Prompt.CaptureID("What is the ID of the subnet?")
+	var blockchainID ids.ID
+	if blockchainIDstr == "" {
+		blockchainID, err = app.Prompt.CaptureID("What is the ID of the blockchain?")
 		if err != nil {
 			return err
 		}
 	} else {
-		subnetID, err = ids.FromString(subnetIDstr)
+		blockchainID, err = ids.FromString(blockchainIDstr)
 		if err != nil {
 			return err
 		}
 	}
 
-	var pubAPI string
-	switch network {
-	case models.Fuji:
-		pubAPI = constants.FujiAPIEndpoint
-	case models.Mainnet:
-		pubAPI = constants.MainnetAPIEndpoint
-	}
-	client := platformvm.NewClient(pubAPI)
-	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+	client := platformvm.NewClient(network.Endpoint)
+	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
 	options := []rpc.Option{}
 
-	ux.Logger.PrintToUser("Getting information from the %s network...", network.String())
+	ux.Logger.PrintToUser("Getting information from the %s network...", network.Name())
 
-	chains, err := client.GetBlockchains(ctx, options...)
+	txBytes, err := client.GetTx(ctx, blockchainID, options...)
 	if err != nil {
 		return err
 	}
 
 	var (
-		blockchainID, vmID ids.ID
-		subnetName         string
+		vmID, subnetID ids.ID
+		tx             txs.Tx
+		subnetName     string
 	)
 
-	for _, ch := range chains {
-		// NOTE: This supports only one chain per subnet
-		if ch.SubnetID == subnetID {
-			blockchainID = ch.ID
-			vmID = ch.VMID
-			subnetName = ch.Name
-			break
-		}
+	_, err = txs.Codec.Unmarshal(txBytes, &tx)
+	if err != nil {
+		return fmt.Errorf("failed unmarshaling the createChainTx: %w", err)
 	}
 
-	if blockchainID == ids.Empty || vmID == ids.Empty {
-		return fmt.Errorf("subnet ID %s not found on this network", subnetIDstr)
+	createChainTx, ok := tx.Unsigned.(*txs.CreateChainTx)
+	if !ok {
+		return fmt.Errorf("expected a CreateChainTx, got %T", tx.Unsigned)
 	}
 
-	ux.Logger.PrintToUser("Retrieved information. BlockchainID: %s, Name: %s, VMID: %s",
+	vmID = createChainTx.VMID
+	subnetID = createChainTx.SubnetID
+	subnetName = createChainTx.ChainName
+
+	ux.Logger.PrintToUser("Retrieved information. BlockchainID: %s, SubnetID: %s, Name: %s, VMID: %s",
 		blockchainID.String(),
+		subnetID.String(),
 		subnetName,
 		vmID.String(),
 	)
@@ -197,7 +191,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 	if vmType == "" {
 		subnetTypeStr, err := app.Prompt.CaptureList(
 			"What's this VM's type?",
-			[]string{models.SubnetEvm, models.SpacesVM, models.CustomVM},
+			[]string{models.SubnetEvm, models.CustomVM},
 		)
 		if err != nil {
 			return err
@@ -211,7 +205,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		Name: subnetName,
 		VM:   vmType,
 		Networks: map[string]models.NetworkData{
-			network.String(): {
+			network.Name(): {
 				SubnetID:     subnetID,
 				BlockchainID: blockchainID,
 			},
@@ -239,13 +233,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		// no node was queried, ask the user
 		switch vmType {
 		case models.SubnetEvm:
-			versions, err = app.Downloader.GetAllReleasesForRepo(constants.AvaLabsOrg, constants.SubnetEVMRepoName)
-			if err != nil {
-				return err
-			}
-			sc.VMVersion, err = app.Prompt.CaptureList("Pick the version for this VM", versions)
-		case models.SpacesVM:
-			versions, err = app.Downloader.GetAllReleasesForRepo(constants.AvaLabsOrg, constants.SpacesVMRepoName)
+			versions, err = app.Downloader.GetAllReleasesForRepo(constants.LuxDeFiOrg, constants.SubnetEVMRepoName)
 			if err != nil {
 				return err
 			}
@@ -263,27 +251,19 @@ func importRunningSubnet(*cobra.Command, []string) error {
 			return fmt.Errorf("failed getting RPCVersion for VM type %s with version %s", vmType, sc.VMVersion)
 		}
 	}
-
-	switch vmType {
-	case models.SubnetEvm:
+	if vmType == models.SubnetEvm {
 		var genesis core.Genesis
 		if err := json.Unmarshal(genBytes, &genesis); err != nil {
 			return err
 		}
 		sc.ChainID = genesis.Config.ChainID.String()
-	case models.SpacesVM:
-		// for spacesvm just make sure it's valid
-		var genesis chain.Genesis
-		if err := json.Unmarshal(genBytes, &genesis); err != nil {
-			return err
-		}
 	}
 
 	if err := app.CreateSidecar(sc); err != nil {
 		return fmt.Errorf("failed creating the sidecar for import: %w", err)
 	}
 
-	ux.Logger.PrintToUser("Subnet %s imported successfully", sc.Name)
+	ux.Logger.PrintToUser("Subnet %q imported successfully", sc.Name)
 
 	return nil
 }

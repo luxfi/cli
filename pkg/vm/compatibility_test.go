@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -43,22 +43,6 @@ func TestGetRPCProtocolVersionSubnetEVM(t *testing.T) {
 	require.Equal(expectedRPC, rpcVersion)
 }
 
-func TestGetRPCProtocolVersionSpacesVM(t *testing.T) {
-	require := require.New(t)
-	expectedRPC := 18
-	var vm models.VMType = models.SpacesVM
-
-	mockDownloader := &mocks.Downloader{}
-	mockDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
-
-	app := application.New()
-	app.Downloader = mockDownloader
-
-	rpcVersion, err := GetRPCProtocolVersion(app, vm, testAvagoVersion)
-	require.NoError(err)
-	require.Equal(expectedRPC, rpcVersion)
-}
-
 func TestGetRPCProtocolVersionUnknownVM(t *testing.T) {
 	require := require.New(t)
 	var vm models.VMType = "unknown"
@@ -82,7 +66,7 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	require.ErrorContains(err, "no RPC version found")
 }
 
-func TestGetLatestNodeByProtocolVersion(t *testing.T) {
+func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 	type versionTest struct {
 		name            string
 		rpc             int
@@ -177,7 +161,7 @@ func TestGetLatestNodeByProtocolVersion(t *testing.T) {
 			app := application.New()
 			app.Downloader = mockDownloader
 
-			avagoVersion, err := GetLatestNodeByProtocolVersion(app, tt.rpc, constants.NodeCompatibilityURL)
+			avagoVersion, err := GetLatestLuxGoByProtocolVersion(app, tt.rpc, constants.LuxGoCompatibilityURL)
 			if tt.expectedErr == nil {
 				require.NoError(err)
 			} else {

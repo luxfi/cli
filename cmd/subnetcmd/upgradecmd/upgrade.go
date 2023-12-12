@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -11,13 +11,13 @@ import (
 
 var app *application.Lux
 
-// avalanche subnet vm
+// lux subnet vm
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upgrade",
-		Short: "Upgrade your subnets",
+		Short: "Upgrade your Subnets",
 		Long: `The subnet upgrade command suite provides a collection of tools for
-updating your developmental and deployed subnets.`,
+updating your developmental and deployed Subnets.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := cmd.Help()
 			if err != nil {
@@ -36,5 +36,7 @@ updating your developmental and deployed subnets.`,
 	cmd.AddCommand(newUpgradeExportCmd())
 	// subnet upgrade print
 	cmd.AddCommand(newUpgradePrintCmd())
+	// subnet upgrade apply
+	cmd.AddCommand(newUpgradeApplyCmd())
 	return cmd
 }

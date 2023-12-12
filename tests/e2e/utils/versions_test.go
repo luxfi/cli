@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
 )
@@ -26,9 +26,7 @@ type testContext struct {
 	expected map[string]string
 	// fake versions set for the evm binaries, faking github
 	sourceEVM string
-	// fake versions set for the spacesvm binaries, faking github
-	sourceSpacesVM string
-	// fake versions set for the node binaries, faking github
+	// fake versions set for the luxgo binaries, faking github
 	sourceAvago string
 	// should the test fail
 	shouldFail bool
@@ -60,6 +58,11 @@ func newTestMapper(t *testing.T) *testMapper {
 		nil,
 		t,
 	}
+}
+
+// implement VersionMapper
+func (*testMapper) FilterAvailableVersions(versions []string) []string {
+	return versions
 }
 
 // implement VersionMapper
@@ -104,14 +107,12 @@ func (m *testMapper) GetApp() *application.Lux {
 }
 
 // GetCompatURL fakes a github endpoint for
-// evm and spacesvm releases
+// evm release
 // implement VersionMapper
 func (m *testMapper) GetCompatURL(vmType models.VMType) string {
 	switch vmType {
 	case models.SubnetEvm:
 		return m.srv.URL + "/evm"
-	case models.SpacesVM:
-		return m.srv.URL + "/spaces"
 	default:
 		m.t.Fatalf("unexpected vmType: %T", vmType)
 	}
@@ -119,7 +120,7 @@ func (m *testMapper) GetCompatURL(vmType models.VMType) string {
 }
 
 // GetAvagoURL fakes a github endpoint for
-// node releases
+// luxgo releases
 // implement VersionMapper
 func (m *testMapper) GetAvagoURL() string {
 	return m.srv.URL + "/avago"
@@ -138,8 +139,6 @@ func (m *testMapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/evm":
 		_, err = w.Write([]byte(m.currentContext.sourceEVM))
-	case "/spaces":
-		_, err = w.Write([]byte(m.currentContext.sourceSpacesVM))
 	case "/avago":
 		_, err = w.Write([]byte(m.currentContext.sourceAvago))
 	default:
@@ -155,7 +154,7 @@ func (m *testMapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // the expected values.
 // For the test to be meaningful, we start a httptest HTTP
 // server locally, which then returns fake versions for each request
-// (sourceEVM, spacesVM, sourceAvago) which then
+// (sourceEVM, sourceAvago) which then
 // the mapping code in `GetVersionMapping` is expected
 // to correctly evaluate for the global `binaryToVersion` map,
 // used by the tests to know which version to use for which test.
@@ -187,8 +186,6 @@ func TestGetVersionMapping(t *testing.T) {
 				MultiAvagoSubnetEVMKey: "v0.4.3",
 				LatestEVM2AvagoKey:     "v0.4.3",
 				LatestAvago2EVMKey:     "v1.9.3",
-				Spaces2AvagoKey:        "v0.0.12",
-				Avago2SpacesKey:        "v1.9.3",
 			},
 			sourceEVM: `{
 						"rpcChainVMProtocolVersion": {
@@ -199,16 +196,6 @@ func TestGetVersionMapping(t *testing.T) {
 							"v0.4.0": 17
 						}
 				  }`,
-			sourceSpacesVM: `{
-  					"rpcChainVMProtocolVersion": {
-    					"v0.0.12": 19,
-    					"v0.0.11": 19,
-    					"v0.0.10": 19,
-    					"v0.0.9": 17,
-    					"v0.0.8": 16,
-    					"v0.0.7": 15
-						}
-					}`,
 			sourceAvago: `{
 						"19": [
 							"v1.9.2",
@@ -237,8 +224,6 @@ func TestGetVersionMapping(t *testing.T) {
 				MultiAvagoSubnetEVMKey: "v0.9.9",
 				LatestEVM2AvagoKey:     "v0.9.9",
 				LatestAvago2EVMKey:     "v2.3.4",
-				Spaces2AvagoKey:        "v4.5.12",
-				Avago2SpacesKey:        "v2.3.4",
 			},
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
@@ -250,14 +235,6 @@ func TestGetVersionMapping(t *testing.T) {
 						"v0.4.0": 17
 					}
 			  }`,
-			sourceSpacesVM: `{
-  					"rpcChainVMProtocolVersion": {
-    					"v4.5.12": 99,
-    					"v3.2.12": 77,
-    					"v2.1.11": 66,
-    					"v0.0.10": 19
-						}
-					}`,
 			sourceAvago: `{
 					"99": [
 						"v2.3.4",
@@ -286,8 +263,6 @@ func TestGetVersionMapping(t *testing.T) {
 				MultiAvagoSubnetEVMKey: "v0.4.2",
 				LatestEVM2AvagoKey:     "v0.9.9",
 				LatestAvago2EVMKey:     "v4.3.2",
-				Spaces2AvagoKey:        "v3.2.12",
-				Avago2SpacesKey:        "v2.1.1",
 			},
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
@@ -301,13 +276,6 @@ func TestGetVersionMapping(t *testing.T) {
 						"v0.4.0": 17
 					}
 			  }`,
-			sourceSpacesVM: `{
-  					"rpcChainVMProtocolVersion": {
-    					"v3.2.12": 77,
-    					"v2.1.11": 66,
-    					"v0.0.10": 19
-						}
-					}`,
 			sourceAvago: `{
 					"99": [
 						"v4.3.2"
@@ -341,36 +309,6 @@ func TestGetVersionMapping(t *testing.T) {
 			expected:    map[string]string{},
 			sourceEVM:   `{}`,
 			sourceAvago: `{}`,
-		},
-		{
-			// this test should fail, simulating that
-			// the APIs would return empty releases for some reason
-			// just for the spacesvm
-			name:       "no spaces",
-			shouldFail: true,
-			expected:   map[string]string{},
-			sourceAvago: `{
-					"99": [
-						"v2.3.4",
-						"v2.3.3"
-					],
-					"88": [
-						"v1.9.1"
-					],
-					"77": [
-						"v1.9.0"
-					]
-			  }`,
-			sourceEVM: `{
-					"rpcChainVMProtocolVersion": {
-						"v1.0.0": 100,
-						"v0.9.9": 66,
-						"v0.9.8": 55,
-						"v0.4.2": 44,
-						"v0.4.1": 33,
-						"v0.4.0": 22
-					}
-			  }`,
 		},
 		{
 			// this test should fail, simulating that

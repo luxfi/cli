@@ -1,25 +1,31 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package networkcmd
 
 import (
+	"context"
 	"fmt"
 	"path"
 
 	"github.com/luxdefi/cli/pkg/binutils"
 	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/subnet"
+	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/cli/pkg/vm"
 	"github.com/luxdefi/netrunner/client"
 	"github.com/luxdefi/netrunner/server"
-	"github.com/luxdefi/netrunner/utils"
+	anrutils "github.com/luxdefi/netrunner/utils"
 	"github.com/spf13/cobra"
 )
 
 var (
-	avagoVersion string
-	snapshotName string
+	userProvidedAvagoVersion string
+	snapshotName             string
 )
+
+const latest = "latest"
 
 func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -31,25 +37,30 @@ By default, the command loads the default snapshot. If you provide the --snapsho
 flag, the network loads that snapshot instead. The command fails if the local network is
 already running.`,
 
-		RunE:         startNetwork,
+		RunE:         StartNetwork,
 		Args:         cobra.ExactArgs(0),
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&avagoVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedAvagoVersion, "luxgo-version", latest, "use this version of luxgo (ex: v1.17.12)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 
 	return cmd
 }
 
-func startNetwork(*cobra.Command, []string) error {
+func StartNetwork(*cobra.Command, []string) error {
+	avagoVersion, err := determineAvagoVersion(userProvidedAvagoVersion)
+	if err != nil {
+		return err
+	}
+
 	sd := subnet.NewLocalDeployer(app, avagoVersion, "")
 
 	if err := sd.StartServer(); err != nil {
 		return err
 	}
 
-	avalancheGoBinPath, pluginDir, err := sd.SetupLocalEnv()
+	luxGoBinPath, err := sd.SetupLocalEnv()
 	if err != nil {
 		return err
 	}
@@ -57,6 +68,19 @@ func startNetwork(*cobra.Command, []string) error {
 	cli, err := binutils.NewGRPCClient()
 	if err != nil {
 		return err
+	}
+
+	ctx, cancel := utils.GetANRContext()
+	defer cancel()
+
+	bootstrapped, err := checkNetworkIsAlreadyBootstrapped(ctx, cli)
+	if err != nil {
+		return err
+	}
+
+	if bootstrapped {
+		ux.Logger.PrintToUser("Network has already been booted.")
+		return nil
 	}
 
 	var startMsg string
@@ -67,14 +91,16 @@ func startNetwork(*cobra.Command, []string) error {
 	}
 	ux.Logger.PrintToUser(startMsg)
 
-	outputDirPrefix := path.Join(app.GetRunDir(), "restart")
-	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)
+	outputDirPrefix := path.Join(app.GetRunDir(), "network")
+	outputDir, err := anrutils.MkDirWithTimestamp(outputDirPrefix)
 	if err != nil {
 		return err
 	}
 
+	pluginDir := app.GetPluginsDir()
+
 	loadSnapshotOpts := []client.OpOption{
-		client.WithExecPath(avalancheGoBinPath),
+		client.WithExecPath(luxGoBinPath),
 		client.WithRootDataDir(outputDir),
 		client.WithReassignPortsIfUsed(true),
 		client.WithPluginDir(pluginDir),
@@ -89,37 +115,94 @@ func startNetwork(*cobra.Command, []string) error {
 		loadSnapshotOpts = append(loadSnapshotOpts, client.WithGlobalNodeConfig(configStr))
 	}
 
-	ctx := binutils.GetAsyncContext()
-
-	_, err = cli.LoadSnapshot(
+	ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
+	resp, err := cli.LoadSnapshot(
 		ctx,
 		snapshotName,
 		loadSnapshotOpts...,
 	)
-
 	if err != nil {
-		if !server.IsServerError(err, server.ErrAlreadyBootstrapped) {
-			return fmt.Errorf("failed to start network with the persisted snapshot: %w", err)
-		}
-		ux.Logger.PrintToUser("Network has already been booted. Wait until healthy...")
-	} else {
-		ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
+		return fmt.Errorf("failed to start network with the persisted snapshot: %w", err)
 	}
 
-	// TODO: this should probably be extracted from the deployer and
-	// used as an independent helper
-	clusterInfo, err := sd.WaitForHealthy(ctx, cli, constants.HealthCheckInterval)
-	if err != nil {
-		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
-	}
+	ux.Logger.PrintToUser("Node logs directory: %s/node<i>/logs", resp.ClusterInfo.RootDataDir)
+	ux.Logger.PrintToUser("Network ready to use.")
 
-	endpoints := subnet.GetEndpoints(clusterInfo)
-
-	fmt.Println()
-	if len(endpoints) > 0 {
-		ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
-		ux.PrintTableEndpoints(clusterInfo)
+	if subnet.HasEndpoints(resp.ClusterInfo) {
+		fmt.Println()
+		ux.Logger.PrintToUser("Local network node endpoints:")
+		ux.PrintTableEndpoints(resp.ClusterInfo)
 	}
 
 	return nil
+}
+
+func determineAvagoVersion(userProvidedAvagoVersion string) (string, error) {
+	// a specific user provided version should override this calculation, so just return
+	if userProvidedAvagoVersion != latest {
+		return userProvidedAvagoVersion, nil
+	}
+
+	// Need to determine which subnets have been deployed
+	locallyDeployedSubnets, err := subnet.GetLocallyDeployedSubnetsFromFile(app)
+	if err != nil {
+		return "", err
+	}
+
+	// if no subnets have been deployed, use latest
+	if len(locallyDeployedSubnets) == 0 {
+		return latest, nil
+	}
+
+	currentRPCVersion := -1
+
+	// For each deployed subnet, check RPC versions
+	for _, deployedSubnet := range locallyDeployedSubnets {
+		sc, err := app.LoadSidecar(deployedSubnet)
+		if err != nil {
+			return "", err
+		}
+
+		// if you have a custom vm, you must provide the version explicitly
+		// if you upgrade from subnet-evm to a custom vm, the RPC version will be 0
+		if sc.VM == models.CustomVM || sc.Networks[models.Local.String()].RPCVersion == 0 {
+			continue
+		}
+
+		if currentRPCVersion == -1 {
+			currentRPCVersion = sc.Networks[models.Local.String()].RPCVersion
+		}
+
+		if sc.Networks[models.Local.String()].RPCVersion != currentRPCVersion {
+			return "", fmt.Errorf(
+				"RPC version mismatch. Expected %d, got %d for Subnet %s. Upgrade all subnets to the same RPC version to launch the network",
+				currentRPCVersion,
+				sc.RPCVersion,
+				sc.Name,
+			)
+		}
+	}
+
+	// If currentRPCVersion == -1, then only custom subnets have been deployed, the user must provide the version explicitly if not latest
+	if currentRPCVersion == -1 {
+		ux.Logger.PrintToUser("No Subnet RPC version found. Using latest LuxGo version")
+		return latest, nil
+	}
+
+	return vm.GetLatestLuxGoByProtocolVersion(
+		app,
+		currentRPCVersion,
+		constants.LuxGoCompatibilityURL,
+	)
+}
+
+func checkNetworkIsAlreadyBootstrapped(ctx context.Context, cli client.Client) (bool, error) {
+	_, err := cli.Status(ctx)
+	if err != nil {
+		if server.IsServerError(err, server.ErrNotBootstrapped) {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed trying to get network status: %w", err)
+	}
+	return true, nil
 }

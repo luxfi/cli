@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package localnetworkinterface
@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/node/api/info"
+	"github.com/luxdefi/luxgo/api/info"
 )
 
 type StatusChecker interface {
@@ -31,12 +31,12 @@ func (networkStatusChecker) GetCurrentNetworkVersion() (string, int, bool, error
 		return "", 0, false, nil
 	}
 
-	// version is in format avalanche/x.y.z, need to turn to semantic
+	// version is in format lux/x.y.z, need to turn to semantic
 	splitVersion := strings.Split(versionResponse.Version, "/")
 	if len(splitVersion) != 2 {
-		return "", 0, false, errors.New("unable to parse node version " + versionResponse.Version)
+		return "", 0, false, errors.New("unable to parse luxgo version " + versionResponse.Version)
 	}
-	// index 0 should be avalanche, index 1 will be version
+	// index 0 should be lux, index 1 will be version
 	parsedVersion := "v" + splitVersion[1]
 
 	return parsedVersion, int(versionResponse.RPCProtocolVersion), true, nil

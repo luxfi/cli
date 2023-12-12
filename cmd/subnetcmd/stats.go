@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -14,15 +14,15 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/api"
+	"github.com/luxdefi/luxgo/api/info"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/luxgo/vms/platformvm/api"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet stats
+// lux subnet stats
 func newStatsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "stats [subnetName]",
@@ -39,15 +39,15 @@ func newStatsCmd() *cobra.Command {
 }
 
 func stats(_ *cobra.Command, args []string) error {
-	var network models.Network
+	network := models.UndefinedNetwork
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.FujiNetwork
 	case deployMainnet:
-		network = models.Mainnet
+		network = models.MainnetNetwork
 	}
 
-	if network == models.Undefined {
+	if network.Kind == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network from which you want to get the statistics (this command only supports public networks)",
 			[]string{models.Fuji.String(), models.Mainnet.String()},
@@ -64,7 +64,7 @@ func stats(_ *cobra.Command, args []string) error {
 		network = models.NetworkFromString(networkStr)
 	}
 
-	chains, err := validateSubnetNameAndGetChains(args)
+	chains, err := ValidateSubnetNameAndGetChains(args)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func stats(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	subnetID := sc.Networks[network.String()].SubnetID
+	subnetID := sc.Networks[network.Name()].SubnetID
 	if subnetID == ids.Empty {
 		return errors.New("no subnetID found for the provided subnet name; has this subnet actually been deployed to this network?")
 	}
@@ -174,15 +174,12 @@ func buildPendingValidatorStats(pClient platformvm.Client, infoClient info.Clien
 		startTime = time.Unix(int64(v.StartTime), 0)
 		endTime = time.Unix(int64(v.EndTime), 0)
 
-		if v.Weight != nil {
-			uint64Weight := *v.Weight
-			for _, d := range pendingDelegators {
-				uint64Weight += *d.Weight
-			}
-			weight = strconv.FormatUint(uint64(uint64Weight), 10)
-		} else {
-			weight = constants.NotAvailableLabel
+		uint64Weight := v.Weight
+		for _, d := range pendingDelegators {
+			uint64Weight += d.Weight
 		}
+		weight = strconv.FormatUint(uint64(uint64Weight), 10)
+
 		// if retrieval of localNodeID failed, it will be empty,
 		// and this comparison fails
 		if v.NodeID == localNodeID {
@@ -249,16 +246,13 @@ func buildCurrentValidatorStats(pClient platformvm.Client, infoClient info.Clien
 		} else {
 			connected = constants.NotAvailableLabel
 		}
-		if v.Weight != nil {
-			uint64Weight := *v.Weight
-			delegators := v.Delegators
-			for _, d := range delegators {
-				uint64Weight += *d.Weight
-			}
-			weight = strconv.FormatUint(uint64Weight, 10)
-		} else {
-			weight = constants.NotAvailableLabel
+
+		uint64Weight := v.Weight
+		delegators := v.Delegators
+		for _, d := range delegators {
+			uint64Weight += d.Weight
 		}
+		weight = strconv.FormatUint(uint64Weight, 10)
 
 		// if retrieval of localNodeID failed, it will be empty,
 		// and this comparison fails
@@ -296,21 +290,8 @@ func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
 		}
 	}
 
-	var url string
-	// try public APIs
-	switch network {
-	case models.Fuji:
-		url = constants.FujiAPIEndpoint
-	case models.Mainnet:
-		url = constants.MainnetAPIEndpoint
-	}
-	// unsupported network
-	if url == "" {
-		return nil, nil
-	}
-
 	// create client to public API
-	c = platformvm.NewClient(url)
+	c = platformvm.NewClient(network.Endpoint)
 	// try calling it to make sure it actually worked
 	_, err = c.GetHeight(ctx)
 	if err == nil {

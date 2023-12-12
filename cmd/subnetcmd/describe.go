@@ -1,9 +1,10 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 	"os"
 	"strconv"
@@ -12,9 +13,15 @@ import (
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/luxgo/ids"
 	"github.com/luxdefi/subnet-evm/core"
 	"github.com/luxdefi/subnet-evm/params"
+	"github.com/luxdefi/subnet-evm/precompile/contracts/deployerallowlist"
+	"github.com/luxdefi/subnet-evm/precompile/contracts/feemanager"
+	"github.com/luxdefi/subnet-evm/precompile/contracts/nativeminter"
+	"github.com/luxdefi/subnet-evm/precompile/contracts/rewardmanager"
+	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -22,7 +29,7 @@ import (
 
 var printGenesisOnly bool
 
-// avalanche subnet describe
+// lux subnet describe
 func newDescribeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe [subnetName]",
@@ -43,13 +50,16 @@ flag, the command instead prints out the raw genesis file.`,
 	return cmd
 }
 
-func printGenesis(subnetName string) error {
+func printGenesis(sc models.Sidecar, subnetName string) error {
 	genesisFile := app.GetGenesisPath(subnetName)
 	gen, err := os.ReadFile(genesisFile)
 	if err != nil {
 		return err
 	}
 	fmt.Println(string(gen))
+	if sc.SubnetEVMMainnetChainID != 0 {
+		fmt.Printf("Genesis is set to be deployed to Mainnet with Chain Id %d\n", sc.SubnetEVMMainnetChainID)
+	}
 	return nil
 }
 
@@ -71,6 +81,7 @@ func printDetails(genesis core.Genesis, sc models.Sidecar) {
 
 	table.Append([]string{"Subnet Name", sc.Subnet})
 	table.Append([]string{"ChainID", genesis.Config.ChainID.String()})
+	table.Append([]string{"Mainnet ChainID", fmt.Sprint(sc.SubnetEVMMainnetChainID)})
 	table.Append([]string{"Token Name", app.GetTokenName(sc.Subnet)})
 	table.Append([]string{"VM Version", sc.VMVersion})
 	if sc.ImportedVMID != "" {
@@ -173,49 +184,73 @@ func printPrecompileTable(genesis core.Genesis) {
 	fmt.Print(art)
 
 	table := tablewriter.NewWriter(os.Stdout)
-	header := []string{"Precompile", "Admin"}
+	header := []string{"Precompile", "Admin", "Enabled"}
 	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
+	table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2})
 	table.SetRowLine(true)
 
 	precompileSet := false
 
 	// Native Minting
-	if genesis.Config.ContractNativeMinterConfig != nil {
-		for _, address := range genesis.Config.ContractNativeMinterConfig.AllowListAdmins {
-			table.Append([]string{"Native Minter", address.Hex()})
-			precompileSet = true
-		}
+	if genesis.Config.GenesisPrecompiles[nativeminter.ConfigKey] != nil {
+		cfg := genesis.Config.GenesisPrecompiles[nativeminter.ConfigKey].(*nativeminter.Config)
+		appendToAddressTable(table, "Native Minter", cfg.AdminAddresses, cfg.EnabledAddresses)
+		precompileSet = true
 	}
 
 	// Contract allow list
-	if genesis.Config.ContractDeployerAllowListConfig != nil {
-		for _, address := range genesis.Config.ContractDeployerAllowListConfig.AllowListAdmins {
-			table.Append([]string{"Contract Allow list", address.Hex()})
-			precompileSet = true
-		}
+	if genesis.Config.GenesisPrecompiles[deployerallowlist.ConfigKey] != nil {
+		cfg := genesis.Config.GenesisPrecompiles[deployerallowlist.ConfigKey].(*deployerallowlist.Config)
+		appendToAddressTable(table, "Contract Allow List", cfg.AdminAddresses, cfg.EnabledAddresses)
+		precompileSet = true
 	}
 
 	// TX allow list
-	if genesis.Config.TxAllowListConfig != nil {
-		for _, address := range genesis.Config.TxAllowListConfig.AllowListAdmins {
-			table.Append([]string{"Tx Allow list", address.Hex()})
-			precompileSet = true
-		}
+	if genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
+		cfg := genesis.Config.GenesisPrecompiles[txallowlist.Module.ConfigKey].(*txallowlist.Config)
+		appendToAddressTable(table, "Tx Allow List", cfg.AdminAddresses, cfg.EnabledAddresses)
+		precompileSet = true
 	}
 
 	// Fee config allow list
-	if genesis.Config.FeeManagerConfig != nil {
-		for _, address := range genesis.Config.FeeManagerConfig.AllowListAdmins {
-			table.Append([]string{"Fee Config Allow list", address.Hex()})
-			precompileSet = true
-		}
+	if genesis.Config.GenesisPrecompiles[feemanager.ConfigKey] != nil {
+		cfg := genesis.Config.GenesisPrecompiles[feemanager.ConfigKey].(*feemanager.Config)
+		appendToAddressTable(table, "Fee Config Allow List", cfg.AdminAddresses, cfg.EnabledAddresses)
+		precompileSet = true
+	}
+
+	// Reward config allow list
+	if genesis.Config.GenesisPrecompiles[rewardmanager.ConfigKey] != nil {
+		cfg := genesis.Config.GenesisPrecompiles[rewardmanager.ConfigKey].(*rewardmanager.Config)
+		appendToAddressTable(table, "Reward Manager Allow List", cfg.AdminAddresses, cfg.EnabledAddresses)
+		precompileSet = true
 	}
 
 	if precompileSet {
 		table.Render()
 	} else {
 		ux.Logger.PrintToUser("No precompiles set")
+	}
+}
+
+func appendToAddressTable(
+	table *tablewriter.Table,
+	label string,
+	adminAddresses []common.Address,
+	enabledAddresses []common.Address,
+) {
+	admins := len(adminAddresses)
+	enabled := len(enabledAddresses)
+	max := int(math.Max(float64(admins), float64(enabled)))
+	for i := 0; i < max; i++ {
+		var admin, enable string
+		if len(adminAddresses) >= i+1 && adminAddresses[i] != (common.Address{}) {
+			admin = adminAddresses[i].Hex()
+		}
+		if len(enabledAddresses) >= i+1 && enabledAddresses[i] != (common.Address{}) {
+			enable = enabledAddresses[i].Hex()
+		}
+		table.Append([]string{label, admin, enable})
 	}
 }
 
@@ -241,22 +276,22 @@ func readGenesis(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("The provided subnet name %q does not exist", subnetName)
 		return nil
 	}
-	if printGenesisOnly {
-		return printGenesis(subnetName)
-	}
-	// read in sidecar
 	sc, err := app.LoadSidecar(subnetName)
 	if err != nil {
 		return err
 	}
-
-	switch sc.VM {
-	case models.SubnetEvm:
-		return describeSubnetEvmGenesis(sc)
-	default:
-		app.Log.Warn("Unknown genesis format", zap.Any("vm-type", sc.VM))
-		ux.Logger.PrintToUser("Printing genesis")
-		err = printGenesis(subnetName)
+	if printGenesisOnly {
+		return printGenesis(sc, subnetName)
 	}
-	return err
+
+	isEVM, err := hasSubnetEVMGenesis(subnetName)
+	if err != nil {
+		return err
+	}
+	if isEVM {
+		return describeSubnetEvmGenesis(sc)
+	}
+	app.Log.Warn("Unknown genesis format", zap.Any("vm-type", sc.VM))
+	ux.Logger.PrintToUser("Printing genesis")
+	return printGenesis(sc, subnetName)
 }

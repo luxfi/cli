@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package vm
 
@@ -95,7 +95,7 @@ func getMagic(app *application.Lux) (uint64, statemachine.StateDirection, error)
 
 func getDefaultGenesisValues(app *application.Lux) (uint64, string, core.GenesisAlloc, error) {
 	version, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-		constants.AvaLabsOrg,
+		constants.LuxDeFiOrg,
 		constants.SpacesVMRepoName,
 	))
 	if err != nil {

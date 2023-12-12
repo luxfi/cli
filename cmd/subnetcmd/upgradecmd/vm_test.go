@@ -1,11 +1,20 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package upgradecmd
 
 import (
+	"os"
 	"testing"
 
+	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/config"
+	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxdefi/cli/pkg/utils"
+	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 
@@ -211,7 +220,7 @@ func TestAtMostOneVersionSelected(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			useLatest = tt.useLatest
 			targetVersion = tt.version
-			useBinary = tt.binary
+			binaryPathArg = tt.binary
 
 			accepted := atMostOneVersionSelected()
 			if tt.valid {
@@ -273,4 +282,62 @@ func TestAtMostOneAutomationSelected(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUpdateToCustomBin(t *testing.T) {
+	assert := require.New(t)
+	testDir := t.TempDir()
+
+	subnetName := "testSubnet"
+	sc := models.Sidecar{
+		Name:       subnetName,
+		VM:         models.SubnetEvm,
+		VMVersion:  "v3.0.0",
+		RPCVersion: 20,
+		Subnet:     subnetName,
+	}
+	networkToUpgrade := futureDeployment
+
+	factory := logging.NewFactory(logging.Config{})
+	log, err := factory.Make("lux")
+	assert.NoError(err)
+
+	// create the user facing logger as a global var
+	ux.NewUserLog(log, os.Stdout)
+
+	app = &application.Lux{}
+	app.Setup(testDir, log, config.New(), prompts.NewPrompter(), application.NewDownloader())
+
+	err = os.MkdirAll(app.GetSubnetDir(), constants.DefaultPerms755)
+	assert.NoError(err)
+
+	err = app.CreateSidecar(&sc)
+	assert.NoError(err)
+
+	err = os.MkdirAll(app.GetCustomVMDir(), constants.DefaultPerms755)
+	assert.NoError(err)
+
+	binaryPath := "../../../tests/assets/dummyVmBinary.bin"
+
+	assert.FileExists(binaryPath)
+
+	err = updateToCustomBin(sc, networkToUpgrade, binaryPath, false)
+	assert.NoError(err)
+
+	// check new binary exists and matches
+	placedBinaryPath := app.GetCustomVMPath(subnetName)
+	assert.FileExists(placedBinaryPath)
+	expectedHash, err := utils.GetSHA256FromDisk(binaryPath)
+	assert.NoError(err)
+
+	actualHash, err := utils.GetSHA256FromDisk(placedBinaryPath)
+	assert.NoError(err)
+
+	assert.Equal(expectedHash, actualHash)
+
+	// check sidecar
+	diskSC, err := app.LoadSidecar(subnetName)
+	assert.NoError(err)
+	assert.Equal(models.VMTypeFromString(models.CustomVM), diskSC.VM)
+	assert.Empty(diskSC.VMVersion)
 }

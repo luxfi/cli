@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -11,8 +11,6 @@ import (
 )
 
 const (
-	GasLimit = 8_000_000
-
 	defaultEvmAirdropAmount = "1000000000000000000000000"
 	goBackMsg               = "Go back to previous step"
 )
@@ -39,5 +37,5 @@ var (
 	PrefundedEwoqAddress = common.HexToAddress("0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC")
 	PrefundedEwoqPrivate = "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027"
 
-	oneAvax = new(big.Int).SetUint64(1000000000000000000)
+	oneLux = new(big.Int).SetUint64(1000000000000000000)
 )

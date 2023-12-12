@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -10,19 +10,19 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/luxdefi/cli/internal/mocks"
 	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxdefi/cli/pkg/binutils"
 	"github.com/luxdefi/cli/pkg/config"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/netrunner/client"
 	"github.com/luxdefi/netrunner/rpcpb"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/luxgo/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -37,10 +37,11 @@ var (
 	testVMID      = "tGBrM2SXkAdNsqzb3SaFZZWMNdzjjFEUKteheTa4dhUwnfQyu" // VM ID of "test"
 	testChainName = "test"
 
-	fakeHealthResponse = &rpcpb.HealthResponse{
+	fakeWaitForHealthyResponse = &rpcpb.WaitForHealthyResponse{
 		ClusterInfo: &rpcpb.ClusterInfo{
 			Healthy:             true, // currently actually not checked, should it, if CustomVMsHealthy already is?
 			CustomChainsHealthy: true,
+			NodeNames:           []string{"testNode1", "testNode2"},
 			NodeInfos: map[string]*rpcpb.NodeInfo{
 				"testNode1": {
 					Name: "testNode1",
@@ -59,7 +60,10 @@ var (
 					ChainId: testBlockChainID2,
 				},
 			},
-			Subnets: []string{testSubnetID1, testSubnetID2},
+			Subnets: map[string]*rpcpb.SubnetInfo{
+				testSubnetID1: {},
+				testSubnetID2: {},
+			},
 		},
 	}
 )
@@ -89,15 +93,15 @@ func TestDeployToLocal(t *testing.T) {
 	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetNodeBinDir(), "node-"+avagoVersion)
+	binDir := filepath.Join(app.GetLuxgoBinDir(), "luxgo-"+avagoVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}
 	err = os.MkdirAll(filepath.Join(binDir, "plugins"), perms.ReadWriteExecute)
 	require.NoError(err)
 
-	// create a dummy node file, deploy will check it exists
-	f, err := os.Create(filepath.Join(binDir, "node"))
+	// create a dummy luxgo file, deploy will check it exists
+	f, err := os.Create(filepath.Join(binDir, "luxgo"))
 	require.NoError(err)
 	defer func() {
 		_ = f.Close()
@@ -110,14 +114,13 @@ func TestDeployToLocal(t *testing.T) {
 	binDownloader.On("InstallVM", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	testDeployer := &LocalDeployer{
-		procChecker:         procChecker,
-		binChecker:          binChecker,
-		getClientFunc:       getTestClientFunc,
-		binaryDownloader:    binDownloader,
-		healthCheckInterval: 500 * time.Millisecond,
-		app:                 app,
-		setDefaultSnapshot:  fakeSetDefaultSnapshot,
-		avagoVersion:        avagoVersion,
+		procChecker:        procChecker,
+		binChecker:         binChecker,
+		getClientFunc:      getTestClientFunc,
+		binaryDownloader:   binDownloader,
+		app:                app,
+		setDefaultSnapshot: fakeSetDefaultSnapshot,
+		avagoVersion:       avagoVersion,
 	}
 
 	// create a simple genesis for the test
@@ -161,7 +164,7 @@ func TestGetLatestAvagoVersion(t *testing.T) {
 	require.Equal(v, testVersion)
 }
 
-func getTestClientFunc() (client.Client, error) {
+func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 	c := &mocks.Client{}
 	fakeLoadSnapshotResponse := &rpcpb.LoadSnapshotResponse{}
 	fakeSaveSnapshotResponse := &rpcpb.SaveSnapshotResponse{}
@@ -176,18 +179,18 @@ func getTestClientFunc() (client.Client, error) {
 	// otherwise the doDeploy function "aborts" when checking if the subnet had already been deployed.
 	// Afterwards, we can set the actual VM ID so that the test returns an expected subnet ID...
 
-	// Return a fake health response twice
-	c.On("Health", mock.Anything).Return(fakeHealthResponse, nil).Twice()
+	// Return a fake wait for healthy response twice
+	c.On("WaitForHealthy", mock.Anything).Return(fakeWaitForHealthyResponse, nil).Twice()
 	// Afterwards, change the VmId so that TestDeployToLocal has the correct ID to check
-	alteredFakeResponse := proto.Clone(fakeHealthResponse).(*rpcpb.HealthResponse) // new(rpcpb.HealthResponse)
+	alteredFakeResponse := proto.Clone(fakeWaitForHealthyResponse).(*rpcpb.WaitForHealthyResponse) // new(rpcpb.WaitForHealthyResponse)
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].VmId = testVMID
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].ChainName = testChainName
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain1"].ChainName = "bchain1"
-	c.On("Health", mock.Anything).Return(alteredFakeResponse, nil)
+	c.On("WaitForHealthy", mock.Anything).Return(alteredFakeResponse, nil)
 	c.On("Close").Return(nil)
 	return c, nil
 }
 
-func fakeSetDefaultSnapshot(string, bool) error {
+func fakeSetDefaultSnapshot(string, bool, bool) error {
 	return nil
 }

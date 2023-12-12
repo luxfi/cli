@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -72,9 +72,11 @@ func getAllocation(
 
 		amount = amount.Mul(amount, multiplier)
 
-		account := core.GenesisAccount{
-			Balance: amount,
+		account, ok := allocation[addressHex]
+		if !ok {
+			account.Balance = big.NewInt(0)
 		}
+		account.Balance.Add(account.Balance, amount)
 
 		allocation[addressHex] = account
 

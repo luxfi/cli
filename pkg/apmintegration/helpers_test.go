@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package apmintegration
@@ -21,19 +21,19 @@ func TestGetGithubOrg(t *testing.T) {
 	tests := []test{
 		{
 			name:        "Success",
-			url:         "https://github.com/luxdefi/avalanche-plugins-core.git",
+			url:         "https://github.com/luxdefi/plugins-core.git",
 			expectedOrg: "luxdefi",
 			expectedErr: false,
 		},
 		{
 			name:        "Success",
-			url:         "https://github.com/luxdefi/avalanche-plugins-core",
+			url:         "https://github.com/luxdefi/plugins-core",
 			expectedOrg: "luxdefi",
 			expectedErr: false,
 		},
 		{
 			name:        "No org",
-			url:         "https://github.com/avalanche-plugins-core",
+			url:         "https://github.com/plugins-core",
 			expectedOrg: "",
 			expectedErr: true,
 		},
@@ -72,19 +72,19 @@ func TestGetGithubRepo(t *testing.T) {
 	tests := []test{
 		{
 			name:         "Success",
-			url:          "https://github.com/luxdefi/avalanche-plugins-core.git",
-			expectedRepo: "avalanche-plugins-core",
+			url:          "https://github.com/luxdefi/plugins-core.git",
+			expectedRepo: "plugins-core",
 			expectedErr:  false,
 		},
 		{
 			name:         "Success",
-			url:          "https://github.com/luxdefi/avalanche-plugins-core",
-			expectedRepo: "avalanche-plugins-core",
+			url:          "https://github.com/luxdefi/plugins-core",
+			expectedRepo: "plugins-core",
 			expectedErr:  false,
 		},
 		{
 			name:         "No org",
-			url:          "https://github.com/avalanche-plugins-core",
+			url:          "https://github.com/plugins-core",
 			expectedRepo: "",
 			expectedErr:  true,
 		},
@@ -123,19 +123,19 @@ func TestGetAlias(t *testing.T) {
 	tests := []test{
 		{
 			name:          "Success",
-			url:           "https://github.com/luxdefi/avalanche-plugins-core.git",
-			expectedAlias: "luxdefi/avalanche-plugins-core",
+			url:           "https://github.com/luxdefi/plugins-core.git",
+			expectedAlias: "luxdefi/plugins-core",
 			expectedErr:   false,
 		},
 		{
 			name:          "Success",
-			url:           "https://github.com/luxdefi/avalanche-plugins-core",
-			expectedAlias: "luxdefi/avalanche-plugins-core",
+			url:           "https://github.com/luxdefi/plugins-core",
+			expectedAlias: "luxdefi/plugins-core",
 			expectedErr:   false,
 		},
 		{
 			name:          "No org",
-			url:           "https://github.com/avalanche-plugins-core",
+			url:           "https://github.com/plugins-core",
 			expectedAlias: "",
 			expectedErr:   true,
 		},
@@ -166,8 +166,8 @@ func TestGetAlias(t *testing.T) {
 func TestSplitKey(t *testing.T) {
 	require := require.New(t)
 
-	key := "luxdefi/avalanche-plugins-core:wagmi"
-	expectedAlias := "luxdefi/avalanche-plugins-core"
+	key := "luxdefi/plugins-core:wagmi"
+	expectedAlias := "luxdefi/plugins-core"
 	expectedSubnet := "wagmi"
 
 	alias, subnet, err := splitKey(key)
@@ -179,7 +179,7 @@ func TestSplitKey(t *testing.T) {
 func TestSplitKey_Errpr(t *testing.T) {
 	require := require.New(t)
 
-	key := "luxdefi/avalanche-plugins-core_wagmi"
+	key := "luxdefi/plugins-core_wagmi"
 
 	_, _, err := splitKey(key)
 	require.ErrorContains(err, "invalid subnet key:")

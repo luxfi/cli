@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -14,7 +14,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/binutils"
@@ -27,48 +28,53 @@ import (
 	"github.com/luxdefi/netrunner/rpcpb"
 	"github.com/luxdefi/netrunner/server"
 	anrutils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/storage"
+	"github.com/luxdefi/luxgo/genesis"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/crypto/keychain"
+	"github.com/luxdefi/luxgo/utils/set"
+	"github.com/luxdefi/luxgo/utils/storage"
+	"github.com/luxdefi/luxgo/vms/components/lux"
+	"github.com/luxdefi/luxgo/vms/components/verify"
+	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/luxgo/vms/platformvm/reward"
+	"github.com/luxdefi/luxgo/vms/platformvm/signer"
+	"github.com/luxdefi/luxgo/vms/platformvm/txs"
+	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/luxgo/wallet/subnet/primary"
+	"github.com/luxdefi/luxgo/wallet/subnet/primary/common"
 	"github.com/luxdefi/coreth/params"
-	spacesvmchain "github.com/luxdefi/spacesvm/chain"
 	"github.com/luxdefi/subnet-evm/core"
 	"go.uber.org/zap"
 )
 
-const (
-	WriteReadReadPerms = 0o644
-)
-
 type LocalDeployer struct {
-	procChecker         binutils.ProcessChecker
-	binChecker          binutils.BinaryChecker
-	getClientFunc       getGRPCClientFunc
-	binaryDownloader    binutils.PluginBinaryDownloader
-	healthCheckInterval time.Duration
-	app                 *application.Lux
-	backendStartedHere  bool
-	setDefaultSnapshot  setDefaultSnapshotFunc
-	avagoVersion        string
-	vmBin               string
+	procChecker        binutils.ProcessChecker
+	binChecker         binutils.BinaryChecker
+	getClientFunc      getGRPCClientFunc
+	binaryDownloader   binutils.PluginBinaryDownloader
+	app                *application.Lux
+	backendStartedHere bool
+	setDefaultSnapshot setDefaultSnapshotFunc
+	avagoVersion       string
+	vmBin              string
 }
 
 func NewLocalDeployer(app *application.Lux, avagoVersion string, vmBin string) *LocalDeployer {
 	return &LocalDeployer{
-		procChecker:         binutils.NewProcessChecker(),
-		binChecker:          binutils.NewBinaryChecker(),
-		getClientFunc:       binutils.NewGRPCClient,
-		binaryDownloader:    binutils.NewPluginBinaryDownloader(app),
-		healthCheckInterval: 100 * time.Millisecond,
-		app:                 app,
-		setDefaultSnapshot:  SetDefaultSnapshot,
-		avagoVersion:        avagoVersion,
-		vmBin:               vmBin,
+		procChecker:        binutils.NewProcessChecker(),
+		binChecker:         binutils.NewBinaryChecker(),
+		getClientFunc:      binutils.NewGRPCClient,
+		binaryDownloader:   binutils.NewPluginBinaryDownloader(app),
+		app:                app,
+		setDefaultSnapshot: SetDefaultSnapshot,
+		avagoVersion:       avagoVersion,
+		vmBin:              vmBin,
 	}
 }
 
-type getGRPCClientFunc func() (client.Client, error)
+type getGRPCClientFunc func(...binutils.GRPCClientOpOption) (client.Client, error)
 
-type setDefaultSnapshotFunc func(string, bool) error
+type setDefaultSnapshotFunc func(string, bool, bool) error
 
 // DeployToLocalNetwork does the heavy lifting:
 // * it checks the gRPC is running, if not, it starts it
@@ -78,6 +84,228 @@ func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, 
 		return ids.Empty, ids.Empty, err
 	}
 	return d.doDeploy(chain, chainGenesis, genesisPath)
+}
+
+func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
+	xWallet := wallet.X()
+	owner := &secp256k1fx.OutputOwners{
+		Threshold: 1,
+		Addrs: []ids.ShortID{
+			genesis.EWOQKey.PublicKey().Address(),
+		},
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
+	subnetAssetTx, err := xWallet.IssueCreateAssetTx(
+		tokenName,
+		tokenSymbol,
+		9, // denomination for UI purposes only in explorer
+		map[uint32][]verify.State{
+			0: {
+				&secp256k1fx.TransferOutput{
+					Amt:          maxSupply,
+					OutputOwners: *owner,
+				},
+			},
+		},
+		common.WithContext(ctx),
+	)
+	defer cancel()
+	if err != nil {
+		return ids.Empty, err
+	}
+	return subnetAssetTx.ID(), nil
+}
+
+func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, subnetAssetID ids.ID, maxSupply uint64) error {
+	xWallet := wallet.X()
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
+
+	_, err := xWallet.IssueExportTx(
+		ids.Empty,
+		[]*lux.TransferableOutput{
+			{
+				Asset: lux.Asset{
+					ID: subnetAssetID,
+				},
+				Out: &secp256k1fx.TransferOutput{
+					Amt:          maxSupply,
+					OutputOwners: *owner,
+				},
+			},
+		},
+		common.WithContext(ctx),
+	)
+	defer cancel()
+	return err
+}
+
+func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) error {
+	xWallet := wallet.X()
+	pWallet := wallet.P()
+	xChainID := xWallet.BlockchainID()
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
+	_, err := pWallet.IssueImportTx(
+		xChainID,
+		owner,
+		common.WithContext(ctx),
+	)
+	defer cancel()
+	return err
+}
+
+func IssueTransformSubnetTx(
+	elasticSubnetConfig models.ElasticSubnetConfig,
+	kc keychain.Keychain,
+	subnetID ids.ID,
+	tokenName string,
+	tokenSymbol string,
+	maxSupply uint64,
+) (ids.ID, ids.ID, error) {
+	ctx := context.Background()
+	api := constants.LocalAPIEndpoint
+	wallet, err := primary.MakeWallet(
+		ctx,
+		&primary.WalletConfig{
+			URI:              api,
+			LUXKeychain:     kc,
+			EthKeychain:      secp256k1fx.NewKeychain(),
+			PChainTxsToFetch: set.Of(subnetID),
+		},
+	)
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+	subnetAssetID, err := getAssetID(wallet, tokenName, tokenSymbol, maxSupply)
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+	owner := &secp256k1fx.OutputOwners{
+		Threshold: 1,
+		Addrs: []ids.ShortID{
+			genesis.EWOQKey.PublicKey().Address(),
+		},
+	}
+	err = exportToPChain(wallet, owner, subnetAssetID, maxSupply)
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+	err = importFromXChain(wallet, owner)
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
+	transformSubnetTx, err := wallet.P().IssueTransformSubnetTx(elasticSubnetConfig.SubnetID, subnetAssetID,
+		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
+		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
+		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
+		elasticSubnetConfig.MinDelegatorStake, elasticSubnetConfig.MaxValidatorWeightFactor, elasticSubnetConfig.UptimeRequirement,
+		common.WithContext(ctx),
+	)
+	defer cancel()
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+	return transformSubnetTx.ID(), subnetAssetID, err
+}
+
+func IssueAddPermissionlessValidatorTx(
+	kc keychain.Keychain,
+	subnetID ids.ID,
+	nodeID ids.NodeID,
+	stakeAmount uint64,
+	assetID ids.ID,
+	startTime uint64,
+	endTime uint64,
+) (ids.ID, error) {
+	ctx := context.Background()
+	api := constants.LocalAPIEndpoint
+	wallet, err := primary.MakeWallet(
+		ctx,
+		&primary.WalletConfig{
+			URI:              api,
+			LUXKeychain:     kc,
+			EthKeychain:      secp256k1fx.NewKeychain(),
+			PChainTxsToFetch: set.Of(subnetID),
+		},
+	)
+	if err != nil {
+		return ids.Empty, err
+	}
+	owner := &secp256k1fx.OutputOwners{
+		Threshold: 1,
+		Addrs: []ids.ShortID{
+			genesis.EWOQKey.PublicKey().Address(),
+		},
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
+	tx, err := wallet.P().IssueAddPermissionlessValidatorTx(
+		&txs.SubnetValidator{
+			Validator: txs.Validator{
+				NodeID: nodeID,
+				Start:  startTime,
+				End:    endTime,
+				Wght:   stakeAmount,
+			},
+			Subnet: subnetID,
+		},
+		&signer.Empty{},
+		assetID,
+		owner,
+		owner,
+		reward.PercentDenominator,
+		common.WithContext(ctx),
+	)
+	defer cancel()
+	if err != nil {
+		return ids.Empty, err
+	}
+	return tx.ID(), err
+}
+
+func IssueAddPermissionlessDelegatorTx(
+	kc keychain.Keychain,
+	subnetID ids.ID,
+	nodeID ids.NodeID,
+	stakeAmount uint64,
+	assetID ids.ID,
+	startTime uint64,
+	endTime uint64,
+) (ids.ID, error) {
+	ctx := context.Background()
+	api := constants.LocalAPIEndpoint
+	wallet, err := primary.MakeWallet(
+		ctx,
+		&primary.WalletConfig{
+			URI:              api,
+			LUXKeychain:     kc,
+			EthKeychain:      secp256k1fx.NewKeychain(),
+			PChainTxsToFetch: set.Of(subnetID),
+		},
+	)
+	if err != nil {
+		return ids.Empty, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
+	tx, err := wallet.P().IssueAddPermissionlessDelegatorTx(
+		&txs.SubnetValidator{
+			Validator: txs.Validator{
+				NodeID: nodeID,
+				Start:  startTime,
+				End:    endTime,
+				Wght:   stakeAmount,
+			},
+			Subnet: subnetID,
+		},
+		assetID,
+		&secp256k1fx.OutputOwners{},
+		common.WithContext(ctx),
+	)
+	defer cancel()
+	if err != nil {
+		return ids.Empty, err
+	}
+	return tx.ID(), err
 }
 
 func (d *LocalDeployer) StartServer() error {
@@ -93,6 +321,15 @@ func (d *LocalDeployer) StartServer() error {
 		d.backendStartedHere = true
 	}
 	return nil
+}
+
+func GetCurrentSupply(subnetID ids.ID) error {
+	api := constants.LocalAPIEndpoint
+	pClient := platformvm.NewClient(api)
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
+	_, _, err := pClient.GetCurrentSupply(ctx, subnetID)
+	return err
 }
 
 // BackendStartedHere returns true if the backend was started by this run,
@@ -113,9 +350,16 @@ func (d *LocalDeployer) BackendStartedHere() bool {
 //   - waits completion of operation
 //   - show status
 func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
-	avalancheGoBinPath, pluginDir, err := d.SetupLocalEnv()
+	luxGoBinPath, err := d.SetupLocalEnv()
 	if err != nil {
 		return ids.Empty, ids.Empty, err
+	}
+
+	backendLogFile, err := binutils.GetBackendLogFile(d.app)
+	var backendLogDir string
+	if err == nil {
+		// TODO should we do something if there _was_ an error?
+		backendLogDir = filepath.Dir(backendLogFile)
 	}
 
 	cli, err := d.getClientFunc()
@@ -126,13 +370,22 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 
 	runDir := d.app.GetRunDir()
 
-	ctx := binutils.GetAsyncContext()
+	ctx, cancel := utils.GetANRContext()
+	defer cancel()
 
-	// check for network and get VM info
+	// loading sidecar before it's needed so we catch any error early
+	sc, err := d.app.LoadSidecar(chain)
+	if err != nil {
+		return ids.Empty, ids.Empty, fmt.Errorf("failed to load sidecar: %w", err)
+	}
+
+	// check for network status
 	networkBooted := true
-	clusterInfo, err := d.WaitForHealthy(ctx, cli, d.healthCheckInterval)
+	clusterInfo, err := WaitForHealthy(ctx, cli)
+	rootDir := clusterInfo.GetRootDataDir()
 	if err != nil {
 		if !server.IsServerError(err, server.ErrNotBootstrapped) {
+			utils.FindErrorLogs(rootDir, backendLogDir)
 			return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
 		} else {
 			networkBooted = false
@@ -145,29 +398,29 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	}
 	d.app.Log.Debug("this VM will get ID", zap.String("vm-id", chainVMID.String()))
 
+	if !networkBooted {
+		if err := d.startNetwork(ctx, cli, luxGoBinPath, runDir); err != nil {
+			utils.FindErrorLogs(rootDir, backendLogDir)
+			return ids.Empty, ids.Empty, err
+		}
+	}
+
+	// get VM info
+	clusterInfo, err = WaitForHealthy(ctx, cli)
+	if err != nil {
+		utils.FindErrorLogs(clusterInfo.GetRootDataDir(), backendLogDir)
+		return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
+	}
+	rootDir = clusterInfo.GetRootDataDir()
+
 	if alreadyDeployed(chainVMID, clusterInfo) {
 		ux.Logger.PrintToUser("Subnet %s has already been deployed", chain)
 		return ids.Empty, ids.Empty, nil
 	}
 
-	if err := d.installPlugin(chainVMID, d.vmBin, pluginDir); err != nil {
-		return ids.Empty, ids.Empty, err
-	}
-
-	ux.Logger.PrintToUser("VMs ready.")
-
-	if !networkBooted {
-		if err := d.startNetwork(ctx, cli, avalancheGoBinPath, pluginDir, runDir); err != nil {
-			return ids.Empty, ids.Empty, err
-		}
-	}
-
-	clusterInfo, err = d.WaitForHealthy(ctx, cli, d.healthCheckInterval)
-	if err != nil {
-		return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
-	}
-	subnetIDs := clusterInfo.Subnets
 	numBlockchains := len(clusterInfo.CustomChains)
+
+	subnetIDs := maps.Keys(clusterInfo.Subnets)
 
 	// in order to make subnet deploy faster, a set of validated subnet IDs is preloaded
 	// in the bootstrap snapshot
@@ -186,6 +439,8 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		chainConfigFile        = filepath.Join(d.app.GetSubnetDir(), chain, constants.ChainConfigFileName)
 		perNodeChainConfig     string
 		perNodeChainConfigFile = filepath.Join(d.app.GetSubnetDir(), chain, constants.PerNodeChainConfigFileName)
+		subnetConfig           string
+		subnetConfigFile       = filepath.Join(d.app.GetSubnetDir(), chain, constants.SubnetConfigFileName)
 	)
 	if _, err := os.Stat(chainConfigFile); err == nil {
 		// currently the ANR only accepts the file as a path, not its content
@@ -194,14 +449,30 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	if _, err := os.Stat(perNodeChainConfigFile); err == nil {
 		perNodeChainConfig = perNodeChainConfigFile
 	}
+	if _, err := os.Stat(subnetConfigFile); err == nil {
+		subnetConfig = subnetConfigFile
+	}
+
+	// install the plugin binary for the new VM
+	if err := d.installPlugin(chainVMID, d.vmBin); err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+
+	fmt.Println()
+	ux.Logger.PrintToUser("Deploying Blockchain. Wait until network acknowledges...")
+
 	// create a new blockchain on the already started network, associated to
 	// the given VM ID, genesis, and available subnet ID
 	blockchainSpecs := []*rpcpb.BlockchainSpec{
 		{
-			VmName:             chain,
-			Genesis:            genesisPath,
-			SubnetId:           &subnetIDStr,
+			VmName:   chain,
+			Genesis:  genesisPath,
+			SubnetId: &subnetIDStr,
+			SubnetSpec: &rpcpb.SubnetSpec{
+				SubnetConfig: subnetConfig,
+			},
 			ChainConfig:        chainConfig,
+			BlockchainAlias:    chain,
 			PerNodeChainConfig: perNodeChainConfig,
 		},
 	}
@@ -210,44 +481,39 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		blockchainSpecs,
 	)
 	if err != nil {
+		utils.FindErrorLogs(rootDir, backendLogDir)
+		pluginRemoveErr := d.removeInstalledPlugin(chainVMID)
+		if pluginRemoveErr != nil {
+			ux.Logger.PrintToUser("Failed to remove plugin binary: %s", pluginRemoveErr)
+		}
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to deploy blockchain: %w", err)
 	}
+	rootDir = clusterInfo.GetRootDataDir()
 
 	d.app.Log.Debug(deployBlockchainsInfo.String())
 
-	fmt.Println()
-	ux.Logger.PrintToUser("Blockchain has been deployed. Wait until network acknowledges...")
-
-	clusterInfo, err = d.WaitForHealthy(ctx, cli, d.healthCheckInterval)
+	clusterInfo, err = WaitForHealthy(ctx, cli)
 	if err != nil {
+		utils.FindErrorLogs(rootDir, backendLogDir)
+		pluginRemoveErr := d.removeInstalledPlugin(chainVMID)
+		if pluginRemoveErr != nil {
+			ux.Logger.PrintToUser("Failed to remove plugin binary: %s", pluginRemoveErr)
+		}
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
 	}
 
-	endpoints := GetEndpoints(clusterInfo)
+	endpoint := GetFirstEndpoint(clusterInfo, chain)
 
 	fmt.Println()
-	ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
+	ux.Logger.PrintToUser("Blockchain ready to use. Local network node endpoints:")
 	ux.PrintTableEndpoints(clusterInfo)
 	fmt.Println()
 
-	firstURL := endpoints[0]
-
 	ux.Logger.PrintToUser("Browser Extension connection details (any node URL from above works):")
-	ux.Logger.PrintToUser("RPC URL:          %s", firstURL[strings.LastIndex(firstURL, "http"):])
+	ux.Logger.PrintToUser("RPC URL:          %s", endpoint[strings.LastIndex(endpoint, "http"):])
 
-	// extra ux based on vm type
-	sc, err := d.app.LoadSidecar(chain)
-	if err != nil {
-		return ids.Empty, ids.Empty, fmt.Errorf("failed to load sidecar: %w", err)
-	}
-	switch sc.VM {
-	case models.SubnetEvm:
+	if sc.VM == models.SubnetEvm {
 		if err := d.printExtraEvmInfo(chain, chainGenesis); err != nil {
-			// not supposed to happen due to genesis pre validation
-			return ids.Empty, ids.Empty, nil
-		}
-	case models.SpacesVM:
-		if err := d.printExtraSpacesVMInfo(chainGenesis); err != nil {
 			// not supposed to happen due to genesis pre validation
 			return ids.Empty, ids.Empty, nil
 		}
@@ -262,24 +528,6 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		}
 	}
 	return subnetID, blockchainID, nil
-}
-
-func (*LocalDeployer) printExtraSpacesVMInfo(chainGenesis []byte) error {
-	var genesis spacesvmchain.Genesis
-	if err := json.Unmarshal(chainGenesis, &genesis); err != nil {
-		return fmt.Errorf("failed to unmarshall genesis: %w", err)
-	}
-	for _, alloc := range genesis.CustomAllocation {
-		address := alloc.Address
-		amount := alloc.Balance
-		amountStr := fmt.Sprintf("%d", amount)
-		if address == vm.PrefundedEwoqAddress {
-			ux.Logger.PrintToUser("Funded address:   %s with %s - private key: %s", address, amountStr, vm.PrefundedEwoqPrivate)
-		} else {
-			ux.Logger.PrintToUser("Funded address:   %s with %s", address, amountStr)
-		}
-	}
-	return nil
 }
 
 func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) error {
@@ -304,94 +552,80 @@ func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) err
 
 // SetupLocalEnv also does some heavy lifting:
 // * sets up default snapshot if not installed
-// * checks if node is installed in the local binary path
+// * checks if luxgo is installed in the local binary path
 // * if not, it downloads it and installs it (os - and archive dependent)
-// * returns the location of the node path and plugin
-func (d *LocalDeployer) SetupLocalEnv() (string, string, error) {
-	err := d.setDefaultSnapshot(d.app.GetSnapshotsDir(), false)
+// * returns the location of the luxgo path
+func (d *LocalDeployer) SetupLocalEnv() (string, error) {
+	configSingleNodeEnabled := d.app.Conf.GetConfigBoolValue(constants.ConfigSingleNodeEnabledKey)
+	err := d.setDefaultSnapshot(d.app.GetSnapshotsDir(), false, configSingleNodeEnabled)
 	if err != nil {
-		return "", "", fmt.Errorf("failed setting up snapshots: %w", err)
+		return "", fmt.Errorf("failed setting up snapshots: %w", err)
 	}
 
 	avagoDir, err := d.setupLocalEnv()
 	if err != nil {
-		return "", "", fmt.Errorf("failed setting up local environment: %w", err)
+		return "", fmt.Errorf("failed setting up local environment: %w", err)
 	}
 
-	pluginDir := filepath.Join(avagoDir, "plugins")
-	avalancheGoBinPath := filepath.Join(avagoDir, "node")
+	pluginDir := d.app.GetPluginsDir()
+	luxGoBinPath := filepath.Join(avagoDir, "luxgo")
 
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
-		return "", "", fmt.Errorf("could not create pluginDir %s", pluginDir)
+		return "", fmt.Errorf("could not create pluginDir %s", pluginDir)
 	}
 
 	exists, err := storage.FolderExists(pluginDir)
 	if !exists || err != nil {
-		return "", "", fmt.Errorf("evaluated pluginDir to be %s but it does not exist", pluginDir)
+		return "", fmt.Errorf("evaluated pluginDir to be %s but it does not exist", pluginDir)
 	}
 
 	// TODO: we need some better version management here
 	// * compare latest to local version
 	// * decide if force update or give user choice
-	exists, err = storage.FileExists(avalancheGoBinPath)
+	exists, err = storage.FileExists(luxGoBinPath)
 	if !exists || err != nil {
-		return "", "", fmt.Errorf(
-			"evaluated avalancheGoBinPath to be %s but it does not exist", avalancheGoBinPath)
+		return "", fmt.Errorf(
+			"evaluated luxGoBinPath to be %s but it does not exist", luxGoBinPath)
 	}
 
-	return avalancheGoBinPath, pluginDir, nil
+	return luxGoBinPath, nil
 }
 
 func (d *LocalDeployer) setupLocalEnv() (string, error) {
-	return binutils.SetupNode(d.app, d.avagoVersion)
+	return binutils.SetupLuxgo(d.app, d.avagoVersion)
 }
 
 // WaitForHealthy polls continuously until the network is ready to be used
-func (d *LocalDeployer) WaitForHealthy(
+func WaitForHealthy(
 	ctx context.Context,
 	cli client.Client,
-	healthCheckInterval time.Duration,
 ) (*rpcpb.ClusterInfo, error) {
 	cancel := make(chan struct{})
 	defer close(cancel)
 	go ux.PrintWait(cancel)
-	for {
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-time.After(healthCheckInterval):
-			d.app.Log.Debug("polling for health...")
-			resp, err := cli.Health(ctx)
-			if err != nil {
-				return nil, err
-			}
-			if resp.ClusterInfo == nil {
-				d.app.Log.Debug("warning: ClusterInfo is nil. trying again...")
-				continue
-			}
-			if !resp.ClusterInfo.Healthy {
-				d.app.Log.Debug("network is not healthy. polling again...")
-				continue
-			}
-			if !resp.ClusterInfo.CustomChainsHealthy {
-				d.app.Log.Debug("network is up but custom VMs are not healthy. polling again...")
-				continue
-			}
-			d.app.Log.Debug("network is up and custom VMs are up")
-			return resp.ClusterInfo, nil
-		}
+	resp, err := cli.WaitForHealthy(ctx)
+	if err != nil {
+		return nil, err
 	}
+	return resp.ClusterInfo, nil
 }
 
-// GetEndpoints get a human readable list of endpoints from clusterinfo
-func GetEndpoints(clusterInfo *rpcpb.ClusterInfo) []string {
-	endpoints := []string{}
+// GetFirstEndpoint get a human readable endpoint for the given chain
+func GetFirstEndpoint(clusterInfo *rpcpb.ClusterInfo, chain string) string {
+	var endpoint string
 	for _, nodeInfo := range clusterInfo.NodeInfos {
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			endpoints = append(endpoints, fmt.Sprintf("Endpoint at node %s for blockchain %q with VM ID %q: %s/ext/bc/%s/rpc", nodeInfo.Name, blockchainID, chainInfo.VmId, nodeInfo.GetUri(), blockchainID))
+			if chainInfo.ChainName == chain && nodeInfo.Name == clusterInfo.NodeNames[0] {
+				endpoint = fmt.Sprintf("Endpoint at node %s for blockchain %q with VM ID %q: %s/ext/bc/%s/rpc", nodeInfo.Name, blockchainID, chainInfo.VmId, nodeInfo.GetUri(), blockchainID)
+			}
 		}
 	}
-	return endpoints
+	return endpoint
+}
+
+// HasEndpoints returns true if cluster info contains custom blockchains
+func HasEndpoints(clusterInfo *rpcpb.ClusterInfo) bool {
+	return len(clusterInfo.CustomChains) > 0
 }
 
 // return true if vm has already been deployed
@@ -410,13 +644,23 @@ func alreadyDeployed(chainVMID ids.ID, clusterInfo *rpcpb.ClusterInfo) bool {
 func (d *LocalDeployer) installPlugin(
 	vmID ids.ID,
 	vmBin string,
-	pluginDir string,
 ) error {
-	return d.binaryDownloader.InstallVM(vmID.String(), vmBin, pluginDir)
+	return d.binaryDownloader.InstallVM(vmID.String(), vmBin)
 }
 
-func getExpectedDefaultSnapshotSHA256Sum() (string, error) {
-	resp, err := http.Get(constants.BootstrapSnapshotSHA256URL)
+// get list of all needed plugins and install them
+func (d *LocalDeployer) removeInstalledPlugin(
+	vmID ids.ID,
+) error {
+	return d.binaryDownloader.RemoveVM(vmID.String())
+}
+
+func getExpectedDefaultSnapshotSHA256Sum(isSingleNode bool) (string, error) {
+	url := constants.BootstrapSnapshotSHA256URL
+	if isSingleNode {
+		url = constants.BootstrapSnapshotSingleNodeSHA256URL
+	}
+	resp, err := http.Get(url)
 	if err != nil {
 		return "", fmt.Errorf("failed downloading sha256 sums: %w", err)
 	}
@@ -428,7 +672,11 @@ func getExpectedDefaultSnapshotSHA256Sum() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed downloading sha256 sums: %w", err)
 	}
-	expectedSum, err := utils.SearchSHA256File(sha256FileBytes, constants.BootstrapSnapshotLocalPath)
+	path := constants.BootstrapSnapshotLocalPath
+	if isSingleNode {
+		path = constants.BootstrapSnapshotSingleNodeLocalPath
+	}
+	expectedSum, err := utils.SearchSHA256File(sha256FileBytes, path)
 	if err != nil {
 		return "", fmt.Errorf("failed obtaining snapshot sha256 sum: %w", err)
 	}
@@ -437,8 +685,11 @@ func getExpectedDefaultSnapshotSHA256Sum() (string, error) {
 
 // Initialize default snapshot with bootstrap snapshot archive
 // If force flag is set to true, overwrite the default snapshot if it exists
-func SetDefaultSnapshot(snapshotsDir string, force bool) error {
+func SetDefaultSnapshot(snapshotsDir string, force bool, isSingleNode bool) error {
 	bootstrapSnapshotArchivePath := filepath.Join(snapshotsDir, constants.BootstrapSnapshotArchiveName)
+	if isSingleNode {
+		bootstrapSnapshotArchivePath = filepath.Join(snapshotsDir, constants.BootstrapSnapshotSingleNodeArchiveName)
+	}
 	// will download either if file not exists or if sha256 sum is not the same
 	downloadSnapshot := false
 	if _, err := os.Stat(bootstrapSnapshotArchivePath); os.IsNotExist(err) {
@@ -448,7 +699,7 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 		if err != nil {
 			return err
 		}
-		expectedSum, err := getExpectedDefaultSnapshotSHA256Sum()
+		expectedSum, err := getExpectedDefaultSnapshotSHA256Sum(isSingleNode)
 		if err != nil {
 			ux.Logger.PrintToUser("Warning: failure verifying that the local snapshot is the latest one: %s", err)
 		} else if gotSum != expectedSum {
@@ -456,7 +707,11 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 		}
 	}
 	if downloadSnapshot {
-		resp, err := http.Get(constants.BootstrapSnapshotURL)
+		url := constants.BootstrapSnapshotURL
+		if isSingleNode {
+			url = constants.BootstrapSnapshotSingleNodeURL
+		}
+		resp, err := http.Get(url)
 		if err != nil {
 			return fmt.Errorf("failed downloading bootstrap snapshot: %w", err)
 		}
@@ -468,7 +723,7 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 		if err != nil {
 			return fmt.Errorf("failed downloading bootstrap snapshot: %w", err)
 		}
-		if err := os.WriteFile(bootstrapSnapshotArchivePath, bootstrapSnapshotBytes, WriteReadReadPerms); err != nil {
+		if err := os.WriteFile(bootstrapSnapshotArchivePath, bootstrapSnapshotBytes, constants.WriteReadReadPerms); err != nil {
 			return fmt.Errorf("failed writing down bootstrap snapshot: %w", err)
 		}
 	}
@@ -494,28 +749,28 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 func (d *LocalDeployer) startNetwork(
 	ctx context.Context,
 	cli client.Client,
-	avalancheGoBinPath string,
-	pluginDir string,
+	luxGoBinPath string,
 	runDir string,
 ) error {
-	ux.Logger.PrintToUser("Starting network...")
 	loadSnapshotOpts := []client.OpOption{
-		client.WithExecPath(avalancheGoBinPath),
+		client.WithExecPath(luxGoBinPath),
 		client.WithRootDataDir(runDir),
 		client.WithReassignPortsIfUsed(true),
-		client.WithPluginDir(pluginDir),
+		client.WithPluginDir(d.app.GetPluginsDir()),
 	}
 
 	// load global node configs if they exist
 	configStr, err := d.app.Conf.LoadNodeConfig()
 	if err != nil {
-		return err
+		return nil
 	}
 	if configStr != "" {
 		loadSnapshotOpts = append(loadSnapshotOpts, client.WithGlobalNodeConfig(configStr))
 	}
 
-	_, err = cli.LoadSnapshot(
+	fmt.Println()
+	ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
+	resp, err := cli.LoadSnapshot(
 		ctx,
 		constants.DefaultSnapshotName,
 		loadSnapshotOpts...,
@@ -523,6 +778,8 @@ func (d *LocalDeployer) startNetwork(
 	if err != nil {
 		return fmt.Errorf("failed to start network :%w", err)
 	}
+	ux.Logger.PrintToUser("Node logs directory: %s/node<i>/logs", resp.ClusterInfo.RootDataDir)
+	ux.Logger.PrintToUser("Network ready to use.")
 	return nil
 }
 
@@ -536,7 +793,8 @@ func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
 		return nil, err
 	}
 
-	ctx := binutils.GetAsyncContext()
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
 	resp, err := cli.Status(ctx)
 	if err != nil {
 		return nil, err
@@ -547,4 +805,55 @@ func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
 	}
 
 	return deployedNames, nil
+}
+
+func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
+	ctx := context.Background()
+	api := constants.LocalAPIEndpoint
+	wallet, err := primary.MakeWallet(
+		ctx,
+		&primary.WalletConfig{
+			URI:              api,
+			LUXKeychain:     kc,
+			EthKeychain:      secp256k1fx.NewKeychain(),
+			PChainTxsToFetch: set.Of(subnetID),
+		},
+	)
+	if err != nil {
+		return ids.Empty, err
+	}
+
+	tx, err := wallet.P().IssueRemoveSubnetValidatorTx(nodeID, subnetID)
+	return tx.ID(), err
+}
+
+func GetSubnetValidators(subnetID ids.ID) ([]platformvm.ClientPermissionlessValidator, error) {
+	api := constants.LocalAPIEndpoint
+	pClient := platformvm.NewClient(api)
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
+
+	return pClient.GetCurrentValidators(ctx, subnetID, nil)
+}
+
+func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool, error) {
+	api := constants.LocalAPIEndpoint
+	pClient := platformvm.NewClient(api)
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
+
+	pVals, _, err := pClient.GetPendingValidators(ctx, subnetID, nil)
+	if err != nil {
+		return false, err
+	}
+	for _, iv := range pVals {
+		if v, ok := iv.(map[string]interface{}); ok {
+			// strictly this is not needed, as we are providing the nodeID as param
+			// just a double check
+			if v["nodeID"] == nodeID {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }

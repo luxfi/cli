@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
@@ -12,7 +12,7 @@ import (
 
 var forceDelete bool
 
-// avalanche key delete
+// lux key delete
 func newDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete [keyName]",

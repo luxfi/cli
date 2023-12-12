@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -9,7 +9,7 @@ import (
 	"github.com/luxdefi/cli/cmd/flags"
 	"github.com/luxdefi/cli/internal/mocks"
 	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -199,7 +199,7 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 			app.Log = logging.NoLog{}
 			app.Downloader = mockDownloader
 
-			desiredAvagoVersion, err := checkForInvalidDeployAndGetAvagoVersion(&mockSC, tt.desiredRPC)
+			desiredAvagoVersion, err := CheckForInvalidDeployAndGetAvagoVersion(&mockSC, tt.desiredRPC)
 
 			if tt.expectError {
 				require.Error(err)

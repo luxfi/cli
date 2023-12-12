@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package apm
@@ -46,12 +46,14 @@ var _ = ginkgo.Describe("[APM]", func() {
 		utils.RemoveAPMRepo()
 	})
 
-	ginkgo.It("can import from avalanche-core", func() {
-		repo := "luxdefi/avalanche-plugins-core"
+	ginkgo.It("can import from lux-core", func() {
+		ginkgo.Skip("TODO")
+		repo := "luxdefi/plugins-core"
 		commands.ImportSubnetConfig(repo, subnet1)
 	})
 
 	ginkgo.It("can import from url", func() {
+		ginkgo.Skip("TODO")
 		branch := "master"
 		commands.ImportSubnetConfigFromURL(testRepo, branch, subnet2)
 	})

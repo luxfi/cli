@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package binutils
 
@@ -25,7 +25,9 @@ var (
 )
 
 type PluginBinaryDownloader interface {
-	InstallVM(vmID, vmBin, pluginDir string) error
+	InstallVM(vmID, vmBin string) error
+	UpgradeVM(vmID, vmBin string) error
+	RemoveVM(vmID string) error
 }
 
 type BinaryChecker interface {
@@ -139,7 +141,7 @@ func installTarGzArchive(targz []byte, binDir string) error {
 	byteReader := bytes.NewReader(targz)
 	uncompressedStream, err := gzip.NewReader(byteReader)
 	if err != nil {
-		return fmt.Errorf("failed creating gzip reader from node binary stream: %w", err)
+		return fmt.Errorf("failed creating gzip reader from luxgo binary stream: %w", err)
 	}
 
 	tarReader := tar.NewReader(uncompressedStream)
@@ -205,9 +207,9 @@ func (*binaryChecker) ExistsWithVersion(binDir, binPrefix, version string) (bool
 	return len(match) != 0, nil
 }
 
-func (*pluginBinaryDownloader) InstallVM(vmID, vmBin, pluginDir string) error {
+func (pbd *pluginBinaryDownloader) InstallVM(vmID, vmBin string) error {
 	// target of VM install
-	binaryPath := filepath.Join(pluginDir, vmID)
+	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
 
 	// check if binary is already present, this should never happen
 	if _, err := os.Stat(binaryPath); err == nil {
@@ -217,7 +219,40 @@ func (*pluginBinaryDownloader) InstallVM(vmID, vmBin, pluginDir string) error {
 	}
 
 	if err := CopyFile(vmBin, binaryPath); err != nil {
-		return fmt.Errorf("failed copying custom vm to plugin dir: %w", err)
+		return fmt.Errorf("failed copying vm to plugin dir: %w", err)
+	}
+	return nil
+}
+
+func (pbd *pluginBinaryDownloader) UpgradeVM(vmID, vmBin string) error {
+	// target of VM install
+	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
+
+	// check if binary is already present, it should already exist
+	if _, err := os.Stat(binaryPath); errors.Is(err, os.ErrNotExist) {
+		return errors.New("vm binary does not exist, are you sure this Subnet is ready to upgrade?")
+	}
+
+	// overwrite existing file with new binary
+	if err := CopyFile(vmBin, binaryPath); err != nil {
+		return fmt.Errorf("failed copying vm to plugin dir: %w", err)
+	}
+	return nil
+}
+
+func (pbd *pluginBinaryDownloader) RemoveVM(vmID string) error {
+	// target of VM install
+	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
+
+	// check if binary is already present, this should never happen
+	if _, err := os.Stat(binaryPath); errors.Is(err, os.ErrNotExist) {
+		return errors.New("vm binary does not exist")
+	} else if err != nil {
+		return err
+	}
+
+	if err := os.Remove(binaryPath); err != nil {
+		return fmt.Errorf("failed deleting plugin: %w", err)
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package e2e
@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	_ "github.com/luxdefi/cli/tests/e2e/testcases/apm"
+	_ "github.com/luxdefi/cli/tests/e2e/testcases/errhandling"
 	_ "github.com/luxdefi/cli/tests/e2e/testcases/key"
 	_ "github.com/luxdefi/cli/tests/e2e/testcases/network"
 	_ "github.com/luxdefi/cli/tests/e2e/testcases/packageman"

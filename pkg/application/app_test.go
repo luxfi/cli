@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package application
 
@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/luxgo/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 

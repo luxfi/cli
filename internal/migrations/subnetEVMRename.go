@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package migrations
@@ -7,8 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/models"
+
+	"github.com/luxdefi/cli/pkg/application"
 )
 
 const oldSubnetEVM = "SubnetEVM"
@@ -21,6 +22,9 @@ func migrateSubnetEVMNames(app *application.Lux, runner *migrationRunner) error 
 	}
 
 	for _, subnet := range subnets {
+		if !subnet.IsDir() {
+			continue
+		}
 		// disregard any empty subnet directories
 		dirContents, err := os.ReadDir(filepath.Join(subnetDir, subnet.Name()))
 		if err != nil {

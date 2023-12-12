@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 package key
 
@@ -11,14 +11,17 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/tests/e2e/commands"
 	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxdefi/luxgo/genesis"
+	"github.com/luxdefi/luxgo/utils/units"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
 
 const (
-	keyName   = "e2eKey"
-	testKey   = "tests/e2e/assets/test_key.pk"
-	outputKey = "/tmp/testKey.pk"
+	keyName     = "e2eKey"
+	ewoqKeyName = "ewoq"
+	testKey     = "tests/e2e/assets/test_key.pk"
+	outputKey   = "/tmp/testKey.pk"
 )
 
 var _ = ginkgo.Describe("[Key]", func() {
@@ -132,7 +135,7 @@ var _ = ginkgo.Describe("[Key]", func() {
 		regex1 := `.*NAME.*CHAIN.*ADDRESS.*NETWORK`
 		regex2 := `.*e2eKey.*C-Chain.*0x[a-fA-F0-9]{40}`
 		regex3 := `.*P-Chain.*[(P-custom)(P-fuji)][a-zA-Z0-9]{39}`
-		regex4 := `.*P-avax[a-zA-Z0-9]{39}`
+		regex4 := `.*P-lux[a-zA-Z0-9]{39}`
 
 		// Create a key
 		output, err := commands.CreateKey(keyName)
@@ -143,7 +146,7 @@ var _ = ginkgo.Describe("[Key]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// Call list cmd
-		output, err = commands.ListKeys()
+		output, err = commands.ListKeys("mainnet", false, false)
 		if err != nil {
 			fmt.Println(output)
 			utils.PrintStdErr(err)
@@ -245,5 +248,127 @@ var _ = ginkgo.Describe("[Key]", func() {
 		exists, err = utils.KeyExists(keyName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(exists).Should(gomega.BeFalse())
+	})
+
+	ginkgo.It("can transfer between keys", func() {
+		_ = utils.DeleteKey(keyName)
+		_ = utils.DeleteKey(ewoqKeyName)
+		output, err := commands.CreateKeyFromPath(ewoqKeyName, utils.EwoqKeyPath)
+		if err != nil {
+			fmt.Println(output)
+			utils.PrintStdErr(err)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+		output, err = commands.CreateKey(keyName)
+		if err != nil {
+			fmt.Println(output)
+			utils.PrintStdErr(err)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+		commands.StartNetworkWithVersion("")
+
+		amount := 0.2
+		amountStr := fmt.Sprintf("%.2f", amount)
+		feeNLux := genesis.LocalParams.TxFeeConfig.TxFee * 4
+		amountNLux := uint64(amount * float64(units.Lux))
+
+		// send/receive without recovery
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		keyAddr, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		output, err = commands.KeyTransferSend(ewoqKeyName, keyAddr, amountStr)
+		if err != nil {
+			fmt.Println(output)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(ewoqKeyBalance1 - ewoqKeyBalance2).Should(gomega.Equal(feeNLux + amountNLux))
+		gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(uint64(0)))
+
+		output, err = commands.KeyTransferReceive(keyName, amountStr, "0")
+		if err != nil {
+			fmt.Println(output)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, keyBalance3, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance3, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(ewoqKeyBalance1 - ewoqKeyBalance3).Should(gomega.Equal(feeNLux + amountNLux))
+		gomega.Expect(keyBalance3 - keyBalance1).Should(gomega.Equal(amountNLux))
+
+		// send/receive with recovery 1
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		keyAddr, keyBalance1, err = utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance1, err = utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		output, err = commands.KeyTransferSend(ewoqKeyName, keyAddr, amountStr)
+		if err != nil {
+			fmt.Println(output)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, keyBalance2, err = utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance2, err = utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(ewoqKeyBalance1 - ewoqKeyBalance2).Should(gomega.Equal(feeNLux + amountNLux))
+		gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(uint64(0)))
+
+		output, err = commands.KeyTransferReceive(keyName, "0.3", "0") // make 2nd step to fail with bad amount
+		if err == nil {
+			fmt.Println(output)
+		}
+		gomega.Expect(err).Should(gomega.HaveOccurred())
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, keyBalance3, err = utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance3, err = utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(ewoqKeyBalance1 - ewoqKeyBalance3).Should(gomega.Equal(feeNLux + amountNLux))
+		gomega.Expect(keyBalance3 - keyBalance1).Should(gomega.Equal(uint64(0)))
+
+		output, err = commands.KeyTransferReceive(keyName, amountStr, "1") // do recovery of 2nd step
+		if err != nil {
+			fmt.Println(output)
+		}
+		gomega.Expect(err).Should(gomega.BeNil())
+
+		output, err = commands.ListKeys("local", true, true)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, keyBalance3, err = utils.ParseAddrBalanceFromKeyListOutput(output, keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		_, ewoqKeyBalance3, err = utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		gomega.Expect(ewoqKeyBalance1 - ewoqKeyBalance3).Should(gomega.Equal(feeNLux + amountNLux))
+		gomega.Expect(keyBalance3 - keyBalance1).Should(gomega.Equal(amountNLux))
+
+		err = utils.DeleteKey(keyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		err = utils.DeleteKey(ewoqKeyName)
+		gomega.Expect(err).Should(gomega.BeNil())
+		commands.CleanNetwork()
 	})
 })
