@@ -1,7 +1,7 @@
 // Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package apmintegration
+package lpmintegration
 
 import (
 	"fmt"
@@ -36,11 +36,11 @@ func AddRepo(app *application.Lux, repoURL *url.URL, branch string) (string, err
 
 	fmt.Println("Installing repo")
 
-	return alias, app.Apm.AddRepository(alias, repoStr, branch)
+	return alias, app.Lpm.AddRepository(alias, repoStr, branch)
 }
 
 func UpdateRepos(app *application.Lux) error {
-	return app.Apm.Update()
+	return app.Lpm.Update()
 }
 
 func InstallVM(app *application.Lux, subnetKey string) error {
@@ -59,7 +59,7 @@ func InstallVM(app *application.Lux, subnetKey string) error {
 	for _, vm := range vms {
 		toInstall := repo + ":" + vm
 		fmt.Println("Installing vm:", toInstall)
-		err = app.Apm.Install(toInstall)
+		err = app.Lpm.Install(toInstall)
 		if err != nil {
 			return err
 		}

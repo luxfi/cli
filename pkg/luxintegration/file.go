@@ -1,20 +1,20 @@
 // Copyright (C) 2022, Lux Partners Limited, All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package apmintegration
+package lpmintegration
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/luxdefi/apm/types"
+	"github.com/luxdefi/lpm/types"
 	"github.com/luxdefi/cli/pkg/application"
 	"gopkg.in/yaml.v3"
 )
 
 func GetRepos(app *application.Lux) ([]string, error) {
-	repositoryDir := filepath.Join(app.ApmDir, "repositories")
+	repositoryDir := filepath.Join(app.LpmDir, "repositories")
 	orgs, err := os.ReadDir(repositoryDir)
 	if err != nil {
 		return []string{}, err
@@ -37,7 +37,7 @@ func GetRepos(app *application.Lux) ([]string, error) {
 }
 
 func GetSubnets(app *application.Lux, repoAlias string) ([]string, error) {
-	subnetDir := filepath.Join(app.ApmDir, "repositories", repoAlias, "subnets")
+	subnetDir := filepath.Join(app.LpmDir, "repositories", repoAlias, "subnets")
 	subnets, err := os.ReadDir(subnetDir)
 	if err != nil {
 		return []string{}, err
@@ -65,7 +65,7 @@ func LoadSubnetFile(app *application.Lux, subnetKey string) (types.Subnet, error
 		return types.Subnet{}, err
 	}
 
-	subnetYamlPath := filepath.Join(app.ApmDir, "repositories", repoAlias, "subnets", subnetName+".yaml")
+	subnetYamlPath := filepath.Join(app.LpmDir, "repositories", repoAlias, "subnets", subnetName+".yaml")
 	var subnetWrapper SubnetWrapper
 
 	subnetYamlBytes, err := os.ReadFile(subnetYamlPath)
@@ -91,7 +91,7 @@ func getVMsInSubnet(app *application.Lux, subnetKey string) ([]string, error) {
 }
 
 func LoadVMFile(app *application.Lux, repo, vm string) (types.VM, error) {
-	vmYamlPath := filepath.Join(app.ApmDir, "repositories", repo, "vms", vm+".yaml")
+	vmYamlPath := filepath.Join(app.LpmDir, "repositories", repo, "vms", vm+".yaml")
 	var vmWrapper VMWrapper
 
 	vmYamlBytes, err := os.ReadFile(vmYamlPath)
