@@ -17,7 +17,7 @@ import (
 )
 
 type scriptInputs struct {
-	LuxGoVersion   string
+	LuxdVersion          string
 	SubnetExportFileName string
 	SubnetName           string
 	GoVersion            string
@@ -85,13 +85,13 @@ func PostOverSSH(host *models.Host, path string, requestBody string) ([]byte, er
 }
 
 // RunSSHSetupNode runs script to setup node
-func RunSSHSetupNode(host *models.Host, configPath, luxGoVersion string, isDevNet bool) error {
+func RunSSHSetupNode(host *models.Host, configPath, luxdVersion string, isDevNet bool) error {
 	if err := RunOverSSH(
 		"Setup Node",
 		host,
 		constants.SSHScriptTimeout,
 		"shell/setupNode.sh",
-		scriptInputs{LuxGoVersion: luxGoVersion, IsDevNet: isDevNet},
+		scriptInputs{LuxdVersion: luxdVersion, IsDevNet: isDevNet},
 	); err != nil {
 		return err
 	}
@@ -103,21 +103,21 @@ func RunSSHSetupNode(host *models.Host, configPath, luxGoVersion string, isDevNe
 	)
 }
 
-// RunSSHUpgradeLuxgo runs script to upgrade luxgo
-func RunSSHUpgradeLuxgo(host *models.Host, luxGoVersion string) error {
+// RunSSHUpgradeLuxd runs script to upgrade node
+func RunSSHUpgradeLuxd(host *models.Host, luxdVersion string) error {
 	return RunOverSSH(
-		"Upgrade Luxgo",
+		"Upgrade Lux",
 		host,
 		constants.SSHScriptTimeout,
-		"shell/upgradeLuxGo.sh",
-		scriptInputs{LuxGoVersion: luxGoVersion},
+		"shell/upgradeLuxd.sh",
+		scriptInputs{LuxdVersion: luxdVersion},
 	)
 }
 
-// RunSSHStartNode runs script to start luxgo
+// RunSSHStartNode runs script to start node
 func RunSSHStartNode(host *models.Host) error {
 	return RunOverSSH(
-		"Start Luxgo",
+		"Start Lux",
 		host,
 		constants.SSHScriptTimeout,
 		"shell/startNode.sh",
@@ -125,10 +125,10 @@ func RunSSHStartNode(host *models.Host) error {
 	)
 }
 
-// RunSSHStopNode runs script to stop luxgo
+// RunSSHStopNode runs script to stop node
 func RunSSHStopNode(host *models.Host) error {
 	return RunOverSSH(
-		"Stop Luxgo",
+		"Stop Lux",
 		host,
 		constants.SSHScriptTimeout,
 		"shell/stopNode.sh",
@@ -277,8 +277,8 @@ func RunSSHSetupCLIFromSource(host *models.Host, cliBranch string) error {
 	)
 }
 
-// RunSSHCheckLuxGoVersion checks node luxgo version
-func RunSSHCheckLuxGoVersion(host *models.Host) ([]byte, error) {
+// RunSSHCheckLuxdVersion checks node node version
+func RunSSHCheckLuxdVersion(host *models.Host) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := "{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"info.getNodeVersion\"}"
 	return PostOverSSH(host, "", requestBody)
@@ -298,7 +298,7 @@ func RunSSHCheckHealthy(host *models.Host) ([]byte, error) {
 	return PostOverSSH(host, "/ext/health", requestBody)
 }
 
-// RunSSHGetNodeID reads nodeID from luxgo
+// RunSSHGetNodeID reads nodeID from node
 func RunSSHGetNodeID(host *models.Host) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := "{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"info.getNodeID\"}"

@@ -11,8 +11,8 @@ import (
 	"runtime"
 
 	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/utils/perms"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"go.uber.org/zap"
 )
 

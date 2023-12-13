@@ -13,7 +13,7 @@ import (
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/subnet-evm/core"
 	"github.com/luxdefi/subnet-evm/params"
 	"github.com/luxdefi/subnet-evm/precompile/contracts/deployerallowlist"

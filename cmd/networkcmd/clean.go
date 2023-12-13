@@ -37,7 +37,7 @@ configuration.`,
 		&hard,
 		"hard",
 		false,
-		"Also clean downloaded luxgo and plugin binaries",
+		"Also clean downloaded node and plugin binaries",
 	)
 
 	return cmd
@@ -59,7 +59,7 @@ func clean(*cobra.Command, []string) error {
 	}
 
 	if hard {
-		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded luxgo and plugin binaries")
+		ux.Logger.PrintToUser("hard clean requested via flag, removing all downloaded node and plugin binaries")
 		binDir := filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir)
 		cleanBins(binDir)
 		_ = killAllBackendsByName()

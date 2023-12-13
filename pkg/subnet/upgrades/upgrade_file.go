@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/utils/storage"
+	"github.com/luxdefi/node/utils/storage"
 )
 
 func WriteUpgradeFile(jsonBytes []byte, subnetName, upgradeFilesDir string) error {

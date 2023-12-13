@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxdefi/luxgo/vms/platformvm/signer"
+	"github.com/luxdefi/node/vms/platformvm/signer"
 
-	"github.com/luxdefi/luxgo/vms/components/lux"
-	"github.com/luxdefi/luxgo/vms/components/verify"
+	"github.com/luxdefi/node/vms/components/lux"
+	"github.com/luxdefi/node/vms/components/verify"
 
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/keychain"
@@ -20,17 +20,17 @@ import (
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
 	anrutils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/ids"
-	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/utils/set"
-	avmtxs "github.com/luxdefi/luxgo/vms/avm/txs"
-	"github.com/luxdefi/luxgo/vms/platformvm"
-	"github.com/luxdefi/luxgo/vms/platformvm/txs"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
-	"github.com/luxdefi/luxgo/wallet/subnet/primary"
-	"github.com/luxdefi/luxgo/wallet/subnet/primary/common"
+	"github.com/luxdefi/node/ids"
+	avagoconstants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/set"
+	avmtxs "github.com/luxdefi/node/vms/avm/txs"
+	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxdefi/node/wallet/subnet/primary"
+	"github.com/luxdefi/node/wallet/subnet/primary/common"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")

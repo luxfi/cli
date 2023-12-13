@@ -193,7 +193,7 @@ func createGCEInstances(rootBody *hclwrite.Body,
 			return nil, nil, "", "", err
 		}
 		if !firewallExists {
-			terraformgcp.SetFirewallRule(rootBody, userIPAddress+"/32", firewallName, networkName, []string{strconv.Itoa(constants.SSHTCPPort), strconv.Itoa(constants.LuxgoAPIPort)}, true)
+			terraformgcp.SetFirewallRule(rootBody, userIPAddress+"/32", firewallName, networkName, []string{strconv.Itoa(constants.SSHTCPPort), strconv.Itoa(constants.LuxdAPIPort)}, true)
 		}
 	}
 	nodeName := map[string]string{}

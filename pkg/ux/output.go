@@ -13,7 +13,7 @@ import (
 	"golang.org/x/text/message"
 
 	"github.com/luxdefi/netrunner/rpcpb"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/olekukonko/tablewriter"
 )
 

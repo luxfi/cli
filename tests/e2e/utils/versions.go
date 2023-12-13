@@ -15,7 +15,7 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"golang.org/x/mod/semver"
 )
 
@@ -28,14 +28,14 @@ var (
 
 /*
 VersionMapper keys and their usage:
- * OnlyAvagoKey: 					Used when running one luxgo only (no compatibility required)
+ * OnlyAvagoKey: 					Used when running one node only (no compatibility required)
 
- * MultiAvago1Key					Used for the update scenario where luxgo is updated and
- * MultiAvago2Key    			both luxgo versions need to be compatible.
+ * MultiAvago1Key					Used for the update scenario where node is updated and
+ * MultiAvago2Key    			both node versions need to be compatible.
  * MultiAvagoSubnetEVMKey	This is the Subnet-EVM version compatible to the above scenario.
 
  * LatestEVM2AvagoKey 	  Latest subnet-evm version
- * LatestAvago2EVMKey     while this is the latest luxgo compatible with that subnet-evm
+ * LatestAvago2EVMKey     while this is the latest node compatible with that subnet-evm
 
  * SoloSubnetEVMKey1 			This is used when we want to test subnet-evm versions where compatibility
  * SoloSubnetEVMKey2      needs to be between the two subnet-evm versions
@@ -46,7 +46,7 @@ VersionMapper keys and their usage:
 
 // VersionMapper is an abstraction for retrieving version compatibility URLs
 // allowing unit tests without requiring external http calls.
-// The idea is to finally calculate which VM is compatible with which Luxgo,
+// The idea is to finally calculate which VM is compatible with which Luxd,
 // so that the e2e tests can always download and run the latest compatible versions,
 // without having to manually update the e2e tests periodically.
 type VersionMapper interface {
@@ -75,11 +75,11 @@ type versionMapper struct {
 	app *application.Lux
 }
 
-// GetLatestAvagoByProtoVersion returns the latest Luxgo version which
+// GetLatestAvagoByProtoVersion returns the latest Luxd version which
 // runs with the specified rpcVersion, or an error if it can't be found
 // (or other errors occurred)
 func (*versionMapper) GetLatestAvagoByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
-	return vm.GetLatestLuxGoByProtocolVersion(app, rpcVersion, url)
+	return vm.GetLatestLuxdByProtocolVersion(app, rpcVersion, url)
 }
 
 // GetApp returns the Lux application instance
@@ -100,9 +100,9 @@ func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	}
 }
 
-// GetAvagoURL returns the compatibility URL for Luxgo
+// GetAvagoURL returns the compatibility URL for Luxd
 func (*versionMapper) GetAvagoURL() string {
-	return constants.LuxGoCompatibilityURL
+	return constants.LuxdCompatibilityURL
 }
 
 func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error) {
@@ -141,7 +141,7 @@ func (*versionMapper) FilterAvailableVersions(versions []string) []string {
 	return availableVersions
 }
 
-// GetVersionMapping returns a map of specific VMs resp. Luxgo e2e context keys
+// GetVersionMapping returns a map of specific VMs resp. Luxd e2e context keys
 // to the actual version which corresponds to that key.
 // This allows the e2e test to know what version to download and run.
 // Returns an error if there was a problem reading the URL compatibility json
@@ -174,7 +174,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 
 	subnetEVMversions = mapper.FilterAvailableVersions(subnetEVMversions)
 
-	// now get the luxgo compatibility object
+	// now get the node compatibility object
 	avagoCompat, err := getAvagoCompatibility(mapper)
 	if err != nil {
 		return nil, err
@@ -197,9 +197,9 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	sort.Sort(sort.Reverse(sort.IntSlice(rpcs)))
 
 	// iterate the rpc versions
-	// evaluate two luxgo versions which are consecutive
+	// evaluate two node versions which are consecutive
 	// and run with the same RPC version.
-	// This is required for the for the "can deploy with multiple luxgo versions" test
+	// This is required for the for the "can deploy with multiple node versions" test
 	for _, rpcVersion := range rpcs {
 		versionAsString := strconv.Itoa(rpcVersion)
 		versionsForRPC := avagoCompat[versionAsString]
@@ -233,10 +233,10 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// now let's look for subnet-evm versions which are fit for the
 	// "can deploy multiple subnet-evm versions" test.
 	// We need two subnet-evm versions which run the same RPC version,
-	// and then a compatible Luxgo
+	// and then a compatible Luxd
 	//
 	// To avoid having to iterate again, we'll also fill the values
-	// for the **latest** compatible Luxgo and Subnet-EVM
+	// for the **latest** compatible Luxd and Subnet-EVM
 	for i, ver := range subnetEVMversions {
 		// safety check, should not happen, as we already know
 		// compatible versions exist
@@ -246,7 +246,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		first := ver
 		second := subnetEVMversions[i+1]
 		// we should be able to safely assume that for a given subnet-evm RPC version,
-		// there exists at least one compatible Luxgo.
+		// there exists at least one compatible Luxd.
 		// This means we can in any case use this to set the **latest** compatibility
 		soloAvago, err := mapper.GetLatestAvagoByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetAvagoURL())
 		if err != nil {
@@ -309,7 +309,7 @@ func getCompatibility(mapper VersionMapper, vmType models.VMType) (models.VMComp
 	return parsedCompat, nil
 }
 
-// getAvagoCompatibility returns the compatibility for Luxgo
+// getAvagoCompatibility returns the compatibility for Luxd
 func getAvagoCompatibility(mapper VersionMapper) (models.AvagoCompatiblity, error) {
 	avagoBytes, err := mapper.GetApp().GetDownloader().Download(mapper.GetAvagoURL())
 	if err != nil {

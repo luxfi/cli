@@ -12,8 +12,8 @@ import (
 	"github.com/luxdefi/cli/cmd/flags"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/vms/platformvm"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

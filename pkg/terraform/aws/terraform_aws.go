@@ -102,9 +102,9 @@ func SetSecurityGroup(rootBody *hclwrite.Body, region, ipAddress, securityGroupN
 	// enable inbound access for ip address inputIPAddress in port 22
 	addSecurityGroupRuleToSg(securityGroupBody, "ingress", "TCP", "tcp", inputIPAddress, constants.SSHTCPPort)
 	// enable inbound access for ip address inputIPAddress in port 9650
-	addSecurityGroupRuleToSg(securityGroupBody, "ingress", "LUX HTTP", "tcp", inputIPAddress, constants.LuxgoAPIPort)
+	addSecurityGroupRuleToSg(securityGroupBody, "ingress", "LUX HTTP", "tcp", inputIPAddress, constants.LuxdAPIPort)
 	// "0.0.0.0/0" is a must-have ip address value for inbound and outbound calls
-	addSecurityGroupRuleToSg(securityGroupBody, "ingress", "LUX Staking", "tcp", "0.0.0.0/0", constants.LuxgoP2PPort)
+	addSecurityGroupRuleToSg(securityGroupBody, "ingress", "LUX Staking", "tcp", "0.0.0.0/0", constants.LuxdP2PPort)
 	addSecurityGroupRuleToSg(securityGroupBody, "egress", "Outbound traffic", "-1", "0.0.0.0/0", constants.OutboundPort)
 }
 
@@ -116,7 +116,7 @@ func SetSecurityGroupRule(rootBody *hclwrite.Body, region, ipAddress, sgID strin
 	}
 	if !ipInHTTP {
 		sgRuleName := "ipHttp" + strings.ReplaceAll(ipAddress, ".", "")
-		addNewSecurityGroupRule(rootBody, region, sgRuleName, sgID, "ingress", "tcp", inputIPAddress, constants.LuxgoAPIPort)
+		addNewSecurityGroupRule(rootBody, region, sgRuleName, sgID, "ingress", "tcp", inputIPAddress, constants.LuxdAPIPort)
 	}
 }
 

@@ -16,7 +16,7 @@ spec:
   lifecycle: production
   system: platform
   dependsOn:
-    - component:luxgo
+    - component:node
     - component:netrunner
     - resource:posthog
     - component:subnet-evm

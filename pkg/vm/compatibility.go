@@ -13,11 +13,11 @@ import (
 	"strconv"
 	"time"
 
-	pb "github.com/luxdefi/luxgo/proto/pb/vm/runtime"
-	"github.com/luxdefi/luxgo/vms/rpcchainvm/grpcutils"
-	"github.com/luxdefi/luxgo/vms/rpcchainvm/gruntime"
-	"github.com/luxdefi/luxgo/vms/rpcchainvm/runtime"
-	"github.com/luxdefi/luxgo/vms/rpcchainvm/runtime/subprocess"
+	pb "github.com/luxdefi/node/proto/pb/vm/runtime"
+	"github.com/luxdefi/node/vms/rpcchainvm/grpcutils"
+	"github.com/luxdefi/node/vms/rpcchainvm/gruntime"
+	"github.com/luxdefi/node/vms/rpcchainvm/runtime"
+	"github.com/luxdefi/node/vms/rpcchainvm/runtime/subprocess"
 
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/binutils"
@@ -26,7 +26,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-var ErrNoAvagoVersion = errors.New("unable to find a compatible luxgo version")
+var ErrNoAvagoVersion = errors.New("unable to find a compatible node version")
 
 // protocolVersionQueryInitializer gets vm protocol version during handshake and provides it on a channel
 
@@ -163,8 +163,8 @@ func GetRPCProtocolVersion(app *application.Lux, vmType models.VMType, vmVersion
 	return version, nil
 }
 
-// GetLuxGoVersionsForRPC returns list of compatible lux go versions for a specified rpcVersion
-func GetLuxGoVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]string, error) {
+// GetLuxdVersionsForRPC returns list of compatible lux go versions for a specified rpcVersion
+func GetLuxdVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]string, error) {
 	compatibilityBytes, err := app.Downloader.Download(url)
 	if err != nil {
 		return nil, err
@@ -185,17 +185,17 @@ func GetLuxGoVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([
 	return eligibleVersions, nil
 }
 
-// GetAvailableLuxGoVersions returns list of only available for download lux go versions,
+// GetAvailableLuxdVersions returns list of only available for download lux go versions,
 // with latest version in first index
-func GetAvailableLuxGoVersions(app *application.Lux, rpcVersion int, url string) ([]string, error) {
-	eligibleVersions, err := GetLuxGoVersionsForRPC(app, rpcVersion, url)
+func GetAvailableLuxdVersions(app *application.Lux, rpcVersion int, url string) ([]string, error) {
+	eligibleVersions, err := GetLuxdVersionsForRPC(app, rpcVersion, url)
 	if err != nil {
 		return nil, ErrNoAvagoVersion
 	}
 	// get latest avago release to make sure we're not picking a release currently in progress but not available for download
 	latestAvagoVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.LuxDeFiOrg,
-		constants.LuxGoRepoName,
+		constants.LuxdRepoName,
 	))
 	if err != nil {
 		return nil, err
@@ -213,8 +213,8 @@ func GetAvailableLuxGoVersions(app *application.Lux, rpcVersion int, url string)
 	return availableVersions, nil
 }
 
-func GetLatestLuxGoByProtocolVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
-	useVersion, err := GetAvailableLuxGoVersions(app, rpcVersion, url)
+func GetLatestLuxdByProtocolVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
+	useVersion, err := GetAvailableLuxdVersions(app, rpcVersion, url)
 	if err != nil {
 		return "", err
 	}

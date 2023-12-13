@@ -42,7 +42,7 @@ already running.`,
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&userProvidedAvagoVersion, "luxgo-version", latest, "use this version of luxgo (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedAvagoVersion, "node-version", latest, "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 
 	return cmd
@@ -60,7 +60,7 @@ func StartNetwork(*cobra.Command, []string) error {
 		return err
 	}
 
-	luxGoBinPath, err := sd.SetupLocalEnv()
+	luxdBinPath, err := sd.SetupLocalEnv()
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	pluginDir := app.GetPluginsDir()
 
 	loadSnapshotOpts := []client.OpOption{
-		client.WithExecPath(luxGoBinPath),
+		client.WithExecPath(luxdBinPath),
 		client.WithRootDataDir(outputDir),
 		client.WithReassignPortsIfUsed(true),
 		client.WithPluginDir(pluginDir),
@@ -185,14 +185,14 @@ func determineAvagoVersion(userProvidedAvagoVersion string) (string, error) {
 
 	// If currentRPCVersion == -1, then only custom subnets have been deployed, the user must provide the version explicitly if not latest
 	if currentRPCVersion == -1 {
-		ux.Logger.PrintToUser("No Subnet RPC version found. Using latest LuxGo version")
+		ux.Logger.PrintToUser("No Subnet RPC version found. Using latest Luxd version")
 		return latest, nil
 	}
 
-	return vm.GetLatestLuxGoByProtocolVersion(
+	return vm.GetLatestLuxdByProtocolVersion(
 		app,
 		currentRPCVersion,
-		constants.LuxGoCompatibilityURL,
+		constants.LuxdCompatibilityURL,
 	)
 }
 

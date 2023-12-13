@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxdefi/cli/cmd/subnetcmd"
 	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 
 	"github.com/luxdefi/cli/pkg/application"
 
@@ -91,7 +91,7 @@ func promptProofOfPossession() (jsonProofOfPossession, error) {
 	if publicKey == "" || pop == "" {
 		ux.Logger.PrintToUser("Next, we need the public key and proof of possession of the node's BLS")
 		ux.Logger.PrintToUser("SSH into the node and call info.getNodeID API to get the node's BLS info")
-		ux.Logger.PrintToUser("Check https://docs.lux.network/apis/luxgo/apis/info#infogetnodeid for instructions on calling info.getNodeID API")
+		ux.Logger.PrintToUser("Check https://docs.lux.network/apis/node/apis/info#infogetnodeid for instructions on calling info.getNodeID API")
 	}
 	var err error
 	if publicKey == "" {

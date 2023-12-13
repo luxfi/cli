@@ -5,7 +5,7 @@ package mocks
 import (
 	big "math/big"
 
-	ids "github.com/luxdefi/luxgo/ids"
+	ids "github.com/luxdefi/node/ids"
 	common "github.com/ethereum/go-ethereum/common"
 
 	mock "github.com/stretchr/testify/mock"

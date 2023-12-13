@@ -8,11 +8,11 @@ import (
 
 	"github.com/luxdefi/cli/pkg/key"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
-	"github.com/luxdefi/luxgo/vms/platformvm"
-	"github.com/luxdefi/luxgo/vms/platformvm/txs"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 )
 
 // get network model associated to tx

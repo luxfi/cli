@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
 )
@@ -26,7 +26,7 @@ type testContext struct {
 	expected map[string]string
 	// fake versions set for the evm binaries, faking github
 	sourceEVM string
-	// fake versions set for the luxgo binaries, faking github
+	// fake versions set for the node binaries, faking github
 	sourceAvago string
 	// should the test fail
 	shouldFail bool
@@ -120,7 +120,7 @@ func (m *testMapper) GetCompatURL(vmType models.VMType) string {
 }
 
 // GetAvagoURL fakes a github endpoint for
-// luxgo releases
+// node releases
 // implement VersionMapper
 func (m *testMapper) GetAvagoURL() string {
 	return m.srv.URL + "/avago"

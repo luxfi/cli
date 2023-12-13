@@ -15,9 +15,9 @@ import (
 	"github.com/luxdefi/cli/pkg/txutils"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
-	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
-	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/node/ids"
+	avagoconstants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/vms/platformvm"
 	"github.com/spf13/cobra"
 )
 
@@ -359,7 +359,7 @@ func promptStart() (time.Time, error) {
 func PromptNodeID() (ids.NodeID, error) {
 	ux.Logger.PrintToUser("Next, we need the NodeID of the validator you want to whitelist.")
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser("Check https://docs.lux.network/apis/luxgo/apis/info#infogetnodeid for instructions about how to query the NodeID from your node")
+	ux.Logger.PrintToUser("Check https://docs.lux.network/apis/node/apis/info#infogetnodeid for instructions about how to query the NodeID from your node")
 	ux.Logger.PrintToUser("(Edit host IP address and port to match your deployment, if needed).")
 
 	txt := "What is the NodeID of the validator you'd like to whitelist?"

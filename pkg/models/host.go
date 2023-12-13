@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	maxResponseSize      = 102400          // 100KB should be enough to read the luxgo response
+	maxResponseSize      = 102400          // 100KB should be enough to read the node response
 	sshConnectionTimeout = 3 * time.Second // usually takes less than 2
 	sshConnectionRetries = 5
 )
@@ -218,12 +218,12 @@ func (h *Host) UntimedForward(httpRequest string) ([]byte, error) {
 			return nil, err
 		}
 	}
-	luxGoEndpoint := strings.TrimPrefix(constants.LocalAPIEndpoint, "http://")
-	luxGoAddr, err := net.ResolveTCPAddr("tcp", luxGoEndpoint)
+	luxdEndpoint := strings.TrimPrefix(constants.LocalAPIEndpoint, "http://")
+	luxdAddr, err := net.ResolveTCPAddr("tcp", luxdEndpoint)
 	if err != nil {
 		return nil, err
 	}
-	proxy, err := h.Connection.DialTCP("tcp", nil, luxGoAddr)
+	proxy, err := h.Connection.DialTCP("tcp", nil, luxdAddr)
 	if err != nil {
 		return nil, fmt.Errorf("unable to port forward to %s via %s", h.Connection.RemoteAddr(), "ssh")
 	}

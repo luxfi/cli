@@ -141,7 +141,7 @@ func installTarGzArchive(targz []byte, binDir string) error {
 	byteReader := bytes.NewReader(targz)
 	uncompressedStream, err := gzip.NewReader(byteReader)
 	if err != nil {
-		return fmt.Errorf("failed creating gzip reader from luxgo binary stream: %w", err)
+		return fmt.Errorf("failed creating gzip reader from node binary stream: %w", err)
 	}
 
 	tarReader := tar.NewReader(uncompressedStream)

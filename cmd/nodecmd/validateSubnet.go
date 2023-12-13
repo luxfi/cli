@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxdefi/luxgo/vms/platformvm/status"
+	"github.com/luxdefi/node/vms/platformvm/status"
 
 	"github.com/luxdefi/cli/pkg/ansible"
 	"github.com/luxdefi/cli/pkg/ssh"
@@ -18,7 +18,7 @@ import (
 	"github.com/luxdefi/cli/pkg/keychain"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 )

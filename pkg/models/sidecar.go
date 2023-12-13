@@ -4,7 +4,7 @@ package models
 
 import (
 	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 )
 
 type NetworkData struct {

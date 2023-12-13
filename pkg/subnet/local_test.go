@@ -20,9 +20,9 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/netrunner/client"
 	"github.com/luxdefi/netrunner/rpcpb"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/utils/perms"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -93,15 +93,15 @@ func TestDeployToLocal(t *testing.T) {
 	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetLuxgoBinDir(), "luxgo-"+avagoVersion)
+	binDir := filepath.Join(app.GetLuxdBinDir(), "node-"+avagoVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}
 	err = os.MkdirAll(filepath.Join(binDir, "plugins"), perms.ReadWriteExecute)
 	require.NoError(err)
 
-	// create a dummy luxgo file, deploy will check it exists
-	f, err := os.Create(filepath.Join(binDir, "luxgo"))
+	// create a dummy node file, deploy will check it exists
+	f, err := os.Create(filepath.Join(binDir, "node"))
 	require.NoError(err)
 	defer func() {
 		_ = f.Close()

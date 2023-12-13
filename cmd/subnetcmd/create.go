@@ -237,7 +237,7 @@ func sendMetrics(cmd *cobra.Command, repoName, subnetName string) error {
 }
 
 func checkInvalidSubnetNames(name string) error {
-	// this is currently exactly the same code as in luxgo/vms/platformvm/create_chain_tx.go
+	// this is currently exactly the same code as in node/vms/platformvm/create_chain_tx.go
 	for _, r := range name {
 		if r > unicode.MaxASCII || !(unicode.IsLetter(r) || unicode.IsNumber(r) || r == ' ') {
 			return errIllegalNameCharacter

@@ -14,9 +14,9 @@ import (
 	"github.com/luxdefi/cli/pkg/ssh"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/vms/platformvm/status"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm/status"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
@@ -89,7 +89,7 @@ func statusNode(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	ux.Logger.PrintToUser("Getting luxgo version of node(s)")
+	ux.Logger.PrintToUser("Getting node version of node(s)")
 
 	wg := sync.WaitGroup{}
 	wgResults := models.NodeResults{}
@@ -97,25 +97,25 @@ func statusNode(_ *cobra.Command, args []string) error {
 		wg.Add(1)
 		go func(nodeResults *models.NodeResults, host *models.Host) {
 			defer wg.Done()
-			if resp, err := ssh.RunSSHCheckLuxGoVersion(host); err != nil {
+			if resp, err := ssh.RunSSHCheckLuxdVersion(host); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 				return
 			} else {
-				if luxGoVersion, err := parseLuxGoOutput(resp); err != nil {
+				if luxdVersion, err := parseLuxdOutput(resp); err != nil {
 					nodeResults.AddResult(host.NodeID, nil, err)
 				} else {
-					nodeResults.AddResult(host.NodeID, luxGoVersion, err)
+					nodeResults.AddResult(host.NodeID, luxdVersion, err)
 				}
 			}
 		}(&wgResults, host)
 	}
 	wg.Wait()
 	if wgResults.HasErrors() {
-		return fmt.Errorf("failed to get luxgo version for node(s) %s", wgResults.GetErrorHostMap())
+		return fmt.Errorf("failed to get node version for node(s) %s", wgResults.GetErrorHostMap())
 	}
-	luxgoVersionForNode := map[string]string{}
-	for nodeID, luxgoVersion := range wgResults.GetResultMap() {
-		luxgoVersionForNode[nodeID] = fmt.Sprintf("%v", luxgoVersion)
+	nodeVersionForNode := map[string]string{}
+	for nodeID, nodeVersion := range wgResults.GetResultMap() {
+		nodeVersionForNode[nodeID] = fmt.Sprintf("%v", nodeVersion)
 	}
 
 	notSyncedNodes := []string{}
@@ -195,7 +195,7 @@ func statusNode(_ *cobra.Command, args []string) error {
 		ansibleHostIDs,
 		ansibleHosts,
 		nodeIDs,
-		luxgoVersionForNode,
+		nodeVersionForNode,
 		notHealthyNodes,
 		notBootstrappedNodes,
 		notSyncedNodes,

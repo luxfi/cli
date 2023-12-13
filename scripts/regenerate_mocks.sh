@@ -2,7 +2,7 @@
 
 
 # NOTE: This script can only generate mocks from interfaces inside this repository.
-# For interfaces in other repositories (e.g. luxgo), the mocks should
+# For interfaces in other repositories (e.g. node), the mocks should
 # still be created manually for the time being.
 #
 # This currently affects the following mocks:

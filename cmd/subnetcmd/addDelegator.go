@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/luxgo/genesis"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/node/genesis"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/keychain"

@@ -85,7 +85,7 @@ func checkHostsAreBootstrapped(hosts []*models.Host) ([]string, error) {
 	}
 	wg.Wait()
 	if wgResults.HasErrors() {
-		return nil, fmt.Errorf("failed to get luxgo bootrapp status for node(s) %s", wgResults.GetErrorHostMap())
+		return nil, fmt.Errorf("failed to get node bootrapp status for node(s) %s", wgResults.GetErrorHostMap())
 	}
 	return utils.Filter(wgResults.GetNodeList(), func(nodeID string) bool {
 		return !wgResults.GetResultMap()[nodeID].(bool)
@@ -107,7 +107,7 @@ func parseBootstrappedOutput(byteValue []byte) (bool, error) {
 	return false, errors.New("unable to parse node bootstrap status")
 }
 
-func checkLuxGoVersionCompatible(hosts []*models.Host, subnetName string) ([]string, error) {
+func checkLuxdVersionCompatible(hosts []*models.Host, subnetName string) ([]string, error) {
 	ux.Logger.PrintToUser("Checking compatibility of node(s) lux go version with Subnet EVM RPC of subnet %s ...", subnetName)
 	sc, err := app.LoadSidecar(subnetName)
 	if err != nil {
@@ -123,25 +123,25 @@ func checkLuxGoVersionCompatible(hosts []*models.Host, subnetName string) ([]str
 		wg.Add(1)
 		go func(nodeResults *models.NodeResults, host *models.Host) {
 			defer wg.Done()
-			if resp, err := ssh.RunSSHCheckLuxGoVersion(host); err != nil {
+			if resp, err := ssh.RunSSHCheckLuxdVersion(host); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 				return
 			} else {
-				if luxGoVersion, err := parseLuxGoOutput(resp); err != nil {
+				if luxdVersion, err := parseLuxdOutput(resp); err != nil {
 					nodeResults.AddResult(host.NodeID, nil, err)
 				} else {
-					nodeResults.AddResult(host.NodeID, luxGoVersion, err)
+					nodeResults.AddResult(host.NodeID, luxdVersion, err)
 				}
 			}
 		}(&wgResults, host)
 	}
 	wg.Wait()
 	if wgResults.HasErrors() {
-		return nil, fmt.Errorf("failed to get luxgo version for node(s) %s", wgResults.GetErrorHostMap())
+		return nil, fmt.Errorf("failed to get node version for node(s) %s", wgResults.GetErrorHostMap())
 	}
 	incompatibleNodes := []string{}
-	for nodeID, luxGoVersion := range wgResults.GetResultMap() {
-		if !slices.Contains(compatibleVersions, fmt.Sprintf("%v", luxGoVersion)) {
+	for nodeID, luxdVersion := range wgResults.GetResultMap() {
+		if !slices.Contains(compatibleVersions, fmt.Sprintf("%v", luxdVersion)) {
 			incompatibleNodes = append(incompatibleNodes, nodeID)
 		}
 	}
@@ -151,7 +151,7 @@ func checkLuxGoVersionCompatible(hosts []*models.Host, subnetName string) ([]str
 	return incompatibleNodes, nil
 }
 
-func parseLuxGoOutput(byteValue []byte) (string, error) {
+func parseLuxdOutput(byteValue []byte) (string, error) {
 	var result map[string]interface{}
 	if err := json.Unmarshal(byteValue, &result); err != nil {
 		return "", err
@@ -160,9 +160,9 @@ func parseLuxGoOutput(byteValue []byte) (string, error) {
 	if ok {
 		vmVersions, ok := nodeIDInterface["vmVersions"].(map[string]interface{})
 		if ok {
-			luxGoVersion, ok := vmVersions["platform"].(string)
+			luxdVersion, ok := vmVersions["platform"].(string)
 			if ok {
-				return luxGoVersion, nil
+				return luxdVersion, nil
 			}
 		}
 	}
@@ -170,8 +170,8 @@ func parseLuxGoOutput(byteValue []byte) (string, error) {
 }
 
 func checkForCompatibleAvagoVersion(configuredRPCVersion int) ([]string, error) {
-	compatibleAvagoVersions, err := vm.GetAvailableLuxGoVersions(
-		app, configuredRPCVersion, constants.LuxGoCompatibilityURL)
+	compatibleAvagoVersions, err := vm.GetAvailableLuxdVersions(
+		app, configuredRPCVersion, constants.LuxdCompatibilityURL)
 	if err != nil {
 		return nil, err
 	}

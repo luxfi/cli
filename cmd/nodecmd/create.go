@@ -24,8 +24,8 @@ import (
 	"github.com/luxdefi/cli/pkg/terraform"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/staking"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/staking"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
@@ -37,9 +37,9 @@ import (
 )
 
 const (
-	luxGoReferenceChoiceLatest = "latest"
-	luxGoReferenceChoiceSubnet = "subnet"
-	luxGoReferenceChoiceCustom = "custom"
+	luxdReferenceChoiceLatest = "latest"
+	luxdReferenceChoiceSubnet = "subnet"
+	luxdReferenceChoiceCustom = "custom"
 )
 
 var (
@@ -52,8 +52,8 @@ var (
 	authorizeAccess                 bool
 	numNodes                        []int
 	nodeType                        string
-	useLatestLuxgoVersion     bool
-	useLuxgoVersionFromSubnet string
+	useLatestLuxdVersion     bool
+	useLuxdVersionFromSubnet string
 	cmdLineGCPCredentialsPath       string
 	cmdLineGCPProjectName           string
 	cmdLineAlternativeKeyPairName   string
@@ -88,8 +88,8 @@ will apply to all nodes in the cluster`,
 	cmd.Flags().BoolVar(&authorizeAccess, "authorize-access", false, "authorize CLI to create cloud resources")
 	cmd.Flags().IntSliceVar(&numNodes, "num-nodes", []int{}, "number of nodes to create per region(s). Use comma to separate multiple numbers for each region in the same order as --region flag")
 	cmd.Flags().StringVar(&nodeType, "node-type", "", "cloud instance type. Use 'default' to use recommended default instance type")
-	cmd.Flags().BoolVar(&useLatestLuxgoVersion, "latest-luxgo-version", false, "install latest luxgo version on node/s")
-	cmd.Flags().StringVar(&useLuxgoVersionFromSubnet, "luxgo-version-from-subnet", "", "install latest luxgo version, that is compatible with the given subnet, on node/s")
+	cmd.Flags().BoolVar(&useLatestLuxdVersion, "latest-node-version", false, "install latest node version on node/s")
+	cmd.Flags().StringVar(&useLuxdVersionFromSubnet, "node-version-from-subnet", "", "install latest node version, that is compatible with the given subnet, on node/s")
 	cmd.Flags().StringVar(&cmdLineGCPCredentialsPath, "gcp-credentials", "", "use given GCP credentials")
 	cmd.Flags().StringVar(&cmdLineGCPProjectName, "gcp-project", "", "use given GCP project")
 	cmd.Flags().StringVar(&cmdLineAlternativeKeyPairName, "alternative-key-pair-name", "", "key pair name to use if default one generates conflicts")
@@ -100,8 +100,8 @@ will apply to all nodes in the cluster`,
 }
 
 func preCreateChecks() error {
-	if useLatestLuxgoVersion && useLuxgoVersionFromSubnet != "" {
-		return fmt.Errorf("could not use both latest luxgo version and luxgo version based on given subnet")
+	if useLatestLuxdVersion && useLuxdVersionFromSubnet != "" {
+		return fmt.Errorf("could not use both latest node version and node version based on given subnet")
 	}
 	if useAWS && useGCP {
 		return fmt.Errorf("could not use both AWS and GCP cloud options")
@@ -237,7 +237,7 @@ func createNodes(_ *cobra.Command, args []string) error {
 		return err
 	}
 	inventoryPath := app.GetAnsibleInventoryDirPath(clusterName)
-	luxGoVersion, err := getLuxGoVersion()
+	luxdVersion, err := getLuxdVersion()
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func createNodes(_ *cobra.Command, args []string) error {
 
 	defer disconnectHosts(hosts)
 
-	ux.Logger.PrintToUser("Installing LuxGo and Lux-CLI and starting bootstrap process on the newly created Lux node(s) ...")
+	ux.Logger.PrintToUser("Installing Luxd and Lux-CLI and starting bootstrap process on the newly created Lux node(s) ...")
 	wg := sync.WaitGroup{}
 	wgResults := models.NodeResults{}
 	for _, host := range hosts {
@@ -283,7 +283,7 @@ func createNodes(_ *cobra.Command, args []string) error {
 				nodeResults.AddResult(host.NodeID, nil, err)
 				return
 			}
-			if err := ssh.RunSSHSetupNode(host, app.Conf.GetConfigPath(), luxGoVersion, network.Kind == models.Devnet); err != nil {
+			if err := ssh.RunSSHSetupNode(host, app.Conf.GetConfigPath(), luxdVersion, network.Kind == models.Devnet); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 				return
 			}
@@ -320,7 +320,7 @@ func createNodes(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to deploy node(s) %s", wgResults.GetErrorHostMap())
 	} else {
 		printResults(cloudConfigMap, publicIPMap, ansibleHostIDs)
-		ux.Logger.PrintToUser("LuxGo and Lux-CLI installed and node(s) are bootstrapping!")
+		ux.Logger.PrintToUser("Luxd and Lux-CLI installed and node(s) are bootstrapping!")
 	}
 	return nil
 }
@@ -502,31 +502,31 @@ func getIPAddress() (string, error) {
 	return "", errors.New("no IP address found")
 }
 
-// getLuxGoVersion asks users whether they want to install the newest Lux Go version
+// getLuxdVersion asks users whether they want to install the newest Lux Go version
 // or if they want to use the newest Lux Go Version that is still compatible with Subnet EVM
 // version of their choice
-func getLuxGoVersion() (string, error) {
+func getLuxdVersion() (string, error) {
 	version := ""
 	subnet := ""
-	if useLatestLuxgoVersion { //nolint: gocritic
+	if useLatestLuxdVersion { //nolint: gocritic
 		version = "latest"
-	} else if useLuxgoVersionFromSubnet != "" {
-		subnet = useLuxgoVersionFromSubnet
+	} else if useLuxdVersionFromSubnet != "" {
+		subnet = useLuxdVersionFromSubnet
 	} else {
-		choice, subnetChoice, err := promptLuxGoReferenceChoice()
+		choice, subnetChoice, err := promptLuxdReferenceChoice()
 		if err != nil {
 			return "", err
 		}
 		switch choice {
-		case luxGoReferenceChoiceLatest:
+		case luxdReferenceChoiceLatest:
 			version = "latest"
-		case luxGoReferenceChoiceCustom:
-			customVersion, err := app.Prompt.CaptureVersion("Which version of LuxGo would you like to install? (Use format v1.10.13)")
+		case luxdReferenceChoiceCustom:
+			customVersion, err := app.Prompt.CaptureVersion("Which version of Luxd would you like to install? (Use format v1.10.13)")
 			if err != nil {
 				return "", err
 			}
 			version = customVersion
-		case luxGoReferenceChoiceSubnet:
+		case luxdReferenceChoiceSubnet:
 			subnet = subnetChoice
 		}
 	}
@@ -544,18 +544,18 @@ func getLuxGoVersion() (string, error) {
 }
 
 func GetLatestAvagoVersionForRPC(configuredRPCVersion int) (string, error) {
-	desiredAvagoVersion, err := vm.GetLatestLuxGoByProtocolVersion(
-		app, configuredRPCVersion, constants.LuxGoCompatibilityURL)
+	desiredAvagoVersion, err := vm.GetLatestLuxdByProtocolVersion(
+		app, configuredRPCVersion, constants.LuxdCompatibilityURL)
 	if err != nil {
 		return "", err
 	}
 	return desiredAvagoVersion, nil
 }
 
-// promptLuxGoReferenceChoice returns user's choice of either using the latest Lux Go
+// promptLuxdReferenceChoice returns user's choice of either using the latest Lux Go
 // version or using the latest Lux Go version that is still compatible with the subnet that user
 // wants the cloud server to track
-func promptLuxGoReferenceChoice() (string, string, error) {
+func promptLuxdReferenceChoice() (string, string, error) {
 	defaultVersion := "Use latest Lux Go Version"
 	txt := "What version of Lux Go would you like to install in the node?"
 	versionOptions := []string{defaultVersion, "Use the deployed Subnet's VM version that the node will be validating", "Custom"}
@@ -566,9 +566,9 @@ func promptLuxGoReferenceChoice() (string, string, error) {
 
 	switch versionOption {
 	case defaultVersion:
-		return luxGoReferenceChoiceLatest, "", nil
+		return luxdReferenceChoiceLatest, "", nil
 	case "Custom":
-		return luxGoReferenceChoiceCustom, "", nil
+		return luxdReferenceChoiceCustom, "", nil
 	default:
 		for {
 			subnetName, err := app.Prompt.CaptureString("Which Subnet would you like to use to choose the lux go version?")
@@ -577,7 +577,7 @@ func promptLuxGoReferenceChoice() (string, string, error) {
 			}
 			_, err = subnetcmd.ValidateSubnetNameAndGetChains([]string{subnetName})
 			if err == nil {
-				return luxGoReferenceChoiceSubnet, subnetName, nil
+				return luxdReferenceChoiceSubnet, subnetName, nil
 			}
 			ux.Logger.PrintToUser(fmt.Sprintf("no subnet named %s found", subnetName))
 		}

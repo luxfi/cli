@@ -8,8 +8,8 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 )
 
-func SetupLuxgo(app *application.Lux, avagoVersion string) (string, error) {
-	binDir := app.GetLuxgoBinDir()
+func SetupLuxd(app *application.Lux, avagoVersion string) (string, error) {
+	binDir := app.GetLuxdBinDir()
 
 	installer := NewInstaller()
 	downloader := NewAvagoDownloader()
@@ -18,9 +18,9 @@ func SetupLuxgo(app *application.Lux, avagoVersion string) (string, error) {
 		avagoVersion,
 		binDir,
 		binDir,
-		luxgoBinPrefix,
+		nodeBinPrefix,
 		constants.LuxDeFiOrg,
-		constants.LuxGoRepoName,
+		constants.LuxdRepoName,
 		downloader,
 		installer,
 	)

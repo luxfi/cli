@@ -102,7 +102,7 @@ func FindErrorLogs(rootDirs ...string) {
 }
 
 func removeTimestamp(s string) string {
-	// first let's make sure this string follows the usual luxgo timestamp structure
+	// first let's make sure this string follows the usual node timestamp structure
 	// the same log in a different file most likely will have a different timestamp
 	// log has format `[timestamp] log text`
 	if s[:1] == timestampStart {

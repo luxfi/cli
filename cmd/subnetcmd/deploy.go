@@ -24,9 +24,9 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
 	anrutils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/vms/platformvm/txs"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm/txs"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -87,7 +87,7 @@ so you can take your locally tested Subnet and deploy it on Fuji or Mainnet.`,
 	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `fuji`)")
 	cmd.Flags().BoolVarP(&deployTestnet, "fuji", "f", false, "deploy to fuji (alias to `testnet`")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "deploy to mainnet")
-	cmd.Flags().StringVar(&userProvidedAvagoVersion, "luxgo-version", "latest", "use this version of luxgo (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedAvagoVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji/devnet deploy only]")
 	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use the fee-paying key as control key")
 	cmd.Flags().Uint32Var(&threshold, "threshold", 0, "required number of control key signatures to make subnet changes")
@@ -828,7 +828,7 @@ func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID) erro
 	return nil
 }
 
-// Determines the appropriate version of luxgo to run with. Returns an error if
+// Determines the appropriate version of node to run with. Returns an error if
 // that version conflicts with the current deployment.
 func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
 	// get current network
@@ -839,10 +839,10 @@ func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 
 	desiredAvagoVersion := userProvidedAvagoVersion
 
-	// RPC Version was made available in the info API in luxgo version v1.9.2. For prior versions,
+	// RPC Version was made available in the info API in node version v1.9.2. For prior versions,
 	// we will need to skip this check.
 	skipRPCCheck := false
-	if semver.Compare(runningAvagoVersion, constants.LuxGoCompatibilityVersionAdded) == -1 {
+	if semver.Compare(runningAvagoVersion, constants.LuxdCompatibilityVersionAdded) == -1 {
 		skipRPCCheck = true
 	}
 
@@ -850,7 +850,7 @@ func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 		if userProvidedAvagoVersion == "latest" {
 			if runningRPCVersion != configuredRPCVersion && !skipRPCCheck {
 				return "", fmt.Errorf(
-					"the current luxgo deployment uses rpc version %d but your subnet has version %d and is not compatible",
+					"the current node deployment uses rpc version %d but your subnet has version %d and is not compatible",
 					runningRPCVersion,
 					configuredRPCVersion,
 				)
@@ -858,12 +858,12 @@ func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 			desiredAvagoVersion = runningAvagoVersion
 		} else if runningAvagoVersion != userProvidedAvagoVersion {
 			// user wants a specific version
-			return "", errors.New("incompatible luxgo version selected")
+			return "", errors.New("incompatible node version selected")
 		}
 	} else if userProvidedAvagoVersion == "latest" {
 		// find latest avago version for this rpc version
-		desiredAvagoVersion, err = vm.GetLatestLuxGoByProtocolVersion(
-			app, configuredRPCVersion, constants.LuxGoCompatibilityURL)
+		desiredAvagoVersion, err = vm.GetLatestLuxdByProtocolVersion(
+			app, configuredRPCVersion, constants.LuxdCompatibilityURL)
 		if err != nil {
 			return "", err
 		}

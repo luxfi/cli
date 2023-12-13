@@ -63,7 +63,7 @@ func StartNetworkWithVersion(version string) string {
 	if version != "" {
 		cmdArgs = append(
 			cmdArgs,
-			"--luxgo-version",
+			"--node-version",
 			version,
 		)
 	}

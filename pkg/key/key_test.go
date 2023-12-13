@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxdefi/luxgo/utils/cb58"
-	"github.com/luxdefi/luxgo/utils/crypto/secp256k1"
+	"github.com/luxdefi/node/utils/cb58"
+	"github.com/luxdefi/node/utils/crypto/secp256k1"
 )
 
 const (

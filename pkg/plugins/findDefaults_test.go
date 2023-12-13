@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/luxgo/config"
+	"github.com/luxdefi/node/config"
 	"github.com/stretchr/testify/require"
 )
 
@@ -86,10 +86,10 @@ func TestFindDefaultFiles(t *testing.T) {
 
 	scanDirs := []string{
 		// firs indexes should succeed
-		filepath.Join(testDir, "etc", "luxgo"),
-		filepath.Join(testDir, "home", ".luxgo"),
+		filepath.Join(testDir, "etc", "node"),
+		filepath.Join(testDir, "home", ".node"),
 		testDir,
-		"$" + config.LuxGoDataDirVar,
+		"$" + config.LuxdDataDirVar,
 		// following indexes should fail (don't exist)
 		fakeNotSetEnvVar,
 		fakeSetEnvVar,
@@ -106,11 +106,11 @@ func TestFindDefaultFiles(t *testing.T) {
 	require.NoError(err)
 	existingDataDir := filepath.Join(testDir, "data-dir")
 	// make sure we don't accidentally overwrite a really existing env var
-	origVar := os.Getenv(config.LuxGoDataDirVar)
-	err = os.Setenv(config.LuxGoDataDirVar, existingDataDir)
+	origVar := os.Getenv(config.LuxdDataDirVar)
+	err = os.Setenv(config.LuxdDataDirVar, existingDataDir)
 	require.NoError(err)
 	defer func() {
-		err = os.Setenv(config.LuxGoDataDirVar, origVar)
+		err = os.Setenv(config.LuxdDataDirVar, origVar)
 		require.NoError(err)
 		err = os.Setenv(fakeSetEnvVar, "")
 		require.NoError(err)

@@ -13,14 +13,14 @@ import (
 	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/crypto/keychain"
-	"github.com/luxdefi/luxgo/utils/crypto/ledger"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/utils/set"
-	"github.com/luxdefi/luxgo/utils/units"
-	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/crypto/keychain"
+	"github.com/luxdefi/node/utils/crypto/ledger"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/utils/units"
+	"github.com/luxdefi/node/vms/platformvm"
 )
 
 const (
