@@ -14,7 +14,7 @@ import (
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/node/ids"
-	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxdconstants "github.com/luxdefi/node/utils/constants"
 	"github.com/luxdefi/node/utils/crypto/keychain"
 	ledger "github.com/luxdefi/node/utils/crypto/ledger"
 	"github.com/luxdefi/node/utils/formatting/address"
@@ -378,7 +378,7 @@ func transferF(*cobra.Command, []string) error {
 				ux.Logger.PrintToUser("*** Please sign ImportTx transaction on the ledger device *** ")
 			}
 			unsignedTx, err := wallet.X().Builder().NewImportTx(
-				avagoconstants.PlatformChainID,
+				luxdconstants.PlatformChainID,
 				&to,
 			)
 			if err != nil {

@@ -44,7 +44,7 @@ var (
 	threshold                uint32
 	controlKeys              []string
 	subnetAuthKeys           []string
-	userProvidedAvagoVersion string
+	userProvidedLuxdVersion string
 	outputTxPath             string
 	useLedger                bool
 	useEwoq                  bool
@@ -87,7 +87,7 @@ so you can take your locally tested Subnet and deploy it on Fuji or Mainnet.`,
 	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `fuji`)")
 	cmd.Flags().BoolVarP(&deployTestnet, "fuji", "f", false, "deploy to fuji (alias to `testnet`")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "deploy to mainnet")
-	cmd.Flags().StringVar(&userProvidedAvagoVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedLuxdVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji/devnet deploy only]")
 	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use the fee-paying key as control key")
 	cmd.Flags().Uint32Var(&threshold, "threshold", 0, "required number of control key signatures to make subnet changes")
@@ -370,12 +370,12 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 
 		// check if selected version matches what is currently running
 		nc := localnetworkinterface.NewStatusChecker()
-		userProvidedAvagoVersion, err = CheckForInvalidDeployAndGetAvagoVersion(nc, sidecar.RPCVersion)
+		userProvidedLuxdVersion, err = CheckForInvalidDeployAndGetLuxdVersion(nc, sidecar.RPCVersion)
 		if err != nil {
 			return err
 		}
 
-		deployer := subnet.NewLocalDeployer(app, userProvidedAvagoVersion, vmBin)
+		deployer := subnet.NewLocalDeployer(app, userProvidedLuxdVersion, vmBin)
 		subnetID, blockchainID, err := deployer.DeployToLocalNetwork(chain, chainGenesis, genesisPath)
 		if err != nil {
 			if deployer.BackendStartedHere() {
@@ -830,24 +830,24 @@ func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID) erro
 
 // Determines the appropriate version of node to run with. Returns an error if
 // that version conflicts with the current deployment.
-func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
+func CheckForInvalidDeployAndGetLuxdVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
 	// get current network
-	runningAvagoVersion, runningRPCVersion, networkRunning, err := network.GetCurrentNetworkVersion()
+	runningLuxdVersion, runningRPCVersion, networkRunning, err := network.GetCurrentNetworkVersion()
 	if err != nil {
 		return "", err
 	}
 
-	desiredAvagoVersion := userProvidedAvagoVersion
+	desiredLuxdVersion := userProvidedLuxdVersion
 
 	// RPC Version was made available in the info API in node version v1.9.2. For prior versions,
 	// we will need to skip this check.
 	skipRPCCheck := false
-	if semver.Compare(runningAvagoVersion, constants.LuxdCompatibilityVersionAdded) == -1 {
+	if semver.Compare(runningLuxdVersion, constants.LuxdCompatibilityVersionAdded) == -1 {
 		skipRPCCheck = true
 	}
 
 	if networkRunning {
-		if userProvidedAvagoVersion == "latest" {
+		if userProvidedLuxdVersion == "latest" {
 			if runningRPCVersion != configuredRPCVersion && !skipRPCCheck {
 				return "", fmt.Errorf(
 					"the current node deployment uses rpc version %d but your subnet has version %d and is not compatible",
@@ -855,20 +855,20 @@ func CheckForInvalidDeployAndGetAvagoVersion(network localnetworkinterface.Statu
 					configuredRPCVersion,
 				)
 			}
-			desiredAvagoVersion = runningAvagoVersion
-		} else if runningAvagoVersion != userProvidedAvagoVersion {
+			desiredLuxdVersion = runningLuxdVersion
+		} else if runningLuxdVersion != userProvidedLuxdVersion {
 			// user wants a specific version
 			return "", errors.New("incompatible node version selected")
 		}
-	} else if userProvidedAvagoVersion == "latest" {
-		// find latest avago version for this rpc version
-		desiredAvagoVersion, err = vm.GetLatestLuxdByProtocolVersion(
+	} else if userProvidedLuxdVersion == "latest" {
+		// find latest luxd version for this rpc version
+		desiredLuxdVersion, err = vm.GetLatestLuxdByProtocolVersion(
 			app, configuredRPCVersion, constants.LuxdCompatibilityURL)
 		if err != nil {
 			return "", err
 		}
 	}
-	return desiredAvagoVersion, nil
+	return desiredLuxdVersion, nil
 }
 
 func hasSubnetEVMGenesis(subnetName string) (bool, error) {

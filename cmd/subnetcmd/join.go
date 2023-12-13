@@ -35,7 +35,7 @@ const ewoqPChainAddr = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 
 var (
 	// path to node config file
-	avagoConfigPath string
+	luxdConfigPath string
 	// path to node plugin dir
 	pluginDir string
 	// path to node datadir dir
@@ -75,7 +75,7 @@ This command currently only supports Subnets deployed on the Fuji Testnet and Ma
 		RunE: joinCmd,
 		Args: cobra.ExactArgs(1),
 	}
-	cmd.Flags().StringVar(&avagoConfigPath, "node-config", "", "file path of the node config file")
+	cmd.Flags().StringVar(&luxdConfigPath, "node-config", "", "file path of the node config file")
 	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of node's plugin directory")
 	cmd.Flags().StringVar(&dataDir, "data-dir", "", "path of node's data dir directory")
 	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "join on `fuji` (alias for `testnet`)")
@@ -97,7 +97,7 @@ This command currently only supports Subnets deployed on the Fuji Testnet and Ma
 }
 
 func joinCmd(_ *cobra.Command, args []string) error {
-	if printManual && (avagoConfigPath != "" || pluginDir != "") {
+	if printManual && (luxdConfigPath != "" || pluginDir != "") {
 		return errors.New("--print cannot be used with --node-config or --plugin-dir")
 	}
 
@@ -179,7 +179,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 
 	// if **both** flags were set, nothing special needs to be done
 	// just check the following blocks
-	if avagoConfigPath == "" && pluginDir == "" {
+	if luxdConfigPath == "" && pluginDir == "" {
 		// both flags are NOT set
 		const (
 			choiceManual    = "Manual"
@@ -204,27 +204,27 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	}
 
 	// if choice is automatic, we just pass through this block
-	// or, pluginDir was set but not avagoConfigPath
+	// or, pluginDir was set but not luxdConfigPath
 	// if **both** flags were set, this will be skipped...
-	if avagoConfigPath == "" {
-		avagoConfigPath, err = plugins.FindAvagoConfigPath()
+	if luxdConfigPath == "" {
+		luxdConfigPath, err = plugins.FindLuxdConfigPath()
 		if err != nil {
 			return err
 		}
-		if avagoConfigPath != "" {
-			ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Green.Wrap("Found a config file at %s")), avagoConfigPath)
+		if luxdConfigPath != "" {
+			ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Green.Wrap("Found a config file at %s")), luxdConfigPath)
 			yes, err := app.Prompt.CaptureYesNo("Is this the file we should update?")
 			if err != nil {
 				return err
 			}
 			if yes {
-				ux.Logger.PrintToUser("Will use file at path %s to update the configuration", avagoConfigPath)
+				ux.Logger.PrintToUser("Will use file at path %s to update the configuration", luxdConfigPath)
 			} else {
-				avagoConfigPath = ""
+				luxdConfigPath = ""
 			}
 		}
-		if avagoConfigPath == "" {
-			avagoConfigPath, err = app.Prompt.CaptureString("Path to your existing config file (or where it will be generated)")
+		if luxdConfigPath == "" {
+			luxdConfigPath, err = app.Prompt.CaptureString("Path to your existing config file (or where it will be generated)")
 			if err != nil {
 				return err
 			}
@@ -232,12 +232,12 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	}
 
 	// ...but not this
-	avagoConfigPath, err := plugins.SanitizePath(avagoConfigPath)
+	luxdConfigPath, err := plugins.SanitizePath(luxdConfigPath)
 	if err != nil {
 		return err
 	}
 
-	// avagoConfigPath was set but not pluginDir
+	// luxdConfigPath was set but not pluginDir
 	// if **both** flags were set, this will be skipped...
 	if pluginDir == "" {
 		pluginDir, err = plugins.FindPluginDir()
@@ -278,23 +278,23 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("VM binary written to %s", vmPath)
 
 	if forceWrite {
-		if err := writeAvagoChainConfigFiles(app, dataDir, subnetName, sc, network); err != nil {
+		if err := writeLuxdChainConfigFiles(app, dataDir, subnetName, sc, network); err != nil {
 			return err
 		}
 	}
 
-	subnetAvagoConfigFile := ""
-	if app.AvagoNodeConfigExists(subnetName) {
-		subnetAvagoConfigFile = app.GetAvagoNodeConfigPath(subnetName)
+	subnetLuxdConfigFile := ""
+	if app.LuxdNodeConfigExists(subnetName) {
+		subnetLuxdConfigFile = app.GetLuxdNodeConfigPath(subnetName)
 	}
 
 	if err := plugins.EditConfigFile(
 		app,
 		subnetIDStr,
 		network,
-		avagoConfigPath,
+		luxdConfigPath,
 		forceWrite,
-		subnetAvagoConfigFile,
+		subnetLuxdConfigFile,
 	); err != nil {
 		return err
 	}
@@ -302,7 +302,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func writeAvagoChainConfigFiles(
+func writeLuxdChainConfigFiles(
 	app *application.Lux,
 	dataDir string,
 	subnetName string,
@@ -328,11 +328,11 @@ func writeAvagoChainConfigFiles(
 
 	subnetConfigsPath := filepath.Join(configsPath, "subnets")
 	subnetConfigPath := filepath.Join(subnetConfigsPath, subnetIDStr+".json")
-	if app.AvagoSubnetConfigExists(subnetName) {
+	if app.LuxdSubnetConfigExists(subnetName) {
 		if err := os.MkdirAll(subnetConfigsPath, constants.DefaultPerms755); err != nil {
 			return err
 		}
-		subnetConfig, err := app.LoadRawAvagoSubnetConfig(subnetName)
+		subnetConfig, err := app.LoadRawLuxdSubnetConfig(subnetName)
 		if err != nil {
 			return err
 		}

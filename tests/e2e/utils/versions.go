@@ -28,14 +28,14 @@ var (
 
 /*
 VersionMapper keys and their usage:
- * OnlyAvagoKey: 					Used when running one node only (no compatibility required)
+ * OnlyLuxdKey: 					Used when running one node only (no compatibility required)
 
- * MultiAvago1Key					Used for the update scenario where node is updated and
- * MultiAvago2Key    			both node versions need to be compatible.
- * MultiAvagoSubnetEVMKey	This is the Subnet-EVM version compatible to the above scenario.
+ * MultiLuxd1Key					Used for the update scenario where node is updated and
+ * MultiLuxd2Key    			both node versions need to be compatible.
+ * MultiLuxdSubnetEVMKey	This is the Subnet-EVM version compatible to the above scenario.
 
- * LatestEVM2AvagoKey 	  Latest subnet-evm version
- * LatestAvago2EVMKey     while this is the latest node compatible with that subnet-evm
+ * LatestEVM2LuxdKey 	  Latest subnet-evm version
+ * LatestLuxd2EVMKey     while this is the latest node compatible with that subnet-evm
 
  * SoloSubnetEVMKey1 			This is used when we want to test subnet-evm versions where compatibility
  * SoloSubnetEVMKey2      needs to be between the two subnet-evm versions
@@ -51,9 +51,9 @@ VersionMapper keys and their usage:
 // without having to manually update the e2e tests periodically.
 type VersionMapper interface {
 	GetCompatURL(vmType models.VMType) string
-	GetAvagoURL() string
+	GetLuxdURL() string
 	GetApp() *application.Lux
-	GetLatestAvagoByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error)
+	GetLatestLuxdByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error)
 	GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error)
 	FilterAvailableVersions(versions []string) []string
 }
@@ -75,10 +75,10 @@ type versionMapper struct {
 	app *application.Lux
 }
 
-// GetLatestAvagoByProtoVersion returns the latest Luxd version which
+// GetLatestLuxdByProtoVersion returns the latest Luxd version which
 // runs with the specified rpcVersion, or an error if it can't be found
 // (or other errors occurred)
-func (*versionMapper) GetLatestAvagoByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
+func (*versionMapper) GetLatestLuxdByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
 	return vm.GetLatestLuxdByProtocolVersion(app, rpcVersion, url)
 }
 
@@ -100,13 +100,13 @@ func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	}
 }
 
-// GetAvagoURL returns the compatibility URL for Luxd
-func (*versionMapper) GetAvagoURL() string {
+// GetLuxdURL returns the compatibility URL for Luxd
+func (*versionMapper) GetLuxdURL() string {
 	return constants.LuxdCompatibilityURL
 }
 
 func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error) {
-	// get latest avago release to make sure we're not picking a release currently in progress but not available for download
+	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
 	latest, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.LuxDeFiOrg,
 		repoName,
@@ -175,7 +175,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	subnetEVMversions = mapper.FilterAvailableVersions(subnetEVMversions)
 
 	// now get the node compatibility object
-	avagoCompat, err := getAvagoCompatibility(mapper)
+	luxdCompat, err := getLuxdCompatibility(mapper)
 	if err != nil {
 		return nil, err
 	}
@@ -183,10 +183,10 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// create the global mapping variable
 	binaryToVersion = make(map[string]string)
 
-	// sort avago compatibility by highest available RPC versions
+	// sort luxd compatibility by highest available RPC versions
 	// to lowest (the map can not be iterated in a sorted way)
-	rpcs := make([]int, 0, len(avagoCompat))
-	for k := range avagoCompat {
+	rpcs := make([]int, 0, len(luxdCompat))
+	for k := range luxdCompat {
 		// cannot use string sort
 		kint, err := strconv.Atoi(k)
 		if err != nil {
@@ -202,12 +202,12 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// This is required for the for the "can deploy with multiple node versions" test
 	for _, rpcVersion := range rpcs {
 		versionAsString := strconv.Itoa(rpcVersion)
-		versionsForRPC := avagoCompat[versionAsString]
+		versionsForRPC := luxdCompat[versionAsString]
 		// we need at least 2 versions for the same RPC version
 		if len(versionsForRPC) > 1 {
 			versionsForRPC = reverseSemverSort(versionsForRPC)
-			binaryToVersion[MultiAvago1Key] = versionsForRPC[0]
-			binaryToVersion[MultiAvago2Key] = versionsForRPC[1]
+			binaryToVersion[MultiLuxd1Key] = versionsForRPC[0]
+			binaryToVersion[MultiLuxd2Key] = versionsForRPC[1]
 
 			// now iterate the subnetEVMversions and find a
 			// subnet-evm version which is compatible with that RPC version.
@@ -217,7 +217,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 					// we know there already exists at least one such combination.
 					// unless the compatibility JSON will start to be shortened in some way,
 					// we should always be able to find a matching subnet-evm
-					binaryToVersion[MultiAvagoSubnetEVMKey] = evmVer
+					binaryToVersion[MultiLuxdSubnetEVMKey] = evmVer
 					// found the version, break
 					break
 				}
@@ -227,8 +227,8 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		}
 	}
 
-	// when running Avago only, always use latest
-	binaryToVersion[OnlyAvagoKey] = OnlyAvagoValue
+	// when running Luxd only, always use latest
+	binaryToVersion[OnlyLuxdKey] = OnlyLuxdValue
 
 	// now let's look for subnet-evm versions which are fit for the
 	// "can deploy multiple subnet-evm versions" test.
@@ -248,20 +248,20 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		// we should be able to safely assume that for a given subnet-evm RPC version,
 		// there exists at least one compatible Luxd.
 		// This means we can in any case use this to set the **latest** compatibility
-		soloAvago, err := mapper.GetLatestAvagoByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetAvagoURL())
+		soloLuxd, err := mapper.GetLatestLuxdByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetLuxdURL())
 		if err != nil {
 			return nil, err
 		}
 		// Once latest compatibility has been set, we can skip this
-		if binaryToVersion[LatestEVM2AvagoKey] == "" {
-			binaryToVersion[LatestEVM2AvagoKey] = first
-			binaryToVersion[LatestAvago2EVMKey] = soloAvago
+		if binaryToVersion[LatestEVM2LuxdKey] == "" {
+			binaryToVersion[LatestEVM2LuxdKey] = first
+			binaryToVersion[LatestLuxd2EVMKey] = soloLuxd
 		}
 		// first and second are compatible
 		if subnetEVMmapping[first] == subnetEVMmapping[second] {
 			binaryToVersion[SoloSubnetEVMKey1] = first
 			binaryToVersion[SoloSubnetEVMKey2] = second
-			binaryToVersion[SoloAvagoKey] = soloAvago
+			binaryToVersion[SoloLuxdKey] = soloLuxd
 			break
 		}
 	}
@@ -309,19 +309,19 @@ func getCompatibility(mapper VersionMapper, vmType models.VMType) (models.VMComp
 	return parsedCompat, nil
 }
 
-// getAvagoCompatibility returns the compatibility for Luxd
-func getAvagoCompatibility(mapper VersionMapper) (models.AvagoCompatiblity, error) {
-	avagoBytes, err := mapper.GetApp().GetDownloader().Download(mapper.GetAvagoURL())
+// getLuxdCompatibility returns the compatibility for Luxd
+func getLuxdCompatibility(mapper VersionMapper) (models.LuxdCompatiblity, error) {
+	luxdBytes, err := mapper.GetApp().GetDownloader().Download(mapper.GetLuxdURL())
 	if err != nil {
 		return nil, err
 	}
 
-	var avagoCompat models.AvagoCompatiblity
-	if err = json.Unmarshal(avagoBytes, &avagoCompat); err != nil {
+	var luxdCompat models.LuxdCompatiblity
+	if err = json.Unmarshal(luxdBytes, &luxdCompat); err != nil {
 		return nil, err
 	}
 
-	return avagoCompat, nil
+	return luxdCompat, nil
 }
 
 // For semantic version slices, we can't just reverse twice:

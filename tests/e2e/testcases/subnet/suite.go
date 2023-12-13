@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("[Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can create and delete a custom vm subnet config", func() {
-		// let's use a SubnetEVM version which would be compatible with an existing Avago
+		// let's use a SubnetEVM version which would be compatible with an existing Luxd
 		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloSubnetEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
 

@@ -53,7 +53,7 @@ func StartNetwork() string {
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return StartNetworkWithVersion(mapping[utils.OnlyAvagoKey])
+	return StartNetworkWithVersion(mapping[utils.OnlyLuxdKey])
 }
 
 /* #nosec G204 */

@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	userProvidedAvagoVersion string
+	userProvidedLuxdVersion string
 	snapshotName             string
 )
 
@@ -42,19 +42,19 @@ already running.`,
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&userProvidedAvagoVersion, "node-version", latest, "use this version of node (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedLuxdVersion, "node-version", latest, "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 
 	return cmd
 }
 
 func StartNetwork(*cobra.Command, []string) error {
-	avagoVersion, err := determineAvagoVersion(userProvidedAvagoVersion)
+	luxdVersion, err := determineLuxdVersion(userProvidedLuxdVersion)
 	if err != nil {
 		return err
 	}
 
-	sd := subnet.NewLocalDeployer(app, avagoVersion, "")
+	sd := subnet.NewLocalDeployer(app, luxdVersion, "")
 
 	if err := sd.StartServer(); err != nil {
 		return err
@@ -137,10 +137,10 @@ func StartNetwork(*cobra.Command, []string) error {
 	return nil
 }
 
-func determineAvagoVersion(userProvidedAvagoVersion string) (string, error) {
+func determineLuxdVersion(userProvidedLuxdVersion string) (string, error) {
 	// a specific user provided version should override this calculation, so just return
-	if userProvidedAvagoVersion != latest {
-		return userProvidedAvagoVersion, nil
+	if userProvidedLuxdVersion != latest {
+		return userProvidedLuxdVersion, nil
 	}
 
 	// Need to determine which subnets have been deployed

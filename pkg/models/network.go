@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/node/genesis"
-	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxdconstants "github.com/luxdefi/node/utils/constants"
 )
 
 type NetworkKind int64
@@ -45,8 +45,8 @@ var (
 	UndefinedNetwork = NewNetwork(Undefined, 0, "")
 	LocalNetwork     = NewNetwork(Local, constants.LocalNetworkID, constants.LocalAPIEndpoint)
 	DevnetNetwork    = NewNetwork(Devnet, constants.DevnetNetworkID, constants.DevnetAPIEndpoint)
-	FujiNetwork      = NewNetwork(Fuji, avagoconstants.FujiID, constants.FujiAPIEndpoint)
-	MainnetNetwork   = NewNetwork(Mainnet, avagoconstants.MainnetID, constants.MainnetAPIEndpoint)
+	FujiNetwork      = NewNetwork(Fuji, luxdconstants.FujiID, constants.FujiAPIEndpoint)
+	MainnetNetwork   = NewNetwork(Mainnet, luxdconstants.MainnetID, constants.MainnetAPIEndpoint)
 )
 
 func NewNetwork(kind NetworkKind, id uint32, endpoint string) Network {
@@ -78,9 +78,9 @@ func NetworkFromString(s string) Network {
 
 func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
-	case avagoconstants.MainnetID:
+	case luxdconstants.MainnetID:
 		return MainnetNetwork
-	case avagoconstants.FujiID:
+	case luxdconstants.FujiID:
 		return FujiNetwork
 	case constants.LocalNetworkID:
 		return LocalNetwork

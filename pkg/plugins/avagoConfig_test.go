@@ -60,14 +60,14 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	fileBytes, err := os.ReadFile(configPath)
 	require.NoError(err)
 
-	var avagoConfig map[string]interface{}
-	err = json.Unmarshal(fileBytes, &avagoConfig)
+	var luxdConfig map[string]interface{}
+	err = json.Unmarshal(fileBytes, &luxdConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", avagoConfig["track-subnets"])
+	require.Equal("subNetId000,testSubNet", luxdConfig["track-subnets"])
 
 	// ensure that the old setting has been deleted
-	require.Equal(nil, avagoConfig["whitelisted-subnets"])
+	require.Equal(nil, luxdConfig["whitelisted-subnets"])
 }
 
 // testing backward compatibility
@@ -102,14 +102,14 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	fileBytes, err := os.ReadFile(configPath)
 	require.NoError(err)
 
-	var avagoConfig map[string]interface{}
-	err = json.Unmarshal(fileBytes, &avagoConfig)
+	var luxdConfig map[string]interface{}
+	err = json.Unmarshal(fileBytes, &luxdConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", avagoConfig["track-subnets"])
+	require.Equal("subNetId000,testSubNet", luxdConfig["track-subnets"])
 
 	// ensure that the old setting wont be applied at all
-	require.Equal(nil, avagoConfig["whitelisted-subnets"])
+	require.Equal(nil, luxdConfig["whitelisted-subnets"])
 }
 
 func TestEditConfigFileWithNoSettings(t *testing.T) {
@@ -143,12 +143,12 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	fileBytes, err := os.ReadFile(configPath)
 	require.NoError(err)
 
-	var avagoConfig map[string]interface{}
-	err = json.Unmarshal(fileBytes, &avagoConfig)
+	var luxdConfig map[string]interface{}
+	err = json.Unmarshal(fileBytes, &luxdConfig)
 	require.NoError(err)
 
-	require.Equal("testSubNet", avagoConfig["track-subnets"])
+	require.Equal("testSubNet", luxdConfig["track-subnets"])
 
 	// ensure that the old setting wont be applied at all
-	require.Equal(nil, avagoConfig["whitelisted-subnets"])
+	require.Equal(nil, luxdConfig["whitelisted-subnets"])
 }

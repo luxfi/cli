@@ -21,7 +21,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	anrutils "github.com/luxdefi/netrunner/utils"
 	"github.com/luxdefi/node/ids"
-	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxdconstants "github.com/luxdefi/node/utils/constants"
 	"github.com/luxdefi/node/utils/formatting/address"
 	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/node/utils/set"
@@ -849,7 +849,7 @@ func IssueXToPExportTx(
 ) (ids.ID, error) {
 	showLedgerSignatureMsg(usingLedger, hasOnlyOneKey, "X -> P Chain Export Transaction")
 	unsignedTx, err := wallet.X().Builder().NewExportTx(
-		avagoconstants.PlatformChainID,
+		luxdconstants.PlatformChainID,
 		[]*lux.TransferableOutput{
 			{
 				Asset: lux.Asset{

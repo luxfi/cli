@@ -55,11 +55,11 @@ type LocalDeployer struct {
 	app                *application.Lux
 	backendStartedHere bool
 	setDefaultSnapshot setDefaultSnapshotFunc
-	avagoVersion       string
+	luxdVersion       string
 	vmBin              string
 }
 
-func NewLocalDeployer(app *application.Lux, avagoVersion string, vmBin string) *LocalDeployer {
+func NewLocalDeployer(app *application.Lux, luxdVersion string, vmBin string) *LocalDeployer {
 	return &LocalDeployer{
 		procChecker:        binutils.NewProcessChecker(),
 		binChecker:         binutils.NewBinaryChecker(),
@@ -67,7 +67,7 @@ func NewLocalDeployer(app *application.Lux, avagoVersion string, vmBin string) *
 		binaryDownloader:   binutils.NewPluginBinaryDownloader(app),
 		app:                app,
 		setDefaultSnapshot: SetDefaultSnapshot,
-		avagoVersion:       avagoVersion,
+		luxdVersion:       luxdVersion,
 		vmBin:              vmBin,
 	}
 }
@@ -562,13 +562,13 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 		return "", fmt.Errorf("failed setting up snapshots: %w", err)
 	}
 
-	avagoDir, err := d.setupLocalEnv()
+	luxdDir, err := d.setupLocalEnv()
 	if err != nil {
 		return "", fmt.Errorf("failed setting up local environment: %w", err)
 	}
 
 	pluginDir := d.app.GetPluginsDir()
-	luxdBinPath := filepath.Join(avagoDir, "node")
+	luxdBinPath := filepath.Join(luxdDir, "node")
 
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
 		return "", fmt.Errorf("could not create pluginDir %s", pluginDir)
@@ -592,7 +592,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 }
 
 func (d *LocalDeployer) setupLocalEnv() (string, error) {
-	return binutils.SetupLuxd(d.app, d.avagoVersion)
+	return binutils.SetupLuxd(d.app, d.luxdVersion)
 }
 
 // WaitForHealthy polls continuously until the network is ready to be used

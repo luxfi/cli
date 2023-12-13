@@ -29,7 +29,7 @@ import (
 	"github.com/luxdefi/netrunner/client"
 	"github.com/luxdefi/node/api/info"
 	"github.com/luxdefi/node/ids"
-	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxdconstants "github.com/luxdefi/node/utils/constants"
 	"github.com/luxdefi/node/utils/crypto/keychain"
 	ledger "github.com/luxdefi/node/utils/crypto/ledger"
 	"github.com/luxdefi/node/utils/formatting/address"
@@ -294,14 +294,14 @@ func DeleteKey(keyName string) error {
 }
 
 func DeleteBins() error {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir)
-	if _, err := os.Stat(avagoPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+	luxdPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir)
+	if _, err := os.Stat(luxdPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
 	}
 
 	// ignore error, file may not exist
-	_ = os.RemoveAll(avagoPath)
+	_ = os.RemoveAll(luxdPath)
 
 	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.SubnetEVMInstallDir)
 	if _, err := os.Stat(subevmPath); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -599,8 +599,8 @@ func CheckSubnetEVMExists(version string) bool {
 }
 
 func CheckLuxdExists(version string) bool {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir, "node-"+version)
-	_, err := os.Stat(avagoPath)
+	luxdPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir, "node-"+version)
+	_, err := os.Stat(luxdPath)
 	return err == nil
 }
 
@@ -724,11 +724,11 @@ func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
-	var avagoConfig map[string]interface{}
-	if err := json.Unmarshal(fileBytes, &avagoConfig); err != nil {
+	var luxdConfig map[string]interface{}
+	if err := json.Unmarshal(fileBytes, &luxdConfig); err != nil {
 		return "", fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
-	whitelistedSubnetsIntf := avagoConfig["track-subnets"]
+	whitelistedSubnetsIntf := luxdConfig["track-subnets"]
 	whitelistedSubnets, ok := whitelistedSubnetsIntf.(string)
 	if !ok {
 		return "", fmt.Errorf("expected a string value, but got %T", whitelistedSubnetsIntf)
@@ -864,7 +864,7 @@ func FundLedgerAddress(amount uint64) error {
 		},
 	}
 	outputs := []*lux.TransferableOutput{output}
-	if _, err := wallet.X().IssueExportTx(avagoconstants.PlatformChainID, outputs); err != nil {
+	if _, err := wallet.X().IssueExportTx(luxdconstants.PlatformChainID, outputs); err != nil {
 		return err
 	}
 

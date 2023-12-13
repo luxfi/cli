@@ -97,11 +97,11 @@ func (kc *Keychain) AddAddresses(addresses []string) error {
 				return err
 			}
 		}
-		avagoKc, err := keychain.NewLedgerKeychainFromIndices(kc.Ledger, kc.LedgerIndices)
+		luxdKc, err := keychain.NewLedgerKeychainFromIndices(kc.Ledger, kc.LedgerIndices)
 		if err != nil {
 			return err
 		}
-		kc.Keychain = avagoKc
+		kc.Keychain = luxdKc
 	}
 	return nil
 }
