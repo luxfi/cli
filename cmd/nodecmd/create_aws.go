@@ -219,7 +219,7 @@ func createEC2Instances(rootBody *hclwrite.Body,
 		} else {
 			ux.Logger.PrintToUser(fmt.Sprintf("Using existing security group %s in AWS[%s]", securityGroupName, region))
 			ipInTCP := awsAPI.CheckUserIPInSg(sg, userIPAddress, constants.SSHTCPPort)
-			ipInHTTP := awsAPI.CheckUserIPInSg(sg, userIPAddress, constants.LuxgoAPIPort)
+			ipInHTTP := awsAPI.CheckUserIPInSg(sg, userIPAddress, constants.LuxdAPIPort)
 			terraformaws.SetSecurityGroupRule(rootBody, region, userIPAddress, *sg.GroupId, ipInTCP, ipInHTTP)
 		}
 		if useStaticIP {

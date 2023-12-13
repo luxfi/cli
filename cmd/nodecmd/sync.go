@@ -143,7 +143,7 @@ func syncSubnet(_ *cobra.Command, args []string) error {
 	if len(notHealthyNodes) > 0 {
 		return fmt.Errorf("node(s) %s are not healthy, please fix the issue and again", notHealthyNodes)
 	}
-	incompatibleNodes, err := checkLuxGoVersionCompatible(hosts, subnetName)
+	incompatibleNodes, err := checkLuxdVersionCompatible(hosts, subnetName)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func syncSubnet(_ *cobra.Command, args []string) error {
 			return err
 		}
 		ux.Logger.PrintToUser("Either modify your Lux Go version or modify your VM version")
-		ux.Logger.PrintToUser("To modify your Lux Go version: https://docs.lux.network/nodes/maintain/upgrade-your-luxgo-node")
+		ux.Logger.PrintToUser("To modify your Lux Go version: https://docs.lux.network/nodes/maintain/upgrade-your-node-node")
 		switch sc.VM {
 		case models.SubnetEvm:
 			ux.Logger.PrintToUser("To modify your Subnet-EVM version: https://docs.lux.network/build/subnet/upgrade/upgrade-subnet-vm")

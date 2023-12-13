@@ -25,17 +25,17 @@ var (
 func newConfigureCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "configure [subnetName]",
-		Short: "Adds additional config files for the luxgo nodes",
-		Long: `LuxGo nodes support several different configuration files. Subnets have their own
+		Short: "Adds additional config files for the node nodes",
+		Long: `Luxd nodes support several different configuration files. Subnets have their own
 Subnet config which applies to all chains/VMs in the Subnet. Each chain within the Subnet
-can have its own chain config. A chain can also have special requirements for the LuxGo node 
+can have its own chain config. A chain can also have special requirements for the Luxd node 
 configuration itself. This command allows you to set all those files.`,
 		SilenceUsage: true,
 		RunE:         configure,
 		Args:         cobra.ExactArgs(1),
 	}
 
-	cmd.Flags().StringVar(&nodeConf, "node-config", "", "path to luxgo node configuration")
+	cmd.Flags().StringVar(&nodeConf, "node-config", "", "path to node node configuration")
 	cmd.Flags().StringVar(&subnetConf, "subnet-config", "", "path to the subnet configuration")
 	cmd.Flags().StringVar(&chainConf, "chain-config", "", "path to the chain configuration")
 	cmd.Flags().StringVar(&perNodeChainConf, "per-node-chain-config", "", "path to per node chain configuration for local network")

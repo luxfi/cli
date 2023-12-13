@@ -16,7 +16,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
 	"github.com/luxdefi/cli/tests/e2e/utils"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

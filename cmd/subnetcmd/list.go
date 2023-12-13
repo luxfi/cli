@@ -14,7 +14,7 @@ import (
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

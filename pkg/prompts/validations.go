@@ -15,14 +15,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/luxgo/genesis"
+	"github.com/luxdefi/node/genesis"
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
-	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
+	"github.com/luxdefi/node/ids"
+	avagoconstants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/formatting/address"
 	"github.com/ethereum/go-ethereum/common"
 )
 

@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxdefi/luxgo/utils/perms"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/stretchr/testify/require"
 )
 

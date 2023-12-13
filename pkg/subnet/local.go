@@ -28,20 +28,20 @@ import (
 	"github.com/luxdefi/netrunner/rpcpb"
 	"github.com/luxdefi/netrunner/server"
 	anrutils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/genesis"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/crypto/keychain"
-	"github.com/luxdefi/luxgo/utils/set"
-	"github.com/luxdefi/luxgo/utils/storage"
-	"github.com/luxdefi/luxgo/vms/components/lux"
-	"github.com/luxdefi/luxgo/vms/components/verify"
-	"github.com/luxdefi/luxgo/vms/platformvm"
-	"github.com/luxdefi/luxgo/vms/platformvm/reward"
-	"github.com/luxdefi/luxgo/vms/platformvm/signer"
-	"github.com/luxdefi/luxgo/vms/platformvm/txs"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
-	"github.com/luxdefi/luxgo/wallet/subnet/primary"
-	"github.com/luxdefi/luxgo/wallet/subnet/primary/common"
+	"github.com/luxdefi/node/genesis"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/crypto/keychain"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/utils/storage"
+	"github.com/luxdefi/node/vms/components/lux"
+	"github.com/luxdefi/node/vms/components/verify"
+	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/node/vms/platformvm/reward"
+	"github.com/luxdefi/node/vms/platformvm/signer"
+	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxdefi/node/wallet/subnet/primary"
+	"github.com/luxdefi/node/wallet/subnet/primary/common"
 	"github.com/luxdefi/coreth/params"
 	"github.com/luxdefi/subnet-evm/core"
 	"go.uber.org/zap"
@@ -350,7 +350,7 @@ func (d *LocalDeployer) BackendStartedHere() bool {
 //   - waits completion of operation
 //   - show status
 func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
-	luxGoBinPath, err := d.SetupLocalEnv()
+	luxdBinPath, err := d.SetupLocalEnv()
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
@@ -399,7 +399,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	d.app.Log.Debug("this VM will get ID", zap.String("vm-id", chainVMID.String()))
 
 	if !networkBooted {
-		if err := d.startNetwork(ctx, cli, luxGoBinPath, runDir); err != nil {
+		if err := d.startNetwork(ctx, cli, luxdBinPath, runDir); err != nil {
 			utils.FindErrorLogs(rootDir, backendLogDir)
 			return ids.Empty, ids.Empty, err
 		}
@@ -552,9 +552,9 @@ func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) err
 
 // SetupLocalEnv also does some heavy lifting:
 // * sets up default snapshot if not installed
-// * checks if luxgo is installed in the local binary path
+// * checks if node is installed in the local binary path
 // * if not, it downloads it and installs it (os - and archive dependent)
-// * returns the location of the luxgo path
+// * returns the location of the node path
 func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 	configSingleNodeEnabled := d.app.Conf.GetConfigBoolValue(constants.ConfigSingleNodeEnabledKey)
 	err := d.setDefaultSnapshot(d.app.GetSnapshotsDir(), false, configSingleNodeEnabled)
@@ -568,7 +568,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 	}
 
 	pluginDir := d.app.GetPluginsDir()
-	luxGoBinPath := filepath.Join(avagoDir, "luxgo")
+	luxdBinPath := filepath.Join(avagoDir, "node")
 
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
 		return "", fmt.Errorf("could not create pluginDir %s", pluginDir)
@@ -582,17 +582,17 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 	// TODO: we need some better version management here
 	// * compare latest to local version
 	// * decide if force update or give user choice
-	exists, err = storage.FileExists(luxGoBinPath)
+	exists, err = storage.FileExists(luxdBinPath)
 	if !exists || err != nil {
 		return "", fmt.Errorf(
-			"evaluated luxGoBinPath to be %s but it does not exist", luxGoBinPath)
+			"evaluated luxdBinPath to be %s but it does not exist", luxdBinPath)
 	}
 
-	return luxGoBinPath, nil
+	return luxdBinPath, nil
 }
 
 func (d *LocalDeployer) setupLocalEnv() (string, error) {
-	return binutils.SetupLuxgo(d.app, d.avagoVersion)
+	return binutils.SetupLuxd(d.app, d.avagoVersion)
 }
 
 // WaitForHealthy polls continuously until the network is ready to be used
@@ -749,11 +749,11 @@ func SetDefaultSnapshot(snapshotsDir string, force bool, isSingleNode bool) erro
 func (d *LocalDeployer) startNetwork(
 	ctx context.Context,
 	cli client.Client,
-	luxGoBinPath string,
+	luxdBinPath string,
 	runDir string,
 ) error {
 	loadSnapshotOpts := []client.OpOption{
-		client.WithExecPath(luxGoBinPath),
+		client.WithExecPath(luxdBinPath),
 		client.WithRootDataDir(runDir),
 		client.WithReassignPortsIfUsed(true),
 		client.WithPluginDir(d.app.GetPluginsDir()),

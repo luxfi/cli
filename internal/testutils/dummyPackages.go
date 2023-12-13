@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	luxgoBin = "luxgo"
+	nodeBin = "node"
 	pluginDirName  = "plugins"
 	evmBin         = "evm"
 	buildDirName   = "build"
@@ -26,7 +26,7 @@ const (
 	readme         = "README.md"
 	license        = "LICENSE"
 
-	luxgoBinPrefix = "luxgo-"
+	nodeBinPrefix = "node-"
 
 	avagoTar     = "/tmp/avago.tar.gz"
 	avagoZip     = "/tmp/avago.zip"
@@ -40,8 +40,8 @@ var (
 )
 
 func verifyAvagoTarContents(require *require.Assertions, tarBytes []byte, version string) {
-	topDir := luxgoBinPrefix + version
-	bin := filepath.Join(topDir, luxgoBin)
+	topDir := nodeBinPrefix + version
+	bin := filepath.Join(topDir, nodeBin)
 	plugins := filepath.Join(topDir, pluginDirName)
 	evm := filepath.Join(plugins, evmBin)
 
@@ -114,7 +114,7 @@ func verifySubnetEVMTarContents(require *require.Assertions, tarBytes []byte) {
 
 func verifyAvagoZipContents(require *require.Assertions, zipFile string) {
 	topDir := buildDirName
-	bin := filepath.Join(topDir, luxgoBin)
+	bin := filepath.Join(topDir, nodeBin)
 	plugins := filepath.Join(topDir, pluginDirName)
 	evm := filepath.Join(plugins, evmBin)
 
@@ -156,7 +156,7 @@ func CreateDummyAvagoZip(require *require.Assertions, binary []byte) []byte {
 	err = os.Mkdir(topDir, 0o700)
 	require.NoError(err)
 
-	binPath := filepath.Join(topDir, luxgoBin)
+	binPath := filepath.Join(topDir, nodeBin)
 	err = os.WriteFile(binPath, binary, 0o600)
 	require.NoError(err)
 
@@ -184,11 +184,11 @@ func CreateDummyAvagoTar(require *require.Assertions, binary []byte, version str
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
 
-	topDir := filepath.Join(sourceDir, luxgoBinPrefix+version)
+	topDir := filepath.Join(sourceDir, nodeBinPrefix+version)
 	err = os.Mkdir(topDir, 0o700)
 	require.NoError(err)
 
-	binPath := filepath.Join(topDir, luxgoBin)
+	binPath := filepath.Join(topDir, nodeBin)
 	err = os.WriteFile(binPath, binary, 0o600)
 	require.NoError(err)
 

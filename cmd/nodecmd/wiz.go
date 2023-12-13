@@ -15,9 +15,9 @@ import (
 	"github.com/luxdefi/cli/pkg/ssh"
 	"github.com/luxdefi/cli/pkg/ux"
 
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/vms/platformvm/status"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm/status"
 	"github.com/spf13/cobra"
 )
 
@@ -78,7 +78,7 @@ The node wiz command creates a devnet and deploys, sync and validate a subnet in
 	cmd.Flags().StringVar(&customVMRepoURL, "custom-vm-repo-url", "", "custom vm repository url")
 	cmd.Flags().StringVar(&customVMBranch, "custom-vm-branch", "", "custom vm branch")
 	cmd.Flags().StringVar(&customVMBuildScript, "custom-vm-build-script", "", "custom vm build-script")
-	cmd.Flags().StringVar(&nodeConf, "node-config", "", "path to luxgo node configuration for subnet")
+	cmd.Flags().StringVar(&nodeConf, "node-config", "", "path to node node configuration for subnet")
 	cmd.Flags().StringVar(&subnetConf, "subnet-config", "", "path to the subnet configuration for subnet")
 	cmd.Flags().StringVar(&chainConf, "chain-config", "", "path to the chain configuration for subnet")
 	return cmd
@@ -126,7 +126,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 		}
 	}
 	createDevnet = true
-	useLuxgoVersionFromSubnet = subnetName
+	useLuxdVersionFromSubnet = subnetName
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser(logging.Green.Wrap("Creating the devnet"))
 	ux.Logger.PrintToUser("")

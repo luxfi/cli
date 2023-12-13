@@ -226,7 +226,7 @@ func DeploySubnetLocallyWithArgs(subnetName string, version string, confPath str
 	// Deploy subnet locally
 	cmdArgs := []string{SubnetCmd, "deploy", "--local", subnetName, "--" + constants.SkipUpdateFlag}
 	if version != "" {
-		cmdArgs = append(cmdArgs, "--luxgo-version", version)
+		cmdArgs = append(cmdArgs, "--node-version", version)
 	}
 	if confPath != "" {
 		cmdArgs = append(cmdArgs, "--config", confPath)
@@ -259,7 +259,7 @@ func DeploySubnetLocallyWithArgsAndOutput(subnetName string, version string, con
 	// Deploy subnet locally
 	cmdArgs := []string{SubnetCmd, "deploy", "--local", subnetName, "--" + constants.SkipUpdateFlag}
 	if version != "" {
-		cmdArgs = append(cmdArgs, "--luxgo-version", version)
+		cmdArgs = append(cmdArgs, "--node-version", version)
 	}
 	if confPath != "" {
 		cmdArgs = append(cmdArgs, "--config", confPath)
@@ -690,7 +690,7 @@ func SimulateMainnetAddValidator(
 /* #nosec G204 */
 func SimulateFujiJoin(
 	subnetName string,
-	luxgoConfig string,
+	nodeConfig string,
 	pluginDir string,
 	nodeID string,
 ) string {
@@ -708,8 +708,8 @@ func SimulateFujiJoin(
 		SubnetCmd,
 		"join",
 		"--fuji",
-		"--luxgo-config",
-		luxgoConfig,
+		"--node-config",
+		nodeConfig,
 		"--plugin-dir",
 		pluginDir,
 		"--nodeID",
@@ -736,7 +736,7 @@ func SimulateFujiJoin(
 /* #nosec G204 */
 func SimulateMainnetJoin(
 	subnetName string,
-	luxgoConfig string,
+	nodeConfig string,
 	pluginDir string,
 	nodeID string,
 ) string {
@@ -754,8 +754,8 @@ func SimulateMainnetJoin(
 		SubnetCmd,
 		"join",
 		"--mainnet",
-		"--luxgo-config",
-		luxgoConfig,
+		"--node-config",
+		nodeConfig,
 		"--plugin-dir",
 		pluginDir,
 		"--nodeID",

@@ -3,9 +3,9 @@
 package utils
 
 import (
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/staking"
-	"github.com/luxdefi/luxgo/utils/crypto/bls"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/staking"
+	"github.com/luxdefi/node/utils/crypto/bls"
 )
 
 func NewBlsSecretKeyBytes() ([]byte, error) {

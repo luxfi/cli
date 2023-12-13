@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/luxdefi/lpm v0.0.4
 	github.com/luxdefi/netrunner v1.7.4-0.20231204182757-5309eeea932f
-	github.com/luxdefi/luxgo v1.10.16
+	github.com/luxdefi/node v1.10.16
 	github.com/luxdefi/coreth v0.12.9-rc.5
 	github.com/luxdefi/subnet-evm v0.5.3
 	github.com/aws/aws-sdk-go v1.44.301

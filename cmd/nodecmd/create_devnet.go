@@ -19,7 +19,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ssh"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/config"
+	"github.com/luxdefi/node/config"
 	coreth_params "github.com/luxdefi/coreth/params"
 )
 
@@ -165,7 +165,7 @@ func setupDevnet(clusterName string, hosts []*models.Host) error {
 		}
 	}
 
-	// create luxgo conf node.json at each node dir
+	// create node conf node.json at each node dir
 	bootstrapIPs := []string{}
 	bootstrapIDs := []string{}
 	for i, ansibleHostID := range ansibleHostIDs {
@@ -176,7 +176,7 @@ func setupDevnet(clusterName string, hosts []*models.Host) error {
 		confMap[config.NetworkNameKey] = fmt.Sprintf("network-%d", network.ID)
 		confMap[config.BootstrapIDsKey] = strings.Join(bootstrapIDs, ",")
 		confMap[config.BootstrapIPsKey] = strings.Join(bootstrapIPs, ",")
-		confMap[config.GenesisFileKey] = "/home/ubuntu/.luxgo/configs/genesis.json"
+		confMap[config.GenesisFileKey] = "/home/ubuntu/.node/configs/genesis.json"
 		bootstrapIDs = append(bootstrapIDs, nodeIDs[i])
 		bootstrapIPs = append(bootstrapIPs, ansibleHosts[ansibleHostID].IP+":9651")
 		confBytes, err := json.MarshalIndent(confMap, "", " ")

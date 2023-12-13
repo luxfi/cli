@@ -11,8 +11,8 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/tests/e2e/commands"
 	"github.com/luxdefi/cli/tests/e2e/utils"
-	"github.com/luxdefi/luxgo/genesis"
-	"github.com/luxdefi/luxgo/utils/units"
+	"github.com/luxdefi/node/genesis"
+	"github.com/luxdefi/node/utils/units"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

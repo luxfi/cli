@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/luxgo/genesis"
-	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
+	"github.com/luxdefi/node/genesis"
+	avagoconstants "github.com/luxdefi/node/utils/constants"
 )
 
 type NetworkKind int64

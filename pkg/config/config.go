@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

@@ -21,8 +21,8 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/version"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/version"
 	"gopkg.in/yaml.v3"
 )
 

@@ -27,17 +27,17 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/luxgo/api/info"
-	"github.com/luxdefi/luxgo/ids"
-	avagoconstants "github.com/luxdefi/luxgo/utils/constants"
-	"github.com/luxdefi/luxgo/utils/crypto/keychain"
-	ledger "github.com/luxdefi/luxgo/utils/crypto/ledger"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/vms/components/lux"
-	"github.com/luxdefi/luxgo/vms/platformvm"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
-	"github.com/luxdefi/luxgo/wallet/subnet/primary"
+	"github.com/luxdefi/node/api/info"
+	"github.com/luxdefi/node/ids"
+	avagoconstants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/crypto/keychain"
+	ledger "github.com/luxdefi/node/utils/crypto/ledger"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/components/lux"
+	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxdefi/node/wallet/subnet/primary"
 	"github.com/luxdefi/subnet-evm/ethclient"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -294,7 +294,7 @@ func DeleteKey(keyName string) error {
 }
 
 func DeleteBins() error {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir)
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir)
 	if _, err := os.Stat(avagoPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -598,8 +598,8 @@ func CheckSubnetEVMExists(version string) bool {
 	return err == nil
 }
 
-func CheckLuxGoExists(version string) bool {
-	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir, "luxgo-"+version)
+func CheckLuxdExists(version string) bool {
+	avagoPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir, "node-"+version)
 	_, err := os.Stat(avagoPath)
 	return err == nil
 }
@@ -722,7 +722,7 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	fileBytes, err := os.ReadFile(configFile)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("failed to load luxgo config file %s: %w", configFile, err)
+		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
 	var avagoConfig map[string]interface{}
 	if err := json.Unmarshal(fileBytes, &avagoConfig); err != nil {

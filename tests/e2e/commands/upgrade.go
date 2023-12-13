@@ -184,7 +184,7 @@ func ApplyUpgradeToPublicNode(subnetName, avagoChainConfDir string) (string, err
 		"apply",
 		subnetName,
 		"--fuji",
-		"--luxgo-chain-config-dir",
+		"--node-chain-config-dir",
 		avagoChainConfDir,
 		"--"+constants.SkipUpdateFlag,
 	)

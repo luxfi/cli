@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 

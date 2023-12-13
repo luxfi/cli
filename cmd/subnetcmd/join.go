@@ -22,23 +22,23 @@ import (
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/netrunner/server"
-	"github.com/luxdefi/luxgo/genesis"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/vms/platformvm"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/node/genesis"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
 const ewoqPChainAddr = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 
 var (
-	// path to luxgo config file
+	// path to node config file
 	avagoConfigPath string
-	// path to luxgo plugin dir
+	// path to node plugin dir
 	pluginDir string
-	// path to luxgo datadir dir
+	// path to node datadir dir
 	dataDir string
 	// if true, print the manual instructions to screen
 	printManual bool
@@ -68,16 +68,16 @@ the NodeID of your validator to the Subnet's allow list by calling addValidator 
 NodeID.
 
 After you update your validator's config, you need to restart your validator manually. If
-you provide the --luxgo-config flag, this command attempts to edit the config file
+you provide the --node-config flag, this command attempts to edit the config file
 at that path.
 
 This command currently only supports Subnets deployed on the Fuji Testnet and Mainnet.`,
 		RunE: joinCmd,
 		Args: cobra.ExactArgs(1),
 	}
-	cmd.Flags().StringVar(&avagoConfigPath, "luxgo-config", "", "file path of the luxgo config file")
-	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of luxgo's plugin directory")
-	cmd.Flags().StringVar(&dataDir, "data-dir", "", "path of luxgo's data dir directory")
+	cmd.Flags().StringVar(&avagoConfigPath, "node-config", "", "file path of the node config file")
+	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of node's plugin directory")
+	cmd.Flags().StringVar(&dataDir, "data-dir", "", "path of node's data dir directory")
 	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "join on `fuji` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `fuji`)")
 	cmd.Flags().BoolVar(&deployLocal, "local", false, "join on `local` (for elastic subnet only)")
@@ -98,7 +98,7 @@ This command currently only supports Subnets deployed on the Fuji Testnet and Ma
 
 func joinCmd(_ *cobra.Command, args []string) error {
 	if printManual && (avagoConfigPath != "" || pluginDir != "") {
-		return errors.New("--print cannot be used with --luxgo-config or --plugin-dir")
+		return errors.New("--print cannot be used with --node-config or --plugin-dir")
 	}
 
 	chains, err := ValidateSubnetNameAndGetChains(args)
@@ -186,7 +186,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 			choiceAutomatic = "Automatic"
 		)
 		choice, err := app.Prompt.CaptureList(
-			"How would you like to update the luxgo config?",
+			"How would you like to update the node config?",
 			[]string{choiceAutomatic, choiceManual},
 		)
 		if err != nil {
@@ -257,7 +257,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 			}
 		}
 		if pluginDir == "" {
-			pluginDir, err = app.Prompt.CaptureString("Path to your luxgo plugin dir (likely luxgo/build/plugins)")
+			pluginDir, err = app.Prompt.CaptureString("Path to your node plugin dir (likely node/build/plugins)")
 			if err != nil {
 				return err
 			}
@@ -310,7 +310,7 @@ func writeAvagoChainConfigFiles(
 	network models.Network,
 ) error {
 	if dataDir == "" {
-		dataDir = utils.UserHomePath(".luxgo")
+		dataDir = utils.UserHomePath(".node")
 	}
 
 	subnetID := sc.Networks[network.Name()].SubnetID
@@ -686,8 +686,8 @@ To setup your node, you must do two things:
 
 To add the VM to your plugin directory, copy or scp from %s
 
-If you installed luxgo with the install script, your plugin directory is likely
-~/.luxgo/build/plugins.
+If you installed node with the install script, your plugin directory is likely
+~/.node/build/plugins.
 
 If you start your node from the command line WITHOUT a config file (e.g. via command
 line or systemd script), add the following flag to your node's startup command:
@@ -697,7 +697,7 @@ line or systemd script), add the following flag to your node's startup command:
 comma-separating it).
 
 For example:
-./build/luxgo --network-id=%s --track-subnets=%s
+./build/node --network-id=%s --track-subnets=%s
 
 If you start the node via a JSON config file, add this to your config file:
 track-subnets: %s
@@ -705,7 +705,7 @@ track-subnets: %s
 NOTE: The flag --track-subnets is a replacement of the deprecated --whitelisted-subnets.
 If the later is present in config, please rename it to track-subnets first.
 
-TIP: Try this command with the --luxgo-config flag pointing to your config file,
+TIP: Try this command with the --node-config flag pointing to your config file,
 this tool will try to update the file automatically (make sure it can write to it).
 
 After you update your config, you will need to restart your node for the changes to

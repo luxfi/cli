@@ -12,8 +12,8 @@ import (
 	"github.com/luxdefi/cli/pkg/application"
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/version"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/version"
 	"github.com/stretchr/testify/require"
 )
 

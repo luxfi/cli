@@ -21,7 +21,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 	ANRclient "github.com/luxdefi/netrunner/client"
 	"github.com/luxdefi/netrunner/server"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/subnet-evm/params"
 	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
 	"github.com/spf13/cobra"
@@ -47,9 +47,9 @@ var (
 
 	errUserAborted = errors.New("user aborted")
 
-	luxgoChainConfigDirDefault = filepath.Join("$HOME", ".luxgo", "chains")
-	luxgoChainConfigFlag       = "luxgo-chain-config-dir"
-	luxgoChainConfigDir        string
+	nodeChainConfigDirDefault = filepath.Join("$HOME", ".node", "chains")
+	nodeChainConfigFlag       = "node-chain-config-dir"
+	nodeChainConfigDir        string
 
 	print bool
 )
@@ -68,7 +68,7 @@ configuration automatically. Alternatively, the command can print the necessary 
 to upgrade your node manually.
 
 After you update your validator's configuration, you need to restart your validator manually.
-If you provide the --luxgo-chain-config-dir flag, this command attempts to write the upgrade file at that path.
+If you provide the --node-chain-config-dir flag, this command attempts to write the upgrade file at that path.
 Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs for related documentation.`,
 		RunE: applyCmd,
 		Args: cobra.ExactArgs(1),
@@ -81,7 +81,7 @@ Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "apply upgrade existing `mainnet` deployment")
 	cmd.Flags().BoolVar(&print, "print", false, "if true, print the manual config without prompting (for public networks only)")
 	cmd.Flags().BoolVar(&force, "force", false, "If true, don't prompt for confirmation of timestamps in the past")
-	cmd.Flags().StringVar(&luxgoChainConfigDir, luxgoChainConfigFlag, os.ExpandEnv(luxgoChainConfigDirDefault), "luxgo's chain config file directory")
+	cmd.Flags().StringVar(&nodeChainConfigDir, nodeChainConfigFlag, os.ExpandEnv(nodeChainConfigDirDefault), "node's chain config file directory")
 
 	return cmd
 }
@@ -249,10 +249,10 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 		}
 		ux.Logger.PrintToUser("To install the upgrade file on your validator:")
 		fmt.Println()
-		ux.Logger.PrintToUser("1. Identify where your validator has the luxgo chain config dir configured.")
-		ux.Logger.PrintToUser("   The default is at $HOME/.luxgo/chains (%s on this machine).", os.ExpandEnv(luxgoChainConfigDirDefault))
+		ux.Logger.PrintToUser("1. Identify where your validator has the node chain config dir configured.")
+		ux.Logger.PrintToUser("   The default is at $HOME/.node/chains (%s on this machine).", os.ExpandEnv(nodeChainConfigDirDefault))
 		ux.Logger.PrintToUser("   If you are using a different chain config dir for your node, use that one.")
-		ux.Logger.PrintToUser("2. Create a directory with the blockchainID in the configured chain-config-dir (e.g. $HOME/.luxgo/chains/%s) if doesn't already exist.", blockchainIDstr)
+		ux.Logger.PrintToUser("2. Create a directory with the blockchainID in the configured chain-config-dir (e.g. $HOME/.node/chains/%s) if doesn't already exist.", blockchainIDstr)
 		ux.Logger.PrintToUser("3. Create an `upgrade.json` file in the blockchain directory with the content of your upgrade file.")
 		upgr, err := app.ReadUpgradeFile(subnetName)
 		if err == nil {
@@ -276,15 +276,15 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 		return err
 	}
 
-	ux.Logger.PrintToUser("The chain config dir luxgo uses is set at %s", luxgoChainConfigDir)
+	ux.Logger.PrintToUser("The chain config dir node uses is set at %s", nodeChainConfigDir)
 	// give the user the chance to check if they indeed want to use the default
-	if luxgoChainConfigDir == luxgoChainConfigDirDefault {
+	if nodeChainConfigDir == nodeChainConfigDirDefault {
 		useDefault, err := app.Prompt.CaptureYesNo("It is set to the default. Is that correct?")
 		if err != nil {
 			return err
 		}
 		if !useDefault {
-			luxgoChainConfigDir, err = app.Prompt.CaptureExistingFilepath(
+			nodeChainConfigDir, err = app.Prompt.CaptureExistingFilepath(
 				"Enter the path to your custom chain config dir (*without* the blockchain ID, e.g /my/configs/dir)")
 			if err != nil {
 				return err
@@ -292,8 +292,8 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 		}
 	}
 
-	ux.Logger.PrintToUser("Trying to install the upgrade files at the provided %s path", luxgoChainConfigDir)
-	chainDir := filepath.Join(luxgoChainConfigDir, sc.Networks[networkKey].BlockchainID.String())
+	ux.Logger.PrintToUser("Trying to install the upgrade files at the provided %s path", nodeChainConfigDir)
+	chainDir := filepath.Join(nodeChainConfigDir, sc.Networks[networkKey].BlockchainID.String())
 	destPath := filepath.Join(chainDir, constants.UpgradeBytesFileName)
 	if err = os.Mkdir(chainDir, constants.DefaultPerms755); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("failed to create blockchain directory: %w", err)

@@ -9,11 +9,11 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/constants"
-	"github.com/luxdefi/luxgo/vms/components/lux"
-	"github.com/luxdefi/luxgo/vms/platformvm/txs"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/vms/components/lux"
+	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 )
 
 var (
@@ -124,7 +124,7 @@ func (ins *innerSortTransferableInputsWithSigners) Swap(i, j int) {
 // SortTransferableInputsWithSigners sorts the inputs and signers based on the
 // input's utxo ID.
 //
-// This is based off of (generics?): https://github.com/luxdefi/luxgo/blob/224c9fd23d41839201dd0275ac864a845de6e93e/vms/components/lux/transferables.go#L202
+// This is based off of (generics?): https://github.com/luxdefi/node/blob/224c9fd23d41839201dd0275ac864a845de6e93e/vms/components/lux/transferables.go#L202
 func SortTransferableInputsWithSigners(ins []*lux.TransferableInput, signers [][]ids.ShortID) {
 	sort.Sort(&innerSortTransferableInputsWithSigners{ins: ins, signers: signers})
 }

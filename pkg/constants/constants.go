@@ -129,8 +129,8 @@ const (
 	AWSSecurityGroupSuffix                       = "-sg"
 	ExportSubnetSuffix                           = "-export.dat"
 	SSHTCPPort                                   = 22
-	LuxgoAPIPort                           = 9650
-	LuxgoP2PPort                           = 9651
+	LuxdAPIPort                           = 9650
+	LuxdP2PPort                           = 9651
 	CloudServerStorageSize                       = 1000
 	OutboundPort                                 = 0
 	Terraform                                    = "terraform"
@@ -141,7 +141,7 @@ const (
 	BuildEnvGolangVersion              = "1.21.1"
 	IsHealthyJSONFile                  = "isHealthy.json"
 	IsBootstrappedJSONFile             = "isBootstrapped.json"
-	LuxGoVersionJSONFile         = "luxGoVersion.json"
+	LuxdVersionJSONFile         = "luxdVersion.json"
 	SubnetSyncJSONFile                 = "isSubnetSynced.json"
 	AnsibleInventoryDir                = "inventories"
 	AnsibleTempInventoryDir            = "temp_inventories"
@@ -172,18 +172,18 @@ const (
 	CustomVMDir                  = "vms"
 	GCPStaticIPPrefix            = "static-ip"
 	LuxDeFiOrg                   = "luxdefi"
-	LuxGoRepoName          = "luxgo"
+	LuxdRepoName          = "node"
 	SubnetEVMRepoName            = "subnet-evm"
 	CliRepoName                  = "cli"
 	SubnetEVMReleaseURL          = "https://github.com/luxdefi/subnet-evm/releases/download/%s/%s"
 	SubnetEVMArchive             = "subnet-evm_%s_linux_amd64.tar.gz"
-	CloudNodeConfigBasePath      = "/home/ubuntu/.luxgo/"
-	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.luxgo/plugins/%s"
-	CloudNodeStakingPath         = "/home/ubuntu/.luxgo/staking/"
-	CloudNodeConfigPath          = "/home/ubuntu/.luxgo/configs/"
+	CloudNodeConfigBasePath      = "/home/ubuntu/.node/"
+	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.node/plugins/%s"
+	CloudNodeStakingPath         = "/home/ubuntu/.node/staking/"
+	CloudNodeConfigPath          = "/home/ubuntu/.node/configs/"
 	CloudNodeCLIConfigBasePath   = "/home/ubuntu/.cli/"
 
-	LuxGoInstallDir = "luxgo"
+	LuxdInstallDir = "node"
 	SubnetEVMInstallDir   = "subnet-evm"
 
 	SubnetEVMBin = "subnet-evm"
@@ -224,9 +224,9 @@ const (
 	NotAvailableLabel         = "Not available"
 	BackendCmd                = "cli-backend"
 
-	LuxGoVersionUnknown            = "n/a"
-	LuxGoCompatibilityVersionAdded = "v1.9.2"
-	LuxGoCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/luxgo/master/version/compatibility.json"
+	LuxdVersionUnknown            = "n/a"
+	LuxdCompatibilityVersionAdded = "v1.9.2"
+	LuxdCompatibilityURL          = "https://raw.githubusercontent.com/luxdefi/node/master/version/compatibility.json"
 	SubnetEVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxdefi/subnet-evm/master/compatibility.json"
 
 	YesLabel = "Yes"

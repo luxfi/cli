@@ -9,9 +9,9 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/key"
 	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/formatting/address"
-	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxdefi/node/vms/platformvm"
 )
 
 func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error) {

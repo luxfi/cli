@@ -373,7 +373,7 @@ func chooseManualOrAutomatic(sc models.Sidecar, targetVersion string) error {
 		choiceAutomatic = "Automatic (Make sure your node isn't running)"
 	)
 	choice, err := app.Prompt.CaptureList(
-		"How would you like to update the luxgo config?",
+		"How would you like to update the node config?",
 		[]string{choiceAutomatic, choiceManual},
 	)
 	if err != nil {

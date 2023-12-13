@@ -9,16 +9,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/luxdefi/luxgo/utils/crypto/bls"
-	"github.com/luxdefi/luxgo/vms/platformvm/signer"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	"github.com/luxdefi/node/vms/platformvm/signer"
 	"golang.org/x/exp/maps"
 
-	"github.com/luxdefi/luxgo/utils/units"
+	"github.com/luxdefi/node/utils/units"
 
 	"github.com/luxdefi/cli/pkg/ansible"
 	"github.com/luxdefi/cli/pkg/keychain"
 
-	"github.com/luxdefi/luxgo/vms/platformvm"
+	"github.com/luxdefi/node/vms/platformvm"
 
 	subnetcmd "github.com/luxdefi/cli/cmd/subnetcmd"
 	"github.com/luxdefi/cli/pkg/constants"
@@ -26,7 +26,7 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 	"github.com/spf13/cobra"
 )
 

@@ -24,12 +24,12 @@ type GithubDownloader interface {
 
 type (
 	subnetEVMDownloader   struct{}
-	luxGoDownloader struct{}
+	luxdDownloader struct{}
 )
 
 var (
 	_ GithubDownloader = (*subnetEVMDownloader)(nil)
-	_ GithubDownloader = (*luxGoDownloader)(nil)
+	_ GithubDownloader = (*luxdDownloader)(nil)
 )
 
 func GetGithubLatestReleaseURL(org, repo string) string {
@@ -37,42 +37,42 @@ func GetGithubLatestReleaseURL(org, repo string) string {
 }
 
 func NewAvagoDownloader() GithubDownloader {
-	return &luxGoDownloader{}
+	return &luxdDownloader{}
 }
 
-func (luxGoDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
+func (luxdDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
 	// NOTE: if any of the underlying URLs change (github changes, release file names, etc.) this fails
 	goarch, goos := installer.GetArch()
 
-	var luxgoURL string
+	var nodeURL string
 	var ext string
 
 	switch goos {
 	case linux:
-		luxgoURL = fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/%s/luxgo-linux-%s-%s.tar.gz",
+		nodeURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/node-linux-%s-%s.tar.gz",
 			constants.LuxDeFiOrg,
-			constants.LuxGoRepoName,
+			constants.LuxdRepoName,
 			version,
 			goarch,
 			version,
 		)
 		ext = tarExtension
 	case darwin:
-		luxgoURL = fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/%s/luxgo-macos-%s.zip",
+		nodeURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/node-macos-%s.zip",
 			constants.LuxDeFiOrg,
-			constants.LuxGoRepoName,
+			constants.LuxdRepoName,
 			version,
 			version,
 		)
 		ext = zipExtension
 		// EXPERIMENTAL WIN, no support
 	case windows:
-		luxgoURL = fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/%s/luxgo-win-%s-experimental.zip",
+		nodeURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/node-win-%s-experimental.zip",
 			constants.LuxDeFiOrg,
-			constants.LuxGoRepoName,
+			constants.LuxdRepoName,
 			version,
 			version,
 		)
@@ -81,7 +81,7 @@ func (luxGoDownloader) GetDownloadURL(version string, installer Installer) (stri
 		return "", "", fmt.Errorf("OS not supported: %s", goos)
 	}
 
-	return luxgoURL, ext, nil
+	return nodeURL, ext, nil
 }
 
 func NewSubnetEVMDownloader() GithubDownloader {

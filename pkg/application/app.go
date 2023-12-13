@@ -13,8 +13,8 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/subnet-evm/core"
 )
 
@@ -76,8 +76,8 @@ func (app *Lux) GetPluginsDir() string {
 	return filepath.Join(app.baseDir, constants.PluginDir)
 }
 
-func (app *Lux) GetLuxgoBinDir() string {
-	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxGoInstallDir)
+func (app *Lux) GetLuxdBinDir() string {
+	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxdInstallDir)
 }
 
 func (app *Lux) GetSubnetEVMBinDir() string {
@@ -220,8 +220,8 @@ func (app *Lux) GetDownloader() Downloader {
 	return app.Downloader
 }
 
-func (*Lux) GetLuxgoCompatibilityURL() string {
-	return constants.LuxGoCompatibilityURL
+func (*Lux) GetLuxdCompatibilityURL() string {
+	return constants.LuxdCompatibilityURL
 }
 
 func (app *Lux) ReadUpgradeFile(subnetName string) ([]byte, error) {

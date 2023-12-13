@@ -5,10 +5,10 @@ package txutils
 import (
 	"fmt"
 
-	"github.com/luxdefi/luxgo/utils/crypto/secp256k1"
-	"github.com/luxdefi/luxgo/vms/components/verify"
-	"github.com/luxdefi/luxgo/vms/platformvm/txs"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/node/utils/crypto/secp256k1"
+	"github.com/luxdefi/node/vms/components/verify"
+	"github.com/luxdefi/node/vms/platformvm/txs"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 )
 
 // get all subnet auth addresses that are required to sign a given tx

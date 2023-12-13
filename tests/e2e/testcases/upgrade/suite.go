@@ -20,8 +20,8 @@ import (
 	"github.com/luxdefi/cli/tests/e2e/commands"
 	"github.com/luxdefi/cli/tests/e2e/utils"
 	anr_utils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/subnet-evm/params"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -125,17 +125,17 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 
 		// we'll set a fake chain config dir to not mess up with a potential real one
 		// in the system
-		luxgoConfigDir, err := os.MkdirTemp("", "cli-tmp-avago-conf-dir")
+		nodeConfigDir, err := os.MkdirTemp("", "cli-tmp-avago-conf-dir")
 		gomega.Expect(err).Should(gomega.BeNil())
-		defer os.RemoveAll(luxgoConfigDir)
+		defer os.RemoveAll(nodeConfigDir)
 
 		// now we try to apply
-		_, err = commands.ApplyUpgradeToPublicNode(subnetName, luxgoConfigDir)
+		_, err = commands.ApplyUpgradeToPublicNode(subnetName, nodeConfigDir)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// we expect the file to be present at the expected location and being
 		// the same content as the original one
-		expectedPath := filepath.Join(luxgoConfigDir, blockchainID.String(), constants.UpgradeBytesFileName)
+		expectedPath := filepath.Join(nodeConfigDir, blockchainID.String(), constants.UpgradeBytesFileName)
 		gomega.Expect(expectedPath).Should(gomega.BeARegularFile())
 		ori, err := os.ReadFile(upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())

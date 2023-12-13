@@ -9,7 +9,7 @@ import (
 	"github.com/luxdefi/cli/cmd/flags"
 	"github.com/luxdefi/cli/internal/mocks"
 	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

@@ -14,7 +14,7 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet/upgrades"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/subnet-evm/commontype"
 	"github.com/luxdefi/subnet-evm/params"
 	"github.com/ethereum/go-ethereum/common"
@@ -116,7 +116,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	fmt.Println()
 	ux.Logger.PrintToUser(logging.Yellow.Wrap(
-		"Luxgo and this tool support configuring multiple precompiles." +
+		"Luxd and this tool support configuring multiple precompiles." +
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 

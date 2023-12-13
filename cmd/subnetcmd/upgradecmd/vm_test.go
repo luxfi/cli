@@ -14,7 +14,7 @@ import (
 	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/utils/logging"
+	"github.com/luxdefi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 

@@ -10,8 +10,8 @@ import (
 	"github.com/luxdefi/cli/pkg/subnet"
 	"github.com/luxdefi/cli/pkg/txutils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
-	"github.com/luxdefi/luxgo/vms/secp256k1fx"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 

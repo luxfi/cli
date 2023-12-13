@@ -15,7 +15,7 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/ids"
+	"github.com/luxdefi/node/ids"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/exp/slices"

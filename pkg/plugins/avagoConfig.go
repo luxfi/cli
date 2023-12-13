@@ -16,7 +16,7 @@ import (
 	"github.com/luxdefi/cli/pkg/ux"
 )
 
-// Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
+// Edits an Luxd config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
 func EditConfigFile(
 	app *application.Lux,
 	subnetID string,
@@ -40,7 +40,7 @@ func EditConfigFile(
 	}
 	fileBytes, err := os.ReadFile(configFile)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("failed to load luxgo config file %s: %w", configFile, err)
+		return fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
 	if fileBytes == nil {
 		fileBytes = []byte("{}")
@@ -116,7 +116,7 @@ func EditConfigFile(
 	}
 	msg := `The config file has been edited. To use it, make sure to start the node with the '--config-file' option, e.g.
 
-./build/luxgo --config-file %s
+./build/node --config-file %s
 
 (using your binary location). The node has to be restarted for the changes to take effect.`
 	ux.Logger.PrintToUser(msg, configFile)

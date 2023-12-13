@@ -31,8 +31,8 @@ import (
 	"github.com/luxdefi/cli/pkg/prompts"
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/luxgo/utils/logging"
-	"github.com/luxdefi/luxgo/utils/perms"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
