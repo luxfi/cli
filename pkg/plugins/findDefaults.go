@@ -75,7 +75,7 @@ func FindPluginDir() (string, error) {
 	return "", nil
 }
 
-func FindAvagoConfigPath() (string, error) {
+func FindLuxdConfigPath() (string, error) {
 	ux.Logger.PrintToUser(logging.Yellow.Wrap("Scanning your system for existing files..."))
 	var path string
 	// Attempt 1: Try the admin API

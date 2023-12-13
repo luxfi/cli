@@ -535,7 +535,7 @@ func getLuxdVersion() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		version, err = GetLatestAvagoVersionForRPC(sc.RPCVersion)
+		version, err = GetLatestLuxdVersionForRPC(sc.RPCVersion)
 		if err != nil {
 			return "", err
 		}
@@ -543,13 +543,13 @@ func getLuxdVersion() (string, error) {
 	return version, nil
 }
 
-func GetLatestAvagoVersionForRPC(configuredRPCVersion int) (string, error) {
-	desiredAvagoVersion, err := vm.GetLatestLuxdByProtocolVersion(
+func GetLatestLuxdVersionForRPC(configuredRPCVersion int) (string, error) {
+	desiredLuxdVersion, err := vm.GetLatestLuxdByProtocolVersion(
 		app, configuredRPCVersion, constants.LuxdCompatibilityURL)
 	if err != nil {
 		return "", err
 	}
-	return desiredAvagoVersion, nil
+	return desiredLuxdVersion, nil
 }
 
 // promptLuxdReferenceChoice returns user's choice of either using the latest Lux Go

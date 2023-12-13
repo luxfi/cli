@@ -34,8 +34,8 @@ const (
 	subnetEVMVersion1 = "v0.5.5"
 	subnetEVMVersion2 = "v0.5.6"
 
-	avagoRPC1Version = "v1.10.11"
-	avagoRPC2Version = "v1.10.12"
+	luxdRPC1Version = "v1.10.11"
+	luxdRPC2Version = "v1.10.12"
 
 	controlKeys = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 	keyName     = "ewoq"
@@ -125,7 +125,7 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 
 		// we'll set a fake chain config dir to not mess up with a potential real one
 		// in the system
-		nodeConfigDir, err := os.MkdirTemp("", "cli-tmp-avago-conf-dir")
+		nodeConfigDir, err := os.MkdirTemp("", "cli-tmp-luxd-conf-dir")
 		gomega.Expect(err).Should(gomega.BeNil())
 		defer os.RemoveAll(nodeConfigDir)
 
@@ -313,8 +313,8 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 
 		// create and deploy
 		commands.CreateCustomVMConfig(subnetName, utils.SubnetEvmGenesisPath, customVMPath1)
-		// need to set avago version manually since VMs are custom
-		commands.StartNetworkWithVersion(avagoRPC1Version)
+		// need to set luxd version manually since VMs are custom
+		commands.StartNetworkWithVersion(luxdRPC1Version)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -337,7 +337,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		commands.UpgradeCustomVMLocal(subnetName, customVMPath2)
 
 		// restart network
-		commands.StartNetworkWithVersion(avagoRPC2Version)
+		commands.StartNetworkWithVersion(luxdRPC2Version)
 
 		// check running version
 		version, err = utils.GetNodeVMVersion(nodeURI, vmid.String())
@@ -384,7 +384,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can upgrade subnet-evm on public deployment", func() {
-		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloAvagoKey])
+		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloLuxdKey])
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1])
 
 		// Simulate fuji deployment

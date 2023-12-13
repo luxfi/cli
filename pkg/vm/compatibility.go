@@ -26,7 +26,7 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-var ErrNoAvagoVersion = errors.New("unable to find a compatible node version")
+var ErrNoLuxdVersion = errors.New("unable to find a compatible node version")
 
 // protocolVersionQueryInitializer gets vm protocol version during handshake and provides it on a channel
 
@@ -170,14 +170,14 @@ func GetLuxdVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]
 		return nil, err
 	}
 
-	var parsedCompat models.AvagoCompatiblity
+	var parsedCompat models.LuxdCompatiblity
 	if err = json.Unmarshal(compatibilityBytes, &parsedCompat); err != nil {
 		return nil, err
 	}
 
 	eligibleVersions, ok := parsedCompat[strconv.Itoa(rpcVersion)]
 	if !ok {
-		return nil, ErrNoAvagoVersion
+		return nil, ErrNoLuxdVersion
 	}
 
 	// versions are not necessarily sorted, so we need to sort them, tho this puts them in ascending order
@@ -190,10 +190,10 @@ func GetLuxdVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]
 func GetAvailableLuxdVersions(app *application.Lux, rpcVersion int, url string) ([]string, error) {
 	eligibleVersions, err := GetLuxdVersionsForRPC(app, rpcVersion, url)
 	if err != nil {
-		return nil, ErrNoAvagoVersion
+		return nil, ErrNoLuxdVersion
 	}
-	// get latest avago release to make sure we're not picking a release currently in progress but not available for download
-	latestAvagoVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
+	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
+	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.LuxDeFiOrg,
 		constants.LuxdRepoName,
 	))
@@ -202,13 +202,13 @@ func GetAvailableLuxdVersions(app *application.Lux, rpcVersion int, url string) 
 	}
 	var availableVersions []string
 	for i := len(eligibleVersions) - 1; i >= 0; i-- {
-		versionComparison := semver.Compare(eligibleVersions[i], latestAvagoVersion)
+		versionComparison := semver.Compare(eligibleVersions[i], latestLuxdVersion)
 		if versionComparison != 1 {
 			availableVersions = append(availableVersions, eligibleVersions[i])
 		}
 	}
 	if len(availableVersions) == 0 {
-		return nil, ErrNoAvagoVersion
+		return nil, ErrNoLuxdVersion
 	}
 	return availableVersions, nil
 }

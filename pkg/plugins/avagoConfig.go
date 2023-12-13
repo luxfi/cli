@@ -23,7 +23,7 @@ func EditConfigFile(
 	network models.Network,
 	configFile string,
 	forceWrite bool,
-	subnetAvagoConfigFile string,
+	subnetLuxdConfigFile string,
 ) error {
 	if !forceWrite {
 		warn := "This will edit your existing config file. This edit is nondestructive,\n" +
@@ -45,34 +45,34 @@ func EditConfigFile(
 	if fileBytes == nil {
 		fileBytes = []byte("{}")
 	}
-	var avagoConfig map[string]interface{}
-	if err := json.Unmarshal(fileBytes, &avagoConfig); err != nil {
+	var luxdConfig map[string]interface{}
+	if err := json.Unmarshal(fileBytes, &luxdConfig); err != nil {
 		return fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
 
-	if subnetAvagoConfigFile != "" {
-		subnetAvagoConfigFileBytes, err := os.ReadFile(subnetAvagoConfigFile)
+	if subnetLuxdConfigFile != "" {
+		subnetLuxdConfigFileBytes, err := os.ReadFile(subnetLuxdConfigFile)
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("failed to load extra flags from subnet avago config file %s: %w", subnetAvagoConfigFile, err)
+			return fmt.Errorf("failed to load extra flags from subnet luxd config file %s: %w", subnetLuxdConfigFile, err)
 		}
-		var subnetAvagoConfig map[string]interface{}
-		if err := json.Unmarshal(subnetAvagoConfigFileBytes, &subnetAvagoConfig); err != nil {
-			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", subnetAvagoConfigFile, err)
+		var subnetLuxdConfig map[string]interface{}
+		if err := json.Unmarshal(subnetLuxdConfigFileBytes, &subnetLuxdConfig); err != nil {
+			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", subnetLuxdConfigFile, err)
 		}
-		for k, v := range subnetAvagoConfig {
+		for k, v := range subnetLuxdConfig {
 			if k == "track-subnets" || k == "whitelisted-subnets" {
-				ux.Logger.PrintToUser("ignoring configuration setting for %q, a subnet's avago conf should not change it", k)
+				ux.Logger.PrintToUser("ignoring configuration setting for %q, a subnet's luxd conf should not change it", k)
 				continue
 			}
-			avagoConfig[k] = v
+			luxdConfig[k] = v
 		}
 	}
 
 	// Banff.10: "track-subnets" instead of "whitelisted-subnets"
-	oldVal := avagoConfig["track-subnets"]
+	oldVal := luxdConfig["track-subnets"]
 	if oldVal == nil {
 		// check the old key in the config file for tracked-subnets
-		oldVal = avagoConfig["whitelisted-subnets"]
+		oldVal = luxdConfig["whitelisted-subnets"]
 	}
 
 	newVal := ""
@@ -103,11 +103,11 @@ func EditConfigFile(
 	}
 
 	// Banf.10 changes from "whitelisted-subnets" to "track-subnets"
-	delete(avagoConfig, "whitelisted-subnets")
-	avagoConfig["track-subnets"] = newVal
-	avagoConfig["network-id"] = network.NetworkIDFlagValue()
+	delete(luxdConfig, "whitelisted-subnets")
+	luxdConfig["track-subnets"] = newVal
+	luxdConfig["network-id"] = network.NetworkIDFlagValue()
 
-	writeBytes, err := json.MarshalIndent(avagoConfig, "", "  ")
+	writeBytes, err := json.MarshalIndent(luxdConfig, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to pack JSON to bytes for the config file: %w", err)
 	}

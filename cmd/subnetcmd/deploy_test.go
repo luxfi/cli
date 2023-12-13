@@ -15,12 +15,12 @@ import (
 )
 
 const (
-	testAvagoVersion1      = "v1.9.2"
-	testAvagoVersion2      = "v1.9.1"
-	testLatestAvagoVersion = "latest"
+	testLuxdVersion1      = "v1.9.2"
+	testLuxdVersion2      = "v1.9.1"
+	testLatestLuxdVersion = "latest"
 )
 
-var testAvagoCompat = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
+var testLuxdCompat = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
 
 func TestMutuallyExclusive(t *testing.T) {
 	require := require.New(t)
@@ -92,7 +92,7 @@ func TestMutuallyExclusive(t *testing.T) {
 	}
 }
 
-func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
+func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 	type test struct {
 		name            string
 		networkRPC      int
@@ -111,21 +111,21 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 		{
 			name:            "network already running, rpc matches",
 			networkRPC:      18,
-			networkVersion:  testAvagoVersion1,
+			networkVersion:  testLuxdVersion1,
 			networkErr:      nil,
 			desiredRPC:      18,
-			desiredVersion:  testLatestAvagoVersion,
+			desiredVersion:  testLatestLuxdVersion,
 			expectError:     false,
-			expectedVersion: testAvagoVersion1,
+			expectedVersion: testLuxdVersion1,
 			networkUp:       true,
 		},
 		{
 			name:            "network already running, rpc mismatch",
 			networkRPC:      18,
-			networkVersion:  testAvagoVersion1,
+			networkVersion:  testLuxdVersion1,
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLatestAvagoVersion,
+			desiredVersion:  testLatestLuxdVersion,
 			expectError:     true,
 			expectedVersion: "",
 			networkUp:       true,
@@ -133,10 +133,10 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 		{
 			name:            "network already running, version mismatch",
 			networkRPC:      18,
-			networkVersion:  testAvagoVersion1,
+			networkVersion:  testLuxdVersion1,
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testAvagoVersion2,
+			desiredVersion:  testLuxdVersion2,
 			expectError:     true,
 			expectedVersion: "",
 			networkUp:       true,
@@ -147,10 +147,10 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 			networkVersion:  "",
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLatestAvagoVersion,
+			desiredVersion:  testLatestLuxdVersion,
 			expectError:     false,
-			expectedVersion: testAvagoVersion1,
-			compatData:      testAvagoCompat,
+			expectedVersion: testLuxdVersion1,
+			compatData:      testLuxdCompat,
 			compatError:     nil,
 			networkUp:       false,
 		},
@@ -160,9 +160,9 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 			networkVersion:  "",
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLatestAvagoVersion,
+			desiredVersion:  testLatestLuxdVersion,
 			expectError:     true,
-			expectedVersion: testAvagoVersion1,
+			expectedVersion: testLuxdVersion1,
 			compatData:      nil,
 			compatError:     errors.New("no compat"),
 			networkUp:       false,
@@ -173,10 +173,10 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 			networkVersion:  "",
 			networkErr:      errors.New("unable to determine rpc version"),
 			desiredRPC:      19,
-			desiredVersion:  testLatestAvagoVersion,
+			desiredVersion:  testLatestLuxdVersion,
 			expectError:     true,
-			expectedVersion: testAvagoVersion1,
-			compatData:      testAvagoCompat,
+			expectedVersion: testLuxdVersion1,
+			compatData:      testLuxdCompat,
 			compatError:     nil,
 			networkUp:       true,
 		},
@@ -189,7 +189,7 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 			mockSC := mocks.StatusChecker{}
 			mockSC.On("GetCurrentNetworkVersion").Return(tt.networkVersion, tt.networkRPC, tt.networkUp, tt.networkErr)
 
-			userProvidedAvagoVersion = tt.desiredVersion
+			userProvidedLuxdVersion = tt.desiredVersion
 
 			mockDownloader := &mocks.Downloader{}
 			mockDownloader.On("Download", mock.Anything).Return(tt.compatData, nil)
@@ -199,13 +199,13 @@ func TestCheckForInvalidDeployAndSetAvagoVersion(t *testing.T) {
 			app.Log = logging.NoLog{}
 			app.Downloader = mockDownloader
 
-			desiredAvagoVersion, err := CheckForInvalidDeployAndGetAvagoVersion(&mockSC, tt.desiredRPC)
+			desiredLuxdVersion, err := CheckForInvalidDeployAndGetLuxdVersion(&mockSC, tt.desiredRPC)
 
 			if tt.expectError {
 				require.Error(err)
 			} else {
 				require.NoError(err)
-				require.Equal(tt.expectedVersion, desiredAvagoVersion)
+				require.Equal(tt.expectedVersion, desiredLuxdVersion)
 			}
 		})
 	}

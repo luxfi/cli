@@ -16,7 +16,7 @@ import (
 	"github.com/luxdefi/cli/pkg/utils"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/node/ids"
-	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxdconstants "github.com/luxdefi/node/utils/constants"
 	"github.com/luxdefi/node/vms/platformvm"
 	"github.com/spf13/cobra"
 )
@@ -252,7 +252,7 @@ func getMaxValidationTime(network models.Network, nodeID ids.NodeID, startTime t
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
 	platformCli := platformvm.NewClient(network.Endpoint)
-	vs, err := platformCli.GetCurrentValidators(ctx, avagoconstants.PrimaryNetworkID, nil)
+	vs, err := platformCli.GetCurrentValidators(ctx, luxdconstants.PrimaryNetworkID, nil)
 	cancel()
 	if err != nil {
 		return 0, err

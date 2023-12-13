@@ -213,7 +213,7 @@ func printOutput(
 	ansibleHostIDs []string,
 	ansibleHosts map[string]*models.Host,
 	nodeIDs []string,
-	avagoVersions map[string]string,
+	luxdVersions map[string]string,
 	notHealthyHosts []string,
 	notBootstrappedHosts []string,
 	notSyncedHosts []string,
@@ -238,7 +238,7 @@ func printOutput(
 	ux.Logger.PrintToUser(tit)
 	ux.Logger.PrintToUser(strings.Repeat("=", len(tit)))
 	ux.Logger.PrintToUser("")
-	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Avago Version", "Primary Network", "Healthy"}
+	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Luxd Version", "Primary Network", "Healthy"}
 	if subnetName != "" {
 		header = append(header, "Subnet "+subnetName)
 	}
@@ -259,7 +259,7 @@ func printOutput(
 			nodeIDs[i],
 			ansibleHosts[ansibleHostID].IP,
 			clustersConfig.Clusters[clusterName].Network.Name(),
-			avagoVersions[ansibleHostID],
+			luxdVersions[ansibleHostID],
 			boostrappedStatus,
 			healthyStatus,
 		}

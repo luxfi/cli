@@ -113,7 +113,7 @@ func checkLuxdVersionCompatible(hosts []*models.Host, subnetName string) ([]stri
 	if err != nil {
 		return nil, err
 	}
-	compatibleVersions, err := checkForCompatibleAvagoVersion(sc.RPCVersion)
+	compatibleVersions, err := checkForCompatibleLuxdVersion(sc.RPCVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -169,13 +169,13 @@ func parseLuxdOutput(byteValue []byte) (string, error) {
 	return "", nil
 }
 
-func checkForCompatibleAvagoVersion(configuredRPCVersion int) ([]string, error) {
-	compatibleAvagoVersions, err := vm.GetAvailableLuxdVersions(
+func checkForCompatibleLuxdVersion(configuredRPCVersion int) ([]string, error) {
+	compatibleLuxdVersions, err := vm.GetAvailableLuxdVersions(
 		app, configuredRPCVersion, constants.LuxdCompatibilityURL)
 	if err != nil {
 		return nil, err
 	}
-	return compatibleAvagoVersions, nil
+	return compatibleLuxdVersions, nil
 }
 
 func disconnectHosts(hosts []*models.Host) {

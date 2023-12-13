@@ -8,14 +8,14 @@ import (
 	"github.com/luxdefi/cli/pkg/constants"
 )
 
-func SetupLuxd(app *application.Lux, avagoVersion string) (string, error) {
+func SetupLuxd(app *application.Lux, luxdVersion string) (string, error) {
 	binDir := app.GetLuxdBinDir()
 
 	installer := NewInstaller()
-	downloader := NewAvagoDownloader()
+	downloader := NewLuxdDownloader()
 	return InstallBinary(
 		app,
-		avagoVersion,
+		luxdVersion,
 		binDir,
 		binDir,
 		nodeBinPrefix,

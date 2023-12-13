@@ -155,11 +155,11 @@ func importFromFile(importPath string) error {
 	}
 
 	if importable.NodeConfig != nil {
-		if err := app.WriteAvagoNodeConfigFile(subnetName, importable.NodeConfig); err != nil {
+		if err := app.WriteLuxdNodeConfigFile(subnetName, importable.NodeConfig); err != nil {
 			return err
 		}
 	} else {
-		_ = os.RemoveAll(app.GetAvagoNodeConfigPath(subnetName))
+		_ = os.RemoveAll(app.GetLuxdNodeConfigPath(subnetName))
 	}
 
 	if importable.ChainConfig != nil {
@@ -171,11 +171,11 @@ func importFromFile(importPath string) error {
 	}
 
 	if importable.SubnetConfig != nil {
-		if err := app.WriteAvagoSubnetConfigFile(subnetName, importable.SubnetConfig); err != nil {
+		if err := app.WriteLuxdSubnetConfigFile(subnetName, importable.SubnetConfig); err != nil {
 			return err
 		}
 	} else {
-		_ = os.RemoveAll(app.GetAvagoSubnetConfigPath(subnetName))
+		_ = os.RemoveAll(app.GetLuxdSubnetConfigPath(subnetName))
 	}
 
 	if importable.NetworkUpgrades != nil {

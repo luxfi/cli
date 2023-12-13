@@ -25,9 +25,9 @@ func CreateSubnetEvmConfig(subnetName string, genesisPath string) (string, strin
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
-	// let's use a SubnetEVM version which has a guaranteed compatible avago
-	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, mapping[utils.LatestEVM2AvagoKey])
-	return mapping[utils.LatestEVM2AvagoKey], mapping[utils.LatestAvago2EVMKey]
+	// let's use a SubnetEVM version which has a guaranteed compatible luxd
+	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, mapping[utils.LatestEVM2LuxdKey])
+	return mapping[utils.LatestEVM2LuxdKey], mapping[utils.LatestLuxd2EVMKey]
 }
 
 /* #nosec G204 */
@@ -196,7 +196,7 @@ func DeploySubnetLocallyExpectError(subnetName string) {
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	DeploySubnetLocallyWithArgsExpectError(subnetName, mapping[utils.OnlyAvagoKey], "")
+	DeploySubnetLocallyWithArgsExpectError(subnetName, mapping[utils.OnlyLuxdKey], "")
 }
 
 // Returns the deploy output
@@ -206,7 +206,7 @@ func DeploySubnetLocallyWithViperConf(subnetName string, confPath string) string
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return DeploySubnetLocallyWithArgs(subnetName, mapping[utils.OnlyAvagoKey], confPath)
+	return DeploySubnetLocallyWithArgs(subnetName, mapping[utils.OnlyLuxdKey], confPath)
 }
 
 // Returns the deploy output

@@ -76,7 +76,7 @@ func setupTest(t *testing.T) *require.Assertions {
 
 func TestDeployToLocal(t *testing.T) {
 	require := setupTest(t)
-	avagoVersion := "v1.18.0"
+	luxdVersion := "v1.18.0"
 
 	// fake-return true simulating the process is running
 	procChecker := &mocks.ProcessChecker{}
@@ -93,7 +93,7 @@ func TestDeployToLocal(t *testing.T) {
 	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetLuxdBinDir(), "node-"+avagoVersion)
+	binDir := filepath.Join(app.GetLuxdBinDir(), "node-"+luxdVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}
@@ -120,7 +120,7 @@ func TestDeployToLocal(t *testing.T) {
 		binaryDownloader:   binDownloader,
 		app:                app,
 		setDefaultSnapshot: fakeSetDefaultSnapshot,
-		avagoVersion:       avagoVersion,
+		luxdVersion:       luxdVersion,
 	}
 
 	// create a simple genesis for the test
@@ -146,7 +146,7 @@ func TestDeployToLocal(t *testing.T) {
 	require.Equal(testBlockChainID2, b.String())
 }
 
-func TestGetLatestAvagoVersion(t *testing.T) {
+func TestGetLatestLuxdVersion(t *testing.T) {
 	require := setupTest(t)
 
 	testVersion := "v1.99.9999"

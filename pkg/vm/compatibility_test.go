@@ -15,16 +15,16 @@ import (
 )
 
 const (
-	testAvagoVersion         = "v0.4.2"
-	testUnlistedAvagoVersion = "v0.4.3"
+	testLuxdVersion         = "v0.4.2"
+	testUnlistedLuxdVersion = "v0.4.3"
 )
 
 var (
 	testSubnetEVMCompat = []byte("{\"rpcChainVMProtocolVersion\": {\"v0.4.2\": 18,\"v0.4.1\": 18,\"v0.4.0\": 17}}")
-	testAvagoCompat     = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
-	testAvagoCompat2    = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
-	testAvagoCompat3    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
-	testAvagoCompat4    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
+	testLuxdCompat     = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
+	testLuxdCompat2    = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
+	testLuxdCompat3    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
+	testLuxdCompat4    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
 )
 
 func TestGetRPCProtocolVersionSubnetEVM(t *testing.T) {
@@ -38,7 +38,7 @@ func TestGetRPCProtocolVersionSubnetEVM(t *testing.T) {
 	app := application.New()
 	app.Downloader = mockDownloader
 
-	rpcVersion, err := GetRPCProtocolVersion(app, vm, testAvagoVersion)
+	rpcVersion, err := GetRPCProtocolVersion(app, vm, testLuxdVersion)
 	require.NoError(err)
 	require.Equal(expectedRPC, rpcVersion)
 }
@@ -49,7 +49,7 @@ func TestGetRPCProtocolVersionUnknownVM(t *testing.T) {
 
 	app := application.New()
 
-	_, err := GetRPCProtocolVersion(app, vm, testAvagoVersion)
+	_, err := GetRPCProtocolVersion(app, vm, testLuxdVersion)
 	require.ErrorContains(err, "unknown VM type")
 }
 
@@ -62,7 +62,7 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	app := application.New()
 	app.Downloader = mockDownloader
 
-	_, err := GetRPCProtocolVersion(app, models.SubnetEvm, testUnlistedAvagoVersion)
+	_, err := GetRPCProtocolVersion(app, models.SubnetEvm, testUnlistedLuxdVersion)
 	require.ErrorContains(err, "no RPC version found")
 }
 
@@ -80,7 +80,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, one entry",
 			rpc:             19,
-			testData:        testAvagoCompat,
+			testData:        testLuxdCompat,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -88,7 +88,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "older, one entry",
 			rpc:             18,
-			testData:        testAvagoCompat,
+			testData:        testLuxdCompat,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.1",
 			expectedErr:     nil,
@@ -96,7 +96,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry",
 			rpc:             19,
-			testData:        testAvagoCompat2,
+			testData:        testLuxdCompat2,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -104,7 +104,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry, reverse sorted",
 			rpc:             19,
-			testData:        testAvagoCompat3,
+			testData:        testLuxdCompat3,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -112,7 +112,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry, unreleased version",
 			rpc:             19,
-			testData:        testAvagoCompat2,
+			testData:        testLuxdCompat2,
 			latestVersion:   "v1.9.1",
 			expectedVersion: "v1.9.1",
 			expectedErr:     nil,
@@ -120,23 +120,23 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "no rpc version",
 			rpc:             20,
-			testData:        testAvagoCompat2,
+			testData:        testLuxdCompat2,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "",
-			expectedErr:     ErrNoAvagoVersion,
+			expectedErr:     ErrNoLuxdVersion,
 		},
 		{
 			name:            "existing rpc, but no eligible version",
 			rpc:             19,
-			testData:        testAvagoCompat,
+			testData:        testLuxdCompat,
 			latestVersion:   "v1.9.1",
 			expectedVersion: "",
-			expectedErr:     ErrNoAvagoVersion,
+			expectedErr:     ErrNoLuxdVersion,
 		},
 		{
 			name:            "string sorting test",
 			rpc:             19,
-			testData:        testAvagoCompat4,
+			testData:        testLuxdCompat4,
 			latestVersion:   "v1.9.11",
 			expectedVersion: "v1.9.11",
 			expectedErr:     nil,
@@ -144,7 +144,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "string sorting test 2",
 			rpc:             19,
-			testData:        testAvagoCompat4,
+			testData:        testLuxdCompat4,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -161,13 +161,13 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 			app := application.New()
 			app.Downloader = mockDownloader
 
-			avagoVersion, err := GetLatestLuxdByProtocolVersion(app, tt.rpc, constants.LuxdCompatibilityURL)
+			luxdVersion, err := GetLatestLuxdByProtocolVersion(app, tt.rpc, constants.LuxdCompatibilityURL)
 			if tt.expectedErr == nil {
 				require.NoError(err)
 			} else {
 				require.ErrorIs(err, tt.expectedErr)
 			}
-			require.Equal(tt.expectedVersion, avagoVersion)
+			require.Equal(tt.expectedVersion, luxdVersion)
 		})
 	}
 }

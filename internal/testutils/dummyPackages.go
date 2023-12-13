@@ -28,8 +28,8 @@ const (
 
 	nodeBinPrefix = "node-"
 
-	avagoTar     = "/tmp/avago.tar.gz"
-	avagoZip     = "/tmp/avago.zip"
+	luxdTar     = "/tmp/luxd.tar.gz"
+	luxdZip     = "/tmp/luxd.zip"
 	subnetEVMTar = "/tmp/subevm.tar.gz"
 )
 
@@ -39,7 +39,7 @@ var (
 	licenseContents = []byte("LICENSE")
 )
 
-func verifyAvagoTarContents(require *require.Assertions, tarBytes []byte, version string) {
+func verifyLuxdTarContents(require *require.Assertions, tarBytes []byte, version string) {
 	topDir := nodeBinPrefix + version
 	bin := filepath.Join(topDir, nodeBin)
 	plugins := filepath.Join(topDir, pluginDirName)
@@ -112,7 +112,7 @@ func verifySubnetEVMTarContents(require *require.Assertions, tarBytes []byte) {
 	require.True(licenseExists)
 }
 
-func verifyAvagoZipContents(require *require.Assertions, zipFile string) {
+func verifyLuxdZipContents(require *require.Assertions, zipFile string) {
 	topDir := buildDirName
 	bin := filepath.Join(topDir, nodeBin)
 	plugins := filepath.Join(topDir, pluginDirName)
@@ -147,7 +147,7 @@ func verifyAvagoZipContents(require *require.Assertions, zipFile string) {
 	require.True(evmExists)
 }
 
-func CreateDummyAvagoZip(require *require.Assertions, binary []byte) []byte {
+func CreateDummyLuxdZip(require *require.Assertions, binary []byte) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
@@ -169,17 +169,17 @@ func CreateDummyAvagoZip(require *require.Assertions, binary []byte) []byte {
 	require.NoError(err)
 
 	// Put into zip
-	CreateZip(require, topDir, avagoZip)
-	defer os.Remove(avagoZip)
+	CreateZip(require, topDir, luxdZip)
+	defer os.Remove(luxdZip)
 
-	verifyAvagoZipContents(require, avagoZip)
+	verifyLuxdZipContents(require, luxdZip)
 
-	zipBytes, err := os.ReadFile(avagoZip)
+	zipBytes, err := os.ReadFile(luxdZip)
 	require.NoError(err)
 	return zipBytes
 }
 
-func CreateDummyAvagoTar(require *require.Assertions, binary []byte, version string) []byte {
+func CreateDummyLuxdTar(require *require.Assertions, binary []byte, version string) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
@@ -201,11 +201,11 @@ func CreateDummyAvagoTar(require *require.Assertions, binary []byte, version str
 	require.NoError(err)
 
 	// Put into tar
-	CreateTarGz(require, topDir, avagoTar, true)
-	defer os.Remove(avagoTar)
-	tarBytes, err := os.ReadFile(avagoTar)
+	CreateTarGz(require, topDir, luxdTar, true)
+	defer os.Remove(luxdTar)
+	tarBytes, err := os.ReadFile(luxdTar)
 	require.NoError(err)
-	verifyAvagoTarContents(require, tarBytes, version)
+	verifyLuxdTarContents(require, tarBytes, version)
 	return tarBytes
 }
 

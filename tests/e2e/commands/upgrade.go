@@ -176,7 +176,7 @@ func ApplyUpgradeLocal(subnetName string) (string, error) {
 }
 
 /* #nosec G204 */
-func ApplyUpgradeToPublicNode(subnetName, avagoChainConfDir string) (string, error) {
+func ApplyUpgradeToPublicNode(subnetName, luxdChainConfDir string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
 		SubnetCmd,
@@ -185,7 +185,7 @@ func ApplyUpgradeToPublicNode(subnetName, avagoChainConfDir string) (string, err
 		subnetName,
 		"--fuji",
 		"--node-chain-config-dir",
-		avagoChainConfDir,
+		luxdChainConfDir,
 		"--"+constants.SkipUpdateFlag,
 	)
 

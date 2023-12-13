@@ -14,9 +14,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testAvagoCompat = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
+var testLuxdCompat = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
 
-func Test_determineAvagoVersion(t *testing.T) {
+func Test_determineLuxdVersion(t *testing.T) {
 	subnetName1 := "test1"
 	subnetName2 := "test2"
 	subnetName3 := "test3"
@@ -74,60 +74,60 @@ func Test_determineAvagoVersion(t *testing.T) {
 
 	type test struct {
 		name          string
-		userAvago     string
+		userLuxd     string
 		sidecars      []models.Sidecar
-		expectedAvago string
+		expectedLuxd string
 		expectedErr   bool
 	}
 
 	tests := []test{
 		{
 			name:          "user not latest",
-			userAvago:     "v1.9.5",
+			userLuxd:     "v1.9.5",
 			sidecars:      []models.Sidecar{sc1},
-			expectedAvago: "v1.9.5",
+			expectedLuxd: "v1.9.5",
 			expectedErr:   false,
 		},
 		{
 			name:          "single sc",
-			userAvago:     "latest",
+			userLuxd:     "latest",
 			sidecars:      []models.Sidecar{sc1},
-			expectedAvago: "v1.9.1",
+			expectedLuxd: "v1.9.1",
 			expectedErr:   false,
 		},
 		{
 			name:          "multi sc matching",
-			userAvago:     "latest",
+			userLuxd:     "latest",
 			sidecars:      []models.Sidecar{sc1, sc2},
-			expectedAvago: "v1.9.1",
+			expectedLuxd: "v1.9.1",
 			expectedErr:   false,
 		},
 		{
 			name:          "multi sc mismatch",
-			userAvago:     "latest",
+			userLuxd:     "latest",
 			sidecars:      []models.Sidecar{sc1, sc3},
-			expectedAvago: "",
+			expectedLuxd: "",
 			expectedErr:   true,
 		},
 		{
 			name:          "single custom",
-			userAvago:     "latest",
+			userLuxd:     "latest",
 			sidecars:      []models.Sidecar{scCustom},
-			expectedAvago: "latest",
+			expectedLuxd: "latest",
 			expectedErr:   false,
 		},
 		{
 			name:          "custom plus user selected",
-			userAvago:     "v1.9.1",
+			userLuxd:     "v1.9.1",
 			sidecars:      []models.Sidecar{scCustom},
-			expectedAvago: "v1.9.1",
+			expectedLuxd: "v1.9.1",
 			expectedErr:   false,
 		},
 		{
 			name:          "multi sc matching plus custom",
-			userAvago:     "latest",
+			userLuxd:     "latest",
 			sidecars:      []models.Sidecar{sc1, sc2, scCustom},
-			expectedAvago: "v1.9.1",
+			expectedLuxd: "v1.9.1",
 			expectedErr:   false,
 		},
 	}
@@ -136,7 +136,7 @@ func Test_determineAvagoVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			app = testutils.SetupTestInTempDir(t)
 			mockDownloader := &mocks.Downloader{}
-			mockDownloader.On("Download", mock.Anything).Return(testAvagoCompat, nil)
+			mockDownloader.On("Download", mock.Anything).Return(testLuxdCompat, nil)
 			mockDownloader.On("GetLatestReleaseVersion", mock.Anything).Return("v1.9.2", nil)
 
 			app.Downloader = mockDownloader
@@ -146,13 +146,13 @@ func Test_determineAvagoVersion(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			avagoVersion, err := determineAvagoVersion(tt.userAvago)
+			luxdVersion, err := determineLuxdVersion(tt.userLuxd)
 			if tt.expectedErr {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
 			}
-			require.Equal(t, tt.expectedAvago, avagoVersion)
+			require.Equal(t, tt.expectedLuxd, luxdVersion)
 		})
 	}
 }

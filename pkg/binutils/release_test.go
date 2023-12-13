@@ -44,13 +44,13 @@ func setupInstallDir(require *require.Assertions) *application.Lux {
 func Test_installLuxdWithVersion_Zip(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	zipBytes := testutils.CreateDummyAvagoZip(require, binary1)
+	zipBytes := testutils.CreateDummyLuxdZip(require, binary1)
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "darwin")
 
-	githubDownloader := NewAvagoDownloader()
+	githubDownloader := NewLuxdDownloader()
 
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(zipBytes, nil)
@@ -71,14 +71,14 @@ func Test_installLuxdWithVersion_Zip(t *testing.T) {
 func Test_installLuxdWithVersion_Tar(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	tarBytes := testutils.CreateDummyAvagoTar(require, binary1, version1)
+	tarBytes := testutils.CreateDummyLuxdTar(require, binary1, version1)
 
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "linux")
 
-	downloader := NewAvagoDownloader()
+	downloader := NewLuxdDownloader()
 
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(tarBytes, nil)
@@ -99,14 +99,14 @@ func Test_installLuxdWithVersion_Tar(t *testing.T) {
 func Test_installLuxdWithVersion_MultipleCoinstalls(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	zipBytes1 := testutils.CreateDummyAvagoZip(require, binary1)
-	zipBytes2 := testutils.CreateDummyAvagoZip(require, binary2)
+	zipBytes1 := testutils.CreateDummyLuxdZip(require, binary1)
+	zipBytes2 := testutils.CreateDummyLuxdZip(require, binary2)
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "darwin")
 
-	downloader := NewAvagoDownloader()
+	downloader := NewLuxdDownloader()
 	url1, _, err := downloader.GetDownloadURL(version1, mockInstaller)
 	require.NoError(err)
 	url2, _, err := downloader.GetDownloadURL(version2, mockInstaller)

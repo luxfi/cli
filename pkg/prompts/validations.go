@@ -21,7 +21,7 @@ import (
 	"github.com/luxdefi/cli/pkg/models"
 	"github.com/luxdefi/cli/pkg/ux"
 	"github.com/luxdefi/node/ids"
-	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxdconstants "github.com/luxdefi/node/utils/constants"
 	"github.com/luxdefi/node/utils/formatting/address"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -148,7 +148,7 @@ func validatePChainFujiAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != avagoconstants.FujiHRP {
+	if hrp != luxdconstants.FujiHRP {
 		return errors.New("this is not a fuji address")
 	}
 	return nil
@@ -159,7 +159,7 @@ func validatePChainMainAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != avagoconstants.MainnetHRP {
+	if hrp != luxdconstants.MainnetHRP {
 		return errors.New("this is not a mainnet address")
 	}
 	return nil
@@ -172,7 +172,7 @@ func validatePChainLocalAddress(input string) error {
 	}
 	// ANR uses the `custom` HRP for local networks,
 	// but the `local` HRP also exists...
-	if hrp != avagoconstants.LocalHRP && hrp != avagoconstants.FallbackHRP {
+	if hrp != luxdconstants.LocalHRP && hrp != luxdconstants.FallbackHRP {
 		return errors.New("this is not a local nor custom address")
 	}
 	return nil

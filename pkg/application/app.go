@@ -100,7 +100,7 @@ func (app *Lux) GetGenesisPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.GenesisFileName)
 }
 
-func (app *Lux) GetAvagoNodeConfigPath(subnetName string) string {
+func (app *Lux) GetLuxdNodeConfigPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.NodeConfigFileName)
 }
 
@@ -108,7 +108,7 @@ func (app *Lux) GetChainConfigPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.ChainConfigFileName)
 }
 
-func (app *Lux) GetAvagoSubnetConfigPath(subnetName string) string {
+func (app *Lux) GetLuxdSubnetConfigPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.SubnetConfigFileName)
 }
 
@@ -254,8 +254,8 @@ func (app *Lux) WriteGenesisFile(subnetName string, genesisBytes []byte) error {
 	return app.writeFile(genesisPath, genesisBytes)
 }
 
-func (app *Lux) WriteAvagoNodeConfigFile(subnetName string, bs []byte) error {
-	path := app.GetAvagoNodeConfigPath(subnetName)
+func (app *Lux) WriteLuxdNodeConfigFile(subnetName string, bs []byte) error {
+	path := app.GetLuxdNodeConfigPath(subnetName)
 	return app.writeFile(path, bs)
 }
 
@@ -264,8 +264,8 @@ func (app *Lux) WriteChainConfigFile(subnetName string, bs []byte) error {
 	return app.writeFile(path, bs)
 }
 
-func (app *Lux) WriteAvagoSubnetConfigFile(subnetName string, bs []byte) error {
-	path := app.GetAvagoSubnetConfigPath(subnetName)
+func (app *Lux) WriteLuxdSubnetConfigFile(subnetName string, bs []byte) error {
+	path := app.GetLuxdSubnetConfigPath(subnetName)
 	return app.writeFile(path, bs)
 }
 
@@ -280,8 +280,8 @@ func (app *Lux) GenesisExists(subnetName string) bool {
 	return err == nil
 }
 
-func (app *Lux) AvagoNodeConfigExists(subnetName string) bool {
-	path := app.GetAvagoNodeConfigPath(subnetName)
+func (app *Lux) LuxdNodeConfigExists(subnetName string) bool {
+	path := app.GetLuxdNodeConfigPath(subnetName)
 	_, err := os.Stat(path)
 	return err == nil
 }
@@ -292,8 +292,8 @@ func (app *Lux) ChainConfigExists(subnetName string) bool {
 	return err == nil
 }
 
-func (app *Lux) AvagoSubnetConfigExists(subnetName string) bool {
-	path := app.GetAvagoSubnetConfigPath(subnetName)
+func (app *Lux) LuxdSubnetConfigExists(subnetName string) bool {
+	path := app.GetLuxdSubnetConfigPath(subnetName)
 	_, err := os.Stat(path)
 	return err == nil
 }
@@ -374,16 +374,16 @@ func (app *Lux) LoadRawGenesis(subnetName string) ([]byte, error) {
 	return os.ReadFile(genesisPath)
 }
 
-func (app *Lux) LoadRawAvagoNodeConfig(subnetName string) ([]byte, error) {
-	return os.ReadFile(app.GetAvagoNodeConfigPath(subnetName))
+func (app *Lux) LoadRawLuxdNodeConfig(subnetName string) ([]byte, error) {
+	return os.ReadFile(app.GetLuxdNodeConfigPath(subnetName))
 }
 
 func (app *Lux) LoadRawChainConfig(subnetName string) ([]byte, error) {
 	return os.ReadFile(app.GetChainConfigPath(subnetName))
 }
 
-func (app *Lux) LoadRawAvagoSubnetConfig(subnetName string) ([]byte, error) {
-	return os.ReadFile(app.GetAvagoSubnetConfigPath(subnetName))
+func (app *Lux) LoadRawLuxdSubnetConfig(subnetName string) ([]byte, error) {
+	return os.ReadFile(app.GetLuxdSubnetConfigPath(subnetName))
 }
 
 func (app *Lux) LoadRawNetworkUpgrades(subnetName string) ([]byte, error) {

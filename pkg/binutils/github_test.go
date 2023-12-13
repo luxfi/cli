@@ -69,7 +69,7 @@ func TestGetDownloadURL_Luxd(t *testing.T) {
 		mockInstaller := &mocks.Installer{}
 		mockInstaller.On("GetArch").Return(tt.goarch, tt.goos)
 
-		downloader := NewAvagoDownloader()
+		downloader := NewLuxdDownloader()
 
 		url, ext, err := downloader.GetDownloadURL(tt.version, mockInstaller)
 		require.Equal(tt.expectedURL, url)
