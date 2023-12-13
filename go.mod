@@ -3,17 +3,17 @@ module github.com/luxdefi/cli
 go 1.20
 
 require (
-	github.com/luxdefi/lpm v0.0.4
-	github.com/luxdefi/netrunner v1.7.4-0.20231204182757-5309eeea932f
-	github.com/luxdefi/node v1.10.16
-	github.com/luxdefi/coreth v0.12.9-rc.5
-	github.com/luxdefi/subnet-evm v0.5.3
 	github.com/aws/aws-sdk-go v1.44.301
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/ethereum/go-ethereum v1.12.0
 	github.com/go-git/go-git/v5 v5.8.1
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+	github.com/luxdefi/coreth v0.12.16
+	github.com/luxdefi/lpm v0.0.5
+	github.com/luxdefi/netrunner v1.7.4-0.20231204182757-5309eeea932f
+	github.com/luxdefi/node v1.10.16
+	github.com/luxdefi/subnet-evm v0.5.3
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v0.0.5
@@ -53,7 +53,6 @@ require (
 	github.com/acomagu/bufpipe v1.0.4 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/luxdefi/ledger-lux/go v0.0.0-20231102202641-ae2ebdaeac34 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
@@ -121,6 +120,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/luxdefi/ledger-lux/go v0.0.0-20231102202641-ae2ebdaeac34 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
