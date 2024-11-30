@@ -19,11 +19,17 @@ import (
 )
 
 var (
-	startNetworkOptions = []networkoptions.NetworkOption{networkoptions.Local, networkoptions.Cluster, networkoptions.Fuji}
-	globalNetworkFlags  networkoptions.NetworkFlags
+	startNetworkOptions = []networkoptions.NetworkOption{
+		networkoptions.Local,
+		networkoptions.Cluster,
+		networkoptions.EtnaDevnet,
+		networkoptions.Fuji,
+	}
+	globalNetworkFlags networkoptions.NetworkFlags
+	binPath            string
 )
 
-// avalanche teleporter relayer start
+// avalanche interchain relayer start
 func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
@@ -33,6 +39,7 @@ func newStartCmd() *cobra.Command {
 		Args:  cobrautils.ExactArgs(0),
 	}
 	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, startNetworkOptions)
+	cmd.Flags().StringVar(&binPath, "bin-path", "", "use the given relayer binary")
 	return cmd
 }
 
@@ -50,7 +57,16 @@ func start(_ *cobra.Command, _ []string) error {
 		return err
 	}
 	switch {
-	case network.Kind == models.Local || network.Kind == models.Fuji:
+	case network.ClusterName != "":
+		host, err := node.GetAWMRelayerHost(app, network.ClusterName)
+		if err != nil {
+			return err
+		}
+		if err := ssh.RunSSHStartAWMRelayerService(host); err != nil {
+			return err
+		}
+		ux.Logger.GreenCheckmarkToUser("Remote AWM Relayer on %s successfully started", host.GetCloudID())
+	default:
 		if relayerIsUp, _, _, err := teleporter.RelayerIsUp(
 			app.GetLocalRelayerRunPath(network.Kind),
 		); err != nil {
@@ -67,10 +83,18 @@ func start(_ *cobra.Command, _ []string) error {
 			localNetworkRootDir = clusterInfo.GetRootDataDir()
 		}
 		relayerConfigPath := app.GetLocalRelayerConfigPath(network.Kind, localNetworkRootDir)
+		if network.Kind == models.Local && binPath == "" {
+			if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(""); err != nil {
+				return err
+			} else if b {
+				binPath = extraLocalNetworkData.RelayerPath
+			}
+		}
 		if !utils.FileExists(relayerConfigPath) {
 			return fmt.Errorf("there is no relayer configuration available")
-		} else if err := teleporter.DeployRelayer(
+		} else if binPath, err := teleporter.DeployRelayer(
 			"latest",
+			binPath,
 			app.GetAWMRelayerBinDir(),
 			relayerConfigPath,
 			app.GetLocalRelayerLogPath(network.Kind),
@@ -78,18 +102,13 @@ func start(_ *cobra.Command, _ []string) error {
 			app.GetLocalRelayerStorageDir(network.Kind),
 		); err != nil {
 			return err
+		} else if network.Kind == models.Local {
+			if err := localnet.WriteExtraLocalNetworkData("", binPath, "", ""); err != nil {
+				return err
+			}
 		}
 		ux.Logger.GreenCheckmarkToUser("Local AWM Relayer successfully started for %s", network.Kind)
 		ux.Logger.PrintToUser("Logs can be found at %s", app.GetLocalRelayerLogPath(network.Kind))
-	case network.ClusterName != "":
-		host, err := node.GetAWMRelayerHost(app, network.ClusterName)
-		if err != nil {
-			return err
-		}
-		if err := ssh.RunSSHStartAWMRelayerService(host); err != nil {
-			return err
-		}
-		ux.Logger.GreenCheckmarkToUser("Remote AWM Relayer on %s successfully started", host.GetCloudID())
 	}
 	return nil
 }
