@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -9,19 +9,19 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/ids"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
 var deployed bool
 
-// lux subnet list
+// avalanche subnet list
 func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -96,7 +96,7 @@ func listSubnets(cmd *cobra.Command, args []string) error {
 			vmID,
 			string(sc.VM),
 			sc.VMVersion,
-			strconv.FormatBool(sc.ImportedFromLPM),
+			strconv.FormatBool(sc.ImportedFromAPM),
 		})
 	}
 	sort.Sort(rows)

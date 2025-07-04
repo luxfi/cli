@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package application
@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/constants"
 	"golang.org/x/mod/semver"
 )
 

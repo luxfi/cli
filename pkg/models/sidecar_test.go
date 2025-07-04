@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package models
@@ -6,7 +6,7 @@ package models
 import (
 	"testing"
 
-	"github.com/luxdefi/netrunner/utils"
+	"github.com/luxfi/netrunner/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,7 +14,7 @@ func TestGetVMID_imported(t *testing.T) {
 	assert := require.New(t)
 	testVMID := "abcd"
 	sc := Sidecar{
-		ImportedFromLPM: true,
+		ImportedFromAPM: true,
 		ImportedVMID:    testVMID,
 	}
 
@@ -27,7 +27,7 @@ func TestGetVMID_derived(t *testing.T) {
 	assert := require.New(t)
 	testVMName := "subnet"
 	sc := Sidecar{
-		ImportedFromLPM: false,
+		ImportedFromAPM: false,
 		Name:            testVMName,
 	}
 

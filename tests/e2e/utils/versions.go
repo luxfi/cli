@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/node/utils/logging"
 	"golang.org/x/mod/semver"
 )
 
@@ -28,14 +28,14 @@ var (
 
 /*
 VersionMapper keys and their usage:
- * OnlyLuxdKey: 					Used when running one node only (no compatibility required)
+ * OnlyLuxKey: 					Used when running one node only (no compatibility required)
 
- * MultiLuxd1Key					Used for the update scenario where node is updated and
- * MultiLuxd2Key    			both node versions need to be compatible.
- * MultiLuxdSubnetEVMKey	This is the Subnet-EVM version compatible to the above scenario.
+ * MultiLux1Key					Used for the update scenario where node is updated and
+ * MultiLux2Key    			both node versions need to be compatible.
+ * MultiLuxSubnetEVMKey	This is the Subnet-EVM version compatible to the above scenario.
 
- * LatestEVM2LuxdKey 	  Latest subnet-evm version
- * LatestLuxd2EVMKey     while this is the latest node compatible with that subnet-evm
+ * LatestEVM2LuxKey 	  Latest subnet-evm version
+ * LatestLux2EVMKey     while this is the latest node compatible with that subnet-evm
 
  * SoloSubnetEVMKey1 			This is used when we want to test subnet-evm versions where compatibility
  * SoloSubnetEVMKey2      needs to be between the two subnet-evm versions
@@ -46,16 +46,15 @@ VersionMapper keys and their usage:
 
 // VersionMapper is an abstraction for retrieving version compatibility URLs
 // allowing unit tests without requiring external http calls.
-// The idea is to finally calculate which VM is compatible with which Luxd,
+// The idea is to finally calculate which VM is compatible with which Luxgo,
 // so that the e2e tests can always download and run the latest compatible versions,
 // without having to manually update the e2e tests periodically.
 type VersionMapper interface {
 	GetCompatURL(vmType models.VMType) string
-	GetLuxdURL() string
+	GetLuxURL() string
 	GetApp() *application.Lux
-	GetLatestLuxdByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error)
+	GetLatestLuxByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error)
 	GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error)
-	FilterAvailableVersions(versions []string) []string
 }
 
 // NewVersionMapper returns the default VersionMapper for e2e tests
@@ -75,11 +74,11 @@ type versionMapper struct {
 	app *application.Lux
 }
 
-// GetLatestLuxdByProtoVersion returns the latest Luxd version which
+// GetLatestLuxByProtoVersion returns the latest Luxgo version which
 // runs with the specified rpcVersion, or an error if it can't be found
 // (or other errors occurred)
-func (*versionMapper) GetLatestLuxdByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
-	return vm.GetLatestLuxdByProtocolVersion(app, rpcVersion, url)
+func (*versionMapper) GetLatestLuxByProtoVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
+	return vm.GetLatestLuxGoByProtocolVersion(app, rpcVersion, url)
 }
 
 // GetApp returns the Lux application instance
@@ -100,15 +99,15 @@ func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	}
 }
 
-// GetLuxdURL returns the compatibility URL for Luxd
-func (*versionMapper) GetLuxdURL() string {
-	return constants.LuxdCompatibilityURL
+// GetLuxURL returns the compatibility URL for Luxgo
+func (*versionMapper) GetLuxURL() string {
+	return constants.LuxGoCompatibilityURL
 }
 
 func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error) {
-	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
+	// get latest lux release to make sure we're not picking a release currently in progress but not available for download
 	latest, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-		constants.LuxDeFiOrg,
+		constants.AvaLabsOrg,
 		repoName,
 	))
 	if err != nil {
@@ -128,20 +127,7 @@ func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName stri
 	return eligible, nil
 }
 
-func (*versionMapper) FilterAvailableVersions(versions []string) []string {
-	availableVersions := []string{}
-	for _, v := range versions {
-		resp, err := binutils.CheckReleaseVersion(logging.NoLog{}, constants.SubnetEVMRepoName, v)
-		if err != nil {
-			continue
-		}
-		availableVersions = append(availableVersions, v)
-		resp.Body.Close()
-	}
-	return availableVersions
-}
-
-// GetVersionMapping returns a map of specific VMs resp. Luxd e2e context keys
+// GetVersionMapping returns a map of specific VMs resp. Luxgo e2e context keys
 // to the actual version which corresponds to that key.
 // This allows the e2e test to know what version to download and run.
 // Returns an error if there was a problem reading the URL compatibility json
@@ -172,10 +158,8 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		return nil, err
 	}
 
-	subnetEVMversions = mapper.FilterAvailableVersions(subnetEVMversions)
-
 	// now get the node compatibility object
-	luxdCompat, err := getLuxdCompatibility(mapper)
+	luxCompat, err := getLuxCompatibility(mapper)
 	if err != nil {
 		return nil, err
 	}
@@ -183,10 +167,10 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// create the global mapping variable
 	binaryToVersion = make(map[string]string)
 
-	// sort luxd compatibility by highest available RPC versions
+	// sort lux compatibility by highest available RPC versions
 	// to lowest (the map can not be iterated in a sorted way)
-	rpcs := make([]int, 0, len(luxdCompat))
-	for k := range luxdCompat {
+	rpcs := make([]int, 0, len(luxCompat))
+	for k := range luxCompat {
 		// cannot use string sort
 		kint, err := strconv.Atoi(k)
 		if err != nil {
@@ -202,12 +186,12 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// This is required for the for the "can deploy with multiple node versions" test
 	for _, rpcVersion := range rpcs {
 		versionAsString := strconv.Itoa(rpcVersion)
-		versionsForRPC := luxdCompat[versionAsString]
+		versionsForRPC := luxCompat[versionAsString]
 		// we need at least 2 versions for the same RPC version
 		if len(versionsForRPC) > 1 {
 			versionsForRPC = reverseSemverSort(versionsForRPC)
-			binaryToVersion[MultiLuxd1Key] = versionsForRPC[0]
-			binaryToVersion[MultiLuxd2Key] = versionsForRPC[1]
+			binaryToVersion[MultiLux1Key] = versionsForRPC[0]
+			binaryToVersion[MultiLux2Key] = versionsForRPC[1]
 
 			// now iterate the subnetEVMversions and find a
 			// subnet-evm version which is compatible with that RPC version.
@@ -217,7 +201,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 					// we know there already exists at least one such combination.
 					// unless the compatibility JSON will start to be shortened in some way,
 					// we should always be able to find a matching subnet-evm
-					binaryToVersion[MultiLuxdSubnetEVMKey] = evmVer
+					binaryToVersion[MultiLuxSubnetEVMKey] = evmVer
 					// found the version, break
 					break
 				}
@@ -227,16 +211,16 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		}
 	}
 
-	// when running Luxd only, always use latest
-	binaryToVersion[OnlyLuxdKey] = OnlyLuxdValue
+	// when running Lux only, always use latest
+	binaryToVersion[OnlyLuxKey] = OnlyLuxValue
 
 	// now let's look for subnet-evm versions which are fit for the
 	// "can deploy multiple subnet-evm versions" test.
 	// We need two subnet-evm versions which run the same RPC version,
-	// and then a compatible Luxd
+	// and then a compatible Luxgo
 	//
 	// To avoid having to iterate again, we'll also fill the values
-	// for the **latest** compatible Luxd and Subnet-EVM
+	// for the **latest** compatible Luxgo and Subnet-EVM
 	for i, ver := range subnetEVMversions {
 		// safety check, should not happen, as we already know
 		// compatible versions exist
@@ -246,22 +230,22 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		first := ver
 		second := subnetEVMversions[i+1]
 		// we should be able to safely assume that for a given subnet-evm RPC version,
-		// there exists at least one compatible Luxd.
+		// there exists at least one compatible Luxgo.
 		// This means we can in any case use this to set the **latest** compatibility
-		soloLuxd, err := mapper.GetLatestLuxdByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetLuxdURL())
+		soloLux, err := mapper.GetLatestLuxByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetLuxURL())
 		if err != nil {
 			return nil, err
 		}
 		// Once latest compatibility has been set, we can skip this
-		if binaryToVersion[LatestEVM2LuxdKey] == "" {
-			binaryToVersion[LatestEVM2LuxdKey] = first
-			binaryToVersion[LatestLuxd2EVMKey] = soloLuxd
+		if binaryToVersion[LatestEVM2LuxKey] == "" {
+			binaryToVersion[LatestEVM2LuxKey] = first
+			binaryToVersion[LatestLux2EVMKey] = soloLux
 		}
 		// first and second are compatible
 		if subnetEVMmapping[first] == subnetEVMmapping[second] {
 			binaryToVersion[SoloSubnetEVMKey1] = first
 			binaryToVersion[SoloSubnetEVMKey2] = second
-			binaryToVersion[SoloLuxdKey] = soloLuxd
+			binaryToVersion[SoloLuxKey] = soloLux
 			break
 		}
 	}
@@ -309,19 +293,19 @@ func getCompatibility(mapper VersionMapper, vmType models.VMType) (models.VMComp
 	return parsedCompat, nil
 }
 
-// getLuxdCompatibility returns the compatibility for Luxd
-func getLuxdCompatibility(mapper VersionMapper) (models.LuxdCompatiblity, error) {
-	luxdBytes, err := mapper.GetApp().GetDownloader().Download(mapper.GetLuxdURL())
+// getLuxCompatibility returns the compatibility for Luxgo
+func getLuxCompatibility(mapper VersionMapper) (models.LuxCompatiblity, error) {
+	luxBytes, err := mapper.GetApp().GetDownloader().Download(mapper.GetLuxURL())
 	if err != nil {
 		return nil, err
 	}
 
-	var luxdCompat models.LuxdCompatiblity
-	if err = json.Unmarshal(luxdBytes, &luxdCompat); err != nil {
+	var luxCompat models.LuxCompatiblity
+	if err = json.Unmarshal(luxBytes, &luxCompat); err != nil {
 		return nil, err
 	}
 
-	return luxdCompat, nil
+	return luxCompat, nil
 }
 
 // For semantic version slices, we can't just reverse twice:

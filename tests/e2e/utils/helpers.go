@@ -1,10 +1,9 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
 
 import (
-	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -16,38 +15,33 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/key"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	luxdconstants "github.com/luxdefi/node/utils/constants"
-	"github.com/luxdefi/node/utils/crypto/keychain"
-	ledger "github.com/luxdefi/node/utils/crypto/ledger"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/vms/components/lux"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/secp256k1fx"
-	"github.com/luxdefi/node/wallet/subnet/primary"
-	"github.com/luxdefi/subnet-evm/ethclient"
-	ginkgo "github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
+	"github.com/luxfi/cli/pkg/subnet"
+
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/netrunner/client"
+	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/node/ids"
+	lux_constants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/utils/crypto/keychain"
+	ledger "github.com/luxfi/node/utils/crypto/ledger"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/vms/components/lux"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/wallet/subnet/primary"
+	"github.com/luxfi/subnet-evm/ethclient"
 )
 
 const (
-	expectedKeyListLineComponents = 8
-	expectedRPCComponentsLen      = 7
-	blockchainIDPos               = 5
-	subnetEVMName                 = "subnet-evm"
+	expectedRPCComponentsLen = 7
+	blockchainIDPos          = 5
+	subnetEVMName            = "subnet-evm"
 )
 
 var defaultLocalNetworkNodeIDs = []string{
@@ -63,16 +57,12 @@ func GetBaseDir() string {
 	return path.Join(usr.HomeDir, baseDir)
 }
 
-func GetSubnetDir() string {
-	return path.Join(GetBaseDir(), constants.SubnetDir)
-}
-
-func GetLPMDir() string {
+func GetAPMDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
-	return path.Join(usr.HomeDir, constants.LPMDir)
+	return path.Join(usr.HomeDir, constants.APMDir)
 }
 
 func ChainConfigExists(subnetName string) (bool, error) {
@@ -194,7 +184,7 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 	if err != nil {
 		return err
 	}
-	sc.Networks[network.Name()] = models.NetworkData{
+	sc.Networks[network.String()] = models.NetworkData{
 		SubnetID: subnetIDstr,
 	}
 
@@ -206,7 +196,7 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 	return os.WriteFile(sidecar, fileBytes, constants.DefaultPerms755)
 }
 
-func LPMConfigExists(subnetName string) (bool, error) {
+func APMConfigExists(subnetName string) (bool, error) {
 	return sidecarExists(subnetName)
 }
 
@@ -223,7 +213,7 @@ func SubnetCustomVMExists(subnetName string) (bool, error) {
 	return vmExists, nil
 }
 
-func SubnetLPMVMExists(subnetName string) (bool, error) {
+func SubnetAPMVMExists(subnetName string) (bool, error) {
 	sidecarPath := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
 	jsonBytes, err := os.ReadFile(sidecarPath)
 	if err != nil {
@@ -238,7 +228,7 @@ func SubnetLPMVMExists(subnetName string) (bool, error) {
 
 	vmid := sc.ImportedVMID
 
-	vm := path.Join(GetBaseDir(), constants.LPMPluginDir, vmid)
+	vm := path.Join(GetBaseDir(), constants.APMPluginDir, vmid)
 	vmExists := true
 	if _, err := os.Stat(vm); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -276,8 +266,8 @@ func DeleteConfigs(subnetName string) error {
 	return nil
 }
 
-func RemoveLPMRepo() {
-	_ = os.RemoveAll(GetLPMDir())
+func RemoveAPMRepo() {
+	_ = os.RemoveAll(GetAPMDir())
 }
 
 func DeleteKey(keyName string) error {
@@ -294,14 +284,14 @@ func DeleteKey(keyName string) error {
 }
 
 func DeleteBins() error {
-	luxdPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir)
-	if _, err := os.Stat(luxdPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+	luxPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir)
+	if _, err := os.Stat(luxPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
 	}
 
 	// ignore error, file may not exist
-	_ = os.RemoveAll(luxdPath)
+	_ = os.RemoveAll(luxPath)
 
 	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.SubnetEVMInstallDir)
 	if _, err := os.Stat(subevmPath); err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -321,8 +311,8 @@ func DeleteCustomBinary(vmName string) {
 	_ = os.RemoveAll(vmPath)
 }
 
-func DeleteLPMBin(vmid string) {
-	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LPMPluginDir, vmid)
+func DeleteAPMBin(vmid string) {
+	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.APMPluginDir, vmid)
 
 	// ignore error, file may not exist
 	_ = os.RemoveAll(vmPath)
@@ -379,31 +369,6 @@ func ParseRPCsFromOutput(output string) ([]string, error) {
 	return rpcs, nil
 }
 
-func ParseAddrBalanceFromKeyListOutput(output string, keyName string) (string, uint64, error) {
-	lines := strings.Split(output, "\n")
-	for _, line := range lines {
-		if !strings.Contains(line, keyName) {
-			continue
-		}
-		components := strings.Split(line, "|")
-		if len(components) != expectedKeyListLineComponents {
-			return "", 0, fmt.Errorf("unexpected number of components in key list line %q: expected %d got %d",
-				line,
-				expectedKeyListLineComponents,
-				len(components),
-			)
-		}
-		addr := strings.TrimSpace(components[4])
-		balanceStr := strings.TrimSpace(components[5])
-		balance, err := strconv.ParseUint(balanceStr, 0, 64)
-		if err != nil {
-			return "", 0, fmt.Errorf("error parsing expected float %s", balanceStr)
-		}
-		return addr, balance, nil
-	}
-	return "", 0, fmt.Errorf("keyName %s not found in key list", keyName)
-}
-
 type greeterAddr struct {
 	Greeter string
 }
@@ -419,7 +384,7 @@ func ParseGreeterAddress(output string) error {
 		return err
 	}
 
-	return os.WriteFile(greeterFile, file, constants.WriteReadUserOnlyPerms)
+	return os.WriteFile(greeterFile, file, 0o600)
 }
 
 type confFile struct {
@@ -432,7 +397,7 @@ func SetHardhatRPC(rpc string) error {
 	if err != nil {
 		return err
 	}
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	chainIDBig, err := client.ChainID(ctx)
 	cancel()
 	if err != nil {
@@ -449,97 +414,7 @@ func SetHardhatRPC(rpc string) error {
 		return err
 	}
 
-	return os.WriteFile(confFilePath, file, constants.WriteReadUserOnlyPerms)
-}
-
-func StartLedgerSim(
-	iters int,
-	seed string,
-	showStdout bool,
-) (chan struct{}, chan struct{}) {
-	ledgerSimReadyCh := make(chan struct{})
-	interactionEndCh := make(chan struct{})
-	ledgerSimEndCh := make(chan struct{})
-	go func() {
-		defer ginkgo.GinkgoRecover()
-		err := RunLedgerSim(iters, seed, ledgerSimReadyCh, interactionEndCh, ledgerSimEndCh, showStdout)
-		if err != nil {
-			fmt.Println(err)
-		}
-		gomega.Expect(err).Should(gomega.BeNil())
-	}()
-	<-ledgerSimReadyCh
-	return interactionEndCh, ledgerSimEndCh
-}
-
-func RunLedgerSim(
-	iters int,
-	seed string,
-	ledgerSimReadyCh chan struct{},
-	interactionEndCh chan struct{},
-	ledgerSimEndCh chan struct{},
-	showStdout bool,
-) error {
-	cmd := exec.Command( //nolint:gosec
-		"ts-node",
-		basicLedgerSimScript,
-		fmt.Sprintf("%d", iters),
-		seed,
-	)
-	cmd.Dir = ledgerSimDir
-
-	stdinPipe, err := cmd.StdinPipe()
-	if err != nil {
-		return err
-	}
-	stdoutPipe, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-	err = cmd.Start()
-	if err != nil {
-		return err
-	}
-
-	go func(p io.ReadCloser) {
-		reader := bufio.NewReader(p)
-		line, err := reader.ReadString('\n')
-		for err == nil {
-			line = strings.TrimSpace(line)
-			if line == "SIMULATED LEDGER DEV READY" {
-				close(ledgerSimReadyCh)
-			}
-			if line == "PRESS ENTER TO END SIMULATOR" {
-				<-interactionEndCh
-				_, _ = io.WriteString(stdinPipe, "\n")
-			}
-			if showStdout {
-				fmt.Println(line)
-			}
-			line, err = reader.ReadString('\n')
-		}
-	}(stdoutPipe)
-
-	stderr, err := io.ReadAll(stderrPipe)
-	if err != nil {
-		return err
-	}
-	if len(stderr) != 0 {
-		fmt.Println(string(stderr))
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	close(ledgerSimEndCh)
-
-	return err
+	return os.WriteFile(confFilePath, file, 0o600)
 }
 
 func RunHardhatTests(test string) error {
@@ -598,9 +473,9 @@ func CheckSubnetEVMExists(version string) bool {
 	return err == nil
 }
 
-func CheckLuxdExists(version string) bool {
-	luxdPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxdInstallDir, "node-"+version)
-	_, err := os.Stat(luxdPath)
+func CheckLuxGoExists(version string) bool {
+	luxPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir, "node-"+version)
+	_, err := os.Stat(luxPath)
 	return err == nil
 }
 
@@ -646,21 +521,22 @@ func RestartNodesWithWhitelistedSubnets(whitelistedSubnets string) error {
 	if err != nil {
 		return err
 	}
-	ctx, cancel := utils.GetAPIContext()
+	rootCtx := context.Background()
+	ctx, cancel := context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
 	resp, err := cli.Status(ctx)
 	cancel()
 	if err != nil {
 		return err
 	}
 	for _, nodeName := range resp.ClusterInfo.NodeNames {
-		ctx, cancel := utils.GetAPIContext()
+		ctx, cancel := context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
 		_, err := cli.RestartNode(ctx, nodeName, client.WithWhitelistedSubnets(whitelistedSubnets))
 		cancel()
 		if err != nil {
 			return err
 		}
 	}
-	ctx, cancel = utils.GetAPIContext()
+	ctx, cancel = context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
 	_, err = cli.Health(ctx)
 	cancel()
 	if err != nil {
@@ -678,7 +554,8 @@ type NodeInfo struct {
 }
 
 func GetNodeVMVersion(nodeURI string, vmid string) (string, error) {
-	ctx, cancel := utils.GetAPIContext()
+	rootCtx := context.Background()
+	ctx, cancel := context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
 
 	client := info.NewClient(nodeURI)
 	versionInfo, err := client.GetNodeVersion(ctx)
@@ -700,7 +577,8 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := utils.GetAPIContext()
+	rootCtx := context.Background()
+	ctx, cancel := context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
 	resp, err := cli.Status(ctx)
 	cancel()
 	if err != nil {
@@ -724,11 +602,11 @@ func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
-	var luxdConfig map[string]interface{}
-	if err := json.Unmarshal(fileBytes, &luxdConfig); err != nil {
+	var luxConfig map[string]interface{}
+	if err := json.Unmarshal(fileBytes, &luxConfig); err != nil {
 		return "", fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
-	whitelistedSubnetsIntf := luxdConfig["track-subnets"]
+	whitelistedSubnetsIntf := luxConfig["track-subnets"]
 	whitelistedSubnets, ok := whitelistedSubnetsIntf.(string)
 	if !ok {
 		return "", fmt.Errorf("expected a string value, but got %T", whitelistedSubnetsIntf)
@@ -747,11 +625,11 @@ func WaitSubnetValidators(subnetIDStr string, nodeInfos map[string]NodeInfo) err
 	if err != nil {
 		return err
 	}
-	mainCtx, mainCtxCancel := utils.GetAPIContext()
+	mainCtx, mainCtxCancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer mainCtxCancel()
 	for {
 		ready := true
-		ctx, ctxCancel := utils.GetAPIContext()
+		ctx, ctxCancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 		vs, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
 		ctxCancel()
 		if err != nil {
@@ -792,30 +670,7 @@ func GetFileHash(filename string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-func GetLedgerAddress(network models.Network, index uint32) (string, error) {
-	// get ledger
-	ledgerDev, err := ledger.New()
-	if err != nil {
-		return "", err
-	}
-	// get ledger addr
-	ledgerAddrs, err := ledgerDev.Addresses([]uint32{index})
-	if err != nil {
-		return "", err
-	}
-	if len(ledgerAddrs) != 1 {
-		return "", fmt.Errorf("no ledger addresses available")
-	}
-	ledgerAddr := ledgerAddrs[0]
-	hrp := key.GetHRP(network.ID)
-	ledgerAddrStr, err := address.Format("P", hrp, ledgerAddr[:])
-	if err != nil {
-		return "", err
-	}
-	return ledgerAddrStr, nil
-}
-
-func FundLedgerAddress(amount uint64) error {
+func FundLedgerAddress() error {
 	// get ledger
 	ledgerDev, err := ledger.New()
 	if err != nil {
@@ -839,14 +694,7 @@ func FundLedgerAddress(amount uint64) error {
 	}
 	var kc keychain.Keychain
 	kc = sk.KeyChain()
-	wallet, err := primary.MakeWallet(
-		context.Background(),
-		&primary.WalletConfig{
-			URI:          constants.LocalAPIEndpoint,
-			LUXKeychain: kc,
-			EthKeychain:  secp256k1fx.NewKeychain(),
-		},
-	)
+	wallet, err := primary.NewWalletWithTxs(context.Background(), constants.LocalAPIEndpoint, kc)
 	if err != nil {
 		return err
 	}
@@ -859,12 +707,12 @@ func FundLedgerAddress(amount uint64) error {
 	output := &lux.TransferableOutput{
 		Asset: lux.Asset{ID: wallet.X().LUXAssetID()},
 		Out: &secp256k1fx.TransferOutput{
-			Amt:          amount,
+			Amt:          1000000000,
 			OutputOwners: to,
 		},
 	}
 	outputs := []*lux.TransferableOutput{output}
-	if _, err := wallet.X().IssueExportTx(luxdconstants.PlatformChainID, outputs); err != nil {
+	if _, err := wallet.X().IssueExportTx(lux_constants.PlatformChainID, outputs); err != nil {
 		return err
 	}
 
@@ -873,14 +721,7 @@ func FundLedgerAddress(amount uint64) error {
 	if err != nil {
 		return err
 	}
-	wallet, err = primary.MakeWallet(
-		context.Background(),
-		&primary.WalletConfig{
-			URI:          constants.LocalAPIEndpoint,
-			LUXKeychain: kc,
-			EthKeychain:  secp256k1fx.NewKeychain(),
-		},
-	)
+	wallet, err = primary.NewWalletWithTxs(context.Background(), constants.LocalAPIEndpoint, kc)
 	if err != nil {
 		return err
 	}
@@ -941,22 +782,6 @@ func getSideCar(subnetName string) (models.Sidecar, error) {
 	return sc, nil
 }
 
-func GetSubnetEVMMainneChainID(subnetName string) (uint, error) {
-	sc, err := getSideCar(subnetName)
-	if err != nil {
-		return 0, err
-	}
-	return sc.SubnetEVMMainnetChainID, nil
-}
-
-func IsCustomVM(subnetName string) (bool, error) {
-	sc, err := getSideCar(subnetName)
-	if err != nil {
-		return false, err
-	}
-	return sc.VM == models.CustomVM, nil
-}
-
 func GetValidators(subnetName string) ([]string, error) {
 	sc, err := getSideCar(subnetName)
 	if err != nil {
@@ -1005,7 +830,7 @@ func CheckAllNodesAreCurrentValidators(subnetName string) (bool, error) {
 
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
 	validators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
@@ -1040,57 +865,4 @@ func AllPermissionlessValidatorExistsInSidecar(subnetName string, network string
 		}
 	}
 	return true, nil
-}
-
-func GetTmpFilePath(fnamePrefix string) (string, error) {
-	file, err := os.CreateTemp("", fnamePrefix+"*")
-	if err != nil {
-		return "", err
-	}
-	path := file.Name()
-	err = file.Close()
-	if err != nil {
-		return "", err
-	}
-	err = os.Remove(path)
-	return path, err
-}
-
-func ExecCommand(cmdName string, args []string, showStdout bool, errorIsExpected bool) string {
-	cmd := exec.Command(cmdName, args...)
-
-	stdoutPipe, err := cmd.StdoutPipe()
-	gomega.Expect(err).Should(gomega.BeNil())
-	stderrPipe, err := cmd.StderrPipe()
-	gomega.Expect(err).Should(gomega.BeNil())
-	err = cmd.Start()
-	gomega.Expect(err).Should(gomega.BeNil())
-
-	stdout := ""
-	go func(p io.ReadCloser) {
-		reader := bufio.NewReader(p)
-		line, err := reader.ReadString('\n')
-		for err == nil {
-			stdout += line
-			if showStdout {
-				fmt.Print(line)
-			}
-			line, err = reader.ReadString('\n')
-		}
-	}(stdoutPipe)
-
-	stderr, err := io.ReadAll(stderrPipe)
-	gomega.Expect(err).Should(gomega.BeNil())
-	if len(stderr) != 0 {
-		fmt.Println(string(stderr))
-	}
-
-	err = cmd.Wait()
-	if errorIsExpected {
-		gomega.Expect(err).Should(gomega.HaveOccurred())
-	} else {
-		gomega.Expect(err).Should(gomega.BeNil())
-	}
-
-	return stdout + string(stderr)
 }

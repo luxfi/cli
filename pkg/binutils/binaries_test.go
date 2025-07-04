@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/testutils"
-	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxfi/cli/internal/testutils"
+	"github.com/luxfi/cli/pkg/constants"
 	"github.com/stretchr/testify/require"
 )
 

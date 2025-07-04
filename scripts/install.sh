@@ -4,14 +4,14 @@ set -e
 usage() {
   this=$1
   cat <<EOF
-$this: download go binaries for luxdefi/cli
+$this: download go binaries for luxfi/cli
 
 Usage: $this [-b] bindir [-d] [tag] [-c]
   -b sets bindir or installation directory, Defaults to ~/bin
   -c run the shell completions setup 
   -d turns on debug logging
    [tag] is a tag from
-   https://github.com/luxdefi/cli/releases
+   https://github.com/luxfi/cli/releases
    If tag is missing, then the latest will be used.
 
 EOF
@@ -61,10 +61,10 @@ execute() {
 }
 get_binaries() {
   case "$PLATFORM" in
-    darwin/amd64) BINARIES="lux" ;;
-    darwin/arm64) BINARIES="lux" ;;
-    linux/amd64) BINARIES="lux" ;;
-    linux/arm64) BINARIES="lux" ;;
+    darwin/amd64) BINARIES="avalanche" ;;
+    darwin/arm64) BINARIES="avalanche" ;;
+    linux/amd64) BINARIES="avalanche" ;;
+    linux/arm64) BINARIES="avalanche" ;;
     *)
       log_crit "platform $PLATFORM is not supported.  Make sure this script is up-to-date and file request at https://github.com/${PREFIX}/issues/new"
       exit 1
@@ -334,9 +334,9 @@ End of functions from https://github.com/client9/shlib
 EOF
 
 PROJECT_NAME=cli
-OWNER=luxdefi
+OWNER=luxfi
 REPO="cli"
-BINARY=lux
+BINARY=avalanche
 FORMAT=tar.gz
 OS=$(uname_os)
 ARCH=$(uname_arch)
@@ -386,69 +386,41 @@ sed_in_place() {
 }
 
 completions() {
-  HAS_BASH=false
-  which bash > /dev/null 2>&1 && HAS_BASH=true
-  if [ $HAS_BASH = true ]
+  BASH_COMPLETION_MAIN=~/.bash_completion
+  BASH_COMPLETION_SCRIPTS_DIR=~/.local/share/bash-completion/completions
+  BASH_COMPLETION_SCRIPT_PATH=$BASH_COMPLETION_SCRIPTS_DIR/avalanche.sh
+  mkdir -p $BASH_COMPLETION_SCRIPTS_DIR
+  $BINDIR/$BINARY completion bash > $BASH_COMPLETION_SCRIPT_PATH
+  touch $BASH_COMPLETION_MAIN
+  sed_in_place "/.*# avalanche completion/d" $BASH_COMPLETION_MAIN
+  echo "source $BASH_COMPLETION_SCRIPT_PATH # avalanche completion" >> $BASH_COMPLETION_MAIN
+  if [ $(uname) = Darwin ]
   then
-    BASH_COMPLETION_MAIN=~/.bash_completion
-    BASH_COMPLETION_SCRIPTS_DIR=~/.local/share/bash-completion/completions
-    BASH_COMPLETION_SCRIPT_PATH=$BASH_COMPLETION_SCRIPTS_DIR/lux.sh
-    mkdir -p $BASH_COMPLETION_SCRIPTS_DIR
-    COBRA_COMPLETION_SUCCEDED=false
-    $BINDIR/$BINARY completion bash > $BASH_COMPLETION_SCRIPT_PATH 2> /dev/null && COBRA_COMPLETION_SUCCEDED=true
-    if [ $COBRA_COMPLETION_SUCCEDED = true ]
-    then
-      touch $BASH_COMPLETION_MAIN
-      sed_in_place "/.*# lux completion/d" $BASH_COMPLETION_MAIN
-      echo "source $BASH_COMPLETION_SCRIPT_PATH # lux completion" >> $BASH_COMPLETION_MAIN
-      if [ $(uname) = Darwin ]
+      BREW_INSTALLED=false
+      which brew >/dev/null 2>&1 && BREW_INSTALLED=true
+      if [ $BREW_INSTALLED = true ]
       then
-        HAS_BREW=false
-        which brew >/dev/null 2>&1 && HAS_BREW=true
-        if [ $HAS_BREW = true ]
-        then
-          HAS_BASH_COMPLETIONS=false
-          brew list bash-completion >/dev/null 2>&1 && HAS_BASH_COMPLETIONS=true
-          if [ $HAS_BASH_COMPLETIONS = true ]
-          then
-            BASHRC=~/.bashrc
-            touch $BASHRC
-            sed_in_place "/.*# lux completion/d" $BASHRC
-            echo "source $(brew --prefix)/etc/bash_completion # lux completion" >> $BASHRC
-          else
-            echo "warning: brew bash-completion package not found. lux command completion for bash not installed"
-          fi
-        else
-          echo "warning: brew not found. lux command completion for bash not installed"
-        fi
+          BASHRC=~/.bashrc
+          touch $BASHRC
+          sed_in_place "/.*# avalanche completion/d" $BASHRC
+          echo "source $(brew --prefix)/etc/bash_completion # avalanche completion" >> $BASHRC
+      else 
+          echo "warning: brew not found on macos. bash avalanche command completion not installed"
       fi
-    else
-      echo "warning: auto completion generation command failed. lux command completion for bash not installed"
-    fi
   fi
 
-  HAS_ZSH=false
-  which zsh > /dev/null 2>&1 && HAS_ZSH=true
-  if [ $HAS_ZSH = true ]
-  then
-    ZSH_COMPLETION_MAIN=~/.zshrc
-    ZSH_COMPLETION_SCRIPTS_DIR=~/.local/share/zsh-completion/completions
-    ZSH_COMPLETION_SCRIPT_PATH=$ZSH_COMPLETION_SCRIPTS_DIR/_lux
-    mkdir -p $ZSH_COMPLETION_SCRIPTS_DIR
-    COBRA_COMPLETION_SUCCEDED=false
-    $BINDIR/$BINARY completion zsh > $BASH_COMPLETION_SCRIPT_PATH 2> /dev/null && COBRA_COMPLETION_SUCCEDED=true
-    if [ $COBRA_COMPLETION_SUCCEDED = true ]
-    then
-      touch $ZSH_COMPLETION_MAIN
-      sed_in_place "/.*# lux completion/d" $ZSH_COMPLETION_MAIN
-      echo "fpath=($ZSH_COMPLETION_SCRIPTS_DIR \$fpath) # lux completion" >> $ZSH_COMPLETION_MAIN
-      echo "rm -f ~/.zcompdump; compinit # lux completion" >> $ZSH_COMPLETION_MAIN
-    else
-      echo "warning: auto completion generation command failed. lux command completion for zsh not installed"
-    fi
-  fi
+  ZSH_COMPLETION_MAIN=~/.zshrc
+  ZSH_COMPLETION_SCRIPTS_DIR=~/.local/share/zsh-completion/completions
+  ZSH_COMPLETION_SCRIPT_PATH=$ZSH_COMPLETION_SCRIPTS_DIR/_avalanche
+  mkdir -p $ZSH_COMPLETION_SCRIPTS_DIR
+  $BINDIR/$BINARY completion zsh > $ZSH_COMPLETION_SCRIPT_PATH
+  touch $ZSH_COMPLETION_MAIN
+  sed_in_place "/.*# avalanche completion/d" $ZSH_COMPLETION_MAIN
+  echo "fpath=($ZSH_COMPLETION_SCRIPTS_DIR \$fpath) # avalanche completion" >> $ZSH_COMPLETION_MAIN
+  echo "rm -f ~/.zcompdump; compinit # avalanche completion" >> $ZSH_COMPLETION_MAIN
 }
 
 if [ "$RUN_COMPLETIONS" = true ]; then
   completions
 fi
+

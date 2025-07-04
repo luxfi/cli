@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// lux subnet
+// avalanche subnet
 func newImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",

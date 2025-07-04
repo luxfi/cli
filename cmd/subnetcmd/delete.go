@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -8,11 +8,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/models"
 	"github.com/spf13/cobra"
 )
 
-// lux subnet delete
+// avalanche subnet delete
 func newDeleteCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "delete",
@@ -51,10 +51,10 @@ func deleteSubnet(_ *cobra.Command, args []string) error {
 	}
 
 	// TODO this method does not delete the imported VM binary if this
-	// is an LPM subnet. We can't naively delete the binary because it
+	// is an APM subnet. We can't naively delete the binary because it
 	// may be used by multiple subnets. We should delete this binary,
 	// but only if no other subnet is using it.
-	// More info: https://github.com/luxdefi/cli/issues/246
+	// More info: https://github.com/luxfi/cli/issues/246
 
 	if _, err := os.Stat(subnetDir); err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {

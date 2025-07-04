@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/statemachine"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/cli/pkg/ux"
 )
 
 func getChainID(app *application.Lux) (*big.Int, error) {
@@ -39,7 +39,7 @@ func getVMVersion(
 	var err error
 	if vmVersion == "latest" {
 		vmVersion, err = app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-			constants.LuxDeFiOrg,
+			constants.AvaLabsOrg,
 			repoName,
 		))
 		if err != nil {
@@ -86,14 +86,14 @@ func askForVMVersion(
 	if versionOption == useLatest {
 		// Get and return latest version
 		version, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-			constants.LuxDeFiOrg,
+			constants.AvaLabsOrg,
 			repoName,
 		))
 		return version, statemachine.Forward, err
 	}
 
 	// prompt for version
-	versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxDeFiOrg, constants.SubnetEVMRepoName)
+	versions, err := app.Downloader.GetAllReleasesForRepo(constants.AvaLabsOrg, constants.SubnetEVMRepoName)
 	if err != nil {
 		return "", statemachine.Stop, err
 	}

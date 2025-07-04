@@ -1,12 +1,12 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package migrations
 
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/ux"
 )
 
 type migrationFunc func(*application.Lux, *migrationRunner) error

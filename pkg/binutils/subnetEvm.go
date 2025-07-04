@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -6,8 +6,8 @@ package binutils
 import (
 	"path/filepath"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
 )
 
 func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, error) {
@@ -23,7 +23,7 @@ func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, erro
 		binDir,
 		subDir,
 		subnetEVMBinPrefix,
-		constants.LuxDeFiOrg,
+		constants.AvaLabsOrg,
 		constants.SubnetEVMRepoName,
 		downloader,
 		installer,

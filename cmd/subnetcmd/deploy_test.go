@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -6,21 +6,21 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxdefi/cli/cmd/flags"
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	testLuxdVersion1      = "v1.9.2"
-	testLuxdVersion2      = "v1.9.1"
-	testLatestLuxdVersion = "latest"
+	testLuxVersion1      = "v1.9.2"
+	testLuxVersion2      = "v1.9.1"
+	testLatestLuxVersion = "latest"
 )
 
-var testLuxdCompat = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
+var testLuxCompat = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
 
 func TestMutuallyExclusive(t *testing.T) {
 	require := require.New(t)
@@ -92,7 +92,7 @@ func TestMutuallyExclusive(t *testing.T) {
 	}
 }
 
-func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
+func TestCheckForInvalidDeployAndSetLuxVersion(t *testing.T) {
 	type test struct {
 		name            string
 		networkRPC      int
@@ -111,21 +111,21 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 		{
 			name:            "network already running, rpc matches",
 			networkRPC:      18,
-			networkVersion:  testLuxdVersion1,
+			networkVersion:  testLuxVersion1,
 			networkErr:      nil,
 			desiredRPC:      18,
-			desiredVersion:  testLatestLuxdVersion,
+			desiredVersion:  testLatestLuxVersion,
 			expectError:     false,
-			expectedVersion: testLuxdVersion1,
+			expectedVersion: testLuxVersion1,
 			networkUp:       true,
 		},
 		{
 			name:            "network already running, rpc mismatch",
 			networkRPC:      18,
-			networkVersion:  testLuxdVersion1,
+			networkVersion:  testLuxVersion1,
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLatestLuxdVersion,
+			desiredVersion:  testLatestLuxVersion,
 			expectError:     true,
 			expectedVersion: "",
 			networkUp:       true,
@@ -133,10 +133,10 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 		{
 			name:            "network already running, version mismatch",
 			networkRPC:      18,
-			networkVersion:  testLuxdVersion1,
+			networkVersion:  testLuxVersion1,
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLuxdVersion2,
+			desiredVersion:  testLuxVersion2,
 			expectError:     true,
 			expectedVersion: "",
 			networkUp:       true,
@@ -147,10 +147,10 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 			networkVersion:  "",
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLatestLuxdVersion,
+			desiredVersion:  testLatestLuxVersion,
 			expectError:     false,
-			expectedVersion: testLuxdVersion1,
-			compatData:      testLuxdCompat,
+			expectedVersion: testLuxVersion1,
+			compatData:      testLuxCompat,
 			compatError:     nil,
 			networkUp:       false,
 		},
@@ -160,9 +160,9 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 			networkVersion:  "",
 			networkErr:      nil,
 			desiredRPC:      19,
-			desiredVersion:  testLatestLuxdVersion,
+			desiredVersion:  testLatestLuxVersion,
 			expectError:     true,
-			expectedVersion: testLuxdVersion1,
+			expectedVersion: testLuxVersion1,
 			compatData:      nil,
 			compatError:     errors.New("no compat"),
 			networkUp:       false,
@@ -173,10 +173,10 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 			networkVersion:  "",
 			networkErr:      errors.New("unable to determine rpc version"),
 			desiredRPC:      19,
-			desiredVersion:  testLatestLuxdVersion,
+			desiredVersion:  testLatestLuxVersion,
 			expectError:     true,
-			expectedVersion: testLuxdVersion1,
-			compatData:      testLuxdCompat,
+			expectedVersion: testLuxVersion1,
+			compatData:      testLuxCompat,
 			compatError:     nil,
 			networkUp:       true,
 		},
@@ -189,7 +189,7 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 			mockSC := mocks.StatusChecker{}
 			mockSC.On("GetCurrentNetworkVersion").Return(tt.networkVersion, tt.networkRPC, tt.networkUp, tt.networkErr)
 
-			userProvidedLuxdVersion = tt.desiredVersion
+			userProvidedLuxVersion = tt.desiredVersion
 
 			mockDownloader := &mocks.Downloader{}
 			mockDownloader.On("Download", mock.Anything).Return(tt.compatData, nil)
@@ -199,13 +199,13 @@ func TestCheckForInvalidDeployAndSetLuxdVersion(t *testing.T) {
 			app.Log = logging.NoLog{}
 			app.Downloader = mockDownloader
 
-			desiredLuxdVersion, err := CheckForInvalidDeployAndGetLuxdVersion(&mockSC, tt.desiredRPC)
+			desiredLuxVersion, err := checkForInvalidDeployAndGetLuxVersion(&mockSC, tt.desiredRPC)
 
 			if tt.expectError {
 				require.Error(err)
 			} else {
 				require.NoError(err)
-				require.Equal(tt.expectedVersion, desiredLuxdVersion)
+				require.Equal(tt.expectedVersion, desiredLuxVersion)
 			}
 		})
 	}

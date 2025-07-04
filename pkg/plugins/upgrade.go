@@ -1,13 +1,13 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
 
 import (
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/utils/logging"
 )
 
 func ManualUpgrade(app *application.Lux, sc models.Sidecar, targetVersion string) error {

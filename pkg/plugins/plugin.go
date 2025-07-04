@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/netrunner/utils"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/netrunner/utils"
 )
 
 func SanitizePath(path string) (string, error) {
@@ -40,8 +40,8 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 	var vmSourcePath string
 	var vmDestPath string
 
-	if sc.ImportedFromLPM {
-		vmSourcePath = binutils.SetupLPMBin(app, sc.ImportedVMID)
+	if sc.ImportedFromAPM {
+		vmSourcePath = binutils.SetupAPMBin(app, sc.ImportedVMID)
 		vmDestPath = filepath.Join(pluginDir, sc.ImportedVMID)
 	} else {
 		// Not imported

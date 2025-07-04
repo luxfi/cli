@@ -1,12 +1,11 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package networkcmd
 
 import (
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/netrunner/server"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"
 )
 
@@ -31,8 +30,7 @@ func networkStatus(*cobra.Command, []string) error {
 		return err
 	}
 
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
+	ctx := binutils.GetAsyncContext()
 	status, err := cli.Status(ctx)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subnetcmd
@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/luxdefi/cli/cmd/flags"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/vms/platformvm"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +24,7 @@ var (
 	validatorsMainnet bool
 )
 
-// lux subnet validators
+// avalanche subnet validators
 func newValidatorsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validators [subnetName]",
@@ -47,17 +47,17 @@ func printValidators(_ *cobra.Command, args []string) error {
 		return errMutuallyExlusiveNetworks
 	}
 
-	network := models.UndefinedNetwork
+	var network models.Network
 	switch {
 	case validatorsLocal:
-		network = models.LocalNetwork
+		network = models.Local
 	case validatorsTestnet:
-		network = models.FujiNetwork
+		network = models.Fuji
 	case validatorsMainnet:
-		network = models.MainnetNetwork
+		network = models.Mainnet
 	}
 
-	if network.Kind == models.Undefined {
+	if network == models.Undefined {
 		// no flag was set, prompt user
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to list validators from",
@@ -75,14 +75,14 @@ func printValidators(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployInfo, ok := sc.Networks[network.Name()]
+	deployInfo, ok := sc.Networks[network.String()]
 	if !ok {
 		return errors.New("no deployment found for subnet")
 	}
 
 	subnetID := deployInfo.SubnetID
 
-	if network.Kind == models.Local {
+	if network == models.Local {
 		return printLocalValidators(subnetID)
 	} else {
 		return printPublicValidators(subnetID, network)

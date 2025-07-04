@@ -1,10 +1,10 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package models
 
 import (
-	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/ids"
 )
 
 type NetworkData struct {
@@ -27,29 +27,24 @@ type ElasticSubnet struct {
 }
 
 type Sidecar struct {
-	Name                string
-	VM                  VMType
-	VMVersion           string
-	RPCVersion          int
-	Subnet              string
-	TokenName           string
-	ChainID             string
-	Version             string
-	Networks            map[string]NetworkData
-	ElasticSubnet       map[string]ElasticSubnet
-	ImportedFromLPM     bool
-	ImportedVMID        string
-	CustomVMRepoURL     string
-	CustomVMBranch      string
-	CustomVMBuildScript string
-	// SubnetEVM based VM's only
-	SubnetEVMMainnetChainID uint
+	Name            string
+	VM              VMType
+	VMVersion       string
+	RPCVersion      int
+	Subnet          string
+	TokenName       string
+	ChainID         string
+	Version         string
+	Networks        map[string]NetworkData
+	ElasticSubnet   map[string]ElasticSubnet
+	ImportedFromAPM bool
+	ImportedVMID    string
 }
 
 func (sc Sidecar) GetVMID() (string, error) {
 	// get vmid
 	var vmid string
-	if sc.ImportedFromLPM {
+	if sc.ImportedFromAPM {
 		vmid = sc.ImportedVMID
 	} else {
 		chainVMID, err := utils.VMID(sc.Name)

@@ -1,13 +1,13 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/vms/platformvm"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/vms/platformvm"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

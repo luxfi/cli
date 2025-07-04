@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -87,7 +87,7 @@ func (p *publisherImpl) Publish(
 
 	ux.Logger.PrintToUser("Committing resources to local git repo...")
 	now := time.Now()
-	commitStr := fmt.Sprintf("lux-commit-%s", now.String())
+	commitStr := fmt.Sprintf("commit-%s", now.String())
 
 	// use the global git config to try identifying the author
 	conf, err := config.LoadConfig(config.GlobalScope)

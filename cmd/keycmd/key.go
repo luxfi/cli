@@ -1,11 +1,11 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
@@ -31,20 +31,17 @@ To get started, use the key create command.`,
 		},
 	}
 
-	// lux key create
+	// avalanche key create
 	cmd.AddCommand(newCreateCmd())
 
-	// lux key list
+	// avalanche key list
 	cmd.AddCommand(newListCmd())
 
-	// lux key delete
+	// avalanche key delete
 	cmd.AddCommand(newDeleteCmd())
 
-	// lux key export
+	// avalanche key export
 	cmd.AddCommand(newExportCmd())
-
-	// lux key transfer
-	cmd.AddCommand(newTransferCmd())
 
 	return cmd
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/internal/testutils"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/config"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/internal/testutils"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -41,24 +41,24 @@ func setupInstallDir(require *require.Assertions) *application.Lux {
 	return app
 }
 
-func Test_installLuxdWithVersion_Zip(t *testing.T) {
+func Test_installLuxGoWithVersion_Zip(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	zipBytes := testutils.CreateDummyLuxdZip(require, binary1)
+	zipBytes := testutils.CreateDummyLuxZip(require, binary1)
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "darwin")
 
-	githubDownloader := NewLuxdDownloader()
+	githubDownloader := NewLuxDownloader()
 
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(zipBytes, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir := filepath.Join(app.GetLuxdBinDir(), nodeBinPrefix+version1)
+	expectedDir := filepath.Join(app.GetLuxgoBinDir(), nodeBinPrefix+version1)
 
-	binDir, err := installBinaryWithVersion(app, version1, app.GetLuxdBinDir(), nodeBinPrefix, githubDownloader, mockInstaller)
+	binDir, err := installBinaryWithVersion(app, version1, app.GetLuxgoBinDir(), nodeBinPrefix, githubDownloader, mockInstaller)
 	require.Equal(expectedDir, binDir)
 	require.NoError(err)
 
@@ -68,25 +68,25 @@ func Test_installLuxdWithVersion_Zip(t *testing.T) {
 	require.Equal(binary1, installedBin)
 }
 
-func Test_installLuxdWithVersion_Tar(t *testing.T) {
+func Test_installLuxGoWithVersion_Tar(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	tarBytes := testutils.CreateDummyLuxdTar(require, binary1, version1)
+	tarBytes := testutils.CreateDummyLuxTar(require, binary1, version1)
 
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "linux")
 
-	downloader := NewLuxdDownloader()
+	downloader := NewLuxDownloader()
 
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(tarBytes, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir := filepath.Join(app.GetLuxdBinDir(), nodeBinPrefix+version1)
+	expectedDir := filepath.Join(app.GetLuxgoBinDir(), nodeBinPrefix+version1)
 
-	binDir, err := installBinaryWithVersion(app, version1, app.GetLuxdBinDir(), nodeBinPrefix, downloader, mockInstaller)
+	binDir, err := installBinaryWithVersion(app, version1, app.GetLuxgoBinDir(), nodeBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir, binDir)
 	require.NoError(err)
 
@@ -96,17 +96,17 @@ func Test_installLuxdWithVersion_Tar(t *testing.T) {
 	require.Equal(binary1, installedBin)
 }
 
-func Test_installLuxdWithVersion_MultipleCoinstalls(t *testing.T) {
+func Test_installLuxGoWithVersion_MultipleCoinstalls(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	zipBytes1 := testutils.CreateDummyLuxdZip(require, binary1)
-	zipBytes2 := testutils.CreateDummyLuxdZip(require, binary2)
+	zipBytes1 := testutils.CreateDummyLuxZip(require, binary1)
+	zipBytes2 := testutils.CreateDummyLuxZip(require, binary2)
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "darwin")
 
-	downloader := NewLuxdDownloader()
+	downloader := NewLuxDownloader()
 	url1, _, err := downloader.GetDownloadURL(version1, mockInstaller)
 	require.NoError(err)
 	url2, _, err := downloader.GetDownloadURL(version2, mockInstaller)
@@ -119,14 +119,14 @@ func Test_installLuxdWithVersion_MultipleCoinstalls(t *testing.T) {
 	mockAppDownloader.On("Download", url2).Return(zipBytes2, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir1 := filepath.Join(app.GetLuxdBinDir(), nodeBinPrefix+version1)
-	expectedDir2 := filepath.Join(app.GetLuxdBinDir(), nodeBinPrefix+version2)
+	expectedDir1 := filepath.Join(app.GetLuxgoBinDir(), nodeBinPrefix+version1)
+	expectedDir2 := filepath.Join(app.GetLuxgoBinDir(), nodeBinPrefix+version2)
 
-	binDir1, err := installBinaryWithVersion(app, version1, app.GetLuxdBinDir(), nodeBinPrefix, downloader, mockInstaller)
+	binDir1, err := installBinaryWithVersion(app, version1, app.GetLuxgoBinDir(), nodeBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir1, binDir1)
 	require.NoError(err)
 
-	binDir2, err := installBinaryWithVersion(app, version2, app.GetLuxdBinDir(), nodeBinPrefix, downloader, mockInstaller)
+	binDir2, err := installBinaryWithVersion(app, version2, app.GetLuxgoBinDir(), nodeBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir2, binDir2)
 	require.NoError(err)
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2023, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package updatecmd
 
@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"
@@ -30,7 +30,7 @@ func NewCmd(injectedApp *application.Lux, version string) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
 		Use:          "update",
-		Short:        "Check for latest updates of Lux-CLI",
+		Short:        "Check for latest updates of Lux CLI",
 		Long:         `Check if an update is available, and prompt the user to install it`,
 		RunE:         runUpdate,
 		Args:         cobra.ExactArgs(0),
@@ -44,23 +44,17 @@ func NewCmd(injectedApp *application.Lux, version string) *cobra.Command {
 
 func runUpdate(cmd *cobra.Command, _ []string) error {
 	isUserCalled := true
-	return Update(cmd, isUserCalled, "", &application.LastActions{})
+	return Update(cmd, isUserCalled, "")
 }
 
-func Update(cmd *cobra.Command, isUserCalled bool, version string, lastActs *application.LastActions) error {
+func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 	// first check if there is a new version exists
-	url := binutils.GetGithubLatestReleaseURL(constants.LuxDeFiOrg, constants.CliRepoName)
+	url := binutils.GetGithubLatestReleaseURL(constants.AvaLabsOrg, constants.CliRepoName)
 	latest, err := app.Downloader.GetLatestReleaseVersion(url)
 	if err != nil {
 		app.Log.Warn("failed to get latest version for cli from repo", zap.Error(err))
 		return err
 	}
-
-	if lastActs == nil {
-		lastActs = &application.LastActions{}
-	}
-	lastActs.LastCheckGit = time.Now()
-	app.WriteLastActionsFile(lastActs)
 
 	// the current version info should be in this variable
 	this := cmd.Version
@@ -75,7 +69,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string, lastActs *app
 				app.Log.Warn("failed to read version from file on disk", zap.Error(err))
 				return ErrNoVersion
 			}
-			this = strings.TrimSpace(string(bver))
+			this = "v" + string(bver)
 		}
 	}
 	thisVFmt := "v" + this
@@ -94,7 +88,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string, lastActs *app
 
 	// flag not provided
 	if !yes {
-		ux.Logger.PrintToUser("We found a new version of Lux-CLI %s upstream. You are running %s", latest, thisVFmt)
+		ux.Logger.PrintToUser("We found a new version of Lux CLI %s upstream. You are running %s", latest, thisVFmt)
 		y, err := app.Prompt.CaptureYesNo("Do you want to update?")
 		if err != nil {
 			return nil
@@ -155,7 +149,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string, lastActs *app
 	}
 
 	// write to file when last updated
-	lastActs, err = app.ReadLastActionsFile()
+	lastActs, err := app.ReadLastActionsFile()
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			lastActs = &application.LastActions{}

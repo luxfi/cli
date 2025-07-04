@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -6,16 +6,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/plugins"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/netrunner/server"
-	anrutils "github.com/luxdefi/netrunner/utils"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/plugins"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/netrunner/server"
+	"github.com/luxfi/netrunner/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +38,7 @@ var (
 	binaryPathArg string
 )
 
-// lux subnet update vm
+// avalanche subnet update vm
 func newUpgradeVMCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vm [subnetName]",
@@ -131,7 +130,7 @@ func upgradeVM(_ *cobra.Command, args []string) error {
 	}
 
 	// Must be a custom update
-	return updateToCustomBin(sc, networkToUpgrade, binaryPathArg, true)
+	return updateToCustomBin(sc, networkToUpgrade, binaryPathArg)
 }
 
 // select which network to upgrade
@@ -193,7 +192,7 @@ func selectUpdateOption(vmType models.VMType, sc models.Sidecar, networkToUpgrad
 	case targetVersion != "":
 		return updateToSpecificVersion(sc, networkToUpgrade)
 	case binaryPathArg != "":
-		return updateToCustomBin(sc, networkToUpgrade, binaryPathArg, true)
+		return updateToCustomBin(sc, networkToUpgrade, binaryPathArg)
 	}
 
 	latestVersionUpdate := "Update to latest version"
@@ -214,7 +213,7 @@ func selectUpdateOption(vmType models.VMType, sc models.Sidecar, networkToUpgrad
 	case specificVersionUpdate:
 		return updateToSpecificVersion(sc, networkToUpgrade)
 	case customBinaryUpdate:
-		return updateToCustomBin(sc, networkToUpgrade, binaryPathArg, true)
+		return updateToCustomBin(sc, networkToUpgrade, binaryPathArg)
 	default:
 		return errors.New("invalid option")
 	}
@@ -226,7 +225,7 @@ func updateToLatestVersion(vmType models.VMType, sc models.Sidecar, networkToUpg
 
 	// check latest version
 	latestVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-		constants.LuxDeFiOrg,
+		constants.AvaLabsOrg,
 		vmType.RepoName(),
 	))
 	if err != nil {
@@ -279,7 +278,7 @@ func updateVMByNetwork(sc models.Sidecar, targetVersion string, networkToUpgrade
 	}
 }
 
-func updateToCustomBin(sc models.Sidecar, networkToUpgrade, binaryPath string, updateVMBinaryProtocolVersion bool) error {
+func updateToCustomBin(sc models.Sidecar, networkToUpgrade, binaryPath string) error {
 	var err error
 	if binaryPath == "" {
 		binaryPath, err = app.Prompt.CaptureExistingFilepath("Enter path to custom binary")
@@ -288,18 +287,12 @@ func updateToCustomBin(sc models.Sidecar, networkToUpgrade, binaryPath string, u
 		}
 	}
 
-	if err := app.CopyVMBinary(binaryPath, sc.Name); err != nil {
+	if err := vm.CopyCustomVM(app, sc.Name, binaryPath); err != nil {
 		return err
 	}
 
 	sc.VM = models.CustomVM
-	if updateVMBinaryProtocolVersion {
-		sc.RPCVersion, err = vm.GetVMBinaryProtocolVersion(binaryPath)
-		if err != nil {
-			return fmt.Errorf("unable to get RPC version: %w", err)
-		}
-	}
-	targetVersion := ""
+	targetVersion = ""
 
 	return updateVMByNetwork(sc, targetVersion, networkToUpgrade)
 }
@@ -315,7 +308,7 @@ func updateFutureVM(sc models.Sidecar, targetVersion string) error {
 }
 
 func updateExistingLocalVM(sc models.Sidecar, targetVersion string) error {
-	vmid, err := anrutils.VMID(sc.Name)
+	vmid, err := utils.VMID(sc.Name)
 	if err != nil {
 		return err
 	}
@@ -336,11 +329,7 @@ func updateExistingLocalVM(sc models.Sidecar, targetVersion string) error {
 	case models.CustomVM:
 		// get the path to the already copied binary
 		vmBin = binutils.SetupCustomBin(app, sc.Name)
-
-		rpcVersion, err = vm.GetVMBinaryProtocolVersion(vmBin)
-		if err != nil {
-			return fmt.Errorf("unable to get RPC version: %w", err)
-		}
+		rpcVersion = 0
 	default:
 		return errors.New("unknown VM type " + string(sc.VM))
 	}
@@ -393,8 +382,7 @@ func isServerRunning() (bool, error) {
 	} else if err != nil {
 		return false, err
 	}
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
+	ctx := binutils.GetAsyncContext()
 
 	_, err = cli.Status(ctx)
 

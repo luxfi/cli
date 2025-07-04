@@ -1,23 +1,23 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/rpc"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/coreth/core"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/rpc"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/coreth/core"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ var (
 	nodeURL         string
 )
 
-// lux subnet import
+// avalanche subnet import
 func newImportFromNetworkCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "public [subnetPath]",
@@ -74,15 +74,15 @@ flag.`,
 func importRunningSubnet(*cobra.Command, []string) error {
 	var err error
 
-	network := models.UndefinedNetwork
+	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.FujiNetwork
+		network = models.Fuji
 	case deployMainnet:
-		network = models.MainnetNetwork
+		network = models.Mainnet
 	}
 
-	if network.Kind == models.Undefined {
+	if network == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to import from",
 			[]string{models.Fuji.String(), models.Mainnet.String()},
@@ -113,7 +113,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 			if err != nil {
 				return err
 			}
-			ctx, cancel := utils.GetAPIContext()
+			ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
 			defer cancel()
 			infoAPI := info.NewClient(nodeURL)
 			options := []rpc.Option{}
@@ -137,12 +137,19 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		}
 	}
 
-	client := platformvm.NewClient(network.Endpoint)
-	ctx, cancel := utils.GetAPIContext()
+	var pubAPI string
+	switch network {
+	case models.Fuji:
+		pubAPI = constants.FujiAPIEndpoint
+	case models.Mainnet:
+		pubAPI = constants.MainnetAPIEndpoint
+	}
+	client := platformvm.NewClient(pubAPI)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
 	defer cancel()
 	options := []rpc.Option{}
 
-	ux.Logger.PrintToUser("Getting information from the %s network...", network.Name())
+	ux.Logger.PrintToUser("Getting information from the %s network...", network.String())
 
 	txBytes, err := client.GetTx(ctx, blockchainID, options...)
 	if err != nil {
@@ -162,7 +169,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 
 	createChainTx, ok := tx.Unsigned.(*txs.CreateChainTx)
 	if !ok {
-		return fmt.Errorf("expected a CreateChainTx, got %T", tx.Unsigned)
+		return fmt.Errorf("expected a CreateChainTx, got %T", createChainTx)
 	}
 
 	vmID = createChainTx.VMID
@@ -205,7 +212,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		Name: subnetName,
 		VM:   vmType,
 		Networks: map[string]models.NetworkData{
-			network.Name(): {
+			network.String(): {
 				SubnetID:     subnetID,
 				BlockchainID: blockchainID,
 			},
@@ -215,7 +222,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		TokenName:    constants.DefaultTokenName,
 		ImportedVMID: vmIDstr,
 		// signals that the VMID wasn't derived from the subnet name but through import
-		ImportedFromLPM: true,
+		ImportedFromAPM: true,
 	}
 
 	var versions []string
@@ -233,7 +240,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		// no node was queried, ask the user
 		switch vmType {
 		case models.SubnetEvm:
-			versions, err = app.Downloader.GetAllReleasesForRepo(constants.LuxDeFiOrg, constants.SubnetEVMRepoName)
+			versions, err = app.Downloader.GetAllReleasesForRepo(constants.AvaLabsOrg, constants.SubnetEVMRepoName)
 			if err != nil {
 				return err
 			}
@@ -263,7 +270,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		return fmt.Errorf("failed creating the sidecar for import: %w", err)
 	}
 
-	ux.Logger.PrintToUser("Subnet %q imported successfully", sc.Name)
+	ux.Logger.PrintToUser("Subnet %s imported successfully", sc.Name)
 
 	return nil
 }

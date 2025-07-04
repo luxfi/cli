@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -9,18 +9,18 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/subnet-evm/core"
-	"github.com/luxdefi/subnet-evm/params"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/deployerallowlist"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/feemanager"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/nativeminter"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/rewardmanager"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/subnet-evm/core"
+	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/subnet-evm/precompile/contracts/deployerallowlist"
+	"github.com/luxfi/subnet-evm/precompile/contracts/feemanager"
+	"github.com/luxfi/subnet-evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/subnet-evm/precompile/contracts/rewardmanager"
+	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ import (
 
 var printGenesisOnly bool
 
-// lux subnet describe
+// avalanche subnet describe
 func newDescribeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe [subnetName]",
@@ -50,16 +50,13 @@ flag, the command instead prints out the raw genesis file.`,
 	return cmd
 }
 
-func printGenesis(sc models.Sidecar, subnetName string) error {
+func printGenesis(subnetName string) error {
 	genesisFile := app.GetGenesisPath(subnetName)
 	gen, err := os.ReadFile(genesisFile)
 	if err != nil {
 		return err
 	}
 	fmt.Println(string(gen))
-	if sc.SubnetEVMMainnetChainID != 0 {
-		fmt.Printf("Genesis is set to be deployed to Mainnet with Chain Id %d\n", sc.SubnetEVMMainnetChainID)
-	}
 	return nil
 }
 
@@ -81,7 +78,6 @@ func printDetails(genesis core.Genesis, sc models.Sidecar) {
 
 	table.Append([]string{"Subnet Name", sc.Subnet})
 	table.Append([]string{"ChainID", genesis.Config.ChainID.String()})
-	table.Append([]string{"Mainnet ChainID", fmt.Sprint(sc.SubnetEVMMainnetChainID)})
 	table.Append([]string{"Token Name", app.GetTokenName(sc.Subnet)})
 	table.Append([]string{"VM Version", sc.VMVersion})
 	if sc.ImportedVMID != "" {
@@ -276,22 +272,22 @@ func readGenesis(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("The provided subnet name %q does not exist", subnetName)
 		return nil
 	}
+	if printGenesisOnly {
+		return printGenesis(subnetName)
+	}
+	// read in sidecar
 	sc, err := app.LoadSidecar(subnetName)
 	if err != nil {
 		return err
 	}
-	if printGenesisOnly {
-		return printGenesis(sc, subnetName)
-	}
 
-	isEVM, err := hasSubnetEVMGenesis(subnetName)
-	if err != nil {
-		return err
-	}
-	if isEVM {
+	switch sc.VM {
+	case models.SubnetEvm:
 		return describeSubnetEvmGenesis(sc)
+	default:
+		app.Log.Warn("Unknown genesis format", zap.Any("vm-type", sc.VM))
+		ux.Logger.PrintToUser("Printing genesis")
+		err = printGenesis(subnetName)
 	}
-	app.Log.Warn("Unknown genesis format", zap.Any("vm-type", sc.VM))
-	ux.Logger.PrintToUser("Printing genesis")
-	return printGenesis(sc, subnetName)
+	return err
 }

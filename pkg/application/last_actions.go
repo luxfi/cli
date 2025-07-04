@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2023, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package application
 
@@ -8,14 +8,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/constants"
 	"go.uber.org/zap"
 )
 
 type LastActions struct {
 	LastSkipCheck time.Time
 	LastUpdated   time.Time
-	LastCheckGit  time.Time
 }
 
 func (app *Lux) WriteLastActionsFile(acts *LastActions) {

@@ -1,8 +1,8 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package models
 
-import "github.com/luxdefi/cli/pkg/constants"
+import "github.com/luxfi/cli/pkg/constants"
 
 type VMType string
 

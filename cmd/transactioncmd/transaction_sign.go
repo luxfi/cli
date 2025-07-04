@@ -1,19 +1,17 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package transactioncmd
 
 import (
 	"errors"
-	"fmt"
 
-	"github.com/luxdefi/cli/cmd/subnetcmd"
-	"github.com/luxdefi/cli/pkg/keychain"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/txutils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/cli/cmd/subnetcmd"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/txutils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +26,7 @@ var (
 	errNoSubnetID = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
 )
 
-// lux transaction sign
+// avalanche transaction sign
 func newTransactionSignCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "sign [subnetName]",
@@ -72,7 +70,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	switch network.Kind {
+	switch network {
 	case models.Fuji, models.Local:
 		if !useLedger && keyName == "" {
 			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, "sign transaction", app.GetKeyDir())
@@ -95,17 +93,9 @@ func signTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.Name()].SubnetID
+	subnetID := sc.Networks[network.String()].SubnetID
 	if subnetID == ids.Empty {
 		return errNoSubnetID
-	}
-
-	subnetIDFromTX, err := txutils.GetSubnetID(tx)
-	if err != nil {
-		return err
-	}
-	if subnetIDFromTX != ids.Empty {
-		subnetID = subnetIDFromTX
 	}
 
 	controlKeys, _, err := txutils.GetOwners(network, subnetID)
@@ -121,22 +111,16 @@ func signTx(_ *cobra.Command, args []string) error {
 
 	if len(remainingSubnetAuthKeys) == 0 {
 		subnetcmd.PrintReadyToSignMsg(subnetName, inputTxPath)
-		ux.Logger.PrintToUser("")
-		return fmt.Errorf("tx is already fully signed")
+		return nil
 	}
 
 	// get keychain accessor
-	kc, err := keychain.GetKeychain(app, false, useLedger, ledgerAddresses, keyName, network, 0)
+	kc, err := subnetcmd.GetKeychain(useLedger, ledgerAddresses, keyName, network)
 	if err != nil {
 		return err
 	}
 
-	// add control keys to the keychain whenever possible
-	if err := kc.AddAddresses(controlKeys); err != nil {
-		return err
-	}
-
-	deployer := subnet.NewPublicDeployer(app, kc, network)
+	deployer := subnet.NewPublicDeployer(app, useLedger, kc, network)
 	if err := deployer.Sign(tx, remainingSubnetAuthKeys, subnetID); err != nil {
 		if errors.Is(err, subnet.ErrNoSubnetAuthKeysInWallet) {
 			ux.Logger.PrintToUser("There are no required subnet auth keys present in the wallet")
@@ -145,8 +129,7 @@ func signTx(_ *cobra.Command, args []string) error {
 			for _, addr := range remainingSubnetAuthKeys {
 				ux.Logger.PrintToUser("  %s", addr)
 			}
-			ux.Logger.PrintToUser("")
-			return fmt.Errorf("no remaining signer address present in wallet")
+			return nil
 		}
 		return err
 	}
