@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/node/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/node/config"
 	"github.com/stretchr/testify/require"
 )
 
@@ -89,7 +89,7 @@ func TestFindDefaultFiles(t *testing.T) {
 		filepath.Join(testDir, "etc", "node"),
 		filepath.Join(testDir, "home", ".node"),
 		testDir,
-		"$" + config.LuxdDataDirVar,
+		"$" + config.LuxGoDataDirVar,
 		// following indexes should fail (don't exist)
 		fakeNotSetEnvVar,
 		fakeSetEnvVar,
@@ -106,11 +106,11 @@ func TestFindDefaultFiles(t *testing.T) {
 	require.NoError(err)
 	existingDataDir := filepath.Join(testDir, "data-dir")
 	// make sure we don't accidentally overwrite a really existing env var
-	origVar := os.Getenv(config.LuxdDataDirVar)
-	err = os.Setenv(config.LuxdDataDirVar, existingDataDir)
+	origVar := os.Getenv(config.LuxGoDataDirVar)
+	err = os.Setenv(config.LuxGoDataDirVar, existingDataDir)
 	require.NoError(err)
 	defer func() {
-		err = os.Setenv(config.LuxdDataDirVar, origVar)
+		err = os.Setenv(config.LuxGoDataDirVar, origVar)
 		require.NoError(err)
 		err = os.Setenv(fakeSetEnvVar, "")
 		require.NoError(err)

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -8,22 +8,22 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/big"
 	"os"
 	"path/filepath"
 	"reflect"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	ANRclient "github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/netrunner/server"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/subnet-evm/params"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/ux"
+	ANRclient "github.com/luxfi/netrunner/client"
+	"github.com/luxfi/netrunner/server"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -54,7 +54,7 @@ var (
 	print bool
 )
 
-// lux subnet upgrade apply
+// avalanche subnet upgrade apply
 func newUpgradeApplyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply [subnetName]",
@@ -143,10 +143,9 @@ func applyLocalNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar)
 		ux.Logger.PrintToUser(ErrNetworkNotStartedOutput)
 		return err
 	}
+	ctx := binutils.GetAsyncContext()
 
 	// first let's get the status
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
 	status, err := cli.Status(ctx)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {
@@ -176,10 +175,6 @@ func applyLocalNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar)
 		return errors.New(
 			"failed to find deployment information about this subnet in state - aborting")
 	}
-
-	// into ANR network ops
-	ctx, cancel = utils.GetANRContext()
-	defer cancel()
 
 	// save a temporary snapshot
 	snapName := subnetName + tmpSnapshotInfix + time.Now().Format(timestampFormat)
@@ -320,7 +315,7 @@ func validateUpgrade(subnetName, networkKey string, sc *models.Sidecar, skipProm
 	if err != nil {
 		if err == os.ErrNotExist {
 			ux.Logger.PrintToUser("No file with upgrade specs for the given subnet has been found")
-			ux.Logger.PrintToUser("You may need to first create it with the `lux subnet upgrade generate` command or import it")
+			ux.Logger.PrintToUser("You may need to first create it with the `avalanche subnet upgrade generate` command or import it")
 			ux.Logger.PrintToUser("Aborting this command. No changes applied")
 		}
 		return nil, "", err
@@ -454,15 +449,18 @@ func getAllTimestamps(upgrades []params.PrecompileUpgrade) ([]int64, error) {
 	return allTimestamps, nil
 }
 
-func validateTimestamp(ts *uint64) (int64, error) {
+func validateTimestamp(ts *big.Int) (int64, error) {
 	if ts == nil {
 		return 0, errNoBlockTimestamp
 	}
-	val := *ts
-	if val == uint64(0) {
+	if !ts.IsInt64() {
 		return 0, errBlockTimestampInvalid
 	}
-	return int64(val), nil
+	val := ts.Int64()
+	if val == int64(0) {
+		return 0, errBlockTimestampInvalid
+	}
+	return val, nil
 }
 
 func getEarliestUpcomingTimestamp(upgrades []params.PrecompileUpgrade) (int64, error) {

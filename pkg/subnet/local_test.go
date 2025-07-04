@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -11,18 +11,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/config"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/netrunner/rpcpb"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/client"
+	"github.com/luxfi/netrunner/rpcpb"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -76,7 +76,7 @@ func setupTest(t *testing.T) *require.Assertions {
 
 func TestDeployToLocal(t *testing.T) {
 	require := setupTest(t)
-	luxdVersion := "v1.18.0"
+	luxVersion := "v1.18.0"
 
 	// fake-return true simulating the process is running
 	procChecker := &mocks.ProcessChecker{}
@@ -93,7 +93,7 @@ func TestDeployToLocal(t *testing.T) {
 	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetLuxdBinDir(), "node-"+luxdVersion)
+	binDir := filepath.Join(app.GetLuxgoBinDir(), "node-"+luxVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}
@@ -120,7 +120,7 @@ func TestDeployToLocal(t *testing.T) {
 		binaryDownloader:   binDownloader,
 		app:                app,
 		setDefaultSnapshot: fakeSetDefaultSnapshot,
-		luxdVersion:       luxdVersion,
+		luxVersion:       luxVersion,
 	}
 
 	// create a simple genesis for the test
@@ -146,7 +146,7 @@ func TestDeployToLocal(t *testing.T) {
 	require.Equal(testBlockChainID2, b.String())
 }
 
-func TestGetLatestLuxdVersion(t *testing.T) {
+func TestGetLatestLuxVersion(t *testing.T) {
 	require := setupTest(t)
 
 	testVersion := "v1.99.9999"
@@ -191,6 +191,6 @@ func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 	return c, nil
 }
 
-func fakeSetDefaultSnapshot(string, bool, bool) error {
+func fakeSetDefaultSnapshot(string, bool) error {
 	return nil
 }

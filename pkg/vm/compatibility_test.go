@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -6,25 +6,25 @@ package vm
 import (
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	testLuxdVersion         = "v0.4.2"
-	testUnlistedLuxdVersion = "v0.4.3"
+	testLuxVersion         = "v0.4.2"
+	testUnlistedLuxVersion = "v0.4.3"
 )
 
 var (
 	testSubnetEVMCompat = []byte("{\"rpcChainVMProtocolVersion\": {\"v0.4.2\": 18,\"v0.4.1\": 18,\"v0.4.0\": 17}}")
-	testLuxdCompat     = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
-	testLuxdCompat2    = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
-	testLuxdCompat3    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
-	testLuxdCompat4    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
+	testLuxCompat     = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
+	testLuxCompat2    = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
+	testLuxCompat3    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
+	testLuxCompat4    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
 )
 
 func TestGetRPCProtocolVersionSubnetEVM(t *testing.T) {
@@ -38,7 +38,7 @@ func TestGetRPCProtocolVersionSubnetEVM(t *testing.T) {
 	app := application.New()
 	app.Downloader = mockDownloader
 
-	rpcVersion, err := GetRPCProtocolVersion(app, vm, testLuxdVersion)
+	rpcVersion, err := GetRPCProtocolVersion(app, vm, testLuxVersion)
 	require.NoError(err)
 	require.Equal(expectedRPC, rpcVersion)
 }
@@ -49,7 +49,7 @@ func TestGetRPCProtocolVersionUnknownVM(t *testing.T) {
 
 	app := application.New()
 
-	_, err := GetRPCProtocolVersion(app, vm, testLuxdVersion)
+	_, err := GetRPCProtocolVersion(app, vm, testLuxVersion)
 	require.ErrorContains(err, "unknown VM type")
 }
 
@@ -62,11 +62,11 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	app := application.New()
 	app.Downloader = mockDownloader
 
-	_, err := GetRPCProtocolVersion(app, models.SubnetEvm, testUnlistedLuxdVersion)
+	_, err := GetRPCProtocolVersion(app, models.SubnetEvm, testUnlistedLuxVersion)
 	require.ErrorContains(err, "no RPC version found")
 }
 
-func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
+func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 	type versionTest struct {
 		name            string
 		rpc             int
@@ -80,7 +80,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, one entry",
 			rpc:             19,
-			testData:        testLuxdCompat,
+			testData:        testLuxCompat,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -88,7 +88,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "older, one entry",
 			rpc:             18,
-			testData:        testLuxdCompat,
+			testData:        testLuxCompat,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.1",
 			expectedErr:     nil,
@@ -96,7 +96,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry",
 			rpc:             19,
-			testData:        testLuxdCompat2,
+			testData:        testLuxCompat2,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -104,7 +104,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry, reverse sorted",
 			rpc:             19,
-			testData:        testLuxdCompat3,
+			testData:        testLuxCompat3,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -112,7 +112,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry, unreleased version",
 			rpc:             19,
-			testData:        testLuxdCompat2,
+			testData:        testLuxCompat2,
 			latestVersion:   "v1.9.1",
 			expectedVersion: "v1.9.1",
 			expectedErr:     nil,
@@ -120,23 +120,23 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "no rpc version",
 			rpc:             20,
-			testData:        testLuxdCompat2,
+			testData:        testLuxCompat2,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "",
-			expectedErr:     ErrNoLuxdVersion,
+			expectedErr:     ErrNoLuxVersion,
 		},
 		{
 			name:            "existing rpc, but no eligible version",
 			rpc:             19,
-			testData:        testLuxdCompat,
+			testData:        testLuxCompat,
 			latestVersion:   "v1.9.1",
 			expectedVersion: "",
-			expectedErr:     ErrNoLuxdVersion,
+			expectedErr:     ErrNoLuxVersion,
 		},
 		{
 			name:            "string sorting test",
 			rpc:             19,
-			testData:        testLuxdCompat4,
+			testData:        testLuxCompat4,
 			latestVersion:   "v1.9.11",
 			expectedVersion: "v1.9.11",
 			expectedErr:     nil,
@@ -144,7 +144,7 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 		{
 			name:            "string sorting test 2",
 			rpc:             19,
-			testData:        testLuxdCompat4,
+			testData:        testLuxCompat4,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -161,13 +161,13 @@ func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
 			app := application.New()
 			app.Downloader = mockDownloader
 
-			luxdVersion, err := GetLatestLuxdByProtocolVersion(app, tt.rpc, constants.LuxdCompatibilityURL)
+			luxVersion, err := GetLatestLuxGoByProtocolVersion(app, tt.rpc, constants.LuxGoCompatibilityURL)
 			if tt.expectedErr == nil {
 				require.NoError(err)
 			} else {
 				require.ErrorIs(err, tt.expectedErr)
 			}
-			require.Equal(tt.expectedVersion, luxdVersion)
+			require.Equal(tt.expectedVersion, luxVersion)
 		})
 	}
 }

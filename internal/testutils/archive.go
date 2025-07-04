@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package testutils
@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxfi/node/utils/perms"
 	"github.com/stretchr/testify/require"
 )
 

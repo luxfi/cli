@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/json"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/api"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/json"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/api"
 	"github.com/olekukonko/tablewriter"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -1,24 +1,23 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
 
 import (
 	"errors"
-	"fmt"
+	"math/big"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/statemachine"
-	"github.com/luxdefi/subnet-evm/params"
-	"github.com/luxdefi/subnet-evm/precompile/allowlist"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/deployerallowlist"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/feemanager"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/nativeminter"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/rewardmanager"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
-	"github.com/luxdefi/subnet-evm/precompile/precompileconfig"
-	"github.com/luxdefi/subnet-evm/utils"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/subnet-evm/precompile/allowlist"
+	"github.com/luxfi/subnet-evm/precompile/contracts/deployerallowlist"
+	"github.com/luxfi/subnet-evm/precompile/contracts/feemanager"
+	"github.com/luxfi/subnet-evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/subnet-evm/precompile/contracts/rewardmanager"
+	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/subnet-evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -57,7 +56,12 @@ func configureRewardManager(app *application.Lux) (rewardmanager.Config, bool, e
 		"on your subnet, including burning or sending fees.\nFor more information visit " +
 		"https://docs.lux.network/subnets/customize-a-subnet#changing-fee-reward-mechanisms\n\n"
 
-	admins, enabled, cancelled, err := getAdminAndEnabledAddresses(adminPrompt, enabledPrompt, info, app)
+	admins, cancelled, err := getAddressList(adminPrompt, info, app)
+	if err != nil || cancelled {
+		return config, false, err
+	}
+
+	enabled, cancelled, err := getAddressList(enabledPrompt, info, app)
 	if err != nil {
 		return config, false, err
 	}
@@ -67,7 +71,7 @@ func configureRewardManager(app *application.Lux) (rewardmanager.Config, bool, e
 		EnabledAddresses: enabled,
 	}
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: utils.NewUint64(0),
+		BlockTimestamp: big.NewInt(0),
 	}
 	config.InitialRewardConfig, err = ConfigureInitialRewardConfig(app)
 	if err != nil {
@@ -129,7 +133,12 @@ func configureContractAllowList(app *application.Lux) (deployerallowlist.Config,
 		"on your subnet.\nFor more information visit " +
 		"https://docs.lux.network/subnets/customize-a-subnet/#restricting-smart-contract-deployers\n\n"
 
-	admins, enabled, cancelled, err := getAdminAndEnabledAddresses(adminPrompt, enabledPrompt, info, app)
+	admins, cancelled, err := getAddressList(adminPrompt, info, app)
+	if err != nil || cancelled {
+		return config, false, err
+	}
+
+	enabled, cancelled, err := getAddressList(enabledPrompt, info, app)
 	if err != nil {
 		return config, false, err
 	}
@@ -139,7 +148,7 @@ func configureContractAllowList(app *application.Lux) (deployerallowlist.Config,
 		EnabledAddresses: enabled,
 	}
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: utils.NewUint64(0),
+		BlockTimestamp: big.NewInt(0),
 	}
 
 	return config, cancelled, nil
@@ -153,7 +162,12 @@ func configureTransactionAllowList(app *application.Lux) (txallowlist.Config, bo
 		"on your subnet.\nFor more information visit " +
 		"https://docs.lux.network/subnets/customize-a-subnet/#restricting-who-can-submit-transactions\n\n"
 
-	admins, enabled, cancelled, err := getAdminAndEnabledAddresses(adminPrompt, enabledPrompt, info, app)
+	admins, cancelled, err := getAddressList(adminPrompt, info, app)
+	if err != nil || cancelled {
+		return config, false, err
+	}
+
+	enabled, cancelled, err := getAddressList(enabledPrompt, info, app)
 	if err != nil {
 		return config, false, err
 	}
@@ -163,31 +177,10 @@ func configureTransactionAllowList(app *application.Lux) (txallowlist.Config, bo
 		EnabledAddresses: enabled,
 	}
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: utils.NewUint64(0),
+		BlockTimestamp: big.NewInt(0),
 	}
 
 	return config, cancelled, nil
-}
-
-func getAdminAndEnabledAddresses(adminPrompt, enabledPrompt, info string, app *application.Lux) ([]common.Address, []common.Address, bool, error) {
-	admins, cancelled, err := getAddressList(adminPrompt, info, app)
-	if err != nil || cancelled {
-		return nil, nil, false, err
-	}
-	adminsMap := make(map[string]bool)
-	for _, adminsAddress := range admins {
-		adminsMap[adminsAddress.String()] = true
-	}
-	enabled, cancelled, err := getAddressList(enabledPrompt, info, app)
-	if err != nil {
-		return nil, nil, false, err
-	}
-	for _, enabledAddress := range enabled {
-		if _, ok := adminsMap[enabledAddress.String()]; ok {
-			return nil, nil, false, fmt.Errorf("can't have address %s in both admin and enabled addresses", enabledAddress.String())
-		}
-	}
-	return admins, enabled, cancelled, nil
 }
 
 func configureMinterList(app *application.Lux) (nativeminter.Config, bool, error) {
@@ -198,16 +191,22 @@ func configureMinterList(app *application.Lux) (nativeminter.Config, bool, error
 		"on your subnet.\nFor more information visit " +
 		"https://docs.lux.network/subnets/customize-a-subnet#minting-native-coins\n\n"
 
-	admins, enabled, cancelled, err := getAdminAndEnabledAddresses(adminPrompt, enabledPrompt, info, app)
+	admins, cancelled, err := getAddressList(adminPrompt, info, app)
+	if err != nil || cancelled {
+		return config, false, err
+	}
+
+	enabled, cancelled, err := getAddressList(enabledPrompt, info, app)
 	if err != nil {
 		return config, false, err
 	}
+
 	config.AllowListConfig = allowlist.AllowListConfig{
 		AdminAddresses:   admins,
 		EnabledAddresses: enabled,
 	}
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: utils.NewUint64(0),
+		BlockTimestamp: big.NewInt(0),
 	}
 
 	return config, cancelled, nil
@@ -221,7 +220,12 @@ func configureFeeConfigAllowList(app *application.Lux) (feemanager.Config, bool,
 		"performing a hardfork.\nFor more information visit " +
 		"https://docs.lux.network/subnets/customize-a-subnet#configuring-dynamic-fees\n\n"
 
-	admins, enabled, cancelled, err := getAdminAndEnabledAddresses(adminPrompt, enabledPrompt, info, app)
+	admins, cancelled, err := getAddressList(adminPrompt, info, app)
+	if err != nil || cancelled {
+		return config, cancelled, err
+	}
+
+	enabled, cancelled, err := getAddressList(enabledPrompt, info, app)
 	if err != nil {
 		return config, false, err
 	}
@@ -231,7 +235,7 @@ func configureFeeConfigAllowList(app *application.Lux) (feemanager.Config, bool,
 		EnabledAddresses: enabled,
 	}
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: utils.NewUint64(0),
+		BlockTimestamp: big.NewInt(0),
 	}
 
 	return config, cancelled, nil

@@ -1,21 +1,18 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package transactioncmd
 
 import (
-	"fmt"
-
-	"github.com/luxdefi/cli/cmd/subnetcmd"
-	"github.com/luxdefi/cli/pkg/keychain"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/txutils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxfi/cli/cmd/subnetcmd"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/txutils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
-// lux transaction commit
+// avalanche transaction commit
 func newTransactionCommitCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "commit [subnetName]",
@@ -53,7 +50,7 @@ func commitTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.Name()].SubnetID
+	subnetID := sc.Networks[network.String()].SubnetID
 	if subnetID == ids.Empty {
 		return errNoSubnetID
 	}
@@ -71,7 +68,7 @@ func commitTx(_ *cobra.Command, args []string) error {
 		signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
 		ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(subnetAuthKeys))
 		subnetcmd.PrintRemainingToSignMsg(subnetName, remainingSubnetAuthKeys, inputTxPath)
-		return fmt.Errorf("tx is not fully signed")
+		return nil
 	}
 
 	// get kc with some random address, to pass wallet creation checks
@@ -81,7 +78,7 @@ func commitTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployer := subnet.NewPublicDeployer(app, keychain.NewKeychain(network, kc, nil, nil), network)
+	deployer := subnet.NewPublicDeployer(app, false, kc, network)
 	txID, err := deployer.Commit(tx)
 	if err != nil {
 		return err

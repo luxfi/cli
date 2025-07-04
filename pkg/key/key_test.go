@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package key
@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxdefi/node/utils/cb58"
-	"github.com/luxdefi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/node/utils/cb58"
+	"github.com/luxfi/node/utils/crypto/secp256k1"
 )
 
 const (
@@ -55,12 +55,13 @@ func TestNewKey(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ewoqPk, err := secp256k1.ToPrivateKey(skBytes)
+	factory := &secp256k1.Factory{}
+	ewoqPk, err := factory.ToPrivateKey(skBytes)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	privKey2, err := secp256k1.NewPrivateKey()
+	privKey2, err := factory.NewPrivateKey()
 	if err != nil {
 		t.Fatal(err)
 	}

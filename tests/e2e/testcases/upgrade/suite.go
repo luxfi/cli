@@ -1,7 +1,7 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package lpm
+package apm
 
 import (
 	"encoding/json"
@@ -12,17 +12,17 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/luxdefi/cli/cmd/subnetcmd/upgradecmd"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/tests/e2e/commands"
-	"github.com/luxdefi/cli/tests/e2e/utils"
-	anr_utils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/subnet-evm/params"
+	"github.com/luxfi/cli/cmd/subnetcmd/upgradecmd"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/tests/e2e/commands"
+	"github.com/luxfi/cli/tests/e2e/utils"
+	anr_utils "github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/subnet-evm/params"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -31,11 +31,11 @@ const (
 	subnetName       = "e2eSubnetTest"
 	secondSubnetName = "e2eSecondSubnetTest"
 
-	subnetEVMVersion1 = "v0.5.5"
-	subnetEVMVersion2 = "v0.5.6"
+	subnetEVMVersion1 = "v0.4.7"
+	subnetEVMVersion2 = "v0.4.8"
 
-	luxdRPC1Version = "v1.10.11"
-	luxdRPC2Version = "v1.10.12"
+	luxRPC1Version = "v1.9.5"
+	luxRPC2Version = "v1.9.8"
 
 	controlKeys = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 	keyName     = "ewoq"
@@ -125,7 +125,7 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 
 		// we'll set a fake chain config dir to not mess up with a potential real one
 		// in the system
-		nodeConfigDir, err := os.MkdirTemp("", "cli-tmp-luxd-conf-dir")
+		nodeConfigDir, err := os.MkdirTemp("", "cli-tmp-lux-conf-dir")
 		gomega.Expect(err).Should(gomega.BeNil())
 		defer os.RemoveAll(nodeConfigDir)
 
@@ -313,8 +313,8 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 
 		// create and deploy
 		commands.CreateCustomVMConfig(subnetName, utils.SubnetEvmGenesisPath, customVMPath1)
-		// need to set luxd version manually since VMs are custom
-		commands.StartNetworkWithVersion(luxdRPC1Version)
+		// need to set lux version manually since VMs are custom
+		commands.StartNetworkWithVersion(luxRPC1Version)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -337,7 +337,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		commands.UpgradeCustomVMLocal(subnetName, customVMPath2)
 
 		// restart network
-		commands.StartNetworkWithVersion(luxdRPC2Version)
+		commands.StartNetworkWithVersion(luxRPC2Version)
 
 		// check running version
 		version, err = utils.GetNodeVMVersion(nodeURI, vmid.String())
@@ -374,17 +374,15 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 
 		containsVersion2 = strings.Contains(output, binaryToVersion[utils.SoloSubnetEVMKey2])
 		gomega.Expect(containsVersion2).Should(gomega.BeFalse())
-
 		// the following indicates it is a custom VM
-		isCustom, err := utils.IsCustomVM(subnetName)
-		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(isCustom).Should(gomega.BeTrue())
+		containsCustomVM := strings.Contains(output, "Printing genesis")
+		gomega.Expect(containsCustomVM).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})
 
 	ginkgo.It("can upgrade subnet-evm on public deployment", func() {
-		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloLuxdKey])
+		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloLuxKey])
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1])
 
 		// Simulate fuji deployment

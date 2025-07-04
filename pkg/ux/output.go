@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package ux
 
@@ -12,8 +12,8 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 
-	"github.com/luxdefi/netrunner/rpcpb"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/netrunner/rpcpb"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/olekukonko/tablewriter"
 )
 

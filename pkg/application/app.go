@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package application
 
@@ -8,14 +8,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/lpm/lpm"
-	"github.com/luxdefi/cli/pkg/config"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/subnet-evm/core"
+	"github.com/luxfi/apm/apm"
+	"github.com/luxfi/cli/pkg/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/subnet-evm/core"
+)
+
+const (
+	WriteReadReadPerms = 0o644
 )
 
 type Lux struct {
@@ -23,8 +27,8 @@ type Lux struct {
 	baseDir    string
 	Conf       *config.Config
 	Prompt     prompts.Prompter
-	Lpm        *lpm.LPM
-	LpmDir     string
+	Apm        *apm.APM
+	ApmDir     string
 	Downloader Downloader
 }
 
@@ -56,10 +60,6 @@ func (app *Lux) GetSubnetDir() string {
 	return filepath.Join(app.baseDir, constants.SubnetDir)
 }
 
-func (app *Lux) GetNodesDir() string {
-	return filepath.Join(app.baseDir, constants.NodesDir)
-}
-
 func (app *Lux) GetReposDir() string {
 	return filepath.Join(app.baseDir, constants.ReposDir)
 }
@@ -76,8 +76,8 @@ func (app *Lux) GetPluginsDir() string {
 	return filepath.Join(app.baseDir, constants.PluginDir)
 }
 
-func (app *Lux) GetLuxdBinDir() string {
-	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxdInstallDir)
+func (app *Lux) GetLuxgoBinDir() string {
+	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxGoInstallDir)
 }
 
 func (app *Lux) GetSubnetEVMBinDir() string {
@@ -92,96 +92,20 @@ func (app *Lux) GetCustomVMPath(subnetName string) string {
 	return filepath.Join(app.GetCustomVMDir(), subnetName)
 }
 
-func (app *Lux) GetLPMVMPath(vmid string) string {
-	return filepath.Join(app.GetLPMPluginDir(), vmid)
+func (app *Lux) GetAPMVMPath(vmid string) string {
+	return filepath.Join(app.GetAPMPluginDir(), vmid)
 }
 
 func (app *Lux) GetGenesisPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.GenesisFileName)
 }
 
-func (app *Lux) GetLuxdNodeConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.NodeConfigFileName)
-}
-
-func (app *Lux) GetChainConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.ChainConfigFileName)
-}
-
-func (app *Lux) GetLuxdSubnetConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.SubnetConfigFileName)
-}
-
 func (app *Lux) GetSidecarPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.SidecarFileName)
 }
 
-func (app *Lux) GetNodeConfigPath(nodeName string) string {
-	return filepath.Join(app.GetNodesDir(), nodeName, constants.NodeCloudConfigFileName)
-}
-
-func (app *Lux) GetNodeInstanceDirPath(nodeName string) string {
-	return filepath.Join(app.GetNodesDir(), nodeName)
-}
-
-func (app *Lux) GetAnsibleDir() string {
-	return filepath.Join(app.GetNodesDir(), constants.AnsibleDir)
-}
-
-func (app *Lux) CreateAnsibleDir() error {
-	ansibleDir := app.GetAnsibleDir()
-	if _, err := os.Stat(ansibleDir); os.IsNotExist(err) {
-		err = os.Mkdir(ansibleDir, constants.DefaultPerms755)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (app *Lux) CreateTerraformDir() error {
-	nodesDir := app.GetNodesDir()
-	if _, err := os.Stat(nodesDir); os.IsNotExist(err) {
-		err = os.Mkdir(nodesDir, constants.DefaultPerms755)
-		if err != nil {
-			return err
-		}
-	}
-	nodeTerraformDir := app.GetTerraformDir()
-	if _, err := os.Stat(nodeTerraformDir); os.IsNotExist(err) {
-		err = os.Mkdir(nodeTerraformDir, constants.DefaultPerms755)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (app *Lux) CreateAnsibleInventoryDir() error {
-	inventoriesDir := filepath.Join(app.GetNodesDir(), constants.AnsibleInventoryDir)
-	if _, err := os.Stat(inventoriesDir); os.IsNotExist(err) {
-		err = os.Mkdir(inventoriesDir, constants.DefaultPerms755)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (app *Lux) GetTerraformDir() string {
-	return filepath.Join(app.GetNodesDir(), constants.TerraformDir)
-}
-
-func (app *Lux) GetTempCertPath(certName string) string {
-	return filepath.Join(app.GetTerraformDir(), certName)
-}
-
-func (app *Lux) GetClustersConfigPath() string {
-	return filepath.Join(app.GetNodesDir(), constants.ClustersConfigFileName)
-}
-
-func (app *Lux) GetNodeBLSSecretKeyPath(instanceID string) string {
-	return filepath.Join(app.GetNodeInstanceDirPath(instanceID), constants.BLSKeyFileName)
+func (app *Lux) GetConfigPath() string {
+	return filepath.Join(app.baseDir, constants.ConfigDir)
 }
 
 func (app *Lux) GetElasticSubnetConfigPath(subnetName string) string {
@@ -196,16 +120,16 @@ func (*Lux) GetTmpPluginDir() string {
 	return os.TempDir()
 }
 
-func (app *Lux) GetLPMBaseDir() string {
-	return filepath.Join(app.baseDir, "lpm")
+func (app *Lux) GetAPMBaseDir() string {
+	return filepath.Join(app.baseDir, "apm")
 }
 
-func (app *Lux) GetLPMLog() string {
-	return filepath.Join(app.baseDir, constants.LogDir, constants.LPMLogName)
+func (app *Lux) GetAPMLog() string {
+	return filepath.Join(app.baseDir, constants.LogDir, constants.APMLogName)
 }
 
-func (app *Lux) GetLPMPluginDir() string {
-	return filepath.Join(app.baseDir, constants.LPMPluginDir)
+func (app *Lux) GetAPMPluginDir() string {
+	return filepath.Join(app.baseDir, constants.APMPluginDir)
 }
 
 func (app *Lux) GetKeyPath(keyName string) string {
@@ -220,8 +144,8 @@ func (app *Lux) GetDownloader() Downloader {
 	return app.Downloader
 }
 
-func (*Lux) GetLuxdCompatibilityURL() string {
-	return constants.LuxdCompatibilityURL
+func (*Lux) GetLuxgoCompatibilityURL() string {
+	return constants.LuxGoCompatibilityURL
 }
 
 func (app *Lux) ReadUpgradeFile(subnetName string) ([]byte, error) {
@@ -254,58 +178,9 @@ func (app *Lux) WriteGenesisFile(subnetName string, genesisBytes []byte) error {
 	return app.writeFile(genesisPath, genesisBytes)
 }
 
-func (app *Lux) WriteLuxdNodeConfigFile(subnetName string, bs []byte) error {
-	path := app.GetLuxdNodeConfigPath(subnetName)
-	return app.writeFile(path, bs)
-}
-
-func (app *Lux) WriteChainConfigFile(subnetName string, bs []byte) error {
-	path := app.GetChainConfigPath(subnetName)
-	return app.writeFile(path, bs)
-}
-
-func (app *Lux) WriteLuxdSubnetConfigFile(subnetName string, bs []byte) error {
-	path := app.GetLuxdSubnetConfigPath(subnetName)
-	return app.writeFile(path, bs)
-}
-
-func (app *Lux) WriteNetworkUpgradesFile(subnetName string, bs []byte) error {
-	path := app.GetUpgradeBytesFilepath(subnetName)
-	return app.writeFile(path, bs)
-}
-
 func (app *Lux) GenesisExists(subnetName string) bool {
 	genesisPath := app.GetGenesisPath(subnetName)
 	_, err := os.Stat(genesisPath)
-	return err == nil
-}
-
-func (app *Lux) LuxdNodeConfigExists(subnetName string) bool {
-	path := app.GetLuxdNodeConfigPath(subnetName)
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func (app *Lux) ChainConfigExists(subnetName string) bool {
-	path := app.GetChainConfigPath(subnetName)
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func (app *Lux) LuxdSubnetConfigExists(subnetName string) bool {
-	path := app.GetLuxdSubnetConfigPath(subnetName)
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func (app *Lux) NetworkUpgradeExists(subnetName string) bool {
-	path := app.GetUpgradeBytesFilepath(subnetName)
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func (app *Lux) ClustersConfigExists() bool {
-	_, err := os.Stat(app.GetClustersConfigPath())
 	return err == nil
 }
 
@@ -336,7 +211,7 @@ func (app *Lux) CopyGenesisFile(inputFilename string, subnetName string) error {
 		return err
 	}
 
-	return os.WriteFile(genesisPath, genesisBytes, constants.WriteReadReadPerms)
+	return os.WriteFile(genesisPath, genesisBytes, WriteReadReadPerms)
 }
 
 func (app *Lux) CopyVMBinary(inputFilename string, subnetName string) error {
@@ -345,7 +220,7 @@ func (app *Lux) CopyVMBinary(inputFilename string, subnetName string) error {
 		return err
 	}
 	vmPath := app.GetCustomVMPath(subnetName)
-	return os.WriteFile(vmPath, vmBytes, constants.DefaultPerms755)
+	return os.WriteFile(vmPath, vmBytes, WriteReadReadPerms)
 }
 
 func (app *Lux) CopyKeyFile(inputFilename string, keyName string) error {
@@ -354,7 +229,7 @@ func (app *Lux) CopyKeyFile(inputFilename string, keyName string) error {
 		return err
 	}
 	keyPath := app.GetKeyPath(keyName)
-	return os.WriteFile(keyPath, keyBytes, constants.WriteReadReadPerms)
+	return os.WriteFile(keyPath, keyBytes, WriteReadReadPerms)
 }
 
 func (app *Lux) LoadEvmGenesis(subnetName string) (core.Genesis, error) {
@@ -371,23 +246,12 @@ func (app *Lux) LoadEvmGenesis(subnetName string) (core.Genesis, error) {
 
 func (app *Lux) LoadRawGenesis(subnetName string) ([]byte, error) {
 	genesisPath := app.GetGenesisPath(subnetName)
-	return os.ReadFile(genesisPath)
-}
+	genesisBytes, err := os.ReadFile(genesisPath)
+	if err != nil {
+		return nil, err
+	}
 
-func (app *Lux) LoadRawLuxdNodeConfig(subnetName string) ([]byte, error) {
-	return os.ReadFile(app.GetLuxdNodeConfigPath(subnetName))
-}
-
-func (app *Lux) LoadRawChainConfig(subnetName string) ([]byte, error) {
-	return os.ReadFile(app.GetChainConfigPath(subnetName))
-}
-
-func (app *Lux) LoadRawLuxdSubnetConfig(subnetName string) ([]byte, error) {
-	return os.ReadFile(app.GetLuxdSubnetConfigPath(subnetName))
-}
-
-func (app *Lux) LoadRawNetworkUpgrades(subnetName string) ([]byte, error) {
-	return os.ReadFile(app.GetUpgradeBytesFilepath(subnetName))
+	return genesisBytes, err
 }
 
 func (app *Lux) CreateSidecar(sc *models.Sidecar) error {
@@ -407,7 +271,7 @@ func (app *Lux) CreateSidecar(sc *models.Sidecar) error {
 		return err
 	}
 
-	return os.WriteFile(sidecarPath, scBytes, constants.WriteReadReadPerms)
+	return os.WriteFile(sidecarPath, scBytes, WriteReadReadPerms)
 }
 
 func (app *Lux) LoadSidecar(subnetName string) (models.Sidecar, error) {
@@ -435,7 +299,7 @@ func (app *Lux) UpdateSidecar(sc *models.Sidecar) error {
 	}
 
 	sidecarPath := app.GetSidecarPath(sc.Name)
-	return os.WriteFile(sidecarPath, scBytes, constants.WriteReadReadPerms)
+	return os.WriteFile(sidecarPath, scBytes, WriteReadReadPerms)
 }
 
 func (app *Lux) UpdateSidecarNetworks(
@@ -447,7 +311,7 @@ func (app *Lux) UpdateSidecarNetworks(
 	if sc.Networks == nil {
 		sc.Networks = make(map[string]models.NetworkData)
 	}
-	sc.Networks[network.Name()] = models.NetworkData{
+	sc.Networks[network.String()] = models.NetworkData{
 		SubnetID:     subnetID,
 		BlockchainID: blockchainID,
 		RPCVersion:   sc.RPCVersion,
@@ -470,8 +334,8 @@ func (app *Lux) UpdateSidecarElasticSubnet(
 	if sc.ElasticSubnet == nil {
 		sc.ElasticSubnet = make(map[string]models.ElasticSubnet)
 	}
-	partialTxs := sc.ElasticSubnet[network.Name()].Txs
-	sc.ElasticSubnet[network.Name()] = models.ElasticSubnet{
+	partialTxs := sc.ElasticSubnet[network.String()].Txs
+	sc.ElasticSubnet[network.String()] = models.ElasticSubnet{
 		SubnetID:    subnetID,
 		AssetID:     assetID,
 		PChainTXID:  pchainTXID,
@@ -491,12 +355,12 @@ func (app *Lux) UpdateSidecarPermissionlessValidator(
 	nodeID string,
 	txID ids.ID,
 ) error {
-	elasticSubnet := sc.ElasticSubnet[network.Name()]
+	elasticSubnet := sc.ElasticSubnet[network.String()]
 	if elasticSubnet.Validators == nil {
 		elasticSubnet.Validators = make(map[string]models.PermissionlessValidators)
 	}
 	elasticSubnet.Validators[nodeID] = models.PermissionlessValidators{TxID: txID}
-	sc.ElasticSubnet[network.Name()] = elasticSubnet
+	sc.ElasticSubnet[network.String()] = elasticSubnet
 	if err := app.UpdateSidecar(sc); err != nil {
 		return err
 	}
@@ -513,11 +377,11 @@ func (app *Lux) UpdateSidecarElasticSubnetPartialTx(
 		sc.ElasticSubnet = make(map[string]models.ElasticSubnet)
 	}
 	partialTxs := make(map[string]ids.ID)
-	if sc.ElasticSubnet[network.Name()].Txs != nil {
-		partialTxs = sc.ElasticSubnet[network.Name()].Txs
+	if sc.ElasticSubnet[network.String()].Txs != nil {
+		partialTxs = sc.ElasticSubnet[network.String()].Txs
 	}
 	partialTxs[txName] = txID
-	sc.ElasticSubnet[network.Name()] = models.ElasticSubnet{
+	sc.ElasticSubnet[network.String()] = models.ElasticSubnet{
 		Txs: partialTxs,
 	}
 	return app.UpdateSidecar(sc)
@@ -563,21 +427,35 @@ func (*Lux) writeFile(path string, bytes []byte) error {
 		return err
 	}
 
-	return os.WriteFile(path, bytes, constants.WriteReadReadPerms)
+	return os.WriteFile(path, bytes, WriteReadReadPerms)
 }
 
-func (app *Lux) CreateNodeCloudConfigFile(nodeName string, nodeConfig *models.NodeConfig) error {
-	nodeConfigPath := app.GetNodeConfigPath(nodeName)
-	if err := os.MkdirAll(filepath.Dir(nodeConfigPath), constants.DefaultPerms755); err != nil {
-		return err
-	}
-
-	esBytes, err := json.MarshalIndent(nodeConfig, "", "    ")
+func (app *Lux) LoadConfig() (models.Config, error) {
+	configPath := app.GetConfigPath()
+	jsonBytes, err := os.ReadFile(configPath)
 	if err != nil {
-		return err
+		return models.Config{}, err
 	}
 
-	return os.WriteFile(nodeConfigPath, esBytes, constants.WriteReadReadPerms)
+	var config models.Config
+	err = json.Unmarshal(jsonBytes, &config)
+	return config, err
+}
+
+func (app *Lux) ConfigFileExists() bool {
+	configPath := app.GetConfigPath()
+	_, err := os.ReadFile(configPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
+}
+
+func (app *Lux) WriteConfigFile(bytes []byte) error {
+	configPath := app.GetConfigPath()
+	return app.writeFile(configPath, bytes)
 }
 
 func (app *Lux) CreateElasticSubnetConfig(subnetName string, es *models.ElasticSubnetConfig) error {
@@ -591,7 +469,7 @@ func (app *Lux) CreateElasticSubnetConfig(subnetName string, es *models.ElasticS
 		return err
 	}
 
-	return os.WriteFile(elasticSubetConfigPath, esBytes, constants.WriteReadReadPerms)
+	return os.WriteFile(elasticSubetConfigPath, esBytes, WriteReadReadPerms)
 }
 
 func (app *Lux) LoadElasticSubnetConfig(subnetName string) (models.ElasticSubnetConfig, error) {
@@ -605,96 +483,4 @@ func (app *Lux) LoadElasticSubnetConfig(subnetName string) (models.ElasticSubnet
 	err = json.Unmarshal(jsonBytes, &esc)
 
 	return esc, err
-}
-
-func (app *Lux) LoadClusterNodeConfig(nodeName string) (models.NodeConfig, error) {
-	nodeConfigPath := app.GetNodeConfigPath(nodeName)
-	jsonBytes, err := os.ReadFile(nodeConfigPath)
-	if err != nil {
-		return models.NodeConfig{}, err
-	}
-	var nodeConfig models.NodeConfig
-	err = json.Unmarshal(jsonBytes, &nodeConfig)
-	return nodeConfig, err
-}
-
-func (app *Lux) LoadClustersConfig() (models.ClustersConfig, error) {
-	clustersConfigPath := app.GetClustersConfigPath()
-	jsonBytes, err := os.ReadFile(clustersConfigPath)
-	if err != nil {
-		return models.ClustersConfig{}, err
-	}
-	var clustersConfig models.ClustersConfig
-	var clustersConfigMap map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &clustersConfigMap); err != nil {
-		return models.ClustersConfig{}, err
-	}
-	v, ok := clustersConfigMap["Version"]
-	if !ok {
-		// backwards compatibility V0
-		var clustersConfigV0 models.ClustersConfigV0
-		if err := json.Unmarshal(jsonBytes, &clustersConfigV0); err != nil {
-			return models.ClustersConfig{}, err
-		}
-		clustersConfig.Version = constants.ClustersConfigVersion
-		clustersConfig.KeyPair = clustersConfigV0.KeyPair
-		clustersConfig.GCPConfig = clustersConfigV0.GCPConfig
-		clustersConfig.Clusters = map[string]models.ClusterConfig{}
-		for clusterName, nodes := range clustersConfigV0.Clusters {
-			clustersConfig.Clusters[clusterName] = models.ClusterConfig{
-				Nodes:   nodes,
-				Network: models.FujiNetwork,
-			}
-		}
-		return clustersConfig, err
-	}
-	if v == constants.ClustersConfigVersion {
-		if err := json.Unmarshal(jsonBytes, &clustersConfig); err != nil {
-			return models.ClustersConfig{}, err
-		}
-		return clustersConfig, err
-	}
-	return models.ClustersConfig{}, fmt.Errorf("unsupported clusters config version %s", v)
-}
-
-func (app *Lux) WriteClustersConfigFile(clustersConfig *models.ClustersConfig) error {
-	clustersConfigPath := app.GetClustersConfigPath()
-	if err := os.MkdirAll(filepath.Dir(clustersConfigPath), constants.DefaultPerms755); err != nil {
-		return err
-	}
-
-	clustersConfig.Version = constants.ClustersConfigVersion
-	clustersConfigBytes, err := json.MarshalIndent(clustersConfig, "", "    ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(clustersConfigPath, clustersConfigBytes, constants.WriteReadReadPerms)
-}
-
-func (*Lux) GetSSHCertFilePath(certName string) (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(homeDir, ".ssh", certName), nil
-}
-
-func (app *Lux) CheckCertInSSHDir(certName string) (bool, error) {
-	certPath, err := app.GetSSHCertFilePath(certName)
-	if err != nil {
-		return false, err
-	}
-	_, err = os.Stat(certPath)
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func (app *Lux) GetAnsibleInventoryDirPath(clusterName string) string {
-	return filepath.Join(app.GetNodesDir(), constants.AnsibleInventoryDir, clusterName)
 }

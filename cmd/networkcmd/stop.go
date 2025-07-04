@@ -1,17 +1,15 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package networkcmd
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/netrunner/local"
-	"github.com/luxdefi/netrunner/server"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/local"
+	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -37,13 +35,9 @@ default snapshot with network start.`,
 }
 
 func StopNetwork(*cobra.Command, []string) error {
-	if err := saveNetwork(); errors.Is(err, binutils.ErrGRPCTimeout) {
-		// no server to kill
-		return nil
-	}
+	err := saveNetwork()
 
-	var err error
-	if err = binutils.KillgRPCServerProcess(app); err != nil {
+	if err := binutils.KillgRPCServerProcess(app); err != nil {
 		app.Log.Warn("failed killing server process", zap.Error(err))
 		fmt.Println(err)
 	} else {
@@ -54,16 +48,12 @@ func StopNetwork(*cobra.Command, []string) error {
 }
 
 func saveNetwork() error {
-	cli, err := binutils.NewGRPCClient(
-		binutils.WithAvoidRPCVersionCheck(true),
-		binutils.WithDialTimeout(constants.FastGRPCDialTimeout),
-	)
+	cli, err := binutils.NewGRPCClient(binutils.WithAvoidRPCVersionCheck(true))
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := utils.GetANRContext()
-	defer cancel()
+	ctx := binutils.GetAsyncContext()
 
 	_, err = cli.RemoveSnapshot(ctx, snapshotName)
 	if err != nil {

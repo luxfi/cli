@@ -5,14 +5,14 @@ package mocks
 import (
 	big "math/big"
 
-	ids "github.com/luxdefi/node/ids"
+	ids "github.com/luxfi/node/ids"
 	common "github.com/ethereum/go-ethereum/common"
 
 	mock "github.com/stretchr/testify/mock"
 
-	models "github.com/luxdefi/cli/pkg/models"
+	models "github.com/luxfi/cli/pkg/models"
 
-	prompts "github.com/luxdefi/cli/pkg/prompts"
+	prompts "github.com/luxfi/cli/pkg/prompts"
 
 	time "time"
 
@@ -74,6 +74,30 @@ func (_m *Prompter) CaptureDate(promptStr string) (time.Time, error) {
 	return r0, r1
 }
 
+// CaptureDuration provides a mock function with given fields: promptStr
+func (_m *Prompter) CaptureDuration(promptStr string) (time.Duration, error) {
+	ret := _m.Called(promptStr)
+
+	var r0 time.Duration
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (time.Duration, error)); ok {
+		return rf(promptStr)
+	}
+	if rf, ok := ret.Get(0).(func(string) time.Duration); ok {
+		r0 = rf(promptStr)
+	} else {
+		r0 = ret.Get(0).(time.Duration)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(promptStr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CaptureEmail provides a mock function with given fields: promptStr
 func (_m *Prompter) CaptureEmail(promptStr string) (string, error) {
 	ret := _m.Called(promptStr)
@@ -111,54 +135,6 @@ func (_m *Prompter) CaptureExistingFilepath(promptStr string) (string, error) {
 		r0 = rf(promptStr)
 	} else {
 		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(promptStr)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureFloat provides a mock function with given fields: promptStr, validator
-func (_m *Prompter) CaptureFloat(promptStr string, validator func(float64) error) (float64, error) {
-	ret := _m.Called(promptStr, validator)
-
-	var r0 float64
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, func(float64) error) (float64, error)); ok {
-		return rf(promptStr, validator)
-	}
-	if rf, ok := ret.Get(0).(func(string, func(float64) error) float64); ok {
-		r0 = rf(promptStr, validator)
-	} else {
-		r0 = ret.Get(0).(float64)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, func(float64) error) error); ok {
-		r1 = rf(promptStr, validator)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureFujiDuration provides a mock function with given fields: promptStr
-func (_m *Prompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
-	ret := _m.Called(promptStr)
-
-	var r0 time.Duration
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (time.Duration, error)); ok {
-		return rf(promptStr)
-	}
-	if rf, ok := ret.Get(0).(func(string) time.Duration); ok {
-		r0 = rf(promptStr)
-	} else {
-		r0 = ret.Get(0).(time.Duration)
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
@@ -270,30 +246,6 @@ func (_m *Prompter) CaptureIndex(promptStr string, options []interface{}) (int, 
 	return r0, r1
 }
 
-// CaptureInt provides a mock function with given fields: promptStr
-func (_m *Prompter) CaptureInt(promptStr string) (int, error) {
-	ret := _m.Called(promptStr)
-
-	var r0 int
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (int, error)); ok {
-		return rf(promptStr)
-	}
-	if rf, ok := ret.Get(0).(func(string) int); ok {
-		r0 = rf(promptStr)
-	} else {
-		r0 = ret.Get(0).(int)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(promptStr)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // CaptureList provides a mock function with given fields: promptStr, options
 func (_m *Prompter) CaptureList(promptStr string, options []string) (string, error) {
 	ret := _m.Called(promptStr, options)
@@ -311,30 +263,6 @@ func (_m *Prompter) CaptureList(promptStr string, options []string) (string, err
 
 	if rf, ok := ret.Get(1).(func(string, []string) error); ok {
 		r1 = rf(promptStr, options)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureMainnetDuration provides a mock function with given fields: promptStr
-func (_m *Prompter) CaptureMainnetDuration(promptStr string) (time.Duration, error) {
-	ret := _m.Called(promptStr)
-
-	var r0 time.Duration
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (time.Duration, error)); ok {
-		return rf(promptStr)
-	}
-	if rf, ok := ret.Get(0).(func(string) time.Duration); ok {
-		r0 = rf(promptStr)
-	} else {
-		r0 = ret.Get(0).(time.Duration)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(promptStr)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -490,54 +418,6 @@ func (_m *Prompter) CapturePositiveInt(promptStr string, comparators []prompts.C
 	return r0, r1
 }
 
-// CaptureRepoBranch provides a mock function with given fields: promptStr, repo
-func (_m *Prompter) CaptureRepoBranch(promptStr string, repo string) (string, error) {
-	ret := _m.Called(promptStr, repo)
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (string, error)); ok {
-		return rf(promptStr, repo)
-	}
-	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(promptStr, repo)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(promptStr, repo)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureRepoFile provides a mock function with given fields: promptStr, repo, branch
-func (_m *Prompter) CaptureRepoFile(promptStr string, repo string, branch string) (string, error) {
-	ret := _m.Called(promptStr, repo, branch)
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string) (string, error)); ok {
-		return rf(promptStr, repo, branch)
-	}
-	if rf, ok := ret.Get(0).(func(string, string, string) string); ok {
-		r0 = rf(promptStr, repo, branch)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(promptStr, repo, branch)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // CaptureString provides a mock function with given fields: promptStr
 func (_m *Prompter) CaptureString(promptStr string) (string, error) {
 	ret := _m.Called(promptStr)
@@ -575,54 +455,6 @@ func (_m *Prompter) CaptureStringAllowEmpty(promptStr string) (string, error) {
 		r0 = rf(promptStr)
 	} else {
 		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(promptStr)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureURL provides a mock function with given fields: promptStr
-func (_m *Prompter) CaptureURL(promptStr string) (string, error) {
-	ret := _m.Called(promptStr)
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
-		return rf(promptStr)
-	}
-	if rf, ok := ret.Get(0).(func(string) string); ok {
-		r0 = rf(promptStr)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(promptStr)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureUint32 provides a mock function with given fields: promptStr
-func (_m *Prompter) CaptureUint32(promptStr string) (uint32, error) {
-	ret := _m.Called(promptStr)
-
-	var r0 uint32
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (uint32, error)); ok {
-		return rf(promptStr)
-	}
-	if rf, ok := ret.Get(0).(func(string) uint32); ok {
-		r0 = rf(promptStr)
-	} else {
-		r0 = ret.Get(0).(uint32)
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
@@ -675,30 +507,6 @@ func (_m *Prompter) CaptureUint64Compare(promptStr string, comparators []prompts
 
 	if rf, ok := ret.Get(1).(func(string, []prompts.Comparator) error); ok {
 		r1 = rf(promptStr, comparators)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// CaptureValidatedString provides a mock function with given fields: promptStr, validator
-func (_m *Prompter) CaptureValidatedString(promptStr string, validator func(string) error) (string, error) {
-	ret := _m.Called(promptStr, validator)
-
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, func(string) error) (string, error)); ok {
-		return rf(promptStr, validator)
-	}
-	if rf, ok := ret.Get(0).(func(string, func(string) error) string); ok {
-		r0 = rf(promptStr, validator)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	if rf, ok := ret.Get(1).(func(string, func(string) error) error); ok {
-		r1 = rf(promptStr, validator)
 	} else {
 		r1 = ret.Error(1)
 	}

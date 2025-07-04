@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -13,16 +13,16 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/luxdefi/lpm/types"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/version"
+	"github.com/luxfi/apm/types"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/version"
 	"gopkg.in/yaml.v3"
 )
 
@@ -39,7 +39,7 @@ var (
 
 type newPublisherFunc func(string, string, string) subnet.Publisher
 
-// lux subnet publish
+// avalanche subnet publish
 func newPublishCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "publish [subnetName]",
@@ -64,7 +64,7 @@ func newPublishCmd() *cobra.Command {
 }
 
 func publish(_ *cobra.Command, args []string) error {
-	chains, err := ValidateSubnetNameAndGetChains(args)
+	chains, err := validateSubnetNameAndGetChains(args)
 	if err != nil {
 		return err
 	}
@@ -482,7 +482,7 @@ func getInfoForKnownVMs(
 	strVer, repoName, vmBinDir, vmBin string,
 	dl binutils.GithubDownloader,
 ) ([]string, *version.Semantic, string, string, error) {
-	maintrs := []string{constants.LuxDeFiMaintainers}
+	maintrs := []string{constants.AvaLabsMaintainers}
 	binPath := filepath.Join(vmBinDir, repoName+"-"+strVer, vmBin)
 	sha, err := utils.GetSHA256FromDisk(binPath)
 	if err != nil {

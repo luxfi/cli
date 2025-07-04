@@ -1,4 +1,4 @@
-# Lux-CLI
+# Lux CLI
 
 Lux CLI is a command line tool that gives developers access to everything Lux. This release specializes in helping developers develop and test subnets.
 
@@ -13,7 +13,7 @@ The tool has been tested on Linux and Mac. Windows is currently not supported.
 To download a binary for the latest release, run:
 
 ```sh
-curl -sSfL https://raw.githubusercontent.com/luxdefi/cli/main/scripts/install.sh | sh -s
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh -s
 ```
 
 The binary will be installed inside the `~/bin` directory.
@@ -31,7 +31,7 @@ To add it to your path permanently, add an export command to your shell initiali
 To download the binary into a specific directory, run:
 
 ```
-curl -sSfL https://raw.githubusercontent.com/luxdefi/cli/main/scripts/install.sh | sh -s -- -b <relative directory>
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh -s -- -b <relative directory>
 ```
 
 ## Quickstart
@@ -39,20 +39,20 @@ curl -sSfL https://raw.githubusercontent.com/luxdefi/cli/main/scripts/install.sh
 After installing, launch your own custom subnet:
 
 ```bash
-lux subnet create <subnetName>
-lux subnet deploy <subnetName>
+avalanche subnet create <subnetName>
+avalanche subnet deploy <subnetName>
 ```
 
 Shut down your local deployment with:
 
 ```bash
-lux network stop
+avalanche network stop
 ```
 
 Restart your local deployment (from where you left off) with:
 
 ```bash
-lux network start
+avalanche network start
 ```
 
 ## Notable Features
@@ -66,7 +66,7 @@ lux network start
 
 ## Modifying your Subnet Deployment
 
-You can provide a global node config to edit the way your local node nodes perform under the hood. To provide such a config, you need to create an cli config file. By default, a config file is read in from $HOME/.cli/config.json If none exists, no error will occur. To provide a config from a custom location, run any command with the flag `--config <pathToConfig>`.
+You can provide a global node config to edit the way your local node nodes perform under the hood. To provide such a config, you need to create an cli config file. By default, a config file is read in from $HOME/.cli.json. If none exists, no error will occur. To provide a config from a custom location, run any command with the flag `--config <pathToConfig>`.
 
 To specify the global node config, provide it as a body for the `node-config` key. Ex:
 
@@ -96,7 +96,7 @@ You may wish to deploy your subnet on a cloud instance and access it remotely. I
 
 ## Building Locally
 
-To build Lux-CLI, you'll first need to install golang. Follow the instructions here: <https://go.dev/doc/install>.
+To build Lux CLI, you'll first need to install golang. Follow the instructions here: https://go.dev/doc/install.
 
 Once golang is installed, run:
 
@@ -104,7 +104,7 @@ Once golang is installed, run:
 ./scripts/build.sh
 ```
 
-The binary will be called `./bin/lux`.
+The binary will be called `./bin/avalanche`.
 
 ### Docker
 
@@ -136,7 +136,6 @@ Network snapshots are used by the CLI in order to keep track of blockchain state
 They are the main way to persist subnets, blockchains, and blockchain operations, among different executions of the tool.
 
 Three different kinds of snapshots are used:
-
 - The `bootstrap snapshot` is provided as the starting network state. It is never modified by CLI usage.
 Designed for fast deploys. Enables full reset of the blockchain state.
 - The `default snapshot` is the main way to keep track of blockchain state. Used by default in the tools.
@@ -147,7 +146,6 @@ explicitly asked to do so.
 ### Local networks
 
 Usage of local networks:
-
 - The local network will be started in the background only if it is not already running
 - If the network is not running, both `network start` and `subnet deploy` will start it from the `default snapshot`.
 `subnet deploy` will also do the deploy on the started network.
@@ -157,7 +155,6 @@ Usage of local networks:
 ### Default snapshot
 
 How the CLI commands affect the `default snapshot`:
-
 - First call of `network start` or `subnet deploy` will initialize `default snapshot` from the `bootstrap snapshot`
 - Subsequent calls to `subnet deploy` do not change the snapshot, only the running network
 - `network stop` persist the running network into the `default snapshot`
@@ -170,7 +167,6 @@ will recover that state.
 ### Custom snapshots
 
 How the CLI commands affect the `custom snapshots`:
-
 - `network stop` can be given an optional snapshot name. This will then be used instead of the default one to save the state
 - `network start` can be given an optional snapshot name. This will then be used instead of the default one to save the state
 - `subnet deploy` will take a running network if it is available, so there is a need to use `network start` previously to do

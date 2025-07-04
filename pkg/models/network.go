@@ -1,136 +1,67 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package models
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/node/genesis"
-	luxdconstants "github.com/luxdefi/node/utils/constants"
+	"github.com/luxfi/cli/pkg/constants"
+	lux_constants "github.com/luxfi/node/utils/constants"
 )
 
-type NetworkKind int64
+type Network int64
 
 const (
-	Undefined NetworkKind = iota
+	Undefined Network = iota
 	Mainnet
 	Fuji
 	Local
-	Devnet
 )
 
-func (nk NetworkKind) String() string {
-	switch nk {
+func (s Network) String() string {
+	switch s {
 	case Mainnet:
 		return "Mainnet"
 	case Fuji:
 		return "Fuji"
 	case Local:
 		return "Local Network"
-	case Devnet:
-		return "Devnet"
 	}
-	return "invalid network"
+	return "Unknown Network"
 }
 
-type Network struct {
-	Kind     NetworkKind
-	ID       uint32
-	Endpoint string
-}
-
-var (
-	UndefinedNetwork = NewNetwork(Undefined, 0, "")
-	LocalNetwork     = NewNetwork(Local, constants.LocalNetworkID, constants.LocalAPIEndpoint)
-	DevnetNetwork    = NewNetwork(Devnet, constants.DevnetNetworkID, constants.DevnetAPIEndpoint)
-	FujiNetwork      = NewNetwork(Fuji, luxdconstants.FujiID, constants.FujiAPIEndpoint)
-	MainnetNetwork   = NewNetwork(Mainnet, luxdconstants.MainnetID, constants.MainnetAPIEndpoint)
-)
-
-func NewNetwork(kind NetworkKind, id uint32, endpoint string) Network {
-	return Network{
-		Kind:     kind,
-		ID:       id,
-		Endpoint: endpoint,
+func (s Network) NetworkID() (uint32, error) {
+	switch s {
+	case Mainnet:
+		return lux_constants.MainnetID, nil
+	case Fuji:
+		return lux_constants.FujiID, nil
+	case Local:
+		return constants.LocalNetworkID, nil
 	}
-}
-
-func NewDevnetNetwork(ip string, port int) Network {
-	endpoint := fmt.Sprintf("http://%s:%d", ip, port)
-	return NewNetwork(Devnet, constants.DevnetNetworkID, endpoint)
+	return 0, fmt.Errorf("unsupported network")
 }
 
 func NetworkFromString(s string) Network {
 	switch s {
 	case Mainnet.String():
-		return MainnetNetwork
+		return Mainnet
 	case Fuji.String():
-		return FujiNetwork
+		return Fuji
 	case Local.String():
-		return LocalNetwork
-	case Devnet.String():
-		return DevnetNetwork
+		return Local
 	}
-	return UndefinedNetwork
+	return Undefined
 }
 
 func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
-	case luxdconstants.MainnetID:
-		return MainnetNetwork
-	case luxdconstants.FujiID:
-		return FujiNetwork
+	case lux_constants.MainnetID:
+		return Mainnet
+	case lux_constants.FujiID:
+		return Fuji
 	case constants.LocalNetworkID:
-		return LocalNetwork
-	case constants.DevnetNetworkID:
-		return DevnetNetwork
+		return Local
 	}
-	return UndefinedNetwork
-}
-
-func (n Network) Name() string {
-	return n.Kind.String()
-}
-
-func (n Network) CChainEndpoint() string {
-	return fmt.Sprintf("%s/ext/bc/%s/rpc", n.Endpoint, "C")
-}
-
-func (n Network) NetworkIDFlagValue() string {
-	switch n.Kind {
-	case Local:
-		return fmt.Sprintf("network-%d", n.ID)
-	case Devnet:
-		return fmt.Sprintf("network-%d", n.ID)
-	case Fuji:
-		return "fuji"
-	case Mainnet:
-		return "mainnet"
-	}
-	return "invalid-network"
-}
-
-func (n Network) GenesisParams() *genesis.Params {
-	switch n.Kind {
-	case Local:
-		return &genesis.LocalParams
-	case Devnet:
-		return &genesis.LocalParams
-	case Fuji:
-		return &genesis.FujiParams
-	case Mainnet:
-		return &genesis.MainnetParams
-	}
-	return nil
-}
-
-func (n *Network) HandlePublicNetworkSimulation() {
-	// used in E2E to simulate public network execution paths on a local network
-	if os.Getenv(constants.SimulatePublicNetwork) != "" {
-		n.Kind = Local
-		n.ID = constants.LocalNetworkID
-		n.Endpoint = constants.LocalAPIEndpoint
-	}
+	return Undefined
 }

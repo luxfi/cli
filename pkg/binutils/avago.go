@@ -1,26 +1,26 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
 
 import (
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
 )
 
-func SetupLuxd(app *application.Lux, luxdVersion string) (string, error) {
-	binDir := app.GetLuxdBinDir()
+func SetupLuxgo(app *application.Lux, luxVersion string) (string, error) {
+	binDir := app.GetLuxgoBinDir()
 
 	installer := NewInstaller()
-	downloader := NewLuxdDownloader()
+	downloader := NewLuxDownloader()
 	return InstallBinary(
 		app,
-		luxdVersion,
+		luxVersion,
 		binDir,
 		binDir,
 		nodeBinPrefix,
-		constants.LuxDeFiOrg,
-		constants.LuxdRepoName,
+		constants.AvaLabsOrg,
+		constants.LuxGoRepoName,
 		downloader,
 		installer,
 	)

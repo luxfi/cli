@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -8,10 +8,10 @@ import (
 	"io"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package binutils
 
@@ -12,17 +12,15 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
-	"time"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/netrunner/server"
-	anrutils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/client"
+	"github.com/luxfi/netrunner/server"
+	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/utils/perms"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"
@@ -47,7 +45,6 @@ func NewProcessChecker() ProcessChecker {
 
 type GRPCClientOp struct {
 	avoidRPCVersionCheck bool
-	dialTimeout          time.Duration
 }
 
 type GRPCClientOpOption func(*GRPCClientOp)
@@ -64,17 +61,9 @@ func WithAvoidRPCVersionCheck(avoidRPCVersionCheck bool) GRPCClientOpOption {
 	}
 }
 
-func WithDialTimeout(dialTimeout time.Duration) GRPCClientOpOption {
-	return func(op *GRPCClientOp) {
-		op.dialTimeout = dialTimeout
-	}
-}
-
 // NewGRPCClient hides away the details (params) of creating a gRPC server connection
 func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
-	op := GRPCClientOp{
-		dialTimeout: gRPCDialTimeout,
-	}
+	op := GRPCClientOp{}
 	op.applyOpts(opts)
 	logLevel, err := logging.ToLevel(gRPCClientLogLevel)
 	if err != nil {
@@ -90,14 +79,13 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	}
 	client, err := client.New(client.Config{
 		Endpoint:    gRPCServerEndpoint,
-		DialTimeout: op.dialTimeout,
+		DialTimeout: gRPCDialTimeout,
 	}, log)
 	if errors.Is(err, context.DeadlineExceeded) {
 		err = ErrGRPCTimeout
 	}
 	if client != nil && !op.avoidRPCVersionCheck {
-		ctx, cancel := utils.GetAPIContext()
-		defer cancel()
+		ctx := GetAsyncContext()
 		rpcVersion, err := client.RPCVersion(ctx)
 		if err != nil {
 			return nil, err
@@ -126,12 +114,11 @@ func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 		return nil, err
 	}
 	return server.New(server.Config{
-		Port:                gRPCServerPort,
-		GwPort:              gRPCGatewayPort,
+		Port:                gRPCServerEndpoint,
+		GwPort:              gRPCGatewayEndpoint,
 		DialTimeout:         gRPCDialTimeout,
 		SnapshotsDir:        snapshotsDir,
 		RedirectNodesOutput: false,
-		LogLevel:            logging.Info,
 	}, log)
 }
 
@@ -207,7 +194,7 @@ func StartServerProcess(app *application.Lux) error {
 	cmd := exec.Command(thisBin, args...)
 
 	outputDirPrefix := path.Join(app.GetRunDir(), "server")
-	outputDir, err := anrutils.MkDirWithTimestamp(outputDirPrefix)
+	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)
 	if err != nil {
 		return err
 	}
@@ -242,17 +229,26 @@ func StartServerProcess(app *application.Lux) error {
 	return nil
 }
 
+// GetAsyncContext returns a timeout context with the cancel function suppressed
+func GetAsyncContext() context.Context {
+	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+	// don't call since "start" is async
+	// and the top-level context here "ctx" is passed
+	// to all underlying function calls
+	// just set the timeout to halt "Start" async ops
+	// when the deadline is reached
+	_ = cancel
+
+	return ctx
+}
+
 func KillgRPCServerProcess(app *application.Lux) error {
-	cli, err := NewGRPCClient(
-		WithAvoidRPCVersionCheck(true),
-		WithDialTimeout(constants.FastGRPCDialTimeout),
-	)
+	cli, err := NewGRPCClient(WithAvoidRPCVersionCheck(true))
 	if err != nil {
 		return err
 	}
 	defer cli.Close()
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
+	ctx := GetAsyncContext()
 	_, err = cli.Stop(ctx)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {

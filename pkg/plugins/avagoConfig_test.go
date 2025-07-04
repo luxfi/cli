@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -10,12 +10,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/testutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/internal/testutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
 
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,10 +22,9 @@ const (
 	subnetName1 = "TEST_subnet"
 	subnetName2 = "TEST_copied_subnet"
 
-	subnetID = "testSubNet"
+	subnetID  = "testSubNet"
+	networkID = "67443"
 )
-
-var network = models.Network{ID: 67443}
 
 // testing backward compatibility
 func TestEditConfigFileWithOldPattern(t *testing.T) {
@@ -54,20 +52,20 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, network, configPath, true, "")
+	err = EditConfigFile(ap, subnetID, networkID, configPath, true)
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath)
 	require.NoError(err)
 
-	var luxdConfig map[string]interface{}
-	err = json.Unmarshal(fileBytes, &luxdConfig)
+	var luxConfig map[string]interface{}
+	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", luxdConfig["track-subnets"])
+	require.Equal("subNetId000,testSubNet", luxConfig["track-subnets"])
 
 	// ensure that the old setting has been deleted
-	require.Equal(nil, luxdConfig["whitelisted-subnets"])
+	require.Equal(nil, luxConfig["whitelisted-subnets"])
 }
 
 // testing backward compatibility
@@ -96,20 +94,20 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, network, configPath, true, "")
+	err = EditConfigFile(ap, subnetID, networkID, configPath, true)
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath)
 	require.NoError(err)
 
-	var luxdConfig map[string]interface{}
-	err = json.Unmarshal(fileBytes, &luxdConfig)
+	var luxConfig map[string]interface{}
+	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", luxdConfig["track-subnets"])
+	require.Equal("subNetId000,testSubNet", luxConfig["track-subnets"])
 
 	// ensure that the old setting wont be applied at all
-	require.Equal(nil, luxdConfig["whitelisted-subnets"])
+	require.Equal(nil, luxConfig["whitelisted-subnets"])
 }
 
 func TestEditConfigFileWithNoSettings(t *testing.T) {
@@ -137,18 +135,18 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, network, configPath, true, "")
+	err = EditConfigFile(ap, subnetID, networkID, configPath, true)
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath)
 	require.NoError(err)
 
-	var luxdConfig map[string]interface{}
-	err = json.Unmarshal(fileBytes, &luxdConfig)
+	var luxConfig map[string]interface{}
+	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("testSubNet", luxdConfig["track-subnets"])
+	require.Equal("testSubNet", luxConfig["track-subnets"])
 
 	// ensure that the old setting wont be applied at all
-	require.Equal(nil, luxdConfig["whitelisted-subnets"])
+	require.Equal(nil, luxConfig["whitelisted-subnets"])
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package elasticsubnet
@@ -8,11 +8,11 @@ import (
 	"math"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/vms/platformvm/reward"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/vms/platformvm/reward"
 )
 
 // default elastic config parameter values are from

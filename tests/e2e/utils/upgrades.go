@@ -1,22 +1,23 @@
-// Copyright (C) 2023, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2023, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/subnet-evm/params"
-	"github.com/luxdefi/subnet-evm/rpc"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/subnet-evm/rpc"
 	"github.com/onsi/gomega"
 )
 
 const chainConfigAPI = "eth_getChainConfig"
 
 func CheckUpgradeIsDeployed(rpcEndpoint string, deployedUpgrades params.UpgradeConfig) error {
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
 	rpcClient, err := rpc.DialContext(ctx, rpcEndpoint)

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnet
 
@@ -8,44 +8,41 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxdefi/node/vms/platformvm/signer"
+	"github.com/luxfi/node/vms/components/lux"
+	"github.com/luxfi/node/vms/components/verify"
 
-	"github.com/luxdefi/node/vms/components/lux"
-	"github.com/luxdefi/node/vms/components/verify"
-
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/keychain"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/txutils"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	anrutils "github.com/luxdefi/netrunner/utils"
-	"github.com/luxdefi/node/ids"
-	luxdconstants "github.com/luxdefi/node/utils/constants"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/set"
-	avmtxs "github.com/luxdefi/node/vms/avm/txs"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/node/vms/secp256k1fx"
-	"github.com/luxdefi/node/wallet/subnet/primary"
-	"github.com/luxdefi/node/wallet/subnet/primary/common"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/txutils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/wallet/subnet/primary"
+	"github.com/luxfi/node/wallet/subnet/primary/common"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")
 
 type PublicDeployer struct {
 	LocalDeployer
-	kc      *keychain.Keychain
-	network models.Network
-	app     *application.Lux
+	usingLedger bool
+	kc          keychain.Keychain
+	network     models.Network
+	app         *application.Lux
 }
 
-func NewPublicDeployer(app *application.Lux, kc *keychain.Keychain, network models.Network) *PublicDeployer {
+func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keychain, network models.Network) *PublicDeployer {
 	return &PublicDeployer{
 		LocalDeployer: *NewLocalDeployer(app, "", ""),
 		app:           app,
+		usingLedger:   usingLedger,
 		kc:            kc,
 		network:       network,
 	}
@@ -83,7 +80,9 @@ func (d *PublicDeployer) AddValidator(
 		},
 		Subnet: subnetID,
 	}
-	showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "SubnetValidator transaction")
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign SubnetValidator transaction on the ledger device *** ")
+	}
 
 	tx, err := d.createAddSubnetValidatorTx(subnetAuthKeys, validator, wallet)
 	if err != nil {
@@ -121,40 +120,17 @@ func (d *PublicDeployer) CreateAssetTx(
 		return ids.Empty, err
 	}
 
-	showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "Create Asset transaction hash")
-
-	unsignedTx, err := wallet.X().Builder().NewCreateAssetTx(
-		tokenName,
-		tokenSymbol,
-		denomination,
-		initialState,
-	)
-	if err != nil {
-		return ids.Empty, fmt.Errorf("error building tx: %w", err)
-	}
-	tx := avmtxs.Tx{Unsigned: unsignedTx}
-	if err := wallet.X().Signer().Sign(context.Background(), &tx); err != nil {
-		return ids.Empty, fmt.Errorf("error signing tx: %w", err)
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign Create Asset Transaction hash on the ledger device *** ")
 	}
 
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.X().IssueTx(
-		&tx,
-		common.WithContext(ctx),
-	)
+	id, err := wallet.X().IssueCreateAssetTx(tokenName, tokenSymbol, denomination, initialState)
 	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
 		return ids.Empty, err
 	}
-
-	ux.Logger.PrintToUser("Create Asset Transaction successful, transaction ID: %s", tx.ID())
+	ux.Logger.PrintToUser("Create Asset Transaction successful, transaction ID: %s", id)
 	ux.Logger.PrintToUser("Now exporting asset to P-Chain ...")
-	return tx.ID(), err
+	return id, err
 }
 
 func (d *PublicDeployer) ExportToPChainTx(
@@ -167,20 +143,28 @@ func (d *PublicDeployer) ExportToPChainTx(
 	if err != nil {
 		return ids.Empty, err
 	}
-	txID, err := IssueXToPExportTx(
-		wallet,
-		d.kc.UsesLedger,
-		d.kc.HasOnlyOneKey(),
-		subnetAssetID,
-		assetAmount,
-		owner,
-	)
-	if err != nil {
-		return txID, err
+
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign X -> P Chain Export Transaction hash on the ledger device *** ")
 	}
-	ux.Logger.PrintToUser("Export to P-Chain Transaction successful, transaction ID: %s", txID)
-	ux.Logger.PrintToUser("Now importing asset from X-Chain ...")
-	return txID, nil
+
+	id, err := wallet.X().IssueExportTx(ids.Empty,
+		[]*lux.TransferableOutput{
+			{
+				Asset: lux.Asset{
+					ID: subnetAssetID,
+				},
+				Out: &secp256k1fx.TransferOutput{
+					Amt:          assetAmount,
+					OutputOwners: *owner,
+				},
+			},
+		})
+	if err == nil {
+		ux.Logger.PrintToUser("Export to P-Chain Transaction successful, transaction ID: %s", id)
+		ux.Logger.PrintToUser("Now importing asset from X-Chain ...")
+	}
+	return id, err
 }
 
 func (d *PublicDeployer) ImportFromXChain(
@@ -191,18 +175,18 @@ func (d *PublicDeployer) ImportFromXChain(
 	if err != nil {
 		return ids.Empty, err
 	}
-	txID, err := IssuePFromXImportTx(
-		wallet,
-		d.kc.UsesLedger,
-		d.kc.HasOnlyOneKey(),
-		owner,
-	)
-	if err != nil {
-		return txID, err
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign X -> P Chain Import Transaction hash on the ledger device *** ")
 	}
-	ux.Logger.PrintToUser("Import from X Chain Transaction successful, transaction ID: %s", txID)
-	ux.Logger.PrintToUser("Now transforming subnet into elastic subnet ...")
-	return txID, nil
+	xWallet := wallet.X()
+	xChainID := xWallet.BlockchainID()
+
+	id, err := wallet.P().IssueImportTx(xChainID, owner)
+	if err == nil {
+		ux.Logger.PrintToUser("Import from X Chain Transaction successful, transaction ID: %s", id)
+		ux.Logger.PrintToUser("Now transforming subnet into elastic subnet ...")
+	}
+	return id, err
 }
 
 func (d *PublicDeployer) TransformSubnetTx(
@@ -221,7 +205,9 @@ func (d *PublicDeployer) TransformSubnetTx(
 		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
 	}
 
-	showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "Transform Subnet hash")
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign Transform Subnet hash on the ledger device *** ")
+	}
 
 	tx, err := d.createTransformSubnetTX(subnetAuthKeys, elasticSubnetConfig, wallet, subnetAssetID)
 	if err != nil {
@@ -269,7 +255,9 @@ func (d *PublicDeployer) RemoveValidator(
 		return false, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
 	}
 
-	showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "tx hash")
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign tx hash on the ledger device *** ")
+	}
 
 	tx, err := d.createRemoveValidatorTX(subnetAuthKeys, nodeID, subnetID, wallet)
 	if err != nil {
@@ -293,55 +281,6 @@ func (d *PublicDeployer) RemoveValidator(
 
 	ux.Logger.PrintToUser("Partial tx created")
 	return false, tx, remainingSubnetAuthKeys, nil
-}
-
-func (d *PublicDeployer) AddPermissionlessValidator(
-	subnetID ids.ID,
-	subnetAssetID ids.ID,
-	nodeID ids.NodeID,
-	stakeAmount uint64,
-	startTime uint64,
-	endTime uint64,
-	recipientAddr ids.ShortID,
-	delegationFee uint32,
-	popBytes []byte,
-	proofOfPossession *signer.ProofOfPossession,
-) (ids.ID, error) {
-	wallet, err := d.loadWallet(subnetID)
-	if err != nil {
-		return ids.Empty, err
-	}
-	if subnetAssetID == ids.Empty {
-		subnetAssetID = wallet.P().LUXAssetID()
-	}
-	// popBytes is a marshalled json object containing publicKey and proofOfPossession of the node's BLS info
-	txID, err := d.issueAddPermissionlessValidatorTX(recipientAddr, stakeAmount, subnetID, nodeID, subnetAssetID, startTime, endTime, wallet, delegationFee, popBytes, proofOfPossession)
-	if err != nil {
-		return ids.Empty, err
-	}
-	ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", txID)
-	return txID, nil
-}
-
-func (d *PublicDeployer) AddPermissionlessDelegator(
-	subnetID ids.ID,
-	subnetAssetID ids.ID,
-	nodeID ids.NodeID,
-	stakeAmount uint64,
-	startTime uint64,
-	endTime uint64,
-	recipientAddr ids.ShortID,
-) (ids.ID, error) {
-	wallet, err := d.loadWallet(subnetID)
-	if err != nil {
-		return ids.Empty, err
-	}
-	txID, err := d.issueAddPermissionlessDelegatorTX(recipientAddr, stakeAmount, subnetID, nodeID, subnetAssetID, startTime, endTime, wallet)
-	if err != nil {
-		return ids.Empty, err
-	}
-	ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", txID)
-	return txID, nil
 }
 
 // - creates a subnet for [chain] using the given [controlKeys] and [threshold] as subnet authentication parameters
@@ -382,7 +321,7 @@ func (d *PublicDeployer) DeployBlockchain(
 		return false, ids.Empty, nil, nil, err
 	}
 
-	vmID, err := anrutils.VMID(chain)
+	vmID, err := utils.VMID(chain)
 	if err != nil {
 		return false, ids.Empty, nil, nil, fmt.Errorf("failed to create VM ID from %s: %w", chain, err)
 	}
@@ -392,7 +331,9 @@ func (d *PublicDeployer) DeployBlockchain(
 		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
 	}
 
-	showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "CreateChain transaction")
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
+	}
 
 	tx, err := d.createBlockchainTx(subnetAuthKeys, chain, vmID, subnetID, genesis, wallet)
 	if err != nil {
@@ -423,17 +364,7 @@ func (d *PublicDeployer) Commit(
 	if err != nil {
 		return ids.Empty, err
 	}
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.P().IssueTx(tx, common.WithContext(ctx))
-	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
-	}
-	return tx.ID(), err
+	return wallet.P().IssueTx(tx)
 }
 
 func (d *PublicDeployer) Sign(
@@ -452,12 +383,12 @@ func (d *PublicDeployer) Sign(
 	if ok := d.checkWalletHasSubnetAuthAddresses(subnetAuthKeys); !ok {
 		return ErrNoSubnetAuthKeysInWallet
 	}
-	if d.kc.UsesLedger {
+	if d.usingLedger {
 		txName := txutils.GetLedgerDisplayName(tx)
 		if len(txName) == 0 {
-			showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "tx hash")
+			ux.Logger.PrintToUser("*** Please sign tx hash on the ledger device *** ")
 		} else {
-			showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), fmt.Sprintf("%s transaction", txName))
+			ux.Logger.PrintToUser("*** Please sign %s transaction on the ledger device *** ", txName)
 		}
 	}
 	if err := d.signTx(tx, wallet); err != nil {
@@ -468,17 +399,21 @@ func (d *PublicDeployer) Sign(
 
 func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error) {
 	ctx := context.Background()
-	// filter out ids.Empty txs
-	filteredTxs := utils.Filter(preloadTxs, func(e ids.ID) bool { return e != ids.Empty })
-	wallet, err := primary.MakeWallet(
-		ctx,
-		&primary.WalletConfig{
-			URI:              d.network.Endpoint,
-			LUXKeychain:     d.kc.Keychain,
-			EthKeychain:      secp256k1fx.NewKeychain(),
-			PChainTxsToFetch: set.Of(filteredTxs...),
-		},
-	)
+
+	var api string
+	switch d.network {
+	case models.Fuji:
+		api = constants.FujiAPIEndpoint
+	case models.Mainnet:
+		api = constants.MainnetAPIEndpoint
+	case models.Local:
+		// used for E2E testing of public related paths
+		api = constants.LocalAPIEndpoint
+	default:
+		return nil, fmt.Errorf("unsupported public network")
+	}
+
+	wallet, err := primary.NewWalletWithTxs(ctx, api, d.kc, preloadTxs...)
 	if err != nil {
 		return nil, err
 	}
@@ -487,17 +422,16 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 
 func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []common.Option {
 	options := []common.Option{}
-	walletAddrs := d.kc.Addresses().List()
-	changeAddr := walletAddrs[0]
+	walletAddr := d.kc.Addresses().List()[0]
 	// addrs to use for signing
 	customAddrsSet := set.Set[ids.ShortID]{}
-	customAddrsSet.Add(walletAddrs...)
+	customAddrsSet.Add(walletAddr)
 	customAddrsSet.Add(subnetAuthKeys...)
 	options = append(options, common.WithCustomAddresses(customAddrsSet))
 	// set change to go to wallet addr (instead of any other subnet auth key)
 	changeOwner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     []ids.ShortID{changeAddr},
+		Addrs:     []ids.ShortID{walletAddr},
 	}
 	options = append(options, common.WithChangeOwner(changeOwner))
 	return options
@@ -523,12 +457,12 @@ func (d *PublicDeployer) createBlockchainTx(
 		options...,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error building tx: %w", err)
+		return nil, err
 	}
 	tx := txs.Tx{Unsigned: unsignedTx}
 	// sign with current wallet
 	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return nil, fmt.Errorf("error signing tx: %w", err)
+		return nil, err
 	}
 	return &tx, nil
 }
@@ -542,12 +476,12 @@ func (d *PublicDeployer) createAddSubnetValidatorTx(
 	// create tx
 	unsignedTx, err := wallet.P().Builder().NewAddSubnetValidatorTx(validator, options...)
 	if err != nil {
-		return nil, fmt.Errorf("error building tx: %w", err)
+		return nil, err
 	}
 	tx := txs.Tx{Unsigned: unsignedTx}
 	// sign with current wallet
 	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return nil, fmt.Errorf("error signing tx: %w", err)
+		return nil, err
 	}
 	return &tx, nil
 }
@@ -562,12 +496,12 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 	// create tx
 	unsignedTx, err := wallet.P().Builder().NewRemoveSubnetValidatorTx(nodeID, subnetID, options...)
 	if err != nil {
-		return nil, fmt.Errorf("error building tx: %w", err)
+		return nil, err
 	}
 	tx := txs.Tx{Unsigned: unsignedTx}
 	// sign with current wallet
 	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return nil, fmt.Errorf("error signing tx: %w", err)
+		return nil, err
 	}
 	return &tx, nil
 }
@@ -586,160 +520,14 @@ func (d *PublicDeployer) createTransformSubnetTX(
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
 		elasticSubnetConfig.MinDelegatorStake, elasticSubnetConfig.MaxValidatorWeightFactor, elasticSubnetConfig.UptimeRequirement, options...)
 	if err != nil {
-		return nil, fmt.Errorf("error building tx: %w", err)
+		return nil, err
 	}
 	tx := txs.Tx{Unsigned: unsignedTx}
 	// sign with current wallet
 	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return nil, fmt.Errorf("error signing tx: %w", err)
+		return nil, err
 	}
 	return &tx, nil
-}
-
-// issueAddPermissionlessValidatorTX calls addPermissionlessValidatorTx API on P-Chain
-// if subnetID is empty, node nodeID is going to be added as a validator on Primary Network
-// if popBytes is empty, that means that we are using BLS proof generated from signer.key file
-func (d *PublicDeployer) issueAddPermissionlessValidatorTX(
-	recipientAddr ids.ShortID,
-	stakeAmount uint64,
-	subnetID ids.ID,
-	nodeID ids.NodeID,
-	assetID ids.ID,
-	startTime uint64,
-	endTime uint64,
-	wallet primary.Wallet,
-	delegationFee uint32,
-	popBytes []byte,
-	blsProof *signer.ProofOfPossession,
-) (ids.ID, error) {
-	options := d.getMultisigTxOptions([]ids.ShortID{})
-	owner := &secp256k1fx.OutputOwners{
-		Threshold: 1,
-		Addrs: []ids.ShortID{
-			recipientAddr,
-		},
-	}
-	var proofOfPossession signer.Signer
-	if subnetID == ids.Empty {
-		if popBytes != nil {
-			pop := &signer.ProofOfPossession{}
-			err := pop.UnmarshalJSON(popBytes)
-			if err != nil {
-				return ids.Empty, err
-			}
-			proofOfPossession = pop
-		} else {
-			proofOfPossession = blsProof
-		}
-	} else {
-		proofOfPossession = &signer.Empty{}
-	}
-
-	if d.kc.UsesLedger {
-		showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "Add Permissionless Validator hash")
-	}
-	unsignedTx, err := wallet.P().Builder().NewAddPermissionlessValidatorTx(
-		&txs.SubnetValidator{
-			Validator: txs.Validator{
-				NodeID: nodeID,
-				Start:  startTime,
-				End:    endTime,
-				Wght:   stakeAmount,
-			},
-			Subnet: subnetID,
-		},
-		proofOfPossession,
-		assetID,
-		owner,
-		owner,
-		delegationFee,
-		options...,
-	)
-	if err != nil {
-		return ids.Empty, fmt.Errorf("error building tx: %w", err)
-	}
-	tx := txs.Tx{Unsigned: unsignedTx}
-	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return ids.Empty, fmt.Errorf("error signing tx: %w", err)
-	}
-
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.P().IssueTx(
-		&tx,
-		common.WithContext(ctx),
-	)
-	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
-		return ids.Empty, err
-	}
-
-	return tx.ID(), nil
-}
-
-func (d *PublicDeployer) issueAddPermissionlessDelegatorTX(
-	recipientAddr ids.ShortID,
-	stakeAmount uint64,
-	subnetID ids.ID,
-	nodeID ids.NodeID,
-	assetID ids.ID,
-	startTime uint64,
-	endTime uint64,
-	wallet primary.Wallet,
-) (ids.ID, error) {
-	options := d.getMultisigTxOptions([]ids.ShortID{})
-	owner := &secp256k1fx.OutputOwners{
-		Threshold: 1,
-		Addrs: []ids.ShortID{
-			recipientAddr,
-		},
-	}
-
-	if d.kc.UsesLedger {
-		showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "Add Permissionless Delegator hash")
-	}
-	unsignedTx, err := wallet.P().Builder().NewAddPermissionlessDelegatorTx(
-		&txs.SubnetValidator{
-			Validator: txs.Validator{
-				NodeID: nodeID,
-				Start:  startTime,
-				End:    endTime,
-				Wght:   stakeAmount,
-			},
-			Subnet: subnetID,
-		},
-		assetID,
-		owner,
-		options...,
-	)
-	if err != nil {
-		return ids.Empty, fmt.Errorf("error building tx: %w", err)
-	}
-	tx := txs.Tx{Unsigned: unsignedTx}
-	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return ids.Empty, fmt.Errorf("error signing tx: %w", err)
-	}
-
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.P().IssueTx(
-		&tx,
-		common.WithContext(ctx),
-	)
-	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
-		return ids.Empty, err
-	}
-
-	return tx.ID(), nil
 }
 
 func (*PublicDeployer) signTx(
@@ -747,7 +535,7 @@ func (*PublicDeployer) signTx(
 	wallet primary.Wallet,
 ) error {
 	if err := wallet.P().Signer().Sign(context.Background(), tx); err != nil {
-		return fmt.Errorf("error signing tx: %w", err)
+		return err
 	}
 	return nil
 }
@@ -762,36 +550,11 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 		Threshold: threshold,
 		Locktime:  0,
 	}
-	if d.kc.UsesLedger {
-		showLedgerSignatureMsg(d.kc.UsesLedger, d.kc.HasOnlyOneKey(), "CreateSubnet transaction")
+	opts := []common.Option{}
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
 	}
-	unsignedTx, err := wallet.P().Builder().NewCreateSubnetTx(
-		owners,
-	)
-	if err != nil {
-		return ids.Empty, fmt.Errorf("error building tx: %w", err)
-	}
-	tx := txs.Tx{Unsigned: unsignedTx}
-	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return ids.Empty, fmt.Errorf("error signing tx: %w", err)
-	}
-
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.P().IssueTx(
-		&tx,
-		common.WithContext(ctx),
-	)
-	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
-		return ids.Empty, err
-	}
-
-	return tx.ID(), nil
+	return wallet.P().IssueCreateSubnetTx(owners, opts...)
 }
 
 func (d *PublicDeployer) getSubnetAuthAddressesInWallet(subnetAuth []ids.ShortID) []ids.ShortID {
@@ -814,8 +577,17 @@ func (d *PublicDeployer) checkWalletHasSubnetAuthAddresses(subnetAuth []ids.Shor
 }
 
 func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Network) (bool, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
-	ctx, cancel := utils.GetAPIContext()
+	var apiURL string
+	switch network {
+	case models.Mainnet:
+		apiURL = constants.MainnetAPIEndpoint
+	case models.Fuji:
+		apiURL = constants.FujiAPIEndpoint
+	default:
+		return false, fmt.Errorf("invalid network: %s", network)
+	}
+	pClient := platformvm.NewClient(apiURL)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
 	vals, err := pClient.GetCurrentValidators(ctx, subnetID, []ids.NodeID{nodeID})
@@ -827,8 +599,17 @@ func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Networ
 }
 
 func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platformvm.ClientPermissionlessValidator, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
-	ctx, cancel := utils.GetAPIContext()
+	var apiURL string
+	switch network {
+	case models.Mainnet:
+		apiURL = constants.MainnetAPIEndpoint
+	case models.Fuji:
+		apiURL = constants.FujiAPIEndpoint
+	default:
+		return nil, fmt.Errorf("invalid network: %s", network)
+	}
+	pClient := platformvm.NewClient(apiURL)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
 	vals, err := pClient.GetCurrentValidators(ctx, subnetID, []ids.NodeID{})
@@ -837,100 +618,4 @@ func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platf
 	}
 
 	return vals, nil
-}
-
-func IssueXToPExportTx(
-	wallet primary.Wallet,
-	usingLedger bool,
-	hasOnlyOneKey bool,
-	assetID ids.ID,
-	amount uint64,
-	owner *secp256k1fx.OutputOwners,
-) (ids.ID, error) {
-	showLedgerSignatureMsg(usingLedger, hasOnlyOneKey, "X -> P Chain Export Transaction")
-	unsignedTx, err := wallet.X().Builder().NewExportTx(
-		luxdconstants.PlatformChainID,
-		[]*lux.TransferableOutput{
-			{
-				Asset: lux.Asset{
-					ID: assetID,
-				},
-				Out: &secp256k1fx.TransferOutput{
-					Amt:          amount,
-					OutputOwners: *owner,
-				},
-			},
-		},
-	)
-	if err != nil {
-		return ids.Empty, fmt.Errorf("error building tx: %w", err)
-	}
-	tx := avmtxs.Tx{Unsigned: unsignedTx}
-	if err := wallet.X().Signer().Sign(context.Background(), &tx); err != nil {
-		return ids.Empty, fmt.Errorf("error signing tx: %w", err)
-	}
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.X().IssueTx(
-		&tx,
-		common.WithContext(ctx),
-	)
-	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
-		return tx.ID(), err
-	}
-	return tx.ID(), nil
-}
-
-func IssuePFromXImportTx(
-	wallet primary.Wallet,
-	usingLedger bool,
-	hasOnlyOneKey bool,
-	owner *secp256k1fx.OutputOwners,
-) (ids.ID, error) {
-	showLedgerSignatureMsg(usingLedger, hasOnlyOneKey, "X -> P Chain Import Transaction")
-	unsignedTx, err := wallet.P().Builder().NewImportTx(
-		wallet.X().BlockchainID(),
-		owner,
-	)
-	if err != nil {
-		return ids.Empty, fmt.Errorf("error building tx: %w", err)
-	}
-	tx := txs.Tx{Unsigned: unsignedTx}
-	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return ids.Empty, fmt.Errorf("error signing tx: %w", err)
-	}
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	err = wallet.P().IssueTx(
-		&tx,
-		common.WithContext(ctx),
-	)
-	if err != nil {
-		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
-		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
-		}
-		return tx.ID(), err
-	}
-	return tx.ID(), err
-}
-
-func showLedgerSignatureMsg(
-	usingLedger bool,
-	hasOnlyOneKey bool,
-	toSignDesc string,
-) {
-	multipleTimesMsg := ""
-	if !hasOnlyOneKey {
-		multipleTimesMsg = logging.LightBlue.Wrap("(you may be asked more than once) ")
-	}
-	if usingLedger {
-		ux.Logger.PrintToUser("*** Please sign %s on the ledger device %s***", toSignDesc, multipleTimesMsg)
-	}
 }

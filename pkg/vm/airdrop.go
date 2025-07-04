@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -7,9 +7,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/statemachine"
-	"github.com/luxdefi/subnet-evm/core"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/subnet-evm/core"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -72,11 +72,9 @@ func getAllocation(
 
 		amount = amount.Mul(amount, multiplier)
 
-		account, ok := allocation[addressHex]
-		if !ok {
-			account.Balance = big.NewInt(0)
+		account := core.GenesisAccount{
+			Balance: amount,
 		}
-		account.Balance.Add(account.Balance, amount)
 
 		allocation[addressHex] = account
 

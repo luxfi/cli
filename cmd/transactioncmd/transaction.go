@@ -1,17 +1,17 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package transactioncmd
 
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
 var app *application.Lux
 
-// lux subnet vm
+// avalanche subnet vm
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transaction",

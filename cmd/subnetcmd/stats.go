@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -11,18 +11,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/api/info"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/api"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/api"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
-// lux subnet stats
+// avalanche subnet stats
 func newStatsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "stats [subnetName]",
@@ -39,15 +39,15 @@ func newStatsCmd() *cobra.Command {
 }
 
 func stats(_ *cobra.Command, args []string) error {
-	network := models.UndefinedNetwork
+	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.FujiNetwork
+		network = models.Fuji
 	case deployMainnet:
-		network = models.MainnetNetwork
+		network = models.Mainnet
 	}
 
-	if network.Kind == models.Undefined {
+	if network == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network from which you want to get the statistics (this command only supports public networks)",
 			[]string{models.Fuji.String(), models.Mainnet.String()},
@@ -64,7 +64,7 @@ func stats(_ *cobra.Command, args []string) error {
 		network = models.NetworkFromString(networkStr)
 	}
 
-	chains, err := ValidateSubnetNameAndGetChains(args)
+	chains, err := validateSubnetNameAndGetChains(args)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func stats(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	subnetID := sc.Networks[network.Name()].SubnetID
+	subnetID := sc.Networks[network.String()].SubnetID
 	if subnetID == ids.Empty {
 		return errors.New("no subnetID found for the provided subnet name; has this subnet actually been deployed to this network?")
 	}
@@ -290,8 +290,21 @@ func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
 		}
 	}
 
+	var url string
+	// try public APIs
+	switch network {
+	case models.Fuji:
+		url = constants.FujiAPIEndpoint
+	case models.Mainnet:
+		url = constants.MainnetAPIEndpoint
+	}
+	// unsupported network
+	if url == "" {
+		return nil, nil
+	}
+
 	// create client to public API
-	c = platformvm.NewClient(network.Endpoint)
+	c = platformvm.NewClient(url)
 	// try calling it to make sure it actually worked
 	_, err = c.GetHeight(ctx)
 	if err == nil {

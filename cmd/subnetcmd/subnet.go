@@ -1,18 +1,18 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/cmd/subnetcmd/upgradecmd"
-	"github.com/luxdefi/cli/pkg/application"
+	"github.com/luxfi/cli/cmd/subnetcmd/upgradecmd"
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
 var app *application.Lux
 
-// lux subnet
+// avalanche subnet
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "subnet",
@@ -68,7 +68,5 @@ manage your Subnet configurations and live deployments.`,
 	cmd.AddCommand(newElasticCmd())
 	// subnet validators
 	cmd.AddCommand(newValidatorsCmd())
-	// subnet addPermissionlessDelegator
-	cmd.AddCommand(newAddPermissionlessDelegatorCmd())
 	return cmd
 }

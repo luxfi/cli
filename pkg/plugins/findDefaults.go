@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -9,24 +9,24 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/config"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/config"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/kardianos/osext"
 	"github.com/shirou/gopsutil/process"
 )
 
 var (
 	// env var for node data dir
-	defaultUnexpandedDataDir = "$" + config.LuxdDataDirVar
+	defaultUnexpandedDataDir = "$" + config.LuxGoDataDirVar
 	// expected file name for the config
 	// TODO should other file names be supported? e.g. conf.json, etc.
 	defaultConfigFileName = "config.json"
 	// expected name of the plugins dir
 	defaultPluginDir = "plugins"
 	// default dir where the binary is usually found
-	defaultLuxdBuildDir = filepath.Join("go", "src", "github.com", constants.LuxDeFiOrg, constants.LuxdRepoName, "build")
+	defaultLuxgoBuildDir = filepath.Join("go", "src", "github.com", constants.AvaLabsOrg, constants.LuxGoRepoName, "build")
 )
 
 // This function needs to be called to initialize this package
@@ -49,12 +49,12 @@ func getScanConfigDirs() ([]string, error) {
 	}
 	// TODO: Any other dirs we want to scan?
 	scanConfigDirs = append(scanConfigDirs,
-		filepath.Join("/", "etc", constants.LuxdRepoName),
-		filepath.Join("/", "usr", "local", "lib", constants.LuxdRepoName),
+		filepath.Join("/", "etc", constants.LuxGoRepoName),
+		filepath.Join("/", "usr", "local", "lib", constants.LuxGoRepoName),
 		wd,
 		home,
-		filepath.Join(home, constants.LuxdRepoName),
-		filepath.Join(home, defaultLuxdBuildDir),
+		filepath.Join(home, constants.LuxGoRepoName),
+		filepath.Join(home, defaultLuxgoBuildDir),
 		filepath.Join(home, ".node"),
 		defaultUnexpandedDataDir,
 	)
@@ -75,11 +75,11 @@ func FindPluginDir() (string, error) {
 	return "", nil
 }
 
-func FindLuxdConfigPath() (string, error) {
+func FindLuxConfigPath() (string, error) {
 	ux.Logger.PrintToUser(logging.Yellow.Wrap("Scanning your system for existing files..."))
 	var path string
 	// Attempt 1: Try the admin API
-	if path = findByRunningProcesses(constants.LuxdRepoName, config.ConfigFileKey); path != "" {
+	if path = findByRunningProcesses(constants.LuxGoRepoName, config.ConfigFileKey); path != "" {
 		return path, nil
 	}
 	// Attempt 2: find looking at some usual dirs

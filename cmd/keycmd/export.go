@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/constants"
-
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +15,7 @@ func newExportCmd() *cobra.Command {
 		Use:   "export [keyName]",
 		Short: "Exports a signing key",
 		Long: `The key export command exports a created signing key. You can use an exported key in other
-applications or import it into another instance of Lux-CLI.
+applications or import it into another instance of Lux CLI.
 
 By default, the tool writes the hex encoded key to stdout. If you provide the --output
 flag, the command writes the key to a file of your choosing.`,
@@ -50,5 +49,5 @@ func exportKey(_ *cobra.Command, args []string) error {
 		return nil
 	}
 
-	return os.WriteFile(filename, keyBytes, constants.WriteReadReadPerms)
+	return os.WriteFile(filename, keyBytes, application.WriteReadReadPerms)
 }

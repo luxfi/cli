@@ -1,14 +1,14 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
 
 import (
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/statemachine"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/subnet-evm/commontype"
-	"github.com/luxdefi/subnet-evm/params"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/subnet-evm/commontype"
+	"github.com/luxfi/subnet-evm/params"
 )
 
 func GetFeeConfig(config params.ChainConfig, app *application.Lux) (

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package testutils
@@ -28,8 +28,8 @@ const (
 
 	nodeBinPrefix = "node-"
 
-	luxdTar     = "/tmp/luxd.tar.gz"
-	luxdZip     = "/tmp/luxd.zip"
+	luxTar     = "/tmp/lux.tar.gz"
+	luxZip     = "/tmp/lux.zip"
 	subnetEVMTar = "/tmp/subevm.tar.gz"
 )
 
@@ -39,7 +39,7 @@ var (
 	licenseContents = []byte("LICENSE")
 )
 
-func verifyLuxdTarContents(require *require.Assertions, tarBytes []byte, version string) {
+func verifyLuxTarContents(require *require.Assertions, tarBytes []byte, version string) {
 	topDir := nodeBinPrefix + version
 	bin := filepath.Join(topDir, nodeBin)
 	plugins := filepath.Join(topDir, pluginDirName)
@@ -112,7 +112,7 @@ func verifySubnetEVMTarContents(require *require.Assertions, tarBytes []byte) {
 	require.True(licenseExists)
 }
 
-func verifyLuxdZipContents(require *require.Assertions, zipFile string) {
+func verifyLuxZipContents(require *require.Assertions, zipFile string) {
 	topDir := buildDirName
 	bin := filepath.Join(topDir, nodeBin)
 	plugins := filepath.Join(topDir, pluginDirName)
@@ -147,7 +147,7 @@ func verifyLuxdZipContents(require *require.Assertions, zipFile string) {
 	require.True(evmExists)
 }
 
-func CreateDummyLuxdZip(require *require.Assertions, binary []byte) []byte {
+func CreateDummyLuxZip(require *require.Assertions, binary []byte) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
@@ -169,17 +169,17 @@ func CreateDummyLuxdZip(require *require.Assertions, binary []byte) []byte {
 	require.NoError(err)
 
 	// Put into zip
-	CreateZip(require, topDir, luxdZip)
-	defer os.Remove(luxdZip)
+	CreateZip(require, topDir, luxZip)
+	defer os.Remove(luxZip)
 
-	verifyLuxdZipContents(require, luxdZip)
+	verifyLuxZipContents(require, luxZip)
 
-	zipBytes, err := os.ReadFile(luxdZip)
+	zipBytes, err := os.ReadFile(luxZip)
 	require.NoError(err)
 	return zipBytes
 }
 
-func CreateDummyLuxdTar(require *require.Assertions, binary []byte, version string) []byte {
+func CreateDummyLuxTar(require *require.Assertions, binary []byte, version string) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
@@ -201,11 +201,11 @@ func CreateDummyLuxdTar(require *require.Assertions, binary []byte, version stri
 	require.NoError(err)
 
 	// Put into tar
-	CreateTarGz(require, topDir, luxdTar, true)
-	defer os.Remove(luxdTar)
-	tarBytes, err := os.ReadFile(luxdTar)
+	CreateTarGz(require, topDir, luxTar, true)
+	defer os.Remove(luxTar)
+	tarBytes, err := os.ReadFile(luxTar)
 	require.NoError(err)
-	verifyLuxdTarContents(require, tarBytes, version)
+	verifyLuxTarContents(require, tarBytes, version)
 	return tarBytes
 }
 

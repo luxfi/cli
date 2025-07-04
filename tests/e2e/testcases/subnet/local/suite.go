@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subnet
@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/tests/e2e/commands"
-	"github.com/luxdefi/cli/tests/e2e/utils"
-	"github.com/luxdefi/netrunner/api"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/tests/e2e/commands"
+	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/netrunner/api"
 	"github.com/ethereum/go-ethereum/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -27,9 +27,7 @@ const (
 	secondSubnetName = "e2eSecondSubnetTest"
 	confPath         = "tests/e2e/assets/test_cli.json"
 	stakeAmount      = "2000"
-	stakeDuration    = "337h"
-	delegateAmount   = "25"
-	delegateDuration = "336h"
+	stakeDuration    = "336h"
 	localNetwork     = "Local Network"
 )
 
@@ -67,7 +65,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloSubnetEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
 		commands.CreateCustomVMConfig(subnetName, utils.SubnetEvmGenesisPath, customVMPath)
-		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, mapping[utils.SoloLuxdKey])
+		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, mapping[utils.SoloLuxKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -174,7 +172,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		commands.DeleteElasticSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("can add permissionless validator to elastic subnet and delegate to it", func() {
+	ginkgo.It("can add permissionless validator to elastic subnet", func() {
 		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		_, err := utils.ParseRPCsFromOutput(deployOutput)
@@ -215,9 +213,6 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		isPendingValidator, err = utils.IsNodeInPendingValidator(subnetName, nodeIDs[1])
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(isPendingValidator).Should(gomega.BeTrue())
-
-		_, err = commands.AddPermissionlessDelegator(subnetName, nodeIDs[1], delegateAmount, delegateDuration)
-		gomega.Expect(err).Should(gomega.BeNil())
 
 		commands.DeleteSubnetConfig(subnetName)
 		commands.DeleteElasticSubnetConfig(subnetName)
@@ -442,7 +437,7 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 	})
 
 	ginkgo.It("can deploy a subnet-evm with old version", func() {
-		subnetEVMVersion := "v0.5.5"
+		subnetEVMVersion := "v0.4.2"
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
@@ -465,8 +460,8 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 
 	ginkgo.It("can't deploy conflicting vm versions", func() {
 		// TODO: These shouldn't be hardcoded either
-		subnetEVMVersion1 := "v0.5.6"
-		subnetEVMVersion2 := "v0.5.3"
+		subnetEVMVersion1 := "v0.4.2"
+		subnetEVMVersion2 := "v0.4.4"
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1)
 		commands.CreateSubnetEvmConfigWithVersion(secondSubnetName, utils.SubnetEvmGenesis2Path, subnetEVMVersion2)

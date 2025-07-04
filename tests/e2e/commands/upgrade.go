@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package commands
@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
 
@@ -176,7 +176,7 @@ func ApplyUpgradeLocal(subnetName string) (string, error) {
 }
 
 /* #nosec G204 */
-func ApplyUpgradeToPublicNode(subnetName, luxdChainConfDir string) (string, error) {
+func ApplyUpgradeToPublicNode(subnetName, luxChainConfDir string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
 		SubnetCmd,
@@ -185,7 +185,7 @@ func ApplyUpgradeToPublicNode(subnetName, luxdChainConfDir string) (string, erro
 		subnetName,
 		"--fuji",
 		"--node-chain-config-dir",
-		luxdChainConfDir,
+		luxChainConfDir,
 		"--"+constants.SkipUpdateFlag,
 	)
 
