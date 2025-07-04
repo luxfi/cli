@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -10,17 +10,17 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/config"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/version"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/version"
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -67,13 +67,13 @@ func TestInfoKnownVMs(t *testing.T) {
 			c.dl,
 		)
 		require.NoError(err)
-		require.ElementsMatch([]string{constants.LuxDeFiMaintainers}, maintrs)
+		require.ElementsMatch([]string{constants.AvaLabsMaintainers}, maintrs)
 		require.NoError(err)
 		_, err = url.Parse(resurl)
 		require.NoError(err)
 		// it's kinda useless to create the URL by building it via downloader -
 		// would defeat the purpose of the test
-		expectedURL := "https://github.com/luxdefi/" +
+		expectedURL := "https://github.com/luxfi/" +
 			c.repoName + "/releases/download/" +
 			c.strVer + "/" + c.repoName + "_" + c.strVer[1:] + "_" +
 			runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"

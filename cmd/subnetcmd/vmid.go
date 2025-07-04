@@ -1,16 +1,16 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/netrunner/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/netrunner/utils"
 	"github.com/spf13/cobra"
 )
 
-// lux subnet create
+// avalanche subnet create
 func vmidCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "vmid [vmName]",
@@ -24,7 +24,7 @@ func vmidCmd() *cobra.Command {
 }
 
 func printVMID(_ *cobra.Command, args []string) error {
-	chains, err := ValidateSubnetNameAndGetChains(args)
+	chains, err := validateSubnetNameAndGetChains(args)
 	if err != nil {
 		return err
 	}

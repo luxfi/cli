@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
@@ -6,13 +6,13 @@ import (
 	"errors"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
 var forceDelete bool
 
-// lux key delete
+// avalanche key delete
 func newDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete [keyName]",

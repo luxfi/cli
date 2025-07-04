@@ -1,21 +1,18 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
 import (
 	"errors"
 	"fmt"
-	"sort"
-	"strconv"
-	"strings"
 	"unicode"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/metrics"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/utils"
 
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/cli/pkg/vm"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/vm"
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
 )
@@ -26,19 +23,19 @@ const (
 )
 
 var (
-	forceCreate         bool
-	useSubnetEvm        bool
-	genesisFile         string
-	vmFile              string
-	useCustom           bool
-	evmVersion          string
-	useLatestEvmVersion bool
+	forceCreate      bool
+	useSubnetEvm     bool
+	genesisFile      string
+	vmFile           string
+	useCustom        bool
+	vmVersion        string
+	useLatestVersion bool
 
 	errIllegalNameCharacter = errors.New(
 		"illegal name character: only letters, no special characters allowed")
 )
 
-// lux subnet create
+// avalanche subnet create
 func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [subnetName]",
@@ -60,41 +57,13 @@ configuration, pass the -f flag.`,
 		PersistentPostRun: handlePostRun,
 	}
 	cmd.Flags().StringVar(&genesisFile, "genesis", "", "file path of genesis to use")
+	cmd.Flags().StringVar(&vmFile, "vm", "", "file path of custom vm to use")
 	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "use the Subnet-EVM as the base template")
-	cmd.Flags().StringVar(&evmVersion, "vm-version", "", "version of Subnet-Evm template to use")
+	cmd.Flags().StringVar(&vmVersion, "vm-version", "", "version of vm template to use")
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
-	cmd.Flags().BoolVar(&useLatestEvmVersion, latest, false, "use latest Subnet-Evm version, takes precedence over --vm-version")
+	cmd.Flags().BoolVar(&useLatestVersion, latest, false, "use latest VM version, takes precedence over --vm-version")
 	cmd.Flags().BoolVarP(&forceCreate, forceFlag, "f", false, "overwrite the existing configuration if one exists")
-	cmd.Flags().StringVar(&vmFile, "custom-vm-path", "", "file path of custom vm to use (deprecation warning: will be generated if not given)")
-	cmd.Flags().StringVar(&customVMRepoURL, "custom-vm-repo-url", "", "custom vm repository url")
-	cmd.Flags().StringVar(&customVMBranch, "custom-vm-branch", "", "custom vm branch")
-	cmd.Flags().StringVar(&customVMBuildScript, "custom-vm-build-script", "", "custom vm build-script")
 	return cmd
-}
-
-func CallCreate(
-	cmd *cobra.Command,
-	subnetName string,
-	forceCreateParam bool,
-	genesisFileParam string,
-	useSubnetEvmParam bool,
-	useCustomParam bool,
-	evmVersionParam string,
-	useLatestEvmVersionParam bool,
-	customVMRepoURLParam string,
-	customVMBranchParam string,
-	customVMBuildScriptParam string,
-) error {
-	forceCreate = forceCreateParam
-	genesisFile = genesisFileParam
-	useSubnetEvm = useSubnetEvmParam
-	evmVersion = evmVersionParam
-	useLatestEvmVersion = useLatestEvmVersionParam
-	useCustom = useCustomParam
-	customVMRepoURL = customVMRepoURLParam
-	customVMBranch = customVMBranchParam
-	customVMBuildScript = customVMBuildScriptParam
-	return createSubnetConfig(cmd, []string{subnetName})
 }
 
 func moreThanOneVMSelected() bool {
@@ -156,30 +125,22 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		err          error
 	)
 
-	if useLatestEvmVersion {
-		evmVersion = latest
+	if useLatestVersion {
+		vmVersion = latest
 	}
 
-	if evmVersion != latest && evmVersion != "" && !semver.IsValid(evmVersion) {
-		return fmt.Errorf("invalid version string, should be semantic version (ex: v1.1.1): %s", evmVersion)
+	if vmVersion != latest && vmVersion != "" && !semver.IsValid(vmVersion) {
+		return fmt.Errorf("invalid version string, should be semantic version (ex: v1.1.1): %s", vmVersion)
 	}
 
 	switch subnetType {
 	case models.SubnetEvm:
-		genesisBytes, sc, err = vm.CreateEvmSubnetConfig(app, subnetName, genesisFile, evmVersion)
+		genesisBytes, sc, err = vm.CreateEvmSubnetConfig(app, subnetName, genesisFile, vmVersion)
 		if err != nil {
 			return err
 		}
 	case models.CustomVM:
-		genesisBytes, sc, err = vm.CreateCustomSubnetConfig(
-			app,
-			subnetName,
-			genesisFile,
-			customVMRepoURL,
-			customVMBranch,
-			customVMBuildScript,
-			vmFile,
-		)
+		genesisBytes, sc, err = vm.CreateCustomSubnetConfig(app, subnetName, genesisFile, vmFile)
 		if err != nil {
 			return err
 		}
@@ -191,48 +152,14 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	sc.ImportedFromLPM = false
+	sc.ImportedFromAPM = false
 	if err = app.CreateSidecar(sc); err != nil {
 		return err
 	}
-	if subnetType == models.SubnetEvm {
-		err = sendMetrics(cmd, subnetType.RepoName(), subnetName)
-		if err != nil {
-			return err
-		}
-	}
-	ux.Logger.PrintToUser("Successfully created subnet configuration")
-	return nil
-}
-
-func sendMetrics(cmd *cobra.Command, repoName, subnetName string) error {
 	flags := make(map[string]string)
-	flags[constants.SubnetType] = repoName
-	genesis, err := app.LoadEvmGenesis(subnetName)
-	if err != nil {
-		return err
-	}
-	conf := genesis.Config.GenesisPrecompiles
-	precompiles := make([]string, 6)
-	for precompileName := range conf {
-		precompileTag := "precompile-" + precompileName
-		flags[precompileTag] = precompileName
-		precompiles = append(precompiles, precompileName)
-	}
-	numAirdropAddresses := len(genesis.Alloc)
-	for address := range genesis.Alloc {
-		if address.String() != vm.PrefundedEwoqAddress.String() {
-			precompileTag := "precompile-" + constants.CustomAirdrop
-			flags[precompileTag] = constants.CustomAirdrop
-			precompiles = append(precompiles, constants.CustomAirdrop)
-			break
-		}
-	}
-	sort.Strings(precompiles)
-	precompilesJoined := strings.Join(precompiles, ",")
-	flags[constants.PrecompileType] = precompilesJoined
-	flags[constants.NumberOfAirdrops] = strconv.Itoa(numAirdropAddresses)
-	metrics.HandleTracking(cmd, app, flags)
+	flags[constants.SubnetType] = subnetType.RepoName()
+	utils.HandleTracking(cmd, app, flags)
+	ux.Logger.PrintToUser("Successfully created subnet configuration")
 	return nil
 }
 

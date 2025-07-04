@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package upgradecmd
@@ -7,14 +7,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/config"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
 
@@ -299,7 +299,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	networkToUpgrade := futureDeployment
 
 	factory := logging.NewFactory(logging.Config{})
-	log, err := factory.Make("lux")
+	log, err := factory.Make("avalanche")
 	assert.NoError(err)
 
 	// create the user facing logger as a global var
@@ -321,7 +321,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 
 	assert.FileExists(binaryPath)
 
-	err = updateToCustomBin(sc, networkToUpgrade, binaryPath, false)
+	err = updateToCustomBin(sc, networkToUpgrade, binaryPath)
 	assert.NoError(err)
 
 	// check new binary exists and matches

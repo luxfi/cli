@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -10,20 +10,18 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/ux"
 )
 
-// Edits an Luxd config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
+// Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
 func EditConfigFile(
 	app *application.Lux,
 	subnetID string,
-	network models.Network,
+	networkID string,
 	configFile string,
 	forceWrite bool,
-	subnetLuxdConfigFile string,
 ) error {
 	if !forceWrite {
 		warn := "This will edit your existing config file. This edit is nondestructive,\n" +
@@ -45,34 +43,16 @@ func EditConfigFile(
 	if fileBytes == nil {
 		fileBytes = []byte("{}")
 	}
-	var luxdConfig map[string]interface{}
-	if err := json.Unmarshal(fileBytes, &luxdConfig); err != nil {
+	var luxConfig map[string]interface{}
+	if err := json.Unmarshal(fileBytes, &luxConfig); err != nil {
 		return fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
 
-	if subnetLuxdConfigFile != "" {
-		subnetLuxdConfigFileBytes, err := os.ReadFile(subnetLuxdConfigFile)
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("failed to load extra flags from subnet luxd config file %s: %w", subnetLuxdConfigFile, err)
-		}
-		var subnetLuxdConfig map[string]interface{}
-		if err := json.Unmarshal(subnetLuxdConfigFileBytes, &subnetLuxdConfig); err != nil {
-			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", subnetLuxdConfigFile, err)
-		}
-		for k, v := range subnetLuxdConfig {
-			if k == "track-subnets" || k == "whitelisted-subnets" {
-				ux.Logger.PrintToUser("ignoring configuration setting for %q, a subnet's luxd conf should not change it", k)
-				continue
-			}
-			luxdConfig[k] = v
-		}
-	}
-
 	// Banff.10: "track-subnets" instead of "whitelisted-subnets"
-	oldVal := luxdConfig["track-subnets"]
+	oldVal := luxConfig["track-subnets"]
 	if oldVal == nil {
 		// check the old key in the config file for tracked-subnets
-		oldVal = luxdConfig["whitelisted-subnets"]
+		oldVal = luxConfig["whitelisted-subnets"]
 	}
 
 	newVal := ""
@@ -103,11 +83,11 @@ func EditConfigFile(
 	}
 
 	// Banf.10 changes from "whitelisted-subnets" to "track-subnets"
-	delete(luxdConfig, "whitelisted-subnets")
-	luxdConfig["track-subnets"] = newVal
-	luxdConfig["network-id"] = network.NetworkIDFlagValue()
+	delete(luxConfig, "whitelisted-subnets")
+	luxConfig["track-subnets"] = newVal
+	luxConfig["network-id"] = networkID
 
-	writeBytes, err := json.MarshalIndent(luxdConfig, "", "  ")
+	writeBytes, err := json.MarshalIndent(luxConfig, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to pack JSON to bytes for the config file: %w", err)
 	}

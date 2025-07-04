@@ -1,33 +1,32 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/node/utils/units"
-	"github.com/luxdefi/coreth/ethclient"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/coreth/ethclient"
 	"go.uber.org/zap"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/cli/pkg/vm"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/subnet-evm/commontype"
-	"github.com/luxdefi/subnet-evm/params"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/deployerallowlist"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/feemanager"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/nativeminter"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/rewardmanager"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
-	subnetevmutils "github.com/luxdefi/subnet-evm/utils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/subnet-evm/commontype"
+	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/subnet-evm/precompile/contracts/deployerallowlist"
+	"github.com/luxfi/subnet-evm/precompile/contracts/feemanager"
+	"github.com/luxfi/subnet-evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/subnet-evm/precompile/contracts/rewardmanager"
+	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/spf13/cobra"
@@ -46,7 +45,7 @@ const (
 
 var subnetName string
 
-// lux subnet upgrade generate
+// avalanche subnet upgrade generate
 func newUpgradeGenerateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate [subnetName]",
@@ -100,7 +99,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	fmt.Println()
 	ux.Logger.PrintToUser(logging.Yellow.Wrap(
-		"Luxd and this tool support configuring multiple precompiles. " +
+		"Luxgo and this tool support configuring multiple precompiles. " +
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 
@@ -248,7 +247,7 @@ func promptNativeMintParams(precompiles *[]params.PrecompileUpgrade, date time.T
 	}
 
 	config := nativeminter.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		big.NewInt(date.Unix()),
 		adminAddrs,
 		enabledAddrs,
 		initialMint,
@@ -272,7 +271,7 @@ func promptRewardManagerParams(precompiles *[]params.PrecompileUpgrade, date tim
 	}
 
 	config := rewardmanager.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		big.NewInt(date.Unix()),
 		adminAddrs,
 		enabledAddrs,
 		initialConfig,
@@ -308,7 +307,7 @@ func promptFeeManagerParams(precompiles *[]params.PrecompileUpgrade, date time.T
 	}
 
 	config := feemanager.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		big.NewInt(date.Unix()),
 		adminAddrs,
 		enabledAddrs,
 		feeConfig,
@@ -327,7 +326,7 @@ func promptContractAllowListParams(precompiles *[]params.PrecompileUpgrade, date
 	}
 
 	config := deployerallowlist.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		big.NewInt(date.Unix()),
 		adminAddrs,
 		enabledAddrs,
 	)
@@ -345,7 +344,7 @@ func promptTxAllowListParams(precompiles *[]params.PrecompileUpgrade, date time.
 	}
 
 	config := txallowlist.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		big.NewInt(date.Unix()),
 		adminAddrs,
 		enabledAddrs,
 	)
@@ -372,7 +371,7 @@ func ensureAdminsHaveBalanceLocalNetwork(admins []common.Address, blockchainID s
 
 	for _, admin := range admins {
 		// we can break at the first admin who has a non-zero balance
-		accountBalance, err := getAccountBalance(cClient, admin.String())
+		accountBalance, err := getAccountBalance(context.Background(), cClient, admin.String())
 		if err != nil {
 			return err
 		}
@@ -415,9 +414,9 @@ func ensureAdminsHaveBalance(admins []common.Address, subnetName string) error {
 	return nil
 }
 
-func getAccountBalance(cClient ethclient.Client, addrStr string) (float64, error) {
+func getAccountBalance(ctx context.Context, cClient ethclient.Client, addrStr string) (float64, error) {
 	addr := common.HexToAddress(addrStr)
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
 	defer cancel()
 	if err != nil {
@@ -443,20 +442,10 @@ func promptAdminAndEnabledAddresses() ([]common.Address, []common.Address, error
 			return nil, nil, err
 		}
 
-		adminsMap := make(map[string]bool)
-		for _, adminsAddress := range admin {
-			adminsMap[adminsAddress.String()] = true
-		}
-
 		if err := captureAddress(enabledLabel, &enabled); err != nil {
 			return nil, nil, err
 		}
 
-		for _, enabledAddress := range enabled {
-			if _, ok := adminsMap[enabledAddress.String()]; ok {
-				return nil, nil, fmt.Errorf("can't have address %s in both admin and enabled addresses", enabledAddress.String())
-			}
-		}
 		if len(enabled) == 0 && len(admin) == 0 {
 			ux.Logger.PrintToUser(fmt.Sprintf(
 				"We need at least one address for either '%s' or '%s'. Otherwise abort.", enabledAddressesKey, adminAddressesKey))

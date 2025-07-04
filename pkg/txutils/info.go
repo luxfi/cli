@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package txutils
 
@@ -6,16 +6,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/key"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 // get network model associated to tx
+// expect tx.Unsigned type to be in [txs.AddSubnetValidatorTx, txs.CreateChainTx]
 func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	unsignedTx := tx.Unsigned
 	var networkID uint32
@@ -28,37 +30,14 @@ func GetNetwork(tx *txs.Tx) (models.Network, error) {
 		networkID = unsignedTx.NetworkID
 	case *txs.TransformSubnetTx:
 		networkID = unsignedTx.NetworkID
-	case *txs.AddPermissionlessValidatorTx:
-		networkID = unsignedTx.NetworkID
 	default:
-		return models.UndefinedNetwork, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
+		return models.Undefined, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
 	network := models.NetworkFromNetworkID(networkID)
-	if network.Kind == models.Undefined {
-		return models.UndefinedNetwork, fmt.Errorf("undefined network model for tx")
+	if network == models.Undefined {
+		return models.Undefined, fmt.Errorf("undefined network model for tx")
 	}
 	return network, nil
-}
-
-// get subnet id associated to tx
-func GetSubnetID(tx *txs.Tx) (ids.ID, error) {
-	unsignedTx := tx.Unsigned
-	var subnetID ids.ID
-	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveSubnetValidatorTx:
-		subnetID = unsignedTx.Subnet
-	case *txs.AddSubnetValidatorTx:
-		subnetID = unsignedTx.SubnetValidator.Subnet
-	case *txs.CreateChainTx:
-		subnetID = unsignedTx.SubnetID
-	case *txs.TransformSubnetTx:
-		subnetID = unsignedTx.Subnet
-	case *txs.AddPermissionlessValidatorTx:
-		subnetID = unsignedTx.Subnet
-	default:
-		return ids.Empty, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
-	}
-	return subnetID, nil
 }
 
 func GetLedgerDisplayName(tx *txs.Tx) string {
@@ -79,7 +58,18 @@ func IsCreateChainTx(tx *txs.Tx) bool {
 }
 
 func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
+	var api string
+	switch network {
+	case models.Fuji:
+		api = constants.FujiAPIEndpoint
+	case models.Mainnet:
+		api = constants.MainnetAPIEndpoint
+	case models.Local:
+		api = constants.LocalAPIEndpoint
+	default:
+		return nil, 0, fmt.Errorf("network not supported")
+	}
+	pClient := platformvm.NewClient(api)
 	ctx := context.Background()
 	txBytes, err := pClient.GetTx(ctx, subnetID)
 	if err != nil {
@@ -99,7 +89,11 @@ func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error
 	}
 	controlKeys := owner.Addrs
 	threshold := owner.Threshold
-	hrp := key.GetHRP(network.ID)
+	networkID, err := network.NetworkID()
+	if err != nil {
+		return nil, 0, err
+	}
+	hrp := key.GetHRP(networkID)
 	controlKeysStrs := []string{}
 	for _, addr := range controlKeys {
 		addrStr, err := address.Format("P", hrp, addr[:])

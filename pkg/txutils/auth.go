@@ -1,14 +1,14 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package txutils
 
 import (
 	"fmt"
 
-	"github.com/luxdefi/node/utils/crypto/secp256k1"
-	"github.com/luxdefi/node/vms/components/verify"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/node/vms/components/verify"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 // get all subnet auth addresses that are required to sign a given tx

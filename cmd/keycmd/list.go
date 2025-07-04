@@ -1,24 +1,24 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/key"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/node/ids"
-	ledger "github.com/luxdefi/node/utils/crypto/ledger"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/utils/units"
-	"github.com/luxdefi/node/vms/platformvm"
-	"github.com/luxdefi/coreth/ethclient"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/node/ids"
+	ledger "github.com/luxfi/node/utils/crypto/ledger"
+	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/coreth/ethclient"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -32,7 +32,6 @@ const (
 	allFlag           = "all-networks"
 	cchainFlag        = "cchain"
 	ledgerIndicesFlag = "ledger"
-	useNanoLuxFlag   = "use-nano-lux"
 )
 
 var (
@@ -41,11 +40,10 @@ var (
 	mainnet       bool
 	all           bool
 	cchain        bool
-	useNanoLux   bool
 	ledgerIndices []uint
 )
 
-// lux subnet list
+// avalanche subnet list
 func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
@@ -97,13 +95,6 @@ keys or for the ledger addresses associated to certain indices.`,
 		true,
 		"list C-Chain addresses",
 	)
-	cmd.Flags().BoolVarP(
-		&useNanoLux,
-		useNanoLuxFlag,
-		"n",
-		false,
-		"use nano Lux for balances",
-	)
 	cmd.Flags().UintSliceVarP(
 		&ledgerIndices,
 		ledgerIndicesFlag,
@@ -119,13 +110,18 @@ func getClients(networks []models.Network, cchain bool) (
 	map[models.Network]ethclient.Client,
 	error,
 ) {
+	apiEndpoints := map[models.Network]string{
+		models.Fuji:    constants.FujiAPIEndpoint,
+		models.Mainnet: constants.MainnetAPIEndpoint,
+		models.Local:   constants.LocalAPIEndpoint,
+	}
 	var err error
 	pClients := map[models.Network]platformvm.Client{}
 	cClients := map[models.Network]ethclient.Client{}
 	for _, network := range networks {
-		pClients[network] = platformvm.NewClient(network.Endpoint)
+		pClients[network] = platformvm.NewClient(apiEndpoints[network])
 		if cchain {
-			cClients[network], err = ethclient.Dial(network.CChainEndpoint())
+			cClients[network], err = ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoints[network], "C"))
 			if err != nil {
 				return nil, nil, err
 			}
@@ -147,13 +143,13 @@ func listKeys(*cobra.Command, []string) error {
 	var addrInfos []addressInfo
 	networks := []models.Network{}
 	if local || all {
-		networks = append(networks, models.LocalNetwork)
+		networks = append(networks, models.Local)
 	}
 	if testnet || all {
-		networks = append(networks, models.FujiNetwork)
+		networks = append(networks, models.Fuji)
 	}
 	if mainnet || all {
-		networks = append(networks, models.MainnetNetwork)
+		networks = append(networks, models.Mainnet)
 	}
 	if len(networks) == 0 {
 		// no flag was set, prompt user
@@ -230,8 +226,12 @@ func getStoredKeyInfo(
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
+		networkID, err := network.NetworkID()
+		if err != nil {
+			return nil, err
+		}
 		keyName := strings.TrimSuffix(filepath.Base(keyPath), constants.KeySuffix)
-		sk, err := key.LoadSoft(network.ID, keyPath)
+		sk, err := key.LoadSoft(networkID, keyPath)
 		if err != nil {
 			return nil, err
 		}
@@ -291,7 +291,11 @@ func getLedgerIndexInfo(
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		pChainAddr, err := address.Format("P", key.GetHRP(network.ID), addr[:])
+		networkID, err := network.NetworkID()
+		if err != nil {
+			return nil, err
+		}
+		pChainAddr, err := address.Format("P", key.GetHRP(networkID), addr[:])
 		if err != nil {
 			return nil, err
 		}
@@ -317,10 +321,10 @@ func getPChainAddrInfo(
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	balance, err := getPChainBalanceStr(pClients[network], pChainAddr)
+	balance, err := getPChainBalanceStr(context.Background(), pClients[network], pChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network.Kind != models.Local {
+		if network != models.Local {
 			return addressInfo{}, err
 		}
 	}
@@ -330,7 +334,7 @@ func getPChainAddrInfo(
 		chain:   "P-Chain (Bech32 format)",
 		address: pChainAddr,
 		balance: balance,
-		network: network.Name(),
+		network: network.String(),
 	}, nil
 }
 
@@ -341,10 +345,10 @@ func getCChainAddrInfo(
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	cChainBalance, err := getCChainBalanceStr(cClients[network], cChainAddr)
+	cChainBalance, err := getCChainBalanceStr(context.Background(), cClients[network], cChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network.Kind != models.Local {
+		if network != models.Local {
 			return addressInfo{}, err
 		}
 	}
@@ -354,7 +358,7 @@ func getCChainAddrInfo(
 		chain:   "C-Chain (Ethereum hex format)",
 		address: cChainAddr,
 		balance: cChainBalance,
-		network: network.Name(),
+		network: network.String(),
 	}, nil
 }
 
@@ -377,9 +381,9 @@ func printAddrInfos(addrInfos []addressInfo) {
 	table.Render()
 }
 
-func getCChainBalanceStr(cClient ethclient.Client, addrStr string) (string, error) {
+func getCChainBalanceStr(ctx context.Context, cClient ethclient.Client, addrStr string) (string, error) {
 	addr := common.HexToAddress(addrStr)
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
 	cancel()
 	if err != nil {
@@ -390,21 +394,15 @@ func getCChainBalanceStr(cClient ethclient.Client, addrStr string) (string, erro
 	if balance.Cmp(big.NewInt(0)) == 0 {
 		return "0", nil
 	}
-	balanceStr := ""
-	if useNanoLux {
-		balanceStr = fmt.Sprintf("%9d", balance.Uint64())
-	} else {
-		balanceStr = fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Lux))
-	}
-	return balanceStr, nil
+	return fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Lux)), nil
 }
 
-func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error) {
+func getPChainBalanceStr(ctx context.Context, pClient platformvm.Client, addr string) (string, error) {
 	pID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err
 	}
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	resp, err := pClient.GetBalance(ctx, []ids.ShortID{pID})
 	cancel()
 	if err != nil {
@@ -413,11 +411,5 @@ func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error)
 	if resp.Balance == 0 {
 		return "0", nil
 	}
-	balanceStr := ""
-	if useNanoLux {
-		balanceStr = fmt.Sprintf("%9d", resp.Balance)
-	} else {
-		balanceStr = fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Lux))
-	}
-	return balanceStr, nil
+	return fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Lux)), nil
 }

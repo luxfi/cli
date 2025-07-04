@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package upgradecmd
 
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +14,7 @@ var upgradeBytesFilePath string
 
 const upgradeBytesFilePathKey = "upgrade-filepath"
 
-// lux subnet upgrade import
+// avalanche subnet upgrade import
 func newUpgradeImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import [subnetName]",

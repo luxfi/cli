@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -6,7 +6,7 @@ package binutils
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/constants"
 )
 
 const (
@@ -24,23 +24,23 @@ type GithubDownloader interface {
 
 type (
 	subnetEVMDownloader   struct{}
-	luxdDownloader struct{}
+	nodeDownloader struct{}
 )
 
 var (
 	_ GithubDownloader = (*subnetEVMDownloader)(nil)
-	_ GithubDownloader = (*luxdDownloader)(nil)
+	_ GithubDownloader = (*nodeDownloader)(nil)
 )
 
 func GetGithubLatestReleaseURL(org, repo string) string {
 	return "https://api.github.com/repos/" + org + "/" + repo + "/releases/latest"
 }
 
-func NewLuxdDownloader() GithubDownloader {
-	return &luxdDownloader{}
+func NewLuxDownloader() GithubDownloader {
+	return &nodeDownloader{}
 }
 
-func (luxdDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
+func (nodeDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
 	// NOTE: if any of the underlying URLs change (github changes, release file names, etc.) this fails
 	goarch, goos := installer.GetArch()
 
@@ -51,8 +51,8 @@ func (luxdDownloader) GetDownloadURL(version string, installer Installer) (strin
 	case linux:
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-linux-%s-%s.tar.gz",
-			constants.LuxDeFiOrg,
-			constants.LuxdRepoName,
+			constants.AvaLabsOrg,
+			constants.LuxGoRepoName,
 			version,
 			goarch,
 			version,
@@ -61,8 +61,8 @@ func (luxdDownloader) GetDownloadURL(version string, installer Installer) (strin
 	case darwin:
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-macos-%s.zip",
-			constants.LuxDeFiOrg,
-			constants.LuxdRepoName,
+			constants.AvaLabsOrg,
+			constants.LuxGoRepoName,
 			version,
 			version,
 		)
@@ -71,8 +71,8 @@ func (luxdDownloader) GetDownloadURL(version string, installer Installer) (strin
 	case windows:
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-win-%s-experimental.zip",
-			constants.LuxDeFiOrg,
-			constants.LuxdRepoName,
+			constants.AvaLabsOrg,
+			constants.LuxGoRepoName,
 			version,
 			version,
 		)
@@ -99,7 +99,7 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 	case linux:
 		subnetEVMURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
-			constants.LuxDeFiOrg,
+			constants.AvaLabsOrg,
 			constants.SubnetEVMRepoName,
 			version,
 			constants.SubnetEVMRepoName,
@@ -109,7 +109,7 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 	case darwin:
 		subnetEVMURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
-			constants.LuxDeFiOrg,
+			constants.AvaLabsOrg,
 			constants.SubnetEVMRepoName,
 			version,
 			constants.SubnetEVMRepoName,

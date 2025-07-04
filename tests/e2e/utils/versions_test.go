@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
 )
@@ -27,7 +27,7 @@ type testContext struct {
 	// fake versions set for the evm binaries, faking github
 	sourceEVM string
 	// fake versions set for the node binaries, faking github
-	sourceLuxd string
+	sourceLux string
 	// should the test fail
 	shouldFail bool
 	// name of the test
@@ -61,21 +61,16 @@ func newTestMapper(t *testing.T) *testMapper {
 }
 
 // implement VersionMapper
-func (*testMapper) FilterAvailableVersions(versions []string) []string {
-	return versions
-}
-
-// implement VersionMapper
 func (*testMapper) GetEligibleVersions(sorted []string, _ string, _ *application.Lux) ([]string, error) {
 	// tests were written with the assumption that the first version is always in progress
 	return sorted[1:], nil
 }
 
 // implement VersionMapper
-func (m *testMapper) GetLatestLuxdByProtoVersion(_ *application.Lux, rpcVersion int, _ string) (string, error) {
-	cBytes := []byte(m.currentContext.sourceLuxd)
+func (m *testMapper) GetLatestLuxByProtoVersion(_ *application.Lux, rpcVersion int, _ string) (string, error) {
+	cBytes := []byte(m.currentContext.sourceLux)
 
-	var compat models.LuxdCompatiblity
+	var compat models.LuxCompatiblity
 	if err := json.Unmarshal(cBytes, &compat); err != nil {
 		return "", err
 	}
@@ -119,11 +114,11 @@ func (m *testMapper) GetCompatURL(vmType models.VMType) string {
 	return ""
 }
 
-// GetLuxdURL fakes a github endpoint for
+// GetLuxURL fakes a github endpoint for
 // node releases
 // implement VersionMapper
-func (m *testMapper) GetLuxdURL() string {
-	return m.srv.URL + "/luxd"
+func (m *testMapper) GetLuxURL() string {
+	return m.srv.URL + "/lux"
 }
 
 // This is the server function which the local
@@ -139,8 +134,8 @@ func (m *testMapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/evm":
 		_, err = w.Write([]byte(m.currentContext.sourceEVM))
-	case "/luxd":
-		_, err = w.Write([]byte(m.currentContext.sourceLuxd))
+	case "/lux":
+		_, err = w.Write([]byte(m.currentContext.sourceLux))
 	default:
 		m.t.Fatalf("Unexpected path URL for test server: %s\n", r.URL.Path)
 	}
@@ -154,7 +149,7 @@ func (m *testMapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // the expected values.
 // For the test to be meaningful, we start a httptest HTTP
 // server locally, which then returns fake versions for each request
-// (sourceEVM, sourceLuxd) which then
+// (sourceEVM, sourceLux) which then
 // the mapping code in `GetVersionMapping` is expected
 // to correctly evaluate for the global `binaryToVersion` map,
 // used by the tests to know which version to use for which test.
@@ -174,18 +169,18 @@ func TestGetVersionMapping(t *testing.T) {
 			// The function should be able to correctly
 			// evaluate compatible versions, hence
 			// `shouldFail` is false
-			name:       "latest evm match latest luxd",
+			name:       "latest evm match latest lux",
 			shouldFail: false,
 			expected: map[string]string{
 				SoloSubnetEVMKey1:      "v0.4.2",
 				SoloSubnetEVMKey2:      "v0.4.1",
-				SoloLuxdKey:           "v1.9.1",
-				OnlyLuxdKey:           OnlyLuxdValue,
-				MultiLuxd1Key:         "v1.9.3",
-				MultiLuxd2Key:         "v1.9.2",
-				MultiLuxdSubnetEVMKey: "v0.4.3",
-				LatestEVM2LuxdKey:     "v0.4.3",
-				LatestLuxd2EVMKey:     "v1.9.3",
+				SoloLuxKey:           "v1.9.1",
+				OnlyLuxKey:           OnlyLuxValue,
+				MultiLux1Key:         "v1.9.3",
+				MultiLux2Key:         "v1.9.2",
+				MultiLuxSubnetEVMKey: "v0.4.3",
+				LatestEVM2LuxKey:     "v0.4.3",
+				LatestLux2EVMKey:     "v1.9.3",
 			},
 			sourceEVM: `{
 						"rpcChainVMProtocolVersion": {
@@ -196,7 +191,7 @@ func TestGetVersionMapping(t *testing.T) {
 							"v0.4.0": 17
 						}
 				  }`,
-			sourceLuxd: `{
+			sourceLux: `{
 						"19": [
 							"v1.9.2",
 							"v1.9.3"
@@ -217,13 +212,13 @@ func TestGetVersionMapping(t *testing.T) {
 			expected: map[string]string{
 				SoloSubnetEVMKey1:      "v0.9.9",
 				SoloSubnetEVMKey2:      "v0.9.8",
-				SoloLuxdKey:           "v2.3.4",
-				OnlyLuxdKey:           OnlyLuxdValue,
-				MultiLuxd1Key:         "v2.3.4",
-				MultiLuxd2Key:         "v2.3.3",
-				MultiLuxdSubnetEVMKey: "v0.9.9",
-				LatestEVM2LuxdKey:     "v0.9.9",
-				LatestLuxd2EVMKey:     "v2.3.4",
+				SoloLuxKey:           "v2.3.4",
+				OnlyLuxKey:           OnlyLuxValue,
+				MultiLux1Key:         "v2.3.4",
+				MultiLux2Key:         "v2.3.3",
+				MultiLuxSubnetEVMKey: "v0.9.9",
+				LatestEVM2LuxKey:     "v0.9.9",
+				LatestLux2EVMKey:     "v2.3.4",
 			},
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
@@ -235,7 +230,7 @@ func TestGetVersionMapping(t *testing.T) {
 						"v0.4.0": 17
 					}
 			  }`,
-			sourceLuxd: `{
+			sourceLux: `{
 					"99": [
 						"v2.3.4",
 						"v2.3.3"
@@ -256,13 +251,13 @@ func TestGetVersionMapping(t *testing.T) {
 			expected: map[string]string{
 				SoloSubnetEVMKey1:      "v0.4.2",
 				SoloSubnetEVMKey2:      "v0.4.1",
-				SoloLuxdKey:           "v2.1.1",
-				OnlyLuxdKey:           OnlyLuxdValue,
-				MultiLuxd1Key:         "v2.1.1",
-				MultiLuxd2Key:         "v2.1.0",
-				MultiLuxdSubnetEVMKey: "v0.4.2",
-				LatestEVM2LuxdKey:     "v0.9.9",
-				LatestLuxd2EVMKey:     "v4.3.2",
+				SoloLuxKey:           "v2.1.1",
+				OnlyLuxKey:           OnlyLuxValue,
+				MultiLux1Key:         "v2.1.1",
+				MultiLux2Key:         "v2.1.0",
+				MultiLuxSubnetEVMKey: "v0.4.2",
+				LatestEVM2LuxKey:     "v0.9.9",
+				LatestLux2EVMKey:     "v4.3.2",
 			},
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
@@ -276,7 +271,7 @@ func TestGetVersionMapping(t *testing.T) {
 						"v0.4.0": 17
 					}
 			  }`,
-			sourceLuxd: `{
+			sourceLux: `{
 					"99": [
 						"v4.3.2"
 					],
@@ -308,7 +303,7 @@ func TestGetVersionMapping(t *testing.T) {
 			shouldFail:  true,
 			expected:    map[string]string{},
 			sourceEVM:   `{}`,
-			sourceLuxd: `{}`,
+			sourceLux: `{}`,
 		},
 		{
 			// this test should fail, simulating that
@@ -317,7 +312,7 @@ func TestGetVersionMapping(t *testing.T) {
 			name:        "only evm",
 			shouldFail:  true,
 			expected:    map[string]string{},
-			sourceLuxd: `{}`,
+			sourceLux: `{}`,
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
 						"v1.0.0": 100,
@@ -332,12 +327,12 @@ func TestGetVersionMapping(t *testing.T) {
 		{
 			// this test should fail, simulating that
 			// the APIs would return empty releases for some reason
-			// but only got sourceLuxd versions
-			name:       "only luxd",
+			// but only got sourceLux versions
+			name:       "only lux",
 			shouldFail: true,
 			expected:   map[string]string{},
 			sourceEVM:  `{}`,
-			sourceLuxd: `{
+			sourceLux: `{
 					"99": [
 						"v2.3.4",
 						"v2.3.3"

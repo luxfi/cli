@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -6,7 +6,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/luxdefi/subnet-evm/commontype"
+	"github.com/luxfi/subnet-evm/commontype"
 	"github.com/ethereum/go-ethereum/common"
 )
 

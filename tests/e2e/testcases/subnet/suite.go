@@ -1,11 +1,11 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subnet
 
 import (
-	"github.com/luxdefi/cli/tests/e2e/commands"
-	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/tests/e2e/commands"
+	"github.com/luxfi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -30,7 +30,7 @@ var _ = ginkgo.Describe("[Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can create and delete a custom vm subnet config", func() {
-		// let's use a SubnetEVM version which would be compatible with an existing Luxd
+		// let's use a SubnetEVM version which would be compatible with an existing Lux
 		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloSubnetEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
 

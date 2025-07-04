@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package prompts
 
@@ -12,13 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/manifoldco/promptui"
-	"golang.org/x/exp/slices"
 	"golang.org/x/mod/semver"
 )
 
@@ -35,7 +34,6 @@ const (
 	LessThanEq = "Less Than Or Eq"
 	MoreThanEq = "More Than Or Eq"
 	MoreThan   = "More Than"
-	NotEq      = "Not Eq"
 )
 
 var errNoKeys = errors.New("no keys")
@@ -60,10 +58,6 @@ func (comparator *Comparator) Validate(val uint64) error {
 		if val < comparator.Value {
 			return fmt.Errorf(fmt.Sprintf("the value must be bigger than or equal to %s (%d)", comparator.Label, comparator.Value))
 		}
-	case NotEq:
-		if val == comparator.Value {
-			return fmt.Errorf(fmt.Sprintf("the value must be different than %s (%d)", comparator.Label, comparator.Value))
-		}
 	}
 	return nil
 }
@@ -77,26 +71,18 @@ type Prompter interface {
 	CaptureNoYes(promptStr string) (bool, error)
 	CaptureList(promptStr string, options []string) (string, error)
 	CaptureString(promptStr string) (string, error)
-	CaptureValidatedString(promptStr string, validator func(string) error) (string, error)
-	CaptureURL(promptStr string) (string, error)
-	CaptureRepoBranch(promptStr string, repo string) (string, error)
-	CaptureRepoFile(promptStr string, repo string, branch string) (string, error)
 	CaptureGitURL(promptStr string) (*url.URL, error)
 	CaptureStringAllowEmpty(promptStr string) (string, error)
 	CaptureEmail(promptStr string) (string, error)
 	CaptureIndex(promptStr string, options []any) (int, error)
 	CaptureVersion(promptStr string) (string, error)
-	CaptureFujiDuration(promptStr string) (time.Duration, error)
-	CaptureMainnetDuration(promptStr string) (time.Duration, error)
+	CaptureDuration(promptStr string) (time.Duration, error)
 	CaptureDate(promptStr string) (time.Time, error)
 	CaptureNodeID(promptStr string) (ids.NodeID, error)
 	CaptureID(promptStr string) (ids.ID, error)
 	CaptureWeight(promptStr string) (uint64, error)
 	CapturePositiveInt(promptStr string, comparators []Comparator) (int, error)
-	CaptureInt(promptStr string) (int, error)
-	CaptureUint32(promptStr string) (uint32, error)
 	CaptureUint64(promptStr string) (uint64, error)
-	CaptureFloat(promptStr string, validator func(float64) error) (float64, error)
 	CaptureUint64Compare(promptStr string, comparators []Comparator) (uint64, error)
 	CapturePChainAddress(promptStr string, network models.Network) (string, error)
 	CaptureFutureDate(promptStr string, minDate time.Time) (time.Time, error)
@@ -184,24 +170,10 @@ func CaptureListDecision[T comparable](
 	}
 }
 
-func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
+func (*realPrompter) CaptureDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
-		Validate: validateFujiStakingDuration,
-	}
-
-	durationStr, err := prompt.Run()
-	if err != nil {
-		return 0, err
-	}
-
-	return time.ParseDuration(durationStr)
-}
-
-func (*realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, error) {
-	prompt := promptui.Prompt{
-		Label:    promptStr,
-		Validate: validateMainnetStakingDuration,
+		Validate: validateStakingDuration,
 	}
 
 	durationStr, err := prompt.Run()
@@ -266,50 +238,6 @@ func (*realPrompter) CaptureWeight(promptStr string) (uint64, error) {
 	return strconv.ParseUint(amountStr, 10, 64)
 }
 
-func (*realPrompter) CaptureInt(promptStr string) (int, error) {
-	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			_, err := strconv.Atoi(input)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-	}
-	input, err := prompt.Run()
-	if err != nil {
-		return 0, err
-	}
-	val, err := strconv.Atoi(input)
-	if err != nil {
-		return 0, err
-	}
-	return val, nil
-}
-
-func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
-	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			_, err := strconv.ParseUint(input, 0, 32)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-	}
-	input, err := prompt.Run()
-	if err != nil {
-		return 0, err
-	}
-	val, err := strconv.ParseUint(input, 0, 32)
-	if err != nil {
-		return 0, err
-	}
-	return uint32(val), nil
-}
-
 func (*realPrompter) CaptureUint64(promptStr string) (uint64, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
@@ -321,25 +249,6 @@ func (*realPrompter) CaptureUint64(promptStr string) (uint64, error) {
 		return 0, err
 	}
 	return strconv.ParseUint(amountStr, 0, 64)
-}
-
-func (*realPrompter) CaptureFloat(promptStr string, validator func(float64) error) (float64, error) {
-	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			val, err := strconv.ParseFloat(input, 64)
-			if err != nil {
-				return err
-			}
-			return validator(val)
-		},
-	}
-
-	amountStr, err := prompt.Run()
-	if err != nil {
-		return 0, err
-	}
-	return strconv.ParseFloat(amountStr, 64)
 }
 
 func (*realPrompter) CapturePositiveInt(promptStr string, comparators []Comparator) (int, error) {
@@ -525,78 +434,15 @@ func (*realPrompter) CaptureStringAllowEmpty(promptStr string) (string, error) {
 	return str, nil
 }
 
-func (*realPrompter) CaptureURL(promptStr string) (string, error) {
-	for {
-		var err error
-		prompt := promptui.Prompt{
-			Label:    promptStr,
-			Validate: validateURLFormat,
-		}
-		str, err := prompt.Run()
-		if err != nil {
-			return "", err
-		}
-		if err = ValidateURL(str); err == nil {
-			return str, nil
-		}
-		ux.Logger.PrintToUser("Invalid URL: %s", err)
-	}
-}
-
-func (*realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, error) {
-	for {
-		var err error
-		prompt := promptui.Prompt{
-			Label:    promptStr,
-			Validate: validateNonEmpty,
-		}
-		str, err := prompt.Run()
-		if err != nil {
-			return "", err
-		}
-		if err = ValidateRepoBranch(repo, str); err == nil {
-			return str, nil
-		}
-		ux.Logger.PrintToUser("Invalid Repo Branch: %s", err)
-	}
-}
-
-func (*realPrompter) CaptureRepoFile(promptStr string, repo string, branch string) (string, error) {
-	for {
-		var err error
-		prompt := promptui.Prompt{
-			Label:    promptStr,
-			Validate: validateNonEmpty,
-		}
-		str, err := prompt.Run()
-		if err != nil {
-			return "", err
-		}
-		if err = ValidateRepoFile(repo, branch, str); err == nil {
-			return str, nil
-		}
-		ux.Logger.PrintToUser("Invalid Repo File: %s", err)
-	}
-}
-
 func (*realPrompter) CaptureString(promptStr string) (string, error) {
 	prompt := promptui.Prompt{
-		Label:    promptStr,
-		Validate: validateNonEmpty,
-	}
-
-	str, err := prompt.Run()
-	if err != nil {
-		return "", err
-	}
-
-	return str, nil
-}
-
-func (*realPrompter) CaptureValidatedString(promptStr string, validator func(string) error) (string, error) {
-	prompt := promptui.Prompt{
-		Label:    promptStr,
-		Validate: validator,
+		Label: promptStr,
+		Validate: func(input string) error {
+			if input == "" {
+				return errors.New("string cannot be empty")
+			}
+			return nil
+		},
 	}
 
 	str, err := prompt.Run()
@@ -610,7 +456,7 @@ func (*realPrompter) CaptureValidatedString(promptStr string, validator func(str
 func (*realPrompter) CaptureGitURL(promptStr string) (*url.URL, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
-		Validate: validateURLFormat,
+		Validate: validateURL,
 	}
 
 	str, err := prompt.Run()
@@ -724,12 +570,7 @@ func getIndexInSlice[T comparable](list []T, element T) (int, error) {
 // check subnet authorization criteria:
 // - [subnetAuthKeys] satisfy subnet's [threshold]
 // - [subnetAuthKeys] is a subset of subnet's [controlKeys]
-func CheckSubnetAuthKeys(walletKeys []string, subnetAuthKeys []string, controlKeys []string, threshold uint32) error {
-	for _, walletKey := range walletKeys {
-		if slices.Contains(controlKeys, walletKey) && !slices.Contains(subnetAuthKeys, walletKey) {
-			return fmt.Errorf("wallet key %s is a subnet control key so it must be included in subnet auth keys", walletKey)
-		}
-	}
+func CheckSubnetAuthKeys(subnetAuthKeys []string, controlKeys []string, threshold uint32) error {
 	if len(subnetAuthKeys) != int(threshold) {
 		return fmt.Errorf("number of given subnet auth differs from the threshold")
 	}
@@ -750,24 +591,13 @@ func CheckSubnetAuthKeys(walletKeys []string, subnetAuthKeys []string, controlKe
 
 // get subnet authorization keys from the user, as a subset of the subnet's [controlKeys]
 // with a len equal to the subnet's [threshold]
-func GetSubnetAuthKeys(prompt Prompter, walletKeys []string, controlKeys []string, threshold uint32) ([]string, error) {
+func GetSubnetAuthKeys(prompt Prompter, controlKeys []string, threshold uint32) ([]string, error) {
 	if len(controlKeys) == int(threshold) {
 		return controlKeys, nil
 	}
 	subnetAuthKeys := []string{}
 	filteredControlKeys := []string{}
 	filteredControlKeys = append(filteredControlKeys, controlKeys...)
-	for _, walletKey := range walletKeys {
-		if slices.Contains(controlKeys, walletKey) {
-			ux.Logger.PrintToUser("Adding wallet key %s to the tx subnet auth keys as it is a subnet control key", walletKey)
-			subnetAuthKeys = append(subnetAuthKeys, walletKey)
-			index, err := getIndexInSlice(filteredControlKeys, walletKey)
-			if err != nil {
-				return nil, err
-			}
-			filteredControlKeys = append(filteredControlKeys[:index], filteredControlKeys[index+1:]...)
-		}
-	}
 	for len(subnetAuthKeys) != int(threshold) {
 		subnetAuthKey, err := prompt.CaptureList(
 			"Choose a subnet auth key",
@@ -797,7 +627,8 @@ func GetFujiKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, stri
 	keyName, err := captureKeyName(prompt, goal, keyDir)
 	if err != nil {
 		if errors.Is(err, errNoKeys) {
-			ux.Logger.PrintToUser("No private keys have been found. Create a new one with `lux key create`")
+			ux.Logger.PrintToUser("No private keys have been found. Signing transactions on Fuji without a private key " +
+				"or ledger is not possible. Create a new one with `avalanche key create`, or use a ledger device.")
 		}
 		return false, "", err
 	}

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package vm
 
@@ -10,14 +10,14 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/statemachine"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/subnet-evm/core"
-	"github.com/luxdefi/subnet-evm/params"
-	"github.com/luxdefi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/subnet-evm/core"
+	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -133,10 +133,6 @@ func createEvmGenesis(
 	genesis.Config = conf
 	genesis.Difficulty = Difficulty
 	genesis.GasLimit = conf.FeeConfig.GasLimit.Uint64()
-
-	if err := genesis.Verify(); err != nil {
-		return nil, nil, err
-	}
 
 	jsonBytes, err := genesis.MarshalJSON()
 	if err != nil {

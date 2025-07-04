@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Package key implements key manager and helper functions.
@@ -9,11 +9,11 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/constants"
-	"github.com/luxdefi/node/vms/components/lux"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/vms/components/lux"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 var (
@@ -124,7 +124,7 @@ func (ins *innerSortTransferableInputsWithSigners) Swap(i, j int) {
 // SortTransferableInputsWithSigners sorts the inputs and signers based on the
 // input's utxo ID.
 //
-// This is based off of (generics?): https://github.com/luxdefi/node/blob/224c9fd23d41839201dd0275ac864a845de6e93e/vms/components/lux/transferables.go#L202
+// This is based off of (generics?): https://github.com/luxfi/node/blob/224c9fd23d41839201dd0275ac864a845de6e93e/vms/components/lux/transferables.go#L202
 func SortTransferableInputsWithSigners(ins []*lux.TransferableInput, signers [][]ids.ShortID) {
 	sort.Sort(&innerSortTransferableInputsWithSigners{ins: ins, signers: signers})
 }

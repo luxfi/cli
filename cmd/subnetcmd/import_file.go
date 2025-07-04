@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package subnetcmd
 
@@ -8,14 +8,11 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/user"
-	"path/filepath"
 
-	"github.com/luxdefi/cli/pkg/lpmintegration"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/cli/pkg/vm"
+	"github.com/luxfi/cli/pkg/apmintegration"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +23,7 @@ var (
 	branch          string
 )
 
-// lux subnet import
+// avalanche subnet import
 func newImportFileCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "file [subnetPath]",
@@ -53,7 +50,7 @@ flag.`,
 		&repoOrURL,
 		"repo",
 		"",
-		"the repo to import (ex: luxdefi/plugins-core) or url to download the repo from",
+		"the repo to import (ex: luxfi/plugins-core) or url to download the repo from",
 	)
 	cmd.Flags().StringVar(
 		&branch,
@@ -78,8 +75,8 @@ func importSubnet(_ *cobra.Command, args []string) error {
 
 	if repoOrURL == "" && branch == "" && subnetAlias == "" {
 		fileOption := "File"
-		lpmOption := "Repository"
-		typeOptions := []string{fileOption, lpmOption}
+		apmOption := "Repository"
+		typeOptions := []string{fileOption, apmOption}
 		promptStr := "Would you like to import your subnet from a file or a repository?"
 		result, err := app.Prompt.CaptureList(promptStr, typeOptions)
 		if err != nil {
@@ -91,8 +88,8 @@ func importSubnet(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	// Option must be LPM
-	return importFromLPM()
+	// Option must be APM
+	return importFromAPM()
 }
 
 func importFromFile(importPath string) error {
@@ -125,68 +122,13 @@ func importFromFile(importPath string) error {
 		return errors.New("subnet already exists. Use --" + forceFlag + " parameter to overwrite")
 	}
 
-	if importable.Sidecar.VM == models.CustomVM {
-		if importable.Sidecar.CustomVMRepoURL == "" {
-			return fmt.Errorf("repository url must be defined for custom vm import")
-		}
-		if importable.Sidecar.CustomVMBranch == "" {
-			return fmt.Errorf("repository branch must be defined for custom vm import")
-		}
-		if importable.Sidecar.CustomVMBuildScript == "" {
-			return fmt.Errorf("build script must be defined for custom vm import")
-		}
-
-		if err := vm.BuildCustomVM(app, &importable.Sidecar); err != nil {
-			return err
-		}
-
-		vmPath := app.GetCustomVMPath(subnetName)
-		rpcVersion, err := vm.GetVMBinaryProtocolVersion(vmPath)
-		if err != nil {
-			return fmt.Errorf("unable to get custom binary RPC version: %w", err)
-		}
-		if rpcVersion != importable.Sidecar.RPCVersion {
-			return fmt.Errorf("RPC version mismatch between sidecar and vm binary (%d vs %d)", importable.Sidecar.RPCVersion, rpcVersion)
-		}
-	}
-
-	if err := app.WriteGenesisFile(subnetName, importable.Genesis); err != nil {
+	err = app.WriteGenesisFile(subnetName, importable.Genesis)
+	if err != nil {
 		return err
 	}
 
-	if importable.NodeConfig != nil {
-		if err := app.WriteLuxdNodeConfigFile(subnetName, importable.NodeConfig); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetLuxdNodeConfigPath(subnetName))
-	}
-
-	if importable.ChainConfig != nil {
-		if err := app.WriteChainConfigFile(subnetName, importable.ChainConfig); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetChainConfigPath(subnetName))
-	}
-
-	if importable.SubnetConfig != nil {
-		if err := app.WriteLuxdSubnetConfigFile(subnetName, importable.SubnetConfig); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetLuxdSubnetConfigPath(subnetName))
-	}
-
-	if importable.NetworkUpgrades != nil {
-		if err := app.WriteNetworkUpgradesFile(subnetName, importable.NetworkUpgrades); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetUpgradeBytesFilepath(subnetName))
-	}
-
-	if err := app.CreateSidecar(&importable.Sidecar); err != nil {
+	err = app.CreateSidecar(&importable.Sidecar)
+	if err != nil {
 		return err
 	}
 
@@ -195,17 +137,8 @@ func importFromFile(importPath string) error {
 	return nil
 }
 
-func importFromLPM() error {
-	// setup lpm
-	usr, err := user.Current()
-	if err != nil {
-		return err
-	}
-	lpmBaseDir := filepath.Join(usr.HomeDir, constants.LPMDir)
-	if err = lpmintegration.SetupLpm(app, lpmBaseDir); err != nil {
-		return err
-	}
-	installedRepos, err := lpmintegration.GetRepos(app)
+func importFromAPM() error {
+	installedRepos, err := apmintegration.GetRepos(app)
 	if err != nil {
 		return err
 	}
@@ -262,18 +195,18 @@ func importFromLPM() error {
 			}
 		}
 
-		repoAlias, err = lpmintegration.AddRepo(app, repoURL, branch)
+		repoAlias, err = apmintegration.AddRepo(app, repoURL, branch)
 		if err != nil {
 			return err
 		}
 
-		err = lpmintegration.UpdateRepos(app)
+		err = apmintegration.UpdateRepos(app)
 		if err != nil {
 			return err
 		}
 	}
 
-	subnets, err := lpmintegration.GetSubnets(app, repoAlias)
+	subnets, err := apmintegration.GetSubnets(app, repoAlias)
 	if err != nil {
 		return err
 	}
@@ -297,10 +230,10 @@ func importFromLPM() error {
 		}
 	}
 
-	subnetKey := lpmintegration.MakeKey(repoAlias, subnet)
+	subnetKey := apmintegration.MakeKey(repoAlias, subnet)
 
 	// Populate the sidecar and create a genesis
-	subnetDescr, err := lpmintegration.LoadSubnetFile(app, subnetKey)
+	subnetDescr, err := apmintegration.LoadSubnetFile(app, subnetKey)
 	if err != nil {
 		return err
 	}
@@ -313,7 +246,7 @@ func importFromLPM() error {
 		return errors.New("multiple vm subnets not supported")
 	}
 
-	vmDescr, err := lpmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
+	vmDescr, err := apmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
 	if err != nil {
 		return err
 	}
@@ -331,13 +264,13 @@ func importFromLPM() error {
 		Subnet:          subnetDescr.Alias,
 		TokenName:       constants.DefaultTokenName,
 		Version:         constants.SidecarVersion,
-		ImportedFromLPM: true,
+		ImportedFromAPM: true,
 		ImportedVMID:    vmDescr.ID,
 	}
 
 	ux.Logger.PrintToUser("Selected subnet, installing " + subnetKey)
 
-	if err = lpmintegration.InstallVM(app, subnetKey); err != nil {
+	if err = apmintegration.InstallVM(app, subnetKey); err != nil {
 		return err
 	}
 

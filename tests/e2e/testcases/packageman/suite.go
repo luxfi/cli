@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package packageman
@@ -6,8 +6,8 @@ package packageman
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/tests/e2e/commands"
-	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/tests/e2e/commands"
+	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -44,10 +44,10 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 	ginkgo.It("can deploy a subnet with subnet-evm version", func() {
 		// check subnet-evm install precondition
 		gomega.Expect(utils.CheckSubnetEVMExists(binaryToVersion[utils.SoloSubnetEVMKey1])).Should(gomega.BeFalse())
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.SoloLuxdKey])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeFalse())
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1])
-		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.SoloLuxdKey])
+		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.SoloLuxKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 
 		// check subnet-evm install
 		gomega.Expect(utils.CheckSubnetEVMExists(binaryToVersion[utils.SoloSubnetEVMKey1])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.SoloLuxdKey])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})
@@ -114,12 +114,12 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can deploy with multiple node versions", func() {
-		// check luxd install precondition
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.MultiLuxd1Key])).Should(gomega.BeFalse())
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.MultiLuxd2Key])).Should(gomega.BeFalse())
+		// check lux install precondition
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
 
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.MultiLuxdSubnetEVMKey])
-		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLuxd1Key])
+		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.MultiLuxSubnetEVMKey])
+		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLux1Key])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -144,13 +144,13 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		// check luxd install
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.MultiLuxd1Key])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.MultiLuxd2Key])).Should(gomega.BeFalse())
+		// check lux install
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
 
 		commands.CleanNetwork()
 
-		deployOutput = commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLuxd2Key])
+		deployOutput = commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLux2Key])
 		rpcs, err = utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -165,9 +165,9 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		// check luxd install
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.MultiLuxd1Key])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckLuxdExists(binaryToVersion[utils.MultiLuxd2Key])).Should(gomega.BeTrue())
+		// check lux install
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})

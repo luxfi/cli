@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -6,8 +6,8 @@ package network
 import (
 	"fmt"
 
-	"github.com/luxdefi/cli/tests/e2e/commands"
-	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/tests/e2e/commands"
+	"github.com/luxfi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

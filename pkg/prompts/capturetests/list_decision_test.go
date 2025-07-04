@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package capturetests
@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxdefi/cli/internal/mocks"
-	"github.com/luxdefi/cli/pkg/prompts"
+	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package key
@@ -12,15 +12,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/cb58"
-	"github.com/luxdefi/node/utils/crypto/secp256k1"
-	"github.com/luxdefi/node/utils/formatting/address"
-	"github.com/luxdefi/node/vms/components/lux"
-	"github.com/luxdefi/node/vms/platformvm/txs"
-	"github.com/luxdefi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/cb58"
+	"github.com/luxfi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/node/vms/components/lux"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/secp256k1fx"
 
 	eth_crypto "github.com/ethereum/go-ethereum/crypto"
 	"go.uber.org/zap"
@@ -41,7 +39,6 @@ type SoftKey struct {
 	privKeyEncoded string
 
 	pAddr string
-	xAddr string
 
 	keyChain *secp256k1fx.Keychain
 }
@@ -54,7 +51,7 @@ const (
 	EwoqPrivateKey = privKeyEncPfx + rawEwoqPk
 )
 
-var ewoqKeyBytes = []byte("56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027")
+var keyFactory = new(secp256k1.Factory)
 
 type SOp struct {
 	privKey        *secp256k1.PrivateKey
@@ -104,7 +101,7 @@ func NewSoft(networkID uint32, opts ...SOpOption) (*SoftKey, error) {
 	// generate a new one
 	if ret.privKey == nil {
 		var err error
-		ret.privKey, err = secp256k1.NewPrivateKey()
+		ret.privKey, err = keyFactory.NewPrivateKey()
 		if err != nil {
 			return nil, err
 		}
@@ -139,10 +136,6 @@ func NewSoft(networkID uint32, opts ...SOpOption) (*SoftKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	m.xAddr, err = address.Format("X", hrp, m.privKey.PublicKey().Address().Bytes())
-	if err != nil {
-		return nil, err
-	}
 
 	return m, nil
 }
@@ -153,16 +146,7 @@ func LoadSoft(networkID uint32, keyPath string) (*SoftKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	return LoadSoftFromBytes(networkID, kb)
-}
 
-func LoadEwoq(networkID uint32) (*SoftKey, error) {
-	ux.Logger.PrintToUser("Loading EWOQ key")
-	return LoadSoftFromBytes(networkID, ewoqKeyBytes)
-}
-
-// LoadSoftFromBytes loads the private key from bytes and creates the corresponding SoftKey.
-func LoadSoftFromBytes(networkID uint32, kb []byte) (*SoftKey, error) {
 	// in case, it's already encoded
 	k, err := NewSoft(networkID, WithPrivateKeyEncoded(string(kb)))
 	if err == nil {
@@ -186,7 +170,7 @@ func LoadSoftFromBytes(networkID uint32, kb []byte) (*SoftKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	privKey, err := secp256k1.ToPrivateKey(skBytes)
+	privKey, err := keyFactory.ToPrivateKey(skBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +227,7 @@ func decodePrivateKey(enc string) (*secp256k1.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	privKey, err := secp256k1.ToPrivateKey(skBytes)
+	privKey, err := keyFactory.ToPrivateKey(skBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -281,15 +265,11 @@ func (m *SoftKey) Encode() string {
 // Saves the private key to disk with hex encoding.
 func (m *SoftKey) Save(p string) error {
 	k := hex.EncodeToString(m.privKeyRaw)
-	return os.WriteFile(p, []byte(k), constants.WriteReadUserOnlyPerms)
+	return os.WriteFile(p, []byte(k), fsModeWrite)
 }
 
 func (m *SoftKey) P() []string {
 	return []string{m.pAddr}
-}
-
-func (m *SoftKey) X() []string {
-	return []string{m.xAddr}
 }
 
 func (m *SoftKey) Spends(outputs []*lux.UTXO, opts ...OpOption) (
@@ -345,6 +325,8 @@ func (m *SoftKey) spend(output *lux.UTXO, time uint64) (
 	}
 	return input, psigners, nil
 }
+
+const fsModeWrite = 0o600
 
 func (m *SoftKey) Addresses() []ids.ShortID {
 	return []ids.ShortID{m.privKey.PublicKey().Address()}

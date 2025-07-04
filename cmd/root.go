@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package cmd
 
@@ -11,29 +11,26 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxdefi/cli/cmd/primarycmd"
+	"github.com/luxfi/cli/cmd/configcmd"
 
-	"github.com/luxdefi/cli/cmd/nodecmd"
-
-	"github.com/luxdefi/cli/cmd/configcmd"
-
-	"github.com/luxdefi/cli/cmd/backendcmd"
-	"github.com/luxdefi/cli/cmd/keycmd"
-	"github.com/luxdefi/cli/cmd/networkcmd"
-	"github.com/luxdefi/cli/cmd/subnetcmd"
-	"github.com/luxdefi/cli/cmd/transactioncmd"
-	"github.com/luxdefi/cli/cmd/updatecmd"
-	"github.com/luxdefi/cli/internal/migrations"
-	"github.com/luxdefi/cli/pkg/application"
-	"github.com/luxdefi/cli/pkg/config"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/metrics"
-	"github.com/luxdefi/cli/pkg/prompts"
-	"github.com/luxdefi/cli/pkg/utils"
-	"github.com/luxdefi/cli/pkg/ux"
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxfi/cli/cmd/backendcmd"
+	"github.com/luxfi/cli/cmd/keycmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
+	"github.com/luxfi/cli/cmd/subnetcmd"
+	"github.com/luxfi/cli/cmd/transactioncmd"
+	"github.com/luxfi/cli/cmd/updatecmd"
+	"github.com/luxfi/cli/internal/migrations"
+	"github.com/luxfi/cli/pkg/apmintegration"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/config"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/utils/perms"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -49,13 +46,13 @@ var (
 func NewRootCmd() *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
-		Use: "lux",
-		Long: `Lux-CLI is a command-line tool that gives developers access to
+		Use: "avalanche",
+		Long: `Lux CLI is a command-line tool that gives developers access to
 everything Lux. This release specializes in helping developers
 build and test Subnets.
 
 To get started, look at the documentation for the subcommands or jump right
-in with lux subnet create myNewSubnet.`,
+in with avalanche subnet create myNewSubnet.`,
 		PersistentPreRunE: createApp,
 		Version:           Version,
 		PersistentPostRun: handleTracking,
@@ -64,13 +61,12 @@ in with lux subnet create myNewSubnet.`,
 	// Disable printing the completion command
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli/config.json)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli.json)")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "ERROR", "log level for the application")
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
 	// add sub commands
 	rootCmd.AddCommand(subnetcmd.NewCmd(app))
-	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(networkcmd.NewCmd(app))
 	rootCmd.AddCommand(keycmd.NewCmd(app))
 
@@ -85,9 +81,6 @@ in with lux subnet create myNewSubnet.`,
 
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
-
-	// add node command
-	rootCmd.AddCommand(nodecmd.NewCmd(app))
 	return rootCmd
 }
 
@@ -103,13 +96,27 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	cf := config.New()
 	app.Setup(baseDir, log, cf, prompts.NewPrompter(), application.NewDownloader())
 
+	// Setup APM, skip if running a hidden command
+	if !cmd.Hidden {
+		usr, err := user.Current()
+		if err != nil {
+			app.Log.Error("unable to get system user")
+			return err
+		}
+		apmBaseDir := filepath.Join(usr.HomeDir, constants.APMDir)
+		if err = apmintegration.SetupApm(app, apmBaseDir); err != nil {
+			return err
+		}
+	}
+
 	initConfig()
 
 	if err := migrations.RunMigrations(app); err != nil {
 		return err
 	}
-	if os.Getenv("RUN_E2E") == "" && !app.Conf.ConfigFileExists() && !utils.FileExists(utils.UserHomePath(constants.OldMetricsConfigFileName)) {
-		err = metrics.HandleUserMetricsPreference(app)
+
+	if os.Getenv("RUN_E2E") == "" && !app.ConfigFileExists() {
+		err = utils.HandleUserMetricsPreference(app)
 		if err != nil {
 			return err
 		}
@@ -169,27 +176,25 @@ func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
 	isUserCalled := false
 	commandList := strings.Fields(cmd.CommandPath())
 	if !(len(commandList) > 1 && commandList[1] == "update") {
-		if lastActs.LastCheckGit != (time.Time{}) && time.Now().Before(lastActs.LastCheckGit.Add(24*time.Hour)) {
-			if err := updatecmd.Update(cmd, isUserCalled, Version, lastActs); err != nil {
-				if errors.Is(err, updatecmd.ErrUserAbortedInstallation) {
-					return nil
-				}
-				if err == updatecmd.ErrNoVersion {
-					ux.Logger.PrintToUser(
-						"Attempted to check if a new version is available, but couldn't find the currently running version information")
-					ux.Logger.PrintToUser(
-						"Make sure to follow official instructions, or automatic updates won't be available for you")
-					return nil
-				}
-				return err
+		if err := updatecmd.Update(cmd, isUserCalled, Version); err != nil {
+			if errors.Is(err, updatecmd.ErrUserAbortedInstallation) {
+				return nil
 			}
+			if err == updatecmd.ErrNoVersion {
+				ux.Logger.PrintToUser(
+					"Attempted to check if a new version is available, but couldn't find the currently running version information")
+				ux.Logger.PrintToUser(
+					"Make sure to follow official instructions, or automatic updates won't be available for you")
+				return nil
+			}
+			return err
 		}
 	}
 	return nil
 }
 
 func handleTracking(cmd *cobra.Command, _ []string) {
-	metrics.HandleTracking(cmd, app, nil)
+	utils.HandleTracking(cmd, app, nil)
 }
 
 func setupEnv() (string, error) {
@@ -275,7 +280,7 @@ func setupLogging(baseDir string) (logging.Logger, error) {
 	config.MaxAge = constants.RetainOldFiles
 
 	factory := logging.NewFactory(config)
-	log, err := factory.Make("lux")
+	log, err := factory.Make("avalanche")
 	if err != nil {
 		factory.Close()
 		return nil, fmt.Errorf("failed setting up logging, exiting: %w", err)
@@ -287,21 +292,25 @@ func setupLogging(baseDir string) (logging.Logger, error) {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	oldConfig := utils.UserHomePath(constants.OldConfigFileName)
-	oldMetricsConfig := utils.UserHomePath(constants.OldMetricsConfigFileName)
-	if utils.FileExists(oldConfig) || utils.FileExists(oldMetricsConfig) {
-		ux.Logger.PrintToUser("-----------------------------------------------------------------------")
-		ux.Logger.PrintToUser("WARNING: Old configuration file was found in %s and/or %s", oldConfig, oldMetricsConfig)
-		ux.Logger.PrintToUser("Please run `lux config migrate` to migrate it to new default location %s", cfgFile)
-		ux.Logger.PrintToUser("-----------------------------------------------------------------------")
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// Search for default config.
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+		viper.AddConfigPath(home)
+		viper.SetConfigType(constants.DefaultConfigFileType)
+		viper.SetConfigName(constants.DefaultConfigFileName)
 	}
-	if cfgFile == "" {
-		cfgFile = utils.UserHomePath(constants.DefaultConfigFileName)
-	}
-	app.Conf.SetConfig(app.Log, cfgFile)
-	// check if metrics setting is available, and if not load metricConfig
-	if !app.Conf.ConfigValueIsSet(constants.ConfigMetricsEnabledKey) {
-		app.Conf.MergeConfig(app.Log, oldMetricsConfig)
+
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err == nil {
+		app.Log.Info("Using config file", zap.String("config-file", viper.ConfigFileUsed()))
+	} else {
+		app.Log.Info("No log file found")
 	}
 }
 

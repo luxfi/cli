@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package networkcmd
 
@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/luxdefi/cli/pkg/elasticsubnet"
+	"github.com/luxfi/cli/pkg/elasticsubnet"
 
-	"github.com/luxdefi/cli/pkg/binutils"
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/pkg/models"
-	"github.com/luxdefi/cli/pkg/subnet"
-	"github.com/luxdefi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/ux"
 	"github.com/shirou/gopsutil/process"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -46,9 +46,7 @@ configuration.`,
 func clean(*cobra.Command, []string) error {
 	app.Log.Info("killing gRPC server process...")
 
-	configSingleNodeEnabled := app.Conf.GetConfigBoolValue(constants.ConfigSingleNodeEnabledKey)
-
-	if err := subnet.SetDefaultSnapshot(app.GetSnapshotsDir(), true, configSingleNodeEnabled); err != nil {
+	if err := subnet.SetDefaultSnapshot(app.GetSnapshotsDir(), true); err != nil {
 		app.Log.Warn("failed resetting default snapshot", zap.Error(err))
 	}
 

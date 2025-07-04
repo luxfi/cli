@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Partners Limited, All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package commands
@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/luxdefi/cli/pkg/constants"
-	"github.com/luxdefi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
 
@@ -53,18 +53,18 @@ func StartNetwork() string {
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return StartNetworkWithVersion(mapping[utils.OnlyLuxdKey])
+	return StartNetworkWithVersion(mapping[utils.OnlyLuxKey])
 }
 
 /* #nosec G204 */
 func StartNetworkWithVersion(version string) string {
 	cmdArgs := []string{NetworkCmd, "start"}
-	cmdArgs = append(cmdArgs, "--"+constants.SkipUpdateFlag)
 	if version != "" {
 		cmdArgs = append(
 			cmdArgs,
 			"--node-version",
 			version,
+			"--"+constants.SkipUpdateFlag,
 		)
 	}
 	cmd := exec.Command(CLIBinary, cmdArgs...)
