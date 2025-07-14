@@ -3,7 +3,7 @@ module github.com/luxfi/cli
 go 1.19
 
 require (
-	github.com/luxfi/apm v0.0.4
+	// github.com/luxfi/apm v0.0.4
 	github.com/luxfi/netrunner v1.6.0
 	github.com/luxfi/node v1.10.2
 	github.com/luxfi/coreth v0.12.2
@@ -29,6 +29,13 @@ require (
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+replace (
+	github.com/luxfi/coreth => github.com/ava-labs/coreth v0.12.2
+	github.com/luxfi/node => github.com/ava-labs/avalanchego v1.10.2
+	github.com/luxfi/subnet-evm => github.com/ava-labs/subnet-evm v0.5.1
+	github.com/luxfi/netrunner => github.com/ava-labs/avalanche-network-runner v1.6.0
 )
 
 require (
