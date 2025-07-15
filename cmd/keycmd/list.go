@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/coreth/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

@@ -48,13 +48,13 @@ func newAutomineStartCmd(flags *autominingFlags) *cobra.Command {
 		Short: "Start automining",
 		Long:  `Start automining on a running Lux node`,
 		Example: `  # Start automining with default account
-  avalanche node automine start
+  lux node automine start
 
   # Start automining with specific account
-  avalanche node automine start --account 0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC
+  lux node automine start --account 0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC
 
   # Start automining and monitor blocks
-  avalanche node automine start --monitor`,
+  lux node automine start --monitor`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return startAutomining(flags)
 		},
@@ -75,7 +75,7 @@ func newAutomineStopCmd(flags *autominingFlags) *cobra.Command {
 		Short: "Stop automining",
 		Long:  `Stop automining on a running Lux node`,
 		Example: `  # Stop automining
-  avalanche node automine stop`,
+  lux node automine stop`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return stopAutomining(flags)
 		},
@@ -92,7 +92,7 @@ func newAutomineStatusCmd(flags *autominingFlags) *cobra.Command {
 		Short: "Check automining status",
 		Long:  `Check the current automining status on a running Lux node`,
 		Example: `  # Check automining status
-  avalanche node automine status`,
+  lux node automine status`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return checkAutominingStatus(flags)
 		},
