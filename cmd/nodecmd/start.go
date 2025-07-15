@@ -39,13 +39,13 @@ func newStartCmd() *cobra.Command {
 		Long: `Start a Lux node with custom configuration options.
 This command provides fine-grained control over node startup parameters.`,
 		Example: `  # Start mainnet node with skip-bootstrap
-  avalanche node start --network-id 96369 --skip-bootstrap
+  lux node start --network-id 96369 --skip-bootstrap
 
   # Start with existing data
-  avalanche node start --existing-data /path/to/data
+  lux node start --existing-data /path/to/data
 
   # Start with custom ports
-  avalanche node start --http-port 8545 --staking-port 8546`,
+  lux node start --http-port 8545 --staking-port 8546`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runStart(flags)
 		},

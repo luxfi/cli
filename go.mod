@@ -6,7 +6,7 @@ require (
 	// github.com/luxfi/apm v0.0.4
 	github.com/luxfi/netrunner v1.6.0
 	github.com/luxfi/node v1.10.2
-	github.com/luxfi/coreth v0.12.2
+	github.com/luxfi/geth v0.12.2
 	github.com/luxfi/subnet-evm v0.5.1
 	github.com/docker/docker v24.0.1+incompatible
 	github.com/ethereum/go-ethereum v1.10.26
@@ -31,13 +31,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace (
-	github.com/luxfi/coreth => github.com/ava-labs/coreth v0.12.2
-	github.com/luxfi/node => github.com/ava-labs/avalanchego v1.10.2
-	github.com/luxfi/subnet-evm => github.com/ava-labs/subnet-evm v0.5.1
-	github.com/luxfi/netrunner => github.com/ava-labs/avalanche-network-runner v1.6.0
-)
-
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/DataDog/zstd v1.5.2 // indirect
@@ -46,7 +39,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
-	github.com/luxdefi/ledger-lux-go v0.0.1 // indirect
+	github.com/luxfi/ledger-lux-go v0.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect

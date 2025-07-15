@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/coreth/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	"go.uber.org/zap"
 
 	"github.com/luxfi/cli/pkg/constants"
