@@ -41,16 +41,16 @@ similar to 'geth --dev'. This mode includes:
 - Pre-funded test accounts
 - Instant finality`,
 		Example: `  # Start dev mode with default settings
-  avalanche node dev
+  lux node dev
 
   # Start with automining enabled
-  avalanche node dev --automine
+  lux node dev --automine
 
   # Start on custom ports
-  avalanche node dev --http-port 8545 --staking-port 8546
+  lux node dev --http-port 8545 --staking-port 8546
 
   # Start multiple instances
-  avalanche node dev --instance 2`,
+  lux node dev --instance 2`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDev(flags)
 		},
@@ -62,7 +62,7 @@ similar to 'geth --dev'. This mode includes:
 	cmd.Flags().StringVar(&flags.dataDir, "data-dir", "", "Data directory (default: temp directory)")
 	cmd.Flags().Uint32Var(&flags.chainID, "chain-id", 96369, "Chain ID for C-Chain")
 	cmd.Flags().BoolVar(&flags.automine, "automine", true, "Enable automining")
-	cmd.Flags().IntVar(&flags.blockTime, "block-time", 2, "Block time in seconds (for automining)")
+	cmd.Flags().IntVar(&flags.blockTime, "block-time", 1, "Block time in seconds (for automining)")
 	cmd.Flags().StringSliceVar(&flags.accounts, "accounts", []string{"0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"}, "Pre-funded accounts")
 	cmd.Flags().StringVar(&flags.balance, "balance", "1000000", "Initial balance in LUX for accounts")
 
