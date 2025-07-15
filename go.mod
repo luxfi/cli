@@ -46,7 +46,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
-	github.com/luxfi/ledger-avalanche/go v0.0.0-20230105152938-00a24d05a8c7 // indirect
+	github.com/luxdefi/ledger-lux-go v0.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
@@ -135,7 +135,7 @@ require (
 	github.com/xtgo/uuid v0.0.0-20140804021211-a0b114877d4c // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	github.com/zondax/hid v0.9.1 // indirect
-	github.com/zondax/ledger-go v0.14.1 // indirect
+	github.com/zondax/ledger-go v0.14.3 // indirect
 	go.opentelemetry.io/otel v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.0 // indirect

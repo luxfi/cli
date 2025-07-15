@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
+	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
@@ -68,6 +69,7 @@ in with avalanche subnet create myNewSubnet.`,
 	// add sub commands
 	rootCmd.AddCommand(subnetcmd.NewCmd(app))
 	rootCmd.AddCommand(networkcmd.NewCmd(app))
+	rootCmd.AddCommand(nodecmd.NewCmd(app))
 	rootCmd.AddCommand(keycmd.NewCmd(app))
 
 	// add hidden backend command
