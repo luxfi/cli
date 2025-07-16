@@ -12,18 +12,28 @@ import (
 
 var app *application.Lux
 
-// avalanche subnet
+// lux l2 (alias: subnet for backward compatibility)
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "subnet",
-		Short: "Create and deploy subnets",
-		Long: `The subnet command suite provides a collection of tools for developing
-and deploying Subnets.
+		Use:     "l2",
+		Aliases: []string{"subnet"},
+		Short:   "Create and deploy L2s",
+		Long: `The l2 command suite provides tools for creating and deploying L2s.
 
-To get started, use the subnet create command wizard to walk through the
-configuration of your very first Subnet. Then, go ahead and deploy it
-with the subnet deploy command. You can use the rest of the commands to
-manage your Subnet configurations and live deployments.`,
+L2s (formerly subnets) support multiple sequencing models:
+- Lux: Based rollup, 100ms blocks, lowest cost
+- Ethereum: Based rollup, 12s blocks, highest security  
+- Avalanche: Based rollup, 2s blocks, fast finality
+- OP: OP Stack compatible for Optimism ecosystem
+- External: Traditional centralized sequencer
+
+Features:
+- EIP-4844 blob support for data availability
+- Pre-confirmations for <100ms transaction acknowledgment
+- IBC/Teleport for cross-chain messaging
+- Ringtail post-quantum signatures
+
+To get started, use 'lux l2 create' to configure your L2.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := cmd.Help()
 			if err != nil {
@@ -60,6 +70,8 @@ manage your Subnet configurations and live deployments.`,
 	cmd.AddCommand(newConfigureCmd())
 	// subnet import-running
 	cmd.AddCommand(newImportFromNetworkCmd())
+	// subnet import-historic
+	cmd.AddCommand(newImportHistoricCmd())
 	// subnet VMID
 	cmd.AddCommand(vmidCmd())
 	// subnet removeValidator
@@ -68,5 +80,7 @@ manage your Subnet configurations and live deployments.`,
 	cmd.AddCommand(newElasticCmd())
 	// subnet validators
 	cmd.AddCommand(newValidatorsCmd())
+	// subnet migrate-base
+	cmd.AddCommand(newMigrateBaseCmd())
 	return cmd
 }

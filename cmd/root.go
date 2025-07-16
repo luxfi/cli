@@ -15,6 +15,9 @@ import (
 
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/keycmd"
+	"github.com/luxfi/cli/cmd/l1cmd"
+	"github.com/luxfi/cli/cmd/l3cmd"
+	"github.com/luxfi/cli/cmd/migratecmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/subnetcmd"
@@ -48,12 +51,29 @@ func NewRootCmd() *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
 		Use: "lux",
-		Long: `Lux CLI is a command-line tool that gives developers access to
-everything Lux. This release specializes in helping developers
-build and test Subnets.
+		Long: `Lux CLI v2 - unified toolchain for sovereign L1s, based rollups, and L3s.
 
-To get started, look at the documentation for the subcommands or jump right
-in with lux subnet create myNewSubnet.`,
+Architecture:
+- L1: Sovereign chains with independent validation
+- L2: Based rollups or OP Stack compatible (formerly subnets)
+- L3: App-specific chains on L2s
+
+Sequencing options:
+- Lux: 100ms blocks, lowest cost (default)
+- Ethereum: 12s blocks, highest security
+- Avalanche: 2s blocks, fast finality
+- OP: Optimism ecosystem compatible
+
+Features:
+- EIP-4844 blob support
+- Pre-confirmations (<100ms ack)
+- IBC/Teleport cross-chain messaging
+- Ringtail post-quantum signatures
+
+Quick start:
+  lux l1 create sovereign       # Sovereign L1
+  lux l2 create rollup          # L2 (based rollup)
+  lux l3 create app --l2 rollup # L3 (app chain)`,
 		PersistentPreRunE: createApp,
 		Version:           Version,
 		PersistentPostRun: handleTracking,
@@ -67,7 +87,9 @@ in with lux subnet create myNewSubnet.`,
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
 	// add sub commands
-	rootCmd.AddCommand(subnetcmd.NewCmd(app))
+	rootCmd.AddCommand(l1cmd.NewCmd(app))
+	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
+	rootCmd.AddCommand(l3cmd.NewCmd(app))
 	rootCmd.AddCommand(networkcmd.NewCmd(app))
 	rootCmd.AddCommand(nodecmd.NewCmd(app))
 	rootCmd.AddCommand(keycmd.NewCmd(app))
@@ -83,6 +105,8 @@ in with lux subnet create myNewSubnet.`,
 
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
+	// add migrate command
+	rootCmd.AddCommand(migratecmd.NewCmd(app))
 	return rootCmd
 }
 
