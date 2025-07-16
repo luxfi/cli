@@ -6,8 +6,7 @@ package apmintegration
 import (
 	"os"
 
-	"github.com/luxfi/apm/apm"
-	"github.com/luxfi/apm/config"
+	"github.com/luxfi/cli/pkg/apm"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
