@@ -1,6 +1,19 @@
 module github.com/luxfi/cli
 
-go 1.19
+go 1.22
+
+replace (
+	github.com/luxfi/node => ../node
+	github.com/luxfi/geth => ../geth
+	github.com/luxfi/evm => ../evm
+	github.com/luxdefi/subnet-evm => ../evm
+	github.com/luxfi/ledger-lux-go => github.com/luxdefi/ledger-lux-go v0.0.1
+	github.com/ava-labs/coreth => ../geth
+	github.com/luxfi/coreth => github.com/luxdefi/coreth v0.13.7
+	github.com/luxdefi/coreth => github.com/luxfi/coreth v0.13.7
+	github.com/luxdefi/node => github.com/luxfi/node v1.11.10
+	github.com/luxdefi/netrunner => github.com/luxfi/netrunner v1.7.7
+)
 
 require (
 	// github.com/luxfi/apm v0.0.4

@@ -30,6 +30,10 @@ var (
 	useCustom        bool
 	vmVersion        string
 	useLatestVersion bool
+	
+	// L2/Sequencer flags
+	sequencer        string
+	enablePreconfirm bool
 
 	errIllegalNameCharacter = errors.New(
 		"illegal name character: only letters, no special characters allowed")
@@ -40,17 +44,22 @@ func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [subnetName]",
 		Short: "Create a new subnet configuration",
-		Long: `The subnet create command builds a new genesis file to configure your Subnet.
-By default, the command runs an interactive wizard. It walks you through
-all the steps you need to create your first Subnet.
+		Long: `The subnet create command builds a new subnet configuration that can be
+deployed as an L2 (using any L1 as sequencer) or as a sovereign L1.
 
-The tool supports deploying Subnet-EVM, and custom VMs. You
-can create a custom, user-generated genesis with a custom VM by providing
-the path to your genesis and VM binaries with the --genesis and --vm flags.
+Subnets are L2s that can use different sequencing models:
+- Based rollups: Use L1 block proposers as sequencers (Ethereum, Lux L1, etc.)
+- Centralized: Traditional single sequencer model
+- Distributed: Multiple sequencers with consensus
 
-By default, running the command with a subnetName that already exists
-causes the command to fail. If you’d like to overwrite an existing
-configuration, pass the -f flag.`,
+By default, the command runs an interactive wizard. It supports:
+- Subnet-EVM and custom VMs
+- Multiple base chains for sequencing
+- Pre-confirmations for fast UX
+- Migration paths between different models
+
+Use --sequencer to specify the sequencing model (lux, ethereum, avalanche, op, external).
+Use -f to overwrite existing configurations.`,
 		SilenceUsage:      true,
 		Args:              cobra.ExactArgs(1),
 		RunE:              createSubnetConfig,
@@ -63,6 +72,10 @@ configuration, pass the -f flag.`,
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
 	cmd.Flags().BoolVar(&useLatestVersion, latest, false, "use latest VM version, takes precedence over --vm-version")
 	cmd.Flags().BoolVarP(&forceCreate, forceFlag, "f", false, "overwrite the existing configuration if one exists")
+	
+	// L2/Sequencer flags
+	cmd.Flags().StringVar(&sequencer, "sequencer", "", "sequencer for the L2 (lux, ethereum, avalanche, op, external)")
+	cmd.Flags().BoolVar(&enablePreconfirm, "enable-preconfirm", false, "enable pre-confirmations for fast UX")
 	return cmd
 }
 
@@ -148,6 +161,70 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		return errors.New("not implemented")
 	}
 
+	// Configure L2/Sequencer settings
+	if sequencer == "" && !cmd.Flags().Changed("sequencer") {
+		// Interactive sequencer selection
+		sequencerOptions := []string{
+			"Lux (100ms blocks, lowest cost, based rollup)",
+			"Ethereum (12s blocks, highest security, based rollup)",
+			"Avalanche (2s blocks, fast finality, based rollup)",
+			"OP Stack (Optimism compatible)",
+			"External (Traditional sequencer)",
+			"None (Deploy as sovereign L1)",
+		}
+		
+		choice, err := app.Prompt.CaptureList(
+			"Select sequencer for your L2",
+			sequencerOptions,
+		)
+		if err != nil {
+			return err
+		}
+		
+		switch choice {
+		case "Lux (100ms blocks, lowest cost, based rollup)":
+			sequencer = "lux"
+		case "Ethereum (12s blocks, highest security, based rollup)":
+			sequencer = "ethereum"
+		case "Avalanche (2s blocks, fast finality, based rollup)":
+			sequencer = "avalanche"
+		case "OP Stack (Optimism compatible)":
+			sequencer = "op"
+		case "External (Traditional sequencer)":
+			sequencer = "external"
+		case "None (Deploy as sovereign L1)":
+			sc.Sovereign = true
+		}
+	}
+
+	// Apply L2 configuration
+	if sequencer != "" {
+		sc.BaseChain = sequencer
+		sc.BasedRollup = isBasedRollup(sequencer)
+		sc.Sovereign = false // L2s are not sovereign
+		sc.SequencerType = sequencer
+		sc.L1BlockTime = getBlockTime(sequencer)
+		sc.PreconfirmEnabled = enablePreconfirm
+		
+		ux.Logger.PrintToUser("🔧 L2 Configuration:")
+		ux.Logger.PrintToUser("   Sequencer: %s", sequencer)
+		if isBasedRollup(sequencer) {
+			ux.Logger.PrintToUser("   Type: Based rollup (L1-sequenced)")
+		} else if sequencer == "op" {
+			ux.Logger.PrintToUser("   Type: OP Stack compatible")
+		} else {
+			ux.Logger.PrintToUser("   Type: External sequencer")
+		}
+		ux.Logger.PrintToUser("   Block Time: %dms", sc.L1BlockTime)
+		if enablePreconfirm {
+			ux.Logger.PrintToUser("   Pre-confirmations: Enabled")
+		}
+	} else if sc.Sovereign {
+		ux.Logger.PrintToUser("🔧 L1 Configuration:")
+		ux.Logger.PrintToUser("   Type: Sovereign L1")
+		ux.Logger.PrintToUser("   Validation: Independent")
+	}
+
 	if err = app.WriteGenesisFile(subnetName, genesisBytes); err != nil {
 		return err
 	}
@@ -172,4 +249,32 @@ func checkInvalidSubnetNames(name string) error {
 	}
 
 	return nil
+}
+
+func getBlockTime(sequencer string) int {
+	switch sequencer {
+	case "lux":
+		return 100 // 100ms
+	case "ethereum":
+		return 12000 // 12s
+	case "avalanche":
+		return 2000 // 2s
+	case "op":
+		return 2000 // 2s (OP Stack block time)
+	case "external":
+		return 1000 // 1s default for external sequencers
+	default:
+		return 100 // Default to Lux timing
+	}
+}
+
+func isBasedRollup(sequencer string) bool {
+	switch sequencer {
+	case "lux", "ethereum", "avalanche":
+		return true // These are L1s, so it's a based rollup
+	case "op", "external":
+		return false // OP Stack and external sequencers are not based rollups
+	default:
+		return false
+	}
 }
