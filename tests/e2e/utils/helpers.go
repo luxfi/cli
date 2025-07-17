@@ -284,7 +284,7 @@ func DeleteKey(keyName string) error {
 }
 
 func DeleteBins() error {
-	luxPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir)
+	luxPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxInstallDir)
 	if _, err := os.Stat(luxPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -473,8 +473,8 @@ func CheckSubnetEVMExists(version string) bool {
 	return err == nil
 }
 
-func CheckLuxGoExists(version string) bool {
-	luxPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir, "node-"+version)
+func CheckLuxExists(version string) bool {
+	luxPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.LuxInstallDir, "node-"+version)
 	_, err := os.Stat(luxPath)
 	return err == nil
 }

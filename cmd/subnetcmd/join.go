@@ -51,7 +51,7 @@ var (
 	defaultLocalNetworkNodeIDs = []string{"NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg", "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ", "NodeID-NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN", "NodeID-GWPcbFJZFfZreETSoWjPimr846mXEKCtu", "NodeID-P7oB2McjBGgW2NXXWVYjV8JEDFoW9xDE5"}
 )
 
-// avalanche subnet deploy
+// lux subnet deploy
 func newJoinCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "join [subnetName]",
@@ -174,7 +174,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 		yes := true
 		if !forceWhitelistCheck {
 			ask := "Would you like to check if your node is allowed to join this subnet?\n" +
-				"If not, the subnet's control key holder must call avalanche subnet\n" +
+				"If not, the subnet's control key holder must call lux subnet\n" +
 				"addValidator with your NodeID."
 			ux.Logger.PrintToUser(ask)
 			yes, err = app.Prompt.CaptureYesNo("Check whitelist?")

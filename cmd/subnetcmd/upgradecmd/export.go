@@ -12,7 +12,7 @@ import (
 
 var force bool
 
-// avalanche subnet upgrade import
+// lux subnet upgrade import
 func newUpgradeExportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export [subnetName]",

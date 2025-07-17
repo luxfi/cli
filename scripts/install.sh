@@ -61,10 +61,10 @@ execute() {
 }
 get_binaries() {
   case "$PLATFORM" in
-    darwin/amd64) BINARIES="avalanche" ;;
-    darwin/arm64) BINARIES="avalanche" ;;
-    linux/amd64) BINARIES="avalanche" ;;
-    linux/arm64) BINARIES="avalanche" ;;
+    darwin/amd64) BINARIES="lux" ;;
+    darwin/arm64) BINARIES="lux" ;;
+    linux/amd64) BINARIES="lux" ;;
+    linux/arm64) BINARIES="lux" ;;
     *)
       log_crit "platform $PLATFORM is not supported.  Make sure this script is up-to-date and file request at https://github.com/${PREFIX}/issues/new"
       exit 1
@@ -336,7 +336,7 @@ EOF
 PROJECT_NAME=cli
 OWNER=luxfi
 REPO="cli"
-BINARY=avalanche
+BINARY=lux
 FORMAT=tar.gz
 OS=$(uname_os)
 ARCH=$(uname_arch)
@@ -388,12 +388,12 @@ sed_in_place() {
 completions() {
   BASH_COMPLETION_MAIN=~/.bash_completion
   BASH_COMPLETION_SCRIPTS_DIR=~/.local/share/bash-completion/completions
-  BASH_COMPLETION_SCRIPT_PATH=$BASH_COMPLETION_SCRIPTS_DIR/avalanche.sh
+  BASH_COMPLETION_SCRIPT_PATH=$BASH_COMPLETION_SCRIPTS_DIR/lux.sh
   mkdir -p $BASH_COMPLETION_SCRIPTS_DIR
   $BINDIR/$BINARY completion bash > $BASH_COMPLETION_SCRIPT_PATH
   touch $BASH_COMPLETION_MAIN
-  sed_in_place "/.*# avalanche completion/d" $BASH_COMPLETION_MAIN
-  echo "source $BASH_COMPLETION_SCRIPT_PATH # avalanche completion" >> $BASH_COMPLETION_MAIN
+  sed_in_place "/.*# lux completion/d" $BASH_COMPLETION_MAIN
+  echo "source $BASH_COMPLETION_SCRIPT_PATH # lux completion" >> $BASH_COMPLETION_MAIN
   if [ $(uname) = Darwin ]
   then
       BREW_INSTALLED=false
@@ -402,22 +402,22 @@ completions() {
       then
           BASHRC=~/.bashrc
           touch $BASHRC
-          sed_in_place "/.*# avalanche completion/d" $BASHRC
-          echo "source $(brew --prefix)/etc/bash_completion # avalanche completion" >> $BASHRC
+          sed_in_place "/.*# lux completion/d" $BASHRC
+          echo "source $(brew --prefix)/etc/bash_completion # lux completion" >> $BASHRC
       else 
-          echo "warning: brew not found on macos. bash avalanche command completion not installed"
+          echo "warning: brew not found on macos. bash lux command completion not installed"
       fi
   fi
 
   ZSH_COMPLETION_MAIN=~/.zshrc
   ZSH_COMPLETION_SCRIPTS_DIR=~/.local/share/zsh-completion/completions
-  ZSH_COMPLETION_SCRIPT_PATH=$ZSH_COMPLETION_SCRIPTS_DIR/_avalanche
+  ZSH_COMPLETION_SCRIPT_PATH=$ZSH_COMPLETION_SCRIPTS_DIR/_lux
   mkdir -p $ZSH_COMPLETION_SCRIPTS_DIR
   $BINDIR/$BINARY completion zsh > $ZSH_COMPLETION_SCRIPT_PATH
   touch $ZSH_COMPLETION_MAIN
-  sed_in_place "/.*# avalanche completion/d" $ZSH_COMPLETION_MAIN
-  echo "fpath=($ZSH_COMPLETION_SCRIPTS_DIR \$fpath) # avalanche completion" >> $ZSH_COMPLETION_MAIN
-  echo "rm -f ~/.zcompdump; compinit # avalanche completion" >> $ZSH_COMPLETION_MAIN
+  sed_in_place "/.*# lux completion/d" $ZSH_COMPLETION_MAIN
+  echo "fpath=($ZSH_COMPLETION_SCRIPTS_DIR \$fpath) # lux completion" >> $ZSH_COMPLETION_MAIN
+  echo "rm -f ~/.zcompdump; compinit # lux completion" >> $ZSH_COMPLETION_MAIN
 }
 
 if [ "$RUN_COMPLETIONS" = true ]; then

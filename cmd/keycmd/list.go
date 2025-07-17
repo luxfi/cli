@@ -43,7 +43,7 @@ var (
 	ledgerIndices []uint
 )
 
-// avalanche subnet list
+// lux subnet list
 func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",

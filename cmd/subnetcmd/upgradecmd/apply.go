@@ -54,7 +54,7 @@ var (
 	print bool
 )
 
-// avalanche subnet upgrade apply
+// lux subnet upgrade apply
 func newUpgradeApplyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply [subnetName]",
@@ -315,7 +315,7 @@ func validateUpgrade(subnetName, networkKey string, sc *models.Sidecar, skipProm
 	if err != nil {
 		if err == os.ErrNotExist {
 			ux.Logger.PrintToUser("No file with upgrade specs for the given subnet has been found")
-			ux.Logger.PrintToUser("You may need to first create it with the `avalanche subnet upgrade generate` command or import it")
+			ux.Logger.PrintToUser("You may need to first create it with the `lux subnet upgrade generate` command or import it")
 			ux.Logger.PrintToUser("Aborting this command. No changes applied")
 		}
 		return nil, "", err

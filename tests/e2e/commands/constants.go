@@ -4,7 +4,7 @@
 package commands
 
 const (
-	CLIBinary           = "./bin/avalanche"
+	CLIBinary           = "./bin/lux"
 	SubnetCmd           = "subnet"
 	NetworkCmd          = "network"
 	KeyCmd              = "key"

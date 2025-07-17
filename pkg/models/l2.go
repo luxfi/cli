@@ -10,7 +10,7 @@ import (
 // L2Config represents a based rollup configuration
 type L2Config struct {
 	Name              string     `json:"name"`
-	BaseChain         string     `json:"baseChain"`         // ethereum, avalanche, lux-l1, op-mainnet
+	BaseChain         string     `json:"baseChain"`         // ethereum, lux, lux-l1, op-mainnet
 	RollupType        string     `json:"rollupType"`        // optimistic, zk, hybrid
 	DataAvailability  string     `json:"dataAvailability"`  // base, celestia, eigenda
 	IBCEnabled        bool       `json:"ibcEnabled"`

@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet stats
+// lux subnet stats
 func newStatsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "stats [subnetName]",

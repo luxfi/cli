@@ -27,7 +27,7 @@ var (
 	nodeURL         string
 )
 
-// avalanche subnet import
+// lux subnet import
 func newImportFromNetworkCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "public [subnetPath]",

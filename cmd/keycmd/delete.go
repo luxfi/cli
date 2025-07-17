@@ -12,7 +12,7 @@ import (
 
 var forceDelete bool
 
-// avalanche key delete
+// lux key delete
 func newDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete [keyName]",

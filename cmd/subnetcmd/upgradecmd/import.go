@@ -14,7 +14,7 @@ var upgradeBytesFilePath string
 
 const upgradeBytesFilePathKey = "upgrade-filepath"
 
-// avalanche subnet upgrade import
+// lux subnet upgrade import
 func newUpgradeImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import [subnetName]",

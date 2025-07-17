@@ -53,7 +53,7 @@ This command provides fine-grained control over node startup parameters.`,
 
 	// Network configuration
 	cmd.Flags().Uint32Var(&flags.networkID, "network-id", 96369, "Network ID")
-	cmd.Flags().StringVar(&flags.dataDir, "data-dir", "", "Data directory (default: ~/.avalanchego)")
+	cmd.Flags().StringVar(&flags.dataDir, "data-dir", "", "Data directory (default: ~/.luxd)")
 	cmd.Flags().IntVar(&flags.httpPort, "http-port", 9650, "HTTP API port")
 	cmd.Flags().IntVar(&flags.stakingPort, "staking-port", 9651, "Staking port")
 	
@@ -94,7 +94,7 @@ func runStart(flags *startFlags) error {
 			dataDir = flags.existingDataDir
 		} else {
 			home, _ := os.UserHomeDir()
-			dataDir = filepath.Join(home, ".avalanchego")
+			dataDir = filepath.Join(home, ".luxd")
 		}
 	}
 	

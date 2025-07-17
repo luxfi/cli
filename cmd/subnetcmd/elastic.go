@@ -50,7 +50,7 @@ var (
 	denominationFlag    int
 )
 
-// avalanche subnet elastic
+// lux subnet elastic
 func newElasticCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "elastic [subnetName]",

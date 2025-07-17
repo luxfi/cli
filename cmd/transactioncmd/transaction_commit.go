@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche transaction commit
+// lux transaction commit
 func newTransactionCommitCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "commit [subnetName]",

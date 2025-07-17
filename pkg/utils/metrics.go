@@ -48,10 +48,10 @@ func PrintMetricsOptOutPrompt() {
 			"basis for purposes of product improvement.  This data will not (i) include any passwords, scripts, or data " +
 			"files, (ii) be associated with any particular user or entity, or (iii) include any personally identifiable " +
 			"information or be used to identify individuals or entities using the software.  You can disable such data " +
-			"collection with `avalanche config metrics disable` command, which will result in no data being collected; " +
+			"collection with `lux config metrics disable` command, which will result in no data being collected; " +
 			"by using the software without so disabling such data collection you expressly consent to the collection of " +
 			"such data.  You can also read our privacy statement <https://www.avalabs.org/privacy-policy> to learn more. \n")
-	ux.Logger.PrintToUser("You can disable data collection with `avalanche config metrics disable` command. " +
+	ux.Logger.PrintToUser("You can disable data collection with `lux config metrics disable` command. " +
 		"You can also read our privacy statement <https://www.avalabs.org/privacy-policy> to learn more.\n")
 }
 

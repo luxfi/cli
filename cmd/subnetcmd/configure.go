@@ -19,12 +19,12 @@ var (
 	perNodeChainConf string
 )
 
-// avalanche subnet configure
+// lux subnet configure
 func newConfigureCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "configure [subnetName]",
 		Short: "Adds additional config files for the node nodes",
-		Long: `LuxGo nodes support several different configuration files. Subnets have their own
+		Long: `Lux nodes support several different configuration files. Subnets have their own
 Subnet config which applies to all chains/VMs in the Subnet. Each chain within the Subnet
 can have its own chain config. This command allows you to set both config files.`,
 		SilenceUsage: true,

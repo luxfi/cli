@@ -8,8 +8,8 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
-func SetupLuxgo(app *application.Lux, luxVersion string) (string, error) {
-	binDir := app.GetLuxgoBinDir()
+func SetupLux(app *application.Lux, luxVersion string) (string, error) {
+	binDir := app.GetLuxBinDir()
 
 	installer := NewInstaller()
 	downloader := NewLuxDownloader()
@@ -20,7 +20,7 @@ func SetupLuxgo(app *application.Lux, luxVersion string) (string, error) {
 		binDir,
 		nodeBinPrefix,
 		constants.AvaLabsOrg,
-		constants.LuxGoRepoName,
+		constants.LuxRepoName,
 		downloader,
 		installer,
 	)

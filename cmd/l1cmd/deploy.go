@@ -31,7 +31,7 @@ L1s are independent blockchains with their own:
 - Consensus mechanism
 - L2/L3 support
 
-A deployed L1 can also connect to other protocols (Avalanche, OP Stack, etc.)
+A deployed L1 can also connect to other protocols (Lux, OP Stack, etc.)
 for cross-chain interoperability.`,
 		Args: cobra.ExactArgs(1),
 		RunE: deployL1,
@@ -41,7 +41,7 @@ for cross-chain interoperability.`,
 	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "Deploy to testnet")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "Deploy to mainnet")
 	cmd.Flags().BoolVar(&useExisting, "use-existing", false, "Use existing blockchain data")
-	cmd.Flags().StringVar(&protocol, "protocol", "lux", "Protocol to use (lux, avalanche-compat)")
+	cmd.Flags().StringVar(&protocol, "protocol", "lux", "Protocol to use (lux, lux-compat)")
 
 	return cmd
 }
@@ -142,9 +142,9 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 	}
 
 	// Set up cross-protocol support if needed
-	if protocol == "avalanche-compat" {
-		ux.Logger.PrintToUser("Enabling Avalanche compatibility mode...")
-		// TODO: Enable Avalanche subnet compatibility
+	if protocol == "lux-compat" {
+		ux.Logger.PrintToUser("Enabling Lux compatibility mode...")
+		// TODO: Enable Lux subnet compatibility
 	}
 
 	ux.Logger.PrintToUser("\n✅ L1 deployed successfully!")

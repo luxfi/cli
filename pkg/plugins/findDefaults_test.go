@@ -89,7 +89,7 @@ func TestFindDefaultFiles(t *testing.T) {
 		filepath.Join(testDir, "etc", "node"),
 		filepath.Join(testDir, "home", ".node"),
 		testDir,
-		"$" + config.LuxGoDataDirVar,
+		"$" + config.LuxDataDirVar,
 		// following indexes should fail (don't exist)
 		fakeNotSetEnvVar,
 		fakeSetEnvVar,
@@ -106,11 +106,11 @@ func TestFindDefaultFiles(t *testing.T) {
 	require.NoError(err)
 	existingDataDir := filepath.Join(testDir, "data-dir")
 	// make sure we don't accidentally overwrite a really existing env var
-	origVar := os.Getenv(config.LuxGoDataDirVar)
-	err = os.Setenv(config.LuxGoDataDirVar, existingDataDir)
+	origVar := os.Getenv(config.LuxDataDirVar)
+	err = os.Setenv(config.LuxDataDirVar, existingDataDir)
 	require.NoError(err)
 	defer func() {
-		err = os.Setenv(config.LuxGoDataDirVar, origVar)
+		err = os.Setenv(config.LuxDataDirVar, origVar)
 		require.NoError(err)
 		err = os.Setenv(fakeSetEnvVar, "")
 		require.NoError(err)

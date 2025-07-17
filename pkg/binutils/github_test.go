@@ -24,11 +24,11 @@ type urlTest struct {
 func TestGetGithubLatestReleaseURL(t *testing.T) {
 	require := require.New(t)
 	expected := "https://api.github.com/repos/luxfi/node/releases/latest"
-	url := GetGithubLatestReleaseURL(constants.AvaLabsOrg, constants.LuxGoRepoName)
+	url := GetGithubLatestReleaseURL(constants.AvaLabsOrg, constants.LuxRepoName)
 	require.Equal(expected, url)
 }
 
-func TestGetDownloadURL_LuxGo(t *testing.T) {
+func TestGetDownloadURL_Lux(t *testing.T) {
 	tests := []urlTest{
 		{
 			version:     "v1.17.1",
