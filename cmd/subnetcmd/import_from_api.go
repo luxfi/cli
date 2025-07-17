@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/coreth/core"
+	"github.com/luxfi/geth/core"
 	"github.com/spf13/cobra"
 )
 
