@@ -8,7 +8,7 @@ builds:
     # windows is ignored by default, as the `goos` field by default only
     # contains linux and darwin
     ldflags:
-      - -X 'github.com/luxdefi/cli/cmd.Version={{.Version}}'
+      - -X 'github.com/luxfi/cli/cmd.Version={{.Version}}'
     goos:
       - linux
       - darwin
