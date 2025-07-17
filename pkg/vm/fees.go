@@ -7,8 +7,8 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/subnet-evm/commontype"
-	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/params"
 )
 
 func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
