@@ -23,6 +23,7 @@ import (
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
+	"github.com/luxfi/cli/cmd/localcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/apmintegration"
 	"github.com/luxfi/cli/pkg/application"
@@ -107,6 +108,7 @@ Quick start:
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
 	// add migrate command
 	rootCmd.AddCommand(migratecmd.NewCmd(app))
+	rootCmd.AddCommand(localcmd.NewCmd(app))
 	return rootCmd
 }
 
