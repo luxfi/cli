@@ -29,7 +29,7 @@ import (
 
 var printGenesisOnly bool
 
-// avalanche subnet describe
+// lux subnet describe
 func newDescribeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe [subnetName]",

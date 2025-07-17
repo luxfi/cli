@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet upgrade import
+// lux subnet upgrade import
 func newUpgradePrintCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "print [subnetName]",

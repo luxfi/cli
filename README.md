@@ -39,20 +39,20 @@ curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh |
 After installing, launch your own custom subnet:
 
 ```bash
-avalanche subnet create <subnetName>
-avalanche subnet deploy <subnetName>
+lux subnet create <subnetName>
+lux subnet deploy <subnetName>
 ```
 
 Shut down your local deployment with:
 
 ```bash
-avalanche network stop
+lux network stop
 ```
 
 Restart your local deployment (from where you left off) with:
 
 ```bash
-avalanche network start
+lux network start
 ```
 
 ## Notable Features
@@ -104,7 +104,7 @@ Once golang is installed, run:
 ./scripts/build.sh
 ```
 
-The binary will be called `./bin/avalanche`.
+The binary will be called `./bin/lux`.
 
 ### Docker
 

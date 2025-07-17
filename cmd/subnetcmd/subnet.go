@@ -23,7 +23,7 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 L2s (formerly subnets) support multiple sequencing models:
 - Lux: Based rollup, 100ms blocks, lowest cost
 - Ethereum: Based rollup, 12s blocks, highest security  
-- Avalanche: Based rollup, 2s blocks, fast finality
+- Lux: Based rollup, 2s blocks, fast finality
 - OP: OP Stack compatible for Optimism ecosystem
 - External: Traditional centralized sequencer
 

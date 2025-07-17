@@ -11,7 +11,7 @@ import (
 
 var app *application.Lux
 
-// avalanche subnet vm
+// lux subnet vm
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transaction",

@@ -265,7 +265,7 @@ func createDevGenesis(flags *devFlags) error {
 		"allocations": []map[string]interface{}{
 			{
 				"ethAddr":       flags.accounts[0],
-				"avaxAddr":      "X-lux1npswupzlgs3kng2q965as2la8rw4787hcn9p7q",
+				"luxAddr":      "X-lux1npswupzlgs3kng2q965as2la8rw4787hcn9p7q",
 				"initialAmount": 1000000000000000000000000000,
 				"unlockSchedule": []interface{}{},
 			},

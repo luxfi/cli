@@ -526,7 +526,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 }
 
 func (d *LocalDeployer) setupLocalEnv() (string, error) {
-	return binutils.SetupLuxgo(d.app, d.luxVersion)
+	return binutils.SetupLux(d.app, d.luxVersion)
 }
 
 // WaitForHealthy polls continuously until the network is ready to be used

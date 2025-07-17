@@ -52,7 +52,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-linux-%s-%s.tar.gz",
 			constants.AvaLabsOrg,
-			constants.LuxGoRepoName,
+			constants.LuxRepoName,
 			version,
 			goarch,
 			version,
@@ -62,7 +62,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-macos-%s.zip",
 			constants.AvaLabsOrg,
-			constants.LuxGoRepoName,
+			constants.LuxRepoName,
 			version,
 			version,
 		)
@@ -72,7 +72,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-win-%s-experimental.zip",
 			constants.AvaLabsOrg,
-			constants.LuxGoRepoName,
+			constants.LuxRepoName,
 			version,
 			version,
 		)

@@ -16,7 +16,7 @@ func newUpgradeCmd() *cobra.Command {
 		Long: `Upgrade various aspects of a sovereign L1 blockchain:
 - VM version
 - Validator management (PoA to PoS migration)
-- Protocol support (add Avalanche compatibility, OP Stack, etc.)
+- Protocol support (add Lux compatibility, OP Stack, etc.)
 - Network parameters`,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := cmd.Help()
@@ -100,7 +100,7 @@ func newUpgradeProtocolCmd() *cobra.Command {
 		Use:   "protocol [l1Name]",
 		Short: "Add protocol support to L1",
 		Long: `Add support for additional protocols to your L1:
-- avalanche: Enable Avalanche subnet compatibility
+- lux: Enable Lux subnet compatibility
 - opstack: Enable OP Stack L2/L3 support
 - cosmos: Enable IBC compatibility`,
 		Args: cobra.ExactArgs(1),
@@ -108,7 +108,7 @@ func newUpgradeProtocolCmd() *cobra.Command {
 			l1Name := args[0]
 			
 			protocols := []string{
-				"Avalanche Compatibility",
+				"Lux Compatibility",
 				"OP Stack Support",
 				"Cosmos IBC",
 				"Ethereum Bridge",
@@ -123,12 +123,12 @@ func newUpgradeProtocolCmd() *cobra.Command {
 			}
 
 			switch choice {
-			case "Avalanche Compatibility":
-				ux.Logger.PrintToUser("\n🔺 Enabling Avalanche compatibility...")
+			case "Lux Compatibility":
+				ux.Logger.PrintToUser("\n🔺 Enabling Lux compatibility...")
 				ux.Logger.PrintToUser("This allows your L1 to:")
-				ux.Logger.PrintToUser("- Accept Avalanche subnet validators")
-				ux.Logger.PrintToUser("- Support Avalanche Warp messaging")
-				ux.Logger.PrintToUser("- Bridge with Avalanche C-Chain")
+				ux.Logger.PrintToUser("- Accept Lux subnet validators")
+				ux.Logger.PrintToUser("- Support Lux Warp messaging")
+				ux.Logger.PrintToUser("- Bridge with Lux C-Chain")
 				// TODO: Implement
 				
 			case "OP Stack Support":

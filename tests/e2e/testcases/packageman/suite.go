@@ -44,7 +44,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 	ginkgo.It("can deploy a subnet with subnet-evm version", func() {
 		// check subnet-evm install precondition
 		gomega.Expect(utils.CheckSubnetEVMExists(binaryToVersion[utils.SoloSubnetEVMKey1])).Should(gomega.BeFalse())
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeFalse())
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1])
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.SoloLuxKey])
@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 
 		// check subnet-evm install
 		gomega.Expect(utils.CheckSubnetEVMExists(binaryToVersion[utils.SoloSubnetEVMKey1])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})
@@ -115,8 +115,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 
 	ginkgo.It("can deploy with multiple node versions", func() {
 		// check lux install precondition
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeFalse())
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.MultiLuxSubnetEVMKey])
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLux1Key])
@@ -145,8 +145,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// check lux install
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
 
 		commands.CleanNetwork()
 
@@ -166,8 +166,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// check lux install
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
-		gomega.Expect(utils.CheckLuxGoExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
+		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
 	})

@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet create
+// lux subnet create
 func vmidCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "vmid [vmName]",

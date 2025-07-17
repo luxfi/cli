@@ -26,7 +26,7 @@ var (
 	errNoSubnetID = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
 )
 
-// avalanche transaction sign
+// lux transaction sign
 func newTransactionSignCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "sign [subnetName]",

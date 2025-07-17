@@ -60,7 +60,7 @@ var (
 	ErrStoredKeyOnMainnet          = errors.New("--key is not available for mainnet operations")
 )
 
-// avalanche subnet deploy
+// lux subnet deploy
 func newDeployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy [subnetName]",
@@ -72,7 +72,7 @@ At the end of the call, the command prints the RPC URL you can use to interact w
 Lux CLI only supports deploying an individual Subnet once per network. Subsequent
 attempts to deploy the same Subnet to the same network (local, Fuji, Mainnet) aren't
 allowed. If you'd like to redeploy a Subnet locally for testing, you must first call
-avalanche network clean to reset all deployed chain state. Subsequent local deploys
+lux network clean to reset all deployed chain state. Subsequent local deploys
 redeploy the chain with fresh state. You can deploy the same Subnet to multiple networks,
 so you can take your locally tested Subnet and deploy it on Fuji or Mainnet.`,
 		SilenceUsage:      true,
@@ -665,7 +665,7 @@ func PrintReadyToSignMsg(
 	ux.Logger.PrintToUser("Tx is fully signed, and ready to be committed")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Commit command:")
-	ux.Logger.PrintToUser("  avalanche transaction commit %s --input-tx-filepath %s", chain, outputTxPath)
+	ux.Logger.PrintToUser("  lux transaction commit %s --input-tx-filepath %s", chain, outputTxPath)
 }
 
 func PrintRemainingToSignMsg(
@@ -683,7 +683,7 @@ func PrintRemainingToSignMsg(
 		"and run the signing command, or send %q to another user for signing.", outputTxPath)
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Signing command:")
-	ux.Logger.PrintToUser("  avalanche transaction sign %s --input-tx-filepath %s", chain, outputTxPath)
+	ux.Logger.PrintToUser("  lux transaction sign %s --input-tx-filepath %s", chain, outputTxPath)
 }
 
 func GetKeychain(
@@ -811,7 +811,7 @@ func checkForInvalidDeployAndGetLuxVersion(network localnetworkinterface.StatusC
 	// RPC Version was made available in the info API in node version v1.9.2. For prior versions,
 	// we will need to skip this check.
 	skipRPCCheck := false
-	if semver.Compare(runningLuxVersion, constants.LuxGoCompatibilityVersionAdded) == -1 {
+	if semver.Compare(runningLuxVersion, constants.LuxCompatibilityVersionAdded) == -1 {
 		skipRPCCheck = true
 	}
 
@@ -831,8 +831,8 @@ func checkForInvalidDeployAndGetLuxVersion(network localnetworkinterface.StatusC
 		}
 	} else if userProvidedLuxVersion == "latest" {
 		// find latest lux version for this rpc version
-		desiredLuxVersion, err = vm.GetLatestLuxGoByProtocolVersion(
-			app, configuredRPCVersion, constants.LuxGoCompatibilityURL)
+		desiredLuxVersion, err = vm.GetLatestLuxByProtocolVersion(
+			app, configuredRPCVersion, constants.LuxCompatibilityURL)
 		if err != nil {
 			return "", err
 		}

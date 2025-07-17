@@ -19,14 +19,14 @@ import (
 
 var (
 	// env var for node data dir
-	defaultUnexpandedDataDir = "$" + config.LuxGoDataDirVar
+	defaultUnexpandedDataDir = "$" + config.LuxDataDirVar
 	// expected file name for the config
 	// TODO should other file names be supported? e.g. conf.json, etc.
 	defaultConfigFileName = "config.json"
 	// expected name of the plugins dir
 	defaultPluginDir = "plugins"
 	// default dir where the binary is usually found
-	defaultLuxgoBuildDir = filepath.Join("go", "src", "github.com", constants.AvaLabsOrg, constants.LuxGoRepoName, "build")
+	defaultLuxBuildDir = filepath.Join("go", "src", "github.com", constants.AvaLabsOrg, constants.LuxRepoName, "build")
 )
 
 // This function needs to be called to initialize this package
@@ -49,12 +49,12 @@ func getScanConfigDirs() ([]string, error) {
 	}
 	// TODO: Any other dirs we want to scan?
 	scanConfigDirs = append(scanConfigDirs,
-		filepath.Join("/", "etc", constants.LuxGoRepoName),
-		filepath.Join("/", "usr", "local", "lib", constants.LuxGoRepoName),
+		filepath.Join("/", "etc", constants.LuxRepoName),
+		filepath.Join("/", "usr", "local", "lib", constants.LuxRepoName),
 		wd,
 		home,
-		filepath.Join(home, constants.LuxGoRepoName),
-		filepath.Join(home, defaultLuxgoBuildDir),
+		filepath.Join(home, constants.LuxRepoName),
+		filepath.Join(home, defaultLuxBuildDir),
 		filepath.Join(home, ".node"),
 		defaultUnexpandedDataDir,
 	)
@@ -79,7 +79,7 @@ func FindLuxConfigPath() (string, error) {
 	ux.Logger.PrintToUser(logging.Yellow.Wrap("Scanning your system for existing files..."))
 	var path string
 	// Attempt 1: Try the admin API
-	if path = findByRunningProcesses(constants.LuxGoRepoName, config.ConfigFileKey); path != "" {
+	if path = findByRunningProcesses(constants.LuxRepoName, config.ConfigFileKey); path != "" {
 		return path, nil
 	}
 	// Attempt 2: find looking at some usual dirs

@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche transaction sign
+// lux transaction sign
 func newMetricsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "metrics [enable | disable]",

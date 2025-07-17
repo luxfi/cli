@@ -38,7 +38,7 @@ var (
 	binaryPathArg string
 )
 
-// avalanche subnet update vm
+// lux subnet update vm
 func newUpgradeVMCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vm [subnetName]",

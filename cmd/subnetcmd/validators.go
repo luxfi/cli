@@ -24,7 +24,7 @@ var (
 	validatorsMainnet bool
 )
 
-// avalanche subnet validators
+// lux subnet validators
 func newValidatorsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validators [subnetName]",

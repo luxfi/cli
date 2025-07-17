@@ -51,7 +51,7 @@ func newListCmd() *cobra.Command {
 					
 					// Check which protocols this L1 supports
 					ux.Logger.PrintToUser("   Protocols: Lux")
-					// TODO: Check for Avalanche compatibility, OP Stack, etc.
+					// TODO: Check for Lux compatibility, OP Stack, etc.
 				}
 
 				ux.Logger.PrintToUser("")

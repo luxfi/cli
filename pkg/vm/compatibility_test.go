@@ -66,7 +66,7 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	require.ErrorContains(err, "no RPC version found")
 }
 
-func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
+func TestGetLatestLuxByProtocolVersion(t *testing.T) {
 	type versionTest struct {
 		name            string
 		rpc             int
@@ -161,7 +161,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 			app := application.New()
 			app.Downloader = mockDownloader
 
-			luxVersion, err := GetLatestLuxGoByProtocolVersion(app, tt.rpc, constants.LuxGoCompatibilityURL)
+			luxVersion, err := GetLatestLuxByProtocolVersion(app, tt.rpc, constants.LuxCompatibilityURL)
 			if tt.expectedErr == nil {
 				require.NoError(err)
 			} else {

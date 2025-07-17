@@ -30,7 +30,7 @@ var (
 	errNoSubnetID = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
 )
 
-// avalanche subnet deploy
+// lux subnet deploy
 func newAddValidatorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "addValidator [subnetName]",

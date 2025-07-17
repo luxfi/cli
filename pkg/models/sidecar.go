@@ -49,7 +49,7 @@ type Sidecar struct {
 	
 	// L1/L2 Architecture (2025)
 	Sovereign       bool   `json:"sovereign"`        // true for L1, false for L2/subnet
-	BaseChain       string `json:"baseChain"`        // For L2s: ethereum, lux-l1, avalanche, op-mainnet
+	BaseChain       string `json:"baseChain"`        // For L2s: ethereum, lux-l1, lux, op-mainnet
 	BasedRollup     bool   `json:"basedRollup"`      // true for L1-sequenced rollups
 	SequencerType   string `json:"sequencerType"`    // based, centralized, distributed
 	

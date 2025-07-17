@@ -31,16 +31,16 @@ To get started, use the key create command.`,
 		},
 	}
 
-	// avalanche key create
+	// lux key create
 	cmd.AddCommand(newCreateCmd())
 
-	// avalanche key list
+	// lux key list
 	cmd.AddCommand(newListCmd())
 
-	// avalanche key delete
+	// lux key delete
 	cmd.AddCommand(newDeleteCmd())
 
-	// avalanche key export
+	// lux key export
 	cmd.AddCommand(newExportCmd())
 
 	return cmd

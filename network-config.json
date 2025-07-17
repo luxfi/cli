@@ -34,7 +34,7 @@
       }
     ]
   },
-  "avalancheGoVersion": "latest",
+  "luxGoVersion": "latest",
   "customVMs": {},
   "useExistingKeys": false
 }

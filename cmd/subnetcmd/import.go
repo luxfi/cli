@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet
+// lux subnet
 func newImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",

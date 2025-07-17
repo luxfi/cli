@@ -45,7 +45,7 @@ const (
 
 var subnetName string
 
-// avalanche subnet upgrade generate
+// lux subnet upgrade generate
 func newUpgradeGenerateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate [subnetName]",
@@ -99,7 +99,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	fmt.Println()
 	ux.Logger.PrintToUser(logging.Yellow.Wrap(
-		"Luxgo and this tool support configuring multiple precompiles. " +
+		"Lux and this tool support configuring multiple precompiles. " +
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 

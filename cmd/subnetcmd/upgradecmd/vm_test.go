@@ -299,7 +299,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	networkToUpgrade := futureDeployment
 
 	factory := logging.NewFactory(logging.Config{})
-	log, err := factory.Make("avalanche")
+	log, err := factory.Make("lux")
 	assert.NoError(err)
 
 	// create the user facing logger as a global var

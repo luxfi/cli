@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 )
 
-// Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
+// Edits an Lux config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
 func EditConfigFile(
 	app *application.Lux,
 	subnetID string,

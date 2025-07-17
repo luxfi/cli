@@ -13,7 +13,7 @@ import (
 
 var exportOutput string
 
-// avalanche subnet list
+// lux subnet list
 func newExportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export [subnetName]",
