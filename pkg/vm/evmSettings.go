@@ -6,7 +6,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/luxfi/subnet-evm/commontype"
+	"github.com/luxfi/evm/commontype"
 	"github.com/ethereum/go-ethereum/common"
 )
 
