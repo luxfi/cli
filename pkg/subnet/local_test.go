@@ -93,7 +93,7 @@ func TestDeployToLocal(t *testing.T) {
 	app := &application.Lux{}
 	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	binDir := filepath.Join(app.GetLuxgoBinDir(), "node-"+luxVersion)
+	binDir := filepath.Join(app.GetLuxBinDir(), "node-"+luxVersion)
 
 	// create a dummy plugins dir, deploy will check it exists
 	binChecker := &mocks.BinaryChecker{}

@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet deploy
+// lux subnet deploy
 func newRemoveValidatorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "removeValidator [subnetName]",

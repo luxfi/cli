@@ -39,7 +39,7 @@ var (
 		"illegal name character: only letters, no special characters allowed")
 )
 
-// avalanche subnet create
+// lux subnet create
 func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [subnetName]",
@@ -58,7 +58,7 @@ By default, the command runs an interactive wizard. It supports:
 - Pre-confirmations for fast UX
 - Migration paths between different models
 
-Use --sequencer to specify the sequencing model (lux, ethereum, avalanche, op, external).
+Use --sequencer to specify the sequencing model (lux, ethereum, lux, op, external).
 Use -f to overwrite existing configurations.`,
 		SilenceUsage:      true,
 		Args:              cobra.ExactArgs(1),
@@ -74,7 +74,7 @@ Use -f to overwrite existing configurations.`,
 	cmd.Flags().BoolVarP(&forceCreate, forceFlag, "f", false, "overwrite the existing configuration if one exists")
 	
 	// L2/Sequencer flags
-	cmd.Flags().StringVar(&sequencer, "sequencer", "", "sequencer for the L2 (lux, ethereum, avalanche, op, external)")
+	cmd.Flags().StringVar(&sequencer, "sequencer", "", "sequencer for the L2 (lux, ethereum, lux, op, external)")
 	cmd.Flags().BoolVar(&enablePreconfirm, "enable-preconfirm", false, "enable pre-confirmations for fast UX")
 	return cmd
 }
@@ -167,7 +167,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		sequencerOptions := []string{
 			"Lux (100ms blocks, lowest cost, based rollup)",
 			"Ethereum (12s blocks, highest security, based rollup)",
-			"Avalanche (2s blocks, fast finality, based rollup)",
+			"Lux (2s blocks, fast finality, based rollup)",
 			"OP Stack (Optimism compatible)",
 			"External (Traditional sequencer)",
 			"None (Deploy as sovereign L1)",
@@ -186,8 +186,8 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 			sequencer = "lux"
 		case "Ethereum (12s blocks, highest security, based rollup)":
 			sequencer = "ethereum"
-		case "Avalanche (2s blocks, fast finality, based rollup)":
-			sequencer = "avalanche"
+		case "Lux (2s blocks, fast finality, based rollup)":
+			sequencer = "lux"
 		case "OP Stack (Optimism compatible)":
 			sequencer = "op"
 		case "External (Traditional sequencer)":
@@ -257,7 +257,7 @@ func getBlockTime(sequencer string) int {
 		return 100 // 100ms
 	case "ethereum":
 		return 12000 // 12s
-	case "avalanche":
+	case "lux":
 		return 2000 // 2s
 	case "op":
 		return 2000 // 2s (OP Stack block time)
@@ -270,7 +270,7 @@ func getBlockTime(sequencer string) int {
 
 func isBasedRollup(sequencer string) bool {
 	switch sequencer {
-	case "lux", "ethereum", "avalanche":
+	case "lux", "ethereum", "lux":
 		return true // These are L1s, so it's a based rollup
 	case "op", "external":
 		return false // OP Stack and external sequencers are not based rollups

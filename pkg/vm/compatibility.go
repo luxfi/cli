@@ -45,7 +45,7 @@ func GetRPCProtocolVersion(app *application.Lux, vmType models.VMType, vmVersion
 	return version, nil
 }
 
-func GetLatestLuxGoByProtocolVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
+func GetLatestLuxByProtocolVersion(app *application.Lux, rpcVersion int, url string) (string, error) {
 	compatibilityBytes, err := app.Downloader.Download(url)
 	if err != nil {
 		return "", err
@@ -67,7 +67,7 @@ func GetLatestLuxGoByProtocolVersion(app *application.Lux, rpcVersion int, url s
 	// get latest lux release to make sure we're not picking a release currently in progress but not available for download
 	latestLuxVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 		constants.AvaLabsOrg,
-		constants.LuxGoRepoName,
+		constants.LuxRepoName,
 	))
 	if err != nil {
 		return "", err
