@@ -51,7 +51,7 @@ const (
 	EwoqPrivateKey = privKeyEncPfx + rawEwoqPk
 )
 
-var keyFactory = new(secp256k1.Factory)
+var keyFactory = secp256k1.Factory{}
 
 type SOp struct {
 	privKey        *secp256k1.PrivateKey

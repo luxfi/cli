@@ -22,7 +22,7 @@ import (
 	anr_utils "github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/subnet-evm/params"
+	"github.com/luxfi/evm/params"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

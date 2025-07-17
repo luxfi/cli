@@ -42,7 +42,7 @@ import (
 	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/node/wallet/subnet/primary/common"
 	"github.com/luxfi/geth/params"
-	"github.com/luxfi/subnet-evm/core"
+	"github.com/luxfi/evm/core"
 	"go.uber.org/zap"
 )
 
