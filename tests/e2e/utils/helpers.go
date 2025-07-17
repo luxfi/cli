@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/subnet-evm/ethclient"
+	"github.com/luxfi/evm/ethclient"
 )
 
 const (

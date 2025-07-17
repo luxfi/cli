@@ -7,6 +7,13 @@ import (
 	"github.com/luxfi/node/ids"
 )
 
+type TokenInfo struct {
+	Name     string `json:"name"`
+	Symbol   string `json:"symbol"`
+	Decimals uint8  `json:"decimals"`
+	Supply   string `json:"supply"`
+}
+
 type NetworkData struct {
 	SubnetID     ids.ID
 	BlockchainID ids.ID

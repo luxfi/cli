@@ -15,9 +15,9 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/subnet-evm/core"
-	"github.com/luxfi/subnet-evm/params"
-	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/ethereum/go-ethereum/common"
 )
 

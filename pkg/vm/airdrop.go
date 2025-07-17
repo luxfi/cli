@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
-	"github.com/luxfi/subnet-evm/core"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/common"
 )
 

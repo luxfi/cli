@@ -224,7 +224,7 @@ Cqc=
 func createCChainConfig(flags *devFlags) error {
 	config := map[string]interface{}{
 		"snowman-api-enabled":       false,
-		"coreth-admin-api-enabled":  true,
+		"geth-admin-api-enabled":    true,
 		"eth-apis":                  []string{"eth", "eth-filter", "net", "web3", "admin", "debug", "personal", "txpool", "miner"},
 		"local-txs-enabled":         true,
 		"allow-unfinalized-queries": true,

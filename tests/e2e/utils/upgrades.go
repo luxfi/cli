@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/subnet-evm/params"
-	"github.com/luxfi/subnet-evm/rpc"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 	"github.com/onsi/gomega"
 )
 

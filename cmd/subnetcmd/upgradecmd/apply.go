@@ -22,8 +22,8 @@ import (
 	ANRclient "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/subnet-evm/params"
-	"github.com/luxfi/subnet-evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
