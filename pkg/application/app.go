@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/subnet-evm/core"
+	"github.com/luxfi/evm/core"
 )
 
 const (
