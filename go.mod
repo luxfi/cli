@@ -9,6 +9,7 @@ replace (
 	github.com/luxfi/geth => /Users/z/work/lux/geth
 	github.com/luxfi/ledger-avalanche/go => /Users/z/work/lux/ledger-avalanche/go
 	github.com/luxfi/ledger-lux-go => /Users/z/work/lux/ledger-lux/go
+	github.com/luxfi/ledger-lux/go => /Users/z/work/lux/ledger-lux/go
 	github.com/luxfi/lpm => /Users/z/work/lux/lpm
 	github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
 	github.com/luxfi/node => /Users/z/work/lux/node
