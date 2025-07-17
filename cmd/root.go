@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
+	"github.com/luxfi/cli/cmd/localcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/apmintegration"
 	"github.com/luxfi/cli/pkg/application"
@@ -81,6 +82,7 @@ in with avalanche subnet create myNewSubnet.`,
 
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
+	rootCmd.AddCommand(localcmd.NewCmd(app))
 	return rootCmd
 }
 
