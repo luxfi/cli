@@ -63,7 +63,7 @@ var historicSubnets = []struct {
 	},
 }
 
-// avalanche subnet import-historic
+// lux subnet import-historic
 func newImportHistoricCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import-historic",
@@ -73,7 +73,7 @@ func newImportHistoricCmd() *cobra.Command {
 This command imports historic subnets as modern L2s with various sequencer options:
 - Lux: Based rollup using Lux L1 (100ms blocks, lowest cost)
 - Ethereum: Based rollup using Ethereum L1 (12s blocks, highest security)
-- Avalanche: Based rollup using Avalanche (2s blocks, fast finality)
+- Lux: Based rollup using Lux (2s blocks, fast finality)
 - OP: OP Stack compatible (Optimism ecosystem compatibility)
 - External: Traditional external sequencer
 
@@ -86,9 +86,9 @@ The import process:
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&historicDataPath, "data-path", "/home/z/.avalanche-cli/runs/network_current/node1/chainData", "Path to historic blockchain data")
+	cmd.Flags().StringVar(&historicDataPath, "data-path", "/home/z/.lux-cli/runs/network_current/node1/chainData", "Path to historic blockchain data")
 	cmd.Flags().BoolVar(&autoRegister, "auto-register", true, "Automatically register subnets with the node")
-	cmd.Flags().StringVar(&sequencer, "sequencer", "lux", "Sequencer for the L2 (lux, ethereum, avalanche, op, external)")
+	cmd.Flags().StringVar(&sequencer, "sequencer", "lux", "Sequencer for the L2 (lux, ethereum, lux, op, external)")
 
 	return cmd
 }
@@ -127,7 +127,7 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 			Sovereign:      false, // These are L2s, not sovereign L1s
 			BaseChain:      sequencer,
 			BasedRollup:    isBasedRollup(sequencer), // true if using L1 sequencer
-			SequencerType:  sequencer, // lux, ethereum, avalanche, or external
+			SequencerType:  sequencer, // lux, ethereum, lux, or external
 			L1BlockTime:    getBlockTime(sequencer),
 			PreconfirmEnabled: false, // Can enable later
 		}
@@ -208,7 +208,7 @@ func getBlockTime(sequencer string) int {
 		return 100 // 100ms
 	case "ethereum":
 		return 12000 // 12s
-	case "avalanche":
+	case "lux":
 		return 2000 // 2s
 	case "op":
 		return 2000 // 2s (OP Stack block time)
@@ -221,7 +221,7 @@ func getBlockTime(sequencer string) int {
 
 func isBasedRollup(sequencer string) bool {
 	switch sequencer {
-	case "lux", "ethereum", "avalanche":
+	case "lux", "ethereum", "lux":
 		return true // These are L1s, so it's a based rollup
 	case "op", "external":
 		return false // OP Stack and external sequencers are not based rollups

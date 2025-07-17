@@ -180,13 +180,13 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 
 	// If currentRPCVersion == -1, then only custom subnets have been deployed, the user must provide the version explicitly if not latest
 	if currentRPCVersion == -1 {
-		ux.Logger.PrintToUser("No Subnet RPC version found. Using latest LuxGo version")
+		ux.Logger.PrintToUser("No Subnet RPC version found. Using latest Lux version")
 		return latest, nil
 	}
 
-	return vm.GetLatestLuxGoByProtocolVersion(
+	return vm.GetLatestLuxByProtocolVersion(
 		app,
 		currentRPCVersion,
-		constants.LuxGoCompatibilityURL,
+		constants.LuxCompatibilityURL,
 	)
 }

@@ -76,8 +76,8 @@ func (app *Lux) GetPluginsDir() string {
 	return filepath.Join(app.baseDir, constants.PluginDir)
 }
 
-func (app *Lux) GetLuxgoBinDir() string {
-	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxGoInstallDir)
+func (app *Lux) GetLuxBinDir() string {
+	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxInstallDir)
 }
 
 func (app *Lux) GetSubnetEVMBinDir() string {
@@ -144,8 +144,8 @@ func (app *Lux) GetDownloader() Downloader {
 	return app.Downloader
 }
 
-func (*Lux) GetLuxgoCompatibilityURL() string {
-	return constants.LuxGoCompatibilityURL
+func (*Lux) GetLuxCompatibilityURL() string {
+	return constants.LuxCompatibilityURL
 }
 
 func (app *Lux) ReadUpgradeFile(subnetName string) ([]byte, error) {
