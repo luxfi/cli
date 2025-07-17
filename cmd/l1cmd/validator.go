@@ -17,7 +17,7 @@ func newValidatorCmd() *cobra.Command {
 
 Validators can participate in multiple protocols:
 - Lux L1s (sovereign blockchains)
-- Legacy Avalanche subnets
+- Legacy Lux subnets
 - OP Stack L2/L3 chains
 - Other blockchain protocols
 
@@ -89,7 +89,7 @@ The validator can be added to:
 
 	cmd.Flags().StringVar(&nodeID, "node-id", "", "Node ID of the validator")
 	cmd.Flags().Uint64Var(&weight, "weight", 100, "Validator weight")
-	cmd.Flags().StringVar(&protocol, "protocol", "lux", "Protocol type (lux, avalanche, opstack)")
+	cmd.Flags().StringVar(&protocol, "protocol", "lux", "Protocol type (lux, lux, opstack)")
 	cmd.Flags().StringVar(&validatorType, "type", "primary", "Validator type (primary, l2, l3)")
 
 	return cmd
@@ -108,10 +108,10 @@ func newValidatorProtocolsCmd() *cobra.Command {
 			ux.Logger.PrintToUser("   - L2/L3 chains on Lux L1s")
 			ux.Logger.PrintToUser("   - Native Lux consensus")
 			ux.Logger.PrintToUser("")
-			ux.Logger.PrintToUser("🔺 Avalanche Protocol")
+			ux.Logger.PrintToUser("🔺 Lux Protocol")
 			ux.Logger.PrintToUser("   - Legacy subnet support")
 			ux.Logger.PrintToUser("   - C-Chain compatibility")
-			ux.Logger.PrintToUser("   - Avalanche consensus")
+			ux.Logger.PrintToUser("   - Lux consensus")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("🟦 OP Stack")
 			ux.Logger.PrintToUser("   - Optimistic rollups")

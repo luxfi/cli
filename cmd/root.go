@@ -61,7 +61,7 @@ Architecture:
 Sequencing options:
 - Lux: 100ms blocks, lowest cost (default)
 - Ethereum: 12s blocks, highest security
-- Avalanche: 2s blocks, fast finality
+- Lux: 2s blocks, fast finality
 - OP: Optimism ecosystem compatible
 
 Features:
@@ -306,7 +306,7 @@ func setupLogging(baseDir string) (logging.Logger, error) {
 	config.MaxAge = constants.RetainOldFiles
 
 	factory := logging.NewFactory(config)
-	log, err := factory.Make("avalanche")
+	log, err := factory.Make("lux")
 	if err != nil {
 		factory.Close()
 		return nil, fmt.Errorf("failed setting up logging, exiting: %w", err)

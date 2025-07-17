@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// avalanche subnet delete
+// lux subnet delete
 func newDeleteCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "delete",

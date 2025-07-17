@@ -23,7 +23,7 @@ var (
 	branch          string
 )
 
-// avalanche subnet import
+// lux subnet import
 func newImportFileCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "file [subnetPath]",

@@ -22,7 +22,7 @@ func newMigrateBaseCmd() *cobra.Command {
 		Short: "Migrate subnet to a different base chain",
 		Long: `Migrate a subnet (L2) to use a different base chain for sequencing.
 
-This allows moving between Lux, Ethereum, or Avalanche as the sequencing layer
+This allows moving between Lux, Ethereum, or Lux as the sequencing layer
 while preserving all state and history. The migration requires governance
 approval and a brief pause for state checkpoint.
 
@@ -32,7 +32,7 @@ Example:
 		RunE: migrateBase,
 	}
 
-	cmd.Flags().StringVar(&targetBase, "target", "", "Target base chain (lux, ethereum, avalanche)")
+	cmd.Flags().StringVar(&targetBase, "target", "", "Target base chain (lux, ethereum, lux)")
 	cmd.Flags().BoolVar(&hotSwap, "hot-swap", false, "Attempt hot-swap migration (experimental)")
 
 	return cmd
@@ -67,7 +67,7 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 		baseOptions := []string{
 			"Lux (100ms blocks, lowest cost)",
 			"Ethereum (12s blocks, highest security)",
-			"Avalanche (2s blocks, fast finality)",
+			"Lux (2s blocks, fast finality)",
 		}
 
 		// Remove current base from options
@@ -171,8 +171,8 @@ func isCurrentBase(option, current string) bool {
 		return option == "Lux (100ms blocks, lowest cost)"
 	case "ethereum":
 		return option == "Ethereum (12s blocks, highest security)"
-	case "avalanche":
-		return option == "Avalanche (2s blocks, fast finality)"
+	case "lux":
+		return option == "Lux (2s blocks, fast finality)"
 	}
 	return false
 }
@@ -183,8 +183,8 @@ func parseBaseChoice(choice string) string {
 		return "lux"
 	case "Ethereum (12s blocks, highest security)":
 		return "ethereum"
-	case "Avalanche (2s blocks, fast finality)":
-		return "avalanche"
+	case "Lux (2s blocks, fast finality)":
+		return "lux"
 	}
 	return choice
 }
@@ -210,7 +210,7 @@ func showMigrationImpact(from, to string) {
 	case "ethereum":
 		ux.Logger.PrintToUser("   💰 Higher data costs (ETH gas)")
 		ux.Logger.PrintToUser("   🛡️  Maximum security inheritance")
-	case "avalanche":
+	case "lux":
 		ux.Logger.PrintToUser("   💵 Moderate data costs")
 		ux.Logger.PrintToUser("   ⚡ Fast finality (~1s)")
 	}
@@ -225,7 +225,7 @@ func getBlockTime(chain string) int {
 		return 100 // 100ms
 	case "ethereum":
 		return 12000 // 12s
-	case "avalanche":
+	case "lux":
 		return 2000 // 2s
 	default:
 		return 12000 // Default to Ethereum timing

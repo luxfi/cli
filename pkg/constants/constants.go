@@ -83,11 +83,11 @@ const (
 	CustomVMDir = "vms"
 
 	AvaLabsOrg          = "luxfi"
-	LuxGoRepoName = "node"
+	LuxRepoName = "node"
 	SubnetEVMRepoName   = "subnet-evm"
 	CliRepoName         = "cli"
 
-	LuxGoInstallDir = "node"
+	LuxInstallDir = "node"
 	SubnetEVMInstallDir   = "subnet-evm"
 
 	SubnetEVMBin = "subnet-evm"
@@ -100,7 +100,7 @@ const (
 	APMPluginDir          = "apm_plugins"
 
 	// #nosec G101
-	GithubAPITokenEnvVarName = "AVALANCHE_CLI_GITHUB_TOKEN"
+	GithubAPITokenEnvVarName = "LUX_CLI_GITHUB_TOKEN"
 
 	ReposDir       = "repos"
 	SubnetDir      = "subnets"
@@ -122,8 +122,8 @@ const (
 	NotAvailableLabel         = "Not available"
 	BackendCmd                = "cli-backend"
 
-	LuxGoCompatibilityVersionAdded = "v1.9.2"
-	LuxGoCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
+	LuxCompatibilityVersionAdded = "v1.9.2"
+	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
 	SubnetEVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxfi/subnet-evm/master/compatibility.json"
 
 	YesLabel = "Yes"
