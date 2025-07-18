@@ -109,8 +109,8 @@ func generateNodeConfigs(outputDir string, numValidators int, networkID uint32) 
 		NetworkPeerListGossipFrequency: "250ms",
 		NetworkMaxReconnectDelay: "1s",
 		HTTPHost:               "0.0.0.0",
-		HTTPPort:               9650,
-		StakingPort:            9651,
+		HTTPPort:               9630,
+		StakingPort:            9631,
 		BootstrapIPs:           []string{},
 		BootstrapIDs:           []string{},
 	}
@@ -131,14 +131,14 @@ func generateNodeConfigs(outputDir string, numValidators int, networkID uint32) 
 		
 		nodeID := ids.NodeIDFromCert(cert)
 		bootstrapIDs[i] = nodeID.String()
-		bootstrapIPs[i] = fmt.Sprintf("validator%d.lux.network:9651", i+1)
+		bootstrapIPs[i] = fmt.Sprintf("validator%d.lux.network:9631", i+1)
 	}
 	
 	// Second pass: create configs with bootstrap info
 	for i := 0; i < numValidators; i++ {
 		nodeConfig := baseConfig
-		nodeConfig.HTTPPort = 9650 + uint16(i*10)
-		nodeConfig.StakingPort = 9651 + uint16(i*10)
+		nodeConfig.HTTPPort = 9630 + uint16(i*10)
+		nodeConfig.StakingPort = 9631 + uint16(i*10)
 		
 		// Add other nodes as bootstrap nodes
 		for j := 0; j < numValidators; j++ {
@@ -188,7 +188,7 @@ exec "$LUXD_PATH" \
     --bootstrap-ids="%s" \
     "$@"
 `, i+1, outputDir, outputDir, 
-			9650+i*10, 9651+i*10,
+			9630+i*10, 9631+i*10,
 			joinStrings(nodeConfig.BootstrapIPs, ","),
 			joinStrings(nodeConfig.BootstrapIDs, ","))
 		
@@ -268,7 +268,7 @@ func validateNetwork(migrationDir string) error {
 	
 	// Check each node
 	for i, validator := range validators {
-		port := 9650 + i*10
+		port := 9630 + i*10
 		url := fmt.Sprintf("http://localhost:%d", port)
 		
 		ux.Logger.PrintToUser(fmt.Sprintf("Checking node %d (NodeID: %s)...", i+1, validator.NodeID))
