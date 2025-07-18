@@ -1,4 +1,4 @@
-# Subnet EVM Contracts
+# Lux EVM Contracts
 
 CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha) AND ARE NOT YET AUDITED. USE AT YOUR OWN RISK!
 
