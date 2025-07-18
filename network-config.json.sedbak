@@ -1,0 +1,40 @@
+{
+  "network": {
+    "name": "lux-local",
+    "nodes": [
+      {
+        "name": "node1",
+        "publicIp": "127.0.0.1",
+        "stakingPort": 9651,
+        "httpPort": 9650
+      },
+      {
+        "name": "node2", 
+        "publicIp": "127.0.0.1",
+        "stakingPort": 9653,
+        "httpPort": 9652
+      },
+      {
+        "name": "node3",
+        "publicIp": "127.0.0.1", 
+        "stakingPort": 9655,
+        "httpPort": 9654
+      },
+      {
+        "name": "node4",
+        "publicIp": "127.0.0.1",
+        "stakingPort": 9657,
+        "httpPort": 9656
+      },
+      {
+        "name": "node5",
+        "publicIp": "127.0.0.1",
+        "stakingPort": 9659,
+        "httpPort": 9658
+      }
+    ]
+  },
+  "luxGoVersion": "latest",
+  "customVMs": {},
+  "useExistingKeys": false
+}
