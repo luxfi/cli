@@ -107,13 +107,13 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("\n✅ Quickstart complete!")
 	ux.Logger.PrintToUser("\n📊 Network Status:")
 	ux.Logger.PrintToUser("  Primary Network: Running")
-	ux.Logger.PrintToUser("  RPC Endpoint: http://localhost:9650")
+	ux.Logger.PrintToUser("  RPC Endpoint: http://localhost:9630")
 	
 	if withHistoricSubnets && !skipSubnetDeploy {
 		ux.Logger.PrintToUser("\n🌐 Subnet RPC Endpoints:")
-		ux.Logger.PrintToUser("  LUX: http://localhost:9650/ext/bc/dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ/rpc")
-		ux.Logger.PrintToUser("  ZOO: http://localhost:9650/ext/bc/bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM/rpc")
-		ux.Logger.PrintToUser("  SPC: http://localhost:9650/ext/bc/QFAFyn1hh59mh7kokA55dJq5ywskF5A1yn8dDpLhmKApS6FP1/rpc")
+		ux.Logger.PrintToUser("  LUX: http://localhost:9630/ext/bc/dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ/rpc")
+		ux.Logger.PrintToUser("  ZOO: http://localhost:9630/ext/bc/bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM/rpc")
+		ux.Logger.PrintToUser("  SPC: http://localhost:9630/ext/bc/QFAFyn1hh59mh7kokA55dJq5ywskF5A1yn8dDpLhmKApS6FP1/rpc")
 	}
 
 	ux.Logger.PrintToUser("\n💡 Next steps:")

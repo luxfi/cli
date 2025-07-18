@@ -38,7 +38,7 @@ const (
 	MainnetAPIEndpoint    = "https://api.lux.network"
 
 	// this depends on bootstrap snapshot
-	LocalAPIEndpoint = "http://127.0.0.1:9650"
+	LocalAPIEndpoint = "http://127.0.0.1:9630"
 	LocalNetworkID   = 1337
 
 	DefaultTokenName = "TEST"
@@ -92,7 +92,7 @@ const (
 
 	SubnetEVMBin = "subnet-evm"
 
-	DefaultNodeRunURL = "http://127.0.0.1:9650"
+	DefaultNodeRunURL = "http://127.0.0.1:9630"
 
 	APMDir                = ".apm"
 	APMLogName            = "apm.log"

@@ -5,32 +5,32 @@
       {
         "name": "node1",
         "publicIp": "127.0.0.1",
-        "stakingPort": 9651,
-        "httpPort": 9650
+        "stakingPort": 9631,
+        "httpPort": 9630
       },
       {
         "name": "node2", 
         "publicIp": "127.0.0.1",
-        "stakingPort": 9653,
-        "httpPort": 9652
+        "stakingPort": 9633,
+        "httpPort": 9632
       },
       {
         "name": "node3",
         "publicIp": "127.0.0.1", 
-        "stakingPort": 9655,
-        "httpPort": 9654
+        "stakingPort": 9635,
+        "httpPort": 9634
       },
       {
         "name": "node4",
         "publicIp": "127.0.0.1",
-        "stakingPort": 9657,
-        "httpPort": 9656
+        "stakingPort": 9637,
+        "httpPort": 9636
       },
       {
         "name": "node5",
         "publicIp": "127.0.0.1",
-        "stakingPort": 9659,
-        "httpPort": 9658
+        "stakingPort": 9639,
+        "httpPort": 9638
       }
     ]
   },

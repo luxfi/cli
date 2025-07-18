@@ -54,8 +54,8 @@ This command provides fine-grained control over node startup parameters.`,
 	// Network configuration
 	cmd.Flags().Uint32Var(&flags.networkID, "network-id", 96369, "Network ID")
 	cmd.Flags().StringVar(&flags.dataDir, "data-dir", "", "Data directory (default: ~/.luxd)")
-	cmd.Flags().IntVar(&flags.httpPort, "http-port", 9650, "HTTP API port")
-	cmd.Flags().IntVar(&flags.stakingPort, "staking-port", 9651, "Staking port")
+	cmd.Flags().IntVar(&flags.httpPort, "http-port", 9630, "HTTP API port")
+	cmd.Flags().IntVar(&flags.stakingPort, "staking-port", 9631, "Staking port")
 	
 	// Bootstrap and consensus
 	cmd.Flags().BoolVar(&flags.skipBootstrap, "skip-bootstrap", false, "Skip bootstrapping phase")

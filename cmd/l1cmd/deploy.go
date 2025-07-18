@@ -149,7 +149,7 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 
 	ux.Logger.PrintToUser("\n✅ L1 deployed successfully!")
 	ux.Logger.PrintToUser("\n🌐 L1 Information:")
-	ux.Logger.PrintToUser("   RPC Endpoint: http://localhost:9650/ext/bc/%s/rpc", sc.BlockchainID)
+	ux.Logger.PrintToUser("   RPC Endpoint: http://localhost:9630/ext/bc/%s/rpc", sc.BlockchainID)
 	ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
 	ux.Logger.PrintToUser("   Explorer: http://localhost:4000")
 
