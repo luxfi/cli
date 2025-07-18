@@ -60,7 +60,7 @@ func newAutomineStartCmd(flags *autominingFlags) *cobra.Command {
 		},
 	}
 	
-	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "http://localhost:9650/ext/bc/C/rpc", "RPC URL of the node")
+	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "http://localhost:9630/ext/bc/C/rpc", "RPC URL of the node")
 	cmd.Flags().StringVar(&flags.account, "account", "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC", "Mining account address")
 	cmd.Flags().StringVar(&flags.privateKey, "private-key", "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027", "Private key for the mining account")
 	cmd.Flags().IntVar(&flags.threads, "threads", 1, "Number of mining threads")
@@ -81,7 +81,7 @@ func newAutomineStopCmd(flags *autominingFlags) *cobra.Command {
 		},
 	}
 	
-	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "http://localhost:9650/ext/bc/C/rpc", "RPC URL of the node")
+	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "http://localhost:9630/ext/bc/C/rpc", "RPC URL of the node")
 	
 	return cmd
 }
@@ -98,7 +98,7 @@ func newAutomineStatusCmd(flags *autominingFlags) *cobra.Command {
 		},
 	}
 	
-	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "http://localhost:9650/ext/bc/C/rpc", "RPC URL of the node")
+	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "http://localhost:9630/ext/bc/C/rpc", "RPC URL of the node")
 	
 	return cmd
 }

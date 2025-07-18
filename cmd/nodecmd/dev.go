@@ -57,8 +57,8 @@ similar to 'geth --dev'. This mode includes:
 	}
 
 	cmd.Flags().IntVar(&flags.instanceID, "instance", 1, "Instance ID for running multiple nodes")
-	cmd.Flags().IntVar(&flags.httpPort, "http-port", 9650, "HTTP API port")
-	cmd.Flags().IntVar(&flags.stakingPort, "staking-port", 9651, "Staking port")
+	cmd.Flags().IntVar(&flags.httpPort, "http-port", 9630, "HTTP API port")
+	cmd.Flags().IntVar(&flags.stakingPort, "staking-port", 9631, "Staking port")
 	cmd.Flags().StringVar(&flags.dataDir, "data-dir", "", "Data directory (default: temp directory)")
 	cmd.Flags().Uint32Var(&flags.chainID, "chain-id", 96369, "Chain ID for C-Chain")
 	cmd.Flags().BoolVar(&flags.automine, "automine", true, "Enable automining")
