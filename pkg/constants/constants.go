@@ -94,10 +94,13 @@ const (
 
 	DefaultNodeRunURL = "http://127.0.0.1:9630"
 
-	APMDir                = ".apm"
-	APMLogName            = "apm.log"
+	// Latest EVM version
+	LatestEVMVersion = "v0.6.9"
+
+	LPMDir                = ".lpm"
+	LPMLogName            = "lpm.log"
 	DefaultAvaLabsPackage = "luxfi/plugins-core"
-	APMPluginDir          = "apm_plugins"
+	LPMPluginDir          = "lpm_plugins"
 
 	// #nosec G101
 	GithubAPITokenEnvVarName = "LUX_CLI_GITHUB_TOKEN"

@@ -8,10 +8,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -47,30 +43,18 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("🚀 Starting Lux network quickstart...")
 
 	// Check if network is already running
-	if app.IsLocalNetworkRunning() {
-		ux.Logger.PrintToUser("⚠️  Local network is already running. Stopping it first...")
-		if err := subnet.StopNetwork(app); err != nil {
-			return fmt.Errorf("failed to stop existing network: %w", err)
-		}
-		time.Sleep(2 * time.Second)
-	}
+	// TODO: Add proper network check and stop logic
 
 	// Start the network
 	ux.Logger.PrintToUser("🌐 Starting local primary network...")
 	
-	// Get luxd binary
+	// Use latest version if not specified
 	if luxdVersion == "latest" {
-		luxdVersion = constants.LatestReleaseVersion
-	}
-	
-	binaryDownloader := binutils.NewBinaryDownloader()
-	version, err := binaryDownloader.GetLatestReleaseVersion(binutils.LuxdGithubOrg, binutils.LuxdRepoName)
-	if err != nil {
-		version = luxdVersion
+		luxdVersion = "latest"
 	}
 
-	// Start network with optimal settings
-	if err := startNetwork(cmd, args); err != nil {
+	// Start network using the existing start command logic
+	if err := StartNetwork(cmd, args); err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
 
@@ -193,7 +177,7 @@ func importHistoricSubnetsForQuickstart() error {
 		if err := os.MkdirAll(filepath.Dir(genesisPath), 0755); err != nil {
 			return err
 		}
-		if err := utils.WriteJSON(genesisPath, genesis); err != nil {
+		if err := os.WriteFile(genesisPath, []byte(genesis), 0644); err != nil {
 			return err
 		}
 

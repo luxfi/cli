@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/maps"
 
@@ -35,20 +36,35 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm"
+	platformapi "github.com/luxfi/node/vms/platformvm/api"
 	"github.com/luxfi/node/vms/platformvm/reward"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
+	walletpkg "github.com/luxfi/node/wallet"
+	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/utils/set"
 	"go.uber.org/zap"
 )
 
 const (
 	WriteReadReadPerms = 0o644
 )
+
+// emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
+type emptyEthKeychain struct{}
+
+func (e *emptyEthKeychain) GetEth(addr common.Address) (keychain.Signer, bool) {
+	return nil, false
+}
+
+func (e *emptyEthKeychain) EthAddresses() set.Set[common.Address] {
+	return set.NewSet[common.Address](0)
+}
 
 type LocalDeployer struct {
 	procChecker        binutils.ProcessChecker
@@ -89,7 +105,7 @@ func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, 
 	return d.doDeploy(chain, chainGenesis, genesisPath)
 }
 
-func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
+func getAssetID(wallet *primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
 	xWallet := wallet.X()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
@@ -98,7 +114,7 @@ func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, max
 		},
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
-	subnetAssetID, err := xWallet.IssueCreateAssetTx(
+	subnetAssetTx, err := xWallet.IssueCreateAssetTx(
 		tokenName,
 		tokenSymbol,
 		9, // denomination for UI purposes only in explorer
@@ -110,16 +126,16 @@ func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, max
 				},
 			},
 		},
-		common.WithContext(ctx),
+		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	if err != nil {
 		return ids.Empty, err
 	}
-	return subnetAssetID, nil
+	return subnetAssetTx.ID(), nil
 }
 
-func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, subnetAssetID ids.ID, maxSupply uint64) error {
+func exportToPChain(wallet *primary.Wallet, owner *secp256k1fx.OutputOwners, subnetAssetID ids.ID, maxSupply uint64) error {
 	xWallet := wallet.X()
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
 
@@ -136,21 +152,20 @@ func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, subn
 				},
 			},
 		},
-		common.WithContext(ctx),
+		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	return err
 }
 
-func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) error {
-	xWallet := wallet.X()
+func importFromXChain(wallet *primary.Wallet, owner *secp256k1fx.OutputOwners) error {
 	pWallet := wallet.P()
-	xChainID := xWallet.BlockchainID()
+	xChainID := ids.FromStringOrPanic("2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM") // X-Chain ID
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
 	_, err := pWallet.IssueImportTx(
 		xChainID,
 		owner,
-		common.WithContext(ctx),
+		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	return err
@@ -166,7 +181,17 @@ func IssueTransformSubnetTx(
 ) (ids.ID, ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	wallet, err := primary.NewWalletWithTxs(ctx, api, kc, subnetID)
+	// Create empty EthKeychain if kc doesn't implement it
+	var ethKc c.EthKeychain
+	if ekc, ok := kc.(c.EthKeychain); ok {
+		ethKc = ekc
+	} else {
+		// Create a minimal EthKeychain implementation
+		ethKc = &emptyEthKeychain{}
+	}
+	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{
+		SubnetIDs: []ids.ID{subnetID},
+	})
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
@@ -195,13 +220,13 @@ func IssueTransformSubnetTx(
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
 		elasticSubnetConfig.MinDelegatorStake, elasticSubnetConfig.MaxValidatorWeightFactor, elasticSubnetConfig.UptimeRequirement,
-		common.WithContext(ctx),
+		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
-	return transformSubnetTxID, subnetAssetID, err
+	return transformSubnetTxID.ID(), subnetAssetID, err
 }
 
 func IssueAddPermissionlessValidatorTx(
@@ -215,7 +240,17 @@ func IssueAddPermissionlessValidatorTx(
 ) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	wallet, err := primary.NewWalletWithTxs(ctx, api, kc, subnetID)
+	// Create empty EthKeychain if kc doesn't implement it
+	var ethKc c.EthKeychain
+	if ekc, ok := kc.(c.EthKeychain); ok {
+		ethKc = ekc
+	} else {
+		// Create a minimal EthKeychain implementation
+		ethKc = &emptyEthKeychain{}
+	}
+	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{
+		SubnetIDs: []ids.ID{subnetID},
+	})
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -241,13 +276,13 @@ func IssueAddPermissionlessValidatorTx(
 		owner,
 		&secp256k1fx.OutputOwners{},
 		reward.PercentDenominator,
-		common.WithContext(ctx),
+		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	if err != nil {
 		return ids.Empty, err
 	}
-	return txID, err
+	return txID.ID(), err
 }
 
 func (d *LocalDeployer) StartServer() error {
@@ -270,7 +305,7 @@ func GetCurrentSupply(subnetID ids.ID) error {
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
-	_, err := pClient.GetCurrentSupply(ctx, subnetID)
+	_, _, err := pClient.GetCurrentSupply(ctx, subnetID)
 	return err
 }
 
@@ -726,12 +761,26 @@ func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
 func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	wallet, err := primary.NewWalletWithTxs(ctx, api, kc, subnetID)
+	// Create empty EthKeychain if kc doesn't implement it
+	var ethKc c.EthKeychain
+	if ekc, ok := kc.(c.EthKeychain); ok {
+		ethKc = ekc
+	} else {
+		// Create a minimal EthKeychain implementation
+		ethKc = &emptyEthKeychain{}
+	}
+	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{
+		SubnetIDs: []ids.ID{subnetID},
+	})
 	if err != nil {
 		return ids.Empty, err
 	}
 
-	return wallet.P().IssueRemoveSubnetValidatorTx(nodeID, subnetID)
+	tx, err := wallet.P().IssueRemoveSubnetValidatorTx(nodeID, subnetID)
+	if err != nil {
+		return ids.Empty, err
+	}
+	return tx.ID(), nil
 }
 
 func GetSubnetValidators(subnetID ids.ID) ([]platformvm.ClientPermissionlessValidator, error) {
@@ -749,18 +798,44 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
-	pVals, _, err := pClient.GetPendingValidators(ctx, subnetID, nil)
+	// Get validators that will be active in the future (pending validators)
+	futureTime := uint64(time.Now().Add(time.Hour).Unix())
+	validators, err := pClient.GetValidatorsAt(ctx, subnetID, platformapi.Height(futureTime))
 	if err != nil {
 		return false, err
 	}
-	for _, iv := range pVals {
-		if v, ok := iv.(map[string]interface{}); ok {
-			// strictly this is not needed, as we are providing the nodeID as param
-			// just a double check
-			if v["nodeID"] == nodeID {
-				return true, nil
-			}
+	
+	// Convert nodeID string to ids.NodeID for comparison
+	nID, err := ids.NodeIDFromString(nodeID)
+	if err != nil {
+		return false, err
+	}
+	
+	// Check current validators
+	currentValidators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+	if err != nil {
+		return false, err
+	}
+	
+	// Check if the node is in future validators but not in current validators
+	inFuture := false
+	for id := range validators {
+		if id == nID {
+			inFuture = true
+			break
 		}
 	}
-	return false, nil
+	
+	if !inFuture {
+		return false, nil
+	}
+	
+	// Check if it's already a current validator
+	for _, v := range currentValidators {
+		if v.NodeID == nID {
+			return false, nil // Already active, not pending
+		}
+	}
+	
+	return true, nil // In future but not current = pending
 }

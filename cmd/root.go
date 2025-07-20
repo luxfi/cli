@@ -124,15 +124,15 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	cf := config.New()
 	app.Setup(baseDir, log, cf, prompts.NewPrompter(), application.NewDownloader())
 
-	// Setup APM, skip if running a hidden command
+	// Setup LPM, skip if running a hidden command
 	if !cmd.Hidden {
 		usr, err := user.Current()
 		if err != nil {
 			app.Log.Error("unable to get system user")
 			return err
 		}
-		apmBaseDir := filepath.Join(usr.HomeDir, constants.APMDir)
-		if err = apmintegration.SetupApm(app, apmBaseDir); err != nil {
+		lpmBaseDir := filepath.Join(usr.HomeDir, constants.LPMDir)
+		if err = apmintegration.SetupLpm(app, lpmBaseDir); err != nil {
 			return err
 		}
 	}

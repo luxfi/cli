@@ -5,7 +5,6 @@ package vm
 
 import (
 	"errors"
-	"math/big"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/prompts"
@@ -18,7 +17,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 type Precompile string
@@ -70,8 +69,9 @@ func configureRewardManager(app *application.Lux) (rewardmanager.Config, bool, e
 		AdminAddresses:   admins,
 		EnabledAddresses: enabled,
 	}
+	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: big.NewInt(0),
+		BlockTimestamp: &zero,
 	}
 	config.InitialRewardConfig, err = ConfigureInitialRewardConfig(app)
 	if err != nil {
@@ -147,8 +147,9 @@ func configureContractAllowList(app *application.Lux) (deployerallowlist.Config,
 		AdminAddresses:   admins,
 		EnabledAddresses: enabled,
 	}
+	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: big.NewInt(0),
+		BlockTimestamp: &zero,
 	}
 
 	return config, cancelled, nil
@@ -176,8 +177,9 @@ func configureTransactionAllowList(app *application.Lux) (txallowlist.Config, bo
 		AdminAddresses:   admins,
 		EnabledAddresses: enabled,
 	}
+	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: big.NewInt(0),
+		BlockTimestamp: &zero,
 	}
 
 	return config, cancelled, nil
@@ -205,8 +207,9 @@ func configureMinterList(app *application.Lux) (nativeminter.Config, bool, error
 		AdminAddresses:   admins,
 		EnabledAddresses: enabled,
 	}
+	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: big.NewInt(0),
+		BlockTimestamp: &zero,
 	}
 
 	return config, cancelled, nil
@@ -234,8 +237,9 @@ func configureFeeConfigAllowList(app *application.Lux) (feemanager.Config, bool,
 		AdminAddresses:   admins,
 		EnabledAddresses: enabled,
 	}
+	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
-		BlockTimestamp: big.NewInt(0),
+		BlockTimestamp: &zero,
 	}
 
 	return config, cancelled, nil

@@ -8,6 +8,10 @@ const (
 	hardhatDir   = "./tests/e2e/hardhat"
 	confFilePath = hardhatDir + "/dynamic_conf.json"
 	greeterFile  = hardhatDir + "/greeter.json"
+	
+	// APM related constants
+	APMDir       = ".apm"
+	APMPluginDir = "plugins"
 
 	BaseTest               = "./test/index.ts"
 	GreeterScript          = "./scripts/deploy.ts"

@@ -10,7 +10,7 @@ func SetupCustomBin(app *application.Lux, subnetName string) string {
 	return app.GetCustomVMPath(subnetName)
 }
 
-func SetupAPMBin(app *application.Lux, vmid string) string {
+func SetupLPMBin(app *application.Lux, vmid string) string {
 	// Just need to get the path of the vm
-	return app.GetAPMVMPath(vmid)
+	return app.GetLPMVMPath(vmid)
 }

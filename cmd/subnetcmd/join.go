@@ -408,7 +408,7 @@ func isNodeValidatingSubnet(subnetID ids.ID, network models.Network) (bool, erro
 	return checkIsValidating(subnetID, nodeID, pClient)
 }
 
-func checkIsValidating(subnetID ids.ID, nodeID ids.NodeID, pClient platformvm.Client) (bool, error) {
+func checkIsValidating(subnetID ids.ID, nodeID ids.NodeID, pClient *platformvm.Client) (bool, error) {
 	// first check if the node is already an accepted validator on the subnet
 	ctx := context.Background()
 	nodeIDs := []ids.NodeID{nodeID}
@@ -424,23 +424,8 @@ func checkIsValidating(subnetID ids.ID, nodeID ids.NodeID, pClient platformvm.Cl
 		}
 	}
 
-	// if not, also check the pending validator set
-	pVals, _, err := pClient.GetPendingValidators(ctx, subnetID, nodeIDs)
-	if err != nil {
-		return false, err
-	}
-	// pVals is an array of interfaces as it can be of different types
-	// but it's content is a JSON map[string]interface{}
-	for _, iv := range pVals {
-		if v, ok := iv.(map[string]interface{}); ok {
-			// strictly this is not needed, as we are providing the nodeID as param
-			// just a double check
-			if v["nodeID"] == nodeID.String() {
-				return true, nil
-			}
-		}
-	}
-
+	// TODO: Check pending validators when GetPendingValidators method is available
+	// For now, we only check current validators
 	return false, nil
 }
 
@@ -569,7 +554,7 @@ take effect.`
 	ux.Logger.PrintToUser(msg, vmPath, subnetID, networkID, subnetID, subnetID)
 }
 
-func getAssetBalance(ctx context.Context, pClient platformvm.Client, addr string, assetID ids.ID) (uint64, error) {
+func getAssetBalance(ctx context.Context, pClient *platformvm.Client, addr string, assetID ids.ID) (uint64, error) {
 	pID, err := address.ParseToID(addr)
 	if err != nil {
 		return 0, err

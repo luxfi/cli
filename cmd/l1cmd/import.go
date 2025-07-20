@@ -3,7 +3,10 @@
 package l1cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"math/big"
+	"os"
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/constants"
@@ -86,7 +89,7 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 		// Check if genesis data exists
 		genesisPath := filepath.Join("/home/z/work/lux", fmt.Sprintf("genesis-%s", l1.Name))
 		hasGenesisData := false
-		if _, err := app.Fs.Stat(genesisPath); err == nil {
+		if _, err := os.Stat(genesisPath); err == nil {
 			hasGenesisData = true
 			ux.Logger.PrintToUser("   Found genesis data at %s", genesisPath)
 		}
@@ -100,8 +103,8 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 			Sovereign:           true,
 			ValidatorManagement: "proof-of-authority", // Default to PoA for historic chains
 			TokenInfo: models.TokenInfo{
-				TokenName:   l1.TokenName,
-				TokenSymbol: l1.TokenSymbol,
+				Name:   l1.TokenName,
+				Symbol: l1.TokenSymbol,
 			},
 			Version: constants.SidecarVersion,
 		}
@@ -125,12 +128,13 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			ux.Logger.PrintToUser("   ⚠️  Invalid VM ID, using default")
 		} else {
-			sc.VMID = vmID
+			sc.ImportedVMID = vmID.String()
+			sc.ImportedFromAPM = true
 		}
 
 		// Create genesis with L1 features
 		genesis := vm.CreateEVMGenesis(
-			l1.ChainID,
+			big.NewInt(int64(l1.ChainID)),
 			nil, // allocations
 			nil, // timestamps
 		)
@@ -151,7 +155,12 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 		}
 
 		// Save configuration
-		if err := app.WriteGenesisFile(l1.Name, genesis); err != nil {
+		genesisBytes, err := json.MarshalIndent(genesis, "", "  ")
+		if err != nil {
+			ux.Logger.PrintToUser("   ❌ Failed to marshal genesis: %v", err)
+			continue
+		}
+		if err := app.WriteGenesisFile(l1.Name, genesisBytes); err != nil {
 			ux.Logger.PrintToUser("   ❌ Failed to write genesis: %v", err)
 			continue
 		}

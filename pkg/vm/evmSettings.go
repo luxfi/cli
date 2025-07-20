@@ -7,7 +7,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/evm/commontype"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 const (

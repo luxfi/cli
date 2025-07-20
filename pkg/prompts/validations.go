@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/node/ids"
 	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func validateEmail(input string) error {

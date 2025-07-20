@@ -26,6 +26,7 @@ development mode, automining, and advanced node configurations.`,
 	cmd.AddCommand(newDevCmd())
 	cmd.AddCommand(newStartCmd())
 	cmd.AddCommand(newAutominingCmd())
+	cmd.AddCommand(newValidatorCmd())
 	
 	return cmd
 }

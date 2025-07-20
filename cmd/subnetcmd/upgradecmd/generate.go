@@ -22,13 +22,14 @@ import (
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
 	"github.com/spf13/cobra"
 )
 
@@ -104,8 +105,8 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 	fmt.Println()
 
 	// use the correct data types from subnet-evm right away
-	precompiles := params.UpgradeConfig{
-		PrecompileUpgrades: make([]params.PrecompileUpgrade, 0),
+	precompiles := extras.UpgradeConfig{
+		PrecompileUpgrades: make([]extras.PrecompileUpgrade, 0),
 	}
 
 	for {
@@ -183,7 +184,7 @@ func queryActivationTimestamp() (time.Time, error) {
 	return date, nil
 }
 
-func promptParams(precomp string, precompiles *[]params.PrecompileUpgrade) error {
+func promptParams(precomp string, precompiles *[]extras.PrecompileUpgrade) error {
 	date, err := queryActivationTimestamp()
 	if err != nil {
 		return err
@@ -204,7 +205,7 @@ func promptParams(precomp string, precompiles *[]params.PrecompileUpgrade) error
 	}
 }
 
-func promptNativeMintParams(precompiles *[]params.PrecompileUpgrade, date time.Time) error {
+func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
 	initialMint := map[common.Address]*math.HexOrDecimal256{}
 
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
@@ -246,20 +247,22 @@ func promptNativeMintParams(precompiles *[]params.PrecompileUpgrade, date time.T
 		}
 	}
 
+	timestamp := uint64(date.Unix())
 	config := nativeminter.NewConfig(
-		big.NewInt(date.Unix()),
+		&timestamp,
 		adminAddrs,
 		enabledAddrs,
+		nil, // managers addresses
 		initialMint,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
 	return nil
 }
 
-func promptRewardManagerParams(precompiles *[]params.PrecompileUpgrade, date time.Time) error {
+func promptRewardManagerParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
 	if err != nil {
 		return err
@@ -270,21 +273,23 @@ func promptRewardManagerParams(precompiles *[]params.PrecompileUpgrade, date tim
 		return err
 	}
 
+	timestamp := uint64(date.Unix())
 	config := rewardmanager.NewConfig(
-		big.NewInt(date.Unix()),
+		&timestamp,
 		adminAddrs,
 		enabledAddrs,
+		nil, // managers addresses
 		initialConfig,
 	)
 
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
 	return nil
 }
 
-func promptFeeManagerParams(precompiles *[]params.PrecompileUpgrade, date time.Time) error {
+func promptFeeManagerParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
 	if err != nil {
 		return err
@@ -306,49 +311,55 @@ func promptFeeManagerParams(precompiles *[]params.PrecompileUpgrade, date time.T
 		feeConfig = &chainConfig.FeeConfig
 	}
 
+	timestamp := uint64(date.Unix())
 	config := feemanager.NewConfig(
-		big.NewInt(date.Unix()),
+		&timestamp,
 		adminAddrs,
 		enabledAddrs,
+		nil, // managers addresses
 		feeConfig,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
 	return nil
 }
 
-func promptContractAllowListParams(precompiles *[]params.PrecompileUpgrade, date time.Time) error {
+func promptContractAllowListParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
 	if err != nil {
 		return err
 	}
 
+	timestamp := uint64(date.Unix())
 	config := deployerallowlist.NewConfig(
-		big.NewInt(date.Unix()),
+		&timestamp,
 		adminAddrs,
 		enabledAddrs,
+		nil, // managers addresses
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
 	return nil
 }
 
-func promptTxAllowListParams(precompiles *[]params.PrecompileUpgrade, date time.Time) error {
+func promptTxAllowListParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
 	if err != nil {
 		return err
 	}
 
+	timestamp := uint64(date.Unix())
 	config := txallowlist.NewConfig(
-		big.NewInt(date.Unix()),
+		&timestamp,
 		adminAddrs,
 		enabledAddrs,
+		nil, // managers addresses
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)

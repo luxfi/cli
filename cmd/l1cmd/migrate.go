@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -66,7 +65,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   Subnet ID: %s", sc.SubnetID)
 	ux.Logger.PrintToUser("   Blockchain ID: %s", sc.BlockchainID)
 	ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
-	ux.Logger.PrintToUser("   Token: %s (%s)", sc.TokenInfo.TokenName, sc.TokenInfo.TokenSymbol)
+	ux.Logger.PrintToUser("   Token: %s (%s)", sc.TokenInfo.Name, sc.TokenInfo.Symbol)
 	ux.Logger.PrintToUser("")
 
 	// Check validator status
@@ -151,11 +150,11 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	
 	// Step 1: Create migration transaction
 	ux.Logger.PrintToUser("1️⃣ Creating migration transaction...")
-	migrationTx := createMigrationTransaction(sc, validatorManagement, rentalPlan)
+	_ = createMigrationTransaction(&sc, validatorManagement, rentalPlan)
 	
 	// Step 2: Notify validators
 	ux.Logger.PrintToUser("2️⃣ Notifying validators of migration...")
-	if err := notifyValidators(sc); err != nil {
+	if err := notifyValidators(&sc); err != nil {
 		ux.Logger.PrintToUser("   ⚠️  Some validators may need manual notification")
 	}
 
@@ -169,7 +168,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	sc.RentalPlan = rentalPlan
 	sc.MigratedAt = time.Now().Unix()
 	
-	if err := app.WriteSidecarFile(sc); err != nil {
+	if err := app.WriteSidecarFile(&sc); err != nil {
 		return fmt.Errorf("failed to update configuration: %w", err)
 	}
 

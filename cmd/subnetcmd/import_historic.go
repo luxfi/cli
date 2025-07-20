@@ -17,7 +17,6 @@ import (
 var (
 	historicDataPath string
 	autoRegister     bool
-	sequencer        string
 )
 
 // Historic subnet configurations
@@ -73,7 +72,7 @@ func newImportHistoricCmd() *cobra.Command {
 This command imports historic subnets as modern L2s with various sequencer options:
 - Lux: Based rollup using Lux L1 (100ms blocks, lowest cost)
 - Ethereum: Based rollup using Ethereum L1 (12s blocks, highest security)
-- Lux: Based rollup using Lux (2s blocks, fast finality)
+- Avalanche: Based rollup using Avalanche (2s blocks, fast finality)
 - OP: OP Stack compatible (Optimism ecosystem compatibility)
 - External: Traditional external sequencer
 
@@ -88,7 +87,7 @@ The import process:
 
 	cmd.Flags().StringVar(&historicDataPath, "data-path", "/home/z/.lux-cli/runs/network_current/node1/chainData", "Path to historic blockchain data")
 	cmd.Flags().BoolVar(&autoRegister, "auto-register", true, "Automatically register subnets with the node")
-	cmd.Flags().StringVar(&sequencer, "sequencer", "lux", "Sequencer for the L2 (lux, ethereum, lux, op, external)")
+	cmd.Flags().StringVar(&sequencer, "sequencer", "lux", "Sequencer for the L2 (lux, ethereum, avalanche, op, external)")
 
 	return cmd
 }
@@ -118,8 +117,8 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 			Subnet:  subnet.Name,
 			ChainID: fmt.Sprintf("%d", subnet.ChainID),
 			TokenInfo: models.TokenInfo{
-				TokenName:   subnet.TokenName,
-				TokenSymbol: subnet.TokenSymbol,
+				Name:   subnet.TokenName,
+				Symbol: subnet.TokenSymbol,
 			},
 			Version: constants.SidecarVersion,
 			
@@ -152,7 +151,7 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("invalid VM ID for %s: %w", subnet.Name, err)
 		}
-		sc.VMID = vmID
+		sc.ImportedVMID = vmID.String()
 
 		// Save subnet configuration
 		if err := app.WriteGenesisFile(subnet.Name, []byte("{}")); err != nil {
@@ -202,30 +201,3 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func getBlockTime(sequencer string) int {
-	switch sequencer {
-	case "lux":
-		return 100 // 100ms
-	case "ethereum":
-		return 12000 // 12s
-	case "lux":
-		return 2000 // 2s
-	case "op":
-		return 2000 // 2s (OP Stack block time)
-	case "external":
-		return 1000 // 1s default for external sequencers
-	default:
-		return 100 // Default to Lux timing
-	}
-}
-
-func isBasedRollup(sequencer string) bool {
-	switch sequencer {
-	case "lux", "ethereum", "lux":
-		return true // These are L1s, so it's a based rollup
-	case "op", "external":
-		return false // OP Stack and external sequencers are not based rollups
-	default:
-		return false
-	}
-}

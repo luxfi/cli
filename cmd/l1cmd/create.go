@@ -3,15 +3,15 @@
 package l1cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/node/ids"
 	"github.com/spf13/cobra"
 )
 
@@ -120,15 +120,15 @@ func createL1(cmd *cobra.Command, args []string) error {
 		Sovereign:           true,
 		ValidatorManagement: validatorManagement,
 		TokenInfo: models.TokenInfo{
-			TokenName:   tokenName,
-			TokenSymbol: tokenSymbol,
+			Name:   tokenName,
+			Symbol: tokenSymbol,
 		},
 		Version: constants.SidecarVersion,
 	}
 
 	// Create genesis configuration
 	genesis := vm.CreateEVMGenesis(
-		chainID,
+		big.NewInt(int64(chainID)),
 		nil, // allocations will be added later
 		nil, // timestamps
 	)
@@ -161,7 +161,11 @@ func createL1(cmd *cobra.Command, args []string) error {
 	}
 
 	// Save configuration
-	if err := app.WriteGenesisFile(l1Name, genesis); err != nil {
+	genesisBytes, err := json.MarshalIndent(genesis, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal genesis: %w", err)
+	}
+	if err := app.WriteGenesisFile(l1Name, genesisBytes); err != nil {
 		return fmt.Errorf("failed to write genesis: %w", err)
 	}
 
