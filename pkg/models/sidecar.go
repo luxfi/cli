@@ -39,6 +39,8 @@ type Sidecar struct {
 	VMVersion       string
 	RPCVersion      int
 	Subnet          string
+	SubnetID        ids.ID
+	BlockchainID    ids.ID
 	TokenName       string
 	ChainID         string
 	Version         string
@@ -85,4 +87,13 @@ func (sc Sidecar) GetVMID() (string, error) {
 		vmid = chainVMID.String()
 	}
 	return vmid, nil
+}
+
+// MigrationTx represents a subnet to L1 migration transaction
+type MigrationTx struct {
+	SubnetID            ids.ID `json:"subnetId"`
+	BlockchainID        ids.ID `json:"blockchainId"`
+	ValidatorManagement string `json:"validatorManagement"`
+	RentalPlan          string `json:"rentalPlan"`
+	Timestamp           int64  `json:"timestamp"`
 }

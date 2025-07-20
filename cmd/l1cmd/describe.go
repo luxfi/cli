@@ -40,8 +40,8 @@ func newDescribeCmd() *cobra.Command {
 
 			// Token info
 			ux.Logger.PrintToUser("💰 Native Token:")
-			ux.Logger.PrintToUser("   Name: %s", sc.TokenInfo.TokenName)
-			ux.Logger.PrintToUser("   Symbol: %s", sc.TokenInfo.TokenSymbol)
+			ux.Logger.PrintToUser("   Name: %s", sc.TokenInfo.Name)
+			ux.Logger.PrintToUser("   Symbol: %s", sc.TokenInfo.Symbol)
 			ux.Logger.PrintToUser("")
 
 			// Validator info
@@ -63,7 +63,8 @@ func newDescribeCmd() *cobra.Command {
 				ux.Logger.PrintToUser("🚀 Deployment Status:")
 				ux.Logger.PrintToUser("   Blockchain ID: %s", sc.BlockchainID)
 				ux.Logger.PrintToUser("   Subnet ID: %s", sc.SubnetID)
-				ux.Logger.PrintToUser("   VM ID: %s", sc.VMID)
+				vmid, _ := sc.GetVMID()
+				ux.Logger.PrintToUser("   VM ID: %s", vmid)
 				ux.Logger.PrintToUser("")
 			}
 

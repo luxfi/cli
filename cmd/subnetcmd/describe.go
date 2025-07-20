@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"

@@ -36,6 +36,8 @@ curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh |
 
 ## Quickstart
 
+### Subnet Management
+
 After installing, launch your own custom subnet:
 
 ```bash
@@ -48,6 +50,26 @@ Shut down your local deployment with:
 ```bash
 lux network stop
 ```
+
+### Validator Management
+
+Manage validator nodes with flexible wallet configurations:
+
+```bash
+# Add a validator
+lux node validator add --name mainnet-0 --seed "your seed phrase" --account 0
+
+# Start validator
+lux node validator start --name mainnet-0
+
+# Check status
+lux node validator status
+
+# Stop validator
+lux node validator stop --name mainnet-0
+```
+
+For detailed validator management, see [CLI Validator Guide](../docs/CLI_VALIDATOR_GUIDE.md).
 
 Restart your local deployment (from where you left off) with:
 

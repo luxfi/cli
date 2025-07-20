@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/luxfi/cli/pkg/apm"
+	"github.com/luxfi/cli/pkg/apmintegration"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
@@ -105,8 +105,8 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 	}
 
 	var (
-		tsubnet *types.Subnet
-		vm      *types.VM
+		tsubnet *apmintegration.Subnet
+		vm      *apmintegration.VM
 	)
 
 	if !forceWrite && noRepoPath == "" {
@@ -125,7 +125,7 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 	if subnetDescPath == "" {
 		tsubnet, err = getSubnetInfo(sc)
 	} else {
-		tsubnet = new(types.Subnet)
+		tsubnet = new(apmintegration.Subnet)
 		err = loadYAMLFile(subnetDescPath, tsubnet)
 	}
 	if err != nil {
@@ -137,7 +137,7 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 	if vmDescPath == "" {
 		vm, err = getVMInfo(sc)
 	} else {
-		vm = new(types.VM)
+		vm = new(apmintegration.VM)
 		err = loadYAMLFile(vmDescPath, vm)
 	}
 	if err != nil {
@@ -329,7 +329,7 @@ func getRepoURL(reposDir string) error {
 
 // loadYAMLFile loads a YAML file from disk into a concrete types.Definition object
 // using generics. It's role really is solely to verify that the YAML content is valid.
-func loadYAMLFile[T types.Definition](path string, defType T) error {
+func loadYAMLFile[T any](path string, defType T) error {
 	fileBytes, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -337,8 +337,8 @@ func loadYAMLFile[T types.Definition](path string, defType T) error {
 	return yaml.Unmarshal(fileBytes, &defType)
 }
 
-func getSubnetInfo(sc *models.Sidecar) (*types.Subnet, error) {
-	homepage, err := app.Prompt.CaptureStringAllowEmpty("What is the homepage of the Subnet project?")
+func getSubnetInfo(sc *models.Sidecar) (*apmintegration.Subnet, error) {
+	_, err := app.Prompt.CaptureStringAllowEmpty("What is the homepage of the Subnet project?")
 	if err != nil {
 		return nil, err
 	}
@@ -348,7 +348,7 @@ func getSubnetInfo(sc *models.Sidecar) (*types.Subnet, error) {
 		return nil, err
 	}
 
-	maintrs, canceled, err := prompts.CaptureListDecision(
+	_, canceled, err := prompts.CaptureListDecision(
 		app.Prompt,
 		"Who are the maintainers of the Subnet?",
 		app.Prompt.CaptureEmail,
@@ -364,21 +364,18 @@ func getSubnetInfo(sc *models.Sidecar) (*types.Subnet, error) {
 		return nil, errors.New("canceled by user")
 	}
 
-	subnet := &types.Subnet{
+	subnet := &apmintegration.Subnet{
 		ID:          sc.Networks[models.Fuji.String()].SubnetID.String(),
 		Alias:       sc.Name,
-		Homepage:    homepage,
 		Description: desc,
-		Maintainers: maintrs,
 		VMs:         []string{sc.Subnet},
 	}
 
 	return subnet, nil
 }
 
-func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
+func getVMInfo(sc *models.Sidecar) (*apmintegration.VM, error) {
 	var (
-		maintrs              []string
 		vmID, desc, url, sha string
 		canceled             bool
 		ver                  *version.Semantic
@@ -395,7 +392,7 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 		if err != nil {
 			return nil, err
 		}
-		maintrs, canceled, err = prompts.CaptureListDecision(
+		_, canceled, err = prompts.CaptureListDecision(
 			app.Prompt,
 			"Who are the maintainers of the VM?",
 			app.Prompt.CaptureEmail,
@@ -436,7 +433,7 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 		vmID = models.SubnetEvm
 		dl := binutils.NewSubnetEVMDownloader()
 		desc = "Lux EVM is a simplified version of Geth VM (C-Chain). It implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality"
-		maintrs, ver, url, sha, err = getInfoForKnownVMs(
+		_, ver, url, sha, err = getInfoForKnownVMs(
 			sc.VMVersion,
 			constants.SubnetEVMRepoName,
 			app.GetSubnetEVMBinDir(),
@@ -450,29 +447,25 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 		return nil, err
 	}
 
-	scr, err := app.Prompt.CaptureStringAllowEmpty(
+	_, err = app.Prompt.CaptureStringAllowEmpty(
 		"What scripts needs to run to install this VM? Needs to be an executable command to build the VM")
 	if err != nil {
 		return nil, err
 	}
 
-	bin, err := app.Prompt.CaptureStringAllowEmpty(
+	_, err = app.Prompt.CaptureStringAllowEmpty(
 		"What is the binary path? (This is the output of the build command)")
 	if err != nil {
 		return nil, err
 	}
 
-	vm := &types.VM{
-		ID:            vmID,
-		Alias:         sc.Networks["Fuji"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
-		Homepage:      "",
-		Description:   desc,
-		Maintainers:   maintrs,
-		InstallScript: scr,
-		BinaryPath:    bin,
-		URL:           url,
-		SHA256:        sha,
-		Version:       *ver,
+	vm := &apmintegration.VM{
+		ID:          vmID,
+		Alias:       sc.Networks["Fuji"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
+		Description: desc,
+		URL:         url,
+		Checksum:    sha,
+		Version:     ver.String(),
 	}
 
 	return vm, nil

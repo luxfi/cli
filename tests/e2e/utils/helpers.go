@@ -62,7 +62,7 @@ func GetAPMDir() string {
 	if err != nil {
 		panic(err)
 	}
-	return path.Join(usr.HomeDir, constants.APMDir)
+	return path.Join(usr.HomeDir, APMDir)
 }
 
 func ChainConfigExists(subnetName string) (bool, error) {
@@ -228,7 +228,7 @@ func SubnetAPMVMExists(subnetName string) (bool, error) {
 
 	vmid := sc.ImportedVMID
 
-	vm := path.Join(GetBaseDir(), constants.APMPluginDir, vmid)
+	vm := path.Join(GetBaseDir(), APMPluginDir, vmid)
 	vmExists := true
 	if _, err := os.Stat(vm); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -312,7 +312,7 @@ func DeleteCustomBinary(vmName string) {
 }
 
 func DeleteAPMBin(vmid string) {
-	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.APMPluginDir, vmid)
+	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, APMPluginDir, vmid)
 
 	// ignore error, file may not exist
 	_ = os.RemoveAll(vmPath)
@@ -694,7 +694,8 @@ func FundLedgerAddress() error {
 	}
 	var kc keychain.Keychain
 	kc = sk.KeyChain()
-	wallet, err := primary.NewWalletWithTxs(context.Background(), constants.LocalAPIEndpoint, kc)
+	// Create wallet without ETH keychain (use nil)
+	wallet, err := primary.MakeWallet(context.Background(), constants.LocalAPIEndpoint, kc, nil, primary.WalletConfig{})
 	if err != nil {
 		return err
 	}
@@ -721,7 +722,7 @@ func FundLedgerAddress() error {
 	if err != nil {
 		return err
 	}
-	wallet, err = primary.NewWalletWithTxs(context.Background(), constants.LocalAPIEndpoint, kc)
+	wallet, err = primary.MakeWallet(context.Background(), constants.LocalAPIEndpoint, kc, nil, primary.WalletConfig{})
 	if err != nil {
 		return err
 	}

@@ -107,12 +107,14 @@ func createL3(cmd *cobra.Command, args []string) error {
 	tokenSymbol, _ := app.Prompt.CaptureString("Token symbol")
 	
 	sc.TokenInfo = models.TokenInfo{
-		TokenName:   tokenName,
-		TokenSymbol: tokenSymbol,
+		Name:   tokenName,
+		Symbol: tokenSymbol,
+		Decimals: 18,
+		Supply: "0",
 	}
 
 	// Save configuration
-	if err := app.WriteSidecarFile(sc); err != nil {
+	if err := app.CreateSidecar(sc); err != nil {
 		return fmt.Errorf("failed to save L3 configuration: %w", err)
 	}
 

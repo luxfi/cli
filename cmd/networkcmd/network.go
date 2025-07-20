@@ -9,7 +9,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var app *application.Lux
+var (
+	app         *application.Lux
+	luxdVersion string
+	numNodes    uint32
+)
 
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp

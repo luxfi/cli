@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"time"
 	
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -266,7 +265,7 @@ func createDevGenesis(flags *devFlags) error {
 			{
 				"ethAddr":       flags.accounts[0],
 				"luxAddr":      "X-lux1npswupzlgs3kng2q965as2la8rw4787hcn9p7q",
-				"initialAmount": 1000000000000000000000000000,
+				"initialAmount": "1000000000000000000000000000",
 				"unlockSchedule": []interface{}{},
 			},
 		},

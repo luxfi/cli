@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/ids"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/mod/semver"
 )
