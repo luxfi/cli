@@ -6,7 +6,7 @@ import (
 	big "math/big"
 
 	ids "github.com/luxfi/node/ids"
-	common "github.com/ethereum/go-ethereum/common"
+	common "github.com/luxfi/geth/common"
 
 	mock "github.com/stretchr/testify/mock"
 

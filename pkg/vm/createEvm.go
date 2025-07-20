@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath string, subnetEVMVersion string) ([]byte, *models.Sidecar, error) {
@@ -181,4 +181,48 @@ func ensureAdminsHaveBalance(admins []common.Address, alloc core.GenesisAlloc) e
 // In own function to facilitate testing
 func getEVMAllocation(app *application.Lux) (core.GenesisAlloc, statemachine.StateDirection, error) {
 	return getAllocation(app, defaultEvmAirdropAmount, oneLux, "Amount to airdrop (in LUX units)")
+}
+
+// CreateEVMGenesis creates a new EVM genesis configuration
+func CreateEVMGenesis(chainID *big.Int, allocations core.GenesisAlloc, timestamps map[string]uint64) map[string]interface{} {
+	// Default configuration
+	config := map[string]interface{}{
+		"config": map[string]interface{}{
+			"chainId":             chainID,
+			"homesteadBlock":      0,
+			"eip150Block":         0,
+			"eip155Block":         0,
+			"eip158Block":         0,
+			"byzantiumBlock":      0,
+			"constantinopleBlock": 0,
+			"petersburgBlock":     0,
+			"istanbulBlock":       0,
+			"muirGlacierBlock":    0,
+			"berlinBlock":         0,
+			"londonBlock":         0,
+			"feeConfig": map[string]interface{}{
+				"gasLimit":        8000000,
+				"targetBlockRate": 2,
+				"minBaseFee":      25000000000,
+				"targetGas":       15000000,
+				"baseFeeChangeDenominator": 36,
+				"minBlockGasCost":  0,
+				"maxBlockGasCost":  1000000,
+				"blockGasCostStep": 200000,
+			},
+		},
+		"alloc":      allocations,
+		"difficulty": "0x0",
+		"gasLimit":   "0x7A1200",
+		"timestamp":  "0x0",
+	}
+
+	// Apply custom timestamps if provided
+	if timestamps != nil {
+		for key, value := range timestamps {
+			config[key] = fmt.Sprintf("0x%x", value)
+		}
+	}
+
+	return config
 }

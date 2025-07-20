@@ -105,7 +105,7 @@ func newUpgradeProtocolCmd() *cobra.Command {
 - cosmos: Enable IBC compatibility`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			l1Name := args[0]
+			_ = args[0] // l1Name already defined
 			
 			protocols := []string{
 				"Lux Compatibility",
