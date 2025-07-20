@@ -3,8 +3,6 @@
 package l1cmd
 
 import (
-	"fmt"
-
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +16,7 @@ func newListCmd() *cobra.Command {
 		Long:  `List all sovereign L1 blockchain configurations and their deployment status.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Get all subnet names (which will become L1s)
-			l1s, err := app.GetSubnetNames()
+			l1s, err := app.GetSidecarNames()
 			if err != nil {
 				return err
 			}
@@ -42,7 +40,7 @@ func newListCmd() *cobra.Command {
 
 				ux.Logger.PrintToUser("🔷 %s", l1Name)
 				ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
-				ux.Logger.PrintToUser("   Token: %s (%s)", sc.TokenInfo.TokenName, sc.TokenInfo.TokenSymbol)
+				ux.Logger.PrintToUser("   Token: %s (%s)", sc.TokenInfo.Name, sc.TokenInfo.Symbol)
 				ux.Logger.PrintToUser("   Validator Type: %s", sc.ValidatorManagement)
 
 				if showDeployed && sc.BlockchainID.String() != "" {

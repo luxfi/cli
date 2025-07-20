@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/mock"
 )
 

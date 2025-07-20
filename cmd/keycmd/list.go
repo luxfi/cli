@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/geth/ethclient"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -106,7 +106,7 @@ keys or for the ledger addresses associated to certain indices.`,
 }
 
 func getClients(networks []models.Network, cchain bool) (
-	map[models.Network]platformvm.Client,
+	map[models.Network]*platformvm.Client,
 	map[models.Network]ethclient.Client,
 	error,
 ) {
@@ -116,7 +116,7 @@ func getClients(networks []models.Network, cchain bool) (
 		models.Local:   constants.LocalAPIEndpoint,
 	}
 	var err error
-	pClients := map[models.Network]platformvm.Client{}
+	pClients := map[models.Network]*platformvm.Client{}
 	cClients := map[models.Network]ethclient.Client{}
 	for _, network := range networks {
 		pClients[network] = platformvm.NewClient(apiEndpoints[network])
@@ -191,7 +191,7 @@ func listKeys(*cobra.Command, []string) error {
 }
 
 func getStoredKeysInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	cClients map[models.Network]ethclient.Client,
 	networks []models.Network,
 	cchain bool,
@@ -218,7 +218,7 @@ func getStoredKeysInfo(
 }
 
 func getStoredKeyInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	cClients map[models.Network]ethclient.Client,
 	networks []models.Network,
 	keyPath string,
@@ -256,7 +256,7 @@ func getStoredKeyInfo(
 }
 
 func getLedgerIndicesInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	ledgerIndices []uint32,
 	networks []models.Network,
 ) ([]addressInfo, error) {
@@ -284,7 +284,7 @@ func getLedgerIndicesInfo(
 }
 
 func getLedgerIndexInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	index uint32,
 	networks []models.Network,
 	addr ids.ShortID,
@@ -315,13 +315,13 @@ func getLedgerIndexInfo(
 }
 
 func getPChainAddrInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	network models.Network,
 	pChainAddr string,
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	balance, err := getPChainBalanceStr(context.Background(), pClients[network], pChainAddr)
+	balance, err := getPChainBalanceStr(context.Background(), *pClients[network], pChainAddr)
 	if err != nil {
 		// just ignore local network errors
 		if network != models.Local {

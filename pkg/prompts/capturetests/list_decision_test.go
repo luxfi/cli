@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

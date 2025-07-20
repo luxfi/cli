@@ -81,7 +81,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 
 			// Generate node configurations
 			ux.Logger.PrintToUser("Step 3: Generating node configurations...")
-			if err := generateNodeConfigs(outputDir, validators, networkID); err != nil {
+			if err := generateNodeConfigs(outputDir, validators); err != nil {
 				return fmt.Errorf("failed to generate node configs: %w", err)
 			}
 
@@ -125,7 +125,9 @@ func newBootstrapCmd(app *application.Lux) *cobra.Command {
 			}
 
 			// Start bootstrap nodes
-			if err := startBootstrapNodes(migrationDir, detached); err != nil {
+			// TODO: Fix startBootstrapNodes to handle detached flag
+			nodeCount := 1 // Default to 1 node for now
+			if err := startBootstrapNodes(migrationDir, nodeCount); err != nil {
 				return fmt.Errorf("failed to start bootstrap nodes: %w", err)
 			}
 
