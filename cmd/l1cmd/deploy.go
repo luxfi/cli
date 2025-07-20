@@ -86,7 +86,7 @@ func deployL1(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("\n📋 L1 Configuration:")
 	ux.Logger.PrintToUser("   Name: %s", l1Name)
 	ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
-	ux.Logger.PrintToUser("   Token: %s (%s)", sc.TokenInfo.TokenName, sc.TokenInfo.TokenSymbol)
+	ux.Logger.PrintToUser("   Token: %s (%s)", sc.TokenInfo.Name, sc.TokenInfo.Symbol)
 	ux.Logger.PrintToUser("   Validator Management: %s", sc.ValidatorManagement)
 	ux.Logger.PrintToUser("   Protocol: %s", protocol)
 
@@ -100,11 +100,11 @@ func deployL1(cmd *cobra.Command, args []string) error {
 	// Deploy based on network
 	switch network {
 	case "local":
-		return deployL1Local(l1Name, sc)
+		return deployL1Local(l1Name, &sc)
 	case "testnet":
-		return deployL1Testnet(l1Name, sc)
+		return deployL1Testnet(l1Name, &sc)
 	case "mainnet":
-		return deployL1Mainnet(l1Name, sc)
+		return deployL1Mainnet(l1Name, &sc)
 	}
 
 	return nil

@@ -6,11 +6,10 @@ package apmintegration
 import (
 	"os"
 
-	"github.com/luxfi/cli/pkg/apm"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/lpm"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -20,17 +19,22 @@ const (
 	adminAPIEndpointKey = "admin-api-endpoint"
 )
 
+// Credential represents git authentication credentials
+type Credential struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
 // Note, you can only call this method once per run
-func SetupApm(app *application.Lux, apmBaseDir string) error {
-	credentials, err := initCredentials()
+func SetupLpm(app *application.Lux, lpmBaseDir string) error {
+	// Note: credentials not used in LPM currently, but keeping for future auth
+	_, err := initCredentials()
 	if err != nil {
 		return err
 	}
 
-	// Need to initialize a afero filesystem object to run apm
-	fs := afero.NewOsFs()
 
-	err = os.MkdirAll(app.GetAPMPluginDir(), constants.DefaultPerms755)
+	err = os.MkdirAll(app.GetLPMPluginDir(), constants.DefaultPerms755)
 	if err != nil {
 		return err
 	}
@@ -38,27 +42,24 @@ func SetupApm(app *application.Lux, apmBaseDir string) error {
 	// The New() function has a lot of prints we'd like to hide from the user,
 	// so going to divert stdout to the log temporarily
 	stdOutHolder := os.Stdout
-	apmLog, err := os.OpenFile(app.GetAPMLog(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, constants.DefaultPerms755)
+	lpmLog, err := os.OpenFile(app.GetLPMLog(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, constants.DefaultPerms755)
 	if err != nil {
 		return err
 	}
-	defer apmLog.Close()
-	os.Stdout = apmLog
-	apmConfig := apm.Config{
-		Directory:        apmBaseDir,
-		Auth:             credentials,
-		AdminAPIEndpoint: viper.GetString(adminAPIEndpointKey),
-		PluginDir:        app.GetAPMPluginDir(),
-		Fs:               fs,
-	}
-	apmInstance, err := apm.New(apmConfig)
+	defer lpmLog.Close()
+	os.Stdout = lpmLog
+	lpmInstance, err := lpm.NewClient(
+		lpmBaseDir,
+		app.GetLPMPluginDir(),
+		viper.GetString(adminAPIEndpointKey),
+	)
 	if err != nil {
 		return err
 	}
 	os.Stdout = stdOutHolder
-	app.Apm = apmInstance
+	app.Lpm = lpmInstance
 
-	app.ApmDir = apmBaseDir
+	app.LpmDir = lpmBaseDir
 	return err
 }
 
@@ -69,7 +70,7 @@ func initCredentials() (http.BasicAuth, error) {
 	result := http.BasicAuth{}
 
 	if viper.IsSet(credentialsFileKey) {
-		credentials := &config.Credential{}
+		credentials := &Credential{}
 
 		bytes, err := os.ReadFile(viper.GetString(credentialsFileKey))
 		if err != nil {

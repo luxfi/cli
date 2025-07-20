@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/apm"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/lpm"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/node/ids"
@@ -27,8 +27,8 @@ type Lux struct {
 	baseDir    string
 	Conf       *config.Config
 	Prompt     prompts.Prompter
-	Apm        *apm.APM
-	ApmDir     string
+	Lpm        *lpm.Client
+	LpmDir     string
 	Downloader Downloader
 }
 
@@ -68,6 +68,13 @@ func (app *Lux) GetRunDir() string {
 	return filepath.Join(app.baseDir, constants.RunDir)
 }
 
+func (app *Lux) IsLocalNetworkRunning() bool {
+	// Check if the local network is running by checking the gRPC server status
+	runFilePath := filepath.Join(app.GetRunDir(), constants.ServerRunFile)
+	_, err := os.Stat(runFilePath)
+	return err == nil
+}
+
 func (app *Lux) GetCustomVMDir() string {
 	return filepath.Join(app.baseDir, constants.CustomVMDir)
 }
@@ -92,8 +99,8 @@ func (app *Lux) GetCustomVMPath(subnetName string) string {
 	return filepath.Join(app.GetCustomVMDir(), subnetName)
 }
 
-func (app *Lux) GetAPMVMPath(vmid string) string {
-	return filepath.Join(app.GetAPMPluginDir(), vmid)
+func (app *Lux) GetLPMVMPath(vmid string) string {
+	return filepath.Join(app.GetLPMPluginDir(), vmid)
 }
 
 func (app *Lux) GetGenesisPath(subnetName string) string {
@@ -120,16 +127,16 @@ func (*Lux) GetTmpPluginDir() string {
 	return os.TempDir()
 }
 
-func (app *Lux) GetAPMBaseDir() string {
-	return filepath.Join(app.baseDir, "apm")
+func (app *Lux) GetLPMBaseDir() string {
+	return filepath.Join(app.baseDir, "lpm")
 }
 
-func (app *Lux) GetAPMLog() string {
-	return filepath.Join(app.baseDir, constants.LogDir, constants.APMLogName)
+func (app *Lux) GetLPMLog() string {
+	return filepath.Join(app.baseDir, constants.LogDir, constants.LPMLogName)
 }
 
-func (app *Lux) GetAPMPluginDir() string {
-	return filepath.Join(app.baseDir, constants.APMPluginDir)
+func (app *Lux) GetLPMPluginDir() string {
+	return filepath.Join(app.baseDir, constants.LPMPluginDir)
 }
 
 func (app *Lux) GetKeyPath(keyName string) string {
@@ -289,6 +296,15 @@ func (app *Lux) LoadSidecar(subnetName string) (models.Sidecar, error) {
 	}
 
 	return sc, err
+}
+
+func (app *Lux) WriteSidecarFile(sc *models.Sidecar) error {
+	sidecarPath := app.GetSidecarPath(sc.Name)
+	jsonBytes, err := json.MarshalIndent(sc, "", "  ")
+	if err != nil {
+		return err
+	}
+	return app.writeFile(sidecarPath, jsonBytes)
 }
 
 func (app *Lux) UpdateSidecar(sc *models.Sidecar) error {

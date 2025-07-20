@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -67,7 +66,7 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 		baseOptions := []string{
 			"Lux (100ms blocks, lowest cost)",
 			"Ethereum (12s blocks, highest security)",
-			"Lux (2s blocks, fast finality)",
+			"Avalanche (2s blocks, fast finality)",
 		}
 
 		// Remove current base from options
@@ -131,16 +130,17 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 	// Create governance proposal
 	ux.Logger.PrintToUser("\n📝 Creating Governance Proposal...")
 	
-	proposal := &models.GovernanceProposal{
-		Type:        "base-migration",
-		Title:       fmt.Sprintf("Migrate %s from %s to %s", subnetName, sc.BaseChain, targetBase),
-		Description: fmt.Sprintf("Migrate subnet to improve performance and reduce costs"),
-		L2Name:      subnetName,
-		CurrentBase: sc.BaseChain,
-		TargetBase:  targetBase,
-		HotSwap:     hotSwap,
-		CreatedAt:   time.Now().Unix(),
-	}
+	// In a real implementation, this would create and submit a governance proposal
+	// proposal := &models.GovernanceProposal{
+	// 	Type:        "base-migration",
+	// 	Title:       fmt.Sprintf("Migrate %s from %s to %s", subnetName, sc.BaseChain, targetBase),
+	// 	Description: fmt.Sprintf("Migrate subnet to improve performance and reduce costs"),
+	// 	L2Name:      subnetName,
+	// 	CurrentBase: sc.BaseChain,
+	// 	TargetBase:  targetBase,
+	// 	HotSwap:     hotSwap,
+	// 	CreatedAt:   time.Now().Unix(),
+	// }
 
 	// Simulate proposal submission
 	ux.Logger.PrintToUser("   Submitting proposal...")
@@ -171,8 +171,8 @@ func isCurrentBase(option, current string) bool {
 		return option == "Lux (100ms blocks, lowest cost)"
 	case "ethereum":
 		return option == "Ethereum (12s blocks, highest security)"
-	case "lux":
-		return option == "Lux (2s blocks, fast finality)"
+	case "avalanche":
+		return option == "Avalanche (2s blocks, fast finality)"
 	}
 	return false
 }
@@ -183,8 +183,8 @@ func parseBaseChoice(choice string) string {
 		return "lux"
 	case "Ethereum (12s blocks, highest security)":
 		return "ethereum"
-	case "Lux (2s blocks, fast finality)":
-		return "lux"
+	case "Avalanche (2s blocks, fast finality)":
+		return "avalanche"
 	}
 	return choice
 }
@@ -210,7 +210,7 @@ func showMigrationImpact(from, to string) {
 	case "ethereum":
 		ux.Logger.PrintToUser("   💰 Higher data costs (ETH gas)")
 		ux.Logger.PrintToUser("   🛡️  Maximum security inheritance")
-	case "lux":
+	case "avalanche":
 		ux.Logger.PrintToUser("   💵 Moderate data costs")
 		ux.Logger.PrintToUser("   ⚡ Fast finality (~1s)")
 	}
@@ -219,15 +219,3 @@ func showMigrationImpact(from, to string) {
 	ux.Logger.PrintToUser("   🔀 MEV flows to %s builders", to)
 }
 
-func getBlockTime(chain string) int {
-	switch chain {
-	case "lux":
-		return 100 // 100ms
-	case "ethereum":
-		return 12000 // 12s
-	case "lux":
-		return 2000 // 2s
-	default:
-		return 12000 // Default to Ethereum timing
-	}
-}

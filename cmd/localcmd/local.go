@@ -7,8 +7,6 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/client"
@@ -72,7 +70,6 @@ func startLocalNetwork(*cobra.Command, []string) error {
 		client.WithRootDataDir(app.GetRunDir()),
 		client.WithReassignPortsIfUsed(true),
 		client.WithPluginDir(app.GetPluginsDir()),
-		client.WithDefaultSnapshot(""),
 	}
 
 	ctx := binutils.GetAsyncContext()
