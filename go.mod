@@ -169,4 +169,10 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
-replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
+replace (
+	github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
+	github.com/luxfi/evm => ../evm
+	github.com/luxfi/geth => ../geth
+	github.com/luxfi/netrunner => ../netrunner
+	github.com/luxfi/node => ../node
+)
