@@ -47,7 +47,7 @@ flag.`,
 	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "import from `fuji` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `fuji`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "import from `mainnet`")
-	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "import a subnet-evm")
+	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "import a evm")
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
 	cmd.Flags().BoolVarP(
 		&overwriteImport,
@@ -240,7 +240,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		// no node was queried, ask the user
 		switch vmType {
 		case models.SubnetEvm:
-			versions, err = app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.SubnetEVMRepoName)
+			versions, err = app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.EVMRepoName)
 			if err != nil {
 				return err
 			}

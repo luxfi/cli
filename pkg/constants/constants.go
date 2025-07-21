@@ -84,13 +84,13 @@ const (
 
 	LuxOrg          = "luxfi"
 	LuxRepoName = "node"
-	SubnetEVMRepoName   = "evm"
+	EVMRepoName   = "evm"
 	CliRepoName         = "cli"
 
 	LuxInstallDir = "node"
-	SubnetEVMInstallDir   = "subnet-evm"
+	EVMInstallDir   = "evm"
 
-	SubnetEVMBin = "subnet-evm"
+	EVMBin = "evm"
 
 	DefaultNodeRunURL = "http://127.0.0.1:9630"
 
@@ -127,7 +127,7 @@ const (
 
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
-	SubnetEVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
+	EVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 
 	YesLabel = "Yes"
 	NoLabel  = "No"

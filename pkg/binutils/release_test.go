@@ -142,46 +142,46 @@ func Test_installLuxWithVersion_MultipleCoinstalls(t *testing.T) {
 	require.Equal(binary2, installedBin2)
 }
 
-func Test_installSubnetEVMWithVersion(t *testing.T) {
+func Test_installEVMWithVersion(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	tarBytes := testutils.CreateDummySubnetEVMTar(require, binary1)
+	tarBytes := testutils.CreateDummyEVMTar(require, binary1)
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("amd64", "darwin")
 
-	downloader := NewSubnetEVMDownloader()
+	downloader := NewEVMDownloader()
 
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(tarBytes, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir := filepath.Join(app.GetSubnetEVMBinDir(), subnetEVMBinPrefix+version1)
+	expectedDir := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
 
-	subDir := filepath.Join(app.GetSubnetEVMBinDir(), subnetEVMBinPrefix+version1)
+	subDir := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
 
 	binDir, err := installBinaryWithVersion(app, version1, subDir, subnetEVMBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir, binDir)
 	require.NoError(err)
 
 	// Check the installed binary
-	installedBin, err := os.ReadFile(filepath.Join(binDir, constants.SubnetEVMBin))
+	installedBin, err := os.ReadFile(filepath.Join(binDir, constants.EVMBin))
 	require.NoError(err)
 	require.Equal(binary1, installedBin)
 }
 
-func Test_installSubnetEVMWithVersion_MultipleCoinstalls(t *testing.T) {
+func Test_installEVMWithVersion_MultipleCoinstalls(t *testing.T) {
 	require := testutils.SetupTest(t)
 
-	tarBytes1 := testutils.CreateDummySubnetEVMTar(require, binary1)
-	tarBytes2 := testutils.CreateDummySubnetEVMTar(require, binary2)
+	tarBytes1 := testutils.CreateDummyEVMTar(require, binary1)
+	tarBytes2 := testutils.CreateDummyEVMTar(require, binary2)
 	app := setupInstallDir(require)
 
 	mockInstaller := &mocks.Installer{}
 	mockInstaller.On("GetArch").Return("arm64", "linux")
 
-	downloader := NewSubnetEVMDownloader()
+	downloader := NewEVMDownloader()
 	url1, _, err := downloader.GetDownloadURL(version1, mockInstaller)
 	require.NoError(err)
 	url2, _, err := downloader.GetDownloadURL(version2, mockInstaller)
@@ -192,11 +192,11 @@ func Test_installSubnetEVMWithVersion_MultipleCoinstalls(t *testing.T) {
 	mockAppDownloader.On("Download", url2).Return(tarBytes2, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir1 := filepath.Join(app.GetSubnetEVMBinDir(), subnetEVMBinPrefix+version1)
-	expectedDir2 := filepath.Join(app.GetSubnetEVMBinDir(), subnetEVMBinPrefix+version2)
+	expectedDir1 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
+	expectedDir2 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version2)
 
-	subDir1 := filepath.Join(app.GetSubnetEVMBinDir(), subnetEVMBinPrefix+version1)
-	subDir2 := filepath.Join(app.GetSubnetEVMBinDir(), subnetEVMBinPrefix+version2)
+	subDir1 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
+	subDir2 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version2)
 
 	binDir1, err := installBinaryWithVersion(app, version1, subDir1, subnetEVMBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir1, binDir1)
@@ -209,11 +209,11 @@ func Test_installSubnetEVMWithVersion_MultipleCoinstalls(t *testing.T) {
 	require.NotEqual(binDir1, binDir2)
 
 	// Check the installed binary
-	installedBin1, err := os.ReadFile(filepath.Join(binDir1, constants.SubnetEVMBin))
+	installedBin1, err := os.ReadFile(filepath.Join(binDir1, constants.EVMBin))
 	require.NoError(err)
 	require.Equal(binary1, installedBin1)
 
-	installedBin2, err := os.ReadFile(filepath.Join(binDir2, constants.SubnetEVMBin))
+	installedBin2, err := os.ReadFile(filepath.Join(binDir2, constants.EVMBin))
 	require.NoError(err)
 	require.Equal(binary2, installedBin2)
 }

@@ -52,9 +52,9 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 
 		switch sc.VM {
 		case models.SubnetEvm:
-			vmSourcePath, err = binutils.SetupSubnetEVM(app, sc.VMVersion)
+			vmSourcePath, err = binutils.SetupEVM(app, sc.VMVersion)
 			if err != nil {
-				return "", fmt.Errorf("failed to install subnet-evm: %w", err)
+				return "", fmt.Errorf("failed to install evm: %w", err)
 			}
 		case models.CustomVM:
 			vmSourcePath = binutils.SetupCustomBin(app, subnetName)
@@ -82,9 +82,9 @@ func CreatePluginFromVersion(
 
 	switch vm {
 	case models.SubnetEvm:
-		vmSourcePath, err = binutils.SetupSubnetEVM(app, version)
+		vmSourcePath, err = binutils.SetupEVM(app, version)
 		if err != nil {
-			return "", fmt.Errorf("failed to install subnet-evm: %w", err)
+			return "", fmt.Errorf("failed to install evm: %w", err)
 		}
 	case models.CustomVM:
 		vmSourcePath = binutils.SetupCustomBin(app, subnetName)

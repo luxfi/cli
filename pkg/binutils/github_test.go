@@ -78,13 +78,13 @@ func TestGetDownloadURL_Lux(t *testing.T) {
 	}
 }
 
-func TestGetDownloadURL_SubnetEVM(t *testing.T) {
+func TestGetDownloadURL_EVM(t *testing.T) {
 	tests := []urlTest{
 		{
 			version:     "v1.17.1",
 			goarch:      "amd64",
 			goos:        "linux",
-			expectedURL: "https://github.com/luxfi/subnet-evm/releases/download/v1.17.1/subnet-evm_1.17.1_linux_amd64.tar.gz",
+			expectedURL: "https://github.com/luxfi/evm/releases/download/v1.17.1/evm_1.17.1_linux_amd64.tar.gz",
 			expectedExt: tarExtension,
 			expectedErr: nil,
 		},
@@ -92,7 +92,7 @@ func TestGetDownloadURL_SubnetEVM(t *testing.T) {
 			version:     "v1.18.5",
 			goarch:      "arm64",
 			goos:        "darwin",
-			expectedURL: "https://github.com/luxfi/subnet-evm/releases/download/v1.18.5/subnet-evm_1.18.5_darwin_arm64.tar.gz",
+			expectedURL: "https://github.com/luxfi/evm/releases/download/v1.18.5/evm_1.18.5_darwin_arm64.tar.gz",
 			expectedExt: tarExtension,
 			expectedErr: nil,
 		},
@@ -111,7 +111,7 @@ func TestGetDownloadURL_SubnetEVM(t *testing.T) {
 		mockInstaller := &mocks.Installer{}
 		mockInstaller.On("GetArch").Return(tt.goarch, tt.goos)
 
-		downloader := NewSubnetEVMDownloader()
+		downloader := NewEVMDownloader()
 
 		url, ext, err := downloader.GetDownloadURL(tt.version, mockInstaller)
 		require.Equal(tt.expectedURL, url)

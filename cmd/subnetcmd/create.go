@@ -53,7 +53,7 @@ Subnets are L2s that can use different sequencing models:
 - Distributed: Multiple sequencers with consensus
 
 By default, the command runs an interactive wizard. It supports:
-- Subnet-EVM and custom VMs
+- Lux EVM and custom VMs
 - Multiple base chains for sequencing
 - Pre-confirmations for fast UX
 - Migration paths between different models
@@ -67,7 +67,7 @@ Use -f to overwrite existing configurations.`,
 	}
 	cmd.Flags().StringVar(&genesisFile, "genesis", "", "file path of genesis to use")
 	cmd.Flags().StringVar(&vmFile, "vm", "", "file path of custom vm to use")
-	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "use the Subnet-EVM as the base template")
+	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "use the Lux EVM as the base template")
 	cmd.Flags().StringVar(&vmVersion, "vm-version", "", "version of vm template to use")
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
 	cmd.Flags().BoolVar(&useLatestVersion, latest, false, "use latest VM version, takes precedence over --vm-version")

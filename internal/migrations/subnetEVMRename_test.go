@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSubnetEVMRenameMigration(t *testing.T) {
+func TestEVMRenameMigration(t *testing.T) {
 	type test struct {
 		name       string
 		sc         *models.Sidecar
@@ -30,20 +30,20 @@ func TestSubnetEVMRenameMigration(t *testing.T) {
 
 	tests := []test{
 		{
-			name: "Convert SubnetEVM",
+			name: "Convert EVM",
 			sc: &models.Sidecar{
 				Name: subnetName,
-				VM:   "SubnetEVM",
+				VM:   "EVM",
 			},
-			expectedVM: "Subnet-EVM",
+			expectedVM: "Lux EVM",
 		},
 		{
-			name: "Preserve Subnet-EVM",
+			name: "Preserve Lux EVM",
 			sc: &models.Sidecar{
 				Name: subnetName,
-				VM:   "Subnet-EVM",
+				VM:   "Lux EVM",
 			},
-			expectedVM: "Subnet-EVM",
+			expectedVM: "Lux EVM",
 		},
 		{
 			name: "Ignore unknown",
@@ -71,7 +71,7 @@ func TestSubnetEVMRenameMigration(t *testing.T) {
 				showMsg: true,
 				running: false,
 				migrations: map[int]migrationFunc{
-					0: migrateSubnetEVMNames,
+					0: migrateEVMNames,
 				},
 			}
 			// run the migration
@@ -85,7 +85,7 @@ func TestSubnetEVMRenameMigration(t *testing.T) {
 	}
 }
 
-func TestSubnetEVMRenameMigration_EmptyDir(t *testing.T) {
+func TestEVMRenameMigration_EmptyDir(t *testing.T) {
 	ux.NewUserLog(logging.NoLog{}, io.Discard)
 	require := require.New(t)
 	testDir := t.TempDir()
@@ -103,7 +103,7 @@ func TestSubnetEVMRenameMigration_EmptyDir(t *testing.T) {
 		showMsg: true,
 		running: false,
 		migrations: map[int]migrationFunc{
-			0: migrateSubnetEVMNames,
+			0: migrateEVMNames,
 		},
 	}
 	// run the migration

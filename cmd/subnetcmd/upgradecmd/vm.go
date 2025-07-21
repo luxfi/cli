@@ -317,9 +317,9 @@ func updateExistingLocalVM(sc models.Sidecar, targetVersion string) error {
 	switch sc.VM {
 	// download the binary and prepare to copy it
 	case models.SubnetEvm:
-		vmBin, err = binutils.SetupSubnetEVM(app, targetVersion)
+		vmBin, err = binutils.SetupEVM(app, targetVersion)
 		if err != nil {
-			return fmt.Errorf("failed to install subnet-evm: %w", err)
+			return fmt.Errorf("failed to install evm: %w", err)
 		}
 
 		rpcVersion, err = vm.GetRPCProtocolVersion(app, models.SubnetEvm, targetVersion)

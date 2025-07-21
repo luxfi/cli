@@ -41,7 +41,7 @@ import (
 const (
 	expectedRPCComponentsLen = 7
 	blockchainIDPos          = 5
-	subnetEVMName            = "subnet-evm"
+	subnetEVMName            = "evm"
 )
 
 var defaultLocalNetworkNodeIDs = []string{
@@ -293,7 +293,7 @@ func DeleteBins() error {
 	// ignore error, file may not exist
 	_ = os.RemoveAll(luxPath)
 
-	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.SubnetEVMInstallDir)
+	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.EVMInstallDir)
 	if _, err := os.Stat(subevmPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -467,8 +467,8 @@ func CheckKeyEquality(keyPath1, keyPath2 string) (bool, error) {
 	return string(key1) == string(key2), nil
 }
 
-func CheckSubnetEVMExists(version string) bool {
-	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.SubnetEVMInstallDir, "subnet-evm-"+version)
+func CheckEVMExists(version string) bool {
+	subevmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, constants.EVMInstallDir, "evm-"+version)
 	_, err := os.Stat(subevmPath)
 	return err == nil
 }
@@ -479,7 +479,7 @@ func CheckLuxExists(version string) bool {
 	return err == nil
 }
 
-// Currently downloads subnet-evm, but that suffices to test the custom vm functionality
+// Currently downloads evm, but that suffices to test the custom vm functionality
 func DownloadCustomVMBin(subnetEVMversion string) (string, error) {
 	targetDir := os.TempDir()
 	subnetEVMDir, err := binutils.DownloadReleaseVersion(logging.NoLog{}, subnetEVMName, subnetEVMversion, targetDir)

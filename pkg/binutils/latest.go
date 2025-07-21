@@ -40,7 +40,7 @@ func DownloadReleaseVersion(
 			repo,
 			version,
 			repo,
-			version[1:], // WARN subnet-evm isn't consistent in its release naming, it's omitting the v in the file name...
+			version[1:], // WARN evm isn't consistent in its release naming, it's omitting the v in the file name...
 			arch,
 		)
 		ext = "tar.gz"
@@ -53,7 +53,7 @@ func DownloadReleaseVersion(
 			version[1:],
 			arch,
 		)
-		// subnet-evm supports darwin and linux only
+		// evm supports darwin and linux only
 		ext = "tar.gz"
 	default:
 		return "", fmt.Errorf("OS not supported: %s", goos)
