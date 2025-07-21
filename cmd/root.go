@@ -25,7 +25,7 @@ import (
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/localcmd"
 	"github.com/luxfi/cli/internal/migrations"
-	"github.com/luxfi/cli/pkg/apmintegration"
+	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
@@ -132,7 +132,7 @@ func createApp(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 		lpmBaseDir := filepath.Join(usr.HomeDir, constants.LPMDir)
-		if err = apmintegration.SetupLpm(app, lpmBaseDir); err != nil {
+		if err = lpmintegration.SetupLpm(app, lpmBaseDir); err != nil {
 			return err
 		}
 	}

@@ -1,7 +1,7 @@
 // Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package apmintegration
+package lpmintegration
 
 import (
 	"os"
@@ -17,11 +17,11 @@ func TestSetupAPM(t *testing.T) {
 	testDir := t.TempDir()
 	app := newTestApp(t, testDir)
 
-	err := os.MkdirAll(filepath.Dir(app.GetAPMLog()), constants.DefaultPerms755)
+	err := os.MkdirAll(filepath.Dir(app.GetLPMLog()), constants.DefaultPerms755)
 	require.NoError(err)
 
-	err = SetupApm(app, testDir)
+	err = SetupLpm(app, testDir)
 	require.NoError(err)
-	require.NotEqual(nil, app.Apm)
-	require.Equal(testDir, app.ApmDir)
+	require.NotEqual(nil, app.Lpm)
+	require.Equal(testDir, app.LpmDir)
 }

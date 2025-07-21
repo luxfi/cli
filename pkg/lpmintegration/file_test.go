@@ -1,14 +1,14 @@
 // Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package apmintegration
+package lpmintegration
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/cli/pkg/apm"
+	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
@@ -63,7 +63,7 @@ func newTestApp(t *testing.T, testDir string) *application.Lux {
 	tempDir := t.TempDir()
 	app := application.New()
 	app.Setup(tempDir, logging.NoLog{}, nil, prompts.NewPrompter(), application.NewDownloader())
-	app.ApmDir = testDir
+	app.LpmDir = testDir
 	return app
 }
 

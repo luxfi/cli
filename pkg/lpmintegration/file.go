@@ -1,7 +1,7 @@
 // Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package apmintegration
+package lpmintegration
 
 import (
 	"os"
