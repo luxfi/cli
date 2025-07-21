@@ -19,7 +19,7 @@ func SetupLux(app *application.Lux, luxVersion string) (string, error) {
 		binDir,
 		binDir,
 		nodeBinPrefix,
-		constants.AvaLabsOrg,
+		constants.LuxOrg,
 		constants.LuxRepoName,
 		downloader,
 		installer,
