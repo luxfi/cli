@@ -1,0 +1,3 @@
+./test_config.go
+./test_precompile.go
+./test_predicate.go

@@ -1,0 +1,10 @@
+./config.go
+./config_extra.go
+./denomination.go
+./lux_params.go
+./network_params.go
+./network_upgrades.go
+./precompile_upgrade.go
+./precompiles.go
+./protocol_params.go
+./version.go

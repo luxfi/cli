@@ -1,0 +1,7 @@
+./batched_vm.go
+./block.go
+./block_vm.go
+./build_block_with_context_vm.go
+./state_syncable_vm.go
+./tx.go
+./vertex_vm.go

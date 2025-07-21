@@ -1,0 +1,5 @@
+./compression_selector.go
+./doc.go
+./encoder_selector.go
+./map.go
+./server.go

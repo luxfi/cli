@@ -1,0 +1,5 @@
+./arith.go
+./asm.go
+./doc.go
+./element.go
+./element_ops_noasm.go

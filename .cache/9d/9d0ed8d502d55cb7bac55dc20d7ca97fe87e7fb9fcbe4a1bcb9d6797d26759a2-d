@@ -1,0 +1,11 @@
+./aliases.go
+./bootstrappers.go
+./checkpoints.go
+./config.go
+./genesis.go
+./genesis_fuji.go
+./genesis_local.go
+./genesis_mainnet.go
+./params.go
+./unparsed_config.go
+./validators.go

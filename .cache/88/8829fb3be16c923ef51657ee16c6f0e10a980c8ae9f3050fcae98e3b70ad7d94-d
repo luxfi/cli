@@ -1,0 +1,6 @@
+./directories.go
+./index.go
+./lookup.go
+./modindex.go
+./symbols.go
+./types.go

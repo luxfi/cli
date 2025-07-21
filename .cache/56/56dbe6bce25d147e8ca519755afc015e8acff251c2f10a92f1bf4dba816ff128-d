@@ -1,0 +1,5 @@
+./hid.go
+_cgo_gotypes.go
+hid_enabled.cgo1.go
+wchar.cgo1.go
+_cgo_import.go

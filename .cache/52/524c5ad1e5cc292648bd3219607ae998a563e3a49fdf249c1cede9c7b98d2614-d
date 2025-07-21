@@ -1,0 +1,6 @@
+./application.go
+./compatibility.go
+./constants.go
+./parser.go
+./string.go
+./version.go

@@ -1,0 +1,12 @@
+./add_repository.go
+./executor.go
+./install.go
+./installer.go
+./mock_executor.go
+./mock_installer.go
+./remove_repository.go
+./uninstall.go
+./update.go
+./upgrade.go
+./upgrade_vm.go
+./workflow.go
