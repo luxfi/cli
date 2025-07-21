@@ -3,8 +3,6 @@
 package subnetcmd
 
 import (
-	"fmt"
-
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/spf13/cobra"
@@ -35,6 +33,6 @@ func printVMID(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	ux.Logger.PrintToUser(fmt.Sprintf("VM ID : %s", vmID.String()))
+	ux.Logger.PrintToUser("VM ID : %s", vmID.String())
 	return nil
 }
