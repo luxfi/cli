@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/luxfi/cli/pkg/apmintegration"
+	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
@@ -138,7 +138,7 @@ func importFromFile(importPath string) error {
 }
 
 func importFromAPM() error {
-	installedRepos, err := apmintegration.GetRepos(app)
+	installedRepos, err := lpmintegration.GetRepos(app)
 	if err != nil {
 		return err
 	}
@@ -195,18 +195,18 @@ func importFromAPM() error {
 			}
 		}
 
-		repoAlias, err = apmintegration.AddRepo(app, repoURL, branch)
+		repoAlias, err = lpmintegration.AddRepo(app, repoURL, branch)
 		if err != nil {
 			return err
 		}
 
-		err = apmintegration.UpdateRepos(app)
+		err = lpmintegration.UpdateRepos(app)
 		if err != nil {
 			return err
 		}
 	}
 
-	subnets, err := apmintegration.GetSubnets(app, repoAlias)
+	subnets, err := lpmintegration.GetSubnets(app, repoAlias)
 	if err != nil {
 		return err
 	}
@@ -230,10 +230,10 @@ func importFromAPM() error {
 		}
 	}
 
-	subnetKey := apmintegration.MakeKey(repoAlias, subnet)
+	subnetKey := lpmintegration.MakeKey(repoAlias, subnet)
 
 	// Populate the sidecar and create a genesis
-	subnetDescr, err := apmintegration.LoadSubnetFile(app, subnetKey)
+	subnetDescr, err := lpmintegration.LoadSubnetFile(app, subnetKey)
 	if err != nil {
 		return err
 	}
@@ -246,7 +246,7 @@ func importFromAPM() error {
 		return errors.New("multiple vm subnets not supported")
 	}
 
-	vmDescr, err := apmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
+	vmDescr, err := lpmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
 	if err != nil {
 		return err
 	}
@@ -270,7 +270,7 @@ func importFromAPM() error {
 
 	ux.Logger.PrintToUser("Selected subnet, installing " + subnetKey)
 
-	if err = apmintegration.InstallVM(app, subnetKey); err != nil {
+	if err = lpmintegration.InstallVM(app, subnetKey); err != nil {
 		return err
 	}
 
