@@ -12,6 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/node/utils/units"
+	gethmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/ethclient"
 	"go.uber.org/zap"
 
@@ -29,7 +30,6 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
 	"github.com/spf13/cobra"
 )
 
@@ -206,7 +206,7 @@ func promptParams(precomp string, precompiles *[]extras.PrecompileUpgrade) error
 }
 
 func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
-	initialMint := map[common.Address]*math.HexOrDecimal256{}
+	initialMint := map[common.Address]*gethmath.HexOrDecimal256{}
 
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
 	if err != nil {
@@ -231,7 +231,7 @@ func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.T
 				if err != nil {
 					return "", err
 				}
-				initialMint[addr] = math.NewHexOrDecimal256(int64(amount))
+				initialMint[addr] = (*gethmath.HexOrDecimal256)(big.NewInt(int64(amount)))
 				return fmt.Sprintf("%s-%d", addr.Hex(), amount), nil
 			},
 			"Add an address to amount pair",
