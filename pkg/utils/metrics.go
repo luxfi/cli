@@ -54,7 +54,6 @@ func PrintMetricsOptOutPrompt() {
 	ux.Logger.PrintToUser("You can disable data collection with `lux config metrics disable` command. " +
 		"You can also read our privacy statement <https://lux.network/privacy> to learn more.\n")
 }
-;q
 
 func saveMetricsConfig(app *application.Lux, metricsEnabled bool) {
 	config := models.Config{MetricsEnabled: metricsEnabled}
