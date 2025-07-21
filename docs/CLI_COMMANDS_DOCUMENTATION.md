@@ -160,7 +160,7 @@ lux subnet create [subnetName] [flags]  # alias
 ```
 
 **Flags:**
-- `--evm`: Use the Subnet-EVM as the base template
+- `--evm`: Use the Lux EVM as the base template
 - `--custom`: Use a custom VM template
 - `--genesis <file>`: File path of genesis to use
 - `--vm <file>`: File path of custom VM to use

@@ -62,7 +62,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can deploy a custom vm subnet to local", func() {
-		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloSubnetEVMKey1])
+		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
 		commands.CreateCustomVMConfig(subnetName, utils.SubnetEvmGenesisPath, customVMPath)
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, mapping[utils.SoloLuxKey])
@@ -436,7 +436,7 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 		}
 	})
 
-	ginkgo.It("can deploy a subnet-evm with old version", func() {
+	ginkgo.It("can deploy a evm with old version", func() {
 		subnetEVMVersion := "v0.4.2"
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion)

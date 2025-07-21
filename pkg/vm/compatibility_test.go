@@ -20,20 +20,20 @@ const (
 )
 
 var (
-	testSubnetEVMCompat = []byte("{\"rpcChainVMProtocolVersion\": {\"v0.4.2\": 18,\"v0.4.1\": 18,\"v0.4.0\": 17}}")
+	testEVMCompat = []byte("{\"rpcChainVMProtocolVersion\": {\"v0.4.2\": 18,\"v0.4.1\": 18,\"v0.4.0\": 17}}")
 	testLuxCompat     = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
 	testLuxCompat2    = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
 	testLuxCompat3    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
 	testLuxCompat4    = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
 )
 
-func TestGetRPCProtocolVersionSubnetEVM(t *testing.T) {
+func TestGetRPCProtocolVersionEVM(t *testing.T) {
 	require := require.New(t)
 	expectedRPC := 18
 	var vm models.VMType = models.SubnetEvm
 
 	mockDownloader := &mocks.Downloader{}
-	mockDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
+	mockDownloader.On("Download", mock.Anything).Return(testEVMCompat, nil)
 
 	app := application.New()
 	app.Downloader = mockDownloader
@@ -57,7 +57,7 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	require := require.New(t)
 
 	mockDownloader := &mocks.Downloader{}
-	mockDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
+	mockDownloader.On("Download", mock.Anything).Return(testEVMCompat, nil)
 
 	app := application.New()
 	app.Downloader = mockDownloader

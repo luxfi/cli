@@ -22,7 +22,7 @@ func GetRPCProtocolVersion(app *application.Lux, vmType models.VMType, vmVersion
 
 	switch vmType {
 	case models.SubnetEvm:
-		url = constants.SubnetEVMRPCCompatibilityURL
+		url = constants.EVMRPCCompatibilityURL
 	default:
 		return 0, errors.New("unknown VM type")
 	}
