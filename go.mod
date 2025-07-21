@@ -6,11 +6,11 @@ require (
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/evm v0.7.6
-	github.com/luxfi/geth v0.15.13
+	github.com/luxfi/evm v0.7.7
+	github.com/luxfi/geth v0.15.39
 	// github.com/luxfi/apm v0.0.4
-	github.com/luxfi/netrunner v1.7.8
-	github.com/luxfi/node v1.13.10
+	github.com/luxfi/netrunner v1.7.11
+	github.com/luxfi/node v1.13.11
 	github.com/manifoldco/promptui v0.9.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -101,7 +101,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/ledger-lux-go v0.0.2 // indirect
+	github.com/luxfi/ledger-lux-go v0.0.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
