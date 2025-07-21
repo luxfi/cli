@@ -66,7 +66,7 @@ func GetLatestLuxByProtocolVersion(app *application.Lux, rpcVersion int, url str
 
 	// get latest lux release to make sure we're not picking a release currently in progress but not available for download
 	latestLuxVersion, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-		constants.AvaLabsOrg,
+		constants.LuxOrg,
 		constants.LuxRepoName,
 	))
 	if err != nil {
