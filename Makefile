@@ -17,8 +17,9 @@ all: build
 .PHONY: build
 build:
 	@echo "Building $(BINARY_NAME)..."
-	go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME) main.go
-	@echo "Build complete: ./$(BINARY_NAME)"
+	@mkdir -p bin
+	go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) main.go
+	@echo "Build complete: ./bin/$(BINARY_NAME)"
 
 # Install the binary to GOBIN
 .PHONY: install
@@ -67,7 +68,7 @@ tidy:
 .PHONY: clean
 clean:
 	@echo "Cleaning build artifacts..."
-	rm -f $(BINARY_NAME)
+	rm -rf bin/
 	rm -f coverage.out coverage.html
 	go clean -cache
 	@echo "Clean complete"
@@ -79,25 +80,29 @@ build-all: build-linux build-darwin build-windows
 .PHONY: build-linux
 build-linux:
 	@echo "Building for Linux..."
-	GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME)-linux-amd64 main.go
-	GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME)-linux-arm64 main.go
+	@mkdir -p bin
+	GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME)-linux-amd64 main.go
+	GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME)-linux-arm64 main.go
 
 .PHONY: build-darwin
 build-darwin:
 	@echo "Building for macOS..."
-	GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME)-darwin-amd64 main.go
-	GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME)-darwin-arm64 main.go
+	@mkdir -p bin
+	GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME)-darwin-amd64 main.go
+	GOOS=darwin GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME)-darwin-arm64 main.go
 
 .PHONY: build-windows
 build-windows:
 	@echo "Building for Windows..."
-	GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BINARY_NAME)-windows-amd64.exe main.go
+	@mkdir -p bin
+	GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME)-windows-amd64.exe main.go
 
 # Development build (with race detector)
 .PHONY: dev
 dev:
 	@echo "Building with race detector..."
-	go build -race -ldflags "$(LDFLAGS)" -o $(BINARY_NAME) main.go
+	@mkdir -p bin
+	go build -race -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) main.go
 
 # Check for vulnerabilities
 .PHONY: vuln-check
