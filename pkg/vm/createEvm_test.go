@@ -26,7 +26,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 	tests := []test{
 		{
 			name: "One address funded",
-			alloc: map[common.Address]core.GenesisAccount{
+			alloc: core.GenesisAlloc{
 				addrs[0]: {},
 				addrs[1]: {
 					Balance: big.NewInt(42),
@@ -38,7 +38,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 		},
 		{
 			name: "Two addresses funded",
-			alloc: map[common.Address]core.GenesisAccount{
+			alloc: core.GenesisAlloc{
 				addrs[2]: {},
 				addrs[3]: {
 					Balance: big.NewInt(42),
@@ -52,7 +52,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 		},
 		{
 			name: "Two addresses in Genesis but no funds",
-			alloc: map[common.Address]core.GenesisAccount{
+			alloc: core.GenesisAlloc{
 				addrs[0]: {
 					Balance: big.NewInt(0),
 				},
@@ -64,7 +64,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 		},
 		{
 			name: "No address funded",
-			alloc: map[common.Address]core.GenesisAccount{
+			alloc: core.GenesisAlloc{
 				addrs[0]: {},
 				addrs[1]: {},
 				addrs[2]: {},
