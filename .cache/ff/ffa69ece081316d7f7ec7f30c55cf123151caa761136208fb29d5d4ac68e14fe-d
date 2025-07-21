@@ -1,5 +1,0 @@
-./asn1.go
-./certificate.go
-./parse.go
-./tls.go
-./verify.go

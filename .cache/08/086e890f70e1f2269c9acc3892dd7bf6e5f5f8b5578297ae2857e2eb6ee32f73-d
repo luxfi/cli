@@ -1,5 +1,0 @@
-./filter.go
-./hasher.go
-./metrics.go
-./optimal.go
-./read_filter.go

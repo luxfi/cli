@@ -1,7 +1,0 @@
-./backend.go
-./builder.go
-./builder_with_options.go
-./context.go
-./signer.go
-./wallet.go
-./wallet_with_options.go

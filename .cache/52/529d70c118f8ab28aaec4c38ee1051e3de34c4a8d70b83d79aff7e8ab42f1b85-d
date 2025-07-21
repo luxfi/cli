@@ -1,7 +1,0 @@
-./rand.go
-./uniform.go
-./uniform_replacer.go
-./weighted.go
-./weighted_heap.go
-./weighted_without_replacement.go
-./weighted_without_replacement_generic.go

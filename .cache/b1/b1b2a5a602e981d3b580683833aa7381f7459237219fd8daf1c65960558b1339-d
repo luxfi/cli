@@ -1,5 +1,0 @@
-./errors.go
-./factory.go
-./vm.go
-./vm_client.go
-./vm_server.go

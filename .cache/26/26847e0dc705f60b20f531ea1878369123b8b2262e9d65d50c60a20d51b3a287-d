@@ -1,9 +1,0 @@
-./color.go
-./config.go
-./factory.go
-./format.go
-./level.go
-./log.go
-./logger.go
-./sanitize.go
-./test_log.go

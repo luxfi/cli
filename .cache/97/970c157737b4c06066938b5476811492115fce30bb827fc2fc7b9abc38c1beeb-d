@@ -1,4 +1,0 @@
-./block_metrics.go
-./metrics.go
-./no_op.go
-./tx_metrics.go

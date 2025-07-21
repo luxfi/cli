@@ -1,4 +1,0 @@
-./compressor.go
-./no_compressor.go
-./type.go
-./zstd_compressor.go

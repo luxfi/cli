@@ -1,6 +1,0 @@
-./binary_sampling.go
-./consensus.go
-./flat.go
-./nnary_sampling.go
-./parameters.go
-./tree.go

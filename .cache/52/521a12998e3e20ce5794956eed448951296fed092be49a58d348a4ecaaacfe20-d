@@ -1,5 +1,0 @@
-./bootstrapper.go
-./config.go
-./metrics.go
-./tx_job.go
-./vertex_job.go

@@ -1,6 +1,0 @@
-./client.go
-./codec.go
-./container.go
-./index.go
-./indexer.go
-./service.go

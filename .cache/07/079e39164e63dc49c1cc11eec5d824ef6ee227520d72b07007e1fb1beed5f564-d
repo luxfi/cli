@@ -1,5 +1,0 @@
-./ifconfig_resolver.go
-./no_updater.go
-./opendns_resolver.go
-./resolver.go
-./updater.go

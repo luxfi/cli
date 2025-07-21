@@ -1,7 +1,0 @@
-./codec.go
-./float32.go
-./float64.go
-./uint16.go
-./uint32.go
-./uint64.go
-./uint8.go

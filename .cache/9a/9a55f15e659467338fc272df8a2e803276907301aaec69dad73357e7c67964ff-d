@@ -1,4 +1,0 @@
-./initializer.go
-./non_linux_stopper.go
-./runtime.go
-./stopper.go

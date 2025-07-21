@@ -1,6 +1,0 @@
-./codec.go
-./memory.go
-./prefixes.go
-./shared_memory.go
-./state.go
-./writer.go

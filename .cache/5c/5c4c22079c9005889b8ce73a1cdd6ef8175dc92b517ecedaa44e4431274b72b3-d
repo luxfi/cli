@@ -1,8 +1,0 @@
-./compatibility.go
-./config.go
-./elasticSubnetConfig.go
-./exportable.go
-./l2.go
-./network.go
-./sidecar.go
-./vm.go

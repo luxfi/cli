@@ -1,9 +1,0 @@
-./btcec.go
-./ciphering.go
-./curve.go
-./doc.go
-./error.go
-./field.go
-./modnscalar.go
-./privkey.go
-./pubkey.go

@@ -1,5 +1,0 @@
-./averager.go
-./averager_heap.go
-./continuous_averager.go
-./safe_math.go
-./sync_averager.go

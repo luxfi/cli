@@ -1,7 +1,0 @@
-./creator.go
-./fields.go
-./inbound_msg_builder.go
-./internal_msg_builder.go
-./messages.go
-./ops.go
-./outbound_msg_builder.go

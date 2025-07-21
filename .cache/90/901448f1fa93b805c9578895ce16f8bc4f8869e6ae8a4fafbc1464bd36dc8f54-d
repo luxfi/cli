@@ -1,7 +1,0 @@
-./aliases.go
-./bits.go
-./id.go
-./node_id.go
-./request_id.go
-./short.go
-./test_generator.go

@@ -1,7 +1,0 @@
-./burn_operation.go
-./credential.go
-./factory.go
-./fx.go
-./mint_operation.go
-./mint_output.go
-./owned_output.go

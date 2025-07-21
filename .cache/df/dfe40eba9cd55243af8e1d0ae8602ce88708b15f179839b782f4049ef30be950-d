@@ -1,4 +1,0 @@
-./gossip.go
-./network.go
-./tx_verifier.go
-./warp.go

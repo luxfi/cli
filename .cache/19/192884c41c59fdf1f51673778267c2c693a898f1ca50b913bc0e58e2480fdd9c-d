@@ -1,7 +1,0 @@
-./credential.go
-./factory.go
-./fx.go
-./mint_operation.go
-./mint_output.go
-./transfer_operation.go
-./transfer_output.go

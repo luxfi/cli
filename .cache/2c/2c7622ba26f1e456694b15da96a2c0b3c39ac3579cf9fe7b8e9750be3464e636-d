@@ -1,7 +1,0 @@
-./acps.go
-./aliases.go
-./application.go
-./memory.go
-./network_ids.go
-./networking.go
-./vm_ids.go

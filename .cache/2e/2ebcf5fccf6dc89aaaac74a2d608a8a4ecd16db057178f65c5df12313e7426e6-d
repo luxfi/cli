@@ -1,6 +1,0 @@
-./chain_router.go
-./chain_router_metrics.go
-./health.go
-./inbound_handler.go
-./router.go
-./traced_router.go

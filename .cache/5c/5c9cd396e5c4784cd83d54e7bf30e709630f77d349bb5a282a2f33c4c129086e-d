@@ -1,6 +1,0 @@
-./batch.go
-./database.go
-./errors.go
-./helpers.go
-./iterator.go
-./utils.go
