@@ -250,10 +250,10 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzWu4=
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
-github.com/luxfi/evm v0.6.1 h1:wbDYbhPMvXftvyXV8zeeZx34zSCDyKVBWWed224hrFI=
-github.com/luxfi/evm v0.6.1/go.mod h1:KmpQxMrFRmav5Uddw/EMigwTQNE28OzSgsKONiBFC1w=
-github.com/luxfi/geth v0.15.38 h1:aK3IYk5Dfk0M9M4mE8KMZBDt6EHtXs1cXVFp4IPYDJE=
-github.com/luxfi/geth v0.15.38/go.mod h1:IqfzUTLCcQjyeAqaBOPfqLaMknAOeCMsVvQHdXq9b/w=
+github.com/luxfi/evm v0.5.5 h1:ZurgHrXalbm6UPTixP7oZRWxJ0z0lCMbTYiP/vpy3gY=
+github.com/luxfi/evm v0.5.5/go.mod h1:KmpQxMrFRmav5Uddw/EMigwTQNE28OzSgsKONiBFC1w=
+github.com/luxfi/geth v0.15.32 h1:+FuR51XaSodkgz5GcxwFL4uLAO4FXqulV+fEM70l6D0=
+github.com/luxfi/geth v0.15.32/go.mod h1:IqfzUTLCcQjyeAqaBOPfqLaMknAOeCMsVvQHdXq9b/w=
 github.com/luxfi/ledger-lux-go v0.0.2 h1:2kHESEXdndkdyrTgimVxNJiBeP+wyPLEF7QRXSAT6UE=
 github.com/luxfi/ledger-lux-go v0.0.2/go.mod h1:BbL5bOv9OgEtzE+dQ180SmNRRc5APi/YksT20qt5TsQ=
 github.com/luxfi/lpm v1.1.0 h1:O7gW4za+MhRXuj0IMzxTxxx8HWAg/sA5DGDAik2alXM=
