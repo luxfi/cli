@@ -22,7 +22,7 @@ const (
 	pluginDirName  = "plugins"
 	evmBin         = "evm"
 	buildDirName   = "build"
-	subnetEVMBin   = "subnet-evm"
+	subnetEVMBin   = "evm"
 	readme         = "README.md"
 	license        = "LICENSE"
 
@@ -80,7 +80,7 @@ func verifyLuxTarContents(require *require.Assertions, tarBytes []byte, version 
 	require.True(evmExists)
 }
 
-func verifySubnetEVMTarContents(require *require.Assertions, tarBytes []byte) {
+func verifyEVMTarContents(require *require.Assertions, tarBytes []byte) {
 	binExists := false
 	readmeExists := false
 	licenseExists := false
@@ -209,7 +209,7 @@ func CreateDummyLuxTar(require *require.Assertions, binary []byte, version strin
 	return tarBytes
 }
 
-func CreateDummySubnetEVMTar(require *require.Assertions, binary []byte) []byte {
+func CreateDummyEVMTar(require *require.Assertions, binary []byte) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
@@ -231,6 +231,6 @@ func CreateDummySubnetEVMTar(require *require.Assertions, binary []byte) []byte 
 	defer os.Remove(subnetEVMTar)
 	tarBytes, err := os.ReadFile(subnetEVMTar)
 	require.NoError(err)
-	verifySubnetEVMTarContents(require, tarBytes)
+	verifyEVMTarContents(require, tarBytes)
 	return tarBytes
 }

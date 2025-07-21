@@ -35,7 +35,7 @@ var _ = ginkgo.Describe("[Error handling]", func() {
 		// delete custom vm
 		utils.DeleteCustomBinary(subnetName)
 	})
-	ginkgo.It("subnet-evm has error but booted", func() {
+	ginkgo.It("evm has error but booted", func() {
 		// tip: if you really want to run this, reduce the RequestTimeout
 		ginkgo.Skip("run this manually only, times out")
 		// this will boot the subnet with a bad genesis:

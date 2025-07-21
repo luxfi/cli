@@ -159,7 +159,7 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 		}
 
 		// if you have a custom vm, you must provide the version explicitly
-		// if you upgrade from subnet-evm to a custom vm, the RPC version will be 0
+		// if you upgrade from evm to a custom vm, the RPC version will be 0
 		if sc.VM == models.CustomVM || sc.Networks[models.Local.String()].RPCVersion == 0 {
 			continue
 		}

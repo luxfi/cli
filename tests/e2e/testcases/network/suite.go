@@ -91,7 +91,7 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 
 		// check that plugin binaries exist
 		plugins, err := utils.GetPluginBinaries()
-		// should have only subnet-evm binary
+		// should have only evm binary
 		gomega.Expect(len(plugins)).Should(gomega.Equal(1))
 		gomega.Expect(err).Should(gomega.BeNil())
 

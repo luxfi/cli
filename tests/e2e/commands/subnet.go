@@ -24,7 +24,7 @@ func CreateSubnetEvmConfig(subnetName string, genesisPath string) (string, strin
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
-	// let's use a SubnetEVM version which has a guaranteed compatible lux
+	// let's use a EVM version which has a guaranteed compatible lux
 	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, mapping[utils.LatestEVM2LuxKey])
 	return mapping[utils.LatestEVM2LuxKey], mapping[utils.LatestLux2EVMKey]
 }

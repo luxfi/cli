@@ -79,7 +79,7 @@ lux network start
 
 ## Notable Features
 
-- Creation of Subnet-EVM, and custom virtual machine subnet configurations
+- Creation of Lux EVM, and custom virtual machine subnet configurations
 - Precompile integration and configuration
 - Local deployment of subnets for development and rapid prototyping
 - Fuji Testnet and Lux Mainnet deployment of subnets

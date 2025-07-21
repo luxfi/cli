@@ -87,8 +87,8 @@ func (app *Lux) GetLuxBinDir() string {
 	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxInstallDir)
 }
 
-func (app *Lux) GetSubnetEVMBinDir() string {
-	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.SubnetEVMInstallDir)
+func (app *Lux) GetEVMBinDir() string {
+	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.EVMInstallDir)
 }
 
 func (app *Lux) GetUpgradeBytesFilepath(subnetName string) string {
