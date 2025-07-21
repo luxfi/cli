@@ -9,9 +9,9 @@ const (
 	confFilePath = hardhatDir + "/dynamic_conf.json"
 	greeterFile  = hardhatDir + "/greeter.json"
 	
-	// APM related constants
-	APMDir       = ".apm"
-	APMPluginDir = "plugins"
+	// LPM related constants
+	LPMDir       = ".lpm"
+	LPMPluginDir = "plugins"
 
 	BaseTest               = "./test/index.ts"
 	GreeterScript          = "./scripts/deploy.ts"

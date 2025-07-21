@@ -46,7 +46,7 @@ type Sidecar struct {
 	Version         string
 	Networks        map[string]NetworkData
 	ElasticSubnet   map[string]ElasticSubnet
-	ImportedFromAPM bool
+	ImportedFromLPM bool
 	ImportedVMID    string
 	
 	// L1/L2 Architecture (2025)
@@ -77,7 +77,7 @@ type Sidecar struct {
 func (sc Sidecar) GetVMID() (string, error) {
 	// get vmid
 	var vmid string
-	if sc.ImportedFromAPM {
+	if sc.ImportedFromLPM {
 		vmid = sc.ImportedVMID
 	} else {
 		chainVMID, err := utils.VMID(sc.Name)

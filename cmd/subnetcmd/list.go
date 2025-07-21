@@ -96,7 +96,7 @@ func listSubnets(cmd *cobra.Command, args []string) error {
 			vmID,
 			string(sc.VM),
 			sc.VMVersion,
-			strconv.FormatBool(sc.ImportedFromAPM),
+			strconv.FormatBool(sc.ImportedFromLPM),
 		})
 	}
 	sort.Sort(rows)
