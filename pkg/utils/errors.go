@@ -88,7 +88,7 @@ func FindErrorLogs(rootDirs ...string) {
 						thisFileNotified = true
 						fmt.Println()
 					}
-					ux.Logger.PrintToUser(o)
+					ux.Logger.PrintToUser("%s", o)
 					ux.Logger.PrintToUser("----------------------------------------------------------------------")
 					fmt.Println()
 				}
