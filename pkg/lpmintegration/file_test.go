@@ -8,12 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/version"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,18 +42,11 @@ const (
 	testVMYaml = `vm:
   id: "efgh"
   alias: "testvm"
-  homepage: "https://vm.com"
   description: "Virtual machine"
-  maintainers:
-    - "dev@vm.com"
-  installScript: "scripts/build.sh"
-  binaryPath: "build/sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm"
+  binary: "build/sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm"
   url: "https://github.com/org/repo/archive/refs/tags/v1.0.0.tar.gz"
-  sha256: "1ac250f6c40472f22eaf0616fc8c886078a4eaa9b2b85fbb4fb7783a1db6af3f"
-  version:
-    major: 1
-    minor: 0
-    patch: 0
+  checksum: "1ac250f6c40472f22eaf0616fc8c886078a4eaa9b2b85fbb4fb7783a1db6af3f"
+  version: "v1.0.0"
 `
 )
 
@@ -207,12 +198,10 @@ func TestLoadSubnetFile_Success(t *testing.T) {
 	err = os.WriteFile(subnetFile, []byte(testSubnetYaml), constants.DefaultPerms755)
 	require.NoError(err)
 
-	expectedSubnet := types.Subnet{
+	expectedSubnet := Subnet{
 		ID:          "abcd",
 		Alias:       "testsubnet",
-		Homepage:    "https://subnet.com",
 		Description: "It's a subnet",
-		Maintainers: []string{"dev@subnet.com"},
 		VMs:         []string{"testvm1", "testvm2"},
 	}
 
@@ -280,21 +269,14 @@ func TestLoadVMFile(t *testing.T) {
 	err = os.WriteFile(vmFile, []byte(testVMYaml), constants.DefaultPerms755)
 	require.NoError(err)
 
-	expectedVM := types.VM{
-		ID:            "efgh",
-		Alias:         vm,
-		Homepage:      "https://vm.com",
-		Description:   "Virtual machine",
-		Maintainers:   []string{"dev@vm.com"},
-		BinaryPath:    "build/sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm",
-		InstallScript: "scripts/build.sh",
-		URL:           "https://github.com/org/repo/archive/refs/tags/v1.0.0.tar.gz",
-		SHA256:        "1ac250f6c40472f22eaf0616fc8c886078a4eaa9b2b85fbb4fb7783a1db6af3f",
-		Version: version.Semantic{
-			Major: 1,
-			Minor: 0,
-			Patch: 0,
-		},
+	expectedVM := VM{
+		ID:          "efgh",
+		Alias:       vm,
+		Description: "Virtual machine",
+		Binary:      "build/sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm",
+		URL:         "https://github.com/org/repo/archive/refs/tags/v1.0.0.tar.gz",
+		Checksum:    "1ac250f6c40472f22eaf0616fc8c886078a4eaa9b2b85fbb4fb7783a1db6af3f",
+		Version:     "v1.0.0",
 	}
 
 	loadedVM, err := LoadVMFile(app, makeAlias(org1, repo1), vm)
