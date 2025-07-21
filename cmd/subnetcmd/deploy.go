@@ -345,7 +345,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 			}
 		}
 	} else {
-		ux.Logger.PrintToUser(logging.Green.Wrap(
+		ux.Logger.PrintToUser("%s", logging.Green.Wrap(
 			fmt.Sprintf("Deploying into pre-existent subnet ID %s", subnetID.String()),
 		))
 		controlKeys, threshold, err = txutils.GetOwners(network, subnetID)
@@ -384,7 +384,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 
 	isFullySigned, blockchainID, tx, remainingSubnetAuthKeys, err := deployer.DeployBlockchain(controlKeys, subnetAuthKeys, subnetID, chain, chainGenesis)
 	if err != nil {
-		ux.Logger.PrintToUser(logging.Red.Wrap(
+		ux.Logger.PrintToUser("%s", logging.Red.Wrap(
 			fmt.Sprintf("error deploying blockchain: %s. fix the issue and try again with a new deploy cmd", err),
 		))
 	}
@@ -424,7 +424,7 @@ func getControlKeys(network models.Network, useLedger bool, kc keychain.Keychain
 		"set how many control keys are required to make a subnet change (the threshold)."
 	moreKeysPrompt := "How would you like to set your control keys?"
 
-	ux.Logger.PrintToUser(controlKeysInitialPrompt)
+	ux.Logger.PrintToUser("%s", controlKeysInitialPrompt)
 
 	const (
 		useAll = "Use all stored keys"
@@ -727,9 +727,9 @@ func GetKeychain(
 			}
 			addrStrs = append(addrStrs, addrStr)
 		}
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Ledger addresses: "))
+		ux.Logger.PrintToUser("%s", logging.Yellow.Wrap("Ledger addresses: "))
 		for _, addrStr := range addrStrs {
-			ux.Logger.PrintToUser(logging.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
+			ux.Logger.PrintToUser("%s", logging.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
 		}
 		return keychain.NewLedgerKeychainFromIndices(ledgerDevice, ledgerIndices)
 	}

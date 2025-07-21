@@ -97,8 +97,8 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("🏛️  Governance Requirements:")
 	ux.Logger.PrintToUser("   - Proposal submission: 100 LUX")
 	ux.Logger.PrintToUser("   - Voting period: 7 days")
-	ux.Logger.PrintToUser("   - Quorum: 10% of staked tokens")
-	ux.Logger.PrintToUser("   - Approval threshold: 66%")
+	ux.Logger.PrintToUser("   - Quorum: 10%% of staked tokens")
+	ux.Logger.PrintToUser("   - Approval threshold: 66%%")
 	ux.Logger.PrintToUser("")
 
 	// Migration mode

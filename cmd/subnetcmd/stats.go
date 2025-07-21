@@ -16,8 +16,10 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/api"
+	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -111,7 +113,13 @@ func stats(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildPendingValidatorStats(pClient *platformvm.Client, infoClient *info.Client, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
+// InfoClient interface for info client operations
+type InfoClient interface {
+	GetNodeID(ctx context.Context, options ...rpc.Option) (ids.NodeID, *signer.ProofOfPossession, error)
+	GetNodeVersion(ctx context.Context, options ...rpc.Option) (*info.GetNodeVersionReply, error)
+}
+
+func buildPendingValidatorStats(pClient PlatformClient, infoClient InfoClient, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -201,7 +209,7 @@ func buildPendingValidatorStats(pClient *platformvm.Client, infoClient *info.Cli
 	return rows, nil
 }
 
-func buildCurrentValidatorStats(pClient *platformvm.Client, infoClient *info.Client, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
+func buildCurrentValidatorStats(pClient PlatformClient, infoClient InfoClient, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
