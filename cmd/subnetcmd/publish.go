@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/luxfi/cli/pkg/apmintegration"
+	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
@@ -105,8 +105,8 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 	}
 
 	var (
-		tsubnet *apmintegration.Subnet
-		vm      *apmintegration.VM
+		tsubnet *lpmintegration.Subnet
+		vm      *lpmintegration.VM
 	)
 
 	if !forceWrite && noRepoPath == "" {
@@ -125,7 +125,7 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 	if subnetDescPath == "" {
 		tsubnet, err = getSubnetInfo(sc)
 	} else {
-		tsubnet = new(apmintegration.Subnet)
+		tsubnet = new(lpmintegration.Subnet)
 		err = loadYAMLFile(subnetDescPath, tsubnet)
 	}
 	if err != nil {
@@ -137,7 +137,7 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 	if vmDescPath == "" {
 		vm, err = getVMInfo(sc)
 	} else {
-		vm = new(apmintegration.VM)
+		vm = new(lpmintegration.VM)
 		err = loadYAMLFile(vmDescPath, vm)
 	}
 	if err != nil {
@@ -337,7 +337,7 @@ func loadYAMLFile[T any](path string, defType T) error {
 	return yaml.Unmarshal(fileBytes, &defType)
 }
 
-func getSubnetInfo(sc *models.Sidecar) (*apmintegration.Subnet, error) {
+func getSubnetInfo(sc *models.Sidecar) (*lpmintegration.Subnet, error) {
 	_, err := app.Prompt.CaptureStringAllowEmpty("What is the homepage of the Subnet project?")
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func getSubnetInfo(sc *models.Sidecar) (*apmintegration.Subnet, error) {
 		return nil, errors.New("canceled by user")
 	}
 
-	subnet := &apmintegration.Subnet{
+	subnet := &lpmintegration.Subnet{
 		ID:          sc.Networks[models.Fuji.String()].SubnetID.String(),
 		Alias:       sc.Name,
 		Description: desc,
@@ -374,7 +374,7 @@ func getSubnetInfo(sc *models.Sidecar) (*apmintegration.Subnet, error) {
 	return subnet, nil
 }
 
-func getVMInfo(sc *models.Sidecar) (*apmintegration.VM, error) {
+func getVMInfo(sc *models.Sidecar) (*lpmintegration.VM, error) {
 	var (
 		vmID, desc, url, sha string
 		canceled             bool
@@ -459,7 +459,7 @@ func getVMInfo(sc *models.Sidecar) (*apmintegration.VM, error) {
 		return nil, err
 	}
 
-	vm := &apmintegration.VM{
+	vm := &lpmintegration.VM{
 		ID:          vmID,
 		Alias:       sc.Networks["Fuji"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
 		Description: desc,
