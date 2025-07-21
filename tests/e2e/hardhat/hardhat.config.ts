@@ -1,7 +1,5 @@
 import { HardhatUserConfig, task } from "hardhat/config"
-import "@nomiclabs/hardhat-etherscan"
-import "@nomiclabs/hardhat-waffle"
-import "@typechain/hardhat"
+import "@nomicfoundation/hardhat-toolbox"
 import { existsSync } from "fs"
 
 // Import the dynamic rpc url if the file exists
