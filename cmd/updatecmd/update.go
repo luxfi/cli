@@ -48,31 +48,34 @@ func runUpdate(cmd *cobra.Command, _ []string) error {
 }
 
 func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
-	// first check if there is a new version exists
-	url := binutils.GetGithubLatestReleaseURL(constants.AvaLabsOrg, constants.CliRepoName)
-	latest, err := app.Downloader.GetLatestReleaseVersion(url)
-	if err != nil {
-		app.Log.Warn("failed to get latest version for cli from repo", zap.Error(err))
-		return err
-	}
-
-	// the current version info should be in this variable
+	// prepare update check
+	url := binutils.GetGithubLatestReleaseURL(constants.LuxOrg, constants.CliRepoName)
+	// determine current version
 	this := cmd.Version
 	if this == "" {
 		if version != "" {
 			this = version
 		} else {
-			// try loading from file system
 			verFile := "VERSION"
 			bver, err := os.ReadFile(verFile)
 			if err != nil {
 				app.Log.Warn("failed to read version from file on disk", zap.Error(err))
 				return ErrNoVersion
 			}
-			this = "v" + string(bver)
+			this = string(bver)
 		}
 	}
 	thisVFmt := "v" + this
+
+	latest, err := app.Downloader.GetLatestReleaseVersion(url)
+	if err != nil {
+		app.Log.Warn("failed to get latest version for cli from repo", zap.Error(err))
+		if isUserCalled {
+			ux.Logger.PrintToUser("Could not check for updates: %v", err)
+		}
+		// skip update on error
+		latest = thisVFmt
+	}
 
 	// check this version needs update
 	// we skip if compare returns -1 (latest < this)
