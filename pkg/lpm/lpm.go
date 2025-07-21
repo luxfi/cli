@@ -68,12 +68,6 @@ func (c *Client) JoinSubnet(alias string) error {
 }
 
 // Placeholder methods to maintain compatibility with existing LPM interface
-type VMUpload struct {
-	ID     string
-	Alias  string
-	URL    string
-	SHA256 string
-}
 
 // GetVM is a placeholder to maintain compatibility
 func (c *Client) GetVM(alias string, version string) (*VMUpload, error) {
