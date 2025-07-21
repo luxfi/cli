@@ -39,7 +39,7 @@ func getVMVersion(
 	var err error
 	if vmVersion == "latest" {
 		vmVersion, err = app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			repoName,
 		))
 		if err != nil {
@@ -86,14 +86,14 @@ func askForVMVersion(
 	if versionOption == useLatest {
 		// Get and return latest version
 		version, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			repoName,
 		))
 		return version, statemachine.Forward, err
 	}
 
 	// prompt for version
-	versions, err := app.Downloader.GetAllReleasesForRepo(constants.AvaLabsOrg, constants.SubnetEVMRepoName)
+	versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.SubnetEVMRepoName)
 	if err != nil {
 		return "", statemachine.Stop, err
 	}

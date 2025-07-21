@@ -107,7 +107,7 @@ func (*versionMapper) GetLuxURL() string {
 func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName string, app *application.Lux) ([]string, error) {
 	// get latest lux release to make sure we're not picking a release currently in progress but not available for download
 	latest, err := app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
-		constants.AvaLabsOrg,
+		constants.LuxOrg,
 		repoName,
 	))
 	if err != nil {

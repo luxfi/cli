@@ -51,7 +51,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 	case linux:
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-linux-%s-%s.tar.gz",
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			constants.LuxRepoName,
 			version,
 			goarch,
@@ -61,7 +61,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 	case darwin:
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-macos-%s.zip",
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			constants.LuxRepoName,
 			version,
 			version,
@@ -71,7 +71,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 	case windows:
 		nodeURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/node-win-%s-experimental.zip",
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			constants.LuxRepoName,
 			version,
 			version,
@@ -99,7 +99,7 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 	case linux:
 		subnetEVMURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			constants.SubnetEVMRepoName,
 			version,
 			constants.SubnetEVMRepoName,
@@ -109,7 +109,7 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 	case darwin:
 		subnetEVMURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
-			constants.AvaLabsOrg,
+			constants.LuxOrg,
 			constants.SubnetEVMRepoName,
 			version,
 			constants.SubnetEVMRepoName,

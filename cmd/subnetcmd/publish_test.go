@@ -67,7 +67,7 @@ func TestInfoKnownVMs(t *testing.T) {
 			c.dl,
 		)
 		require.NoError(err)
-		require.ElementsMatch([]string{constants.AvaLabsMaintainers}, maintrs)
+		require.ElementsMatch([]string{constants.LuxMaintainers}, maintrs)
 		require.NoError(err)
 		_, err = url.Parse(resurl)
 		require.NoError(err)
