@@ -26,7 +26,7 @@ var (
 	// expected name of the plugins dir
 	defaultPluginDir = "plugins"
 	// default dir where the binary is usually found
-	defaultLuxBuildDir = filepath.Join("go", "src", "github.com", constants.AvaLabsOrg, constants.LuxRepoName, "build")
+	defaultLuxBuildDir = filepath.Join("go", "src", "github.com", constants.LuxOrg, constants.LuxRepoName, "build")
 )
 
 // This function needs to be called to initialize this package

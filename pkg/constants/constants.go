@@ -82,7 +82,7 @@ const (
 
 	CustomVMDir = "vms"
 
-	AvaLabsOrg          = "luxfi"
+	LuxOrg          = "luxfi"
 	LuxRepoName = "node"
 	SubnetEVMRepoName   = "subnet-evm"
 	CliRepoName         = "cli"
@@ -99,7 +99,7 @@ const (
 
 	LPMDir                = ".lpm"
 	LPMLogName            = "lpm.log"
-	DefaultAvaLabsPackage = "luxfi/plugins-core"
+	DefaultLuxPackage = "luxfi/plugins-core"
 	LPMPluginDir          = "lpm_plugins"
 
 	// #nosec G101
@@ -118,7 +118,7 @@ const (
 	GitRepoCommitName  = "Lux CLI"
 	GitRepoCommitEmail = "info@lux.network"
 
-	AvaLabsMaintainers = "luxfi"
+	LuxMaintainers = "luxfi"
 
 	UpgradeBytesFileName      = "upgrade.json"
 	UpgradeBytesLockExtension = ".lock"
