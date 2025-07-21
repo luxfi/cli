@@ -93,7 +93,7 @@ func askForVMVersion(
 	}
 
 	// prompt for version
-	versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.SubnetEVMRepoName)
+	versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.EVMRepoName)
 	if err != nil {
 		return "", statemachine.Stop, err
 	}
@@ -122,7 +122,7 @@ func getDescriptors(app *application.Lux, subnetEVMVersion string) (
 		return nil, "", "", statemachine.Stop, err
 	}
 
-	subnetEVMVersion, err = getVMVersion(app, "Subnet-EVM", constants.SubnetEVMRepoName, subnetEVMVersion, false)
+	subnetEVMVersion, err = getVMVersion(app, "Lux EVM", constants.EVMRepoName, subnetEVMVersion, false)
 	if err != nil {
 		return nil, "", "", statemachine.Stop, err
 	}
