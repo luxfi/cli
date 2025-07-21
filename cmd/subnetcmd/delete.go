@@ -51,7 +51,7 @@ func deleteSubnet(_ *cobra.Command, args []string) error {
 	}
 
 	// TODO this method does not delete the imported VM binary if this
-	// is an APM subnet. We can't naively delete the binary because it
+	// is an LPM subnet. We can't naively delete the binary because it
 	// may be used by multiple subnets. We should delete this binary,
 	// but only if no other subnet is using it.
 	// More info: https://github.com/luxfi/cli/issues/246

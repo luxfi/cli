@@ -67,7 +67,7 @@ func (c *Client) JoinSubnet(alias string) error {
 	return c.lpm.JoinSubnet(alias)
 }
 
-// Placeholder methods to maintain compatibility with existing APM interface
+// Placeholder methods to maintain compatibility with existing LPM interface
 type VMUpload struct {
 	ID     string
 	Alias  string

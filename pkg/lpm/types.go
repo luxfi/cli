@@ -1,6 +1,6 @@
 // Copyright (C) 2024, Lux Industries Inc. All rights reserved.
-// Placeholder for APM types
-package apm
+// Placeholder for LPM types
+package lpm
 
 type Metadata struct {
 	Alias       string
