@@ -140,7 +140,7 @@ func applyLocalNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar)
 
 	cli, err := binutils.NewGRPCClient()
 	if err != nil {
-		ux.Logger.PrintToUser(ErrNetworkNotStartedOutput)
+		ux.Logger.PrintToUser("%s", ErrNetworkNotStartedOutput)
 		return err
 	}
 	ctx := binutils.GetAsyncContext()
@@ -149,7 +149,7 @@ func applyLocalNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar)
 	status, err := cli.Status(ctx)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {
-			ux.Logger.PrintToUser(ErrNetworkNotStartedOutput)
+			ux.Logger.PrintToUser("%s", ErrNetworkNotStartedOutput)
 			return err
 		}
 		return err
@@ -352,7 +352,7 @@ func validateUpgrade(subnetName, networkKey string, sc *models.Sidecar, skipProm
 }
 
 func subnetNotYetDeployed() error {
-	ux.Logger.PrintToUser(ErrSubnetNotDeployedOutput)
+	ux.Logger.PrintToUser("%s", ErrSubnetNotDeployedOutput)
 	ux.Logger.PrintToUser("Please deploy this network first.")
 	return errSubnetNotYetDeployed
 }

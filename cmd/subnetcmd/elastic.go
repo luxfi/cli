@@ -289,7 +289,7 @@ func transformElasticSubnet(_ *cobra.Command, args []string) error {
 	var assetID ids.ID
 	// TODO: replace sleep functions with sticky API sessions
 	if txHasOccurred {
-		ux.Logger.PrintToUser(fmt.Sprintf("Skipping CreateAssetTx, transforming subnet with asset ID %s...", txID.String()))
+		ux.Logger.PrintToUser("Skipping CreateAssetTx, transforming subnet with asset ID %s...", txID.String())
 		assetID = txID
 	} else {
 		assetID, err = createAssetID(deployer, elasticSubnetConfig.MaxSupply, subnetID, tokenName, tokenSymbol, tokenDenomination, recipientAddr)
@@ -608,13 +608,13 @@ func handleRemoveAndAddValidators(sc models.Sidecar, subnetID ids.ID, validator 
 	if err != nil {
 		return err
 	}
-	ux.Logger.PrintToUser(fmt.Sprintf("Validator %s removed", validator.String()))
+	ux.Logger.PrintToUser("Validator %s removed", validator.String())
 	assetID := sc.ElasticSubnet[models.Local.String()].AssetID
 	txID, err := subnet.IssueAddPermissionlessValidatorTx(keyChain, subnetID, validator, stakedAmount, assetID, uint64(startTime.Unix()), uint64(endTime.Unix()))
 	if err != nil {
 		return err
 	}
-	ux.Logger.PrintToUser(fmt.Sprintf("%s successfully joined elastic subnet as permissionless validator!", validator.String()))
+	ux.Logger.PrintToUser("%s successfully joined elastic subnet as permissionless validator!", validator.String())
 	if err = app.UpdateSidecarPermissionlessValidator(&sc, models.Local, validator.String(), txID); err != nil {
 		return fmt.Errorf("joining permissionless subnet was successful, but failed to update sidecar: %w", err)
 	}

@@ -21,6 +21,7 @@ import (
 	"github.com/luxfi/node/genesis"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
@@ -176,7 +177,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 			ask := "Would you like to check if your node is allowed to join this subnet?\n" +
 				"If not, the subnet's control key holder must call lux subnet\n" +
 				"addValidator with your NodeID."
-			ux.Logger.PrintToUser(ask)
+			ux.Logger.PrintToUser("%s", ask)
 			yes, err = app.Prompt.CaptureYesNo("Check whitelist?")
 			if err != nil {
 				return err
@@ -408,7 +409,12 @@ func isNodeValidatingSubnet(subnetID ids.ID, network models.Network) (bool, erro
 	return checkIsValidating(subnetID, nodeID, pClient)
 }
 
-func checkIsValidating(subnetID ids.ID, nodeID ids.NodeID, pClient *platformvm.Client) (bool, error) {
+// PlatformClient interface for platform VM client operations
+type PlatformClient interface {
+	GetCurrentValidators(ctx context.Context, subnetID ids.ID, nodeIDs []ids.NodeID, options ...rpc.Option) ([]platformvm.ClientPermissionlessValidator, error)
+}
+
+func checkIsValidating(subnetID ids.ID, nodeID ids.NodeID, pClient PlatformClient) (bool, error) {
 	// first check if the node is already an accepted validator on the subnet
 	ctx := context.Background()
 	nodeIDs := []ids.NodeID{nodeID}
