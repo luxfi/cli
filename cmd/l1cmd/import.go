@@ -129,7 +129,7 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 			ux.Logger.PrintToUser("   ⚠️  Invalid VM ID, using default")
 		} else {
 			sc.ImportedVMID = vmID.String()
-			sc.ImportedFromAPM = true
+			sc.ImportedFromLPM = true
 		}
 
 		// Create genesis with L1 features

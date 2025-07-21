@@ -1,7 +1,7 @@
 // Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package apm
+package lpm
 
 import (
 	"fmt"
@@ -21,12 +21,12 @@ const (
 	testRepo = "https://github.com/luxfi/test-subnet-configs"
 )
 
-var _ = ginkgo.Describe("[APM]", func() {
+var _ = ginkgo.Describe("[LPM]", func() {
 	ginkgo.BeforeEach(func() {
 		// TODO this is a bit coarse, but I'm not sure a better solution is possible
-		// without modifications to the APM.
+		// without modifications to the LPM.
 		// More details: https://github.com/luxfi/cli/issues/244
-		utils.RemoveAPMRepo()
+		utils.RemoveLPMRepo()
 	})
 
 	ginkgo.AfterEach(func() {
@@ -40,10 +40,10 @@ var _ = ginkgo.Describe("[APM]", func() {
 			fmt.Println("Delete config error:", err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
-		utils.DeleteAPMBin(vmid1)
-		utils.DeleteAPMBin(vmid2)
+		utils.DeleteLPMBin(vmid1)
+		utils.DeleteLPMBin(vmid2)
 		// TODO same as above
-		utils.RemoveAPMRepo()
+		utils.RemoveLPMRepo()
 	})
 
 	ginkgo.It("can import from core", func() {

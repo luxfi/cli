@@ -710,10 +710,10 @@ func ImportSubnetConfig(repoAlias string, subnetName string) {
 	}
 
 	// Config should now exist
-	exists, err = utils.APMConfigExists(subnetName)
+	exists, err = utils.LPMConfigExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
-	exists, err = utils.SubnetAPMVMExists(subnetName)
+	exists, err = utils.SubnetLPMVMExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
@@ -758,10 +758,10 @@ func ImportSubnetConfigFromURL(repoURL string, branch string, subnetName string)
 	}
 
 	// Config should now exist
-	exists, err = utils.APMConfigExists(subnetName)
+	exists, err = utils.LPMConfigExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
-	exists, err = utils.SubnetAPMVMExists(subnetName)
+	exists, err = utils.SubnetLPMVMExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }

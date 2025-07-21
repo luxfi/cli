@@ -75,8 +75,8 @@ func importSubnet(_ *cobra.Command, args []string) error {
 
 	if repoOrURL == "" && branch == "" && subnetAlias == "" {
 		fileOption := "File"
-		apmOption := "Repository"
-		typeOptions := []string{fileOption, apmOption}
+		lpmOption := "Repository"
+		typeOptions := []string{fileOption, lpmOption}
 		promptStr := "Would you like to import your subnet from a file or a repository?"
 		result, err := app.Prompt.CaptureList(promptStr, typeOptions)
 		if err != nil {
@@ -88,8 +88,8 @@ func importSubnet(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	// Option must be APM
-	return importFromAPM()
+	// Option must be LPM
+	return importFromLPM()
 }
 
 func importFromFile(importPath string) error {
@@ -137,7 +137,7 @@ func importFromFile(importPath string) error {
 	return nil
 }
 
-func importFromAPM() error {
+func importFromLPM() error {
 	installedRepos, err := lpmintegration.GetRepos(app)
 	if err != nil {
 		return err
@@ -264,7 +264,7 @@ func importFromAPM() error {
 		Subnet:          subnetDescr.Alias,
 		TokenName:       constants.DefaultTokenName,
 		Version:         constants.SidecarVersion,
-		ImportedFromAPM: true,
+		ImportedFromLPM: true,
 		ImportedVMID:    vmDescr.ID,
 	}
 

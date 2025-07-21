@@ -57,12 +57,12 @@ func GetBaseDir() string {
 	return path.Join(usr.HomeDir, baseDir)
 }
 
-func GetAPMDir() string {
+func GetLPMDir() string {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
-	return path.Join(usr.HomeDir, APMDir)
+	return path.Join(usr.HomeDir, LPMDir)
 }
 
 func ChainConfigExists(subnetName string) (bool, error) {
@@ -196,7 +196,7 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 	return os.WriteFile(sidecar, fileBytes, constants.DefaultPerms755)
 }
 
-func APMConfigExists(subnetName string) (bool, error) {
+func LPMConfigExists(subnetName string) (bool, error) {
 	return sidecarExists(subnetName)
 }
 
@@ -213,7 +213,7 @@ func SubnetCustomVMExists(subnetName string) (bool, error) {
 	return vmExists, nil
 }
 
-func SubnetAPMVMExists(subnetName string) (bool, error) {
+func SubnetLPMVMExists(subnetName string) (bool, error) {
 	sidecarPath := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
 	jsonBytes, err := os.ReadFile(sidecarPath)
 	if err != nil {
@@ -228,7 +228,7 @@ func SubnetAPMVMExists(subnetName string) (bool, error) {
 
 	vmid := sc.ImportedVMID
 
-	vm := path.Join(GetBaseDir(), APMPluginDir, vmid)
+	vm := path.Join(GetBaseDir(), LPMPluginDir, vmid)
 	vmExists := true
 	if _, err := os.Stat(vm); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -266,8 +266,8 @@ func DeleteConfigs(subnetName string) error {
 	return nil
 }
 
-func RemoveAPMRepo() {
-	_ = os.RemoveAll(GetAPMDir())
+func RemoveLPMRepo() {
+	_ = os.RemoveAll(GetLPMDir())
 }
 
 func DeleteKey(keyName string) error {
@@ -311,8 +311,8 @@ func DeleteCustomBinary(vmName string) {
 	_ = os.RemoveAll(vmPath)
 }
 
-func DeleteAPMBin(vmid string) {
-	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, APMPluginDir, vmid)
+func DeleteLPMBin(vmid string) {
+	vmPath := path.Join(GetBaseDir(), constants.LuxCliBinDir, LPMPluginDir, vmid)
 
 	// ignore error, file may not exist
 	_ = os.RemoveAll(vmPath)
