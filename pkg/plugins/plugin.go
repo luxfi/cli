@@ -40,7 +40,7 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 	var vmSourcePath string
 	var vmDestPath string
 
-	if sc.ImportedFromAPM {
+	if sc.ImportedFromLPM {
 		vmSourcePath = binutils.SetupLPMBin(app, sc.ImportedVMID)
 		vmDestPath = filepath.Join(pluginDir, sc.ImportedVMID)
 	} else {

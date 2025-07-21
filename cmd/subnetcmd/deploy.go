@@ -144,7 +144,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to load sidecar for later update: %w", err)
 	}
 
-	if sc.ImportedFromAPM {
+	if sc.ImportedFromLPM {
 		return errors.New("unable to deploy subnets imported from a repo")
 	}
 

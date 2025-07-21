@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSetupAPM(t *testing.T) {
+func TestSetupLPM(t *testing.T) {
 	require := require.New(t)
 	testDir := t.TempDir()
 	app := newTestApp(t, testDir)

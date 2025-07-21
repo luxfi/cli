@@ -229,7 +229,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	sc.ImportedFromAPM = false
+	sc.ImportedFromLPM = false
 	if err = app.CreateSidecar(sc); err != nil {
 		return err
 	}
