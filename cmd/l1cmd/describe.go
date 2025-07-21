@@ -28,7 +28,7 @@ func newDescribeCmd() *cobra.Command {
 			}
 
 			ux.Logger.PrintToUser("L1 Blockchain: %s", l1Name)
-			ux.Logger.PrintToUser("=" + strings.Repeat("=", len(l1Name)+14))
+			ux.Logger.PrintToUser("%s", "="+strings.Repeat("=", len(l1Name)+14))
 			ux.Logger.PrintToUser("")
 
 			// Basic info
@@ -90,7 +90,7 @@ func newDescribeCmd() *cobra.Command {
 				ux.Logger.PrintToUser("📄 Genesis Configuration:")
 				ux.Logger.PrintToUser("```json")
 				formatted, _ := json.MarshalIndent(genesis, "", "  ")
-				ux.Logger.PrintToUser(string(formatted))
+				ux.Logger.PrintToUser("%s", string(formatted))
 				ux.Logger.PrintToUser("```")
 			}
 

@@ -34,7 +34,7 @@ func runMigration(sourceDB, destDB string, chainID int64) error {
 		return fmt.Errorf("migration failed: %w\n%s", err, output)
 	}
 	
-	ux.Logger.PrintToUser(string(output))
+	ux.Logger.PrintToUser("%s", string(output))
 	return nil
 }
 

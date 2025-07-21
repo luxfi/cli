@@ -63,7 +63,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 			for i := 1; i <= validators; i++ {
 				nodeDir := filepath.Join(outputDir, fmt.Sprintf("node%d", i))
 				if err := os.MkdirAll(filepath.Join(nodeDir, "staking"), 0755); err != nil {
-					return fmt.Errorf("failed to create node%d directory: %w", err, i)
+					return fmt.Errorf("failed to create node%d directory: %w", i, err)
 				}
 			}
 
@@ -86,7 +86,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 			}
 
 			ux.Logger.PrintToUser("✅ Migration preparation complete!")
-			ux.Logger.PrintToUser(fmt.Sprintf("Output directory: %s", outputDir))
+			ux.Logger.PrintToUser("Output directory: %s", outputDir)
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("Next steps:")
 			ux.Logger.PrintToUser("1. Review the generated configurations")
@@ -134,7 +134,7 @@ func newBootstrapCmd(app *application.Lux) *cobra.Command {
 			ux.Logger.PrintToUser("✅ Bootstrap network started!")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("Monitor the network with:")
-			ux.Logger.PrintToUser("  lux migrate validate --migration-dir " + migrationDir)
+			ux.Logger.PrintToUser("  lux migrate validate --migration-dir %s", migrationDir)
 
 			return nil
 		},
