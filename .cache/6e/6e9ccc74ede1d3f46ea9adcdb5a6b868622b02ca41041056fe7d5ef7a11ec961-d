@@ -1,0 +1,6 @@
+./bloom.go
+./gossip.go
+./gossipable.go
+./handler.go
+./message.go
+./test_gossip.go

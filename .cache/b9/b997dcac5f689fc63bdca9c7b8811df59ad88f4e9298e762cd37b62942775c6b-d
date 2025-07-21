@@ -1,0 +1,7 @@
+./blockchain.go
+./helpers.go
+./network.go
+./node.go
+./node_process.go
+./snapshot.go
+./test_message.go

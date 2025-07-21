@@ -1,0 +1,4 @@
+./bech32.go
+./doc.go
+./error.go
+./version.go

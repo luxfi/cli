@@ -1,0 +1,6 @@
+./majority.go
+./minority.go
+./noop.go
+./poll.go
+./requests.go
+./sampler.go

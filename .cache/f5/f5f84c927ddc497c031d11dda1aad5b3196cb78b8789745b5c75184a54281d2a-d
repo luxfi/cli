@@ -1,0 +1,3 @@
+./filtered_batch.go
+./shared_memory_client.go
+./shared_memory_server.go

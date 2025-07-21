@@ -1,0 +1,6 @@
+./codec.go
+./l1_validator_registration.go
+./l1_validator_weight.go
+./payload.go
+./register_l1_validator.go
+./subnet_to_l1_conversion.go

@@ -1,0 +1,6 @@
+./allowlist.go
+./config.go
+./event.go
+./role.go
+./test_allowlist.go
+./test_allowlist_config.go

@@ -1,0 +1,2 @@
+./reader.pb.go
+./reader_grpc.pb.go

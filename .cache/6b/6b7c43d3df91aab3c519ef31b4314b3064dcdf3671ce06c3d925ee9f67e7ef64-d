@@ -1,0 +1,8 @@
+./binary_confidence.go
+./binary_threshold.go
+./factory.go
+./nnary_confidence.go
+./nnary_threshold.go
+./types.go
+./unary_confidence.go
+./unary_threshold.go
