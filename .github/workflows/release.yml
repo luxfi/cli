@@ -83,4 +83,4 @@ jobs:
           workdir: ./lux-cli/
         env:
           #https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
