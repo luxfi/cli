@@ -74,7 +74,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	} else {
 		startMsg = fmt.Sprintf("Starting previously deployed and stopped snapshot %s...", snapshotName)
 	}
-	ux.Logger.PrintToUser(startMsg)
+	ux.Logger.PrintToUser("%s", startMsg)
 
 	outputDirPrefix := path.Join(app.GetRunDir(), "restart")
 	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)
