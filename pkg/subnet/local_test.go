@@ -29,10 +29,10 @@ import (
 )
 
 var (
-	testBlockChainID1 = ids.GenerateTestID().String()
-	testBlockChainID2 = ids.GenerateTestID().String()
-	testSubnetID1     = ids.GenerateTestID().String()
-	testSubnetID2     = ids.GenerateTestID().String()
+	testBlockChainID1 = "S4mBqKYypXfnCX7drcacHmSJFneYYrqCTfq3fkVwPnPHVqQ2y"
+	testBlockChainID2 = "zmV8z4kqPDPCj8WpFzGhgt4WZCbaeXWhFXktya4Hj1xKhLdqz"
+	testSubnetID1     = "XDnPSGJr2XmkkFaBEGcKFmJgtH8Fv7rNa6YFRKxCHQsUV6Egp"
+	testSubnetID2     = "2LSwchh6dK64RtGRXVdjyDd9YPu89mXB2MMjpZ1dDvnKZDYyro"
 
 	testVMID      = "tGBrM2SXkAdNsqzb3SaFZZWMNdzjjFEUKteheTa4dhUwnfQyu" // VM ID of "test"
 	testChainName = "test"
