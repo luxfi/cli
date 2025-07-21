@@ -706,7 +706,7 @@ func FundLedgerAddress() error {
 		Addrs:     []ids.ShortID{ledgerAddr},
 	}
 	output := &lux.TransferableOutput{
-		Asset: lux.Asset{ID: wallet.X().LUXAssetID()},
+		Asset: lux.Asset{ID: wallet.X().Context().LUXAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          1000000000,
 			OutputOwners: to,
@@ -729,7 +729,7 @@ func FundLedgerAddress() error {
 
 	// import X-Chain genesis addr to P-Chain ledger addr
 	fmt.Println("*** Please sign import hash on the ledger device *** ")
-	if _, err = wallet.P().IssueImportTx(wallet.X().BlockchainID(), &to); err != nil {
+	if _, err = wallet.P().IssueImportTx(wallet.X().Context().BlockchainID, &to); err != nil {
 		return err
 	}
 
