@@ -6,10 +6,11 @@ require (
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/evm v0.5.5
+	github.com/luxfi/evm v0.7.6
+	github.com/luxfi/geth v0.15.13
 	// github.com/luxfi/apm v0.0.4
-	github.com/luxfi/netrunner v1.7.10
-	github.com/luxfi/node v1.13.9
+	github.com/luxfi/netrunner v1.7.8
+	github.com/luxfi/node v1.13.10
 	github.com/manifoldco/promptui v0.9.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -29,10 +30,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require (
-	github.com/luxfi/geth v0.15.32
-	github.com/luxfi/lpm v1.1.0
-)
+require github.com/luxfi/lpm v1.1.0
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
@@ -171,4 +169,10 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
-replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
+replace (
+	github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
+	github.com/luxfi/evm => ../evm
+	github.com/luxfi/geth => ../geth
+	github.com/luxfi/netrunner => ../netrunner
+	github.com/luxfi/node => ../node
+)

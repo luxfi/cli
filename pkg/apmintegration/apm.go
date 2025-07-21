@@ -23,7 +23,7 @@ func AddRepo(app *application.Lux, repoURL *url.URL, branch string) (string, err
 		return "", err
 	}
 
-	if alias == constants.DefaultAvaLabsPackage {
+	if alias == constants.DefaultLuxPackage {
 		ux.Logger.PrintToUser("Lux Plugins Core already installed, skipping...")
 		return "", nil
 	}
