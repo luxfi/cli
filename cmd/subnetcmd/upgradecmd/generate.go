@@ -66,16 +66,16 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 		return nil
 	}
 	// print some warning/info message
-	ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Yellow.Wrap(
+	ux.Logger.PrintToUser("%s", logging.Bold.Wrap(logging.Yellow.Wrap(
 		"Performing a network upgrade requires coordinating the upgrade network-wide.")))
-	ux.Logger.PrintToUser(logging.White.Wrap(logging.Reset.Wrap(
+	ux.Logger.PrintToUser("%s", logging.White.Wrap(logging.Reset.Wrap(
 		"A network upgrade changes the rule set used to process and verify blocks, " +
 			"such that any node that upgrades incorrectly or fails to upgrade by the time " +
 			"that upgrade goes into effect may become out of sync with the rest of the network.\n")))
-	ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Red.Wrap(
+	ux.Logger.PrintToUser("%s", logging.Bold.Wrap(logging.Red.Wrap(
 		"Any mistakes in configuring network upgrades or coordinating them on validators " +
 			"may cause the network to halt and recovering may be difficult.")))
-	ux.Logger.PrintToUser(logging.Reset.Wrap(
+	ux.Logger.PrintToUser("%s", logging.Reset.Wrap(
 		"Please consult " + logging.Cyan.Wrap(
 			"https://docs.lux.network/subnets/customize-a-subnet#network-upgrades-enabledisable-precompiles ") +
 			logging.Reset.Wrap("for more information")))
@@ -99,7 +99,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 	}
 
 	fmt.Println()
-	ux.Logger.PrintToUser(logging.Yellow.Wrap(
+	ux.Logger.PrintToUser("%s", logging.Yellow.Wrap(
 		"Lux and this tool support configuring multiple precompiles. " +
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
@@ -115,7 +115,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 			return err
 		}
 
-		ux.Logger.PrintToUser(fmt.Sprintf("Set parameters for the %q precompile", precomp))
+		ux.Logger.PrintToUser("Set parameters for the %q precompile", precomp)
 		if err := promptParams(precomp, &precompiles.PrecompileUpgrades); err != nil {
 			return err
 		}
@@ -458,8 +458,8 @@ func promptAdminAndEnabledAddresses() ([]common.Address, []common.Address, error
 		}
 
 		if len(enabled) == 0 && len(admin) == 0 {
-			ux.Logger.PrintToUser(fmt.Sprintf(
-				"We need at least one address for either '%s' or '%s'. Otherwise abort.", enabledAddressesKey, adminAddressesKey))
+			ux.Logger.PrintToUser(
+				"We need at least one address for either '%s' or '%s'. Otherwise abort.", enabledAddressesKey, adminAddressesKey)
 			continue
 		}
 		return admin, enabled, nil
