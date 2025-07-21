@@ -50,10 +50,11 @@ func PrintMetricsOptOutPrompt() {
 			"information or be used to identify individuals or entities using the software.  You can disable such data " +
 			"collection with `lux config metrics disable` command, which will result in no data being collected; " +
 			"by using the software without so disabling such data collection you expressly consent to the collection of " +
-			"such data.  You can also read our privacy statement <https://www.avalabs.org/privacy-policy> to learn more. \n")
+			"such data.  You can also read our privacy statement <https://lux.network/privacy> to learn more. \n")
 	ux.Logger.PrintToUser("You can disable data collection with `lux config metrics disable` command. " +
-		"You can also read our privacy statement <https://www.avalabs.org/privacy-policy> to learn more.\n")
+		"You can also read our privacy statement <https://lux.network/privacy> to learn more.\n")
 }
+;q
 
 func saveMetricsConfig(app *application.Lux, metricsEnabled bool) {
 	config := models.Config{MetricsEnabled: metricsEnabled}

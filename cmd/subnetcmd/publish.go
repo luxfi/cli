@@ -475,7 +475,7 @@ func getInfoForKnownVMs(
 	strVer, repoName, vmBinDir, vmBin string,
 	dl binutils.GithubDownloader,
 ) ([]string, *version.Semantic, string, string, error) {
-	maintrs := []string{constants.AvaLabsMaintainers}
+	maintrs := []string{constants.LuxMaintainers}
 	binPath := filepath.Join(vmBinDir, repoName+"-"+strVer, vmBin)
 	sha, err := utils.GetSHA256FromDisk(binPath)
 	if err != nil {

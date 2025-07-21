@@ -23,7 +23,7 @@ func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, erro
 		binDir,
 		subDir,
 		subnetEVMBinPrefix,
-		constants.AvaLabsOrg,
+		constants.LuxOrg,
 		constants.SubnetEVMRepoName,
 		downloader,
 		installer,

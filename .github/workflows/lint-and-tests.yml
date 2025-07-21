@@ -75,7 +75,7 @@ jobs:
         run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} scripts/run.e2e.sh
       - name: 'Upload Artifact'
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cli-logs-${{ matrix.os }}
           path: |
