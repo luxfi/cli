@@ -79,7 +79,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 		txt := "No new version found upstream; skipping update"
 		app.Log.Debug(txt)
 		if isUserCalled {
-			ux.Logger.PrintToUser(txt)
+			ux.Logger.PrintToUser("%s", txt)
 		}
 		return nil
 	}
