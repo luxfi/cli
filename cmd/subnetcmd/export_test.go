@@ -26,12 +26,12 @@ func TestExportImportSubnet(t *testing.T) {
 	require := require.New(t)
 	testSubnet := "testSubnet"
 	vmVersion := "v0.9.99"
-	testSubnetEVMCompat := []byte("{\"rpcChainVMProtocolVersion\": {\"v0.9.99\": 18}}")
+	testEVMCompat := []byte("{\"rpcChainVMProtocolVersion\": {\"v0.9.99\": 18}}")
 
 	app = application.New()
 
 	mockAppDownloader := mocks.Downloader{}
-	mockAppDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
+	mockAppDownloader.On("Download", mock.Anything).Return(testEVMCompat, nil)
 
 	app.Setup(testDir, logging.NoLog{}, nil, prompts.NewPrompter(), &mockAppDownloader)
 	ux.NewUserLog(logging.NoLog{}, io.Discard)
@@ -65,7 +65,7 @@ func TestExportImportSubnet(t *testing.T) {
 	err = json.Unmarshal(orig, &control)
 	require.NoError(err)
 	require.Equal(control["Name"], testSubnet)
-	require.Equal(control["VM"], "Subnet-EVM")
+	require.Equal(control["VM"], "Lux EVM")
 	require.Equal(control["VMVersion"], vmVersion)
 	require.Equal(control["Subnet"], testSubnet)
 	require.Equal(control["TokenName"], "TEST")

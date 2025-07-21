@@ -431,13 +431,13 @@ func getVMInfo(sc *models.Sidecar) (*lpmintegration.VM, error) {
 
 	case sc.VM == models.SubnetEvm:
 		vmID = models.SubnetEvm
-		dl := binutils.NewSubnetEVMDownloader()
+		dl := binutils.NewEVMDownloader()
 		desc = "Lux EVM is a simplified version of Geth VM (C-Chain). It implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality"
 		_, ver, url, sha, err = getInfoForKnownVMs(
 			sc.VMVersion,
-			constants.SubnetEVMRepoName,
-			app.GetSubnetEVMBinDir(),
-			constants.SubnetEVMBin,
+			constants.EVMRepoName,
+			app.GetEVMBinDir(),
+			constants.EVMBin,
 			dl,
 		)
 	default:

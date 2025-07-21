@@ -32,13 +32,13 @@ VersionMapper keys and their usage:
 
  * MultiLux1Key					Used for the update scenario where node is updated and
  * MultiLux2Key    			both node versions need to be compatible.
- * MultiLuxSubnetEVMKey	This is the Subnet-EVM version compatible to the above scenario.
+ * MultiLuxEVMKey	This is the Lux EVM version compatible to the above scenario.
 
- * LatestEVM2LuxKey 	  Latest subnet-evm version
- * LatestLux2EVMKey     while this is the latest node compatible with that subnet-evm
+ * LatestEVM2LuxKey 	  Latest evm version
+ * LatestLux2EVMKey     while this is the latest node compatible with that evm
 
- * SoloSubnetEVMKey1 			This is used when we want to test subnet-evm versions where compatibility
- * SoloSubnetEVMKey2      needs to be between the two subnet-evm versions
+ * SoloEVMKey1 			This is used when we want to test evm versions where compatibility
+ * SoloEVMKey2      needs to be between the two evm versions
  													(latest might not be compatible with second latest)
 
 
@@ -90,7 +90,7 @@ func (m *versionMapper) GetApp() *application.Lux {
 func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	switch vmType {
 	case models.SubnetEvm:
-		return constants.SubnetEVMRPCCompatibilityURL
+		return constants.EVMRPCCompatibilityURL
 	case models.CustomVM:
 		// TODO: unclear yet what we should return here
 		return ""
@@ -151,9 +151,9 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		return nil, err
 	}
 
-	// subnet-evm publishes its upcoming new version in the compatibility json
+	// evm publishes its upcoming new version in the compatibility json
 	// before the new version is actually a downloadable release
-	subnetEVMversions, err = mapper.GetEligibleVersions(subnetEVMversions, constants.SubnetEVMRepoName, mapper.GetApp())
+	subnetEVMversions, err = mapper.GetEligibleVersions(subnetEVMversions, constants.EVMRepoName, mapper.GetApp())
 	if err != nil {
 		return nil, err
 	}
@@ -194,14 +194,14 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 			binaryToVersion[MultiLux2Key] = versionsForRPC[1]
 
 			// now iterate the subnetEVMversions and find a
-			// subnet-evm version which is compatible with that RPC version.
+			// evm version which is compatible with that RPC version.
 			// The above-mentioned test runs with this as well.
 			for _, evmVer := range subnetEVMversions {
 				if subnetEVMmapping[evmVer] == rpcVersion {
 					// we know there already exists at least one such combination.
 					// unless the compatibility JSON will start to be shortened in some way,
-					// we should always be able to find a matching subnet-evm
-					binaryToVersion[MultiLuxSubnetEVMKey] = evmVer
+					// we should always be able to find a matching evm
+					binaryToVersion[MultiLuxEVMKey] = evmVer
 					// found the version, break
 					break
 				}
@@ -214,22 +214,22 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// when running Lux only, always use latest
 	binaryToVersion[OnlyLuxKey] = OnlyLuxValue
 
-	// now let's look for subnet-evm versions which are fit for the
-	// "can deploy multiple subnet-evm versions" test.
-	// We need two subnet-evm versions which run the same RPC version,
+	// now let's look for evm versions which are fit for the
+	// "can deploy multiple evm versions" test.
+	// We need two evm versions which run the same RPC version,
 	// and then a compatible Lux
 	//
 	// To avoid having to iterate again, we'll also fill the values
-	// for the **latest** compatible Lux and Subnet-EVM
+	// for the **latest** compatible Lux and Lux EVM
 	for i, ver := range subnetEVMversions {
 		// safety check, should not happen, as we already know
 		// compatible versions exist
 		if i+1 == len(subnetEVMversions) {
-			return nil, errors.New("no compatible versions for subsequent SubnetEVM found")
+			return nil, errors.New("no compatible versions for subsequent EVM found")
 		}
 		first := ver
 		second := subnetEVMversions[i+1]
-		// we should be able to safely assume that for a given subnet-evm RPC version,
+		// we should be able to safely assume that for a given evm RPC version,
 		// there exists at least one compatible Lux.
 		// This means we can in any case use this to set the **latest** compatibility
 		soloLux, err := mapper.GetLatestLuxByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetLuxURL())
@@ -243,8 +243,8 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 		}
 		// first and second are compatible
 		if subnetEVMmapping[first] == subnetEVMmapping[second] {
-			binaryToVersion[SoloSubnetEVMKey1] = first
-			binaryToVersion[SoloSubnetEVMKey2] = second
+			binaryToVersion[SoloEVMKey1] = first
+			binaryToVersion[SoloEVMKey2] = second
 			binaryToVersion[SoloLuxKey] = soloLux
 			break
 		}

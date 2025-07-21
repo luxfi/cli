@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 )
 
-const oldSubnetEVM = "SubnetEVM"
+const oldEVM = "EVM"
 
-func migrateSubnetEVMNames(app *application.Lux, runner *migrationRunner) error {
+func migrateEVMNames(app *application.Lux, runner *migrationRunner) error {
 	subnetDir := app.GetSubnetDir()
 	subnets, err := os.ReadDir(subnetDir)
 	if err != nil {
@@ -39,7 +39,7 @@ func migrateSubnetEVMNames(app *application.Lux, runner *migrationRunner) error 
 			return err
 		}
 
-		if string(sc.VM) == oldSubnetEVM {
+		if string(sc.VM) == oldEVM {
 			runner.printMigrationMessage()
 			sc.VM = models.SubnetEvm
 			if err = app.UpdateSidecar(&sc); err != nil {

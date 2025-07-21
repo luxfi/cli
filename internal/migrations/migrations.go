@@ -31,7 +31,7 @@ func RunMigrations(app *application.Lux) error {
 			// add new migrations here in rising index order
 			// next one is 2
 			0: migrateTopLevelFiles,
-			1: migrateSubnetEVMNames,
+			1: migrateEVMNames,
 		},
 	}
 	return runner.run(app)

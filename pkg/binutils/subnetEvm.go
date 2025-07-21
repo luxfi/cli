@@ -10,13 +10,13 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
-func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, error) {
+func SetupEVM(app *application.Lux, subnetEVMVersion string) (string, error) {
 	// Check if already installed
-	binDir := app.GetSubnetEVMBinDir()
+	binDir := app.GetEVMBinDir()
 	subDir := filepath.Join(binDir, subnetEVMBinPrefix+subnetEVMVersion)
 
 	installer := NewInstaller()
-	downloader := NewSubnetEVMDownloader()
+	downloader := NewEVMDownloader()
 	vmDir, err := InstallBinary(
 		app,
 		subnetEVMVersion,
@@ -24,9 +24,9 @@ func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, erro
 		subDir,
 		subnetEVMBinPrefix,
 		constants.LuxOrg,
-		constants.SubnetEVMRepoName,
+		constants.EVMRepoName,
 		downloader,
 		installer,
 	)
-	return filepath.Join(vmDir, constants.SubnetEVMBin), err
+	return filepath.Join(vmDir, constants.EVMBin), err
 }

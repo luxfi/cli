@@ -104,7 +104,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 
-	// use the correct data types from subnet-evm right away
+	// use the correct data types from evm right away
 	precompiles := extras.UpgradeConfig{
 		PrecompileUpgrades: make([]extras.PrecompileUpgrade, 0),
 	}

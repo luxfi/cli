@@ -40,7 +40,7 @@ func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath 
 			return nil, &models.Sidecar{}, err
 		}
 
-		subnetEVMVersion, err = getVMVersion(app, "Subnet-EVM", constants.SubnetEVMRepoName, subnetEVMVersion, false)
+		subnetEVMVersion, err = getVMVersion(app, "Lux EVM", constants.EVMRepoName, subnetEVMVersion, false)
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}
@@ -71,7 +71,7 @@ func createEvmGenesis(
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	genesis := core.Genesis{}
-	conf := params.SubnetEVMDefaultChainConfig
+	conf := params.EVMDefaultChainConfig
 
 	const (
 		descriptorsState = "descriptors"

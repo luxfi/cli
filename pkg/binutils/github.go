@@ -84,7 +84,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 	return nodeURL, ext, nil
 }
 
-func NewSubnetEVMDownloader() GithubDownloader {
+func NewEVMDownloader() GithubDownloader {
 	return &subnetEVMDownloader{}
 }
 
@@ -100,19 +100,19 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 		subnetEVMURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
 			constants.LuxOrg,
-			constants.SubnetEVMRepoName,
+			constants.EVMRepoName,
 			version,
-			constants.SubnetEVMRepoName,
-			version[1:], // WARN subnet-evm isn't consistent in its release naming, it's omitting the v in the file name...
+			constants.EVMRepoName,
+			version[1:], // WARN evm isn't consistent in its release naming, it's omitting the v in the file name...
 			goarch,
 		)
 	case darwin:
 		subnetEVMURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
 			constants.LuxOrg,
-			constants.SubnetEVMRepoName,
+			constants.EVMRepoName,
 			version,
-			constants.SubnetEVMRepoName,
+			constants.EVMRepoName,
 			version[1:],
 			goarch,
 		)

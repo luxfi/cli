@@ -243,8 +243,8 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can create and update future", func() {
-		subnetEVMVersion1 := binaryToVersion[utils.SoloSubnetEVMKey1]
-		subnetEVMVersion2 := binaryToVersion[utils.SoloSubnetEVMKey2]
+		subnetEVMVersion1 := binaryToVersion[utils.SoloEVMKey1]
+		subnetEVMVersion2 := binaryToVersion[utils.SoloEVMKey2]
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1)
 
 		// check version
@@ -270,7 +270,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("upgrade SubnetEVM local deployment", func() {
+	ginkgo.It("upgrade EVM local deployment", func() {
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
@@ -347,22 +347,22 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("can update a subnet-evm to a custom VM", func() {
-		customVMPath, err := utils.DownloadCustomVMBin(binaryToVersion[utils.SoloSubnetEVMKey2])
+	ginkgo.It("can update a evm to a custom VM", func() {
+		customVMPath, err := utils.DownloadCustomVMBin(binaryToVersion[utils.SoloEVMKey2])
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		commands.CreateSubnetEvmConfigWithVersion(
 			subnetName,
 			utils.SubnetEvmGenesisPath,
-			binaryToVersion[utils.SoloSubnetEVMKey1],
+			binaryToVersion[utils.SoloEVMKey1],
 		)
 
 		// check version
 		output, err := commands.DescribeSubnet(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		containsVersion1 := strings.Contains(output, binaryToVersion[utils.SoloSubnetEVMKey1])
-		containsVersion2 := strings.Contains(output, binaryToVersion[utils.SoloSubnetEVMKey2])
+		containsVersion1 := strings.Contains(output, binaryToVersion[utils.SoloEVMKey1])
+		containsVersion2 := strings.Contains(output, binaryToVersion[utils.SoloEVMKey2])
 		gomega.Expect(containsVersion1).Should(gomega.BeTrue())
 		gomega.Expect(containsVersion2).Should(gomega.BeFalse())
 
@@ -372,7 +372,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		output, err = commands.DescribeSubnet(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		containsVersion2 = strings.Contains(output, binaryToVersion[utils.SoloSubnetEVMKey2])
+		containsVersion2 = strings.Contains(output, binaryToVersion[utils.SoloEVMKey2])
 		gomega.Expect(containsVersion2).Should(gomega.BeFalse())
 		// the following indicates it is a custom VM
 		containsCustomVM := strings.Contains(output, "Printing genesis")
@@ -381,9 +381,9 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("can upgrade subnet-evm on public deployment", func() {
+	ginkgo.It("can upgrade evm on public deployment", func() {
 		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloLuxKey])
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1])
+		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloEVMKey1])
 
 		// Simulate fuji deployment
 		s := commands.SimulateFujiDeploy(subnetName, keyName, controlKeys)
@@ -430,7 +430,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		commands.StopNetwork()
 
 		for _, nodeInfo := range nodeInfos {
-			_, err := commands.UpgradeVMPublic(subnetName, binaryToVersion[utils.SoloSubnetEVMKey2], nodeInfo.PluginDir)
+			_, err := commands.UpgradeVMPublic(subnetName, binaryToVersion[utils.SoloEVMKey2], nodeInfo.PluginDir)
 			gomega.Expect(err).Should(gomega.BeNil())
 		}
 

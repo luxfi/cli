@@ -16,8 +16,8 @@ import (
 func NewCmd(app *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "migrate",
-		Short: "Migrate subnet-evm data to C-Chain for network upgrade",
-		Long: `The migrate command helps with the one-time migration of subnet-evm 
+		Short: "Migrate evm data to C-Chain for network upgrade",
+		Long: `The migrate command helps with the one-time migration of evm 
 data to C-Chain for the Lux network upgrade. This includes:
 - Converting PebbleDB subnet data to LevelDB C-Chain format
 - Setting up P-Chain genesis for the new validator set
@@ -48,7 +48,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 		Use:   "prepare",
 		Short: "Prepare migration data for mainnet launch",
 		Long: `Prepares the migration by:
-1. Converting subnet-evm PebbleDB to C-Chain LevelDB
+1. Converting evm PebbleDB to C-Chain LevelDB
 2. Creating P-Chain genesis with validator set
 3. Generating node configurations for bootstrap validators`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -68,7 +68,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 			}
 
 			// Run the migration tool
-			ux.Logger.PrintToUser("Step 1: Converting subnet-evm data to C-Chain format...")
+			ux.Logger.PrintToUser("Step 1: Converting evm data to C-Chain format...")
 			if err := runMigration(sourceDB, filepath.Join(outputDir, "c-chain-db"), int64(networkID)); err != nil {
 				return fmt.Errorf("migration failed: %w", err)
 			}
@@ -96,7 +96,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&sourceDB, "source-db", "", "Path to subnet-evm PebbleDB")
+	cmd.Flags().StringVar(&sourceDB, "source-db", "", "Path to evm PebbleDB")
 	cmd.Flags().StringVar(&outputDir, "output", "./lux-mainnet-migration", "Output directory for migration data")
 	cmd.Flags().Uint32Var(&networkID, "network-id", 96369, "Network ID for the new mainnet")
 	cmd.Flags().IntVar(&validators, "validators", 5, "Number of bootstrap validators")
@@ -149,8 +149,8 @@ func newBootstrapCmd(app *application.Lux) *cobra.Command {
 func newImportCmd(app *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
-		Short: "Import subnet-evm data into running C-Chain",
-		Long:  `Imports historical subnet-evm data into a running C-Chain`,
+		Short: "Import evm data into running C-Chain",
+		Long:  `Imports historical evm data into a running C-Chain`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ux.Logger.PrintToUser("This command will be implemented for importing data into a running network")
 			return nil

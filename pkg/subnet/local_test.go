@@ -130,7 +130,7 @@ func TestDeployToLocal(t *testing.T) {
 	err = os.WriteFile(testGenesis.Name(), []byte(genesis), constants.DefaultPerms755)
 	require.NoError(err)
 	// create dummy sidecar file, also checked by deploy
-	sidecar := `{"VM": "SubnetEVM"}`
+	sidecar := `{"VM": "EVM"}`
 	testSubnetDir := filepath.Join(testDir, constants.SubnetDir, testChainName)
 	err = os.MkdirAll(testSubnetDir, constants.DefaultPerms755)
 	require.NoError(err)

@@ -25,7 +25,7 @@ func CheckUpgradeIsDeployed(rpcEndpoint string, deployedUpgrades params.UpgradeC
 		return err
 	}
 
-	// subnet-evm doesn't serialize the 'upgrades' section in a way that maps to go objects
+	// evm doesn't serialize the 'upgrades' section in a way that maps to go objects
 	// (serialized with `json:"-"`)
 	// therefore we need to do it manually:
 
