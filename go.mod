@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.24.5
+go 1.24
 
 require (
 	github.com/docker/docker v28.3.2+incompatible
