@@ -231,7 +231,8 @@ func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.T
 				if err != nil {
 					return "", err
 				}
-				initialMint[addr] = math.NewHexOrDecimal256(int64(amount))
+				val := (*math.HexOrDecimal256)(big.NewInt(int64(amount)))
+				initialMint[addr] = val
 				return fmt.Sprintf("%s-%d", addr.Hex(), amount), nil
 			},
 			"Add an address to amount pair",
