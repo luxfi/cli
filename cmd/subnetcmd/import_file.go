@@ -268,7 +268,7 @@ func importFromAPM() error {
 		ImportedVMID:    vmDescr.ID,
 	}
 
-	ux.Logger.PrintToUser("Selected subnet, installing " + subnetKey)
+	ux.Logger.PrintToUser("Selected subnet, installing %s", subnetKey)
 
 	if err = lpmintegration.InstallVM(app, subnetKey); err != nil {
 		return err
