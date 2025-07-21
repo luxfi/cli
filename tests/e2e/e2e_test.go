@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"testing"
 
-	_ "github.com/luxfi/cli/tests/e2e/testcases/apm"
+	_ "github.com/luxfi/cli/tests/e2e/testcases/lpm"
 	_ "github.com/luxfi/cli/tests/e2e/testcases/errhandling"
 	_ "github.com/luxfi/cli/tests/e2e/testcases/key"
 	_ "github.com/luxfi/cli/tests/e2e/testcases/network"
