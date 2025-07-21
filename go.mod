@@ -30,7 +30,7 @@ require (
 )
 
 require (
-	github.com/luxfi/geth v0.15.32
+	github.com/luxfi/geth v0.15.31
 	github.com/luxfi/lpm v1.1.0
 )
 
