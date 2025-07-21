@@ -1,6 +1,6 @@
 // Copyright (C) 2024, Lux Industries Inc. All rights reserved.
-// Placeholder for APM config
-package apm
+// Placeholder for LPM config
+package lpm
 
 type Config struct {
 	RepositoryURL   string
@@ -15,7 +15,7 @@ type Credential struct {
 
 func DefaultConfig() *Config {
 	return &Config{
-		RepositoryURL: "https://apm.lux.network",
+		RepositoryURL: "https://lpm.lux.network",
 		RegistryURL:   "https://registry.lux.network",
 	}
 }

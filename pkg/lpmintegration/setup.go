@@ -65,7 +65,7 @@ func SetupLpm(app *application.Lux, lpmBaseDir string) error {
 
 // If we need to use custom git credentials (say for private repos).
 // the zero value for credentials is safe to use.
-// Stolen from APM repo
+// Stolen from LPM repo
 func initCredentials() (http.BasicAuth, error) {
 	result := http.BasicAuth{}
 
