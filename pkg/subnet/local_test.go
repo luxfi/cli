@@ -20,7 +20,6 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
-	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
@@ -30,7 +29,7 @@ import (
 
 var (
 	testBlockChainID1 = "S4mBqKYypXfnCX7drcacHmSJFneYYrqCTfq3fkVwPnPHVqQ2y"
-	testBlockChainID2 = "zmV8z4kqPDPCj8WpFzGhgt4WZCbaeXWhFXktya4Hj1xKhLdqz"
+	testBlockChainID2 = "11111111111111111111111111111111LpoYY"
 	testSubnetID1     = "XDnPSGJr2XmkkFaBEGcKFmJgtH8Fv7rNa6YFRKxCHQsUV6Egp"
 	testSubnetID2     = "2LSwchh6dK64RtGRXVdjyDd9YPu89mXB2MMjpZ1dDvnKZDYyro"
 
