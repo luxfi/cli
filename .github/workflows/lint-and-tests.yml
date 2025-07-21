@@ -62,7 +62,9 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
+      - name: Install Python setuptools
+        run: pip3 install setuptools
       - name: Yarn install
         uses: nick-fields/retry@v2
         with:
