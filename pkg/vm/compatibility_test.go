@@ -30,7 +30,7 @@ var (
 func TestGetRPCProtocolVersionEVM(t *testing.T) {
 	require := require.New(t)
 	expectedRPC := 18
-	var vm models.VMType = models.SubnetEvm
+	var vm models.VMType = models.EVM
 
 	mockDownloader := &mocks.Downloader{}
 	mockDownloader.On("Download", mock.Anything).Return(testEVMCompat, nil)
@@ -62,7 +62,7 @@ func TestGetRPCProtocolVersionMissing(t *testing.T) {
 	app := application.New()
 	app.Downloader = mockDownloader
 
-	_, err := GetRPCProtocolVersion(app, models.SubnetEvm, testUnlistedLuxVersion)
+	_, err := GetRPCProtocolVersion(app, models.EVM, testUnlistedLuxVersion)
 	require.ErrorContains(err, "no RPC version found")
 }
 

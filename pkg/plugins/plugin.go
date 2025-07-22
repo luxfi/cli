@@ -51,7 +51,7 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 		}
 
 		switch sc.VM {
-		case models.SubnetEvm:
+		case models.EVM:
 			vmSourcePath, err = binutils.SetupEVM(app, sc.VMVersion)
 			if err != nil {
 				return "", fmt.Errorf("failed to install evm: %w", err)
@@ -81,7 +81,7 @@ func CreatePluginFromVersion(
 	var err error
 
 	switch vm {
-	case models.SubnetEvm:
+	case models.EVM:
 		vmSourcePath, err = binutils.SetupEVM(app, version)
 		if err != nil {
 			return "", fmt.Errorf("failed to install evm: %w", err)

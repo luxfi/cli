@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/geth/common"
 )
 
-func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath string, subnetEVMVersion string) ([]byte, *models.Sidecar, error) {
+func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string, evmVersion string) ([]byte, *models.Sidecar, error) {
 	var (
 		genesisBytes []byte
 		sc           *models.Sidecar
@@ -29,7 +29,7 @@ func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath 
 	)
 
 	if genesisPath == "" {
-		genesisBytes, sc, err = createEvmGenesis(app, subnetName, subnetEVMVersion)
+		genesisBytes, sc, err = createEvmGenesis(app, subnetName, evmVersion)
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}
@@ -40,20 +40,20 @@ func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath 
 			return nil, &models.Sidecar{}, err
 		}
 
-		subnetEVMVersion, err = getVMVersion(app, "Lux EVM", constants.EVMRepoName, subnetEVMVersion, false)
+		evmVersion, err = getVMVersion(app, "Lux EVM", constants.EVMRepoName, evmVersion, false)
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}
 
-		rpcVersion, err := GetRPCProtocolVersion(app, models.SubnetEvm, subnetEVMVersion)
+		rpcVersion, err := GetRPCProtocolVersion(app, models.EVM, evmVersion)
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}
 
 		sc = &models.Sidecar{
 			Name:       subnetName,
-			VM:         models.SubnetEvm,
-			VMVersion:  subnetEVMVersion,
+			VM:         models.EVM,
+			VMVersion:  evmVersion,
 			RPCVersion: rpcVersion,
 			Subnet:     subnetName,
 			TokenName:  "",
@@ -66,12 +66,12 @@ func CreateEvmSubnetConfig(app *application.Lux, subnetName string, genesisPath 
 func createEvmGenesis(
 	app *application.Lux,
 	subnetName string,
-	subnetEVMVersion string,
+	evmVersion string,
 ) ([]byte, *models.Sidecar, error) {
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	genesis := core.Genesis{}
-	conf := params.EVMDefaultChainConfig
+	conf := params.SubnetEVMDefaultChainConfig
 
 	const (
 		descriptorsState = "descriptors"
@@ -98,7 +98,7 @@ func createEvmGenesis(
 	for subnetEvmState.Running() {
 		switch subnetEvmState.CurrentState() {
 		case descriptorsState:
-			chainID, tokenName, vmVersion, direction, err = getDescriptors(app, subnetEVMVersion)
+			chainID, tokenName, vmVersion, direction, err = getDescriptors(app, evmVersion)
 		case feeState:
 			*conf, direction, err = GetFeeConfig(*conf, app)
 		case airdropState:
@@ -145,14 +145,14 @@ func createEvmGenesis(
 		return nil, nil, err
 	}
 
-	rpcVersion, err := GetRPCProtocolVersion(app, models.SubnetEvm, vmVersion)
+	rpcVersion, err := GetRPCProtocolVersion(app, models.EVM, vmVersion)
 	if err != nil {
 		return nil, &models.Sidecar{}, err
 	}
 
 	sc := &models.Sidecar{
 		Name:       subnetName,
-		VM:         models.SubnetEvm,
+		VM:         models.EVM,
 		VMVersion:  vmVersion,
 		RPCVersion: rpcVersion,
 		Subnet:     subnetName,
