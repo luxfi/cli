@@ -106,7 +106,7 @@ func (m *testMapper) GetApp() *application.Lux {
 // implement VersionMapper
 func (m *testMapper) GetCompatURL(vmType models.VMType) string {
 	switch vmType {
-	case models.SubnetEvm:
+	case models.EVM:
 		return m.srv.URL + "/evm"
 	default:
 		m.t.Fatalf("unexpected vmType: %T", vmType)

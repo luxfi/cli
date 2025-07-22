@@ -198,7 +198,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 	if vmType == "" {
 		subnetTypeStr, err := app.Prompt.CaptureList(
 			"What's this VM's type?",
-			[]string{models.SubnetEvm, models.CustomVM},
+			[]string{models.EVM, models.CustomVM},
 		)
 		if err != nil {
 			return err
@@ -239,7 +239,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 	} else {
 		// no node was queried, ask the user
 		switch vmType {
-		case models.SubnetEvm:
+		case models.EVM:
 			versions, err = app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.EVMRepoName)
 			if err != nil {
 				return err
@@ -258,7 +258,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 			return fmt.Errorf("failed getting RPCVersion for VM type %s with version %s", vmType, sc.VMVersion)
 		}
 	}
-	if vmType == models.SubnetEvm {
+	if vmType == models.EVM {
 		var genesis core.Genesis
 		if err := json.Unmarshal(genBytes, &genesis); err != nil {
 			return err
