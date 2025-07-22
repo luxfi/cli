@@ -429,8 +429,8 @@ func getVMInfo(sc *models.Sidecar) (*lpmintegration.VM, error) {
 			return nil, err
 		}
 
-	case sc.VM == models.SubnetEvm:
-		vmID = models.SubnetEvm
+	case sc.VM == models.EVM:
+		vmID = models.EVM
 		dl := binutils.NewEVMDownloader()
 		desc = "Lux EVM is a simplified version of Geth VM (C-Chain). It implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality"
 		_, ver, url, sha, err = getInfoForKnownVMs(

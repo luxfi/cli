@@ -291,7 +291,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	subnetName := "testSubnet"
 	sc := models.Sidecar{
 		Name:       subnetName,
-		VM:         models.SubnetEvm,
+		VM:         models.EVM,
 		VMVersion:  "v3.0.0",
 		RPCVersion: 20,
 		Subnet:     subnetName,

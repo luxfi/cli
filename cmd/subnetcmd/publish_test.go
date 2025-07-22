@@ -98,7 +98,7 @@ func TestNoRepoPath(t *testing.T) {
 	configureMockPrompt(mockPrompt)
 
 	sc := &models.Sidecar{
-		VM:        models.SubnetEvm,
+		VM:        models.EVM,
 		VMVersion: "v0.9.99",
 		Name:      testSubnet,
 		Subnet:    testSubnet,
@@ -209,7 +209,7 @@ func TestCanPublish(t *testing.T) {
 	}()
 
 	scCanPublishFuji := &models.Sidecar{
-		VM:     models.SubnetEvm,
+		VM:     models.EVM,
 		Name:   "fuji",
 		Subnet: "fuji",
 		Networks: map[string]models.NetworkData{
@@ -221,7 +221,7 @@ func TestCanPublish(t *testing.T) {
 	}
 
 	scCanPublishMain := &models.Sidecar{
-		VM:     models.SubnetEvm,
+		VM:     models.EVM,
 		Name:   "main",
 		Subnet: "main",
 		Networks: map[string]models.NetworkData{
@@ -233,7 +233,7 @@ func TestCanPublish(t *testing.T) {
 	}
 
 	scCanPublishBoth := &models.Sidecar{
-		VM:     models.SubnetEvm,
+		VM:     models.EVM,
 		Name:   "both",
 		Subnet: "both",
 		Networks: map[string]models.NetworkData{
@@ -249,7 +249,7 @@ func TestCanPublish(t *testing.T) {
 	}
 
 	scCanNotPublishLocal := &models.Sidecar{
-		VM:     models.SubnetEvm,
+		VM:     models.EVM,
 		Name:   "local",
 		Subnet: "local",
 		Networks: map[string]models.NetworkData{
@@ -261,7 +261,7 @@ func TestCanPublish(t *testing.T) {
 	}
 
 	scCanNotPublishUndefined := &models.Sidecar{
-		VM:     models.SubnetEvm,
+		VM:     models.EVM,
 		Name:   "undefined",
 		Subnet: "undefined",
 		Networks: map[string]models.NetworkData{
@@ -273,7 +273,7 @@ func TestCanPublish(t *testing.T) {
 	}
 
 	scCanNotPublishBothInvalid := &models.Sidecar{
-		VM:     models.SubnetEvm,
+		VM:     models.EVM,
 		Name:   "bothInvalid",
 		Subnet: "bothInvalid",
 		Networks: map[string]models.NetworkData{
@@ -373,7 +373,7 @@ func TestPublishing(t *testing.T) {
 	configureMockPrompt(mockPrompt)
 
 	sc := &models.Sidecar{
-		VM:        models.SubnetEvm,
+		VM:        models.EVM,
 		VMVersion: "v0.9.99",
 	}
 	// For Sha256 calc we are accessing the evm binary

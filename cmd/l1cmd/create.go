@@ -114,7 +114,7 @@ func createL1(cmd *cobra.Command, args []string) error {
 	// Create L1 configuration
 	sc := &models.Sidecar{
 		Name:                l1Name,
-		VM:                  models.SubnetEvm,
+		VM:                  models.EVM,
 		VMVersion:           constants.LatestEVMVersion,
 		ChainID:             fmt.Sprintf("%d", chainID),
 		Sovereign:           true,

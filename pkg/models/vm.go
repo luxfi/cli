@@ -7,7 +7,7 @@ import "github.com/luxfi/cli/pkg/constants"
 type VMType string
 
 const (
-	SubnetEvm   = "Lux EVM"
+	EVM         = "EVM"
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
 	CustomVM    = "Custom"
@@ -15,8 +15,8 @@ const (
 
 func VMTypeFromString(s string) VMType {
 	switch s {
-	case SubnetEvm:
-		return SubnetEvm
+	case EVM:
+		return EVM
 	case BlobVM:
 		return BlobVM
 	case TimestampVM:
@@ -28,7 +28,7 @@ func VMTypeFromString(s string) VMType {
 
 func (v VMType) RepoName() string {
 	switch v {
-	case SubnetEvm:
+	case EVM:
 		return constants.EVMRepoName
 	default:
 		return "unknown"

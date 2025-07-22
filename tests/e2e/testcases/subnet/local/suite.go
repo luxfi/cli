@@ -436,8 +436,8 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 		}
 	})
 
-	ginkgo.It("can deploy a evm with old version", func() {
-		subnetEVMVersion := "v0.4.2"
+	ginkgo.It("can deploy a evm with specific version", func() {
+		subnetEVMVersion := "v0.7.9"
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
@@ -459,9 +459,9 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 	})
 
 	ginkgo.It("can't deploy conflicting vm versions", func() {
-		// TODO: These shouldn't be hardcoded either
-		subnetEVMVersion1 := "v0.4.2"
-		subnetEVMVersion2 := "v0.4.4"
+		// Using versions with different RPC protocols
+		subnetEVMVersion1 := "v0.7.9"  // RPC 42
+		subnetEVMVersion2 := "v0.7.5"  // RPC 41
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1)
 		commands.CreateSubnetEvmConfigWithVersion(secondSubnetName, utils.SubnetEvmGenesis2Path, subnetEVMVersion2)

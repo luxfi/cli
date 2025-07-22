@@ -23,7 +23,7 @@ func TestUpdateSideCar(t *testing.T) {
 	require := require.New(t)
 	sc := &models.Sidecar{
 		Name:      "TEST",
-		VM:        models.SubnetEvm,
+		VM:        models.EVM,
 		TokenName: "TEST",
 		ChainID:   "42",
 	}
@@ -141,7 +141,7 @@ func Test_createSidecar_success(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			const vm = models.SubnetEvm
+			const vm = models.EVM
 
 			sc := &models.Sidecar{
 				Name:      tt.subnetName,
@@ -174,7 +174,7 @@ func Test_createSidecar_success(t *testing.T) {
 
 func Test_loadSidecar_success(t *testing.T) {
 	require := require.New(t)
-	const vm = models.SubnetEvm
+	const vm = models.EVM
 
 	ap := newTestApp(t)
 

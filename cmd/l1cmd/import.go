@@ -97,7 +97,7 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 		// Create L1 configuration
 		sc := &models.Sidecar{
 			Name:                l1.Name,
-			VM:                  models.SubnetEvm,
+			VM:                  models.EVM,
 			VMVersion:           l1.VMVersion,
 			ChainID:             fmt.Sprintf("%d", l1.ChainID),
 			Sovereign:           true,
