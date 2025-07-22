@@ -482,7 +482,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	ux.Logger.PrintToUser("Browser Extension connection details (any node URL from above works):")
 	ux.Logger.PrintToUser("RPC URL:          %s", endpoint[strings.LastIndex(endpoint, "http"):])
 
-	if sc.VM == models.SubnetEvm {
+	if sc.VM == models.EVM {
 		if err := d.printExtraEvmInfo(chain, chainGenesis); err != nil {
 			// not supposed to happen due to genesis pre validation
 			return ids.Empty, ids.Empty, nil

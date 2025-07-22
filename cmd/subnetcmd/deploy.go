@@ -195,7 +195,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	}
 
 	// validate genesis as far as possible previous to deploy
-	if sidecar.VM == models.SubnetEvm {
+	if sidecar.VM == models.EVM {
 		var genesis core.Genesis
 		err = json.Unmarshal(chainGenesis, &genesis)
 	}
@@ -220,7 +220,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 		// copy vm binary to the expected location, first downloading it if necessary
 		var vmBin string
 		switch sidecar.VM {
-		case models.SubnetEvm:
+		case models.EVM:
 			vmBin, err = binutils.SetupEVM(app, sidecar.VMVersion)
 			if err != nil {
 				return fmt.Errorf("failed to install evm: %w", err)
