@@ -21,8 +21,8 @@ type startFlags struct {
 	enableAutomining   bool
 	stakingEnabled     bool
 	sybilProtection    bool
-	snowSampleSize     int
-	snowQuorumSize     int
+	consensusSampleSize     int
+	consensusQuorumSize     int
 	publicIP           string
 	logLevel           string
 	chainConfigDir     string
@@ -62,8 +62,8 @@ This command provides fine-grained control over node startup parameters.`,
 	cmd.Flags().BoolVar(&flags.enableAutomining, "enable-automining", false, "Enable automining in POA mode")
 	cmd.Flags().BoolVar(&flags.stakingEnabled, "staking-enabled", true, "Enable staking")
 	cmd.Flags().BoolVar(&flags.sybilProtection, "sybil-protection", true, "Enable sybil protection")
-	cmd.Flags().IntVar(&flags.snowSampleSize, "snow-sample-size", 20, "Snow sample size")
-	cmd.Flags().IntVar(&flags.snowQuorumSize, "snow-quorum-size", 14, "Snow quorum size")
+	cmd.Flags().IntVar(&flags.consensusSampleSize, "consensus-sample-size", 20, "Snow sample size")
+	cmd.Flags().IntVar(&flags.consensusQuorumSize, "consensus-quorum-size", 14, "Snow quorum size")
 	
 	// Advanced configuration
 	cmd.Flags().StringVar(&flags.publicIP, "public-ip", "", "Public IP address")
@@ -126,12 +126,12 @@ func runStart(flags *startFlags) error {
 		args = append(args, "--sybil-protection-enabled=false")
 	}
 	
-	if flags.snowSampleSize != 20 {
-		args = append(args, "--snow-sample-size", fmt.Sprintf("%d", flags.snowSampleSize))
+	if flags.consensusSampleSize != 20 {
+		args = append(args, "--consensus-sample-size", fmt.Sprintf("%d", flags.consensusSampleSize))
 	}
 	
-	if flags.snowQuorumSize != 14 {
-		args = append(args, "--snow-quorum-size", fmt.Sprintf("%d", flags.snowQuorumSize))
+	if flags.consensusQuorumSize != 14 {
+		args = append(args, "--consensus-quorum-size", fmt.Sprintf("%d", flags.consensusQuorumSize))
 	}
 	
 	if flags.publicIP != "" {
