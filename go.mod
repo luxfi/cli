@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/evm v0.7.12
-	github.com/luxfi/geth v0.15.43
+	github.com/luxfi/geth v0.15.44
 	// github.com/luxfi/lpm v0.0.4
 	github.com/luxfi/netrunner v1.7.13
 	github.com/luxfi/node v1.13.20
