@@ -130,8 +130,8 @@ func runDev(flags *devFlags) error {
 		"--skip-bootstrap",
 		"--staking-enabled=false",
 		"--sybil-protection-enabled=false",
-		"--snow-sample-size=1",
-		"--snow-quorum-size=1",
+		"--consensus-sample-size=1",
+		"--consensus-quorum-size=1",
 		"--public-ip=127.0.0.1",
 		"--http-host=0.0.0.0",
 		"--http-port", fmt.Sprintf("%d", flags.httpPort),
@@ -222,7 +222,7 @@ Cqc=
 
 func createCChainConfig(flags *devFlags) error {
 	config := map[string]interface{}{
-		"snowman-api-enabled":       false,
+		"linear-api-enabled":       false,
 		"geth-admin-api-enabled":    true,
 		"eth-apis":                  []string{"eth", "eth-filter", "net", "web3", "admin", "debug", "personal", "txpool", "miner"},
 		"local-txs-enabled":         true,
