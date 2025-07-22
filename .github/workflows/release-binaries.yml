@@ -1,0 +1,111 @@
+name: Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  release-linux-amd64:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o lux main.go
+          tar -czf lux-linux-amd64.tar.gz lux
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./lux-linux-amd64.tar.gz
+          asset_name: lux-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+  release-linux-arm64:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o lux main.go
+          tar -czf lux-linux-arm64.tar.gz lux
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./lux-linux-arm64.tar.gz
+          asset_name: lux-linux-arm64.tar.gz
+          asset_content_type: application/gzip
+
+  release-darwin-amd64:
+    needs: create-release
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -v -o lux main.go
+          tar -czf lux-darwin-amd64.tar.gz lux
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./lux-darwin-amd64.tar.gz
+          asset_name: lux-darwin-amd64.tar.gz
+          asset_content_type: application/gzip
+
+  release-darwin-arm64:
+    needs: create-release
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Build
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -v -o lux main.go
+          tar -czf lux-darwin-arm64.tar.gz lux
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./lux-darwin-arm64.tar.gz
+          asset_name: lux-darwin-arm64.tar.gz
+          asset_content_type: application/gzip
