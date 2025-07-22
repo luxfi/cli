@@ -282,7 +282,7 @@ func readGenesis(_ *cobra.Command, args []string) error {
 	}
 
 	switch sc.VM {
-	case models.SubnetEvm:
+	case models.EVM:
 		return describeSubnetEvmGenesis(sc)
 	default:
 		app.Log.Warn("Unknown genesis format", zap.Any("vm-type", sc.VM))

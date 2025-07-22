@@ -89,7 +89,7 @@ func (m *versionMapper) GetApp() *application.Lux {
 // GetCompatURL returns the compatibility URL for the given VM type
 func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	switch vmType {
-	case models.SubnetEvm:
+	case models.EVM:
 		return constants.EVMRPCCompatibilityURL
 	case models.CustomVM:
 		// TODO: unclear yet what we should return here
@@ -146,7 +146,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	// get compatible versions for subnetEVM
 	// subnetEVMversions is a list of sorted EVM versions,
 	// subnetEVMmapping maps EVM versions to their RPC versions
-	subnetEVMversions, subnetEVMmapping, err := getVersions(mapper, models.SubnetEvm)
+	subnetEVMversions, subnetEVMmapping, err := getVersions(mapper, models.EVM)
 	if err != nil {
 		return nil, err
 	}

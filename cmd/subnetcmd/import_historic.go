@@ -145,7 +145,7 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 		sc.BlockchainID = blockchainID
 
 		// Set VM type and ID
-		sc.VM = models.SubnetEvm
+		sc.VM = models.EVM
 		sc.VMVersion = subnet.VMVersion
 		vmID, err := ids.FromString(subnet.VMID)
 		if err != nil {

@@ -94,7 +94,7 @@ func moreThanOneVMSelected() bool {
 
 func getVMFromFlag() models.VMType {
 	if useSubnetEvm {
-		return models.SubnetEvm
+		return models.EVM
 	}
 	if useCustom {
 		return models.CustomVM
@@ -124,7 +124,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 	if subnetType == "" {
 		subnetTypeStr, err := app.Prompt.CaptureList(
 			"Choose your VM",
-			[]string{models.SubnetEvm, models.CustomVM},
+			[]string{models.EVM, models.CustomVM},
 		)
 		if err != nil {
 			return err
@@ -147,8 +147,8 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 	}
 
 	switch subnetType {
-	case models.SubnetEvm:
-		genesisBytes, sc, err = vm.CreateEvmSubnetConfig(app, subnetName, genesisFile, vmVersion)
+	case models.EVM:
+		genesisBytes, sc, err = vm.CreateEvmConfig(app, subnetName, genesisFile, vmVersion)
 		if err != nil {
 			return err
 		}

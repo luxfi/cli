@@ -41,7 +41,7 @@ func migrateEVMNames(app *application.Lux, runner *migrationRunner) error {
 
 		if string(sc.VM) == oldEVM {
 			runner.printMigrationMessage()
-			sc.VM = models.SubnetEvm
+			sc.VM = models.EVM
 			if err = app.UpdateSidecar(&sc); err != nil {
 				return err
 			}

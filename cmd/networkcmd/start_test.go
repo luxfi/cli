@@ -33,7 +33,7 @@ func Test_determineLuxVersion(t *testing.T) {
 				RPCVersion:   18,
 			},
 		},
-		VM: models.SubnetEvm,
+		VM: models.EVM,
 	}
 
 	sc2 := models.Sidecar{
@@ -45,7 +45,7 @@ func Test_determineLuxVersion(t *testing.T) {
 				RPCVersion:   18,
 			},
 		},
-		VM: models.SubnetEvm,
+		VM: models.EVM,
 	}
 
 	sc3 := models.Sidecar{
@@ -57,7 +57,7 @@ func Test_determineLuxVersion(t *testing.T) {
 				RPCVersion:   19,
 			},
 		},
-		VM: models.SubnetEvm,
+		VM: models.EVM,
 	}
 
 	scCustom := models.Sidecar{
