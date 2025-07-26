@@ -36,8 +36,8 @@ severarl statistics about them.`,
 		SilenceUsage: true,
 	}
 	cmd.Flags().BoolVarP(&validatorsLocal, "local", "l", false, "deploy to a local network")
-	cmd.Flags().BoolVarP(&validatorsTestnet, "testnet", "t", false, "deploy to testnet (alias to `fuji`)")
-	cmd.Flags().BoolVarP(&validatorsTestnet, "fuji", "f", false, "deploy to fuji (alias to `testnet`")
+	cmd.Flags().BoolVarP(&validatorsTestnet, "testnet", "t", false, "deploy to testnet (alias to `testnet`)")
+	cmd.Flags().BoolVarP(&validatorsTestnet, "testnet", "f", false, "deploy to testnet (alias to `testnet`")
 	cmd.Flags().BoolVarP(&validatorsMainnet, "mainnet", "m", false, "deploy to mainnet")
 	return cmd
 }
@@ -52,7 +52,7 @@ func printValidators(_ *cobra.Command, args []string) error {
 	case validatorsLocal:
 		network = models.Local
 	case validatorsTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case validatorsMainnet:
 		network = models.Mainnet
 	}
@@ -61,7 +61,7 @@ func printValidators(_ *cobra.Command, args []string) error {
 		// no flag was set, prompt user
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to list validators from",
-			[]string{models.Local.String(), models.Fuji.String(), models.Mainnet.String()},
+			[]string{models.Local.String(), models.Testnet.String(), models.Mainnet.String()},
 		)
 		if err != nil {
 			return err

@@ -34,8 +34,8 @@ func newStatsCmd() *cobra.Command {
 		RunE:         stats,
 		SilenceUsage: true,
 	}
-	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "print stats on `fuji` (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "print stats on `testnet` (alias for `fuji`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "print stats on `testnet` (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "print stats on `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "print stats on `mainnet`")
 	return cmd
 }
@@ -44,7 +44,7 @@ func stats(_ *cobra.Command, args []string) error {
 	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	}
@@ -52,7 +52,7 @@ func stats(_ *cobra.Command, args []string) error {
 	if network == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network from which you want to get the statistics (this command only supports public networks)",
-			[]string{models.Fuji.String(), models.Mainnet.String()},
+			[]string{models.Testnet.String(), models.Mainnet.String()},
 		)
 		if err != nil {
 			return err
@@ -60,7 +60,7 @@ func stats(_ *cobra.Command, args []string) error {
 		// flag provided
 		networkStr = strings.Title(networkStr)
 		// as we are allowing a flag, we need to check if a supported network has been provided
-		if !(networkStr == models.Fuji.String() || networkStr == models.Mainnet.String()) {
+		if !(networkStr == models.Testnet.String() || networkStr == models.Mainnet.String()) {
 			return errors.New("unsupported network")
 		}
 		network = models.NetworkFromString(networkStr)
@@ -304,8 +304,8 @@ func findAPIEndpoint(network models.Network) (*platformvm.Client, *info.Client) 
 	var url string
 	// try public APIs
 	switch network {
-	case models.Fuji:
-		url = constants.FujiAPIEndpoint
+	case models.Testnet:
+		url = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		url = constants.MainnetAPIEndpoint
 	}

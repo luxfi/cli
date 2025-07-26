@@ -140,7 +140,7 @@ func getSidecars(app *application.Lux) ([]*models.Sidecar, error) {
 }
 
 func listDeployInfo(*cobra.Command, []string) error {
-	header := []string{"subnet", "chain", "vm ID", "Local Network", "Fuji (testnet)", "Mainnet"}
+	header := []string{"subnet", "chain", "vm ID", "Local Network", "Testnet (testnet)", "Mainnet"}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
 	table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2, 3, 4})
@@ -160,7 +160,7 @@ func listDeployInfo(*cobra.Command, []string) error {
 		return err
 	}
 
-	fujiKey := models.Fuji.String()
+	testnetKey := models.Testnet.String()
 	mainKey := models.Mainnet.String()
 
 	singleLine := true
@@ -171,16 +171,16 @@ func listDeployInfo(*cobra.Command, []string) error {
 		if _, ok := deployedNames[sc.Subnet]; ok {
 			deployedLocal = constants.YesLabel
 		}
-		if _, ok := sc.Networks[fujiKey]; ok {
-			if sc.Networks[fujiKey].SubnetID != ids.Empty {
-				netToID[fujiKey] = []string{
-					constants.SubnetIDLabel + sc.Networks[fujiKey].SubnetID.String(),
-					constants.BlockchainIDLabel + sc.Networks[fujiKey].BlockchainID.String(),
+		if _, ok := sc.Networks[testnetKey]; ok {
+			if sc.Networks[testnetKey].SubnetID != ids.Empty {
+				netToID[testnetKey] = []string{
+					constants.SubnetIDLabel + sc.Networks[testnetKey].SubnetID.String(),
+					constants.BlockchainIDLabel + sc.Networks[testnetKey].BlockchainID.String(),
 				}
 				singleLine = false
 			}
 		} else {
-			netToID[fujiKey] = []string{constants.NoLabel, constants.NoLabel}
+			netToID[testnetKey] = []string{constants.NoLabel, constants.NoLabel}
 		}
 		if _, ok := sc.Networks[mainKey]; ok {
 			if sc.Networks[mainKey].SubnetID != ids.Empty {
@@ -208,7 +208,7 @@ func listDeployInfo(*cobra.Command, []string) error {
 			sc.Name,
 			vmID,
 			deployedLocal,
-			netToID[fujiKey][0],
+			netToID[testnetKey][0],
 			netToID[mainKey][0],
 		})
 
@@ -218,7 +218,7 @@ func listDeployInfo(*cobra.Command, []string) error {
 				sc.Name,
 				vmID,
 				deployedLocal,
-				netToID[fujiKey][1],
+				netToID[testnetKey][1],
 				netToID[mainKey][1],
 			})
 		}

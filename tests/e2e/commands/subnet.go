@@ -266,9 +266,9 @@ func DeploySubnetLocallyWithArgsExpectError(subnetName string, version string, c
 	gomega.Expect(err).Should(gomega.HaveOccurred())
 }
 
-// simulates fuji deploy execution path on a local network
+// simulates testnet deploy execution path on a local network
 /* #nosec G204 */
-func SimulateFujiDeploy(
+func SimulateTestnetDeploy(
 	subnetName string,
 	key string,
 	controlKeys string,
@@ -287,7 +287,7 @@ func SimulateFujiDeploy(
 		CLIBinary,
 		SubnetCmd,
 		"deploy",
-		"--fuji",
+		"--testnet",
 		"--threshold",
 		"1",
 		"--key",
@@ -370,9 +370,9 @@ func SimulateMainnetDeploy(
 	return stdout + string(stderr)
 }
 
-// simulates fuji add validator execution path on a local network
+// simulates testnet add validator execution path on a local network
 /* #nosec G204 */
-func SimulateFujiAddValidator(
+func SimulateTestnetAddValidator(
 	subnetName string,
 	key string,
 	nodeID string,
@@ -393,7 +393,7 @@ func SimulateFujiAddValidator(
 		CLIBinary,
 		SubnetCmd,
 		"addValidator",
-		"--fuji",
+		"--testnet",
 		"--key",
 		key,
 		"--nodeID",
@@ -422,8 +422,8 @@ func SimulateFujiAddValidator(
 	return string(output)
 }
 
-// simulates fuji add validator execution path on a local network
-func SimulateFujiRemoveValidator(
+// simulates testnet add validator execution path on a local network
+func SimulateTestnetRemoveValidator(
 	subnetName string,
 	key string,
 	nodeID string,
@@ -441,7 +441,7 @@ func SimulateFujiRemoveValidator(
 		CLIBinary,
 		SubnetCmd,
 		"removeValidator",
-		"--fuji",
+		"--testnet",
 		"--key",
 		key,
 		"--nodeID",
@@ -463,7 +463,7 @@ func SimulateFujiRemoveValidator(
 	return string(output)
 }
 
-func SimulateFujiTransformSubnet(
+func SimulateTestnetTransformSubnet(
 	subnetName string,
 	key string,
 ) (string, error) {
@@ -479,7 +479,7 @@ func SimulateFujiTransformSubnet(
 		CLIBinary,
 		SubnetCmd,
 		ElasticTransformCmd,
-		"--fuji",
+		"--testnet",
 		"--key",
 		key,
 		"--tokenName",
@@ -575,9 +575,9 @@ func SimulateMainnetAddValidator(
 	return stdout + string(stderr)
 }
 
-// simulates fuji join execution path on a local network
+// simulates testnet join execution path on a local network
 /* #nosec G204 */
-func SimulateFujiJoin(
+func SimulateTestnetJoin(
 	subnetName string,
 	nodeConfig string,
 	pluginDir string,
@@ -596,7 +596,7 @@ func SimulateFujiJoin(
 		CLIBinary,
 		SubnetCmd,
 		"join",
-		"--fuji",
+		"--testnet",
 		"--node-config",
 		nodeConfig,
 		"--plugin-dir",
@@ -787,17 +787,17 @@ func DescribeSubnet(subnetName string) (string, error) {
 }
 
 /* #nosec G204 */
-func SimulateGetSubnetStatsFuji(subnetName, subnetID string) string {
+func SimulateGetSubnetStatsTestnet(subnetName, subnetID string) string {
 	// Check config does already exist:
 	// We want to run stats on an existing subnet
 	exists, err := utils.SubnetConfigExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
-	// add the subnet ID to the `fuji` section so that the `stats` command
+	// add the subnet ID to the `testnet` section so that the `stats` command
 	// can find it (as this is a simulation with a `local` network,
 	// it got written in to the `local` network section)
-	err = utils.AddSubnetIDToSidecar(subnetName, models.Fuji, subnetID)
+	err = utils.AddSubnetIDToSidecar(subnetName, models.Testnet, subnetID)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// run stats
 	cmd := exec.Command(
@@ -805,7 +805,7 @@ func SimulateGetSubnetStatsFuji(subnetName, subnetID string) string {
 		SubnetCmd,
 		"stats",
 		subnetName,
-		"--fuji",
+		"--testnet",
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()

@@ -33,15 +33,15 @@ these prompts by providing the values with flags.`,
 		RunE:         removeValidator,
 		Args:         cobra.ExactArgs(1),
 	}
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji deploy only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet deploy only]")
 	cmd.Flags().StringVar(&nodeIDStr, "nodeID", "", "set the NodeID of the validator to remove")
 	cmd.Flags().BoolVar(&deployLocal, "local", false, "remove from the locally deployed Subnet")
-	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "remove from `fuji` deployment (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "remove from `testnet` deployment (alias for `fuji`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "remove from `testnet` deployment (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "remove from `testnet` deployment (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "remove from `mainnet` deployment")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "subnet-auth-keys", nil, "control keys that will be used to authenticate the removeValidator tx")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the removeValidator tx")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	return cmd
 }
@@ -55,7 +55,7 @@ func removeValidator(_ *cobra.Command, args []string) error {
 	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	case deployLocal:
@@ -65,7 +65,7 @@ func removeValidator(_ *cobra.Command, args []string) error {
 	if network == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to remove a validator from",
-			[]string{models.Local.String(), models.Fuji.String(), models.Mainnet.String()},
+			[]string{models.Local.String(), models.Testnet.String(), models.Mainnet.String()},
 		)
 		if err != nil {
 			return err
@@ -96,9 +96,9 @@ func removeValidator(_ *cobra.Command, args []string) error {
 	switch network {
 	case models.Local:
 		return removeFromLocal(subnetName)
-	case models.Fuji:
+	case models.Testnet:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
+			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
 			if err != nil {
 				return err
 			}

@@ -60,8 +60,8 @@ func IsCreateChainTx(tx *txs.Tx) bool {
 func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error) {
 	var api string
 	switch network {
-	case models.Fuji:
-		api = constants.FujiAPIEndpoint
+	case models.Testnet:
+		api = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		api = constants.MainnetAPIEndpoint
 	case models.Local:

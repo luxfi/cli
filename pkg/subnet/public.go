@@ -409,8 +409,8 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (*primary.Wallet, erro
 
 	var api string
 	switch d.network {
-	case models.Fuji:
-		api = constants.FujiAPIEndpoint
+	case models.Testnet:
+		api = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		api = constants.MainnetAPIEndpoint
 	case models.Local:
@@ -600,8 +600,8 @@ func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Networ
 	switch network {
 	case models.Mainnet:
 		apiURL = constants.MainnetAPIEndpoint
-	case models.Fuji:
-		apiURL = constants.FujiAPIEndpoint
+	case models.Testnet:
+		apiURL = constants.TestnetAPIEndpoint
 	default:
 		return false, fmt.Errorf("invalid network: %s", network)
 	}
@@ -622,8 +622,8 @@ func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platf
 	switch network {
 	case models.Mainnet:
 		apiURL = constants.MainnetAPIEndpoint
-	case models.Fuji:
-		apiURL = constants.FujiAPIEndpoint
+	case models.Testnet:
+		apiURL = constants.TestnetAPIEndpoint
 	default:
 		return nil, fmt.Errorf("invalid network: %s", network)
 	}

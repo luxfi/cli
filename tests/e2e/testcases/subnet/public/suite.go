@@ -23,9 +23,9 @@ const (
 	keyName     = "ewoq"
 )
 
-func deploySubnetToFuji() (string, map[string]utils.NodeInfo) {
+func deploySubnetToTestnet() (string, map[string]utils.NodeInfo) {
 	// deploy
-	s := commands.SimulateFujiDeploy(subnetName, keyName, controlKeys)
+	s := commands.SimulateTestnetDeploy(subnetName, keyName, controlKeys)
 	subnetID, err := utils.ParsePublicDeployOutput(s)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// add validators to subnet
@@ -33,11 +33,11 @@ func deploySubnetToFuji() (string, map[string]utils.NodeInfo) {
 	gomega.Expect(err).Should(gomega.BeNil())
 	for _, nodeInfo := range nodeInfos {
 		start := time.Now().Add(time.Second * 30).UTC().Format("2006-01-02 15:04:05")
-		_ = commands.SimulateFujiAddValidator(subnetName, keyName, nodeInfo.ID, start, "24h", "20")
+		_ = commands.SimulateTestnetAddValidator(subnetName, keyName, nodeInfo.ID, start, "24h", "20")
 	}
 	// join to copy vm binary and update config file
 	for _, nodeInfo := range nodeInfos {
-		_ = commands.SimulateFujiJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
+		_ = commands.SimulateTestnetJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
 	}
 	// get and check whitelisted subnets from config file
 	var whitelistedSubnets string
@@ -81,8 +81,8 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		commands.CleanNetwork()
 	})
 
-	ginkgo.It("deploy subnet to fuji", func() {
-		deploySubnetToFuji()
+	ginkgo.It("deploy subnet to testnet", func() {
+		deploySubnetToTestnet()
 	})
 
 	ginkgo.It("deploy subnet to mainnet", ginkgo.Label("local_machine"), func() {
@@ -127,18 +127,18 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// this is a simulation, so app is probably saving the info in the
-		// `local network` section of the sidecar instead of the `fuji` section...
-		// ...need to manipulate the `fuji` section of the sidecar to contain the subnetID info
-		// so that the `stats` command for `fuji` can find it
-		output := commands.SimulateGetSubnetStatsFuji(subnetName, subnetID)
+		// `local network` section of the sidecar instead of the `testnet` section...
+		// ...need to manipulate the `testnet` section of the sidecar to contain the subnetID info
+		// so that the `stats` command for `testnet` can find it
+		output := commands.SimulateGetSubnetStatsTestnet(subnetName, subnetID)
 		gomega.Expect(output).Should(gomega.Not(gomega.BeNil()))
 		gomega.Expect(output).Should(gomega.ContainSubstring("Current validators"))
 		gomega.Expect(output).Should(gomega.ContainSubstring("NodeID-"))
 		gomega.Expect(output).Should(gomega.ContainSubstring("No pending validators found"))
 	})
 
-	ginkgo.It("can transform a deployed SubnetEvm subnet to elastic subnet only on fuji", func() {
-		subnetIDStr, _ := deploySubnetToFuji()
+	ginkgo.It("can transform a deployed SubnetEvm subnet to elastic subnet only on testnet", func() {
+		subnetIDStr, _ := deploySubnetToTestnet()
 		subnetID, err := ids.FromString(subnetIDStr)
 		gomega.Expect(err).Should(gomega.BeNil())
 
@@ -146,7 +146,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		err = subnet.GetCurrentSupply(subnetID)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 
-		_, err = commands.SimulateFujiTransformSubnet(subnetName, keyName)
+		_, err = commands.SimulateTestnetTransformSubnet(subnetName, keyName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		exists, err := utils.ElasticSubnetConfigExists(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -156,14 +156,14 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		err = subnet.GetCurrentSupply(subnetID)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.SimulateFujiTransformSubnet(subnetName, keyName)
+		_, err = commands.SimulateTestnetTransformSubnet(subnetName, keyName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 
 		commands.DeleteElasticSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("remove validator fuji", func() {
-		subnetIDStr, nodeInfos := deploySubnetToFuji()
+	ginkgo.It("remove validator testnet", func() {
+		subnetIDStr, nodeInfos := deploySubnetToTestnet()
 
 		// pick a validator to remove
 		var validatorToRemove string
@@ -190,7 +190,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		gomega.Expect(found).Should(gomega.BeTrue())
 
 		// remove validator
-		_ = commands.SimulateFujiRemoveValidator(subnetName, keyName, validatorToRemove)
+		_ = commands.SimulateTestnetRemoveValidator(subnetName, keyName, validatorToRemove)
 
 		// confirm current validator set
 		validators, err = subnet.GetSubnetValidators(subnetID)

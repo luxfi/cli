@@ -44,8 +44,8 @@ flag.`,
 
 	cmd.Flags().StringVar(&nodeURL, "node-url", "", "[optional] URL of an already running subnet validator")
 
-	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "import from `fuji` (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `fuji`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "import from `mainnet`")
 	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "import a evm")
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
@@ -77,7 +77,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	}
@@ -85,7 +85,7 @@ func importRunningSubnet(*cobra.Command, []string) error {
 	if network == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to import from",
-			[]string{models.Fuji.String(), models.Mainnet.String()},
+			[]string{models.Testnet.String(), models.Mainnet.String()},
 		)
 		if err != nil {
 			return err
@@ -139,8 +139,8 @@ func importRunningSubnet(*cobra.Command, []string) error {
 
 	var pubAPI string
 	switch network {
-	case models.Fuji:
-		pubAPI = constants.FujiAPIEndpoint
+	case models.Testnet:
+		pubAPI = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		pubAPI = constants.MainnetAPIEndpoint
 	}
