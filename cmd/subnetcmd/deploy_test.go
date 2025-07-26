@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -196,7 +196,7 @@ func TestCheckForInvalidDeployAndSetLuxVersion(t *testing.T) {
 			mockDownloader.On("GetLatestReleaseVersion", mock.Anything).Return(tt.expectedVersion, nil)
 
 			app = application.New()
-			app.Log = logging.NoLog{}
+			app.Log = luxlog.NewNoOpLogger()
 			app.Downloader = mockDownloader
 
 			desiredLuxVersion, err := checkForInvalidDeployAndGetLuxVersion(&mockSC, tt.desiredRPC)

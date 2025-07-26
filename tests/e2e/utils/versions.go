@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"golang.org/x/mod/semver"
 )
 
@@ -61,7 +61,7 @@ type VersionMapper interface {
 func NewVersionMapper() VersionMapper {
 	app := &application.Lux{
 		Downloader: application.NewDownloader(),
-		Log:        logging.NoLog{},
+		Log:        luxlog.NewNoOpLogger(),
 	}
 	return &versionMapper{
 		app: app,

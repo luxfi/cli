@@ -10,13 +10,13 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
 func SetupTest(t *testing.T) *require.Assertions {
 	// use io.Discard to not print anything
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	return require.New(t)
 }
 
@@ -24,7 +24,7 @@ func SetupTestInTempDir(t *testing.T) *application.Lux {
 	testDir := t.TempDir()
 
 	app := application.New()
-	app.Setup(testDir, logging.NoLog{}, &config.Config{}, nil, nil)
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	app.Setup(testDir, luxlog.NewNoOpLogger(), &config.Config{}, nil, nil)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	return app
 }

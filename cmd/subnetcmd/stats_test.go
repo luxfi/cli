@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/json"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/api"
 	"github.com/olekukonko/tablewriter"
@@ -23,7 +23,7 @@ import (
 func TestStats(t *testing.T) {
 	require := require.New(t)
 
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 
 	pClient := &mocks.PClient{}
 	iClient := &mocks.InfoClient{}

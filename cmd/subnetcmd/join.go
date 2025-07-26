@@ -19,8 +19,8 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
@@ -253,7 +253,7 @@ but until the node is whitelisted, it will not be able to validate this subnet.`
 			return err
 		}
 		if luxConfigPath != "" {
-			ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Green.Wrap("Found a config file at %s")), luxConfigPath)
+			ux.Logger.PrintToUser(luxlog.Bold.Wrap(luxlog.Green.Wrap("Found a config file at %s")), luxConfigPath)
 			yes, err := app.Prompt.CaptureYesNo("Is this the file we should update?")
 			if err != nil {
 				return err
@@ -286,7 +286,7 @@ but until the node is whitelisted, it will not be able to validate this subnet.`
 			return err
 		}
 		if pluginDir != "" {
-			ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
+			ux.Logger.PrintToUser(luxlog.Bold.Wrap(luxlog.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
 			yes, err := app.Prompt.CaptureYesNo("Is this where we should install the VM?")
 			if err != nil {
 				return err

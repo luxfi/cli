@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -298,7 +298,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	}
 	networkToUpgrade := futureDeployment
 
-	factory := logging.NewFactory(logging.Config{})
+	factory := luxlog.NewFactory(luxlog.Config{})
 	log, err := factory.Make("lux")
 	assert.NoError(err)
 
