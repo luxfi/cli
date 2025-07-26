@@ -124,13 +124,13 @@ func validatePChainAddress(input string) (string, error) {
 	return hrp, nil
 }
 
-func validatePChainFujiAddress(input string) error {
+func validatePChainTestnetAddress(input string) error {
 	hrp, err := validatePChainAddress(input)
 	if err != nil {
 		return err
 	}
-	if hrp != lux_constants.FujiHRP {
-		return errors.New("this is not a fuji address")
+	if hrp != lux_constants.TestnetHRP {
+		return errors.New("this is not a testnet address")
 	}
 	return nil
 }
@@ -161,8 +161,8 @@ func validatePChainLocalAddress(input string) error {
 
 func getPChainValidationFunc(network models.Network) func(string) error {
 	switch network {
-	case models.Fuji:
-		return validatePChainFujiAddress
+	case models.Testnet:
+		return validatePChainTestnetAddress
 	case models.Mainnet:
 		return validatePChainMainAddress
 	case models.Local:

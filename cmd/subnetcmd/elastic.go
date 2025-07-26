@@ -35,7 +35,7 @@ import (
 
 const (
 	localDeployment      = "Existing local deployment"
-	fujiDeployment       = "Fuji"
+	testnetDeployment       = "Testnet"
 	mainnetDeployment    = "Mainnet (coming soon)"
 	subnetIsElasticError = "subnet is already elastic"
 )
@@ -65,8 +65,8 @@ mechanics will work.`,
 		RunE:         transformElasticSubnet,
 	}
 	cmd.Flags().BoolVarP(&transformLocal, "local", "l", false, "transform a subnet on a local network")
-	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "remove from `fuji` deployment (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "remove from `testnet` deployment (alias for `fuji`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "remove from `testnet` deployment (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "remove from `testnet` deployment (alias for `testnet`)")
 	cmd.Flags().StringVar(&tokenNameFlag, "tokenName", "", "specify the token name")
 	cmd.Flags().StringVar(&tokenSymbolFlag, "tokenSymbol", "", "specify the token symbol")
 	cmd.Flags().BoolVar(&useDefaultConfig, "default", false, "use default elastic subnet config values")
@@ -76,9 +76,9 @@ mechanics will work.`,
 	cmd.Flags().DurationVar(&duration, "staking-period", 0, "how long validator validates for after start time")
 	cmd.Flags().BoolVar(&transformValidators, "transform-validators", false, "transform validators to permissionless validators")
 	cmd.Flags().IntVar(&denominationFlag, "denomination", -1, "specify the token denomination")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet only]")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "subnet-auth-keys", nil, "control keys that will be used to authenticate the transformSubnet tx")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the transformSubnet tx")
 	return cmd
@@ -162,7 +162,7 @@ func transformElasticSubnet(_ *cobra.Command, args []string) error {
 	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	case transformLocal:
@@ -177,8 +177,8 @@ func transformElasticSubnet(_ *cobra.Command, args []string) error {
 		switch networkToUpgrade {
 		case localDeployment:
 			network = models.Local
-		case fujiDeployment:
-			network = models.Fuji
+		case testnetDeployment:
+			network = models.Testnet
 		default:
 			return errors.New("elastic subnet transformation is not yet supported on Mainnet")
 		}
@@ -257,9 +257,9 @@ func transformElasticSubnet(_ *cobra.Command, args []string) error {
 	switch network {
 	case models.Local:
 		return transformElasticSubnetLocal(sc, subnetName, tokenName, tokenSymbol, elasticSubnetConfig)
-	case models.Fuji:
+	case models.Testnet:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
+			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
 			if err != nil {
 				return err
 			}
@@ -453,8 +453,8 @@ func promptNetworkElastic(sc models.Sidecar, prompt string) (string, error) {
 		switch network {
 		case models.Local.String():
 			networkOptions = append(networkOptions, localDeployment)
-		case models.Fuji.String():
-			networkOptions = append(networkOptions, fujiDeployment)
+		case models.Testnet.String():
+			networkOptions = append(networkOptions, testnetDeployment)
 		case models.Mainnet.String():
 			networkOptions = append(networkOptions, mainnetDeployment)
 		}
@@ -479,8 +479,8 @@ func selectNetworkToTransform(sc models.Sidecar) (string, error) {
 		switch network {
 		case models.Local.String():
 			networkOptions = append(networkOptions, localDeployment)
-		case models.Fuji.String():
-			networkOptions = append(networkOptions, fujiDeployment)
+		case models.Testnet.String():
+			networkOptions = append(networkOptions, testnetDeployment)
 		case models.Mainnet.String():
 			networkOptions = append(networkOptions, mainnetDeployment)
 		}
@@ -651,8 +651,8 @@ func CheckSubnetIsElastic(subnetID ids.ID, network models.Network) (bool, error)
 	switch network {
 	case models.Mainnet:
 		apiURL = constants.MainnetAPIEndpoint
-	case models.Fuji:
-		apiURL = constants.FujiAPIEndpoint
+	case models.Testnet:
+		apiURL = constants.TestnetAPIEndpoint
 	default:
 		return false, fmt.Errorf("invalid network: %s", network)
 	}
