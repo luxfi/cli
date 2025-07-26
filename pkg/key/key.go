@@ -9,7 +9,7 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -84,8 +84,8 @@ func GetHRP(networkID uint32) string {
 	switch networkID {
 	case constants.LocalID:
 		return constants.LocalHRP
-	case constants.FujiID:
-		return constants.FujiHRP
+	case constants.TestnetID:
+		return constants.TestnetHRP
 	case constants.MainnetID:
 		return constants.MainnetHRP
 	default:

@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/spf13/cobra"
 )
 

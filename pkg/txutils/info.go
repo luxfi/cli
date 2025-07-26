@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -60,8 +60,8 @@ func IsCreateChainTx(tx *txs.Tx) bool {
 func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error) {
 	var api string
 	switch network {
-	case models.Fuji:
-		api = constants.FujiAPIEndpoint
+	case models.Testnet:
+		api = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		api = constants.MainnetAPIEndpoint
 	case models.Local:

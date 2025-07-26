@@ -7,7 +7,7 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )

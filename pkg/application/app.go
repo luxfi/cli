@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/lpm"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/evm/core"
 )

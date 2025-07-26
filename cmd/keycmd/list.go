@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
@@ -26,7 +26,7 @@ import (
 
 const (
 	localFlag         = "local"
-	fujiFlag          = "fuji"
+	testnetFlag          = "testnet"
 	testnetFlag       = "testnet"
 	mainnetFlag       = "mainnet"
 	allFlag           = "all-networks"
@@ -62,17 +62,17 @@ keys or for the ledger addresses associated to certain indices.`,
 	)
 	cmd.Flags().BoolVarP(
 		&testnet,
-		fujiFlag,
+		testnetFlag,
 		"f",
 		false,
-		"list testnet (fuji) network addresses",
+		"list testnet (testnet) network addresses",
 	)
 	cmd.Flags().BoolVarP(
 		&testnet,
 		testnetFlag,
 		"t",
 		false,
-		"list testnet (fuji) network addresses",
+		"list testnet (testnet) network addresses",
 	)
 	cmd.Flags().BoolVarP(
 		&mainnet,
@@ -111,7 +111,7 @@ func getClients(networks []models.Network, cchain bool) (
 	error,
 ) {
 	apiEndpoints := map[models.Network]string{
-		models.Fuji:    constants.FujiAPIEndpoint,
+		models.Testnet:    constants.TestnetAPIEndpoint,
 		models.Mainnet: constants.MainnetAPIEndpoint,
 		models.Local:   constants.LocalAPIEndpoint,
 	}
@@ -146,7 +146,7 @@ func listKeys(*cobra.Command, []string) error {
 		networks = append(networks, models.Local)
 	}
 	if testnet || all {
-		networks = append(networks, models.Fuji)
+		networks = append(networks, models.Testnet)
 	}
 	if mainnet || all {
 		networks = append(networks, models.Mainnet)
@@ -155,7 +155,7 @@ func listKeys(*cobra.Command, []string) error {
 		// no flag was set, prompt user
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose network for which to list addresses",
-			[]string{models.Mainnet.String(), models.Fuji.String(), models.Local.String()},
+			[]string{models.Mainnet.String(), models.Testnet.String(), models.Local.String()},
 		)
 		if err != nil {
 			return err

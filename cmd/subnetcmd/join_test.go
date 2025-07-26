@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/internal/mocks"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

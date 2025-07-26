@@ -6,7 +6,7 @@ import (
 	context "context"
 
 	info "github.com/luxfi/node/api/info"
-	ids "github.com/luxfi/node/ids"
+	ids "github.com/luxfi/ids"
 
 	mock "github.com/stretchr/testify/mock"
 

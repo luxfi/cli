@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/internal/testutils"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
