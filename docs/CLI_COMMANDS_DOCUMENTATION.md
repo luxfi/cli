@@ -602,7 +602,7 @@ lux transaction sign [subnetName] [flags]
 
 **Flags:**
 - `--input-tx-filepath <string>`: Path to the transaction file for signing
-- `-k, --key <string>`: Select the key to use (fuji only)
+- `-k, --key <string>`: Select the key to use (testnet only)
 - `-g, --ledger`: Use ledger instead of key
 - `--ledger-addrs <strings>`: Use the given ledger addresses
 

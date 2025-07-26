@@ -82,7 +82,7 @@ lux network start
 - Creation of Lux EVM, and custom virtual machine subnet configurations
 - Precompile integration and configuration
 - Local deployment of subnets for development and rapid prototyping
-- Fuji Testnet and Lux Mainnet deployment of subnets
+- Testnet and Lux Mainnet deployment of subnets
 - Ledger support
 - Lux Package Manager Integration
 

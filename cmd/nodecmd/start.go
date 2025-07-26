@@ -28,6 +28,7 @@ type startFlags struct {
 	chainConfigDir     string
 	genesisFile        string
 	existingDataDir    string
+	importMode         bool
 }
 
 func newStartCmd() *cobra.Command {
@@ -71,6 +72,7 @@ This command provides fine-grained control over node startup parameters.`,
 	cmd.Flags().StringVar(&flags.chainConfigDir, "chain-config-dir", "", "Chain config directory")
 	cmd.Flags().StringVar(&flags.genesisFile, "genesis-file", "", "Custom genesis file")
 	cmd.Flags().StringVar(&flags.existingDataDir, "existing-data", "", "Use existing data directory")
+	cmd.Flags().BoolVar(&flags.importMode, "import-mode", false, "Enable import mode for one-time blockchain data import with pruning disabled")
 	
 	return cmd
 }
@@ -78,13 +80,24 @@ This command provides fine-grained control over node startup parameters.`,
 func runStart(flags *startFlags) error {
 	ux.Logger.PrintToUser("Starting Lux node...")
 	
-	// Find luxd binary
-	luxdPath := filepath.Join(app.GetBaseDir(), "bin", "luxd")
-	if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
-		luxdPath = filepath.Join(app.GetBaseDir(), "..", "..", "node", "build", "luxd")
-		if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
-			return fmt.Errorf("luxd binary not found. Please build it first with './scripts/build.sh'")
+	// Find luxd binary - check multiple locations
+	var luxdPath string
+	possiblePaths := []string{
+		filepath.Join(app.GetBaseDir(), "bin", "luxd"),
+		filepath.Join(app.GetBaseDir(), "..", "node", "build", "luxd"),
+		filepath.Join(app.GetBaseDir(), "..", "..", "node", "build", "luxd"),
+		"/home/z/work/lux/node/build/luxd",
+	}
+	
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			luxdPath = path
+			break
 		}
+	}
+	
+	if luxdPath == "" {
+		return fmt.Errorf("luxd binary not found. Please install with 'lux node version install' or build from source")
 	}
 	
 	// Determine data directory
@@ -146,12 +159,17 @@ func runStart(flags *startFlags) error {
 		args = append(args, "--genesis-file", flags.genesisFile)
 	}
 	
+	if flags.importMode {
+		args = append(args, "--import-mode")
+	}
+	
 	// Always enable useful APIs
 	args = append(args,
 		"--api-admin-enabled=true",
 		"--api-keystore-enabled=true",
 		"--api-metrics-enabled=true",
-		"--index-enabled=true",
+		"--index-enabled=false",
+		"--index-allow-incomplete=true",
 		"--http-host=0.0.0.0",
 	)
 	

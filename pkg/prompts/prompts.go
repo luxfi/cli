@@ -616,7 +616,7 @@ func GetSubnetAuthKeys(prompt Prompter, controlKeys []string, threshold uint32) 
 	return subnetAuthKeys, nil
 }
 
-func GetFujiKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, string, error) {
+func GetTestnetKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, string, error) {
 	useStoredKey, err := prompt.ChooseKeyOrLedger(goal)
 	if err != nil {
 		return false, "", err
@@ -627,7 +627,7 @@ func GetFujiKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, stri
 	keyName, err := captureKeyName(prompt, goal, keyDir)
 	if err != nil {
 		if errors.Is(err, errNoKeys) {
-			ux.Logger.PrintToUser("No private keys have been found. Signing transactions on Fuji without a private key " +
+			ux.Logger.PrintToUser("No private keys have been found. Signing transactions on Testnet without a private key " +
 				"or ledger is not possible. Create a new one with `lux key create`, or use a ledger device.")
 		}
 		return false, "", err
