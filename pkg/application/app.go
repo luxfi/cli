@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/cli/pkg/lpm"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 )
 
@@ -23,7 +23,7 @@ const (
 )
 
 type Lux struct {
-	Log        logging.Logger
+	Log        luxlog.Logger
 	baseDir    string
 	Conf       *config.Config
 	Prompt     prompts.Prompter
@@ -36,7 +36,7 @@ func New() *Lux {
 	return &Lux{}
 }
 
-func (app *Lux) Setup(baseDir string, log logging.Logger, conf *config.Config, prompt prompts.Prompter, downloader Downloader) {
+func (app *Lux) Setup(baseDir string, log luxlog.Logger, conf *config.Config, prompt prompts.Prompter, downloader Downloader) {
 	app.baseDir = baseDir
 	app.Log = log
 	app.Conf = conf
