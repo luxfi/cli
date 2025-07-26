@@ -197,3 +197,4 @@ require (
 )
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
+replace github.com/luxfi/netrunner => ../netrunner
