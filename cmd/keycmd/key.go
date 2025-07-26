@@ -18,7 +18,7 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 		Use:   "key",
 		Short: "Create and manage testnet signing keys",
 		Long: `The key command suite provides a collection of tools for creating and managing
-signing keys. You can use these keys to deploy Subnets to the Fuji Testnet,
+signing keys. You can use these keys to deploy Subnets to the Testnet,
 but these keys are NOT suitable to use in production environments. DO NOT use
 these keys on Mainnet.
 

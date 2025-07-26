@@ -14,7 +14,7 @@ type Network int64
 const (
 	Undefined Network = iota
 	Mainnet
-	Fuji
+	Testnet
 	Local
 )
 
@@ -22,8 +22,8 @@ func (s Network) String() string {
 	switch s {
 	case Mainnet:
 		return "Mainnet"
-	case Fuji:
-		return "Fuji"
+	case Testnet:
+		return "Testnet"
 	case Local:
 		return "Local Network"
 	}
@@ -34,8 +34,8 @@ func (s Network) NetworkID() (uint32, error) {
 	switch s {
 	case Mainnet:
 		return lux_constants.MainnetID, nil
-	case Fuji:
-		return lux_constants.FujiID, nil
+	case Testnet:
+		return lux_constants.TestnetID, nil
 	case Local:
 		return constants.LocalNetworkID, nil
 	}
@@ -46,8 +46,8 @@ func NetworkFromString(s string) Network {
 	switch s {
 	case Mainnet.String():
 		return Mainnet
-	case Fuji.String():
-		return Fuji
+	case Testnet.String():
+		return Testnet
 	case Local.String():
 		return Local
 	}
@@ -58,8 +58,8 @@ func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
 	case lux_constants.MainnetID:
 		return Mainnet
-	case lux_constants.FujiID:
-		return Fuji
+	case lux_constants.TestnetID:
+		return Testnet
 	case constants.LocalNetworkID:
 		return Local
 	}

@@ -34,7 +34,7 @@ var (
 	noRepoPath     string
 
 	errSubnetNotDeployed = errors.New(
-		"only subnets which have already been deployed to either testnet (fuji) or mainnet can be published")
+		"only subnets which have already been deployed to either testnet (testnet) or mainnet can be published")
 )
 
 type newPublisherFunc func(string, string, string) subnet.Publisher
@@ -79,10 +79,10 @@ func publish(_ *cobra.Command, args []string) error {
 	return doPublish(&sc, subnetName, subnet.NewPublisher)
 }
 
-// isReadyToPublish currently means if deployed to fuji and/or main
+// isReadyToPublish currently means if deployed to testnet and/or main
 func isReadyToPublish(sc *models.Sidecar) bool {
-	if sc.Networks[models.Fuji.String()].SubnetID != ids.Empty &&
-		sc.Networks[models.Fuji.String()].BlockchainID != ids.Empty {
+	if sc.Networks[models.Testnet.String()].SubnetID != ids.Empty &&
+		sc.Networks[models.Testnet.String()].BlockchainID != ids.Empty {
 		return true
 	}
 	if sc.Networks[models.Mainnet.String()].SubnetID != ids.Empty &&
@@ -365,7 +365,7 @@ func getSubnetInfo(sc *models.Sidecar) (*lpmintegration.Subnet, error) {
 	}
 
 	subnet := &lpmintegration.Subnet{
-		ID:          sc.Networks[models.Fuji.String()].SubnetID.String(),
+		ID:          sc.Networks[models.Testnet.String()].SubnetID.String(),
 		Alias:       sc.Name,
 		Description: desc,
 		VMs:         []string{sc.Subnet},
@@ -461,7 +461,7 @@ func getVMInfo(sc *models.Sidecar) (*lpmintegration.VM, error) {
 
 	vm := &lpmintegration.VM{
 		ID:          vmID,
-		Alias:       sc.Networks["Fuji"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
+		Alias:       sc.Networks["Testnet"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
 		Description: desc,
 		URL:         url,
 		Checksum:    sha,

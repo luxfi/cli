@@ -43,23 +43,23 @@ the subnetName and the validator's unique NodeID. The command then prompts
 for the validation start time, duration, and stake weight. You can bypass
 these prompts by providing the values with flags.
 
-This command currently only works on Subnets deployed to either the Fuji
+This command currently only works on Subnets deployed to either the Testnet
 Testnet or Mainnet.`,
 		SilenceUsage: true,
 		RunE:         addValidator,
 		Args:         cobra.ExactArgs(1),
 	}
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji deploy only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet deploy only]")
 	cmd.Flags().StringVar(&nodeIDStr, "nodeID", "", "set the NodeID of the validator to add")
 	cmd.Flags().Uint64Var(&weight, "weight", 0, "set the staking weight of the validator to add")
 	cmd.Flags().StringVar(&startTimeStr, "start-time", "", "UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format")
 	cmd.Flags().DurationVar(&duration, "staking-period", 0, "how long this validator will be staking")
-	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "join on `fuji` (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `fuji`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "join on `mainnet`")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "subnet-auth-keys", nil, "control keys that will be used to authenticate add validator tx")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the add validator tx")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	return cmd
 }
@@ -74,7 +74,7 @@ func addValidator(_ *cobra.Command, args []string) error {
 	var network models.Network
 	switch {
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	}
@@ -82,7 +82,7 @@ func addValidator(_ *cobra.Command, args []string) error {
 	if network == models.Undefined {
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to add validator to.",
-			[]string{models.Fuji.String(), models.Mainnet.String()},
+			[]string{models.Testnet.String(), models.Mainnet.String()},
 		)
 		if err != nil {
 			return err
@@ -105,9 +105,9 @@ func addValidator(_ *cobra.Command, args []string) error {
 	}
 
 	switch network {
-	case models.Fuji:
+	case models.Testnet:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
+			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
 			if err != nil {
 				return err
 			}
@@ -241,8 +241,8 @@ func promptDuration(start time.Time) (time.Duration, error) {
 func getMaxValidationTime(network models.Network, nodeID ids.NodeID, startTime time.Time) (time.Duration, error) {
 	var uri string
 	switch network {
-	case models.Fuji:
-		uri = constants.FujiAPIEndpoint
+	case models.Testnet:
+		uri = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		uri = constants.MainnetAPIEndpoint
 	case models.Local:
