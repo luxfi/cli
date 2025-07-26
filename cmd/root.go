@@ -32,7 +32,8 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -287,12 +288,12 @@ func setupEnv() (string, error) {
 	return baseDir, nil
 }
 
-func setupLogging(baseDir string) (logging.Logger, error) {
+func setupLogging(baseDir string) (luxlog.Logger, error) {
 	var err error
 
-	config := logging.Config{}
-	config.LogLevel = logging.Info
-	config.DisplayLevel, err = logging.ToLevel(logLevel)
+	config := luxlog.Config{}
+	config.LogLevel = level.Info
+	config.DisplayLevel, err = luxlog.ToLevel(logLevel)
 	if err != nil {
 		return nil, fmt.Errorf("invalid log level configured: %s", logLevel)
 	}
@@ -302,12 +303,12 @@ func setupLogging(baseDir string) (logging.Logger, error) {
 	}
 
 	// some logging config params
-	config.LogFormat = logging.Colors
+	config.LogFormat = luxlog.Colors
 	config.MaxSize = constants.MaxLogFileSize
 	config.MaxFiles = constants.MaxNumOfLogFiles
 	config.MaxAge = constants.RetainOldFiles
 
-	factory := logging.NewFactory(config)
+	factory := luxlog.NewFactoryWithConfig(config)
 	log, err := factory.Make("lux")
 	if err != nil {
 		factory.Close()
