@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ const testToken = "TEST"
 
 func setupTest(t *testing.T) *require.Assertions {
 	// use io.Discard to not print anything
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	return require.New(t)
 }
 

@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -69,7 +69,7 @@ var (
 
 func setupTest(t *testing.T) *require.Assertions {
 	// use io.Discard to not print anything
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	return require.New(t)
 }
 
@@ -90,7 +90,7 @@ func TestDeployToLocal(t *testing.T) {
 	}()
 
 	app := &application.Lux{}
-	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
+	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	binDir := filepath.Join(app.GetLuxBinDir(), "node-"+luxVersion)
 

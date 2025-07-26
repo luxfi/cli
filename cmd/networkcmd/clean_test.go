@@ -9,14 +9,14 @@ import (
 	"github.com/luxfi/cli/internal/testutils"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCleanBins(t *testing.T) {
 	require := require.New(t)
-	ux.NewUserLog(logging.NoLog{}, os.Stdout)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), os.Stdout)
 	dir := t.TempDir()
 	f, err := os.CreateTemp(dir, "bin-test")
 	require.NoError(err)

@@ -18,8 +18,8 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/version"
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/mock"
@@ -412,10 +412,10 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *mocks.Prompter) {
 	testDir := t.TempDir()
 	err := os.Mkdir(filepath.Join(testDir, "repos"), 0o755)
 	require.NoError(err)
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	app = &application.Lux{}
 	mockPrompt := mocks.NewPrompter(t)
-	app.Setup(testDir, logging.NoLog{}, config.New(), mockPrompt, application.NewDownloader())
+	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), mockPrompt, application.NewDownloader())
 
 	return require, mockPrompt
 }

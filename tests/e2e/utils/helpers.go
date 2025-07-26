@@ -30,7 +30,7 @@ import (
 	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
@@ -482,7 +482,7 @@ func CheckLuxExists(version string) bool {
 // Currently downloads evm, but that suffices to test the custom vm functionality
 func DownloadCustomVMBin(subnetEVMversion string) (string, error) {
 	targetDir := os.TempDir()
-	subnetEVMDir, err := binutils.DownloadReleaseVersion(logging.NoLog{}, subnetEVMName, subnetEVMversion, targetDir)
+	subnetEVMDir, err := binutils.DownloadReleaseVersion(luxlog.NewNoOpLogger(), subnetEVMName, subnetEVMversion, targetDir)
 	if err != nil {
 		return "", err
 	}

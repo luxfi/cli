@@ -7,7 +7,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 )
 
 func ManualUpgrade(app *application.Lux, sc models.Sidecar, targetVersion string) error {
@@ -33,7 +33,7 @@ func AutomatedUpgrade(app *application.Lux, sc models.Sidecar, targetVersion str
 			return err
 		}
 		if pluginDir != "" {
-			ux.Logger.PrintToUser(logging.Bold.Wrap(logging.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
+			ux.Logger.PrintToUser(luxlog.Bold.Wrap(luxlog.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
 			yes, err := app.Prompt.CaptureYesNo("Is this where we should upgrade the VM?")
 			if err != nil {
 				return err
