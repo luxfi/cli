@@ -26,7 +26,6 @@ import (
 
 const (
 	localFlag         = "local"
-	testnetFlag          = "testnet"
 	testnetFlag       = "testnet"
 	mainnetFlag       = "mainnet"
 	allFlag           = "all-networks"
@@ -106,8 +105,8 @@ keys or for the ledger addresses associated to certain indices.`,
 }
 
 func getClients(networks []models.Network, cchain bool) (
-	map[models.Network]*platformvm.Client,
-	map[models.Network]ethclient.Client,
+	map[models.Network]platformvm.Client,
+	map[models.Network]*ethclient.Client,
 	error,
 ) {
 	apiEndpoints := map[models.Network]string{
@@ -116,8 +115,8 @@ func getClients(networks []models.Network, cchain bool) (
 		models.Local:   constants.LocalAPIEndpoint,
 	}
 	var err error
-	pClients := map[models.Network]*platformvm.Client{}
-	cClients := map[models.Network]ethclient.Client{}
+	pClients := map[models.Network]platformvm.Client{}
+	cClients := map[models.Network]*ethclient.Client{}
 	for _, network := range networks {
 		pClients[network] = platformvm.NewClient(apiEndpoints[network])
 		if cchain {
@@ -191,8 +190,8 @@ func listKeys(*cobra.Command, []string) error {
 }
 
 func getStoredKeysInfo(
-	pClients map[models.Network]*platformvm.Client,
-	cClients map[models.Network]ethclient.Client,
+	pClients map[models.Network]platformvm.Client,
+	cClients map[models.Network]*ethclient.Client,
 	networks []models.Network,
 	cchain bool,
 ) ([]addressInfo, error) {
@@ -218,8 +217,8 @@ func getStoredKeysInfo(
 }
 
 func getStoredKeyInfo(
-	pClients map[models.Network]*platformvm.Client,
-	cClients map[models.Network]ethclient.Client,
+	pClients map[models.Network]platformvm.Client,
+	cClients map[models.Network]*ethclient.Client,
 	networks []models.Network,
 	keyPath string,
 	cchain bool,
@@ -256,18 +255,16 @@ func getStoredKeyInfo(
 }
 
 func getLedgerIndicesInfo(
-	pClients map[models.Network]*platformvm.Client,
+	pClients map[models.Network]platformvm.Client,
 	ledgerIndices []uint32,
 	networks []models.Network,
 ) ([]addressInfo, error) {
-	ledgerDevice, err := ledger.New()
+	ledgerDevice, err := ledger.NewKeychain()
 	if err != nil {
 		return nil, err
 	}
-	addresses, err := ledgerDevice.Addresses(ledgerIndices)
-	if err != nil {
-		return nil, err
-	}
+	addresses := ledgerDevice.Addresses()
+	// TODO: Filter addresses by ledgerIndices once supported
 	if len(addresses) != len(ledgerIndices) {
 		return nil, fmt.Errorf("derived addresses length %d differs from expected %d", len(addresses), len(ledgerIndices))
 	}
@@ -284,7 +281,7 @@ func getLedgerIndicesInfo(
 }
 
 func getLedgerIndexInfo(
-	pClients map[models.Network]*platformvm.Client,
+	pClients map[models.Network]platformvm.Client,
 	index uint32,
 	networks []models.Network,
 	addr ids.ShortID,
@@ -315,13 +312,13 @@ func getLedgerIndexInfo(
 }
 
 func getPChainAddrInfo(
-	pClients map[models.Network]*platformvm.Client,
+	pClients map[models.Network]platformvm.Client,
 	network models.Network,
 	pChainAddr string,
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	balance, err := getPChainBalanceStr(context.Background(), *pClients[network], pChainAddr)
+	balance, err := getPChainBalanceStr(context.Background(), pClients[network], pChainAddr)
 	if err != nil {
 		// just ignore local network errors
 		if network != models.Local {
@@ -339,7 +336,7 @@ func getPChainAddrInfo(
 }
 
 func getCChainAddrInfo(
-	cClients map[models.Network]ethclient.Client,
+	cClients map[models.Network]*ethclient.Client,
 	network models.Network,
 	cChainAddr string,
 	kind string,
@@ -381,7 +378,7 @@ func printAddrInfos(addrInfos []addressInfo) {
 	table.Render()
 }
 
-func getCChainBalanceStr(ctx context.Context, cClient ethclient.Client, addrStr string) (string, error) {
+func getCChainBalanceStr(ctx context.Context, cClient *ethclient.Client, addrStr string) (string, error) {
 	addr := common.HexToAddress(addrStr)
 	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
