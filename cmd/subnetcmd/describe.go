@@ -203,7 +203,7 @@ func printPrecompileTable(genesis core.Genesis) {
 
 	// TX allow list
 	if genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[txallowlist.Module.ConfigKey].(*txallowlist.Config)
+		cfg := genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey].(*txallowlist.Config)
 		appendToAddressTable(table, "Tx Allow List", cfg.AdminAddresses, cfg.EnabledAddresses)
 		precompileSet = true
 	}

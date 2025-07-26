@@ -26,7 +26,6 @@ import (
 
 const (
 	localFlag         = "local"
-	testnetFlag          = "testnet"
 	testnetFlag       = "testnet"
 	mainnetFlag       = "mainnet"
 	allFlag           = "all-networks"
@@ -107,7 +106,7 @@ keys or for the ledger addresses associated to certain indices.`,
 
 func getClients(networks []models.Network, cchain bool) (
 	map[models.Network]*platformvm.Client,
-	map[models.Network]ethclient.Client,
+	map[models.Network]*ethclient.Client,
 	error,
 ) {
 	apiEndpoints := map[models.Network]string{
@@ -117,7 +116,7 @@ func getClients(networks []models.Network, cchain bool) (
 	}
 	var err error
 	pClients := map[models.Network]*platformvm.Client{}
-	cClients := map[models.Network]ethclient.Client{}
+	cClients := map[models.Network]*ethclient.Client{}
 	for _, network := range networks {
 		pClients[network] = platformvm.NewClient(apiEndpoints[network])
 		if cchain {
@@ -192,7 +191,7 @@ func listKeys(*cobra.Command, []string) error {
 
 func getStoredKeysInfo(
 	pClients map[models.Network]*platformvm.Client,
-	cClients map[models.Network]ethclient.Client,
+	cClients map[models.Network]*ethclient.Client,
 	networks []models.Network,
 	cchain bool,
 ) ([]addressInfo, error) {
@@ -219,7 +218,7 @@ func getStoredKeysInfo(
 
 func getStoredKeyInfo(
 	pClients map[models.Network]*platformvm.Client,
-	cClients map[models.Network]ethclient.Client,
+	cClients map[models.Network]*ethclient.Client,
 	networks []models.Network,
 	keyPath string,
 	cchain bool,
@@ -339,7 +338,7 @@ func getPChainAddrInfo(
 }
 
 func getCChainAddrInfo(
-	cClients map[models.Network]ethclient.Client,
+	cClients map[models.Network]*ethclient.Client,
 	network models.Network,
 	cChainAddr string,
 	kind string,
@@ -381,7 +380,7 @@ func printAddrInfos(addrInfos []addressInfo) {
 	table.Render()
 }
 
-func getCChainBalanceStr(ctx context.Context, cClient ethclient.Client, addrStr string) (string, error) {
+func getCChainBalanceStr(ctx context.Context, cClient *ethclient.Client, addrStr string) (string, error) {
 	addr := common.HexToAddress(addrStr)
 	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)

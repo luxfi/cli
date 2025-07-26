@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/evm/core"
+	evmtypes "github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 )
 
 const (
@@ -27,7 +27,7 @@ func getDefaultAllocation(defaultAirdropAmount string) (core.GenesisAlloc, error
 		return allocation, errors.New("unable to decode default allocation")
 	}
 
-	allocation[PrefundedEwoqAddress] = types.GenesisAccount{
+	allocation[PrefundedEwoqAddress] = evmtypes.GenesisAccount{
 		Balance: defaultAmount,
 	}
 	return allocation, nil
@@ -73,7 +73,7 @@ func getAllocation(
 
 		amount = amount.Mul(amount, multiplier)
 
-		account := types.GenesisAccount{
+		account := evmtypes.GenesisAccount{
 			Balance: amount,
 		}
 
