@@ -103,7 +103,7 @@ func TestNoRepoPath(t *testing.T) {
 		Name:      testSubnet,
 		Subnet:    testSubnet,
 		Networks: map[string]models.NetworkData{
-			models.Fuji.String(): {
+			models.Testnet.String(): {
 				SubnetID:     ids.GenerateTestID(),
 				BlockchainID: ids.GenerateTestID(),
 			},
@@ -126,7 +126,7 @@ func TestNoRepoPath(t *testing.T) {
 	err = os.MkdirAll(vmDir, constants.DefaultPerms755)
 	require.NoError(err)
 	expectedSubnetFile := filepath.Join(subnetDir, testSubnet+constants.YAMLSuffix)
-	expectedVMFile := filepath.Join(vmDir, sc.Networks["Fuji"].BlockchainID.String()+constants.YAMLSuffix)
+	expectedVMFile := filepath.Join(vmDir, sc.Networks["Testnet"].BlockchainID.String()+constants.YAMLSuffix)
 	_, err = os.Create(expectedSubnetFile)
 	require.NoError(err)
 
@@ -208,12 +208,12 @@ func TestCanPublish(t *testing.T) {
 		app = nil
 	}()
 
-	scCanPublishFuji := &models.Sidecar{
+	scCanPublishTestnet := &models.Sidecar{
 		VM:     models.EVM,
-		Name:   "fuji",
-		Subnet: "fuji",
+		Name:   "testnet",
+		Subnet: "testnet",
 		Networks: map[string]models.NetworkData{
-			models.Fuji.String(): {
+			models.Testnet.String(): {
 				SubnetID:     ids.GenerateTestID(),
 				BlockchainID: ids.GenerateTestID(),
 			},
@@ -237,7 +237,7 @@ func TestCanPublish(t *testing.T) {
 		Name:   "both",
 		Subnet: "both",
 		Networks: map[string]models.NetworkData{
-			models.Fuji.String(): {
+			models.Testnet.String(): {
 				SubnetID:     ids.GenerateTestID(),
 				BlockchainID: ids.GenerateTestID(),
 			},
@@ -289,7 +289,7 @@ func TestCanPublish(t *testing.T) {
 	}
 
 	sidecars := []*models.Sidecar{
-		scCanPublishFuji,
+		scCanPublishTestnet,
 		scCanPublishMain,
 		scCanPublishBoth,
 		scCanNotPublishLocal,

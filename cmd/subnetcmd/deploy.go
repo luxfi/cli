@@ -54,7 +54,7 @@ var (
 	ledgerAddresses          []string
 	subnetIDStr              string
 
-	errMutuallyExlusiveNetworks    = errors.New("--local, --fuji (resp. --testnet) and --mainnet are mutually exclusive")
+	errMutuallyExlusiveNetworks    = errors.New("--local, --testnet (resp. --testnet) and --mainnet are mutually exclusive")
 	errMutuallyExlusiveControlKeys = errors.New("--control-keys and --same-control-key are mutually exclusive")
 	ErrMutuallyExlusiveKeyLedger   = errors.New("--key and --ledger,--ledger-addrs are mutually exclusive")
 	ErrStoredKeyOnMainnet          = errors.New("--key is not available for mainnet operations")
@@ -65,35 +65,35 @@ func newDeployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy [subnetName]",
 		Short: "Deploys a subnet configuration",
-		Long: `The subnet deploy command deploys your Subnet configuration locally, to Fuji Testnet, or to Mainnet.
+		Long: `The subnet deploy command deploys your Subnet configuration locally, to Testnet, or to Mainnet.
 
 At the end of the call, the command prints the RPC URL you can use to interact with the Subnet.
 
 Lux CLI only supports deploying an individual Subnet once per network. Subsequent
-attempts to deploy the same Subnet to the same network (local, Fuji, Mainnet) aren't
+attempts to deploy the same Subnet to the same network (local, Testnet, Mainnet) aren't
 allowed. If you'd like to redeploy a Subnet locally for testing, you must first call
 lux network clean to reset all deployed chain state. Subsequent local deploys
 redeploy the chain with fresh state. You can deploy the same Subnet to multiple networks,
-so you can take your locally tested Subnet and deploy it on Fuji or Mainnet.`,
+so you can take your locally tested Subnet and deploy it on Testnet or Mainnet.`,
 		SilenceUsage:      true,
 		RunE:              deploySubnet,
 		PersistentPostRun: handlePostRun,
 		Args:              cobra.ExactArgs(1),
 	}
 	cmd.Flags().BoolVarP(&deployLocal, "local", "l", false, "deploy to a local network")
-	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `fuji`)")
-	cmd.Flags().BoolVarP(&deployTestnet, "fuji", "f", false, "deploy to fuji (alias to `testnet`")
+	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `testnet`)")
+	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "f", false, "deploy to testnet (alias to `testnet`")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "deploy to mainnet")
 	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji deploy only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet deploy only]")
 	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use creation key as control key")
 	cmd.Flags().Uint32Var(&threshold, "threshold", 0, "required number of control key signatures to make subnet changes")
 	cmd.Flags().StringSliceVar(&controlKeys, "control-keys", nil, "addresses that may make subnet changes")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "subnet-auth-keys", nil, "control keys that will be used to authenticate chain creation")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the blockchain creation tx")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
-	cmd.Flags().StringVarP(&subnetIDStr, "subnet-id", "u", "", "deploy into given subnet id [fuji/mainnet deploy only]")
+	cmd.Flags().StringVarP(&subnetIDStr, "subnet-id", "u", "", "deploy into given subnet id [testnet/mainnet deploy only]")
 	return cmd
 }
 
@@ -165,7 +165,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	case deployLocal:
 		network = models.Local
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	}
@@ -174,7 +174,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 		// no flag was set, prompt user
 		networkStr, err := app.Prompt.CaptureList(
 			"Choose a network to deploy on",
-			[]string{models.Local.String(), models.Fuji.String(), models.Mainnet.String()},
+			[]string{models.Local.String(), models.Testnet.String(), models.Mainnet.String()},
 		)
 		if err != nil {
 			return err
@@ -256,9 +256,9 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 		utilspkg.HandleTracking(cmd, app, flags)
 		return app.UpdateSidecarNetworks(&sidecar, network, subnetID, blockchainID)
 
-	case models.Fuji:
+	case models.Testnet:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
+			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.Prompt, "pay transaction fees", app.GetKeyDir())
 			if err != nil {
 				return err
 			}

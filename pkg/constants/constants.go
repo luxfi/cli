@@ -34,7 +34,7 @@ const (
 	E2ERequestTimeout = 30 * time.Second
 
 	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
-	FujiAPIEndpoint       = "https://api.lux-test.network"
+	TestnetAPIEndpoint       = "https://api.lux-test.network"
 	MainnetAPIEndpoint    = "https://api.lux.network"
 
 	// this depends on bootstrap snapshot

@@ -38,8 +38,8 @@ func newTransactionSignCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&inputTxPath, inputTxPathFlag, "", "Path to the transaction file for signing")
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji only]")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet only]")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	return cmd
 }
@@ -71,9 +71,9 @@ func signTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 	switch network {
-	case models.Fuji, models.Local:
+	case models.Testnet, models.Local:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetFujiKeyOrLedger(app.Prompt, "sign transaction", app.GetKeyDir())
+			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.Prompt, "sign transaction", app.GetKeyDir())
 			if err != nil {
 				return err
 			}

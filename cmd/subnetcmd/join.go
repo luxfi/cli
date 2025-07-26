@@ -70,14 +70,14 @@ After you update your validator's config, you need to restart your validator man
 you provide the --node-config flag, this command attempts to edit the config file
 at that path.
 
-This command currently only supports Subnets deployed on the Fuji Testnet and Mainnet.`,
+This command currently only supports Subnets deployed on the Testnet and Mainnet.`,
 		RunE: joinCmd,
 		Args: cobra.ExactArgs(1),
 	}
 	cmd.Flags().StringVar(&luxConfigPath, "node-config", "", "file path of the node config file")
 	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of node's plugin directory")
-	cmd.Flags().BoolVar(&deployTestnet, "fuji", false, "join on `fuji` (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `fuji`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployLocal, "local", false, "join on `local` (for elastic subnet only)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "join on `mainnet`")
 	cmd.Flags().BoolVar(&printManual, "print", false, "if true, print the manual config without prompting")
@@ -110,7 +110,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	}
 
 	if !flags.EnsureMutuallyExclusive([]bool{deployMainnet, deployTestnet}) {
-		return errors.New("--fuji and --mainnet are mutually exclusive")
+		return errors.New("--testnet and --mainnet are mutually exclusive")
 	}
 
 	var network models.Network
@@ -118,7 +118,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	case deployLocal:
 		network = models.Local
 	case deployTestnet:
-		network = models.Fuji
+		network = models.Testnet
 	case deployMainnet:
 		network = models.Mainnet
 	}
@@ -130,8 +130,8 @@ func joinCmd(_ *cobra.Command, args []string) error {
 				return err
 			}
 			switch networkToUpgrade {
-			case fujiDeployment:
-				return errors.New("joining elastic subnet is not yet supported on Fuji network")
+			case testnetDeployment:
+				return errors.New("joining elastic subnet is not yet supported on Testnet network")
 			case mainnetDeployment:
 				return errors.New("joining elastic subnet is not yet supported on Mainnet")
 			}
@@ -139,7 +139,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 		} else {
 			networkStr, err := app.Prompt.CaptureList(
 				"Choose a network to validate on (this command only supports public networks)",
-				[]string{models.Fuji.String(), models.Mainnet.String()},
+				[]string{models.Testnet.String(), models.Mainnet.String()},
 			)
 			if err != nil {
 				return err
@@ -147,7 +147,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 			// flag provided
 			networkStr = strings.Title(networkStr)
 			// as we are allowing a flag, we need to check if a supported network has been provided
-			if !(networkStr == models.Fuji.String() || networkStr == models.Mainnet.String()) {
+			if !(networkStr == models.Testnet.String() || networkStr == models.Mainnet.String()) {
 				return errors.New("unsupported network")
 			}
 			network = models.NetworkFromString(networkStr)
@@ -394,8 +394,8 @@ func isNodeValidatingSubnet(subnetID ids.ID, network models.Network) (bool, erro
 
 	var api string
 	switch network {
-	case models.Fuji:
-		api = constants.FujiAPIEndpoint
+	case models.Testnet:
+		api = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		api = constants.MainnetAPIEndpoint
 	case models.Local:
