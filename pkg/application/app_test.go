@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -279,6 +279,6 @@ func newTestApp(t *testing.T) *Lux {
 	tempDir := t.TempDir()
 	return &Lux{
 		baseDir: tempDir,
-		Log:     logging.NoLog{},
+		Log:     luxlog.NewNoOpLogger(),
 	}
 }

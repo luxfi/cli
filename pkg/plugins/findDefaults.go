@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/kardianos/osext"
 	"github.com/shirou/gopsutil/process"
 )
@@ -62,7 +62,7 @@ func getScanConfigDirs() ([]string, error) {
 }
 
 func FindPluginDir() (string, error) {
-	ux.Logger.PrintToUser("%s", logging.Yellow.Wrap("Scanning your system for the plugin directory..."))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Scanning your system for the plugin directory..."))
 	scanConfigDirs, err := getScanConfigDirs()
 	if err != nil {
 		return "", err
@@ -71,12 +71,12 @@ func FindPluginDir() (string, error) {
 	if dir != "" {
 		return dir, nil
 	}
-	ux.Logger.PrintToUser("%s", logging.Yellow.Wrap("No plugin directory found on your system"))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("No plugin directory found on your system"))
 	return "", nil
 }
 
 func FindLuxConfigPath() (string, error) {
-	ux.Logger.PrintToUser("%s", logging.Yellow.Wrap("Scanning your system for existing files..."))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Scanning your system for existing files..."))
 	var path string
 	// Attempt 1: Try the admin API
 	if path = findByRunningProcesses(constants.LuxRepoName, config.ConfigFileKey); path != "" {
@@ -90,7 +90,7 @@ func FindLuxConfigPath() (string, error) {
 	if path = findByCommonDirs(defaultConfigFileName, scanConfigDirs); path != "" {
 		return path, nil
 	}
-	ux.Logger.PrintToUser("%s", logging.Yellow.Wrap("No config file has been found on your system"))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("No config file has been found on your system"))
 	return "", nil
 }
 

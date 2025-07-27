@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -8,19 +8,20 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
-func SetupLux(app *application.Lux, luxVersion string) (string, error) {
-	binDir := app.GetLuxBinDir()
+func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error) {
+	binDir := app.GetLuxgoBinDir()
 
 	installer := NewInstaller()
-	downloader := NewLuxDownloader()
+	downloader := NewAvagoDownloader()
 	return InstallBinary(
 		app,
-		luxVersion,
+		luxdVersion,
 		binDir,
 		binDir,
-		nodeBinPrefix,
+		luxdBinPrefix,
 		constants.LuxOrg,
-		constants.LuxRepoName,
+		constants.LuxGoRepoName,
+		"",
 		downloader,
 		installer,
 	)

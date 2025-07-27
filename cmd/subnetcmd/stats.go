@@ -34,8 +34,7 @@ func newStatsCmd() *cobra.Command {
 		RunE:         stats,
 		SilenceUsage: true,
 	}
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "print stats on `testnet` (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "print stats on `testnet` (alias for `testnet`)")
+	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "print stats on testnet")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "print stats on `mainnet`")
 	return cmd
 }
@@ -113,13 +112,15 @@ func stats(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+// Removed duplicate PlatformClient interface - using the one from platformvm package directly
+
 // InfoClient interface for info client operations
 type InfoClient interface {
 	GetNodeID(ctx context.Context, options ...rpc.Option) (ids.NodeID, *signer.ProofOfPossession, error)
 	GetNodeVersion(ctx context.Context, options ...rpc.Option) (*info.GetNodeVersionReply, error)
 }
 
-func buildPendingValidatorStats(pClient PlatformClient, infoClient InfoClient, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
+func buildPendingValidatorStats(pClient platformvm.Client, infoClient InfoClient, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -209,7 +210,7 @@ func buildPendingValidatorStats(pClient PlatformClient, infoClient InfoClient, t
 	return rows, nil
 }
 
-func buildCurrentValidatorStats(pClient PlatformClient, infoClient InfoClient, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
+func buildCurrentValidatorStats(pClient platformvm.Client, infoClient InfoClient, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -285,15 +286,13 @@ func buildCurrentValidatorStats(pClient PlatformClient, infoClient InfoClient, t
 
 // findAPIEndpoint tries first to create a client to a local node
 // if it doesn't find one, it tries public APIs
-func findAPIEndpoint(network models.Network) (*platformvm.Client, *info.Client) {
-	var i *info.Client
-
+func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
 	// first try local node
 	ctx := context.Background()
 	c := platformvm.NewClient(constants.LocalAPIEndpoint)
 	_, err := c.GetHeight(ctx)
 	if err == nil {
-		i = info.NewClient(constants.LocalAPIEndpoint)
+		i := info.NewClient(constants.LocalAPIEndpoint)
 		// try calling it to make sure it actually worked
 		_, _, err := i.GetNodeID(ctx)
 		if err == nil {
@@ -320,7 +319,8 @@ func findAPIEndpoint(network models.Network) (*platformvm.Client, *info.Client) 
 	_, err = c.GetHeight(ctx)
 	if err == nil {
 		// also try to get a local client
-		i = info.NewClient(constants.LocalAPIEndpoint)
+		i := info.NewClient(constants.LocalAPIEndpoint)
+		return c, i
 	}
-	return c, i
+	return nil, nil
 }

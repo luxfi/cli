@@ -11,19 +11,19 @@ import (
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRunMigrations(t *testing.T) {
 	buffer := make([]byte, 0, 100)
 	bufWriter := bytes.NewBuffer(buffer)
-	ux.NewUserLog(logging.NoLog{}, bufWriter)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), bufWriter)
 	require := require.New(t)
 	testDir := t.TempDir()
 
 	app := &application.Lux{}
-	app.Setup(testDir, logging.NoLog{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
+	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	type migTest struct {
 		migs           map[int]migrationFunc

@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +28,7 @@ const (
 
 // testing backward compatibility
 func TestEditConfigFileWithOldPattern(t *testing.T) {
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 
 	require := require.New(t)
 
@@ -70,7 +70,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 
 // testing backward compatibility
 func TestEditConfigFileWithNewPattern(t *testing.T) {
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 
 	require := require.New(t)
 
@@ -111,7 +111,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 }
 
 func TestEditConfigFileWithNoSettings(t *testing.T) {
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 
 	require := require.New(t)
 

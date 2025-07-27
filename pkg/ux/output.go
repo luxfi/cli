@@ -13,18 +13,18 @@ import (
 	"golang.org/x/text/message"
 
 	"github.com/luxfi/netrunner/rpcpb"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/olekukonko/tablewriter"
 )
 
 var Logger *UserLog
 
 type UserLog struct {
-	log    logging.Logger
+	log    luxlog.Logger
 	writer io.Writer
 }
 
-func NewUserLog(log logging.Logger, userwriter io.Writer) {
+func NewUserLog(log luxlog.Logger, userwriter io.Writer) {
 	if Logger == nil {
 		Logger = &UserLog{
 			log:    log,

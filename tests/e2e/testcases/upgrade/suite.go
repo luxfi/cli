@@ -20,8 +20,8 @@ import (
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	anr_utils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/evm/params"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -69,7 +69,7 @@ var _ = ginkgo.Describe("[Upgrade expect network failure]", ginkgo.Ordered, func
 		// the code would detect it hasn't been deployed yet so report that error first
 		// therefore we can just manually edit the file to fake it had been deployed
 		app := application.New()
-		app.Setup(utils.GetBaseDir(), logging.NoLog{}, nil, nil, nil)
+		app.Setup(utils.GetBaseDir(), luxlog.NewNoOpLogger(), nil, nil, nil)
 		sc := models.Sidecar{
 			Name:     subnetName,
 			Subnet:   subnetName,
@@ -105,7 +105,7 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 		// simulate as if this had already been deployed to testnet
 		// by just entering fake data into the struct
 		app := application.New()
-		app.Setup(utils.GetBaseDir(), logging.NoLog{}, nil, nil, nil)
+		app.Setup(utils.GetBaseDir(), luxlog.NewNoOpLogger(), nil, nil, nil)
 
 		sc, err := app.LoadSidecar(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -210,7 +210,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		app := application.New()
-		app.Setup(utils.GetBaseDir(), logging.NoLog{}, nil, nil, nil)
+		app.Setup(utils.GetBaseDir(), luxlog.NewNoOpLogger(), nil, nil, nil)
 
 		stripped := stripWhitespaces(string(upgradeBytes))
 		lockUpgradeBytes, err := app.ReadLockUpgradeFile(subnetName)

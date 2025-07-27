@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
 )
@@ -50,7 +50,7 @@ type testMapper struct {
 func newTestMapper(t *testing.T) *testMapper {
 	app := &application.Lux{
 		Downloader: application.NewDownloader(),
-		Log:        logging.NoLog{},
+		Log:        luxlog.NewNoOpLogger(),
 	}
 	return &testMapper{
 		app,
