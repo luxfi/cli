@@ -56,7 +56,6 @@ command line flags.`,
 	cmd.Flags().BoolVar(&useConfig, "config", false, "upgrade config for future subnet deployments")
 	cmd.Flags().BoolVar(&useLocal, "local", false, "upgrade existing `local` deployment")
 	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "upgrade existing `testnet` deployment (alias for `testnet`)")
-	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "upgrade existing `testnet` deployment (alias for `testnet`)")
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "upgrade existing `mainnet` deployment")
 
 	cmd.Flags().BoolVar(&useManual, "print", false, "print instructions for upgrading")

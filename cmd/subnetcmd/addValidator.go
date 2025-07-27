@@ -55,7 +55,6 @@ Testnet or Mainnet.`,
 	cmd.Flags().StringVar(&startTimeStr, "start-time", "", "UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format")
 	cmd.Flags().DurationVar(&duration, "staking-period", 0, "how long this validator will be staking")
 	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `testnet`)")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "join on `mainnet`")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "subnet-auth-keys", nil, "control keys that will be used to authenticate add validator tx")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the add validator tx")
