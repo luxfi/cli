@@ -24,13 +24,13 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/crypto/keychain"
-	ledger "github.com/luxfi/node/utils/crypto/ledger"
+	ledger "github.com/luxfi/ledger-lux-go"
 	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/geth/core"
+	"github.com/luxfi/evm/core"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -345,7 +345,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 			}
 		}
 	} else {
-		ux.Logger.PrintToUser("%s", logging.Green.Wrap(
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(
 			fmt.Sprintf("Deploying into pre-existent subnet ID %s", subnetID.String()),
 		))
 		controlKeys, threshold, err = txutils.GetOwners(network, subnetID)
@@ -384,7 +384,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 
 	isFullySigned, blockchainID, tx, remainingSubnetAuthKeys, err := deployer.DeployBlockchain(controlKeys, subnetAuthKeys, subnetID, chain, chainGenesis)
 	if err != nil {
-		ux.Logger.PrintToUser("%s", logging.Red.Wrap(
+		ux.Logger.PrintToUser("%s", luxlog.Red.Wrap(
 			fmt.Sprintf("error deploying blockchain: %s. fix the issue and try again with a new deploy cmd", err),
 		))
 	}
@@ -727,9 +727,9 @@ func GetKeychain(
 			}
 			addrStrs = append(addrStrs, addrStr)
 		}
-		ux.Logger.PrintToUser("%s", logging.Yellow.Wrap("Ledger addresses: "))
+		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Ledger addresses: "))
 		for _, addrStr := range addrStrs {
-			ux.Logger.PrintToUser("%s", logging.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
+			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
 		}
 		return keychain.NewLedgerKeychainFromIndices(ledgerDevice, ledgerIndices)
 	}

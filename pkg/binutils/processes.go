@@ -19,7 +19,8 @@ import (
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/shirou/gopsutil/process"
@@ -65,13 +66,13 @@ func WithAvoidRPCVersionCheck(avoidRPCVersionCheck bool) GRPCClientOpOption {
 func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	op := GRPCClientOp{}
 	op.applyOpts(opts)
-	logLevel, err := logging.ToLevel(gRPCClientLogLevel)
+	logLevel, err := luxlog.ToLevel(gRPCClientLogLevel)
 	if err != nil {
 		return nil, err
 	}
-	logFactory := logging.NewFactory(logging.Config{
+	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
 		DisplayLevel: logLevel,
-		LogLevel:     logging.Off,
+		LogLevel:     level.Off,
 	})
 	log, err := logFactory.Make("grpc-client")
 	if err != nil {
@@ -105,9 +106,9 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 
 // NewGRPCClient hides away the details (params) of creating a gRPC server
 func NewGRPCServer(snapshotsDir string) (server.Server, error) {
-	logFactory := logging.NewFactory(logging.Config{
-		DisplayLevel: logging.Info,
-		LogLevel:     logging.Off,
+	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
+		DisplayLevel: level.Info,
+		LogLevel:     level.Off,
 	})
 	log, err := logFactory.Make("grpc-server")
 	if err != nil {
@@ -277,7 +278,7 @@ func KillgRPCServerProcess(app *application.Lux) error {
 	return nil
 }
 
-func WatchServerProcess(serverCancel context.CancelFunc, errc chan error, log logging.Logger) {
+func WatchServerProcess(serverCancel context.CancelFunc, errc chan error, log luxlog.Logger) {
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	select {
