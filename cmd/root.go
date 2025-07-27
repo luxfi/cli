@@ -14,16 +14,21 @@ import (
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
+	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/contractcmd"
+	"github.com/luxfi/cli/cmd/interchaincmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/l1cmd"
 	"github.com/luxfi/cli/cmd/l3cmd"
+	"github.com/luxfi/cli/cmd/localcmd"
 	"github.com/luxfi/cli/cmd/migratecmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
+	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
-	"github.com/luxfi/cli/cmd/localcmd"
+	"github.com/luxfi/cli/cmd/validatorcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/application"
@@ -32,7 +37,8 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -43,7 +49,7 @@ var (
 	app *application.Lux
 
 	logLevel  string
-	Version   = ""
+	Version   = "1.9.0"
 	cfgFile   string
 	skipCheck bool
 )
@@ -88,15 +94,14 @@ Quick start:
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
 	// add sub commands
+	rootCmd.AddCommand(blockchaincmd.NewCmd(app))
+	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(l1cmd.NewCmd(app))
 	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
 	rootCmd.AddCommand(networkcmd.NewCmd(app))
 	rootCmd.AddCommand(nodecmd.NewCmd(app))
 	rootCmd.AddCommand(keycmd.NewCmd(app))
-
-	// add hidden backend command
-	rootCmd.AddCommand(backendcmd.NewCmd(app))
 
 	// add transaction command
 	rootCmd.AddCommand(transactioncmd.NewCmd(app))
@@ -106,9 +111,22 @@ Quick start:
 
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
+
+	// add interchain command
+	rootCmd.AddCommand(interchaincmd.NewCmd(app))
+
+	// add contract command
+	rootCmd.AddCommand(contractcmd.NewCmd(app))
+
+	// add validator command
+	rootCmd.AddCommand(validatorcmd.NewCmd(app))
+
 	// add migrate command
 	rootCmd.AddCommand(migratecmd.NewCmd(app))
 	rootCmd.AddCommand(localcmd.NewCmd(app))
+
+	// add hidden backend command
+	rootCmd.AddCommand(backendcmd.NewCmd(app))
 	return rootCmd
 }
 
@@ -287,12 +305,12 @@ func setupEnv() (string, error) {
 	return baseDir, nil
 }
 
-func setupLogging(baseDir string) (logging.Logger, error) {
+func setupLogging(baseDir string) (luxlog.Logger, error) {
 	var err error
 
-	config := logging.Config{}
-	config.LogLevel = logging.Info
-	config.DisplayLevel, err = logging.ToLevel(logLevel)
+	config := luxlog.Config{}
+	config.LogLevel = level.Info
+	config.DisplayLevel, err = luxlog.ToLevel(logLevel)
 	if err != nil {
 		return nil, fmt.Errorf("invalid log level configured: %s", logLevel)
 	}
@@ -302,12 +320,12 @@ func setupLogging(baseDir string) (logging.Logger, error) {
 	}
 
 	// some logging config params
-	config.LogFormat = logging.Colors
+	config.LogFormat = luxlog.Colors
 	config.MaxSize = constants.MaxLogFileSize
 	config.MaxFiles = constants.MaxNumOfLogFiles
 	config.MaxAge = constants.RetainOldFiles
 
-	factory := logging.NewFactory(config)
+	factory := luxlog.NewFactoryWithConfig(config)
 	log, err := factory.Make("lux")
 	if err != nil {
 		factory.Close()

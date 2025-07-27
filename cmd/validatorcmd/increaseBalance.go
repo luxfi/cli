@@ -1,0 +1,120 @@
+// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+package validatorcmd
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/luxfi/cli/pkg/blockchain"
+
+	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/keychain"
+	"github.com/luxfi/cli/pkg/networkoptions"
+	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/sdk/validator"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/units"
+	"github.com/spf13/cobra"
+)
+
+var (
+	keyName         string
+	useLedger       bool
+	useEwoq         bool
+	ledgerAddresses []string
+	balanceLUX     float64
+)
+
+func NewIncreaseBalanceCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "increaseBalance",
+		Short: "Increases current balance of validator on P-Chain",
+		Long:  `This command increases the validator P-Chain balance`,
+		RunE:  increaseBalance,
+		Args:  cobrautils.ExactArgs(0),
+	}
+
+	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji/devnet deploy only]")
+	cmd.Flags().StringVar(&l1, "l1", "", "name of L1 (to increase balance of bootstrap validators only)")
+	cmd.Flags().StringVar(&validationIDStr, "validation-id", "", "validationIDStr of the validator")
+	cmd.Flags().StringVar(&nodeIDStr, "node-id", "", "node ID of the validator")
+	cmd.Flags().Float64Var(&balanceLUX, "balance", 0, "amount of LUX to increase validator's balance by")
+	return cmd
+}
+
+func increaseBalance(_ *cobra.Command, _ []string) error {
+	network, err := networkoptions.GetNetworkFromCmdLineFlags(
+		app,
+		"",
+		globalNetworkFlags,
+		true,
+		false,
+		networkoptions.DefaultSupportedNetworkOptions,
+		"",
+	)
+	if err != nil {
+		return err
+	}
+
+	validationID, cancel, err := getNodeValidationID(network, l1, nodeIDStr, validationIDStr)
+	if err != nil {
+		return err
+	}
+	if cancel {
+		return nil
+	}
+	if validationID == ids.Empty {
+		return fmt.Errorf("the specified node is not a L1 validator")
+	}
+
+	// TODO: will estimate fee in subsecuent PR
+	fee := uint64(0)
+	kc, err := keychain.GetKeychainFromCmdLineFlags(
+		app,
+		constants.PayTxsFeesMsg,
+		network,
+		keyName,
+		useEwoq,
+		useLedger,
+		ledgerAddresses,
+		fee,
+	)
+	if err != nil {
+		return err
+	}
+
+	var balance uint64
+	if balanceLUX == 0 {
+		availableBalance, err := utils.GetNetworkBalance(kc.Addresses().List(), network.Endpoint)
+		if err != nil {
+			return err
+		}
+		prompt := "How many LUX do you want to increase the balance of this validator by?"
+		balanceLUX, err = blockchain.PromptValidatorBalance(app, float64(availableBalance)/float64(units.Lux), prompt)
+		if err != nil {
+			return err
+		}
+	}
+	balance = uint64(balanceLUX * float64(units.Lux))
+
+	deployer := subnet.NewPublicDeployer(app, kc, network)
+	if _, err := deployer.IncreaseValidatorPChainBalance(validationID, balance); err != nil {
+		return err
+	}
+
+	// add a delay to safely retrieve updated balance (to avoid issues when connecting to a different API node)
+	time.Sleep(5 * time.Second)
+
+	balance, err = validator.GetValidatorBalance(network.SDKNetwork(), validationID)
+	if err != nil {
+		return err
+	}
+	ux.Logger.PrintToUser("  New Validator Balance: %.5f LUX", float64(balance)/float64(units.Lux))
+
+	return nil
+}

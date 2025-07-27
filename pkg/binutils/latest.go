@@ -11,7 +11,7 @@ import (
 	"runtime"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/perms"
 	"go.uber.org/zap"
 )
@@ -23,7 +23,7 @@ import (
 //
 // Deprecated: Use GetLatestReleaseVersion
 func DownloadReleaseVersion(
-	log logging.Logger,
+	log luxlog.Logger,
 	repo,
 	version,
 	binDir string,

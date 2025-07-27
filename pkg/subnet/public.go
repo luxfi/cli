@@ -24,9 +24,9 @@ import (
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	walletpkg "github.com/luxfi/node/wallet"
 	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/subnet/primary"
+	"github.com/luxfi/node/wallet/subnet/primary/common"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")
@@ -404,7 +404,7 @@ func (d *PublicDeployer) Sign(
 	return nil
 }
 
-func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (*primary.Wallet, error) {
+func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error) {
 	ctx := context.Background()
 
 	var api string
@@ -428,27 +428,31 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (*primary.Wallet, erro
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, api, d.kc, ethKc, primary.WalletConfig{})
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:         api,
+		LUXKeychain: d.kc,
+		EthKeychain: ethKc,
+	})
 	if err != nil {
 		return nil, err
 	}
 	return wallet, nil
 }
 
-func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []walletpkg.Option {
-	options := []walletpkg.Option{}
+func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []common.Option {
+	options := []common.Option{}
 	walletAddr := d.kc.Addresses().List()[0]
 	// addrs to use for signing
 	customAddrsSet := set.Set[ids.ShortID]{}
 	customAddrsSet.Add(walletAddr)
 	customAddrsSet.Add(subnetAuthKeys...)
-	options = append(options, walletpkg.WithCustomAddresses(customAddrsSet))
+	options = append(options, common.WithCustomAddresses(customAddrsSet))
 	// set change to go to wallet addr (instead of any other subnet auth key)
 	changeOwner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs:     []ids.ShortID{walletAddr},
 	}
-	options = append(options, walletpkg.WithChangeOwner(changeOwner))
+	options = append(options, common.WithChangeOwner(changeOwner))
 	return options
 }
 
@@ -458,7 +462,7 @@ func (d *PublicDeployer) createBlockchainTx(
 	vmID,
 	subnetID ids.ID,
 	genesis []byte,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 ) (*txs.Tx, error) {
 	fxIDs := make([]ids.ID, 0)
 	options := d.getMultisigTxOptions(subnetAuthKeys)
@@ -485,7 +489,7 @@ func (d *PublicDeployer) createBlockchainTx(
 func (d *PublicDeployer) createAddSubnetValidatorTx(
 	subnetAuthKeys []ids.ShortID,
 	validator *txs.SubnetValidator,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
@@ -505,7 +509,7 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 	subnetAuthKeys []ids.ShortID,
 	nodeID ids.NodeID,
 	subnetID ids.ID,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
@@ -524,7 +528,7 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 func (d *PublicDeployer) createTransformSubnetTX(
 	subnetAuthKeys []ids.ShortID,
 	elasticSubnetConfig models.ElasticSubnetConfig,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 	assetID ids.ID,
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
@@ -547,7 +551,7 @@ func (d *PublicDeployer) createTransformSubnetTX(
 
 func (*PublicDeployer) signTx(
 	tx *txs.Tx,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 ) error {
 	if err := wallet.P().Signer().Sign(context.Background(), tx); err != nil {
 		return err
@@ -555,7 +559,7 @@ func (*PublicDeployer) signTx(
 	return nil
 }
 
-func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, wallet *primary.Wallet) (ids.ID, error) {
+func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
 	addrs, err := address.ParseToIDs(controlKeys)
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failure parsing control keys: %w", err)
@@ -565,7 +569,7 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 		Threshold: threshold,
 		Locktime:  0,
 	}
-	opts := []walletpkg.Option{}
+	opts := []common.Option{}
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
 	}

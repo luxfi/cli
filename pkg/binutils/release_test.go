@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -37,7 +37,7 @@ func setupInstallDir(require *require.Assertions) *application.Lux {
 	defer os.RemoveAll(rootDir)
 
 	app := application.New()
-	app.Setup(rootDir, logging.NoLog{}, &config.Config{}, prompts.NewPrompter(), application.NewDownloader())
+	app.Setup(rootDir, luxlog.NewNoOpLogger(), &config.Config{}, prompts.NewPrompter(), application.NewDownloader())
 	return app
 }
 
