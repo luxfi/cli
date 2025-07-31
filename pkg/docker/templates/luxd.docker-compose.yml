@@ -1,0 +1,79 @@
+name: lux-cli
+services:
+{{if .WithLuxgo}}
+  luxd:
+    image: avaplatform/luxd:{{ .LuxgoVersion }}
+{{if .E2E }}
+    container_name: luxd{{.E2ESuffix}}
+{{ else }}
+    container_name: luxd
+{{ end }}
+    restart: unless-stopped
+    user: "1000:1000"  # ubuntu user
+    command: >
+        ./luxd
+        --config-file=/.luxd/configs/node.json
+{{if .E2E }}
+    volumes:
+      - luxd_data_{{.E2ESuffix}}:/.luxd:rw
+    ports:
+      - "{{ .E2EIP }}:9650:9650"
+      - "{{ .E2EIP }}:9651:9651"
+    networks:
+      - luxd_net_{{.E2ESuffix}}
+{{ else }}
+    volumes:
+      - /home/ubuntu/.luxd:/.luxd:rw
+    ports:
+      - "9650:9650"
+      - "9651:9651"
+    network_mode: "host"
+{{ end }}
+{{ end }}
+
+{{if .WithMonitoring}}
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: promtail
+    restart: unless-stopped
+    user: "1000:1000"  # ubuntu user
+    command: -config.file=/etc/promtail/promtail.yml
+{{if .E2E }}
+    volumes:
+      - luxd_logs_{{.E2ESuffix}}:/.luxd/logs:rw
+      - /home/ubuntu/.lux-cli/services/promtail:/etc/promtail:ro
+    networks:
+      - luxd_net_{{.E2ESuffix}}
+{{ else }}
+    volumes:
+      - /home/ubuntu/.luxd/logs:/logs:ro
+      - /home/ubuntu/.lux-cli/services/promtail:/etc/promtail:ro
+{{ end }}
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+{{if .WithLuxgo}}
+    links:
+      - luxd
+{{end}}
+{{if .E2E }}
+    networks:
+      - luxd_net_{{.E2ESuffix}}
+{{ end }}
+{{end}}
+
+{{if .E2E }}
+volumes:
+  luxd_data_{{.E2ESuffix}}:
+  luxd_logs_{{.E2ESuffix}}:
+networks:
+  luxd_net_{{.E2ESuffix}}:
+{{ end }}
+    

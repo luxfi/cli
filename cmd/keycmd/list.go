@@ -1,92 +1,84 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package keycmd
 
 import (
-	"context"
 	"fmt"
 	"math/big"
 	"os"
-	"path/filepath"
-	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/networkoptions"
+	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/sdk/evm"
+	sdkUtils "github.com/luxfi/cli/sdk/utils"
 	"github.com/luxfi/node/ids"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/node/vms/avm"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/geth/ethclient"
-	"github.com/luxfi/geth/common"
+
+	"github.com/ethereum/go-ethereum/common"
+	goethereumethclient "github.com/ethereum/go-ethereum/ethclient"
+	"github.com/liyue201/erc20-go/erc20"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
 const (
-	localFlag         = "local"
-	testnetFlag          = "testnet"
-	testnetFlag       = "testnet"
-	mainnetFlag       = "mainnet"
 	allFlag           = "all-networks"
+	pchainFlag        = "pchain"
 	cchainFlag        = "cchain"
+	xchainFlag        = "xchain"
 	ledgerIndicesFlag = "ledger"
+	useNanoLuxFlag   = "use-nano-lux"
+	keysFlag          = "keys"
 )
 
 var (
-	local         bool
-	testnet       bool
-	mainnet       bool
-	all           bool
-	cchain        bool
-	ledgerIndices []uint
+	globalNetworkFlags networkoptions.NetworkFlags
+	all                bool
+	pchain             bool
+	cchain             bool
+	xchain             bool
+	useNanoLux        bool
+	useGwei            bool
+	ledgerIndices      []uint
+	keys               []string
+	tokenAddresses     []string
+	subnetToken        string
+	subnets            []string
+	showNativeToken    bool
 )
 
-// lux subnet list
+// lux blockchain list
 func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List stored signing keys or ledger addresses",
 		Long: `The key list command prints information for all stored signing
 keys or for the ledger addresses associated to certain indices.`,
-		RunE:         listKeys,
-		SilenceUsage: true,
+		RunE: listKeys,
 	}
-	cmd.Flags().BoolVarP(
-		&local,
-		localFlag,
-		"l",
-		false,
-		"list local network addresses",
-	)
-	cmd.Flags().BoolVarP(
-		&testnet,
-		testnetFlag,
-		"f",
-		false,
-		"list testnet (testnet) network addresses",
-	)
-	cmd.Flags().BoolVarP(
-		&testnet,
-		testnetFlag,
-		"t",
-		false,
-		"list testnet (testnet) network addresses",
-	)
-	cmd.Flags().BoolVarP(
-		&mainnet,
-		mainnetFlag,
-		"m",
-		false,
-		"list mainnet network addresses",
-	)
+	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
 	cmd.Flags().BoolVarP(
 		&all,
 		allFlag,
 		"a",
 		false,
 		"list all network addresses",
+	)
+	cmd.Flags().BoolVar(
+		&pchain,
+		pchainFlag,
+		true,
+		"list P-Chain addresses",
 	)
 	cmd.Flags().BoolVarP(
 		&cchain,
@@ -95,6 +87,25 @@ keys or for the ledger addresses associated to certain indices.`,
 		true,
 		"list C-Chain addresses",
 	)
+	cmd.Flags().BoolVar(
+		&xchain,
+		xchainFlag,
+		true,
+		"list X-Chain addresses",
+	)
+	cmd.Flags().BoolVarP(
+		&useNanoLux,
+		useNanoLuxFlag,
+		"n",
+		false,
+		"use nano Lux for balances",
+	)
+	cmd.Flags().BoolVar(
+		&useGwei,
+		"use-gwei",
+		false,
+		"use gwei for EVM balances",
+	)
 	cmd.Flags().UintSliceVarP(
 		&ledgerIndices,
 		ledgerIndicesFlag,
@@ -102,38 +113,144 @@ keys or for the ledger addresses associated to certain indices.`,
 		[]uint{},
 		"list ledger addresses for the given indices",
 	)
+	cmd.Flags().StringSliceVar(
+		&keys,
+		keysFlag,
+		[]string{},
+		"list addresses for the given keys",
+	)
+	cmd.Flags().StringSliceVar(
+		&subnets,
+		"subnets",
+		[]string{},
+		"subnets to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)",
+	)
+	cmd.Flags().StringSliceVar(
+		&subnets,
+		"blockchains",
+		[]string{},
+		"blockchains to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)",
+	)
+	cmd.Flags().StringSliceVar(
+		&tokenAddresses,
+		"tokens",
+		[]string{"Native"},
+		"provide balance information for the given token contract addresses (Evm only)",
+	)
 	return cmd
 }
 
-func getClients(networks []models.Network, cchain bool) (
-	map[models.Network]*platformvm.Client,
-	map[models.Network]ethclient.Client,
+type Clients struct {
+	x             map[models.Network]avm.Client
+	p             map[models.Network]platformvm.Client
+	c             map[models.Network]ethclient.Client
+	cGeth         map[models.Network]*goethereumethclient.Client
+	evm           map[models.Network]map[string]ethclient.Client
+	evmGeth       map[models.Network]map[string]*goethereumethclient.Client
+	blockchainRPC map[models.Network]map[string]string
+}
+
+func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool, subnets []string) (
+	*Clients,
 	error,
 ) {
-	apiEndpoints := map[models.Network]string{
-		models.Testnet:    constants.TestnetAPIEndpoint,
-		models.Mainnet: constants.MainnetAPIEndpoint,
-		models.Local:   constants.LocalAPIEndpoint,
-	}
 	var err error
-	pClients := map[models.Network]*platformvm.Client{}
+	xClients := map[models.Network]avm.Client{}
+	pClients := map[models.Network]platformvm.Client{}
 	cClients := map[models.Network]ethclient.Client{}
+	cGethClients := map[models.Network]*goethereumethclient.Client{}
+	evmClients := map[models.Network]map[string]ethclient.Client{}
+	evmGethClients := map[models.Network]map[string]*goethereumethclient.Client{}
+	blockchainRPCs := map[models.Network]map[string]string{}
 	for _, network := range networks {
-		pClients[network] = platformvm.NewClient(apiEndpoints[network])
+		if pchain {
+			pClients[network] = platformvm.NewClient(network.Endpoint)
+		}
+		if xchain {
+			xClients[network] = avm.NewClient(network.Endpoint, "X")
+		}
 		if cchain {
-			cClients[network], err = ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoints[network], "C"))
+			cClients[network], err = ethclient.Dial(network.CChainEndpoint())
 			if err != nil {
-				return nil, nil, err
+				return nil, err
+			}
+			if len(tokenAddresses) != 0 {
+				cGethClients[network], err = goethereumethclient.Dial(network.CChainEndpoint())
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+		for _, subnetName := range subnets {
+			if subnetName != "p" && subnetName != "x" && subnetName != "c" {
+				_, err = blockchaincmd.ValidateSubnetNameAndGetChains([]string{subnetName})
+				if err != nil {
+					return nil, err
+				}
+				b, _, err := app.HasSubnetEVMGenesis(subnetName)
+				if err != nil {
+					return nil, err
+				}
+				if b {
+					sc, err := app.LoadSidecar(subnetName)
+					if err != nil {
+						return nil, err
+					}
+					subnetToken = sc.TokenSymbol
+					endpoint, _, err := contract.GetBlockchainEndpoints(
+						app,
+						network,
+						contract.ChainSpec{
+							BlockchainName: subnetName,
+						},
+						true,
+						false,
+					)
+					if err == nil {
+						_, b := blockchainRPCs[network]
+						if !b {
+							blockchainRPCs[network] = map[string]string{}
+						}
+						blockchainRPCs[network][subnetName] = endpoint
+						_, b = evmClients[network]
+						if !b {
+							evmClients[network] = map[string]ethclient.Client{}
+						}
+						evmClients[network][subnetName], err = ethclient.Dial(endpoint)
+						if err != nil {
+							return nil, err
+						}
+						if len(tokenAddresses) != 0 {
+							_, b := evmGethClients[network]
+							if !b {
+								evmGethClients[network] = map[string]*goethereumethclient.Client{}
+							}
+							evmGethClients[network][subnetName], err = goethereumethclient.Dial(endpoint)
+							if err != nil {
+								return nil, err
+							}
+						}
+					}
+				}
 			}
 		}
 	}
-	return pClients, cClients, nil
+	return &Clients{
+		p:             pClients,
+		x:             xClients,
+		c:             cClients,
+		evm:           evmClients,
+		cGeth:         cGethClients,
+		evmGeth:       evmGethClients,
+		blockchainRPC: blockchainRPCs,
+	}, nil
 }
 
 type addressInfo struct {
 	kind    string
 	name    string
 	chain   string
+	token   string
 	address string
 	balance string
 	network string
@@ -142,32 +259,66 @@ type addressInfo struct {
 func listKeys(*cobra.Command, []string) error {
 	var addrInfos []addressInfo
 	networks := []models.Network{}
-	if local || all {
-		networks = append(networks, models.Local)
+	if globalNetworkFlags.UseLocal || all {
+		networks = append(networks, models.NewLocalNetwork())
 	}
-	if testnet || all {
-		networks = append(networks, models.Testnet)
+	if globalNetworkFlags.UseFuji || all {
+		networks = append(networks, models.NewFujiNetwork())
 	}
-	if mainnet || all {
-		networks = append(networks, models.Mainnet)
+	if globalNetworkFlags.UseMainnet || all {
+		networks = append(networks, models.NewMainnetNetwork())
+	}
+	if globalNetworkFlags.ClusterName != "" {
+		network, err := app.GetClusterNetwork(globalNetworkFlags.ClusterName)
+		if err != nil {
+			return err
+		}
+		networks = append(networks, network)
 	}
 	if len(networks) == 0 {
-		// no flag was set, prompt user
-		networkStr, err := app.Prompt.CaptureList(
-			"Choose network for which to list addresses",
-			[]string{models.Mainnet.String(), models.Testnet.String(), models.Local.String()},
+		network, err := networkoptions.GetNetworkFromCmdLineFlags(
+			app,
+			"",
+			globalNetworkFlags,
+			true,
+			false,
+			networkoptions.DefaultSupportedNetworkOptions,
+			"",
 		)
 		if err != nil {
 			return err
 		}
-		network := models.NetworkFromString(networkStr)
 		networks = append(networks, network)
+	}
+	mainnetIsIncluded := len(utils.Filter(networks, func(n models.Network) bool { return n.Kind == models.Mainnet })) > 0
+	if mainnetIsIncluded && len(keys) != 1 {
+		ux.Logger.PrintToUser("For mainnet you need to specify the key name to be listed by using the --keys flag")
+		return nil
+	}
+
+	if len(subnets) == 0 {
+		subnets = []string{"p", "x", "c"}
+	}
+	if !sdkUtils.Belongs(subnets, "p") {
+		pchain = false
+	}
+	if !sdkUtils.Belongs(subnets, "x") {
+		xchain = false
+	}
+	if !sdkUtils.Belongs(subnets, "c") {
+		cchain = false
 	}
 	queryLedger := len(ledgerIndices) > 0
 	if queryLedger {
+		pchain = true
 		cchain = false
+		xchain = false
 	}
-	pClients, cClients, err := getClients(networks, cchain)
+	if sdkUtils.Belongs(tokenAddresses, "Native") || sdkUtils.Belongs(tokenAddresses, "native") {
+		showNativeToken = true
+	}
+	tokenAddresses = utils.RemoveFromSlice(tokenAddresses, "Native")
+	clients, err := getClients(networks, pchain, cchain, xchain, subnets)
 	if err != nil {
 		return err
 	}
@@ -176,12 +327,12 @@ func listKeys(*cobra.Command, []string) error {
 		for _, index := range ledgerIndices {
 			ledgerIndicesU32 = append(ledgerIndicesU32, uint32(index))
 		}
-		addrInfos, err = getLedgerIndicesInfo(pClients, ledgerIndicesU32, networks)
+		addrInfos, err = getLedgerIndicesInfo(clients.p, ledgerIndicesU32, networks)
 		if err != nil {
 			return err
 		}
 	} else {
-		addrInfos, err = getStoredKeysInfo(pClients, cClients, networks, cchain)
+		addrInfos, err = getStoredKeysInfo(clients, networks)
 		if err != nil {
 			return err
 		}
@@ -191,24 +342,19 @@ func listKeys(*cobra.Command, []string) error {
 }
 
 func getStoredKeysInfo(
-	pClients map[models.Network]*platformvm.Client,
-	cClients map[models.Network]ethclient.Client,
+	clients *Clients,
 	networks []models.Network,
-	cchain bool,
 ) ([]addressInfo, error) {
-	files, err := os.ReadDir(app.GetKeyDir())
+	keyNames, err := utils.GetKeyNames(app.GetKeyDir(), true)
 	if err != nil {
 		return nil, err
 	}
-	keyPaths := make([]string, len(files))
-	for i, f := range files {
-		if strings.HasSuffix(f.Name(), constants.KeySuffix) {
-			keyPaths[i] = filepath.Join(app.GetKeyDir(), f.Name())
-		}
+	if len(keys) != 0 {
+		keyNames = utils.Filter(keyNames, func(keyName string) bool { return sdkUtils.Belongs(keys, keyName) })
 	}
 	addrInfos := []addressInfo{}
-	for _, keyPath := range keyPaths {
-		keyAddrInfos, err := getStoredKeyInfo(pClients, cClients, networks, keyPath, cchain)
+	for _, keyName := range keyNames {
+		keyAddrInfos, err := getStoredKeyInfo(clients, networks, keyName)
 		if err != nil {
 			return nil, err
 		}
@@ -218,45 +364,74 @@ func getStoredKeysInfo(
 }
 
 func getStoredKeyInfo(
-	pClients map[models.Network]*platformvm.Client,
-	cClients map[models.Network]ethclient.Client,
+	clients *Clients,
 	networks []models.Network,
-	keyPath string,
-	cchain bool,
+	keyName string,
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		networkID, err := network.NetworkID()
+		sk, err := app.GetKey(keyName, network, false)
 		if err != nil {
 			return nil, err
 		}
-		keyName := strings.TrimSuffix(filepath.Base(keyPath), constants.KeySuffix)
-		sk, err := key.LoadSoft(networkID, keyPath)
-		if err != nil {
-			return nil, err
+		if _, ok := clients.evm[network]; ok {
+			evmAddr := sk.C()
+			for subnetName := range clients.evm[network] {
+				addrInfo, err := getEvmBasedChainAddrInfo(
+					subnetName,
+					subnetToken,
+					clients.evm[network][subnetName],
+					clients.evmGeth[network][subnetName],
+					network,
+					evmAddr,
+					"stored",
+					keyName,
+				)
+				if err != nil {
+					ux.Logger.RedXToUser(
+						"failure obtaining info for blockchain %s on url %s",
+						subnetName,
+						clients.blockchainRPC[network][subnetName],
+					)
+					continue
+				}
+				addrInfos = append(addrInfos, addrInfo...)
+			}
 		}
-		if cchain {
+		if _, ok := clients.c[network]; ok {
 			cChainAddr := sk.C()
-			addrInfo, err := getCChainAddrInfo(cClients, network, cChainAddr, "stored", keyName)
+			addrInfo, err := getEvmBasedChainAddrInfo("C-Chain", "LUX", clients.c[network], clients.cGeth[network], network, cChainAddr, "stored", keyName)
 			if err != nil {
 				return nil, err
 			}
-			addrInfos = append(addrInfos, addrInfo)
+			addrInfos = append(addrInfos, addrInfo...)
 		}
-		pChainAddrs := sk.P()
-		for _, pChainAddr := range pChainAddrs {
-			addrInfo, err := getPChainAddrInfo(pClients, network, pChainAddr, "stored", keyName)
-			if err != nil {
-				return nil, err
+		if _, ok := clients.p[network]; ok {
+			pChainAddrs := sk.P()
+			for _, pChainAddr := range pChainAddrs {
+				addrInfo, err := getPChainAddrInfo(clients.p, network, pChainAddr, "stored", keyName)
+				if err != nil {
+					return nil, err
+				}
+				addrInfos = append(addrInfos, addrInfo)
 			}
-			addrInfos = append(addrInfos, addrInfo)
+		}
+		if _, ok := clients.x[network]; ok {
+			xChainAddrs := sk.X()
+			for _, xChainAddr := range xChainAddrs {
+				addrInfo, err := getXChainAddrInfo(clients.x, network, xChainAddr, "stored", keyName)
+				if err != nil {
+					return nil, err
+				}
+				addrInfos = append(addrInfos, addrInfo)
+			}
 		}
 	}
 	return addrInfos, nil
 }
 
 func getLedgerIndicesInfo(
-	pClients map[models.Network]*platformvm.Client,
+	pClients map[models.Network]platformvm.Client,
 	ledgerIndices []uint32,
 	networks []models.Network,
 ) ([]addressInfo, error) {
@@ -284,18 +459,14 @@ func getLedgerIndicesInfo(
 }
 
 func getLedgerIndexInfo(
-	pClients map[models.Network]*platformvm.Client,
+	pClients map[models.Network]platformvm.Client,
 	index uint32,
 	networks []models.Network,
 	addr ids.ShortID,
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		networkID, err := network.NetworkID()
-		if err != nil {
-			return nil, err
-		}
-		pChainAddr, err := address.Format("P", key.GetHRP(networkID), addr[:])
+		pChainAddr, err := address.Format("P", key.GetHRP(network.ID), addr[:])
 		if err != nil {
 			return nil, err
 		}
@@ -315,55 +486,140 @@ func getLedgerIndexInfo(
 }
 
 func getPChainAddrInfo(
-	pClients map[models.Network]*platformvm.Client,
+	pClients map[models.Network]platformvm.Client,
 	network models.Network,
 	pChainAddr string,
 	kind string,
 	name string,
 ) (addressInfo, error) {
-	balance, err := getPChainBalanceStr(context.Background(), *pClients[network], pChainAddr)
+	balance, err := getPChainBalanceStr(pClients[network], pChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network != models.Local {
+		if network.Kind != models.Local {
 			return addressInfo{}, err
 		}
 	}
 	return addressInfo{
 		kind:    kind,
 		name:    name,
-		chain:   "P-Chain (Bech32 format)",
+		chain:   "P-Chain",
+		token:   "LUX",
 		address: pChainAddr,
 		balance: balance,
-		network: network.String(),
+		network: network.Name(),
 	}, nil
 }
 
-func getCChainAddrInfo(
-	cClients map[models.Network]ethclient.Client,
+func getXChainAddrInfo(
+	xClients map[models.Network]avm.Client,
+	network models.Network,
+	xChainAddr string,
+	kind string,
+	name string,
+) (addressInfo, error) {
+	balance, err := getXChainBalanceStr(xClients[network], xChainAddr)
+	if err != nil {
+		// just ignore local network errors
+		if network.Kind != models.Local {
+			return addressInfo{}, err
+		}
+	}
+	return addressInfo{
+		kind:    kind,
+		name:    name,
+		chain:   "X-Chain",
+		token:   "LUX",
+		address: xChainAddr,
+		balance: balance,
+		network: network.Name(),
+	}, nil
+}
+
+func getEvmBasedChainAddrInfo(
+	chainName string,
+	chainToken string,
+	cClient ethclient.Client,
+	cGethClient *goethereumethclient.Client,
 	network models.Network,
 	cChainAddr string,
 	kind string,
 	name string,
-) (addressInfo, error) {
-	cChainBalance, err := getCChainBalanceStr(context.Background(), cClients[network], cChainAddr)
-	if err != nil {
-		// just ignore local network errors
-		if network != models.Local {
-			return addressInfo{}, err
+) ([]addressInfo, error) {
+	addressInfos := []addressInfo{}
+	if showNativeToken {
+		cChainBalance, err := getCChainBalanceStr(cClient, cChainAddr)
+		if err != nil {
+			// just ignore local network errors
+			if network.Kind != models.Local {
+				return nil, err
+			}
+		}
+		taggedChainToken := chainToken
+		if taggedChainToken != "LUX" {
+			taggedChainToken = fmt.Sprintf("%s (Native)", taggedChainToken)
+		}
+		info := addressInfo{
+			kind:    kind,
+			name:    name,
+			chain:   chainName,
+			token:   taggedChainToken,
+			address: cChainAddr,
+			balance: cChainBalance,
+			network: network.Name(),
+		}
+		addressInfos = append(addressInfos, info)
+	}
+	if cGethClient != nil {
+		for _, tokenAddress := range tokenAddresses {
+			token, err := erc20.NewGGToken(common.HexToAddress(tokenAddress), cGethClient)
+			if err != nil {
+				return addressInfos, err
+			}
+
+			// Ignore contract address access errors as those may depend on network
+			tokenSymbol, err := token.Symbol(nil)
+			if err != nil {
+				continue
+			}
+
+			// Get the raw balance for the given token.
+			balance, err := token.BalanceOf(nil, common.HexToAddress(cChainAddr))
+			if err != nil {
+				return addressInfos, err
+			}
+
+			// Get the decimal count for the token to format the balance.
+			// Note: decimals() is not officially part of the IERC20 interface, but is a common extension.
+			decimals, err := token.Decimals(nil)
+			if err != nil {
+				return addressInfos, err
+			}
+
+			// Format the balance to a human-readable string.
+			var formattedBalance string
+			if useGwei {
+				formattedBalance = fmt.Sprintf("%d", balance)
+			} else {
+				formattedBalance = utils.FormatAmount(balance, decimals)
+			}
+
+			info := addressInfo{
+				kind:    kind,
+				name:    name,
+				chain:   chainName,
+				token:   fmt.Sprintf("%s (%s.)", tokenSymbol, tokenAddress[:6]),
+				address: cChainAddr,
+				balance: formattedBalance,
+				network: network.Name(),
+			}
+			addressInfos = append(addressInfos, info)
 		}
 	}
-	return addressInfo{
-		kind:    kind,
-		name:    name,
-		chain:   "C-Chain (Ethereum hex format)",
-		address: cChainAddr,
-		balance: cChainBalance,
-		network: network.String(),
-	}, nil
+	return addressInfos, nil
 }
 
 func printAddrInfos(addrInfos []addressInfo) {
-	header := []string{"Kind", "Name", "Chain", "Address", "Balance", "Network"}
+	header := []string{"Kind", "Name", "Subnet", "Address", "Token", "Balance", "Network"}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
 	table.SetRowLine(true)
@@ -374,6 +630,7 @@ func printAddrInfos(addrInfos []addressInfo) {
 			addrInfo.name,
 			addrInfo.chain,
 			addrInfo.address,
+			addrInfo.token,
 			addrInfo.balance,
 			addrInfo.network,
 		})
@@ -381,28 +638,41 @@ func printAddrInfos(addrInfos []addressInfo) {
 	table.Render()
 }
 
-func getCChainBalanceStr(ctx context.Context, cClient ethclient.Client, addrStr string) (string, error) {
+func getCChainBalanceStr(cClient ethclient.Client, addrStr string) (string, error) {
 	addr := common.HexToAddress(addrStr)
-	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
 	cancel()
 	if err != nil {
 		return "", err
 	}
-	// convert to nLux
-	balance = balance.Div(balance, big.NewInt(int64(units.Lux)))
-	if balance.Cmp(big.NewInt(0)) == 0 {
-		return "0", nil
-	}
-	return fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Lux)), nil
+	return formatCChainBalance(balance)
 }
 
-func getPChainBalanceStr(ctx context.Context, pClient platformvm.Client, addr string) (string, error) {
+func formatCChainBalance(balance *big.Int) (string, error) {
+	if useGwei {
+		return fmt.Sprintf("%d", balance), nil
+	}
+
+	result := evm.ConvertToNanoLux(balance)
+	if result.Cmp(big.NewInt(0)) == 0 {
+		return "0", nil
+	}
+	balanceStr := ""
+	if useNanoLux {
+		balanceStr = fmt.Sprintf("%9d", result.Uint64())
+	} else {
+		balanceStr = fmt.Sprintf("%.9f", float64(result.Uint64())/float64(units.Lux))
+	}
+	return balanceStr, nil
+}
+
+func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error) {
 	pID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err
 	}
-	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
+	ctx, cancel := utils.GetAPIContext()
 	resp, err := pClient.GetBalance(ctx, []ids.ShortID{pID})
 	cancel()
 	if err != nil {
@@ -411,5 +681,40 @@ func getPChainBalanceStr(ctx context.Context, pClient platformvm.Client, addr st
 	if resp.Balance == 0 {
 		return "0", nil
 	}
-	return fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Lux)), nil
+	balanceStr := ""
+	if useNanoLux {
+		balanceStr = fmt.Sprintf("%9d", resp.Balance)
+	} else {
+		balanceStr = fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Lux))
+	}
+	return balanceStr, nil
+}
+
+func getXChainBalanceStr(xClient avm.Client, addr string) (string, error) {
+	xID, err := address.ParseToID(addr)
+	if err != nil {
+		return "", err
+	}
+	ctx, cancel := utils.GetAPIContext()
+	defer cancel()
+	asset, err := xClient.GetAssetDescription(ctx, "LUX")
+	if err != nil {
+		return "", err
+	}
+	ctx, cancel = utils.GetAPILargeContext()
+	defer cancel()
+	resp, err := xClient.GetBalance(ctx, xID, asset.AssetID.String(), false)
+	if err != nil {
+		return "", err
+	}
+	if resp.Balance == 0 {
+		return "0", nil
+	}
+	balanceStr := ""
+	if useNanoLux {
+		balanceStr = fmt.Sprintf("%9d", resp.Balance)
+	} else {
+		balanceStr = fmt.Sprintf("%.9f", float64(resp.Balance)/float64(units.Lux))
+	}
+	return balanceStr, nil
 }

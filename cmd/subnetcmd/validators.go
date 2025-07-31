@@ -37,7 +37,6 @@ severarl statistics about them.`,
 	}
 	cmd.Flags().BoolVarP(&validatorsLocal, "local", "l", false, "deploy to a local network")
 	cmd.Flags().BoolVarP(&validatorsTestnet, "testnet", "t", false, "deploy to testnet (alias to `testnet`)")
-	cmd.Flags().BoolVarP(&validatorsTestnet, "testnet", "f", false, "deploy to testnet (alias to `testnet`")
 	cmd.Flags().BoolVarP(&validatorsMainnet, "mainnet", "m", false, "deploy to mainnet")
 	return cmd
 }

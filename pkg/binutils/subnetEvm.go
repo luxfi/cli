@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package binutils
@@ -10,23 +10,24 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
-func SetupEVM(app *application.Lux, subnetEVMVersion string) (string, error) {
+func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, string, error) {
 	// Check if already installed
-	binDir := app.GetEVMBinDir()
+	binDir := app.GetSubnetEVMBinDir()
 	subDir := filepath.Join(binDir, subnetEVMBinPrefix+subnetEVMVersion)
 
 	installer := NewInstaller()
-	downloader := NewEVMDownloader()
-	vmDir, err := InstallBinary(
+	downloader := NewSubnetEVMDownloader()
+	version, vmDir, err := InstallBinary(
 		app,
 		subnetEVMVersion,
 		binDir,
 		subDir,
 		subnetEVMBinPrefix,
 		constants.LuxOrg,
-		constants.EVMRepoName,
+		constants.SubnetEVMRepoName,
+		"",
 		downloader,
 		installer,
 	)
-	return filepath.Join(vmDir, constants.EVMBin), err
+	return version, filepath.Join(vmDir, constants.SubnetEVMBin), err
 }
