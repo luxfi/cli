@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package plugins
@@ -55,7 +55,7 @@ func getScanConfigDirs() ([]string, error) {
 		home,
 		filepath.Join(home, constants.LuxRepoName),
 		filepath.Join(home, defaultLuxBuildDir),
-		filepath.Join(home, ".node"),
+		filepath.Join(home, ".luxd"),
 		defaultUnexpandedDataDir,
 	)
 	return scanConfigDirs, nil
