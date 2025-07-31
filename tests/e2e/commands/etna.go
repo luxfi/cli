@@ -82,11 +82,11 @@ func CreateEtnaSubnetEvmConfig(
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
-	return mapping[utils.LatestEVM2AvagoKey], mapping[utils.LatestAvago2EVMKey]
+	return mapping[utils.LatestEVM2LuxdKey], mapping[utils.LatestLuxd2EVMKey]
 }
 
 func CreateLocalEtnaNode(
-	avagoVersion string,
+	luxdVersion string,
 	clusterName string,
 	numNodes int,
 ) (string, error) {
@@ -100,7 +100,7 @@ func CreateLocalEtnaNode(
 		"--num-nodes",
 		fmt.Sprintf("%d", numNodes),
 		"--custom-luxd-version",
-		avagoVersion,
+		luxdVersion,
 		"--"+constants.SkipUpdateFlag,
 	)
 	fmt.Println(cmd)

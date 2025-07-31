@@ -132,8 +132,8 @@ func exportSubnet(_ *cobra.Command, args []string) error {
 
 	var nodeConfig, chainConfig, subnetConfig, networkUpgrades []byte
 
-	if app.AvagoNodeConfigExists(blockchainName) {
-		nodeConfig, err = app.LoadRawAvagoNodeConfig(blockchainName)
+	if app.LuxdNodeConfigExists(blockchainName) {
+		nodeConfig, err = app.LoadRawLuxdNodeConfig(blockchainName)
 		if err != nil {
 			return err
 		}
@@ -144,8 +144,8 @@ func exportSubnet(_ *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	if app.AvagoSubnetConfigExists(blockchainName) {
-		subnetConfig, err = app.LoadRawAvagoSubnetConfig(blockchainName)
+	if app.LuxdSubnetConfigExists(blockchainName) {
+		subnetConfig, err = app.LoadRawLuxdSubnetConfig(blockchainName)
 		if err != nil {
 			return err
 		}

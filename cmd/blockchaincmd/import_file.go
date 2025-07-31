@@ -155,11 +155,11 @@ func importFromFile(importPath string) error {
 	}
 
 	if importable.NodeConfig != nil {
-		if err := app.WriteAvagoNodeConfigFile(blockchainName, importable.NodeConfig); err != nil {
+		if err := app.WriteLuxdNodeConfigFile(blockchainName, importable.NodeConfig); err != nil {
 			return err
 		}
 	} else {
-		_ = os.RemoveAll(app.GetAvagoNodeConfigPath(blockchainName))
+		_ = os.RemoveAll(app.GetLuxdNodeConfigPath(blockchainName))
 	}
 
 	if importable.ChainConfig != nil {
@@ -171,11 +171,11 @@ func importFromFile(importPath string) error {
 	}
 
 	if importable.SubnetConfig != nil {
-		if err := app.WriteAvagoSubnetConfigFile(blockchainName, importable.SubnetConfig); err != nil {
+		if err := app.WriteLuxdSubnetConfigFile(blockchainName, importable.SubnetConfig); err != nil {
 			return err
 		}
 	} else {
-		_ = os.RemoveAll(app.GetAvagoSubnetConfigPath(blockchainName))
+		_ = os.RemoveAll(app.GetLuxdSubnetConfigPath(blockchainName))
 	}
 
 	if importable.NetworkUpgrades != nil {

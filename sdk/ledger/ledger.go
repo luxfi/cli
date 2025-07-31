@@ -24,12 +24,12 @@ type LedgerDevice struct {
 }
 
 func New() (*LedgerDevice, error) {
-	avagoDev, err := ledger.New()
+	luxdDev, err := ledger.New()
 	if err != nil {
 		return nil, err
 	}
 	dev := LedgerDevice{
-		Ledger: avagoDev,
+		Ledger: luxdDev,
 	}
 	return &dev, nil
 }

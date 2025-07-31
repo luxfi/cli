@@ -27,8 +27,8 @@ type LocalMachineFlags struct {
 	PartialSync              bool
 	HTTPPorts                []uint
 	StakingPorts             []uint
-	AvagoBinaryPath          string
-	UserProvidedAvagoVersion string
+	LuxdBinaryPath          string
+	UserProvidedLuxdVersion string
 	StakingTLSKeyPaths       []string
 	StakingCertKeyPaths      []string
 	StakingSignerKeyPaths    []string
@@ -47,9 +47,9 @@ func AddLocalMachineFlagsToCmd(cmd *cobra.Command, localMachineFlags *LocalMachi
 		set.BoolVar(&localMachineFlags.PartialSync, partialSyncFlag, true, "set primary network partial sync for new validators")
 		set.UintSliceVar(&localMachineFlags.HTTPPorts, httpPortFlag, []uint{}, "http port for node(s)")
 		set.UintSliceVar(&localMachineFlags.StakingPorts, stakingPortFlag, []uint{}, "staking port for node(s)")
-		set.StringVar(&localMachineFlags.AvagoBinaryPath, luxdPathFlag, "", "use this luxd binary path")
+		set.StringVar(&localMachineFlags.LuxdBinaryPath, luxdPathFlag, "", "use this luxd binary path")
 		set.StringVar(
-			&localMachineFlags.UserProvidedAvagoVersion,
+			&localMachineFlags.UserProvidedLuxdVersion,
 			luxdVersionFlag,
 			constants.DefaultLuxGoVersion,
 			"use this version of luxd (ex: v1.17.12)",

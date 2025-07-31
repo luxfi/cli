@@ -62,8 +62,8 @@ func UpdateBlockchainConfig(
 			return err
 		}
 	}
-	if app.AvagoSubnetConfigExists(blockchainName) {
-		subnetConfig, err = os.ReadFile(app.GetAvagoSubnetConfigPath(blockchainName))
+	if app.LuxdSubnetConfigExists(blockchainName) {
+		subnetConfig, err = os.ReadFile(app.GetLuxdSubnetConfigPath(blockchainName))
 		if err != nil {
 			return err
 		}
@@ -81,8 +81,8 @@ func UpdateBlockchainConfig(
 		return fmt.Errorf("invalid common node config JSON: %w", err)
 	}
 	// blockchain node config
-	if app.AvagoNodeConfigExists(blockchainName) {
-		blockchainNodeConfig, err := utils.ReadJSON(app.GetAvagoNodeConfigPath(blockchainName))
+	if app.LuxdNodeConfigExists(blockchainName) {
+		blockchainNodeConfig, err := utils.ReadJSON(app.GetLuxdNodeConfigPath(blockchainName))
 		if err != nil {
 			return err
 		}
