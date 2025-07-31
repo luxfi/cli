@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
-	warpMessage "github.com/luxfi/node/vms/platformvm/warp/message"
+	warpMessage "github.com/luxfi/warp"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"

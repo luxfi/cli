@@ -13,7 +13,7 @@ import (
 
 	"github.com/luxfi/cli/sdk/constants"
 	mockethclient "github.com/luxfi/cli/sdk/mocks/ethclient"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/core/types"
 	subnetethclient "github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/interfaces"
