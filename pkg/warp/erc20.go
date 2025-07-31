@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/liyue201/erc20-go/erc20"
+	"github.com/luxfi/erc20-go/erc20"
 )
 
 func GetTokenParams(endpoint string, tokenAddress common.Address) (string, string, uint8, error) {
