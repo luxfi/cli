@@ -27,7 +27,7 @@ import (
 var (
 	logsNetworkOptions = []networkoptions.NetworkOption{
 		networkoptions.Local,
-		networkoptions.Fuji,
+		networkoptions.Testnet,
 	}
 	raw                bool
 	last               uint

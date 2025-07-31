@@ -864,13 +864,13 @@ func setWarpRelayerSecurityGroupRule(clusterName string, awmRelayerHost *models.
 			if !securityGroupExists {
 				return fmt.Errorf("security group %s doesn't exist in region %s", nodeConfig.SecurityGroup, nodeConfig.Region)
 			}
-			if inSG := awsAPI.CheckIPInSg(&sg, awmRelayerHost.IP, constants.LuxGoAPIPort); !inSG {
+			if inSG := awsAPI.CheckIPInSg(&sg, awmRelayerHost.IP, constants.LuxdAPIPort); !inSG {
 				if err = ec2Svc.AddSecurityGroupRule(
 					*sg.GroupId,
 					"ingress",
 					"tcp",
 					awmRelayerHost.IP+constants.IPAddressSuffix,
-					constants.LuxGoAPIPort,
+					constants.LuxdAPIPort,
 				); err != nil {
 					return err
 				}
@@ -944,7 +944,7 @@ func setUpSubnetLogging(clusterName, subnetName string) error {
 				ux.SpinFailWithError(spinner, "", err)
 				return
 			}
-			if err = ssh.RunSSHSetupPromtailConfig(host, monitoringHosts[0].IP, constants.LuxGoLokiPort, cloudID, nodeID.String(), chainID); err != nil {
+			if err = ssh.RunSSHSetupPromtailConfig(host, monitoringHosts[0].IP, constants.LuxdLokiPort, cloudID, nodeID.String(), chainID); err != nil {
 				wgResults.AddResult(host.NodeID, nil, err)
 				ux.SpinFailWithError(spinner, "", err)
 				return

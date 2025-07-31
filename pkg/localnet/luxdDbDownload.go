@@ -17,19 +17,19 @@ import (
 )
 
 // Downloads luxd database into the given [nodeNames]
-// To be used on [fuji] only, after creating the nodes, but previously starting them.
-func DownloadLuxGoDB(
+// To be used on [testnet] only, after creating the nodes, but previously starting them.
+func DownloadLuxdDB(
 	clusterNetwork models.Network,
 	rootDir string,
 	nodeNames []string,
 	log logging.Logger,
 	printFunc func(msg string, args ...interface{}),
 ) error {
-	// only for fuji
-	if clusterNetwork.Kind != models.Fuji {
+	// only for testnet
+	if clusterNetwork.Kind != models.Testnet {
 		return nil
 	}
-	network := network.FujiNetwork()
+	network := network.TestnetNetwork()
 	printFunc("Downloading public archive for network %s", clusterNetwork.Name())
 	publicArcDownloader, err := publicarchive.NewDownloader(network, logging.NewLogger("public-archive-downloader", logging.NewWrappedCore(logging.Off, os.Stdout, logging.JSON.ConsoleEncoder()))) // off as we run inside of the spinner
 	if err != nil {

@@ -17,7 +17,7 @@ import (
 )
 
 type configInputs struct {
-	LuxGoPorts string
+	LuxdPorts string
 	MachinePorts     string
 	LoadTestPorts    string
 	IP               string
@@ -77,9 +77,9 @@ func GenerateConfig(configPath string, configDesc string, templateVars configInp
 	return config.String(), nil
 }
 
-func WritePrometheusConfig(filePath string, luxGoPorts []string, machinePorts []string, loadTestPorts []string) error {
+func WritePrometheusConfig(filePath string, luxdPorts []string, machinePorts []string, loadTestPorts []string) error {
 	config, err := GenerateConfig("configs/prometheus.yml", "Prometheus Config", configInputs{
-		LuxGoPorts: strings.Join(utils.AddSingleQuotes(luxGoPorts), ","),
+		LuxdPorts: strings.Join(utils.AddSingleQuotes(luxdPorts), ","),
 		MachinePorts:     strings.Join(utils.AddSingleQuotes(machinePorts), ","),
 		LoadTestPorts:    strings.Join(utils.AddSingleQuotes(loadTestPorts), ","),
 	})

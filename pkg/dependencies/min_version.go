@@ -26,9 +26,9 @@ func CheckVersionIsOverMin(app *application.Lux, dependencyName string, network 
 	}
 
 	switch dependencyName {
-	case constants.LuxGoRepoName:
+	case constants.LuxdRepoName:
 		// version has to be at least higher than minimum version specified for the dependency
-		minVersion := parsedDependency.LuxGo[network.Name()].MinimumVersion
+		minVersion := parsedDependency.Luxd[network.Name()].MinimumVersion
 		versionComparison := semver.Compare(version, minVersion)
 		if versionComparison == -1 {
 			return fmt.Errorf("minimum version of %s that is supported by CLI is %s, current version provided is %s", dependencyName, minVersion, version)

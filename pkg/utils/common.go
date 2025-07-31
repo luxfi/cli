@@ -358,7 +358,7 @@ func GetCodespaceURL(url string) (string, error) {
 	if codespaceName == "" {
 		return "", nil
 	}
-	if strings.HasPrefix(url, constants.MainnetAPIEndpoint) || strings.HasPrefix(url, constants.FujiAPIEndpoint) {
+	if strings.HasPrefix(url, constants.MainnetAPIEndpoint) || strings.HasPrefix(url, constants.TestnetAPIEndpoint) {
 		return "", nil
 	}
 	_, port, path, err := GetURIHostPortAndPath(url)

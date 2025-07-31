@@ -318,7 +318,7 @@ func startLoadTest(_ *cobra.Command, args []string) error {
 		return err
 	}
 	if len(monitoringHosts) > 0 {
-		if err := ssh.RunSSHSetupPromtailConfig(currentLoadTestHost[0], monitoringHosts[0].IP, constants.LuxGoLokiPort, currentLoadTestHost[0].GetCloudID(), "NodeID-Loadtest", ""); err != nil {
+		if err := ssh.RunSSHSetupPromtailConfig(currentLoadTestHost[0], monitoringHosts[0].IP, constants.LuxdLokiPort, currentLoadTestHost[0].GetCloudID(), "NodeID-Loadtest", ""); err != nil {
 			return err
 		}
 		if err := ssh.RunSSHSetupDockerService(currentLoadTestHost[0]); err != nil {
@@ -327,11 +327,11 @@ func startLoadTest(_ *cobra.Command, args []string) error {
 		if err := docker.ComposeSSHSetupLoadTest(currentLoadTestHost[0]); err != nil {
 			return err
 		}
-		luxGoPorts, machinePorts, ltPorts, err := getPrometheusTargets(clusterName)
+		luxdPorts, machinePorts, ltPorts, err := getPrometheusTargets(clusterName)
 		if err != nil {
 			return err
 		}
-		if err := ssh.RunSSHSetupPrometheusConfig(monitoringHosts[0], luxGoPorts, machinePorts, ltPorts); err != nil {
+		if err := ssh.RunSSHSetupPrometheusConfig(monitoringHosts[0], luxdPorts, machinePorts, ltPorts); err != nil {
 			return err
 		}
 		if err := docker.RestartDockerComposeService(monitoringHosts[0], utils.GetRemoteComposeFile(), "prometheus", constants.SSHLongRunningScriptTimeout); err != nil {
@@ -422,7 +422,7 @@ func createClusterYAMLFile(clusterName, subnetID, chainID string, separateHost *
 			return err
 		}
 		nodeIDStr := ""
-		if clusterConf.IsLuxGoHost(cloudID) {
+		if clusterConf.IsLuxdHost(cloudID) {
 			nodeID, err := getNodeID(app.GetNodeInstanceDirPath(cloudID))
 			if err != nil {
 				return err

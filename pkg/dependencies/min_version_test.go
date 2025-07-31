@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testCLIMinVersion = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0", "minimum-version":""},"DevNet":{"latest-version":"v1.13.0", "minimum-version":""},"Fuji":{"latest-version":"v1.13.0", "minimum-version":"v1.13.0-fuji"},"Mainnet":{"latest-version":"v1.13.0", "minimum-version":"v1.13.0"}}}`)
+var testCLIMinVersion = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0", "minimum-version":""},"DevNet":{"latest-version":"v1.13.0", "minimum-version":""},"Testnet":{"latest-version":"v1.13.0", "minimum-version":"v1.13.0-testnet"},"Mainnet":{"latest-version":"v1.13.0", "minimum-version":"v1.13.0"}}}`)
 
 func TestCheckMinDependencyVersion(t *testing.T) {
 	tests := []struct {
@@ -27,47 +27,47 @@ func TestCheckMinDependencyVersion(t *testing.T) {
 	}{
 		{
 			name:              "custom luxd dependency equal to cli minimum supported version of luxd",
-			dependency:        constants.LuxGoRepoName,
+			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
-			customVersion:     "v1.13.0-fuji",
-			network:           models.NewFujiNetwork(),
+			customVersion:     "v1.13.0-testnet",
+			network:           models.NewTestnetNetwork(),
 		},
 		{
 			name:              "custom luxd dependency higher than cli minimum supported version of luxd",
-			dependency:        constants.LuxGoRepoName,
+			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
 			customVersion:     "v1.13.0",
-			network:           models.NewFujiNetwork(),
+			network:           models.NewTestnetNetwork(),
 		},
 		{
 			name:              "custom luxd dependency equal to cli minimum supported version of luxd",
-			dependency:        constants.LuxGoRepoName,
+			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
-			customVersion:     "v1.13.0-fuji",
-			network:           models.NewFujiNetwork(),
+			customVersion:     "v1.13.0-testnet",
+			network:           models.NewTestnetNetwork(),
 		},
 		{
 			name:              "custom luxd dependency higher than cli minimum supported version of luxd",
-			dependency:        constants.LuxGoRepoName,
+			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
 			customVersion:     "v1.13.1",
-			network:           models.NewFujiNetwork(),
+			network:           models.NewTestnetNetwork(),
 		},
 		{
 			name:              "custom luxd dependency lower than cli minimum supported version of luxd",
-			dependency:        constants.LuxGoRepoName,
+			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     true,
 			customVersion:     "v1.12.2",
-			network:           models.NewFujiNetwork(),
+			network:           models.NewTestnetNetwork(),
 		},
 		{
 			name:              "custom luxd dependency for network that doesn't have minimum supported version of luxd",
-			dependency:        constants.LuxGoRepoName,
+			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
 			customVersion:     "v1.12.2",

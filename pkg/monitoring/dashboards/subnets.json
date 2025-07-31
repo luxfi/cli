@@ -1876,7 +1876,7 @@
       {
         "current": {
           "selected": true,
-          "text": "Spaces (Fuji)",
+          "text": "Spaces (Testnet)",
           "value": "2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt"
         },
         "description": "This is a list of popular/known subnets. Your node may not be syncing these subnets in which case you will se no data.",
@@ -1888,16 +1888,16 @@
         "options": [
           {
             "selected": true,
-            "text": "Spaces (Fuji)",
+            "text": "Spaces (Testnet)",
             "value": "2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt"
           },
           {
             "selected": false,
-            "text": "WAGMI (Fuji)",
+            "text": "WAGMI (Testnet)",
             "value": "2AM3vsuLoJdGBGqX2ibE8RGEq4Lg7g4bot6BT1Z7B9dH5corUD"
           }
         ],
-        "query": "Spaces (Fuji) : 2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt, WAGMI (Fuji) : 2AM3vsuLoJdGBGqX2ibE8RGEq4Lg7g4bot6BT1Z7B9dH5corUD",
+        "query": "Spaces (Testnet) : 2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt, WAGMI (Testnet) : 2AM3vsuLoJdGBGqX2ibE8RGEq4Lg7g4bot6BT1Z7B9dH5corUD",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"

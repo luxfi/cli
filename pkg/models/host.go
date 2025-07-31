@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/utils"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 )
@@ -113,7 +112,7 @@ func (h *Host) Upload(localFile string, remoteFile string, timeout time.Duration
 			return err
 		}
 	}
-	_, err := utils.TimedFunction(
+	_, err := timedFunction(
 		func() (any, error) {
 			return nil, h.Connection.Upload(localFile, remoteFile)
 		},
@@ -152,7 +151,7 @@ func (h *Host) Download(remoteFile string, localFile string, timeout time.Durati
 	if err := os.MkdirAll(filepath.Dir(localFile), os.ModePerm); err != nil {
 		return err
 	}
-	_, err := utils.TimedFunction(
+	_, err := timedFunction(
 		func() (any, error) {
 			return nil, h.Connection.Download(remoteFile, localFile)
 		},
@@ -198,7 +197,7 @@ func (h *Host) MkdirAll(remoteDir string, timeout time.Duration) error {
 			return err
 		}
 	}
-	_, err := utils.TimedFunction(
+	_, err := timedFunction(
 		func() (any, error) {
 			return nil, h.UntimedMkdirAll(remoteDir)
 		},
@@ -255,7 +254,7 @@ func (h *Host) Forward(httpRequest string, timeout time.Duration) ([]byte, error
 			return nil, err
 		}
 	}
-	ret, err := utils.TimedFunctionWithRetry(
+	ret, err := timedFunctionWithRetry(
 		func() ([]byte, error) {
 			return h.UntimedForward(httpRequest)
 		},
@@ -278,20 +277,20 @@ func (h *Host) UntimedForward(httpRequest string) ([]byte, error) {
 			return nil, err
 		}
 	}
-	luxGoEndpoint := strings.TrimPrefix(constants.LocalAPIEndpoint, "http://")
-	luxGoAddr, err := net.ResolveTCPAddr("tcp", luxGoEndpoint)
+	luxdEndpoint := strings.TrimPrefix(constants.LocalAPIEndpoint, "http://")
+	luxdAddr, err := net.ResolveTCPAddr("tcp", luxdEndpoint)
 	if err != nil {
 		return nil, err
 	}
 	var proxy net.Conn
-	if utils.IsE2E() {
-		luxGoEndpoint = fmt.Sprintf("%s:%d", utils.E2EConvertIP(h.IP), constants.LuxGoAPIPort)
-		proxy, err = net.Dial("tcp", luxGoEndpoint)
+	if isE2E() {
+		luxdEndpoint = fmt.Sprintf("%s:%d", e2eConvertIP(h.IP), constants.LuxdAPIPort)
+		proxy, err = net.Dial("tcp", luxdEndpoint)
 		if err != nil {
-			return nil, fmt.Errorf("unable to port forward E2E to %s", luxGoEndpoint)
+			return nil, fmt.Errorf("unable to port forward E2E to %s", luxdEndpoint)
 		}
 	} else {
-		proxy, err = h.Connection.DialTCP("tcp", nil, luxGoAddr)
+		proxy, err = h.Connection.DialTCP("tcp", nil, luxdAddr)
 		if err != nil {
 			return nil, fmt.Errorf("unable to port forward to %s via %s", h.Connection.RemoteAddr(), "ssh")
 		}
@@ -352,7 +351,7 @@ func (h *Host) CreateTempFile() (string, error) {
 		return "", err
 	}
 	defer sftp.Close()
-	tmpFileName := filepath.Join("/tmp", utils.RandomString(10))
+	tmpFileName := filepath.Join("/tmp", randomString(10))
 	_, err = sftp.Create(tmpFileName)
 	if err != nil {
 		return "", err
@@ -372,7 +371,7 @@ func (h *Host) CreateTempDir() (string, error) {
 		return "", err
 	}
 	defer sftp.Close()
-	tmpDirName := filepath.Join("/tmp", utils.RandomString(10))
+	tmpDirName := filepath.Join("/tmp", randomString(10))
 	err = sftp.Mkdir(tmpDirName)
 	if err != nil {
 		return "", err

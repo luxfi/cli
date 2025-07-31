@@ -22,16 +22,16 @@ authority, the owner of the validator manager contract must sign the
 transaction. If the network is proof of stake, the node must stake the L1's
 staking token. Both processes will issue a RegisterL1ValidatorTx on the P-Chain.
 
-This command currently only works on Blockchains deployed to either the Fuji
+This command currently only works on Blockchains deployed to either the Testnet
 Testnet or Mainnet.
 - [`changeOwner`](#lux-blockchain-changeowner): The blockchain changeOwner changes the owner of the deployed Blockchain.
 - [`changeWeight`](#lux-blockchain-changeweight): The blockchain changeWeight command changes the weight of a L1 Validator.
 
 The L1 has to be a Proof of Authority L1.
-- [`configure`](#lux-blockchain-configure): LuxGo nodes support several different configuration files.
+- [`configure`](#lux-blockchain-configure): Luxd nodes support several different configuration files.
 Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
 Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for subnet-evm options).
-A chain can also have special requirements for the LuxGo node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
+A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.
 - [`create`](#lux-blockchain-create): The blockchain create command builds a new genesis file to configure your Blockchain.
 By default, the command runs an interactive wizard. It walks you through
@@ -45,16 +45,16 @@ By default, running the command with a blockchainName that already exists
 causes the command to fail. If you'd like to overwrite an existing
 configuration, pass the -f flag.
 - [`delete`](#lux-blockchain-delete): The blockchain delete command deletes an existing blockchain configuration.
-- [`deploy`](#lux-blockchain-deploy): The blockchain deploy command deploys your Blockchain configuration locally, to Fuji Testnet, or to Mainnet.
+- [`deploy`](#lux-blockchain-deploy): The blockchain deploy command deploys your Blockchain configuration locally, to Testnet, or to Mainnet.
 
 At the end of the call, the command prints the RPC URL you can use to interact with the Subnet.
 
 Lux-CLI only supports deploying an individual Blockchain once per network. Subsequent
-attempts to deploy the same Blockchain to the same network (local, Fuji, Mainnet) aren't
+attempts to deploy the same Blockchain to the same network (local, Testnet, Mainnet) aren't
 allowed. If you'd like to redeploy a Blockchain locally for testing, you must first call
 lux network clean to reset all deployed chain state. Subsequent local deploys
 redeploy the chain with fresh state. You can deploy the same Blockchain to multiple networks,
-so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.
+so you can take your locally tested Blockchain and deploy it on Testnet or Mainnet.
 - [`describe`](#lux-blockchain-describe): The blockchain describe command prints the details of a Blockchain configuration to the console.
 By default, the command prints a summary of the configuration. By providing the --genesis
 flag, the command instead prints out the raw genesis file.
@@ -80,7 +80,7 @@ After you update your validator's config, you need to restart your validator man
 you provide the --luxd-config flag, this command attempts to edit the config file
 at that path.
 
-This command currently only supports Blockchains deployed on the Fuji Testnet and Mainnet.
+This command currently only supports Blockchains deployed on the Testnet and Mainnet.
 - [`list`](#lux-blockchain-list): The blockchain list command prints the names of all created Blockchain configurations. Without any flags,
 it prints some general, static information about the Blockchain. With the --deployed flag, the command
 shows additional information including the VMID, BlockchainID and SubnetID.
@@ -115,7 +115,7 @@ authority, the owner of the validator manager contract must sign the
 transaction. If the network is proof of stake, the node must stake the L1's
 staking token. Both processes will issue a RegisterL1ValidatorTx on the P-Chain.
 
-This command currently only works on Blockchains deployed to either the Fuji
+This command currently only works on Blockchains deployed to either the Testnet
 Testnet or Mainnet.
 
 **Usage:**
@@ -139,17 +139,17 @@ lux blockchain addValidator [subcommand] [flags]
 --cluster string                        operate on the given cluster
 --create-local-validator                create additional local validator and add it to existing running local node
 --default-duration                      (for Subnets, not L1s) set duration so as to validate until primary validator ends its period
---default-start-time                    (for Subnets, not L1s) use default start time for subnet validator (5 minutes later for fuji & mainnet, 30 seconds later for devnet)
+--default-start-time                    (for Subnets, not L1s) use default start time for subnet validator (5 minutes later for testnet & mainnet, 30 seconds later for devnet)
 --default-validator-params              (for Subnets, not L1s) use default weight/start/duration params for subnet validator
 --delegation-fee uint16                 (PoS only) delegation fee (in bips) (default 100)
 --devnet                                operate on a devnet network
 --disable-owner string                  P-Chain address that will able to disable the validator with a P-Chain transaction
 --endpoint string                       use the given endpoint for network operations
--e, --ewoq                              use ewoq key [fuji/devnet only]
--f, --fuji                              testnet                         operate on fuji (alias to testnet
+-e, --ewoq                              use ewoq key [testnet/devnet only]
+-f, --testnet                              testnet                         operate on testnet (alias to testnet
 -h, --help                              help for addValidator
--k, --key string                        select the key to use [fuji/devnet only]
--g, --ledger                            use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)
+-k, --key string                        select the key to use [testnet/devnet only]
+-g, --ledger                            use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
 --ledger-addrs strings                  use the given ledger addresses
 -l, --local                             operate on a local network
 -m, --mainnet                           operate on mainnet
@@ -163,7 +163,7 @@ lux blockchain addValidator [subcommand] [flags]
 --staking-period duration               how long this validator will be staking
 --start-time string                     (for Subnets, not L1s) UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
 --subnet-auth-keys strings              (for Subnets, not L1s) control keys that will be used to authenticate add validator tx
--t, --testnet                           fuji                         operate on testnet (alias to fuji)
+-t, --testnet                           testnet                         operate on testnet (alias to testnet)
 --wait-for-tx-acceptance                (for Subnets, not L1s) just issue the add validator tx, without waiting for its acceptance (default true)
 --weight uint                           set the staking weight of the validator to add (default 20)
 --config string                         config file (default is $HOME/.lux-cli/config.json)
@@ -189,17 +189,17 @@ lux blockchain changeOwner [subcommand] [flags]
 --control-keys strings     addresses that may make blockchain changes
 --devnet                   operate on a devnet network
 --endpoint string          use the given endpoint for network operations
--e, --ewoq                 use ewoq key [fuji/devnet]
--f, --fuji                 testnet            operate on fuji (alias to testnet
+-e, --ewoq                 use ewoq key [testnet/devnet]
+-f, --testnet                 testnet            operate on testnet (alias to testnet
 -h, --help                 help for changeOwner
--k, --key string           select the key to use [fuji/devnet]
--g, --ledger               use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)
+-k, --key string           select the key to use [testnet/devnet]
+-g, --ledger               use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
 --ledger-addrs strings     use the given ledger addresses
 -l, --local                operate on a local network
 -m, --mainnet              operate on mainnet
 --output-tx-path string    file path of the transfer blockchain ownership tx
 -s, --same-control-key     use the fee-paying key as control key
--t, --testnet              fuji            operate on testnet (alias to fuji)
+-t, --testnet              testnet            operate on testnet (alias to testnet)
 --threshold uint32         required number of control key signatures to make blockchain changes
 --config string            config file (default is $HOME/.lux-cli/config.json)
 --log-level string         log level for the application (default "ERROR")
@@ -224,17 +224,17 @@ lux blockchain changeWeight [subcommand] [flags]
 --cluster string          operate on the given cluster
 --devnet                  operate on a devnet network
 --endpoint string         use the given endpoint for network operations
--e, --ewoq                use ewoq key [fuji/devnet only]
--f, --fuji                testnet           operate on fuji (alias to testnet
+-e, --ewoq                use ewoq key [testnet/devnet only]
+-f, --testnet                testnet           operate on testnet (alias to testnet
 -h, --help                help for changeWeight
--k, --key string          select the key to use [fuji/devnet only]
--g, --ledger              use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)
+-k, --key string          select the key to use [testnet/devnet only]
+-g, --ledger              use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
 --ledger-addrs strings    use the given ledger addresses
 -l, --local               operate on a local network
 -m, --mainnet             operate on mainnet
 --node-endpoint string    gather node id/bls from publicly available luxd apis on the given endpoint
 --node-id string          node-id of the validator
--t, --testnet             fuji           operate on testnet (alias to fuji)
+-t, --testnet             testnet           operate on testnet (alias to testnet)
 --weight uint             set the new staking weight of the validator
 --config string           config file (default is $HOME/.lux-cli/config.json)
 --log-level string        log level for the application (default "ERROR")
@@ -244,10 +244,10 @@ lux blockchain changeWeight [subcommand] [flags]
 <a id="lux-blockchain-configure"></a>
 ### configure
 
-LuxGo nodes support several different configuration files.
+Luxd nodes support several different configuration files.
 Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
 Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for subnet-evm options).
-A chain can also have special requirements for the LuxGo node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
+A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.
 
 **Usage:**
@@ -349,7 +349,7 @@ lux blockchain delete [subcommand] [flags]
 <a id="lux-blockchain-deploy"></a>
 ### deploy
 
-The blockchain deploy command deploys your Blockchain configuration to Local Network, to Fuji Testnet, DevNet or to Mainnet.
+The blockchain deploy command deploys your Blockchain configuration to Local Network, to Testnet, DevNet or to Mainnet.
 
 At the end of the call, the command prints the RPC URL you can use to interact with the L1 / Subnet.
 
@@ -366,11 +366,11 @@ If using your own Lux Nodes as bootstrap validators:
 - Next, Initialize Validator Manager contract on the L1 using lux contract initValidatorManager [L1_Name]
 
 Lux-CLI only supports deploying an individual Blockchain once per network. Subsequent
-attempts to deploy the same Blockchain to the same network (Local Network, Fuji, Mainnet) aren't
+attempts to deploy the same Blockchain to the same network (Local Network, Testnet, Mainnet) aren't
 allowed. If you'd like to redeploy a Blockchain locally for testing, you must first call
 lux network clean to reset all deployed chain state. Subsequent local deploys
 redeploy the chain with fresh state. You can deploy the same Blockchain to multiple networks,
-so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.
+so you can take your locally tested Blockchain and deploy it on Testnet or Mainnet.
 
 **Usage:**
 ```bash
@@ -383,7 +383,7 @@ lux blockchain deploy [subcommand] [flags]
  --convert-only              avoid node track, restart and poa manager setup
   -e, --ewoq                      use ewoq key [local/devnet deploy only]
   -h, --help                      help for deploy
-  -k, --key string                select the key to use [fuji/devnet deploy only]
+  -k, --key string                select the key to use [testnet/devnet deploy only]
   -g, --ledger                    use ledger instead of key
       --ledger-addrs strings      use the given ledger addresses
       --mainnet-chain-id uint32   use different ChainID for mainnet deployment
@@ -395,10 +395,10 @@ Network Flags (Select One):
   --cluster string   operate on the given cluster
   --devnet           operate on a devnet network
   --endpoint string  use the given endpoint for network operations
-  --fuji             operate on fuji (alias to `testnet`)
+  --testnet             operate on testnet (alias to `testnet`)
   --local            operate on a local network
   --mainnet          operate on mainnet
-  --testnet          operate on testnet (alias to `fuji`)
+  --testnet          operate on testnet (alias to `testnet`)
 
 Bootstrap Validators Flags:
   --balance float64                  set the LUX balance of each bootstrap validator that will be used for continuous fee on P-Chain (setting balance=1 equals to 1 LUX for each bootstrap validator)
@@ -601,12 +601,12 @@ lux blockchain import public [subcommand] [flags]
 --endpoint string         use the given endpoint for network operations
 --evm                     import a subnet-evm
 --force                   overwrite the existing configuration if one exists
--f, --fuji                testnet           operate on fuji (alias to testnet
+-f, --testnet                testnet           operate on testnet (alias to testnet
 -h, --help                help for public
 -l, --local               operate on a local network
 -m, --mainnet             operate on mainnet
 --node-url string         [optional] URL of an already running validator
--t, --testnet             fuji           operate on testnet (alias to fuji)
+-t, --testnet             testnet           operate on testnet (alias to testnet)
 --config string           config file (default is $HOME/.lux-cli/config.json)
 --log-level string        log level for the application (default "ERROR")
 --skip-update-check       skip check for new versions
@@ -628,7 +628,7 @@ After you update your validator's config, you need to restart your validator man
 you provide the --luxd-config flag, this command attempts to edit the config file
 at that path.
 
-This command currently only supports Blockchains deployed on the Fuji Testnet and Mainnet.
+This command currently only supports Blockchains deployed on the Testnet and Mainnet.
 
 **Usage:**
 ```bash
@@ -644,10 +644,10 @@ lux blockchain join [subcommand] [flags]
 --devnet                       operate on a devnet network
 --endpoint string              use the given endpoint for network operations
 --force-write                  if true, skip to prompt to overwrite the config file
--f, --fuji                     testnet                operate on fuji (alias to testnet
+-f, --testnet                     testnet                operate on testnet (alias to testnet
 -h, --help                     help for join
--k, --key string               select the key to use [fuji only]
--g, --ledger                   use ledger instead of key (always true on mainnet, defaults to false on fuji)
+-k, --key string               select the key to use [testnet only]
+-g, --ledger                   use ledger instead of key (always true on mainnet, defaults to false on testnet)
 --ledger-addrs strings         use the given ledger addresses
 -l, --local                    operate on a local network
 -m, --mainnet                  operate on mainnet
@@ -657,7 +657,7 @@ lux blockchain join [subcommand] [flags]
 --stake-amount uint            amount of tokens to stake on validator
 --staking-period duration      how long validator validates for after start time
 --start-time string            start time that validator starts validating
--t, --testnet                  fuji                operate on testnet (alias to fuji)
+-t, --testnet                  testnet                operate on testnet (alias to testnet)
 --config string                config file (default is $HOME/.lux-cli/config.json)
 --log-level string             log level for the application (default "ERROR")
 --skip-update-check            skip check for new versions
@@ -739,10 +739,10 @@ lux blockchain removeValidator [subcommand] [flags]
 --devnet                                operate on a devnet network
 --endpoint string                       use the given endpoint for network operations
 --force                                 force validator removal even if it's not getting rewarded
--f, --fuji                              testnet                         operate on fuji (alias to testnet
+-f, --testnet                              testnet                         operate on testnet (alias to testnet
 -h, --help                              help for removeValidator
--k, --key string                        select the key to use [fuji deploy only]
--g, --ledger                            use ledger instead of key (always true on mainnet, defaults to false on fuji)
+-k, --key string                        select the key to use [testnet deploy only]
+-g, --ledger                            use ledger instead of key (always true on mainnet, defaults to false on testnet)
 --ledger-addrs strings                  use the given ledger addresses
 -l, --local                             operate on a local network
 -m, --mainnet                           operate on mainnet
@@ -750,7 +750,7 @@ lux blockchain removeValidator [subcommand] [flags]
 --node-id string                        node-id of the validator
 --output-tx-path string                 (for non-SOV blockchain only) file path of the removeValidator tx
 --rpc string                            connect to validator manager at the given rpc endpoint
--t, --testnet                           fuji                         operate on testnet (alias to fuji)
+-t, --testnet                           testnet                         operate on testnet (alias to testnet)
 --uptime uint                           validator's uptime in seconds. If not provided, it will be automatically calculated
 --config string                         config file (default is $HOME/.lux-cli/config.json)
 --log-level string                      log level for the application (default "ERROR")
@@ -773,11 +773,11 @@ lux blockchain stats [subcommand] [flags]
 --cluster string       operate on the given cluster
 --devnet               operate on a devnet network
 --endpoint string      use the given endpoint for network operations
--f, --fuji             testnet      operate on fuji (alias to testnet
+-f, --testnet             testnet      operate on testnet (alias to testnet
 -h, --help             help for stats
 -l, --local            operate on a local network
 -m, --mainnet          operate on mainnet
--t, --testnet          fuji      operate on testnet (alias to fuji)
+-t, --testnet          testnet      operate on testnet (alias to testnet)
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -798,7 +798,7 @@ lux blockchain upgrade [subcommand] [flags]
 
 - [`apply`](#lux-blockchain-upgrade-apply): Apply generated upgrade bytes to running Blockchain nodes to trigger a network upgrade.
 
-For public networks (Fuji Testnet or Mainnet), to complete this process,
+For public networks (Testnet or Mainnet), to complete this process,
 you must have access to the machine running your validator.
 If the CLI is running on the same machine as your validator, it can manipulate your node's
 configuration automatically. Alternatively, the command can print the necessary instructions
@@ -813,7 +813,7 @@ guides the user through the process using an interactive wizard.
 - [`import`](#lux-blockchain-upgrade-import): Import the upgrade bytes file into the local environment
 - [`print`](#lux-blockchain-upgrade-print): Print the upgrade.json file content
 - [`vm`](#lux-blockchain-upgrade-vm): The blockchain upgrade vm command enables the user to upgrade their Blockchain's VM binary. The command
-can upgrade both local Blockchains and publicly deployed Blockchains on Fuji and Mainnet.
+can upgrade both local Blockchains and publicly deployed Blockchains on Testnet and Mainnet.
 
 The command walks the user through an interactive wizard. The user can skip the wizard by providing
 command line flags.
@@ -832,7 +832,7 @@ command line flags.
 
 Apply generated upgrade bytes to running Blockchain nodes to trigger a network upgrade.
 
-For public networks (Fuji Testnet or Mainnet), to complete this process,
+For public networks (Testnet or Mainnet), to complete this process,
 you must have access to the machine running your validator.
 If the CLI is running on the same machine as your validator, it can manipulate your node's
 configuration automatically. Alternatively, the command can print the necessary instructions
@@ -853,12 +853,12 @@ lux blockchain upgrade apply [subcommand] [flags]
 --luxd-chain-config-dir string    luxd's chain config file directory (default "/home/runner/.luxd/chains")
 --config                                 create upgrade config for future subnet deployments (same as generate)
 --force                                  If true, don't prompt for confirmation of timestamps in the past
---fuji                                   fuji                             apply upgrade existing fuji deployment (alias for `testnet`)
+--testnet                                   testnet                             apply upgrade existing testnet deployment (alias for `testnet`)
 -h, --help                               help for apply
 --local                                  local                           apply upgrade existing local deployment
 --mainnet                                mainnet                       apply upgrade existing mainnet deployment
 --print                                  if true, print the manual config without prompting (for public networks only)
---testnet                                testnet                       apply upgrade existing testnet deployment (alias for `fuji`)
+--testnet                                testnet                       apply upgrade existing testnet deployment (alias for `testnet`)
 --log-level string                       log level for the application (default "ERROR")
 --skip-update-check                      skip check for new versions
 ```
@@ -947,7 +947,7 @@ lux blockchain upgrade print [subcommand] [flags]
 #### upgrade vm
 
 The blockchain upgrade vm command enables the user to upgrade their Blockchain's VM binary. The command
-can upgrade both local Blockchains and publicly deployed Blockchains on Fuji and Mainnet.
+can upgrade both local Blockchains and publicly deployed Blockchains on Testnet and Mainnet.
 
 The command walks the user through an interactive wizard. The user can skip the wizard by providing
 command line flags.
@@ -962,14 +962,14 @@ lux blockchain upgrade vm [subcommand] [flags]
 ```bash
 --binary string        Upgrade to custom binary
 --config               upgrade config for future subnet deployments
---fuji                 fuji           upgrade existing fuji deployment (alias for `testnet`)
+--testnet                 testnet           upgrade existing testnet deployment (alias for `testnet`)
 -h, --help             help for vm
 --latest               upgrade to latest version
 --local                local         upgrade existing local deployment
 --mainnet              mainnet     upgrade existing mainnet deployment
 --plugin-dir string    plugin directory to automatically upgrade VM
 --print                print instructions for upgrading
---testnet              testnet     upgrade existing testnet deployment (alias for `fuji`)
+--testnet              testnet     upgrade existing testnet deployment (alias for `testnet`)
 --version string       Upgrade to custom version
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -992,11 +992,11 @@ lux blockchain validators [subcommand] [flags]
 --cluster string       operate on the given cluster
 --devnet               operate on a devnet network
 --endpoint string      use the given endpoint for network operations
--f, --fuji             testnet      operate on fuji (alias to testnet
+-f, --testnet             testnet      operate on testnet (alias to testnet
 -h, --help             help for validators
 -l, --local            operate on a local network
 -m, --mainnet          operate on mainnet
--t, --testnet          fuji      operate on testnet (alias to fuji)
+-t, --testnet          testnet      operate on testnet (alias to testnet)
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -1212,7 +1212,7 @@ lux contract deploy erc20 [subcommand] [flags]
 --cluster string          operate on the given cluster
 --devnet                  operate on a devnet network
 --endpoint string         use the given endpoint for network operations
--f, --fuji                testnet           operate on fuji (alias to testnet
+-f, --testnet                testnet           operate on testnet (alias to testnet
 --funded string           set the funded address
 --genesis-key             use genesis allocated key as contract deployer
 -h, --help                help for erc20
@@ -1223,7 +1223,7 @@ lux contract deploy erc20 [subcommand] [flags]
 --rpc string              deploy the contract into the given rpc endpoint
 --supply uint             set the token supply
 --symbol string           set the token symbol
--t, --testnet             fuji           operate on testnet (alias to fuji)
+-t, --testnet             testnet           operate on testnet (alias to testnet)
 --config string           config file (default is $HOME/.lux-cli/config.json)
 --log-level string        log level for the application (default "ERROR")
 --skip-update-check       skip check for new versions
@@ -1249,7 +1249,7 @@ lux contract initValidatorManager [subcommand] [flags]
 --cluster string                          operate on the given cluster
 --devnet                                  operate on a devnet network
 --endpoint string                         use the given endpoint for network operations
--f, --fuji                                testnet                           operate on fuji (alias to testnet
+-f, --testnet                                testnet                           operate on testnet (alias to testnet
 --genesis-key                             use genesis allocated key as contract deployer
 -h, --help                                help for initValidatorManager
 --key string                              CLI stored key to use as contract deployer
@@ -1264,7 +1264,7 @@ lux contract initValidatorManager [subcommand] [flags]
 --pos-weight-to-value-factor uint         (PoS only) weight to value factor (default 1)
 --private-key string                      private key to use as contract deployer
 --rpc string                              deploy the contract into the given rpc endpoint
--t, --testnet                             fuji                           operate on testnet (alias to fuji)
+-t, --testnet                             testnet                           operate on testnet (alias to testnet)
 --config string                           config file (default is $HOME/.lux-cli/config.json)
 --log-level string                        log level for the application (default "ERROR")
 --skip-update-check                       skip check for new versions
@@ -1340,7 +1340,7 @@ lux warp deploy [subcommand] [flags]
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
 --force-registry-deploy                     deploy Warp Registry even if Messenger has already been deployed
--f, --fuji                                  testnet                             operate on fuji (alias to testnet
+-f, --testnet                                  testnet                             operate on testnet (alias to testnet
 --genesis-key                               use genesis allocated key to fund Warp deploy
 -h, --help                                  help for deploy
 --include-cchain                            deploy Warp also to C-Chain
@@ -1353,7 +1353,7 @@ lux warp deploy [subcommand] [flags]
 --private-key string                        private key to use to fund Warp deploy
 --registry-bytecode-path string             path to a registry bytecode file
 --rpc-url string                            use the given RPC URL to connect to the subnet
--t, --testnet                               fuji                             operate on testnet (alias to fuji)
+-t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --version string                            version to deploy (default "latest")
 --config string                             config file (default is $HOME/.lux-cli/config.json)
 --log-level string                          log level for the application (default "ERROR")
@@ -1378,7 +1378,7 @@ lux warp sendMsg [subcommand] [flags]
 --destination-address string    deliver the message to the given contract destination address
 --devnet                        operate on a devnet network
 --endpoint string               use the given endpoint for network operations
--f, --fuji                      testnet                 operate on fuji (alias to testnet
+-f, --testnet                      testnet                 operate on testnet (alias to testnet
 --genesis-key                   use genesis allocated key as message originator and to pay source blockchain fees
 -h, --help                      help for sendMsg
 --hex-encoded                   given message is hex encoded
@@ -1387,7 +1387,7 @@ lux warp sendMsg [subcommand] [flags]
 -m, --mainnet                   operate on mainnet
 --private-key string            private key to use as message originator and to pay source blockchain fees
 --source-rpc string             use the given source blockchain rpc endpoint
--t, --testnet                   fuji                 operate on testnet (alias to fuji)
+-t, --testnet                   testnet                 operate on testnet (alias to testnet)
 --config string                 config file (default is $HOME/.lux-cli/config.json)
 --log-level string              log level for the application (default "ERROR")
 --skip-update-check             skip check for new versions
@@ -1437,7 +1437,7 @@ lux warp deploy [subcommand] [flags]
 --deploy-native-remote         deploy a Transferrer Remote for the Chain's Native Token
 --devnet                       operate on a devnet network
 --endpoint string              use the given endpoint for network operations
--f, --fuji                     testnet                  operate on fuji (alias to testnet
+-f, --testnet                     testnet                  operate on testnet (alias to testnet
 -h, --help                     help for deploy
 --home-blockchain string       set the Transferrer's Home Chain into the given CLI blockchain
 --home-genesis-key             use genesis allocated key to deploy Transferrer Home
@@ -1453,7 +1453,7 @@ lux warp deploy [subcommand] [flags]
 --remote-rpc string            use the given RPC URL to connect to the remote blockchain
 --remote-token-decimals        uint8   use the given number of token decimals for the Transferrer Remote [defaults to token home's decimals (18 for a new wrapped native home token)]
 --remove-minter-admin          remove the native minter precompile admin found on remote blockchain genesis
--t, --testnet                  fuji                  operate on testnet (alias to fuji)
+-t, --testnet                  testnet                  operate on testnet (alias to testnet)
 --use-home string              use the given Transferrer's Home Address
 --version string               tag/branch/commit of Lux Warp to be used (defaults to main branch)
 --config string                config file (default is $HOME/.lux-cli/config.json)
@@ -1539,7 +1539,7 @@ lux interchain messenger deploy [subcommand] [flags]
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
 --force-registry-deploy                     deploy Warp Registry even if Messenger has already been deployed
--f, --fuji                                  testnet                             operate on fuji (alias to testnet
+-f, --testnet                                  testnet                             operate on testnet (alias to testnet
 --genesis-key                               use genesis allocated key to fund Warp deploy
 -h, --help                                  help for deploy
 --include-cchain                            deploy Warp also to C-Chain
@@ -1552,7 +1552,7 @@ lux interchain messenger deploy [subcommand] [flags]
 --private-key string                        private key to use to fund Warp deploy
 --registry-bytecode-path string             path to a registry bytecode file
 --rpc-url string                            use the given RPC URL to connect to the subnet
--t, --testnet                               fuji                             operate on testnet (alias to fuji)
+-t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --version string                            version to deploy (default "latest")
 --config string                             config file (default is $HOME/.lux-cli/config.json)
 --log-level string                          log level for the application (default "ERROR")
@@ -1577,7 +1577,7 @@ lux interchain messenger sendMsg [subcommand] [flags]
 --destination-address string    deliver the message to the given contract destination address
 --devnet                        operate on a devnet network
 --endpoint string               use the given endpoint for network operations
--f, --fuji                      testnet                 operate on fuji (alias to testnet
+-f, --testnet                      testnet                 operate on testnet (alias to testnet
 --genesis-key                   use genesis allocated key as message originator and to pay source blockchain fees
 -h, --help                      help for sendMsg
 --hex-encoded                   given message is hex encoded
@@ -1586,7 +1586,7 @@ lux interchain messenger sendMsg [subcommand] [flags]
 -m, --mainnet                   operate on mainnet
 --private-key string            private key to use as message originator and to pay source blockchain fees
 --source-rpc string             use the given source blockchain rpc endpoint
--t, --testnet                   fuji                 operate on testnet (alias to fuji)
+-t, --testnet                   testnet                 operate on testnet (alias to testnet)
 --config string                 config file (default is $HOME/.lux-cli/config.json)
 --log-level string              log level for the application (default "ERROR")
 --skip-update-check             skip check for new versions
@@ -1643,12 +1643,12 @@ lux interchain relayer deploy [subcommand] [flags]
 --cluster string                   operate on the given cluster
 --devnet                           operate on a devnet network
 --endpoint string                  use the given endpoint for network operations
--f, --fuji                         testnet                    operate on fuji (alias to testnet
+-f, --testnet                         testnet                    operate on testnet (alias to testnet
 -h, --help                         help for deploy
 --key string                       key to be used by default both for rewards and to pay fees
 -l, --local                        operate on a local network
 --log-level string                 log level to use for relayer logs
--t, --testnet                      fuji                    operate on testnet (alias to fuji)
+-t, --testnet                      testnet                    operate on testnet (alias to testnet)
 --version string                   version to deploy (default "latest-prerelease")
 --config string                    config file (default is $HOME/.lux-cli/config.json)
 --skip-update-check                skip check for new versions
@@ -1669,12 +1669,12 @@ lux interchain relayer logs [subcommand] [flags]
 ```bash
 --endpoint string      use the given endpoint for network operations
 --first uint           output first N log lines
--f, --fuji             testnet      operate on fuji (alias to testnet
+-f, --testnet             testnet      operate on testnet (alias to testnet
 -h, --help             help for logs
 --last uint            output last N log lines
 -l, --local            operate on a local network
 --raw                  raw logs output
--t, --testnet          fuji      operate on testnet (alias to fuji)
+-t, --testnet          testnet      operate on testnet (alias to testnet)
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -1696,10 +1696,10 @@ lux interchain relayer start [subcommand] [flags]
 --bin-path string      use the given relayer binary
 --cluster string       operate on the given cluster
 --endpoint string      use the given endpoint for network operations
--f, --fuji             testnet      operate on fuji (alias to testnet
+-f, --testnet             testnet      operate on testnet (alias to testnet
 -h, --help             help for start
 -l, --local            operate on a local network
--t, --testnet          fuji      operate on testnet (alias to fuji)
+-t, --testnet          testnet      operate on testnet (alias to testnet)
 --version string       version to use (default "latest-prerelease")
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
@@ -1721,10 +1721,10 @@ lux interchain relayer stop [subcommand] [flags]
 ```bash
 --cluster string       operate on the given cluster
 --endpoint string      use the given endpoint for network operations
--f, --fuji             testnet      operate on fuji (alias to testnet
+-f, --testnet             testnet      operate on testnet (alias to testnet
 -h, --help             help for stop
 -l, --local            operate on a local network
--t, --testnet          fuji      operate on testnet (alias to fuji)
+-t, --testnet          testnet      operate on testnet (alias to testnet)
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -1774,7 +1774,7 @@ lux interchain tokenTransferrer deploy [subcommand] [flags]
 --deploy-native-remote         deploy a Transferrer Remote for the Chain's Native Token
 --devnet                       operate on a devnet network
 --endpoint string              use the given endpoint for network operations
--f, --fuji                     testnet                  operate on fuji (alias to testnet
+-f, --testnet                     testnet                  operate on testnet (alias to testnet
 -h, --help                     help for deploy
 --home-blockchain string       set the Transferrer's Home Chain into the given CLI blockchain
 --home-genesis-key             use genesis allocated key to deploy Transferrer Home
@@ -1790,7 +1790,7 @@ lux interchain tokenTransferrer deploy [subcommand] [flags]
 --remote-rpc string            use the given RPC URL to connect to the remote blockchain
 --remote-token-decimals        uint8   use the given number of token decimals for the Transferrer Remote [defaults to token home's decimals (18 for a new wrapped native home token)]
 --remove-minter-admin          remove the native minter precompile admin found on remote blockchain genesis
--t, --testnet                  fuji                  operate on testnet (alias to fuji)
+-t, --testnet                  testnet                  operate on testnet (alias to testnet)
 --use-home string              use the given Transferrer's Home Address
 --version string               tag/branch/commit of Lux Interchain Token Transfer (Warp) to be used (defaults to main branch)
 --config string                config file (default is $HOME/.lux-cli/config.json)
@@ -1802,7 +1802,7 @@ lux interchain tokenTransferrer deploy [subcommand] [flags]
 ## lux key
 
 The key command suite provides a collection of tools for creating and managing
-signing keys. You can use these keys to deploy Subnets to the Fuji Testnet,
+signing keys. You can use these keys to deploy Subnets to the Testnet,
 but these keys are NOT suitable to use in production environments. DO NOT use
 these keys on Mainnet.
 
@@ -1943,7 +1943,7 @@ lux key list [subcommand] [flags]
 --cluster string         operate on the given cluster
 --devnet                 operate on a devnet network
 --endpoint string        use the given endpoint for network operations
--f, --fuji               testnet          operate on fuji (alias to testnet
+-f, --testnet               testnet          operate on testnet (alias to testnet
 -h, --help               help for list
 --keys strings           list addresses for the given keys
 -g, --ledger             uints          list ledger addresses for the given indices (default [])
@@ -1951,7 +1951,7 @@ lux key list [subcommand] [flags]
 -m, --mainnet            operate on mainnet
 --pchain                 list P-Chain addresses (default true)
 --subnets strings        subnets to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)
--t, --testnet            fuji          operate on testnet (alias to fuji)
+-t, --testnet            testnet          operate on testnet (alias to testnet)
 --tokens strings         provide balance information for the given token contract addresses (Evm only) (default [Native])
 --use-gwei               use gwei for EVM balances
 -n, --use-nano-lux      use nano Lux for balances
@@ -1984,7 +1984,7 @@ lux key transfer [subcommand] [flags]
 --destination-transferrer-address string    token transferrer address at the destination subnet (token transferrer experimental)
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
--f, --fuji                                  testnet                             operate on fuji (alias to testnet
+-f, --testnet                                  testnet                             operate on testnet (alias to testnet
 -h, --help                                  help for transfer
 -k, --key string                            key associated to the sender or receiver address
 -i, --ledger uint32                         ledger index associated to the sender or receiver address (default 32768)
@@ -1998,7 +1998,7 @@ lux key transfer [subcommand] [flags]
 --receiver-blockchain-id string             receive at the given blockchain ID/Alias
 --sender-blockchain string                  send from the given CLI blockchain
 --sender-blockchain-id string               send from the given blockchain ID/Alias
--t, --testnet                               fuji                             operate on testnet (alias to fuji)
+-t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --x-chain-receiver                          receive at X-Chain
 --x-chain-sender                            send from X-Chain
 --config string                             config file (default is $HOME/.lux-cli/config.json)
@@ -2353,7 +2353,7 @@ lux node create [subcommand] [flags]
 --devnet                                    operate on a devnet network
 --enable-monitoring                         set up Prometheus monitoring for created nodes. This option creates a separate monitoring cloud instance and incures additional cost
 --endpoint string                           use the given endpoint for network operations
--f, --fuji                                  testnet                             operate on fuji (alias to testnet
+-f, --testnet                                  testnet                             operate on testnet (alias to testnet
 --gcp                                       create node/s in GCP cloud
 --gcp-credentials string                    use given GCP credentials
 --gcp-project string                        use given GCP project
@@ -2370,7 +2370,7 @@ lux node create [subcommand] [flags]
 --public-http-port                          allow public access to luxd HTTP port
 --region strings                            create node(s) in given region(s). Use comma to separate multiple regions
 --ssh-agent-identity string                 use given ssh identity(only for ssh agent). If not set, default will be used
--t, --testnet                               fuji                             operate on testnet (alias to fuji)
+-t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --upgrade string                            path to upgrade file
 --use-ssh-agent                             use ssh agent(ex: Yubikey) for ssh auth
 --use-static-ip                             attach static Public IP on cloud servers (default true)
@@ -2804,7 +2804,7 @@ lux node local start [subcommand] [flags]
 --custom-luxd-version string         install given luxd version on node/s
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
--f, --fuji                                  testnet                             operate on fuji (alias to testnet
+-f, --testnet                                  testnet                             operate on testnet (alias to testnet
 --genesis string                            path to genesis file
 -h, --help                                  help for start
 --latest-luxd-pre-release-version    install latest luxd pre-release version on node/s (default true)
@@ -2817,7 +2817,7 @@ lux node local start [subcommand] [flags]
 --staking-cert-key-path string              path to provided staking cert key for node
 --staking-signer-key-path string            path to provided staking signer key for node
 --staking-tls-key-path string               path to provided staking tls key for node
--t, --testnet                               fuji                             operate on testnet (alias to fuji)
+-t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --upgrade string                            path to upgrade file
 --config string                             config file (default is $HOME/.lux-cli/config.json)
 --log-level string                          log level for the application (default "ERROR")
@@ -3210,10 +3210,10 @@ lux node validate primary [subcommand] [flags]
 **Flags:**
 
 ```bash
--e, --ewoq                   use ewoq key [fuji/devnet only]
+-e, --ewoq                   use ewoq key [testnet/devnet only]
 -h, --help                   help for primary
--k, --key string             select the key to use [fuji only]
--g, --ledger                 use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)
+-k, --key string             select the key to use [testnet only]
+-g, --ledger                 use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
 --ledger-addrs strings       use the given ledger addresses
 --stake-amount uint          how many LUX to stake in the validator
 --staking-period duration    how long validator validates for after start time
@@ -3245,10 +3245,10 @@ lux node validate subnet [subcommand] [flags]
 
 ```bash
 --default-validator-params    use default weight/start/duration params for subnet validator
--e, --ewoq                    use ewoq key [fuji/devnet only]
+-e, --ewoq                    use ewoq key [testnet/devnet only]
 -h, --help                    help for subnet
--k, --key string              select the key to use [fuji/devnet only]
--g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)
+-k, --key string              select the key to use [testnet/devnet only]
+-g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
 --ledger-addrs strings        use the given ledger addresses
 --no-checks                   do not check for bootstrapped status or healthy status
 --no-validation-checks        do not check if subnet is already synced or validated (default true)
@@ -3331,10 +3331,10 @@ lux primary addValidator [subcommand] [flags]
 --delegation-fee uint32         set the delegation fee (20 000 is equivalent to 2%)
 --devnet                        operate on a devnet network
 --endpoint string               use the given endpoint for network operations
--f, --fuji                      testnet                 operate on fuji (alias to testnet
+-f, --testnet                      testnet                 operate on testnet (alias to testnet
 -h, --help                      help for addValidator
--k, --key string                select the key to use [fuji only]
--g, --ledger                    use ledger instead of key (always true on mainnet, defaults to false on fuji)
+-k, --key string                select the key to use [testnet only]
+-g, --ledger                    use ledger instead of key (always true on mainnet, defaults to false on testnet)
 --ledger-addrs strings          use the given ledger addresses
 -m, --mainnet                   operate on mainnet
 --nodeID string                 set the NodeID of the validator to add
@@ -3342,7 +3342,7 @@ lux primary addValidator [subcommand] [flags]
 --public-key string             set the BLS public key of the validator to add
 --staking-period duration       how long this validator will be staking
 --start-time string             UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
--t, --testnet                   fuji                 operate on testnet (alias to fuji)
+-t, --testnet                   testnet                 operate on testnet (alias to testnet)
 --weight uint                   set the staking weight of the validator to add
 --config string                 config file (default is $HOME/.lux-cli/config.json)
 --log-level string              log level for the application (default "ERROR")
@@ -3429,8 +3429,8 @@ lux transaction sign [subcommand] [flags]
 ```bash
 -h, --help                    help for sign
 --input-tx-filepath string    Path to the transaction file for signing
--k, --key string              select the key to use [fuji only]
--g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on fuji)
+-k, --key string              select the key to use [testnet only]
+-g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on testnet)
 --ledger-addrs strings        use the given ledger addresses
 --config string               config file (default is $HOME/.lux-cli/config.json)
 --log-level string            log level for the application (default "ERROR")
@@ -3505,13 +3505,13 @@ lux validator getBalance [subcommand] [flags]
 --cluster string          operate on the given cluster
 --devnet                  operate on a devnet network
 --endpoint string         use the given endpoint for network operations
--f, --fuji                testnet           operate on fuji (alias to testnet
+-f, --testnet                testnet           operate on testnet (alias to testnet
 -h, --help                help for getBalance
 --l1 string               name of L1
 -l, --local               operate on a local network
 -m, --mainnet             operate on mainnet
 --node-id string          node ID of the validator
--t, --testnet             fuji           operate on testnet (alias to fuji)
+-t, --testnet             testnet           operate on testnet (alias to testnet)
 --validation-id string    validation ID of the validator
 --config string           config file (default is $HOME/.lux-cli/config.json)
 --log-level string        log level for the application (default "ERROR")
@@ -3535,14 +3535,14 @@ lux validator increaseBalance [subcommand] [flags]
 --cluster string          operate on the given cluster
 --devnet                  operate on a devnet network
 --endpoint string         use the given endpoint for network operations
--f, --fuji                testnet           operate on fuji (alias to testnet
+-f, --testnet                testnet           operate on testnet (alias to testnet
 -h, --help                help for increaseBalance
--k, --key string          select the key to use [fuji/devnet deploy only]
+-k, --key string          select the key to use [testnet/devnet deploy only]
 --l1 string               name of L1 (to increase balance of bootstrap validators only)
 -l, --local               operate on a local network
 -m, --mainnet             operate on mainnet
 --node-id string          node ID of the validator
--t, --testnet             fuji           operate on testnet (alias to fuji)
+-t, --testnet             testnet           operate on testnet (alias to testnet)
 --validation-id string    validationIDStr of the validator
 --config string           config file (default is $HOME/.lux-cli/config.json)
 --log-level string        log level for the application (default "ERROR")
@@ -3565,11 +3565,11 @@ lux validator list [subcommand] [flags]
 --cluster string       operate on the given cluster
 --devnet               operate on a devnet network
 --endpoint string      use the given endpoint for network operations
--f, --fuji             testnet      operate on fuji (alias to testnet
+-f, --testnet             testnet      operate on testnet (alias to testnet
 -h, --help             help for list
 -l, --local            operate on a local network
 -m, --mainnet          operate on mainnet
--t, --testnet          fuji      operate on testnet (alias to fuji)
+-t, --testnet          testnet      operate on testnet (alias to testnet)
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions

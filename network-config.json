@@ -34,7 +34,7 @@
       }
     ]
   },
-  "luxGoVersion": "latest",
+  "luxdVersion": "latest",
   "customVMs": {},
   "useExistingKeys": false
 }

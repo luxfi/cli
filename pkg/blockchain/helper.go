@@ -46,12 +46,12 @@ func GetAggregatorNetworkUris(app *application.Lux, clusterName string) ([]strin
 				return nil, err
 			}
 			clusterConfig := clustersConfig.Clusters[clusterName]
-			hostIDs := utils.Filter(clusterConfig.GetCloudIDs(), clusterConfig.IsLuxGoHost)
+			hostIDs := utils.Filter(clusterConfig.GetCloudIDs(), clusterConfig.IsLuxdHost)
 			for _, hostID := range hostIDs {
 				if nodeConfig, err := app.LoadClusterNodeConfig(hostID); err != nil {
 					return nil, err
 				} else {
-					aggregatorExtraPeerEndpointsUris = append(aggregatorExtraPeerEndpointsUris, fmt.Sprintf("http://%s:%d", nodeConfig.ElasticIP, constants.LuxGoAPIPort))
+					aggregatorExtraPeerEndpointsUris = append(aggregatorExtraPeerEndpointsUris, fmt.Sprintf("http://%s:%d", nodeConfig.ElasticIP, constants.LuxdAPIPort))
 				}
 			}
 		}

@@ -27,7 +27,7 @@ var _ = ginkgo.Describe("[Key] list", func() {
 		// Go RE2 library doesn't support lookahead and lookbehind
 		regex1 := `.*NAME.*SUBNET.*ADDRESS.*NETWORK`
 		regex2 := `.*e2eKey.*C-Chain.*0x[a-fA-F0-9]{40}`
-		regex3 := `.*P-Chain.*[(P-custom)(P-fuji)][a-zA-Z0-9]{39}`
+		regex3 := `.*P-Chain.*[(P-custom)(P-testnet)][a-zA-Z0-9]{39}`
 		regex4 := `.*P-custom[a-zA-Z0-9]{39}`
 
 		// Create a key

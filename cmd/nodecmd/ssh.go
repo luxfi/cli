@@ -105,7 +105,7 @@ func printNodeInfo(host *models.Host, clusterConf models.ClusterConfig, result s
 		return err
 	}
 	nodeIDStr := "----------------------------------------"
-	if clusterConf.IsLuxGoHost(host.GetCloudID()) {
+	if clusterConf.IsLuxdHost(host.GetCloudID()) {
 		nodeID, err := getNodeID(app.GetNodeInstanceDirPath(host.GetCloudID()))
 		if err != nil {
 			return err

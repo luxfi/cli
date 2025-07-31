@@ -145,7 +145,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("blockchain has not been deployed to %s", network.Name())
 	}
 	bootstrapValidators := scNetwork.BootstrapValidators
-	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxGoSubnetValidator(bootstrapValidators)
+	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxdSubnetValidator(bootstrapValidators)
 	if err != nil {
 		return err
 	}

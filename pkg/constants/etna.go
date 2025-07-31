@@ -10,7 +10,7 @@ import (
 )
 
 var EtnaActivationTime = map[uint32]time.Time{
-	luxdconstants.FujiID:    time.Date(2024, time.November, 25, 16, 0, 0, 0, time.UTC),
+	luxdconstants.TestnetID:    time.Date(2024, time.November, 25, 16, 0, 0, 0, time.UTC),
 	luxdconstants.MainnetID: time.Date(2024, time.December, 16, 17, 0, 0, 0, time.UTC),
 	LocalNetworkID:           upgrade.Default.EtnaTime,
 }

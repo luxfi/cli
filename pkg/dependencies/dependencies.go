@@ -21,8 +21,8 @@ import (
 
 var ErrNoLuxdVersion = errors.New("unable to find a compatible luxd version")
 
-func GetLatestLuxGoByProtocolVersion(app *application.Lux, rpcVersion int) (string, error) {
-	useVersion, err := GetAvailableLuxGoVersions(app, rpcVersion, constants.LuxGoCompatibilityURL)
+func GetLatestLuxdByProtocolVersion(app *application.Lux, rpcVersion int) (string, error) {
+	useVersion, err := GetAvailableLuxdVersions(app, rpcVersion, constants.LuxdCompatibilityURL)
 	if err != nil {
 		return "", err
 	}
@@ -41,16 +41,16 @@ func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName
 	}
 
 	switch dependencyName {
-	case constants.LuxGoRepoName:
-		// if the user is using RPC that is lower than the latest RPC supported by CLI, user will get latest LuxGo version for that RPC
+	case constants.LuxdRepoName:
+		// if the user is using RPC that is lower than the latest RPC supported by CLI, user will get latest Luxd version for that RPC
 		// based on "https://raw.githubusercontent.com/luxfi/luxd/master/version/compatibility.json"
 		if rpcVersion != nil && parsedDependency.RPC > *rpcVersion {
-			return GetLatestLuxGoByProtocolVersion(
+			return GetLatestLuxdByProtocolVersion(
 				app,
 				*rpcVersion,
 			)
 		}
-		return parsedDependency.LuxGo[network.Name()].LatestVersion, nil
+		return parsedDependency.Luxd[network.Name()].LatestVersion, nil
 	case constants.SubnetEVMRepoName:
 		return parsedDependency.SubnetEVM, nil
 	default:
@@ -58,8 +58,8 @@ func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName
 	}
 }
 
-// GetLuxGoVersionsForRPC returns list of compatible lux go versions for a specified rpcVersion
-func GetLuxGoVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]string, error) {
+// GetLuxdVersionsForRPC returns list of compatible lux go versions for a specified rpcVersion
+func GetLuxdVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]string, error) {
 	compatibilityBytes, err := app.Downloader.Download(url)
 	if err != nil {
 		return nil, err
@@ -80,17 +80,17 @@ func GetLuxGoVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([
 	return eligibleVersions, nil
 }
 
-// GetAvailableLuxGoVersions returns list of only available for download lux go versions,
+// GetAvailableLuxdVersions returns list of only available for download lux go versions,
 // with latest version in first index
-func GetAvailableLuxGoVersions(app *application.Lux, rpcVersion int, url string) ([]string, error) {
-	eligibleVersions, err := GetLuxGoVersionsForRPC(app, rpcVersion, url)
+func GetAvailableLuxdVersions(app *application.Lux, rpcVersion int, url string) ([]string, error) {
+	eligibleVersions, err := GetLuxdVersionsForRPC(app, rpcVersion, url)
 	if err != nil {
 		return nil, ErrNoLuxdVersion
 	}
 	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
 	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
 		constants.LuxOrg,
-		constants.LuxGoRepoName,
+		constants.LuxdRepoName,
 		"",
 	)
 	if err != nil {
@@ -109,28 +109,28 @@ func GetAvailableLuxGoVersions(app *application.Lux, rpcVersion int, url string)
 	return availableVersions, nil
 }
 
-type LuxGoVersionSettings struct {
+type LuxdVersionSettings struct {
 	UseCustomLuxgoVersion           string
 	UseLatestLuxgoReleaseVersion    bool
 	UseLatestLuxgoPreReleaseVersion bool
 	UseLuxgoVersionFromSubnet       string
 }
 
-// GetLuxGoVersion asks users whether they want to install the newest Lux Go version
+// GetLuxdVersion asks users whether they want to install the newest Lux Go version
 // or if they want to use the newest Lux Go Version that is still compatible with Subnet EVM
 // version of their choice
-func GetLuxGoVersion(app *application.Lux, luxdVersion LuxGoVersionSettings, network models.Network) (string, error) {
+func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, network models.Network) (string, error) {
 	// skip this logic if custom-luxd-version flag is set
 	if luxdVersion.UseCustomLuxgoVersion != "" {
 		return luxdVersion.UseCustomLuxgoVersion, nil
 	}
-	latestReleaseVersion, err := GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, nil)
+	latestReleaseVersion, err := GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, network, nil)
 	if err != nil {
 		return "", err
 	}
 	latestPreReleaseVersion, err := app.Downloader.GetLatestPreReleaseVersion(
 		constants.LuxOrg,
-		constants.LuxGoRepoName,
+		constants.LuxdRepoName,
 		"",
 	)
 	if err != nil {
@@ -138,7 +138,7 @@ func GetLuxGoVersion(app *application.Lux, luxdVersion LuxGoVersionSettings, net
 	}
 
 	if !luxdVersion.UseLatestLuxgoReleaseVersion && !luxdVersion.UseLatestLuxgoPreReleaseVersion && luxdVersion.UseCustomLuxgoVersion == "" && luxdVersion.UseLuxgoVersionFromSubnet == "" {
-		luxdVersion, err = promptLuxGoVersionChoice(app, latestReleaseVersion, latestPreReleaseVersion)
+		luxdVersion, err = promptLuxdVersionChoice(app, latestReleaseVersion, latestPreReleaseVersion)
 		if err != nil {
 			return "", err
 		}
@@ -157,7 +157,7 @@ func GetLuxGoVersion(app *application.Lux, luxdVersion LuxGoVersionSettings, net
 		if err != nil {
 			return "", err
 		}
-		version, err = GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sc.RPCVersion)
+		version, err = GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, network, &sc.RPCVersion)
 		if err != nil {
 			return "", err
 		}
@@ -165,12 +165,12 @@ func GetLuxGoVersion(app *application.Lux, luxdVersion LuxGoVersionSettings, net
 	return version, nil
 }
 
-// promptLuxGoVersionChoice sets flags for either using the latest Lux Go
+// promptLuxdVersionChoice sets flags for either using the latest Lux Go
 // version or using the latest Lux Go version that is still compatible with the subnet that user
 // wants the cloud server to track
-func promptLuxGoVersionChoice(app *application.Lux, latestReleaseVersion string, latestPreReleaseVersion string) (LuxGoVersionSettings, error) {
+func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, latestPreReleaseVersion string) (LuxdVersionSettings, error) {
 	versionComments := map[string]string{
-		"v1.11.0-fuji": " (recommended for fuji durango)",
+		"v1.11.0-testnet": " (recommended for testnet durango)",
 	}
 	latestReleaseVersionOption := "Use latest Lux Go Release Version" + versionComments[latestReleaseVersion]
 	latestPreReleaseVersionOption := "Use latest Lux Go Pre-release Version" + versionComments[latestPreReleaseVersion]
@@ -184,26 +184,26 @@ func promptLuxGoVersionChoice(app *application.Lux, latestReleaseVersion string,
 	}
 	versionOption, err := app.Prompt.CaptureList(txt, versionOptions)
 	if err != nil {
-		return LuxGoVersionSettings{}, err
+		return LuxdVersionSettings{}, err
 	}
 
 	switch versionOption {
 	case latestReleaseVersionOption:
-		return LuxGoVersionSettings{UseLatestLuxgoReleaseVersion: true}, nil
+		return LuxdVersionSettings{UseLatestLuxgoReleaseVersion: true}, nil
 	case latestPreReleaseVersionOption:
-		return LuxGoVersionSettings{UseLatestLuxgoPreReleaseVersion: true}, nil
+		return LuxdVersionSettings{UseLatestLuxgoPreReleaseVersion: true}, nil
 	case customOption:
-		useCustomLuxgoVersion, err := app.Prompt.CaptureVersion("Which version of LuxGo would you like to install? (Use format v1.10.13)")
+		useCustomLuxgoVersion, err := app.Prompt.CaptureVersion("Which version of Luxd would you like to install? (Use format v1.10.13)")
 		if err != nil {
-			return LuxGoVersionSettings{}, err
+			return LuxdVersionSettings{}, err
 		}
-		return LuxGoVersionSettings{UseCustomLuxgoVersion: useCustomLuxgoVersion}, nil
+		return LuxdVersionSettings{UseCustomLuxgoVersion: useCustomLuxgoVersion}, nil
 	default:
 		useLuxgoVersionFromSubnet := ""
 		for {
 			useLuxgoVersionFromSubnet, err = app.Prompt.CaptureString("Which Subnet would you like to use to choose the lux go version?")
 			if err != nil {
-				return LuxGoVersionSettings{}, err
+				return LuxdVersionSettings{}, err
 			}
 			_, err = subnet.ValidateSubnetNameAndGetChains(app, []string{useLuxgoVersionFromSubnet})
 			if err == nil {
@@ -211,6 +211,6 @@ func promptLuxGoVersionChoice(app *application.Lux, latestReleaseVersion string,
 			}
 			ux.Logger.PrintToUser(fmt.Sprintf("no blockchain named as %s found", useLuxgoVersionFromSubnet))
 		}
-		return LuxGoVersionSettings{UseLuxgoVersionFromSubnet: useLuxgoVersionFromSubnet}, nil
+		return LuxdVersionSettings{UseLuxgoVersionFromSubnet: useLuxgoVersionFromSubnet}, nil
 	}
 }

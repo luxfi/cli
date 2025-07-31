@@ -19,7 +19,7 @@ import (
 var stopNetworkOptions = []networkoptions.NetworkOption{
 	networkoptions.Local,
 	networkoptions.Cluster,
-	networkoptions.Fuji,
+	networkoptions.Testnet,
 }
 
 type StopFlags struct {

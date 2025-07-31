@@ -34,14 +34,14 @@ type ConnectionSettings struct {
 // Create a local cluster [clusterName] connected to another network,
 // based on [connectionSettings].
 // Set up [numNodes] nodes, either with fresh keys and ports, or based on settings given by [nodeSettings]
-// If [downloadDB] is set, and network is fuji, downloads the current luxd DB -note: db download is not desired
+// If [downloadDB] is set, and network is testnet, downloads the current luxd DB -note: db download is not desired
 // if migrating from a network runner cluster-
 // If [bootstrap] is set, starts the nodes
 func CreateLocalCluster(
 	app *application.Lux,
 	printFunc func(msg string, args ...interface{}),
 	clusterName string,
-	luxGoBinPath string,
+	luxdBinPath string,
 	pluginDir string,
 	defaultFlags map[string]interface{},
 	connectionSettings ConnectionSettings,
@@ -73,7 +73,7 @@ func CreateLocalCluster(
 		ctx,
 		app.Log,
 		networkDir,
-		luxGoBinPath,
+		luxdBinPath,
 		pluginDir,
 		connectionSettings.NetworkID,
 		connectionSettings.BootstrapIPs,
@@ -97,7 +97,7 @@ func CreateLocalCluster(
 		for _, node := range network.Nodes {
 			nodeIDs = append(nodeIDs, node.NodeID.String())
 		}
-		if err := DownloadLuxGoDB(networkModel, networkDir, nodeIDs, app.Log, printFunc); err != nil {
+		if err := DownloadLuxdDB(networkModel, networkDir, nodeIDs, app.Log, printFunc); err != nil {
 			app.Log.Info("seeding public archive data finished with error: %v. Ignored if any", zap.Error(err))
 		}
 	}
@@ -113,7 +113,7 @@ func CreateLocalCluster(
 // into cluster [clusterName] conf, and starts it
 // Copies all node conf from the first node of the cluster,
 // including connection settings, tracked subnets, blockchain config files.
-// Downloads luxd DB for fuji nodes
+// Downloads luxd DB for testnet nodes
 // Finally waits for all the blockchains validated by the cluster to be bootstrapped
 func AddNodeToLocalCluster(
 	app *application.Lux,
@@ -148,7 +148,7 @@ func AddNodeToLocalCluster(
 	if err != nil {
 		return nil, err
 	}
-	if err := DownloadLuxGoDB(networkModel, networkDir, nodeIDs, app.Log, printFunc); err != nil {
+	if err := DownloadLuxdDB(networkModel, networkDir, nodeIDs, app.Log, printFunc); err != nil {
 		app.Log.Info("seeding public archive data finished with error: %v. Ignored if any", zap.Error(err))
 	}
 	printFunc("Waiting for node: %s to be bootstrapping P-Chain", newNode.NodeID)
@@ -597,7 +597,7 @@ func LocalClusterTrackSubnet(
 func LoadLocalCluster(
 	app *application.Lux,
 	clusterName string,
-	luxGoBinaryPath string,
+	luxdBinaryPath string,
 ) error {
 	if !LocalClusterExists(app, clusterName) {
 		return fmt.Errorf("local cluster %q is not found", clusterName)
@@ -623,7 +623,7 @@ func LoadLocalCluster(
 	}
 	ctx, cancel := networkModel.BootstrappingContext()
 	defer cancel()
-	if _, err := TmpNetLoad(ctx, app.Log, networkDir, luxGoBinaryPath); err != nil {
+	if _, err := TmpNetLoad(ctx, app.Log, networkDir, luxdBinaryPath); err != nil {
 		return err
 	}
 	blockchains, err = GetLocalClusterTrackedBlockchains(app, clusterName)

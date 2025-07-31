@@ -99,7 +99,7 @@ var _ = ginkgo.Describe("[Upgrade public network non SOV]", ginkgo.Ordered, func
 	ginkgo.It("can create and apply to public node non SOV", func() {
 		commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 
-		// simulate as if this had already been deployed to fuji
+		// simulate as if this had already been deployed to testnet
 		// by just entering fake data into the struct
 		app := utils.GetApp()
 
@@ -108,7 +108,7 @@ var _ = ginkgo.Describe("[Upgrade public network non SOV]", ginkgo.Ordered, func
 
 		blockchainID := ids.GenerateTestID()
 		sc.Networks = make(map[string]models.NetworkData)
-		sc.Networks[models.Fuji.String()] = models.NetworkData{
+		sc.Networks[models.Testnet.String()] = models.NetworkData{
 			SubnetID:     ids.GenerateTestID(),
 			BlockchainID: blockchainID,
 		}
@@ -385,8 +385,8 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloLuxdKey])
 		commands.CreateSubnetEvmConfigWithVersionNonSOV(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloSubnetEVMKey1], false)
 
-		// Simulate fuji deployment
-		s := commands.SimulateFujiDeployNonSOV(subnetName, keyName, controlKeys)
+		// Simulate testnet deployment
+		s := commands.SimulateTestnetDeployNonSOV(subnetName, keyName, controlKeys)
 		subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
 		gomega.Expect(err).Should(gomega.BeNil())
 		// add validators to subnet
@@ -394,11 +394,11 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 		for _, nodeInfo := range nodeInfos {
 			start := time.Now().Add(time.Second * 30).UTC().Format("2006-01-02 15:04:05")
-			_ = commands.SimulateFujiAddValidator(subnetName, keyName, nodeInfo.ID, start, "24h", "20")
+			_ = commands.SimulateTestnetAddValidator(subnetName, keyName, nodeInfo.ID, start, "24h", "20")
 		}
 		// join to copy vm binary and update config file
 		for _, nodeInfo := range nodeInfos {
-			_ = commands.SimulateFujiJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
+			_ = commands.SimulateTestnetJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
 		}
 		// get and check whitelisted subnets from config file
 		for _, nodeInfo := range nodeInfos {

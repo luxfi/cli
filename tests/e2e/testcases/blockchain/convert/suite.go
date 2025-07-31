@@ -90,7 +90,7 @@ var _ = ginkgo.Describe("[Blockchain Convert]", ginkgo.Ordered, func() {
 			"luxd-path": luxdPath,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "convert", blockchainCmdArgs, globalFlags, testFlags)
-		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("LuxGo path: %s", luxdPath)))
+		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Luxd path: %s", luxdPath)))
 		gomega.Expect(output).Should(gomega.ContainSubstring("Subnet is successfully converted to sovereign L1"))
 		gomega.Expect(err).Should(gomega.BeNil())
 		// verify that we have a local machine created that is now a bootstrap validator
@@ -223,13 +223,13 @@ var _ = ginkgo.Describe("[Blockchain Convert]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("ERROR PATH: invalid_luxd_path", func() {
-		luxGoPath := "invalid_luxd_path"
+		luxdPath := "invalid_luxd_path"
 		testFlags := utils.TestFlags{
-			"luxd-path": luxGoPath,
+			"luxd-path": luxdPath,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "convert", blockchainCmdArgs, globalFlags, testFlags)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
-		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("luxGo binary %s does not exist", luxGoPath)))
+		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("luxd binary %s does not exist", luxdPath)))
 	})
 
 	ginkgo.It("ERROR PATH: zero balance value", func() {

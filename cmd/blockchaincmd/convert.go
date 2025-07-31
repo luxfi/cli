@@ -166,13 +166,13 @@ func StartLocalMachine(
 				availableBalance,
 			)
 		}
-		luxdVersionSettings := dependencies.LuxGoVersionSettings{}
+		luxdVersionSettings := dependencies.LuxdVersionSettings{}
 		// setup (install if needed) luxd binary
 		luxdVersion := localMachineFlags.UserProvidedLuxdVersion
-		if localMachineFlags.UserProvidedLuxdVersion == constants.DefaultLuxGoVersion && localMachineFlags.LuxdBinaryPath == "" {
+		if localMachineFlags.UserProvidedLuxdVersion == constants.DefaultLuxdVersion && localMachineFlags.LuxdBinaryPath == "" {
 			// nothing given: get luxd version from RPC compat using latest.json defined in
 			// https://raw.githubusercontent.com/luxfi/lux-cli/control-default-version/versions/latest.json
-			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sidecar.RPCVersion)
+			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, network, &sidecar.RPCVersion)
 			if err != nil {
 				if err != dependencies.ErrNoLuxdVersion {
 					return false, err
@@ -180,7 +180,7 @@ func StartLocalMachine(
 				luxdVersion = constants.LatestPreReleaseVersionTag
 			}
 		}
-		localMachineFlags.LuxdBinaryPath, err = localnet.SetupLuxGoBinary(app, luxdVersion, localMachineFlags.LuxdBinaryPath)
+		localMachineFlags.LuxdBinaryPath, err = localnet.SetupLuxdBinary(app, luxdVersion, localMachineFlags.LuxdBinaryPath)
 		if err != nil {
 			return false, err
 		}
@@ -188,8 +188,8 @@ func StartLocalMachine(
 		if partialSync {
 			nodeConfig[config.PartialSyncPrimaryNetworkKey] = true
 		}
-		if network.Kind == models.Fuji {
-			globalNetworkFlags.UseFuji = true
+		if network.Kind == models.Testnet {
+			globalNetworkFlags.UseTestnet = true
 		}
 		if network.Kind == models.Mainnet {
 			globalNetworkFlags.UseMainnet = true
@@ -480,7 +480,7 @@ func convertSubnetToL1(
 	if !common.IsHexAddress(validatorManagerAddressStr) {
 		return nil, false, false, constants.ErrInvalidValidatorManagerAddress
 	}
-	luxdBootstrapValidators, err := ConvertToLuxGoSubnetValidator(bootstrapValidators)
+	luxdBootstrapValidators, err := ConvertToLuxdSubnetValidator(bootstrapValidators)
 	if err != nil {
 		return luxdBootstrapValidators, false, false, err
 	}

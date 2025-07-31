@@ -110,7 +110,7 @@ func getGCPConfig(singleNode bool) (*gcpAPI.GcpCloud, map[string]NumNodes, strin
 			}
 		}
 	default:
-		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseFuji {
+		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseTestnet {
 			for i, region := range cmdLineRegion {
 				finalRegions[region] = NumNodes{numValidatorsNodes[i], numAPINodes[i]}
 			}
@@ -207,9 +207,9 @@ func createGCEInstances(gcpClient *gcpAPI.GcpCloud,
 				networkName,
 				[]string{
 					strconv.Itoa(constants.SSHTCPPort),
-					strconv.Itoa(constants.LuxGoAPIPort),
-					strconv.Itoa(constants.LuxGoMonitoringPort),
-					strconv.Itoa(constants.LuxGoGrafanaPort),
+					strconv.Itoa(constants.LuxdAPIPort),
+					strconv.Itoa(constants.LuxdMonitoringPort),
+					strconv.Itoa(constants.LuxdGrafanaPort),
 				},
 			)
 			if err != nil {
@@ -223,7 +223,7 @@ func createGCEInstances(gcpClient *gcpAPI.GcpCloud,
 				return nil, nil, "", "", err
 			}
 			if !firewallExists {
-				_, err := gcpClient.SetFirewallRule(userIPAddress, firewallMonitoringName, networkName, []string{strconv.Itoa(constants.LuxGoMonitoringPort), strconv.Itoa(constants.LuxGoGrafanaPort)})
+				_, err := gcpClient.SetFirewallRule(userIPAddress, firewallMonitoringName, networkName, []string{strconv.Itoa(constants.LuxdMonitoringPort), strconv.Itoa(constants.LuxdGrafanaPort)})
 				if err != nil {
 					return nil, nil, "", "", err
 				}
@@ -234,7 +234,7 @@ func createGCEInstances(gcpClient *gcpAPI.GcpCloud,
 				return nil, nil, "", "", err
 			}
 			if !firewallExists {
-				_, err := gcpClient.SetFirewallRule("0.0.0.0/0", firewallLoggingName, networkName, []string{strconv.Itoa(constants.LuxGoLokiPort)})
+				_, err := gcpClient.SetFirewallRule("0.0.0.0/0", firewallLoggingName, networkName, []string{strconv.Itoa(constants.LuxdLokiPort)})
 				if err != nil {
 					return nil, nil, "", "", err
 				}
@@ -398,9 +398,9 @@ func grantAccessToPublicIPViaFirewall(gcpClient *gcpAPI.GcpCloud, projectName st
 	networkName := fmt.Sprintf("%s-network", prefix)
 	firewallName := fmt.Sprintf("%s-%s-%s", networkName, strings.ReplaceAll(publicIP, ".", ""), label)
 	ports := []string{
-		strconv.Itoa(constants.LuxGoMachineMetricsPort), strconv.Itoa(constants.LuxGoAPIPort),
-		strconv.Itoa(constants.LuxGoMonitoringPort), strconv.Itoa(constants.LuxGoGrafanaPort),
-		strconv.Itoa(constants.LuxGoLokiPort),
+		strconv.Itoa(constants.LuxdMachineMetricsPort), strconv.Itoa(constants.LuxdAPIPort),
+		strconv.Itoa(constants.LuxdMonitoringPort), strconv.Itoa(constants.LuxdGrafanaPort),
+		strconv.Itoa(constants.LuxdLokiPort),
 	}
 	if err = gcpClient.AddFirewall(
 		publicIP,
@@ -426,7 +426,7 @@ func setGCPWarpRelayerSecurityGroupRule(awmRelayerHost *models.Host) error {
 	networkName := fmt.Sprintf("%s-network", prefix)
 	firewallName := fmt.Sprintf("%s-%s-relayer", networkName, strings.ReplaceAll(awmRelayerHost.IP, ".", ""))
 	ports := []string{
-		strconv.Itoa(constants.LuxGoAPIPort),
+		strconv.Itoa(constants.LuxdAPIPort),
 	}
 	return gcpClient.AddFirewall(
 		awmRelayerHost.IP,

@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/lpm"
 	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/types"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
@@ -446,16 +447,16 @@ func (*Lux) writeFile(path string, bytes []byte) error {
 	return os.WriteFile(path, bytes, WriteReadReadPerms)
 }
 
-func (app *Lux) LoadConfig() (models.Config, error) {
+func (app *Lux) LoadConfig() (types.Config, error) {
 	configPath := app.GetConfigPath()
 	jsonBytes, err := os.ReadFile(configPath)
 	if err != nil {
-		return models.Config{}, err
+		return types.Config{}, err
 	}
 
-	var config models.Config
-	err = json.Unmarshal(jsonBytes, &config)
-	return config, err
+	var cfg types.Config
+	err = json.Unmarshal(jsonBytes, &cfg)
+	return cfg, err
 }
 
 func (app *Lux) ConfigFileExists() bool {
@@ -467,6 +468,11 @@ func (app *Lux) ConfigFileExists() bool {
 		}
 	}
 	return true
+}
+
+// CaptureYesNo delegates to the internal prompt
+func (app *Lux) CaptureYesNo(prompt string) (bool, error) {
+	return app.Prompt.CaptureYesNo(prompt)
 }
 
 func (app *Lux) WriteConfigFile(bytes []byte) error {
