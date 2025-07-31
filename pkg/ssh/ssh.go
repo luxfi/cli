@@ -153,11 +153,11 @@ func RunSSHSetupDockerService(host *models.Host) error {
 // RunSSHRestartNode runs script to restart luxd
 func RunSSHRestartNode(host *models.Host) error {
 	remoteComposeFile := utils.GetRemoteComposeFile()
-	avagoService := "luxd"
+	luxdService := "luxd"
 	if utils.IsE2E() {
-		avagoService += utils.E2ESuffix(host.IP)
+		luxdService += utils.E2ESuffix(host.IP)
 	}
-	return docker.RestartDockerComposeService(host, remoteComposeFile, avagoService, constants.SSHLongRunningScriptTimeout)
+	return docker.RestartDockerComposeService(host, remoteComposeFile, luxdService, constants.SSHLongRunningScriptTimeout)
 }
 
 // ComposeSSHSetupWarpRelayer used docker compose to setup AWM Relayer
@@ -502,8 +502,8 @@ func RunSSHUploadStakingFiles(host *models.Host, nodeInstanceDirPath string) err
 	)
 }
 
-// RunSSHRenderAvagoAliasConfigFile renders lux alias config to a remote host via SSH.
-func RunSSHRenderAvagoAliasConfigFile(
+// RunSSHRenderLuxdAliasConfigFile renders lux alias config to a remote host via SSH.
+func RunSSHRenderLuxdAliasConfigFile(
 	host *models.Host,
 	blockchainID string,
 	subnetAliases []string,
@@ -567,42 +567,42 @@ func RunSSHRenderLuxNodeConfig(
 		return err
 	}
 
-	avagoConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), subnetIDs)
+	luxdConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), subnetIDs)
 	// preserve remote configuration if it exists
 	if nodeConfigFileExists(host) {
 		// make sure that genesis and bootstrap data is preserved
 		if genesisFileExists(host) {
-			avagoConf.GenesisPath = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
+			luxdConf.GenesisPath = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
 		}
 		if upgradeFileExists(host) {
-			avagoConf.UpgradePath = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
+			luxdConf.UpgradePath = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
 		}
 		if network.Kind == models.Local || network.Kind == models.Devnet || isAPIHost {
-			avagoConf.HTTPHost = "0.0.0.0"
+			luxdConf.HTTPHost = "0.0.0.0"
 		}
-		remoteAvagoConf, err := getLuxGoConfigData(host)
+		remoteLuxdConf, err := getLuxGoConfigData(host)
 		if err != nil {
 			return err
 		}
 		// ignore errors if bootstrap configuration is not present - it's fine
-		bootstrapIDs, _ := utils.StringValue(remoteAvagoConf, "bootstrap-ids")
-		bootstrapIPs, _ := utils.StringValue(remoteAvagoConf, "bootstrap-ips")
-		avagoConf.BootstrapIDs = bootstrapIDs
-		avagoConf.BootstrapIPs = bootstrapIPs
-		partialSyncI, ok := remoteAvagoConf[config.PartialSyncPrimaryNetworkKey]
+		bootstrapIDs, _ := utils.StringValue(remoteLuxdConf, "bootstrap-ids")
+		bootstrapIPs, _ := utils.StringValue(remoteLuxdConf, "bootstrap-ips")
+		luxdConf.BootstrapIDs = bootstrapIDs
+		luxdConf.BootstrapIPs = bootstrapIPs
+		partialSyncI, ok := remoteLuxdConf[config.PartialSyncPrimaryNetworkKey]
 		if !ok {
-			fmt.Println("Key not found in remoteAvagoConf:", config.PartialSyncPrimaryNetworkKey)
+			fmt.Println("Key not found in remoteLuxdConf:", config.PartialSyncPrimaryNetworkKey)
 		} else {
 			partialSync, _ := partialSyncI.(string)
 			if partialSync == "true" {
-				avagoConf.PartialSync = true
+				luxdConf.PartialSync = true
 			} else {
-				avagoConf.PartialSync = false
+				luxdConf.PartialSync = false
 			}
 		}
 	}
 	// ready to render node config
-	nodeConf, err := remoteconfig.RenderLuxNodeConfig(avagoConf)
+	nodeConf, err := remoteconfig.RenderLuxNodeConfig(luxdConf)
 	if err != nil {
 		return err
 	}
@@ -724,15 +724,15 @@ func RunSSHSyncSubnetData(app *application.Lux, host *models.Host, network model
 	}
 	// end genesis config
 	// subnet node config
-	subnetNodeConfigPath := app.GetAvagoNodeConfigPath(subnetName)
+	subnetNodeConfigPath := app.GetLuxdNodeConfigPath(subnetName)
 	if utils.FileExists(subnetNodeConfigPath) {
 		if err := mergeSubnetNodeConfig(host, subnetNodeConfigPath); err != nil {
 			return err
 		}
 	}
 	// subnet config
-	if app.AvagoSubnetConfigExists(subnetName) {
-		subnetConfig, err := app.LoadRawAvagoSubnetConfig(subnetName)
+	if app.LuxdSubnetConfigExists(subnetName) {
+		subnetConfig, err := app.LoadRawLuxdSubnetConfig(subnetName)
 		if err != nil {
 			return fmt.Errorf("error loading blockchain config: %w", err)
 		}
@@ -954,11 +954,11 @@ func getLuxGoConfigData(host *models.Host) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var avagoConfig map[string]interface{}
-	if err := json.Unmarshal(nodeJSON, &avagoConfig); err != nil {
+	var luxdConfig map[string]interface{}
+	if err := json.Unmarshal(nodeJSON, &luxdConfig); err != nil {
 		return nil, err
 	}
-	return avagoConfig, nil
+	return luxdConfig, nil
 }
 
 func getLuxGoAliasData(host *models.Host) (map[string][]string, error) {

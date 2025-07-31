@@ -141,13 +141,13 @@ func setupNode(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	avaGoVersionSetting := dependencies.LuxGoVersionSettings{
+	luxdVersionSetting := dependencies.LuxGoVersionSettings{
 		UseLuxgoVersionFromSubnet:       useLuxgoVersionFromSubnet,
 		UseLatestLuxgoReleaseVersion:    useLatestLuxgoReleaseVersion,
 		UseLatestLuxgoPreReleaseVersion: useLatestLuxgoPreReleaseVersion,
 		UseCustomLuxgoVersion:           useCustomLuxgoVersion,
 	}
-	luxGoVersion, err := dependencies.GetLuxGoVersion(app, avaGoVersionSetting, network)
+	luxGoVersion, err := dependencies.GetLuxGoVersion(app, luxdVersionSetting, network)
 	if err != nil {
 		return err
 	}

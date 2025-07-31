@@ -113,9 +113,9 @@ func upgrade(_ *cobra.Command, args []string) error {
 // getNodesUpgradeInfo gets the node versions of all given nodes and checks which
 // nodes needs to have Lux Go & SubnetEVM upgraded. It first checks the subnet EVM version -
 // it will install the newest subnet EVM version and install the latest lux Go that is still compatible with the Subnet EVM version
-// if the node is not tracking any subnet, it will just install latestAvagoVersion
+// if the node is not tracking any subnet, it will just install latestLuxdVersion
 func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo, error) {
-	latestAvagoVersion, err := app.Downloader.GetLatestReleaseVersion(
+	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
 		constants.LuxOrg,
 		constants.LuxGoRepoName,
 		"",
@@ -172,7 +172,7 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 			return nil, err
 		}
 		currentLuxGoVersion := vmVersions[constants.PlatformKeyName]
-		luxGoVersionToUpdateTo := latestAvagoVersion
+		luxGoVersionToUpdateTo := latestLuxdVersion
 		nodeUpgradeInfo := nodeUpgradeInfo{}
 		nodeUpgradeInfo.SubnetEVMIDsToUpgrade = []string{}
 		for vmName, vmVersion := range vmVersions {
@@ -221,9 +221,9 @@ func checkIfKeyIsStandardVMName(vmName string) bool {
 
 func upgradeLuxGo(
 	host *models.Host,
-	avaGoVersionToUpdateTo string,
+	luxdVersionToUpdateTo string,
 ) error {
-	if err := ssh.RunSSHUpgradeLuxgo(host, avaGoVersionToUpdateTo); err != nil {
+	if err := ssh.RunSSHUpgradeLuxgo(host, luxdVersionToUpdateTo); err != nil {
 		return err
 	}
 	return nil
