@@ -2,41 +2,58 @@ module github.com/luxfi/cli
 
 go 1.24.5
 
-replace github.com/luxfi/node => ../node
-
-replace github.com/luxfi/evm => ../evm
-
-replace github.com/luxfi/geth => ../geth
+toolchain go1.24.5
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2/config v1.29.10
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.200.0
+	github.com/cavaliergopher/grab/v3 v3.0.1
+	github.com/chelnak/ysmrr v0.5.0
 	github.com/docker/docker v28.3.2+incompatible
-	github.com/go-git/go-git/v5 v5.11.0
+	github.com/ethereum/go-ethereum v1.13.14
+	github.com/fatih/color v1.18.0
+	github.com/go-git/go-git/v5 v5.13.1
+	github.com/jedib0t/go-pretty/v6 v6.6.5
+	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/evm v0.7.12
-	github.com/luxfi/geth v1.16.2
-	// github.com/luxfi/lpm v0.0.4
-	github.com/luxfi/netrunner v1.7.13
-	github.com/luxfi/node v1.13.13
+	github.com/luxfi/evm v0.7.3
+	github.com/luxfi/geth v0.15.0-rc.0
+	github.com/luxfi/lpm v1.0.0
+	github.com/luxfi/netrunner v1.8.4-0.20250324213418-9a0709b1ecfa
+	github.com/luxfi/node v1.13.1-0.20250326010016-044f93f83526
 	github.com/manifoldco/promptui v0.9.0
+	github.com/melbahja/goph v1.4.0
+	github.com/mitchellh/go-wordwrap v1.0.1
+	github.com/okteto/remote v0.0.0-20210428052247-99de42c04148
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/onsi/ginkgo/v2 v2.23.4
-	github.com/onsi/gomega v1.37.0
-	github.com/posthog/posthog-go v0.0.0-20221221115252-24dfed35d71a
+	github.com/onsi/ginkgo/v2 v2.23.3
+	github.com/onsi/gomega v1.36.3
+	github.com/otiai10/copy v1.14.1
+	github.com/pborman/ansi v1.0.0
+	github.com/pingcap/errors v0.11.4
+	github.com/posthog/posthog-go v1.4.7
+	github.com/prometheus/client_golang v1.21.1
+	github.com/schollz/progressbar/v3 v3.17.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/spf13/afero v1.14.0
+	github.com/spf13/afero v1.12.0
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/viper v1.18.1
+	github.com/spf13/viper v1.20.0
 	github.com/stretchr/testify v1.10.0
+	go.uber.org/mock v0.5.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc
-	golang.org/x/mod v0.26.0
-	golang.org/x/text v0.27.0
-	google.golang.org/protobuf v1.36.6
+	golang.org/x/crypto v0.36.0
+	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
+	golang.org/x/mod v0.24.0
+	golang.org/x/net v0.37.0
+	golang.org/x/oauth2 v0.25.0
+	golang.org/x/sync v0.12.0
+	golang.org/x/text v0.23.0
+	google.golang.org/api v0.216.0
+	google.golang.org/protobuf v1.36.5
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-require github.com/luxfi/lpm v1.1.0
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
@@ -162,7 +179,6 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
-	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/urfave/cli/v2 v2.27.7 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
