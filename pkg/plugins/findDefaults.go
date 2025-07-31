@@ -55,7 +55,7 @@ func getScanConfigDirs() ([]string, error) {
 		home,
 		filepath.Join(home, constants.LuxRepoName),
 		filepath.Join(home, defaultLuxBuildDir),
-		filepath.Join(home, ".node"),
+		filepath.Join(home, ".luxd"),
 		defaultUnexpandedDataDir,
 	)
 	return scanConfigDirs, nil
