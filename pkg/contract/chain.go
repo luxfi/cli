@@ -322,7 +322,7 @@ func GetBlockchainDesc(
 	return blockchainDesc, nil
 }
 
-func GetICMInfo(
+func GetWarpInfo(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -335,7 +335,7 @@ func GetICMInfo(
 	switch {
 	case chainSpec.CChain:
 		var err error
-		registryAddress, messengerAddress, err = GetCChainICMInfo(app, network)
+		registryAddress, messengerAddress, err = GetCChainWarpInfo(app, network)
 		if err != nil {
 			return "", "", err
 		}
@@ -358,7 +358,7 @@ func GetICMInfo(
 		return "", "", err
 	}
 	if registryAddress == "" && promptForRegistry {
-		addr, err := app.Prompt.CaptureAddress("Which is the ICM Registry address for " + blockchainDesc)
+		addr, err := app.Prompt.CaptureAddress("Which is the Warp Registry address for " + blockchainDesc)
 		if err != nil {
 			return "", "", err
 		}
@@ -366,13 +366,13 @@ func GetICMInfo(
 	}
 	if messengerAddress == "" {
 		if promptForMessenger {
-			addr, err := app.Prompt.CaptureAddress("Which is the ICM Messenger address for " + blockchainDesc)
+			addr, err := app.Prompt.CaptureAddress("Which is the Warp Messenger address for " + blockchainDesc)
 			if err != nil {
 				return "", "", err
 			}
 			messengerAddress = addr.Hex()
 		} else if defaultToLatestReleasedMessenger {
-			messengerAddress = constants.DefaultICMMessengerAddress
+			messengerAddress = constants.DefaultWarpMessengerAddress
 		}
 	}
 	return registryAddress, messengerAddress, nil
@@ -427,7 +427,7 @@ func PromptChain(
 	return false, nil
 }
 
-func GetCChainICMInfo(
+func GetCChainWarpInfo(
 	app *application.Lux,
 	network models.Network,
 ) (string, string, error) {
@@ -452,11 +452,11 @@ func GetCChainICMInfo(
 		messengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
 		registryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
 	case network.Kind == models.Fuji:
-		messengerAddress = constants.DefaultICMMessengerAddress
-		registryAddress = constants.FujiCChainICMRegistryAddress
+		messengerAddress = constants.DefaultWarpMessengerAddress
+		registryAddress = constants.FujiCChainWarpRegistryAddress
 	case network.Kind == models.Mainnet:
-		messengerAddress = constants.DefaultICMMessengerAddress
-		registryAddress = constants.MainnetCChainICMRegistryAddress
+		messengerAddress = constants.DefaultWarpMessengerAddress
+		registryAddress = constants.MainnetCChainWarpRegistryAddress
 	}
 	return registryAddress, messengerAddress, nil
 }

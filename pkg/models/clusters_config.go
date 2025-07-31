@@ -84,8 +84,8 @@ func (cc *ClusterConfig) GetHostRoles(nodeConf NodeConfig) []string {
 	if nodeConf.IsMonitor {
 		roles = append(roles, constants.MonitorRole)
 	}
-	if nodeConf.IsICMRelayer {
-		roles = append(roles, constants.ICMRelayerRole)
+	if nodeConf.IsWarpRelayer {
+		roles = append(roles, constants.WarpRelayerRole)
 	}
 	return roles
 }

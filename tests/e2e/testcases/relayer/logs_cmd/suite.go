@@ -35,8 +35,8 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 
 	ginkgo.Context("With valid input", func() {
 		ginkgo.It("should display logs", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -66,12 +66,12 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 				"skip-update-check": true,
 			}, utils.TestFlags{})
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing icm-relayer"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing warp-relayer"))
 		})
 
 		ginkgo.It("should display raw logs", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -102,12 +102,12 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 				"skip-update-check": true,
 			}, utils.TestFlags{})
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing icm-relayer"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing warp-relayer"))
 		})
 
 		ginkgo.It("should display first logs", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -141,14 +141,14 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 				"skip-update-check": true,
 			}, logsFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing icm-relayer"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing warp-relayer"))
 			gomega.Expect(output).Should(gomega.ContainSubstring("Initializing destination clients"))
 			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Initializing source clients"))
 		})
 
 		ginkgo.It("should display last logs", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -182,7 +182,7 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 				"skip-update-check": true,
 			}, logsFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Initializing icm-relayer"))
+			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Initializing warp-relayer"))
 			gomega.Expect(output).Should(gomega.ContainSubstring("Listener initialized. Listening for messages to relay."))
 		})
 	})

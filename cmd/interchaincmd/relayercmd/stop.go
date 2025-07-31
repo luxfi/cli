@@ -63,11 +63,11 @@ func CallStop(_ []string, flags StopFlags, network models.Network) error {
 	}
 	switch {
 	case network.ClusterName != "":
-		host, err := node.GetICMRelayerHost(app, network.ClusterName)
+		host, err := node.GetWarpRelayerHost(app, network.ClusterName)
 		if err != nil {
 			return err
 		}
-		if err := ssh.RunSSHStopICMRelayerService(host); err != nil {
+		if err := ssh.RunSSHStopWarpRelayerService(host); err != nil {
 			return err
 		}
 		ux.Logger.GreenCheckmarkToUser("Remote AWM Relayer on %s successfully stopped", host.GetCloudID())

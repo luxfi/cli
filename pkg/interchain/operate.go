@@ -93,33 +93,33 @@ func SendCrossChainMessage(
 
 // events
 
-type ICMMessageReceipt struct {
+type WarpMessageReceipt struct {
 	ReceivedMessageNonce *big.Int
 	RelayerRewardAddress common.Address
 }
-type ICMFeeInfo struct {
+type WarpFeeInfo struct {
 	FeeTokenAddress common.Address
 	Amount          *big.Int
 }
-type ICMMessage struct {
+type WarpMessage struct {
 	MessageNonce            *big.Int
 	OriginSenderAddress     common.Address
 	DestinationBlockchainID [32]byte
 	DestinationAddress      common.Address
 	RequiredGasLimit        *big.Int
 	AllowedRelayerAddresses []common.Address
-	Receipts                []ICMMessageReceipt
+	Receipts                []WarpMessageReceipt
 	Message                 []byte
 }
-type ICMMessengerSendCrossChainMessage struct {
+type WarpMessengerSendCrossChainMessage struct {
 	MessageID               [32]byte
 	DestinationBlockchainID [32]byte
-	Message                 ICMMessage
-	FeeInfo                 ICMFeeInfo
+	Message                 WarpMessage
+	FeeInfo                 WarpFeeInfo
 }
 
-func ParseSendCrossChainMessage(log types.Log) (*ICMMessengerSendCrossChainMessage, error) {
-	event := new(ICMMessengerSendCrossChainMessage)
+func ParseSendCrossChainMessage(log types.Log) (*WarpMessengerSendCrossChainMessage, error) {
+	event := new(WarpMessengerSendCrossChainMessage)
 	if err := contract.UnpackLog(
 		"SendCrossChainMessage(bytes32,bytes32,(uint256,address,bytes32,address,uint256,[address],[(uint256,address)],bytes),(address,uint256))",
 		[]int{0, 1},

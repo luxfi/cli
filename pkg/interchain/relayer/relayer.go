@@ -24,9 +24,9 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/sdk/evm"
-	apiConfig "github.com/luxfi/icm-services/config"
-	offchainregistry "github.com/luxfi/icm-services/messages/off-chain-registry"
-	"github.com/luxfi/icm-services/relayer/config"
+	apiConfig "github.com/luxfi/warp/config"
+	offchainregistry "github.com/luxfi/warp/messages/off-chain-registry"
+	"github.com/luxfi/warp/relayer/config"
 )
 
 const (
@@ -41,7 +41,7 @@ const (
 var relayerRequiredBalance = big.NewInt(0).Mul(big.NewInt(1e18), big.NewInt(500)) // 500 LUX
 
 func GetDefaultRelayerKeyInfo(app *application.Lux) (string, string, string, error) {
-	keyName := constants.ICMRelayerKeyName
+	keyName := constants.WarpRelayerKeyName
 	keyPath := app.GetKeyPath(keyName)
 	var (
 		k   *key.SoftKey
@@ -216,8 +216,8 @@ func GetLatestRelayerReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
 	return downloader.GetLatestReleaseVersion(
 		constants.LuxOrg,
-		constants.ICMServicesRepoName,
-		constants.ICMRelayerKind,
+		constants.WarpServicesRepoName,
+		constants.WarpRelayerKind,
 	)
 }
 
@@ -225,8 +225,8 @@ func GetLatestRelayerPreReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
 	return downloader.GetLatestPreReleaseVersion(
 		constants.LuxOrg,
-		constants.ICMServicesRepoName,
-		constants.ICMRelayerKind,
+		constants.WarpServicesRepoName,
+		constants.WarpRelayerKind,
 	)
 }
 
@@ -247,7 +247,7 @@ func InstallRelayer(binDir, version string) (string, error) {
 	}
 	ux.Logger.PrintToUser("Relayer version %s", version)
 	versionBinDir := filepath.Join(binDir, version)
-	binPath := filepath.Join(versionBinDir, constants.ICMRelayerBin)
+	binPath := filepath.Join(versionBinDir, constants.WarpRelayerBin)
 	if utils.IsExecutable(binPath) {
 		return binPath, nil
 	}
@@ -311,13 +311,13 @@ func getRelayerURL(version string) (string, error) {
 	if goos != "linux" && goos != "darwin" {
 		return "", fmt.Errorf("OS not supported: %s", goos)
 	}
-	component := "icm-relayer"
+	component := "warp-relayer"
 	semanticVersion := strings.TrimPrefix(version, component+"/")
 	if semanticVersion != version {
 		return fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/icm-relayer%%2F%s/icm-relayer_%s_%s_%s.tar.gz",
+			"https://github.com/%s/%s/releases/download/warp-relayer%%2F%s/warp-relayer_%s_%s_%s.tar.gz",
 			constants.LuxOrg,
-			constants.ICMServicesRepoName,
+			constants.WarpServicesRepoName,
 			semanticVersion,
 			strings.TrimPrefix(semanticVersion, "v"),
 			goos,
@@ -327,9 +327,9 @@ func getRelayerURL(version string) (string, error) {
 	semanticVersion = strings.TrimPrefix(version, component+"-")
 	if semanticVersion != version {
 		return fmt.Sprintf(
-			"https://github.com/%s/%s/releases/download/icm-relayer-%s/icm-relayer_%s_%s_%s.tar.gz",
+			"https://github.com/%s/%s/releases/download/warp-relayer-%s/warp-relayer_%s_%s_%s.tar.gz",
 			constants.LuxOrg,
-			constants.ICMServicesRepoName,
+			constants.WarpServicesRepoName,
 			semanticVersion,
 			strings.TrimPrefix(semanticVersion, "v"),
 			goos,
@@ -337,9 +337,9 @@ func getRelayerURL(version string) (string, error) {
 		), nil
 	}
 	return fmt.Sprintf(
-		"https://github.com/%s/%s/releases/download/%s/icm-relayer_%s_%s_%s.tar.gz",
+		"https://github.com/%s/%s/releases/download/%s/warp-relayer_%s_%s_%s.tar.gz",
 		constants.LuxOrg,
-		constants.ICMServicesRepoName,
+		constants.WarpServicesRepoName,
 		semanticVersion,
 		strings.TrimPrefix(semanticVersion, "v"),
 		goos,
@@ -428,8 +428,8 @@ func AddSourceAndDestinationToRelayerConfig(
 	wsEndpoint string,
 	subnetID string,
 	blockchainID string,
-	icmRegistryAddress string,
-	icmMessengerAddress string,
+	warpRegistryAddress string,
+	warpMessengerAddress string,
 	relayerRewardAddress string,
 	relayerPrivateKey string,
 ) error {
@@ -443,8 +443,8 @@ func AddSourceAndDestinationToRelayerConfig(
 		wsEndpoint,
 		subnetID,
 		blockchainID,
-		icmRegistryAddress,
-		icmMessengerAddress,
+		warpRegistryAddress,
+		warpMessengerAddress,
 		relayerRewardAddress,
 	)
 	addDestinationToRelayerConfig(
@@ -463,8 +463,8 @@ func AddSourceToRelayerConfig(
 	wsEndpoint string,
 	subnetID string,
 	blockchainID string,
-	icmRegistryAddress string,
-	icmMessengerAddress string,
+	warpRegistryAddress string,
+	warpMessengerAddress string,
 	relayerRewardAddress string,
 ) error {
 	awmRelayerConfig, err := loadRelayerConfig(relayerConfigPath)
@@ -477,8 +477,8 @@ func AddSourceToRelayerConfig(
 		wsEndpoint,
 		subnetID,
 		blockchainID,
-		icmRegistryAddress,
-		icmMessengerAddress,
+		warpRegistryAddress,
+		warpMessengerAddress,
 		relayerRewardAddress,
 	)
 	return saveRelayerConfig(awmRelayerConfig, relayerConfigPath)
@@ -511,8 +511,8 @@ func addSourceToRelayerConfig(
 	wsEndpoint string,
 	subnetID string,
 	blockchainID string,
-	icmRegistryAddress string,
-	icmMessengerAddress string,
+	warpRegistryAddress string,
+	warpMessengerAddress string,
 	relayerRewardAddress string,
 ) {
 	if wsEndpoint == "" {
@@ -532,7 +532,7 @@ func addSourceToRelayerConfig(
 			BaseURL: wsEndpoint,
 		},
 		MessageContracts: map[string]config.MessageProtocolConfig{
-			icmMessengerAddress: {
+			warpMessengerAddress: {
 				MessageFormat: config.TELEPORTER.String(),
 				Settings: map[string]interface{}{
 					"reward-address": relayerRewardAddress,
@@ -541,7 +541,7 @@ func addSourceToRelayerConfig(
 			offchainregistry.OffChainRegistrySourceAddress.Hex(): {
 				MessageFormat: config.OFF_CHAIN_REGISTRY.String(),
 				Settings: map[string]interface{}{
-					"teleporter-registry-address": icmRegistryAddress,
+					"teleporter-registry-address": warpRegistryAddress,
 				},
 			},
 		},

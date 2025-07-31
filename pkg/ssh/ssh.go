@@ -160,22 +160,22 @@ func RunSSHRestartNode(host *models.Host) error {
 	return docker.RestartDockerComposeService(host, remoteComposeFile, avagoService, constants.SSHLongRunningScriptTimeout)
 }
 
-// ComposeSSHSetupICMRelayer used docker compose to setup AWM Relayer
-func ComposeSSHSetupICMRelayer(host *models.Host, relayerVersion string) error {
-	if err := docker.ComposeSSHSetupICMRelayer(host, relayerVersion); err != nil {
+// ComposeSSHSetupWarpRelayer used docker compose to setup AWM Relayer
+func ComposeSSHSetupWarpRelayer(host *models.Host, relayerVersion string) error {
+	if err := docker.ComposeSSHSetupWarpRelayer(host, relayerVersion); err != nil {
 		return err
 	}
-	return docker.StartDockerComposeService(host, utils.GetRemoteComposeFile(), "icm-relayer", constants.SSHLongRunningScriptTimeout)
+	return docker.StartDockerComposeService(host, utils.GetRemoteComposeFile(), "warp-relayer", constants.SSHLongRunningScriptTimeout)
 }
 
-// RunSSHStartICMRelayerService runs script to start an AWM Relayer Service
-func RunSSHStartICMRelayerService(host *models.Host) error {
-	return docker.StartDockerComposeService(host, utils.GetRemoteComposeFile(), "icm-relayer", constants.SSHLongRunningScriptTimeout)
+// RunSSHStartWarpRelayerService runs script to start an AWM Relayer Service
+func RunSSHStartWarpRelayerService(host *models.Host) error {
+	return docker.StartDockerComposeService(host, utils.GetRemoteComposeFile(), "warp-relayer", constants.SSHLongRunningScriptTimeout)
 }
 
-// RunSSHStopICMRelayerService runs script to start an AWM Relayer Service
-func RunSSHStopICMRelayerService(host *models.Host) error {
-	return docker.StopDockerComposeService(host, utils.GetRemoteComposeFile(), "icm-relayer", constants.SSHLongRunningScriptTimeout)
+// RunSSHStopWarpRelayerService runs script to start an AWM Relayer Service
+func RunSSHStopWarpRelayerService(host *models.Host) error {
+	return docker.StopDockerComposeService(host, utils.GetRemoteComposeFile(), "warp-relayer", constants.SSHLongRunningScriptTimeout)
 }
 
 // RunSSHUpgradeLuxgo runs script to upgrade luxd
@@ -403,14 +403,14 @@ func RunSSHDownloadNodePrometheusConfig(host *models.Host, nodeInstanceDirPath s
 	)
 }
 
-func RunSSHUploadNodeICMRelayerConfig(host *models.Host, nodeInstanceDirPath string) error {
-	cloudICMRelayerConfigDir := filepath.Join(constants.CloudNodeCLIConfigBasePath, constants.ServicesDir, constants.ICMRelayerInstallDir)
-	if err := host.MkdirAll(cloudICMRelayerConfigDir, constants.SSHDirOpsTimeout); err != nil {
+func RunSSHUploadNodeWarpRelayerConfig(host *models.Host, nodeInstanceDirPath string) error {
+	cloudWarpRelayerConfigDir := filepath.Join(constants.CloudNodeCLIConfigBasePath, constants.ServicesDir, constants.WarpRelayerInstallDir)
+	if err := host.MkdirAll(cloudWarpRelayerConfigDir, constants.SSHDirOpsTimeout); err != nil {
 		return err
 	}
 	return host.Upload(
-		filepath.Join(nodeInstanceDirPath, constants.ServicesDir, constants.ICMRelayerInstallDir, constants.ICMRelayerConfigFilename),
-		filepath.Join(cloudICMRelayerConfigDir, constants.ICMRelayerConfigFilename),
+		filepath.Join(nodeInstanceDirPath, constants.ServicesDir, constants.WarpRelayerInstallDir, constants.WarpRelayerConfigFilename),
+		filepath.Join(cloudWarpRelayerConfigDir, constants.WarpRelayerConfigFilename),
 		constants.SSHFileOpsTimeout,
 	)
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/contract"
-	icmgenesis "github.com/luxfi/cli/pkg/interchain/genesis"
+	warpgenesis "github.com/luxfi/cli/pkg/interchain/genesis"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/models"
@@ -181,12 +181,12 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 	}
 	ux.Logger.PrintToUser(t.Render())
 
-	// ICM
-	t = ux.DefaultTable("ICM", nil)
+	// Warp
+	t = ux.DefaultTable("Warp", nil)
 	t.SetColumnConfigs([]table.ColumnConfig{
 		{Number: 1, AutoMerge: true},
 	})
-	hasICMInfo := false
+	hasWarpInfo := false
 	for net, data := range sc.Networks {
 		network, err := app.GetNetworkFromSidecarNetworkName(net)
 		if err != nil {
@@ -199,15 +199,15 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 			continue
 		}
 		if data.TeleporterMessengerAddress != "" {
-			t.AppendRow(table.Row{net, "ICM Messenger Address", data.TeleporterMessengerAddress})
-			hasICMInfo = true
+			t.AppendRow(table.Row{net, "Warp Messenger Address", data.TeleporterMessengerAddress})
+			hasWarpInfo = true
 		}
 		if data.TeleporterRegistryAddress != "" {
-			t.AppendRow(table.Row{net, "ICM Registry Address", data.TeleporterRegistryAddress})
-			hasICMInfo = true
+			t.AppendRow(table.Row{net, "Warp Registry Address", data.TeleporterRegistryAddress})
+			hasWarpInfo = true
 		}
 	}
-	if hasICMInfo {
+	if hasWarpInfo {
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser(t.Render())
 	}
@@ -266,13 +266,13 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 }
 
 func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
-	icmKeyAddress := ""
+	warpKeyAddress := ""
 	if sc.TeleporterReady {
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID, app.GetKeyPath(sc.TeleporterKey))
 		if err != nil {
 			return err
 		}
-		icmKeyAddress = k.C()
+		warpKeyAddress = k.C()
 	}
 	_, subnetAirdropAddress, _, err := subnet.GetDefaultSubnetAirdropKeyInfo(app, sc.Name)
 	if err != nil {
@@ -299,8 +299,8 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 			description := ""
 			privKey := ""
 			switch address.Hex() {
-			case icmKeyAddress:
-				description = logging.Orange.Wrap("Used by ICM")
+			case warpKeyAddress:
+				description = logging.Orange.Wrap("Used by Warp")
 			case subnetAirdropAddress:
 				description = logging.Orange.Wrap("Main funded account")
 			case vm.PrefundedEwoqAddress.Hex():
@@ -343,9 +343,9 @@ func printSmartContracts(sc models.Sidecar, genesis core.Genesis) {
 		}
 		var description, deployer string
 		switch {
-		case address == common.HexToAddress(icmgenesis.MessengerContractAddress):
-			description = "ICM Messenger"
-			deployer = icmgenesis.MessengerDeployerAddress
+		case address == common.HexToAddress(warpgenesis.MessengerContractAddress):
+			description = "Warp Messenger"
+			deployer = warpgenesis.MessengerDeployerAddress
 		case address == common.HexToAddress(validatorManagerSDK.ValidatorMessagesContractAddress):
 			description = "Validator Messages Lib"
 		case address == common.HexToAddress(validatorManagerSDK.ValidatorContractAddress):

@@ -13,7 +13,7 @@ import (
 
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/warp"
-	signatureAggregator "github.com/luxfi/icm-services/signature-aggregator/api"
+	signatureAggregator "github.com/luxfi/warp/signature-aggregator/api"
 	"go.uber.org/zap"
 )
 

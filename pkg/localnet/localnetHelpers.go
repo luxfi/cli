@@ -147,8 +147,8 @@ func WriteExtraLocalNetworkData(
 	app *application.Lux,
 	rootDataDir string,
 	relayerPath string,
-	cchainICMMessengerAddress string,
-	cchainICMRegistryAddress string,
+	cchainWarpMessengerAddress string,
+	cchainWarpRegistryAddress string,
 ) error {
 	if rootDataDir == "" {
 		var err error
@@ -169,11 +169,11 @@ func WriteExtraLocalNetworkData(
 	if relayerPath != "" {
 		extraLocalNetworkData.RelayerPath = utils.ExpandHome(relayerPath)
 	}
-	if cchainICMMessengerAddress != "" {
-		extraLocalNetworkData.CChainTeleporterMessengerAddress = cchainICMMessengerAddress
+	if cchainWarpMessengerAddress != "" {
+		extraLocalNetworkData.CChainTeleporterMessengerAddress = cchainWarpMessengerAddress
 	}
-	if cchainICMRegistryAddress != "" {
-		extraLocalNetworkData.CChainTeleporterRegistryAddress = cchainICMRegistryAddress
+	if cchainWarpRegistryAddress != "" {
+		extraLocalNetworkData.CChainTeleporterRegistryAddress = cchainWarpRegistryAddress
 	}
 	bs, err := json.Marshal(&extraLocalNetworkData)
 	if err != nil {

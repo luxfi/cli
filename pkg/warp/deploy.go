@@ -14,14 +14,14 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-type ICMFeeInfo struct {
+type WarpFeeInfo struct {
 	FeeTokenAddress common.Address
 	Amount          *big.Int
 }
 
 type TokenRemoteSettings struct {
-	ICMRegistryAddress    common.Address
-	ICMManager            common.Address
+	WarpRegistryAddress    common.Address
+	WarpManager            common.Address
 	TokenHomeBlockchainID [32]byte
 	TokenHomeAddress      common.Address
 	TokenHomeDecimals     uint8
@@ -33,7 +33,7 @@ func RegisterRemote(
 	remoteAddress common.Address,
 ) error {
 	ux.Logger.PrintToUser("Registering remote contract with home contract")
-	feeInfo := ICMFeeInfo{
+	feeInfo := WarpFeeInfo{
 		Amount: big.NewInt(0),
 	}
 	_, _, err := contract.TxToMethod(
@@ -55,8 +55,8 @@ func DeployERC20Remote(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	icmRegistryAddress common.Address,
-	icmManagerAddress common.Address,
+	warpRegistryAddress common.Address,
+	warpManagerAddress common.Address,
 	tokenHomeBlockchainID [32]byte,
 	tokenHomeAddress common.Address,
 	tokenHomeDecimals uint8,
@@ -70,8 +70,8 @@ func DeployERC20Remote(
 		return common.Address{}, err
 	}
 	tokenRemoteSettings := TokenRemoteSettings{
-		ICMRegistryAddress:    icmRegistryAddress,
-		ICMManager:            icmManagerAddress,
+		WarpRegistryAddress:    warpRegistryAddress,
+		WarpManager:            warpManagerAddress,
 		TokenHomeBlockchainID: tokenHomeBlockchainID,
 		TokenHomeAddress:      tokenHomeAddress,
 		TokenHomeDecimals:     tokenHomeDecimals,
@@ -92,8 +92,8 @@ func DeployNativeRemote(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	icmRegistryAddress common.Address,
-	icmManagerAddress common.Address,
+	warpRegistryAddress common.Address,
+	warpManagerAddress common.Address,
 	tokenHomeBlockchainID [32]byte,
 	tokenHomeAddress common.Address,
 	tokenHomeDecimals uint8,
@@ -107,8 +107,8 @@ func DeployNativeRemote(
 		return common.Address{}, err
 	}
 	tokenRemoteSettings := TokenRemoteSettings{
-		ICMRegistryAddress:    icmRegistryAddress,
-		ICMManager:            icmManagerAddress,
+		WarpRegistryAddress:    warpRegistryAddress,
+		WarpManager:            warpManagerAddress,
 		TokenHomeBlockchainID: tokenHomeBlockchainID,
 		TokenHomeAddress:      tokenHomeAddress,
 		TokenHomeDecimals:     tokenHomeDecimals,
@@ -129,8 +129,8 @@ func DeployERC20Home(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	icmRegistryAddress common.Address,
-	icmManagerAddress common.Address,
+	warpRegistryAddress common.Address,
+	warpManagerAddress common.Address,
 	erc20TokenAddress common.Address,
 	erc20TokenDecimals uint8,
 ) (common.Address, error) {
@@ -144,8 +144,8 @@ func DeployERC20Home(
 		privateKey,
 		binBytes,
 		"(address, address, address, uint8)",
-		icmRegistryAddress,
-		icmManagerAddress,
+		warpRegistryAddress,
+		warpManagerAddress,
 		erc20TokenAddress,
 		erc20TokenDecimals,
 	)
@@ -155,8 +155,8 @@ func DeployNativeHome(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	icmRegistryAddress common.Address,
-	icmManagerAddress common.Address,
+	warpRegistryAddress common.Address,
+	warpManagerAddress common.Address,
 	wrappedNativeTokenAddress common.Address,
 ) (common.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/NativeTokenHome.sol/NativeTokenHome.bin")
@@ -169,8 +169,8 @@ func DeployNativeHome(
 		privateKey,
 		binBytes,
 		"(address, address, address)",
-		icmRegistryAddress,
-		icmManagerAddress,
+		warpRegistryAddress,
+		warpManagerAddress,
 		wrappedNativeTokenAddress,
 	)
 }

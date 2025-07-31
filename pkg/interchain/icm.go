@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	releaseURL                     = "https://github.com/luxfi/icm-contracts/releases/download/%s/"
+	releaseURL                     = "https://github.com/luxfi/warp-contracts/releases/download/%s/"
 	messengerContractAddressURLFmt = releaseURL + "/TeleporterMessenger_Contract_Address_%s.txt"
 	messengerDeployerAddressURLFmt = releaseURL + "/TeleporterMessenger_Deployer_Address_%s.txt"
 	messengerDeployerTxURLFmt      = releaseURL + "/TeleporterMessenger_Deployment_Transaction_%s.txt"
@@ -34,7 +34,7 @@ var (
 	InterchainMessagingPrefundedAddressBalance = big.NewInt(0).Mul(big.NewInt(1e18), big.NewInt(600))
 )
 
-func getICMURLs(version string) (string, string, string, string) {
+func getWarpURLs(version string) (string, string, string, string) {
 	messengerContractAddressURL := fmt.Sprintf(
 		messengerContractAddressURLFmt,
 		version,
@@ -58,31 +58,31 @@ func getICMURLs(version string) (string, string, string, string) {
 	return messengerContractAddressURL, messengerDeployerAddressURL, messengerDeployerTxURL, registryBydecodeURL
 }
 
-type ICMDeployer struct {
+type WarpDeployer struct {
 	messengerContractAddress string
 	messengerDeployerAddress string
 	messengerDeployerTx      string
 	registryBydecode         string
 }
 
-func (t *ICMDeployer) GetAssets(
-	icmInstallDir string,
+func (t *WarpDeployer) GetAssets(
+	warpInstallDir string,
 	version string,
 ) (string, string, string, string, error) {
-	if err := t.DownloadAssets(icmInstallDir, version); err != nil {
+	if err := t.DownloadAssets(warpInstallDir, version); err != nil {
 		return "", "", "", "", err
 	}
 	return t.messengerContractAddress, t.messengerDeployerAddress, t.messengerDeployerTx, t.registryBydecode, nil
 }
 
-func (t *ICMDeployer) CheckAssets() error {
+func (t *WarpDeployer) CheckAssets() error {
 	if t.messengerContractAddress == "" || t.messengerDeployerAddress == "" || t.messengerDeployerTx == "" || t.registryBydecode == "" {
-		return fmt.Errorf("icm assets has not been initialized")
+		return fmt.Errorf("warp assets has not been initialized")
 	}
 	return nil
 }
 
-func (t *ICMDeployer) SetAssetsFromPaths(
+func (t *WarpDeployer) SetAssetsFromPaths(
 	messengerContractAddressPath string,
 	messengerDeployerAddressPath string,
 	messengerDeployerTxPath string,
@@ -119,7 +119,7 @@ func (t *ICMDeployer) SetAssetsFromPaths(
 	return nil
 }
 
-func (t *ICMDeployer) SetAssets(
+func (t *WarpDeployer) SetAssets(
 	messengerContractAddress string,
 	messengerDeployerAddress string,
 	messengerDeployerTx string,
@@ -139,13 +139,13 @@ func (t *ICMDeployer) SetAssets(
 	}
 }
 
-func (t *ICMDeployer) DownloadAssets(
-	icmInstallDir string,
+func (t *WarpDeployer) DownloadAssets(
+	warpInstallDir string,
 	version string,
 ) error {
 	var err error
-	binDir := filepath.Join(icmInstallDir, version)
-	messengerContractAddressURL, messengerDeployerAddressURL, messengerDeployerTxURL, registryBydecodeURL := getICMURLs(
+	binDir := filepath.Join(warpInstallDir, version)
+	messengerContractAddressURL, messengerDeployerAddressURL, messengerDeployerTxURL, registryBydecodeURL := getWarpURLs(
 		version,
 	)
 	messengerContractAddressPath := filepath.Join(
@@ -174,7 +174,7 @@ func (t *ICMDeployer) DownloadAssets(
 				return err
 			}
 		} else {
-			// get target icm messenger contract address
+			// get target warp messenger contract address
 			messengerContractAddressBytes, err = application.NewDownloader().DownloadWithTee(messengerContractAddressURL, messengerContractAddressPath)
 			if err != nil {
 				return err
@@ -192,7 +192,7 @@ func (t *ICMDeployer) DownloadAssets(
 				return err
 			}
 		} else {
-			// get icm deployer address
+			// get warp deployer address
 			messengerDeployerAddressBytes, err = application.NewDownloader().DownloadWithTee(messengerDeployerAddressURL, messengerDeployerAddressPath)
 			if err != nil {
 				return err
@@ -233,7 +233,7 @@ func (t *ICMDeployer) DownloadAssets(
 	return nil
 }
 
-func (t *ICMDeployer) Deploy(
+func (t *WarpDeployer) Deploy(
 	subnetName string,
 	rpcURL string,
 	privateKey string,
@@ -262,7 +262,7 @@ func (t *ICMDeployer) Deploy(
 	return alreadyDeployed, messengerAddress, registryAddress, err
 }
 
-func (t *ICMDeployer) DeployMessenger(
+func (t *WarpDeployer) DeployMessenger(
 	subnetName string,
 	rpcURL string,
 	privateKey string,
@@ -278,10 +278,10 @@ func (t *ICMDeployer) DeployMessenger(
 	if messengerAlreadyDeployed, err := client.ContractAlreadyDeployed(t.messengerContractAddress); err != nil {
 		return false, "", fmt.Errorf("failure making a request to %s: %w", rpcURL, err)
 	} else if messengerAlreadyDeployed {
-		ux.Logger.PrintToUser("ICM Messenger has already been deployed to %s", subnetName)
+		ux.Logger.PrintToUser("Warp Messenger has already been deployed to %s", subnetName)
 		return true, t.messengerContractAddress, nil
 	}
-	// get icm deployer balance
+	// get warp deployer balance
 	messengerDeployerBalance, err := client.GetAddressBalance(
 		t.messengerDeployerAddress,
 	)
@@ -303,14 +303,14 @@ func (t *ICMDeployer) DeployMessenger(
 		return false, "", err
 	}
 	ux.Logger.PrintToUser(
-		"ICM Messenger successfully deployed to %s (%s)",
+		"Warp Messenger successfully deployed to %s (%s)",
 		subnetName,
 		t.messengerContractAddress,
 	)
 	return false, t.messengerContractAddress, nil
 }
 
-func (t *ICMDeployer) DeployRegistry(
+func (t *WarpDeployer) DeployRegistry(
 	subnetName string,
 	rpcURL string,
 	privateKey string,
@@ -340,7 +340,7 @@ func (t *ICMDeployer) DeployRegistry(
 		return "", err
 	}
 	ux.Logger.PrintToUser(
-		"ICM Registry successfully deployed to %s (%s)",
+		"Warp Registry successfully deployed to %s (%s)",
 		subnetName,
 		registryAddress,
 	)
@@ -388,7 +388,7 @@ func SetProposerVM(
 	return client.SetupProposerVM(privKeyStr)
 }
 
-func getICMKeyInfo(
+func getWarpKeyInfo(
 	app *application.Lux,
 	keyName string,
 ) (string, string, *big.Int, error) {
@@ -399,29 +399,29 @@ func getICMKeyInfo(
 	return k.C(), k.PrivKeyHex(), InterchainMessagingPrefundedAddressBalance, nil
 }
 
-type ICMInfo struct {
+type WarpInfo struct {
 	Version                  string
 	FundedAddress            string
 	FundedBalance            *big.Int
 	MessengerDeployerAddress string
 }
 
-func GetICMInfo(
+func GetWarpInfo(
 	app *application.Lux,
-) (*ICMInfo, error) {
+) (*WarpInfo, error) {
 	var err error
-	ti := ICMInfo{}
-	ti.FundedAddress, _, ti.FundedBalance, err = getICMKeyInfo(
+	ti := WarpInfo{}
+	ti.FundedAddress, _, ti.FundedBalance, err = getWarpKeyInfo(
 		app,
-		constants.ICMKeyName,
+		constants.WarpKeyName,
 	)
 	if err != nil {
 		return nil, err
 	}
-	ti.Version = constants.ICMVersion
-	deployer := ICMDeployer{}
+	ti.Version = constants.WarpVersion
+	deployer := WarpDeployer{}
 	_, ti.MessengerDeployerAddress, _, _, err = deployer.GetAssets(
-		app.GetICMContractsBinDir(),
+		app.GetWarpContractsBinDir(),
 		ti.Version,
 	)
 	if err != nil {

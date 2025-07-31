@@ -23,8 +23,8 @@ type SourceSpec struct {
 	blockchainID        string
 	subnetID            string
 	rewardAddress       string
-	icmMessengerAddress string
-	icmRegistryAddress  string
+	warpMessengerAddress string
+	warpRegistryAddress  string
 }
 
 type DestinationSpec struct {
@@ -140,7 +140,7 @@ func addSource(
 	if err != nil {
 		return ConfigSpec{}, err
 	}
-	icmRegistryAddress, icmMessengerAddress, err := contract.GetICMInfo(app, network, chainSpec, true, true, false)
+	warpRegistryAddress, warpMessengerAddress, err := contract.GetWarpInfo(app, network, chainSpec, true, true, false)
 	if err != nil {
 		return ConfigSpec{}, err
 	}
@@ -179,8 +179,8 @@ func addSource(
 		blockchainID:        blockchainID.String(),
 		subnetID:            subnetID.String(),
 		rewardAddress:       rewardAddress,
-		icmRegistryAddress:  icmRegistryAddress,
-		icmMessengerAddress: icmMessengerAddress,
+		warpRegistryAddress:  warpRegistryAddress,
+		warpMessengerAddress: warpMessengerAddress,
 		rpcEndpoint:         rpcEndpoint,
 		wsEndpoint:          wsEndpoint,
 	})
@@ -387,7 +387,7 @@ func GenerateConfigSpec(
 					}
 				case explainOption:
 					ux.Logger.PrintToUser("A source blockchain is going to be listened by the relayer to check for new")
-					ux.Logger.PrintToUser("messages. You need to specify blockchain ID, ICM addresses.")
+					ux.Logger.PrintToUser("messages. You need to specify blockchain ID, Warp addresses.")
 					ux.Logger.PrintToUser("A destination blockchain is going to be connected by the relayer in order")
 					ux.Logger.PrintToUser("to deliver a message. You need to specify blockchain ID, private key")
 					continue
