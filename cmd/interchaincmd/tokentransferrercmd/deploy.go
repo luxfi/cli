@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/ictt"
+	"github.com/luxfi/cli/pkg/warp"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/precompiles"
@@ -146,8 +146,8 @@ func getHomeKeyAndAddress(app *application.Lux, network models.Network, homeFlag
 }
 
 func CallDeploy(_ []string, flags DeployFlags) error {
-	if !ictt.FoundryIsInstalled() {
-		if err := ictt.InstallFoundry(); err != nil {
+	if !warp.FoundryIsInstalled() {
+		if err := warp.InstallFoundry(); err != nil {
 			return err
 		}
 	}
@@ -491,16 +491,16 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 
 	// Setup Contracts
 	ux.Logger.PrintToUser("Downloading Lux Warp Contracts")
-	if err := ictt.DownloadRepo(app, flags.version); err != nil {
+	if err := warp.DownloadRepo(app, flags.version); err != nil {
 		return err
 	}
 	ux.Logger.PrintToUser("Compiling Lux Warp Contracts")
-	if err := ictt.BuildContracts(app); err != nil {
+	if err := warp.BuildContracts(app); err != nil {
 		return err
 	}
 
 	// Home Deploy
-	icttSrcDir, err := ictt.RepoDir(app)
+	warpSrcDir, err := warp.RepoDir(app)
 	if err != nil {
 		return err
 	}
@@ -519,15 +519,15 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 	if flags.homeFlags.erc20Address != "" {
 		tokenHomeAddress := common.HexToAddress(flags.homeFlags.erc20Address)
-		tokenHomeDecimals, err := ictt.GetTokenDecimals(
+		tokenHomeDecimals, err := warp.GetTokenDecimals(
 			homeRPCEndpoint,
 			tokenHomeAddress,
 		)
 		if err != nil {
 			return err
 		}
-		homeAddress, err = ictt.DeployERC20Home(
-			icttSrcDir,
+		homeAddress, err = warp.DeployERC20Home(
+			warpSrcDir,
 			homeRPCEndpoint,
 			homeKey,
 			common.HexToAddress(homeRegistryAddress),
@@ -550,8 +550,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		if err != nil {
 			return err
 		}
-		wrappedNativeTokenAddress, err := ictt.DeployWrappedNativeToken(
-			icttSrcDir,
+		wrappedNativeTokenAddress, err := warp.DeployWrappedNativeToken(
+			warpSrcDir,
 			homeRPCEndpoint,
 			homeKey,
 			nativeTokenSymbol,
@@ -562,8 +562,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		ux.Logger.PrintToUser("Wrapped Native Token Deployed to %s", homeRPCEndpoint)
 		ux.Logger.PrintToUser("%s Address: %s", nativeTokenSymbol, wrappedNativeTokenAddress)
 		ux.Logger.PrintToUser("")
-		homeAddress, err = ictt.DeployNativeHome(
-			icttSrcDir,
+		homeAddress, err = warp.DeployNativeHome(
+			warpSrcDir,
 			homeRPCEndpoint,
 			homeKey,
 			common.HexToAddress(homeRegistryAddress),
@@ -594,33 +594,33 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	)
 
 	// get token home symbol, name, decimals
-	endpointKind, err := ictt.GetEndpointKind(homeRPCEndpoint, homeAddress)
+	endpointKind, err := warp.GetEndpointKind(homeRPCEndpoint, homeAddress)
 	if err != nil {
 		return err
 	}
 	var tokenHomeAddress common.Address
 	switch endpointKind {
-	case ictt.ERC20TokenHome:
-		tokenHomeAddress, err = ictt.ERC20TokenHomeGetTokenAddress(homeRPCEndpoint, homeAddress)
+	case warp.ERC20TokenHome:
+		tokenHomeAddress, err = warp.ERC20TokenHomeGetTokenAddress(homeRPCEndpoint, homeAddress)
 		if err != nil {
 			return err
 		}
-	case ictt.NativeTokenHome:
-		tokenHomeAddress, err = ictt.NativeTokenHomeGetTokenAddress(homeRPCEndpoint, homeAddress)
+	case warp.NativeTokenHome:
+		tokenHomeAddress, err = warp.NativeTokenHomeGetTokenAddress(homeRPCEndpoint, homeAddress)
 		if err != nil {
 			return err
 		}
 	default:
-		return fmt.Errorf("unsupported ictt endpoint kind %d", endpointKind)
+		return fmt.Errorf("unsupported warp endpoint kind %d", endpointKind)
 	}
-	tokenHomeSymbol, tokenHomeName, _, err := ictt.GetTokenParams(
+	tokenHomeSymbol, tokenHomeName, _, err := warp.GetTokenParams(
 		homeRPCEndpoint,
 		tokenHomeAddress,
 	)
 	if err != nil {
 		return err
 	}
-	homeDecimals, err := ictt.TokenHomeGetDecimals(homeRPCEndpoint, homeAddress)
+	homeDecimals, err := warp.TokenHomeGetDecimals(homeRPCEndpoint, homeAddress)
 	if err != nil {
 		return err
 	}
@@ -632,8 +632,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		if flags.remoteFlags.Decimals != 0 {
 			remoteDecimals = flags.remoteFlags.Decimals
 		}
-		remoteAddress, err = ictt.DeployERC20Remote(
-			icttSrcDir,
+		remoteAddress, err = warp.DeployERC20Remote(
+			warpSrcDir,
 			remoteRPCEndpoint,
 			remoteKey,
 			common.HexToAddress(remoteRegistryAddress),
@@ -664,8 +664,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		if err != nil {
 			return err
 		}
-		remoteAddress, err = ictt.DeployNativeRemote(
-			icttSrcDir,
+		remoteAddress, err = warp.DeployNativeRemote(
+			warpSrcDir,
 			remoteRPCEndpoint,
 			remoteKey,
 			common.HexToAddress(remoteRegistryAddress),
@@ -684,7 +684,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	ux.Logger.PrintToUser("Remote Deployed to %s", remoteRPCEndpoint)
 	ux.Logger.PrintToUser("Remote Address: %s", remoteAddress)
 
-	if err := ictt.RegisterRemote(
+	if err := warp.RegisterRemote(
 		remoteRPCEndpoint,
 		remoteKey,
 		remoteAddress,
@@ -697,7 +697,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	t0 := time.Now()
 	var collateralNeeded *big.Int
 	for {
-		registeredRemote, err := ictt.TokenHomeGetRegisteredRemote(
+		registeredRemote, err := warp.TokenHomeGetRegisteredRemote(
 			homeRPCEndpoint,
 			homeAddress,
 			remoteBlockchainID,
@@ -719,7 +719,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 
 	// Collateralize the remote contract on the home contract if necessary
 	if collateralNeeded.Cmp(big.NewInt(0)) != 0 {
-		err = ictt.TokenHomeAddCollateral(
+		err = warp.TokenHomeAddCollateral(
 			homeRPCEndpoint,
 			homeAddress,
 			homeKey,
@@ -732,7 +732,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		}
 
 		// Check that the remote is collateralized on the home contract now.
-		registeredRemote, err := ictt.TokenHomeGetRegisteredRemote(
+		registeredRemote, err := warp.TokenHomeGetRegisteredRemote(
 			homeRPCEndpoint,
 			homeAddress,
 			remoteBlockchainID,
@@ -758,7 +758,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		}
 
 		// Send a single token unit to report that the remote is collateralized.
-		_, _, err = ictt.Send(
+		_, _, err = warp.Send(
 			homeRPCEndpoint,
 			homeAddress,
 			homeKey,
@@ -773,7 +773,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 
 		t0 := time.Now()
 		for {
-			isCollateralized, err := ictt.TokenRemoteIsCollateralized(
+			isCollateralized, err := warp.TokenRemoteIsCollateralized(
 				remoteRPCEndpoint,
 				remoteAddress,
 			)
