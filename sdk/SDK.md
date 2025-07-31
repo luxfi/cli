@@ -536,7 +536,7 @@ func PoSValidatorManagerInitialize(
 #### New
 
 ```go
-func New(ctx context.Context, uri string, luxKeychain avagokeychain.Keychain, config primary.WalletConfig) (Wallet, error)
+func New(ctx context.Context, uri string, luxKeychain luxdkeychain.Keychain, config primary.WalletConfig) (Wallet, error)
 ```
 
 ---

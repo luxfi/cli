@@ -166,21 +166,21 @@ func StartLocalMachine(
 				availableBalance,
 			)
 		}
-		avagoVersionSettings := dependencies.LuxGoVersionSettings{}
+		luxdVersionSettings := dependencies.LuxGoVersionSettings{}
 		// setup (install if needed) luxd binary
-		avagoVersion := localMachineFlags.UserProvidedAvagoVersion
-		if localMachineFlags.UserProvidedAvagoVersion == constants.DefaultLuxGoVersion && localMachineFlags.AvagoBinaryPath == "" {
-			// nothing given: get avago version from RPC compat using latest.json defined in
+		luxdVersion := localMachineFlags.UserProvidedLuxdVersion
+		if localMachineFlags.UserProvidedLuxdVersion == constants.DefaultLuxGoVersion && localMachineFlags.LuxdBinaryPath == "" {
+			// nothing given: get luxd version from RPC compat using latest.json defined in
 			// https://raw.githubusercontent.com/luxfi/lux-cli/control-default-version/versions/latest.json
-			avagoVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sidecar.RPCVersion)
+			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sidecar.RPCVersion)
 			if err != nil {
-				if err != dependencies.ErrNoAvagoVersion {
+				if err != dependencies.ErrNoLuxdVersion {
 					return false, err
 				}
-				avagoVersion = constants.LatestPreReleaseVersionTag
+				luxdVersion = constants.LatestPreReleaseVersionTag
 			}
 		}
-		localMachineFlags.AvagoBinaryPath, err = localnet.SetupLuxGoBinary(app, avagoVersion, localMachineFlags.AvagoBinaryPath)
+		localMachineFlags.LuxdBinaryPath, err = localnet.SetupLuxGoBinary(app, luxdVersion, localMachineFlags.LuxdBinaryPath)
 		if err != nil {
 			return false, err
 		}
@@ -223,16 +223,16 @@ func StartLocalMachine(
 			}
 			nodeSettings[i] = nodeSetting
 		}
-		// anrSettings, avagoVersionSettings, globalNetworkFlags are empty
+		// anrSettings, luxdVersionSettings, globalNetworkFlags are empty
 		if err = node.StartLocalNode(
 			app,
 			clusterName,
-			localMachineFlags.AvagoBinaryPath,
+			localMachineFlags.LuxdBinaryPath,
 			uint32(bootstrapValidatorFlags.NumBootstrapValidators),
 			nodeConfig,
 			localnet.ConnectionSettings{},
 			nodeSettings,
-			avagoVersionSettings,
+			luxdVersionSettings,
 			network,
 		); err != nil {
 			return false, err
@@ -255,7 +255,7 @@ func InitializeValidatorManager(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	network models.Network,
-	avaGoBootstrapValidators []*txs.ConvertSubnetToL1Validator,
+	luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator,
 	pos bool,
 	managerAddress string,
 	proxyContractOwner string,
@@ -384,7 +384,7 @@ func InitializeValidatorManager(
 		BlockchainID:        blockchainID,
 		OwnerAddress:        &ownerAddress,
 		RPC:                 rpcURL,
-		BootstrapValidators: avaGoBootstrapValidators,
+		BootstrapValidators: luxdBootstrapValidators,
 	}
 	aggregatorLogger, err := signatureaggregator.NewSignatureAggregatorLogger(
 		signatureAggregatorFlags.AggregatorLogLevel,
@@ -480,9 +480,9 @@ func convertSubnetToL1(
 	if !common.IsHexAddress(validatorManagerAddressStr) {
 		return nil, false, false, constants.ErrInvalidValidatorManagerAddress
 	}
-	avaGoBootstrapValidators, err := ConvertToLuxGoSubnetValidator(bootstrapValidators)
+	luxdBootstrapValidators, err := ConvertToLuxGoSubnetValidator(bootstrapValidators)
 	if err != nil {
-		return avaGoBootstrapValidators, false, false, err
+		return luxdBootstrapValidators, false, false, err
 	}
 	managerAddress := common.HexToAddress(validatorManagerAddressStr)
 
@@ -501,9 +501,9 @@ func convertSubnetToL1(
 		ux.Logger.PrintToUser("Please review the details of the ConvertSubnetToL1 Transaction")
 		ux.Logger.PrintToUser("")
 		if doContinue, err := app.Prompt.CaptureYesNo("Do you want to create the transaction?"); err != nil {
-			return avaGoBootstrapValidators, false, false, err
+			return luxdBootstrapValidators, false, false, err
 		} else if !doContinue {
-			return avaGoBootstrapValidators, true, false, nil
+			return luxdBootstrapValidators, true, false, nil
 		}
 	}
 
@@ -513,11 +513,11 @@ func convertSubnetToL1(
 		subnetID,
 		blockchainID,
 		managerAddress,
-		avaGoBootstrapValidators,
+		luxdBootstrapValidators,
 	)
 	if err != nil {
 		ux.Logger.RedXToUser("error converting blockchain: %s. fix the issue and try again with a new convert cmd", err)
-		return avaGoBootstrapValidators, false, false, err
+		return luxdBootstrapValidators, false, false, err
 	}
 
 	savePartialTx := !isFullySigned && err == nil
@@ -532,7 +532,7 @@ func convertSubnetToL1(
 			outputTxPath,
 			false,
 		); err != nil {
-			return avaGoBootstrapValidators, false, savePartialTx, err
+			return luxdBootstrapValidators, false, savePartialTx, err
 		}
 	} else {
 		ux.Logger.PrintToUser("ConvertSubnetToL1Tx ID: %s", convertL1TxID)
@@ -542,13 +542,13 @@ func convertSubnetToL1(
 			0,
 		)
 		if err != nil {
-			return avaGoBootstrapValidators, false, savePartialTx, err
+			return luxdBootstrapValidators, false, savePartialTx, err
 		}
 	}
 
 	ux.Logger.PrintToUser("")
-	setBootstrapValidatorValidationID(avaGoBootstrapValidators, bootstrapValidators, subnetID)
-	return avaGoBootstrapValidators, false, savePartialTx, app.UpdateSidecarNetworks(
+	setBootstrapValidatorValidationID(luxdBootstrapValidators, bootstrapValidators, subnetID)
+	return luxdBootstrapValidators, false, savePartialTx, app.UpdateSidecarNetworks(
 		&sidecar,
 		network,
 		subnetID,
@@ -727,7 +727,7 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 	// deploy to public network
 	deployer := subnet.NewPublicDeployer(app, kc, network)
 
-	avaGoBootstrapValidators, cancel, savePartialTx, err := convertSubnetToL1(
+	luxdBootstrapValidators, cancel, savePartialTx, err := convertSubnetToL1(
 		bootstrapValidators,
 		deployer,
 		subnetID,
@@ -758,7 +758,7 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 			subnetID,
 			blockchainID,
 			network,
-			avaGoBootstrapValidators,
+			luxdBootstrapValidators,
 			sidecar.ValidatorManagement == validatormanagertypes.ProofOfStake,
 			validatorManagerAddress,
 			sidecar.ProxyContractOwner,

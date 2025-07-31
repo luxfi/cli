@@ -25,7 +25,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	commonAvago "github.com/luxfi/node/wallet/subnet/primary/common"
+	commonLuxd "github.com/luxfi/node/wallet/subnet/primary/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
@@ -310,9 +310,9 @@ func (c *Subnet) Commit(ms multisig.Multisig, wallet wallet.Wallet, waitForTxAcc
 	for i := 0; i < repeats; i++ {
 		ctx, cancel := utilsSDK.GetAPILargeContext()
 		defer cancel()
-		options := []commonAvago.Option{commonAvago.WithContext(ctx)}
+		options := []commonLuxd.Option{commonLuxd.WithContext(ctx)}
 		if !waitForTxAcceptance {
-			options = append(options, commonAvago.WithAssumeDecided())
+			options = append(options, commonLuxd.WithAssumeDecided())
 		}
 		// TODO: split error checking and recovery between issuing and waiting for status
 		issueTxErr = wallet.P().IssueTx(tx, options...)

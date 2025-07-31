@@ -12,7 +12,7 @@ import (
 
 const luxdReleaseURL = "https://api.github.com/repos/luxfi/luxd/releases/latest"
 
-func GetLatestAvagoVersionFromGithub() string {
+func GetLatestLuxdVersionFromGithub() string {
 	response, err := http.Get(luxdReleaseURL)
 	gomega.Expect(err).Should(gomega.BeNil())
 	defer response.Body.Close()

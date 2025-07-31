@@ -113,7 +113,7 @@ func trackSubnet(
 				nodeResults.AddResult(host.NodeID, nil, err)
 			}
 
-			if err := ssh.RunSSHRenderAvagoAliasConfigFile(
+			if err := ssh.RunSSHRenderLuxdAliasConfigFile(
 				host,
 				blockchainID.String(),
 				subnetAliases,
