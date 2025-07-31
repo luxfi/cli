@@ -19,12 +19,8 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/liyue201/erc20-go v0.0.0-20210521034206-b2824246def0
 	github.com/luxfi/evm v0.7.8
 	github.com/luxfi/geth v0.15.3
-	github.com/luxfi/ids v1.0.0
-	github.com/luxfi/ledger-lux-go v0.0.0-20241017195939-5f7df9b7c3f2
-	github.com/luxfi/log v1.0.0
 	github.com/luxfi/lpm v1.0.0
 	github.com/luxfi/netrunner v1.8.4
 	github.com/luxfi/node v1.13.13
@@ -209,4 +205,3 @@ require (
 )
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
-
