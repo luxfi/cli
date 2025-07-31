@@ -97,11 +97,11 @@ func getRPCIncompatibleNodes(app *application.Lux, hosts []*models.Host, subnetN
 		wg.Add(1)
 		go func(nodeResults *models.NodeResults, host *models.Host) {
 			defer wg.Done()
-			if resp, err := ssh.RunSSHCheckLuxGoVersion(host); err != nil {
+			if resp, err := ssh.RunSSHCheckLuxdVersion(host); err != nil {
 				nodeResults.AddResult(host.GetCloudID(), nil, err)
 				return
 			} else {
-				if _, rpcVersion, err := ParseLuxGoOutput(resp); err != nil {
+				if _, rpcVersion, err := ParseLuxdOutput(resp); err != nil {
 					nodeResults.AddResult(host.GetCloudID(), nil, err)
 				} else {
 					nodeResults.AddResult(host.GetCloudID(), rpcVersion, err)
@@ -126,7 +126,7 @@ func getRPCIncompatibleNodes(app *application.Lux, hosts []*models.Host, subnetN
 	return incompatibleNodes, nil
 }
 
-func ParseLuxGoOutput(byteValue []byte) (string, uint32, error) {
+func ParseLuxdOutput(byteValue []byte) (string, uint32, error) {
 	reply := map[string]interface{}{}
 	if err := json.Unmarshal(byteValue, &reply); err != nil {
 		return "", 0, err
@@ -167,13 +167,13 @@ func getPublicEndpoints(
 		return sdkutils.Belongs(publicNodes, tracker.GetCloudID())
 	})
 	endpoints := sdkutils.Map(publicTrackers, func(tracker *models.Host) string {
-		return GetLuxGoEndpoint(tracker.IP)
+		return GetLuxdEndpoint(tracker.IP)
 	})
 	return endpoints, nil
 }
 
-func GetLuxGoEndpoint(ip string) string {
-	return fmt.Sprintf("http://%s:%d", ip, constants.LuxGoAPIPort)
+func GetLuxdEndpoint(ip string) string {
+	return fmt.Sprintf("http://%s:%d", ip, constants.LuxdAPIPort)
 }
 
 func GetUnhealthyNodes(hosts []*models.Host) ([]string, error) {

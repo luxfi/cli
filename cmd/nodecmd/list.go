@@ -48,7 +48,7 @@ func list(_ *cobra.Command, _ []string) error {
 		nodeIDs := []string{}
 		for _, cloudID := range cloudIDs {
 			nodeIDStr := "----------------------------------------"
-			if clusterConf.IsLuxGoHost(cloudID) {
+			if clusterConf.IsLuxdHost(cloudID) {
 				if nodeID, err := getNodeID(app.GetNodeInstanceDirPath(cloudID)); err != nil {
 					ux.Logger.RedXToUser("could not obtain node ID for nodes %s: %s", cloudID, err)
 				} else {

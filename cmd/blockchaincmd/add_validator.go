@@ -93,7 +93,7 @@ authority, the owner of the validator manager contract must sign the
 transaction. If the network is proof of stake, the node must stake the L1's
 staking token. Both processes will issue a RegisterL1ValidatorTx on the P-Chain.
 
-This command currently only works on Blockchains deployed to either the Fuji
+This command currently only works on Blockchains deployed to either the Testnet
 Testnet or Mainnet.`,
 		RunE:    addValidator,
 		PreRunE: cobrautils.MaximumNArgs(1),
@@ -101,15 +101,15 @@ Testnet or Mainnet.`,
 	networkGroup := networkoptions.GetNetworkFlagsGroup(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
 	flags.AddRPCFlagToCmd(cmd, app, &addValidatorFlags.RPC)
 	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &addValidatorFlags.SigAggFlags)
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji/devnet only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet only]")
 	cmd.Flags().Float64Var(
 		&balanceLUX,
 		"balance",
 		0,
 		"set the LUX balance of the validator that will be used for continuous fee on P-Chain",
 	)
-	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [fuji/devnet only]")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)")
+	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [testnet/devnet only]")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	cmd.Flags().StringVar(&nodeIDStr, "node-id", "", "node-id of the validator to add")
 	cmd.Flags().StringVar(&publicKey, "bls-public-key", "", "set the BLS public key of the validator to add")
@@ -128,7 +128,7 @@ Testnet or Mainnet.`,
 	})
 
 	nonSovGroup := flags.RegisterFlagGroup(cmd, "Non Subnet-Only-Validators (Non-SOV) Flags", "show-non-sov-flags", false, func(set *pflag.FlagSet) {
-		set.BoolVar(&useDefaultStartTime, "default-start-time", false, "(for Subnets, not L1s) use default start time for subnet validator (5 minutes later for fuji & mainnet, 30 seconds later for devnet)")
+		set.BoolVar(&useDefaultStartTime, "default-start-time", false, "(for Subnets, not L1s) use default start time for subnet validator (5 minutes later for testnet & mainnet, 30 seconds later for devnet)")
 		set.StringVar(&startTimeStr, "start-time", "", "(for Subnets, not L1s) UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format")
 		set.BoolVar(&useDefaultDuration, "default-duration", false, "(for Subnets, not L1s) set duration so as to validate until primary validator ends its period")
 		set.BoolVar(&defaultValidatorParams, "default-validator-params", false, "(for Subnets, not L1s) use default weight/start/duration params for subnet validator")
@@ -789,8 +789,8 @@ func PromptDuration(start time.Time, network models.Network, isPos bool) (time.D
 		var d time.Duration
 		var err error
 		switch {
-		case network.Kind == models.Fuji:
-			d, err = app.Prompt.CaptureFujiDuration(txt)
+		case network.Kind == models.Testnet:
+			d, err = app.Prompt.CaptureTestnetDuration(txt)
 		case network.Kind == models.Mainnet && isPos:
 			d, err = app.Prompt.CaptureMainnetL1StakingDuration(txt)
 		case network.Kind == models.Mainnet && !isPos:

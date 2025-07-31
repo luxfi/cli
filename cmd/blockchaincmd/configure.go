@@ -28,10 +28,10 @@ func newConfigureCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "configure [blockchainName]",
 		Short: "Adds additional config files for the luxd nodes",
-		Long: `LuxGo nodes support several different configuration files.
+		Long: `Luxd nodes support several different configuration files.
 Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
 Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for subnet-evm options).
-A chain can also have special requirements for the LuxGo node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
+A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.`,
 		RunE: configure,
 		Args: cobrautils.ExactArgs(1),

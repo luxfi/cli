@@ -34,7 +34,7 @@ func TestNewGetter(t *testing.T) {
 }
 
 func TestNewDownloader(t *testing.T) {
-	downloader, err := NewDownloader(network.Network{ID: constants.FujiID}, logging.NewLogger("public-archive-downloader", logging.NewWrappedCore(logging.Info, os.Stdout, logging.JSON.ConsoleEncoder())))
+	downloader, err := NewDownloader(network.Network{ID: constants.TestnetID}, logging.NewLogger("public-archive-downloader", logging.NewWrappedCore(logging.Info, os.Stdout, logging.JSON.ConsoleEncoder())))
 	require.NoError(t, err, "NewDownloader should not return an error")
 	require.NotNil(t, downloader.logger, "downloader logger should not be nil")
 	require.NotNil(t, downloader.getter.client, "downloader getter client should not be nil")
@@ -139,8 +139,8 @@ func TestDownloader_EndToEnd(t *testing.T) {
 	tmpDir := t.TempDir()
 	targetDir := filepath.Join(tmpDir, "extracted_files")
 
-	// Configure the test network (Fuji in this case)
-	net := network.Network{ID: constants.FujiID}
+	// Configure the test network (Testnet in this case)
+	net := network.Network{ID: constants.TestnetID}
 
 	// Step 1: Create the downloader
 	downloader, err := NewDownloader(net, logging.NewLogger("public-archive-downloader", logging.NewWrappedCore(logging.Debug, os.Stdout, logging.JSON.ConsoleEncoder())))

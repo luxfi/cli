@@ -199,7 +199,7 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 	} else {
 		endpointIP = ansibleHosts[ansibleHostIDs[0]].IP
 	}
-	endpoint := node.GetLuxGoEndpoint(endpointIP)
+	endpoint := node.GetLuxdEndpoint(endpointIP)
 	network := models.NewDevnetNetwork(endpoint, 0)
 	network = models.NewNetworkFromCluster(network, clusterName)
 

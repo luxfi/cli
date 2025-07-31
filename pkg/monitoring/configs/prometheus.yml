@@ -37,7 +37,7 @@ scrape_configs:
   - job_name: 'luxd'
     metrics_path: '/ext/metrics'
     static_configs:
-      - targets: [{{ .LuxGoPorts }}]
+      - targets: [{{ .LuxdPorts }}]
   - job_name: 'luxd-machine'
     static_configs:
       - targets: [{{ .MachinePorts }}]

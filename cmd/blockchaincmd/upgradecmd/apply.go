@@ -63,7 +63,7 @@ func newUpgradeApplyCmd() *cobra.Command {
 		Short: "Apply upgrade bytes onto blockchain nodes",
 		Long: `Apply generated upgrade bytes to running Blockchain nodes to trigger a network upgrade.
 
-For public networks (Fuji Testnet or Mainnet), to complete this process,
+For public networks (Testnet or Mainnet), to complete this process,
 you must have access to the machine running your validator.
 If the CLI is running on the same machine as your validator, it can manipulate your node's
 configuration automatically. Alternatively, the command can print the necessary instructions
@@ -78,8 +78,8 @@ Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain
 
 	cmd.Flags().BoolVar(&useConfig, "config", false, "create upgrade config for future subnet deployments (same as generate)")
 	cmd.Flags().BoolVar(&useLocal, "local", false, "apply upgrade existing `local` deployment")
-	cmd.Flags().BoolVar(&useFuji, "fuji", false, "apply upgrade existing `fuji` deployment (alias for `testnet`)")
-	cmd.Flags().BoolVar(&useFuji, "testnet", false, "apply upgrade existing `testnet` deployment (alias for `fuji`)")
+	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "apply upgrade existing `testnet` deployment (alias for `testnet`)")
+	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "apply upgrade existing `testnet` deployment (alias for `testnet`)")
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "apply upgrade existing `mainnet` deployment")
 	cmd.Flags().BoolVar(&print, "print", false, "if true, print the manual config without prompting (for public networks only)")
 	cmd.Flags().BoolVar(&force, "force", false, "If true, don't prompt for confirmation of timestamps in the past")
@@ -109,8 +109,8 @@ func applyCmd(_ *cobra.Command, args []string) error {
 	// update a locally running network
 	case localDeployment:
 		return applyLocalNetworkUpgrade(blockchainName, models.Local.String(), &sc)
-	case fujiDeployment:
-		return applyPublicNetworkUpgrade(blockchainName, models.Fuji.String(), &sc)
+	case testnetDeployment:
+		return applyPublicNetworkUpgrade(blockchainName, models.Testnet.String(), &sc)
 	case mainnetDeployment:
 		return applyPublicNetworkUpgrade(blockchainName, models.Mainnet.String(), &sc)
 	}
@@ -236,17 +236,17 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 }
 
 // applyPublicNetworkUpgrade applies an upgrade file to a locally running validator
-// for public networks (fuji, main)
+// for public networks (testnet, main)
 // the validation of the upgrade file has many things to consider:
 // * No upgrade file for <public net> can be found - do we copy the existing file in the prev stage?
-// (for fuji: take the local, for main, take the fuji?)?
-// * If not, we exit, but then force the user to create a fuji file? Can be quite annoying!
-// * Do we validate that the fuji file is the same as local before applying? Or we just take whatever is there?
-// For main, that it's the same as fuji and/or local or take whatever is there?
+// (for testnet: take the local, for main, take the testnet?)?
+// * If not, we exit, but then force the user to create a testnet file? Can be quite annoying!
+// * Do we validate that the testnet file is the same as local before applying? Or we just take whatever is there?
+// For main, that it's the same as testnet and/or local or take whatever is there?
 // * What if the local deployment has applied different stages of upgrades,
-// but they were for development only and fuji/main is going to be different (start from scratch)?
-// * What if someone isn't even doing local, just fuji and main...(or even just main...we may want to discourage that though...)
-// * User probably would never use the exact same file for local as for Fuji, because you’d probably want to change the timestamps
+// but they were for development only and testnet/main is going to be different (start from scratch)?
+// * What if someone isn't even doing local, just testnet and main...(or even just main...we may want to discourage that though...)
+// * User probably would never use the exact same file for local as for Testnet, because you’d probably want to change the timestamps
 //
 // For public networks we therefore limit ourselves to just "apply" the upgrades
 // This also means we are *ignoring* the lock file here!

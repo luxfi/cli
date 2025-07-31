@@ -51,7 +51,7 @@ func AddLocalMachineFlagsToCmd(cmd *cobra.Command, localMachineFlags *LocalMachi
 		set.StringVar(
 			&localMachineFlags.UserProvidedLuxdVersion,
 			luxdVersionFlag,
-			constants.DefaultLuxGoVersion,
+			constants.DefaultLuxdVersion,
 			"use this version of luxd (ex: v1.17.12)",
 		)
 		set.StringSliceVar(&localMachineFlags.StakingTLSKeyPaths, stakingTLSKeyPathFlag, []string{}, "path to provided staking TLS key for node(s)")

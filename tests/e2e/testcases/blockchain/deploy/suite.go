@@ -85,7 +85,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 			"luxd-path": luxdPath,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "deploy", blockchainCmdArgs, globalFlags, testFlags)
-		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("LuxGo path: %s", luxdPath)))
+		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Luxd path: %s", luxdPath)))
 		gomega.Expect(output).Should(gomega.ContainSubstring("L1 is successfully deployed on Local Network"))
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
@@ -273,13 +273,13 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("ERROR PATH: invalid_luxd_path", func() {
-		luxGoPath := "invalid_luxd_path"
+		luxdPath := "invalid_luxd_path"
 		testFlags := utils.TestFlags{
-			"luxd-path": luxGoPath,
+			"luxd-path": luxdPath,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "deploy", blockchainCmdArgs, globalFlags, testFlags)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
-		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("luxGo binary %s does not exist", luxGoPath)))
+		gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("luxd binary %s does not exist", luxdPath)))
 	})
 
 	ginkgo.It("ERROR PATH: zero balance value", func() {

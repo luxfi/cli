@@ -23,8 +23,8 @@ import (
 
 const (
 	luxdVersion = "v1.10.18"
-	network            = "fuji"
-	networkCapitalized = "Fuji"
+	network            = "testnet"
+	networkCapitalized = "Testnet"
 	numNodes           = 2
 	relativePath       = "nodes"
 )
@@ -42,7 +42,7 @@ var _ = ginkgo.Describe("[Node monitoring]", func() {
 	ginkgo.It("can create a node", func() {
 		output := commands.NodeCreate(network, luxdVersion, numNodes, true, 0, commands.ExpectSuccess)
 		fmt.Println(output)
-		gomega.Expect(output).To(gomega.ContainSubstring("LuxGo and Lux-CLI installed and node(s) are bootstrapping!"))
+		gomega.Expect(output).To(gomega.ContainSubstring("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 		// parse hostName
 		re := regexp.MustCompile(`Generated staking keys for host (\S+)\[NodeID-(\S+)\]`)
 		match := re.FindStringSubmatch(output)
@@ -79,23 +79,23 @@ var _ = ginkgo.Describe("[Node monitoring]", func() {
 		createdDockerHosts, err := ansible.GetInventoryFromAnsibleInventoryFile(filepath.Join(homeDir, constants.E2EBaseDirName, relativePath, constants.AnsibleInventoryDir, "e2e"))
 		gomega.Expect(err).Should(gomega.BeNil())
 		createdHosts = createdDockerHosts
-		hostluxGoPorts := []string{}
+		hostluxdPorts := []string{}
 		hostMachinePorts := []string{}
 		for _, host := range createdHosts {
-			hostluxGoPorts = append(hostluxGoPorts, fmt.Sprintf("%s:9650", host.IP))
+			hostluxdPorts = append(hostluxdPorts, fmt.Sprintf("%s:9650", host.IP))
 			hostMachinePorts = append(hostMachinePorts, fmt.Sprintf("%s:9100", host.IP))
 		}
 		prometheusConfig := commands.ParsePrometheusYamlConfig(filepath.Join(homeDir, constants.E2EBaseDirName, relativePath, monitoringHostID, constants.NodePrometheusConfigFileName))
 		scrapeConfig := prometheusConfig.ScrapeConfigs
-		luxGoJob := "luxd"
-		luxGoMachineJob := "luxd-machine"
+		luxdJob := "luxd"
+		luxdMachineJob := "luxd-machine"
 		for _, newConfig := range scrapeConfig {
-			if newConfig.JobName == luxGoJob || newConfig.JobName == luxGoMachineJob {
+			if newConfig.JobName == luxdJob || newConfig.JobName == luxdMachineJob {
 				targets := newConfig.StaticConfigs
 				dockerTarget := targets[0]
 				gomega.Expect(len(dockerTarget.Targets)).To(gomega.Equal(numNodes))
-				if newConfig.JobName == luxGoJob {
-					for _, host := range hostluxGoPorts {
+				if newConfig.JobName == luxdJob {
+					for _, host := range hostluxdPorts {
 						gomega.Expect(slices.Contains(dockerTarget.Targets, host)).To(gomega.Equal(true))
 					}
 				} else {
@@ -134,7 +134,7 @@ var _ = ginkgo.Describe("[Node monitoring]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(monitoringHost).To(gomega.HaveLen(1))
 		sshOutput := commands.NodeSSH(monitoringHostID, "sudo cat /etc/promtail/promtail.yml")
-		gomega.Expect(sshOutput).To(gomega.ContainSubstring(fmt.Sprintf("url: http://%s:%d/loki/api/v1/push", monitoringHost[0].IP, constants.LuxGoLokiPort)))
+		gomega.Expect(sshOutput).To(gomega.ContainSubstring(fmt.Sprintf("url: http://%s:%d/loki/api/v1/push", monitoringHost[0].IP, constants.LuxdLokiPort)))
 		gomega.Expect(sshOutput).To(gomega.ContainSubstring("tenant_id: lux"))
 		gomega.Expect(sshOutput).To(gomega.ContainSubstring("CF-Access-Client-Id: lux"))
 		gomega.Expect(sshOutput).To(gomega.ContainSubstring("__path__: /home/ubuntu/.luxd/logs/C.log"))
@@ -151,7 +151,7 @@ var _ = ginkgo.Describe("[Node monitoring]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(monitoringHost).To(gomega.HaveLen(1))
 		sshOutput := commands.NodeSSH(monitoringHostID, "sudo cat /etc/loki/loki.yml")
-		gomega.Expect(sshOutput).To(gomega.ContainSubstring(fmt.Sprintf("http_listen_port: %d", constants.LuxGoLokiPort)))
+		gomega.Expect(sshOutput).To(gomega.ContainSubstring(fmt.Sprintf("http_listen_port: %d", constants.LuxdLokiPort)))
 		gomega.Expect(sshOutput).To(gomega.ContainSubstring("chunks_directory: /var/lib/loki/chunks"))
 		gomega.Expect(sshOutput).To(gomega.ContainSubstring("store: tsdb"))
 	})
