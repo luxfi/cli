@@ -280,7 +280,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "Include I/O from applications other than LuxGo",
+      "description": "Include I/O from applications other than Luxd",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -395,7 +395,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "Includes I/O from applications other than LuxGo",
+      "description": "Includes I/O from applications other than Luxd",
       "fieldConfig": {
         "defaults": {
           "color": {

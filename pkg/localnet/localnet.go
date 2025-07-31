@@ -100,7 +100,7 @@ func GetLocalNetworkBlockchainsInfo(app *application.Lux) ([]BlockchainInfo, err
 }
 
 // Returns luxd version and RPC version for the local network
-func GetLocalNetworkLuxGoVersion(app *application.Lux) (bool, string, int, error) {
+func GetLocalNetworkLuxdVersion(app *application.Lux) (bool, string, int, error) {
 	// not actually an error, network just not running
 	if isRunning, err := IsLocalNetworkRunning(app); err != nil {
 		return true, "", 0, err
@@ -228,14 +228,14 @@ func LocalNetworkHealth(
 	return pChainBootstrapped, true, nil
 }
 
-// Create a local network of [numNodes] nodes at [networkDir] using luxd binary at [luxGoBinPath]
+// Create a local network of [numNodes] nodes at [networkDir] using luxd binary at [luxdBinPath]
 // Make local network meta to point to it
 func CreateLocalNetwork(
 	app *application.Lux,
 	networkDir string,
 	numNodes uint32,
 	pluginDir string,
-	luxGoBinPath string,
+	luxdBinPath string,
 ) error {
 	// get default network conf for NumNodes
 	networkID, unparsedGenesis, upgradeBytes, defaultFlags, nodes, err := GetDefaultNetworkConf(numNodes)
@@ -259,7 +259,7 @@ func CreateLocalNetwork(
 		ctx,
 		app.Log,
 		networkDir,
-		luxGoBinPath,
+		luxdBinPath,
 		pluginDir,
 		networkID,
 		nil,
@@ -277,12 +277,12 @@ func CreateLocalNetwork(
 	return SaveLocalNetworkMeta(app, networkDir)
 }
 
-// Load a local network at [networkDir] using luxd binary at [luxGoBinPath]
+// Load a local network at [networkDir] using luxd binary at [luxdBinPath]
 // Make local network meta to point to it
 func LoadLocalNetwork(
 	app *application.Lux,
 	networkDir string,
-	luxGoBinPath string,
+	luxdBinPath string,
 ) error {
 	// add node flags on CLI config info flags
 	nodeConfigStr, err := app.Conf.LoadNodeConfig()
@@ -308,7 +308,7 @@ func LoadLocalNetwork(
 	// local network
 	ctx, cancel := GetLocalNetworkDefaultContext()
 	defer cancel()
-	if _, err := TmpNetLoad(ctx, app.Log, networkDir, luxGoBinPath); err != nil {
+	if _, err := TmpNetLoad(ctx, app.Log, networkDir, luxdBinPath); err != nil {
 		_ = TmpNetStop(networkDir)
 		return err
 	}

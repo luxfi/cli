@@ -57,9 +57,9 @@ Network.`,
 		RunE: validatePrimaryNetwork,
 	}
 
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji only]")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji/devnet)")
-	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [fuji/devnet only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet only]")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)")
+	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [testnet/devnet only]")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 
 	cmd.Flags().Uint64Var(&weight, "stake-amount", 0, "how many LUX to stake in the validator")
@@ -217,7 +217,7 @@ func GetTimeParametersPrimaryNetwork(network models.Network, nodeIndex int, vali
 }
 
 func getDefaultValidationTime(start time.Time, network models.Network, nodeIndex int) (time.Duration, error) {
-	durationStr := constants.DefaultFujiStakeDuration
+	durationStr := constants.DefaultTestnetStakeDuration
 	if network.Kind == models.Mainnet {
 		durationStr = constants.DefaultMainnetStakeDuration
 	}

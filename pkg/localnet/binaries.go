@@ -15,33 +15,33 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 )
 
-// SetupLuxGoBinary:
+// SetupLuxdBinary:
 // * checks if luxd is installed in the local binary path
 // * if not, it downloads and installs it (os - and archive dependent)
 // * returns the location of the luxd path
-func SetupLuxGoBinary(
+func SetupLuxdBinary(
 	app *application.Lux,
-	luxGoVersion string,
-	luxGoBinaryPath string,
+	luxdVersion string,
+	luxdBinaryPath string,
 ) (string, error) {
 	var err error
-	if luxGoBinaryPath == "" {
-		if luxGoVersion == constants.DefaultLuxGoVersion {
-			luxGoVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, models.NewLocalNetwork(), nil)
+	if luxdBinaryPath == "" {
+		if luxdVersion == constants.DefaultLuxdVersion {
+			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, models.NewLocalNetwork(), nil)
 			if err != nil {
 				return "", err
 			}
 		}
-		_, luxGoDir, err := binutils.SetupLuxgo(app, luxGoVersion)
+		_, luxdDir, err := binutils.SetupLuxgo(app, luxdVersion)
 		if err != nil {
 			return "", fmt.Errorf("failed setting up luxd binary: %w", err)
 		}
-		luxGoBinaryPath = filepath.Join(luxGoDir, "luxd")
+		luxdBinaryPath = filepath.Join(luxdDir, "luxd")
 	}
-	if !utils.IsExecutable(luxGoBinaryPath) {
-		return "", fmt.Errorf("luxGo binary %s does not exist", luxGoBinaryPath)
+	if !utils.IsExecutable(luxdBinaryPath) {
+		return "", fmt.Errorf("luxd binary %s does not exist", luxdBinaryPath)
 	}
-	return luxGoBinaryPath, nil
+	return luxdBinaryPath, nil
 }
 
 // SetupVMBinary ensures a binary for [blockchainName]'s VM is locally available,

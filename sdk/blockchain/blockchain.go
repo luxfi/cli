@@ -178,7 +178,7 @@ type DeployParams struct {
 // New takes SubnetParams as input and creates Subnet as an output
 //
 // The created Subnet object can be used to :
-//   - Create the Subnet on a specified network (Fuji / Mainnet)
+//   - Create the Subnet on a specified network (Testnet / Mainnet)
 //   - Create Blockchain(s) in the Subnet
 //   - Add Validator(s) into the Subnet
 func New(subnetParams *SubnetParams) (*Subnet, error) {

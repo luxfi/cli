@@ -20,7 +20,7 @@ func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error
 		binDir,
 		luxdBinPrefix,
 		constants.LuxOrg,
-		constants.LuxGoRepoName,
+		constants.LuxdRepoName,
 		"",
 		downloader,
 		installer,

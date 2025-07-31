@@ -29,7 +29,7 @@ type NetworkOption int64
 const (
 	Undefined NetworkOption = iota
 	Mainnet
-	Fuji
+	Testnet
 	Local
 	Devnet
 	Cluster
@@ -39,18 +39,18 @@ var (
 	DefaultSupportedNetworkOptions = []NetworkOption{
 		Local,
 		Devnet,
-		Fuji,
+		Testnet,
 		Mainnet,
 	}
 	NonLocalSupportedNetworkOptions = []NetworkOption{
 		Devnet,
-		Fuji,
+		Testnet,
 		Mainnet,
 	}
 	NonMainnetSupportedNetworkOptions = []NetworkOption{
 		Local,
 		Devnet,
-		Fuji,
+		Testnet,
 	}
 	LocalClusterSupportedNetworkOptions = []NetworkOption{
 		Local,
@@ -62,8 +62,8 @@ func (n NetworkOption) String() string {
 	switch n {
 	case Mainnet:
 		return "Mainnet"
-	case Fuji:
-		return "Fuji Testnet"
+	case Testnet:
+		return "Testnet"
 	case Local:
 		return "Local Network"
 	case Devnet:
@@ -78,10 +78,10 @@ func NetworkOptionFromString(s string) NetworkOption {
 	switch {
 	case s == "Mainnet":
 		return Mainnet
-	case s == "Fuji":
-		return Fuji
-	case s == "Fuji Testnet":
-		return Fuji
+	case s == "Testnet":
+		return Testnet
+	case s == "Testnet":
+		return Testnet
 	case s == "Local Network":
 		return Local
 	case s == "Devnet" || strings.Contains(s, "Devnet"):
@@ -96,7 +96,7 @@ func NetworkOptionFromString(s string) NetworkOption {
 type NetworkFlags struct {
 	UseLocal    bool
 	UseDevnet   bool
-	UseFuji     bool
+	UseTestnet     bool
 	UseMainnet  bool
 	Endpoint    string
 	ClusterName string
@@ -112,9 +112,9 @@ func AddNetworkFlagsToCmd(cmd *cobra.Command, networkFlags *NetworkFlags, addEnd
 			cmd.Flags().BoolVar(&networkFlags.UseDevnet, "devnet", false, "operate on a devnet network")
 			addEndpoint = true
 			addCluster = true
-		case Fuji:
-			cmd.Flags().BoolVarP(&networkFlags.UseFuji, "testnet", "t", false, "operate on testnet (alias to `fuji`)")
-			cmd.Flags().BoolVarP(&networkFlags.UseFuji, "fuji", "f", false, "operate on fuji (alias to `testnet`")
+		case Testnet:
+			cmd.Flags().BoolVarP(&networkFlags.UseTestnet, "testnet", "t", false, "operate on testnet (alias to `testnet`)")
+			cmd.Flags().BoolVarP(&networkFlags.UseTestnet, "testnet", "f", false, "operate on testnet (alias to `testnet`")
 		case Mainnet:
 			cmd.Flags().BoolVarP(&networkFlags.UseMainnet, "mainnet", "m", false, "operate on mainnet")
 		case Cluster:
@@ -140,9 +140,9 @@ func GetNetworkFlagsGroup(cmd *cobra.Command, networkFlags *NetworkFlags, addEnd
 				set.BoolVar(&networkFlags.UseDevnet, "devnet", false, "operate on a devnet network")
 				addEndpoint = true
 				addCluster = true
-			case Fuji:
-				set.BoolVarP(&networkFlags.UseFuji, "testnet", "t", false, "operate on testnet (alias to `fuji`)")
-				set.BoolVarP(&networkFlags.UseFuji, "fuji", "f", false, "operate on fuji (alias to `testnet`)")
+			case Testnet:
+				set.BoolVarP(&networkFlags.UseTestnet, "testnet", "t", false, "operate on testnet (alias to `testnet`)")
+				set.BoolVarP(&networkFlags.UseTestnet, "testnet", "f", false, "operate on testnet (alias to `testnet`)")
 			case Mainnet:
 				set.BoolVarP(&networkFlags.UseMainnet, "mainnet", "m", false, "operate on mainnet")
 			case Cluster:
@@ -181,7 +181,7 @@ func GetSupportedNetworkOptionsForSubnet(
 			}
 			if os.Getenv(constants.SimulatePublicNetwork) != "" {
 				if networkName == Local.String() {
-					if networkOption == Fuji || networkOption == Mainnet {
+					if networkOption == Testnet || networkOption == Mainnet {
 						isInSidecar = true
 					}
 				}
@@ -273,7 +273,7 @@ func GetNetworkFromCmdLineFlags(
 	networkFlagsMap := map[NetworkOption]string{
 		Local:   "--local",
 		Devnet:  "--devnet",
-		Fuji:    "--fuji/--testnet",
+		Testnet:    "--testnet/--testnet",
 		Mainnet: "--mainnet",
 		Cluster: "--cluster",
 	}
@@ -285,8 +285,8 @@ func GetNetworkFromCmdLineFlags(
 		networkOption = Local
 	case networkFlags.UseDevnet:
 		networkOption = Devnet
-	case networkFlags.UseFuji:
-		networkOption = Fuji
+	case networkFlags.UseTestnet:
+		networkOption = Testnet
 	case networkFlags.UseMainnet:
 		networkOption = Mainnet
 	case networkFlags.ClusterName != "":
@@ -295,8 +295,8 @@ func GetNetworkFromCmdLineFlags(
 		switch networkFlags.Endpoint {
 		case constants.MainnetAPIEndpoint:
 			networkOption = Mainnet
-		case constants.FujiAPIEndpoint:
-			networkOption = Fuji
+		case constants.TestnetAPIEndpoint:
+			networkOption = Testnet
 		case constants.LocalAPIEndpoint:
 			networkOption = Local
 		default:
@@ -322,7 +322,7 @@ func GetNetworkFromCmdLineFlags(
 		return models.UndefinedNetwork, errMsg
 	}
 	// mutual exclusion
-	if !flags.EnsureMutuallyExclusive([]bool{networkFlags.UseLocal, networkFlags.UseDevnet, networkFlags.UseFuji, networkFlags.UseMainnet, networkFlags.ClusterName != ""}) {
+	if !flags.EnsureMutuallyExclusive([]bool{networkFlags.UseLocal, networkFlags.UseDevnet, networkFlags.UseTestnet, networkFlags.UseMainnet, networkFlags.ClusterName != ""}) {
 		return models.UndefinedNetwork, fmt.Errorf("network flags %s are mutually exclusive", supportedNetworksFlags)
 	}
 
@@ -422,8 +422,8 @@ func GetNetworkFromCmdLineFlags(
 			}
 		}
 		network = models.NewDevnetNetwork(networkFlags.Endpoint, networkID)
-	case Fuji:
-		network = models.NewFujiNetwork()
+	case Testnet:
+		network = models.NewTestnetNetwork()
 	case Mainnet:
 		network = models.NewMainnetNetwork()
 	case Cluster:

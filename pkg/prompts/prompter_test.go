@@ -426,7 +426,7 @@ func TestCaptureDurationEdgeCases(t *testing.T) {
 	})
 }
 
-func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
+func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -442,15 +442,15 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name:        "valid duration - within Fuji range",
-			mockReturn:  h720, // 30 days, should be within Fuji range
+			name:        "valid duration - within Testnet range",
+			mockReturn:  h720, // 30 days, should be within Testnet range
 			mockError:   nil,
 			expectedDur: 720 * time.Hour,
 			expectError: false,
 		},
 		{
 			name:        "valid duration - minimum (24h)",
-			mockReturn:  "24h", // 1 day, should be minimum for Fuji
+			mockReturn:  "24h", // 1 day, should be minimum for Testnet
 			mockError:   nil,
 			expectedDur: 24 * time.Hour,
 			expectError: false,
@@ -470,7 +470,7 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:          "invalid duration - too short for Fuji (30 minutes)",
+			name:          "invalid duration - too short for Testnet (30 minutes)",
 			mockReturn:    "30m",
 			mockError:     nil,
 			expectedDur:   0,
@@ -478,7 +478,7 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 			errorContains: belowMinStakingDuration,
 		},
 		{
-			name:          "invalid duration - too short for Fuji (1 hour)",
+			name:          "invalid duration - too short for Testnet (1 hour)",
 			mockReturn:    "1h",
 			mockError:     nil,
 			expectedDur:   0,
@@ -486,8 +486,8 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 			errorContains: belowMinStakingDuration,
 		},
 		{
-			name:          "invalid duration - too long for Fuji",
-			mockReturn:    "9600h", // 400 days, should exceed Fuji max
+			name:          "invalid duration - too long for Testnet",
+			mockReturn:    "9600h", // 400 days, should exceed Testnet max
 			mockError:     nil,
 			expectedDur:   0,
 			expectError:   true,
@@ -540,7 +540,7 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 			// Replace the global function with mock
 			promptUIRunner = func(prompt promptui.Prompt) (string, error) {
 				// Verify the prompt was set up correctly
-				require.Equal(t, "Enter Fuji staking duration:", prompt.Label)
+				require.Equal(t, "Enter Testnet staking duration:", prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
 				// If we expect a validation error, simulate the prompt validation failing
@@ -564,7 +564,7 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			duration, err := prompter.CaptureFujiDuration("Enter Fuji staking duration:")
+			duration, err := prompter.CaptureTestnetDuration("Enter Testnet staking duration:")
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -580,7 +580,7 @@ func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 	}
 }
 
-func TestCaptureFujiDurationEdgeCases(t *testing.T) {
+func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -591,14 +591,14 @@ func TestCaptureFujiDurationEdgeCases(t *testing.T) {
 		validationCalled := false
 		promptUIRunner = func(prompt promptui.Prompt) (string, error) {
 			// Call the validation function to ensure it's the right one
-			err := prompt.Validate(h720) // Should be valid for Fuji
+			err := prompt.Validate(h720) // Should be valid for Testnet
 			require.NoError(t, err)
 			validationCalled = true
 			return h720, nil
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureFujiDuration("Test Fuji prompt")
+		duration, err := prompter.CaptureTestnetDuration("Test Testnet prompt")
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
@@ -606,27 +606,27 @@ func TestCaptureFujiDurationEdgeCases(t *testing.T) {
 	})
 
 	t.Run("prompt label preserved", func(t *testing.T) {
-		expectedLabel := "Please enter the duration for Fuji staking"
+		expectedLabel := "Please enter the duration for Testnet staking"
 		promptUIRunner = func(prompt promptui.Prompt) (string, error) {
 			require.Equal(t, expectedLabel, prompt.Label)
 			return h720, nil
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureFujiDuration(expectedLabel)
+		duration, err := prompter.CaptureTestnetDuration(expectedLabel)
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
 	})
 
-	t.Run("Fuji-specific validation", func(t *testing.T) {
+	t.Run("Testnet-specific validation", func(t *testing.T) {
 		promptUIRunner = func(prompt promptui.Prompt) (string, error) {
-			// Test that it uses Fuji-specific validation (different from general duration validation)
-			err1 := prompt.Validate("1h") // Should fail for Fuji (too short)
+			// Test that it uses Testnet-specific validation (different from general duration validation)
+			err1 := prompt.Validate("1h") // Should fail for Testnet (too short)
 			require.Error(t, err1)
 			require.Contains(t, err1.Error(), belowMinStakingDuration)
 
-			err2 := prompt.Validate("9600h") // Should fail for Fuji (too long)
+			err2 := prompt.Validate("9600h") // Should fail for Testnet (too long)
 			require.Error(t, err2)
 			require.Contains(t, err2.Error(), exceedsMaxStakingDuration)
 
@@ -634,7 +634,7 @@ func TestCaptureFujiDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureFujiDuration("Enter Fuji duration:")
+		duration, err := prompter.CaptureTestnetDuration("Enter Testnet duration:")
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)

@@ -24,8 +24,8 @@ import (
 
 const (
 	luxdVersion = "v1.13.0"
-	network            = "fuji"
-	networkCapitalized = "Fuji"
+	network            = "testnet"
+	networkCapitalized = "Testnet"
 	numNodes           = 1
 	exportFileName     = "e2e.json"
 	importClusterName  = "e2e_imported"
@@ -42,7 +42,7 @@ var _ = ginkgo.Describe("[Node create]", func() {
 	ginkgo.It("can create a node", func() {
 		output := commands.NodeCreate(network, luxdVersion, numNodes, false, 0, commands.ExpectSuccess)
 		fmt.Println(output)
-		gomega.Expect(output).To(gomega.ContainSubstring("LuxGo and Lux-CLI installed and node(s) are bootstrapping!"))
+		gomega.Expect(output).To(gomega.ContainSubstring("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 		// parse hostName
 		re := regexp.MustCompile(`Generated staking keys for host (\S+)\[NodeID-(\S+)\]`)
 		match := re.FindStringSubmatch(output)
@@ -91,7 +91,7 @@ var _ = ginkgo.Describe("[Node create]", func() {
 	})
 	ginkgo.It("can wait up 30 seconds for luxd to startup", func() {
 		timeout := 30 * time.Second
-		address := fmt.Sprintf("%s:%d", utils.E2EConvertIP(ElasticIP), constants.LuxGoP2PPort)
+		address := fmt.Sprintf("%s:%d", utils.E2EConvertIP(ElasticIP), constants.LuxdP2PPort)
 		deadline := time.Now().Add(timeout)
 		var err error
 

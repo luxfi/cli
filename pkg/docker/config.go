@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 )
 
-type LuxGoConfigOptions struct {
+type LuxdConfigOptions struct {
 	BootstrapIPs      []string
 	BootstrapIDs      []string
 	PartialSync       bool
@@ -26,19 +26,19 @@ type LuxGoConfigOptions struct {
 func prepareLuxgoConfig(
 	host *models.Host,
 	network models.Network,
-	luxGoConfig LuxGoConfigOptions,
+	luxdConfig LuxdConfigOptions,
 ) (string, string, error) {
 	luxdConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), nil)
-	if luxGoConfig.AllowPublicAccess || utils.IsE2E() {
+	if luxdConfig.AllowPublicAccess || utils.IsE2E() {
 		luxdConf.HTTPHost = "0.0.0.0"
 	}
-	luxdConf.PartialSync = luxGoConfig.PartialSync
-	luxdConf.BootstrapIPs = strings.Join(luxGoConfig.BootstrapIPs, ",")
-	luxdConf.BootstrapIDs = strings.Join(luxGoConfig.BootstrapIDs, ",")
-	if luxGoConfig.GenesisPath != "" {
+	luxdConf.PartialSync = luxdConfig.PartialSync
+	luxdConf.BootstrapIPs = strings.Join(luxdConfig.BootstrapIPs, ",")
+	luxdConf.BootstrapIDs = strings.Join(luxdConfig.BootstrapIDs, ",")
+	if luxdConfig.GenesisPath != "" {
 		luxdConf.GenesisPath = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
 	}
-	if luxGoConfig.UpgradePath != "" {
+	if luxdConfig.UpgradePath != "" {
 		luxdConf.UpgradePath = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
 	}
 	nodeConf, err := remoteconfig.RenderLuxNodeConfig(luxdConf)

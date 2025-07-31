@@ -31,7 +31,7 @@ const (
 
 var (
 	ErrMutuallyExlusiveKeySource = errors.New("key source flags --key, --ewoq, --ledger/--ledger-addrs are mutually exclusive")
-	ErrEwoqKeyOnFujiOrMainnet    = errors.New("key source ewoq is not available for mainnet/fuji operations")
+	ErrEwoqKeyOnTestnetOrMainnet    = errors.New("key source ewoq is not available for mainnet/testnet operations")
 )
 
 type Keychain struct {
@@ -142,9 +142,9 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network.Kind == models.Fuji:
+	case network.Kind == models.Testnet:
 		if useEwoq || keyName == "ewoq" {
-			return nil, ErrEwoqKeyOnFujiOrMainnet
+			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
 		// prompt the user if no key source was provided
 		if !useLedger && keyName == "" {
@@ -156,7 +156,7 @@ func GetKeychainFromCmdLineFlags(
 		}
 	case network.Kind == models.Mainnet:
 		if useEwoq || keyName == "ewoq" {
-			return nil, ErrEwoqKeyOnFujiOrMainnet
+			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
 		if keyName == "" {
 			useLedger = true

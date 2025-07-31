@@ -138,7 +138,7 @@ func handlePostRun(_ *cobra.Command, _ []string) {}
 func preCreateChecks(clusterName string, network models.Network) error {
 	if useCustomLuxgoVersion != "" || useLuxgoVersionFromSubnet != "" {
 		if useCustomLuxgoVersion != "" {
-			if err := dependencies.CheckVersionIsOverMin(app, constants.LuxGoRepoName, network, useCustomLuxgoVersion); err != nil {
+			if err := dependencies.CheckVersionIsOverMin(app, constants.LuxdRepoName, network, useCustomLuxgoVersion); err != nil {
 				return err
 			}
 		}
@@ -174,10 +174,10 @@ func preCreateChecks(clusterName string, network models.Network) error {
 	if useSSHAgent && !utils.IsSSHAgentAvailable() {
 		return fmt.Errorf("ssh agent is not available")
 	}
-	if len(numAPINodes) > 0 && !(globalNetworkFlags.UseDevnet || globalNetworkFlags.UseFuji) {
-		return fmt.Errorf("API nodes can only be created in Devnet/Fuji(Testnet)")
+	if len(numAPINodes) > 0 && !(globalNetworkFlags.UseDevnet || globalNetworkFlags.UseTestnet) {
+		return fmt.Errorf("API nodes can only be created in Devnet/Testnet(Testnet)")
 	}
-	if (globalNetworkFlags.UseDevnet || globalNetworkFlags.UseFuji) && len(numAPINodes) > 0 && len(numAPINodes) != len(numValidatorsNodes) {
+	if (globalNetworkFlags.UseDevnet || globalNetworkFlags.UseTestnet) && len(numAPINodes) > 0 && len(numAPINodes) != len(numValidatorsNodes) {
 		return fmt.Errorf("API nodes and Validator nodes must be deployed to same number of regions")
 	}
 	if len(numAPINodes) > 0 {
@@ -287,8 +287,8 @@ func stringToAWSVolumeType(input string) types.VolumeType {
 
 func setGlobalNetworkFlags(network models.Network) {
 	switch network.Kind {
-	case models.Fuji:
-		globalNetworkFlags.UseFuji = true
+	case models.Testnet:
+		globalNetworkFlags.UseTestnet = true
 	case models.Devnet:
 		globalNetworkFlags.UseDevnet = true
 	case models.Local:
@@ -315,13 +315,13 @@ func createNodes(cmd *cobra.Command, args []string) error {
 	}
 	network = models.NewNetworkFromCluster(network, clusterName)
 	globalNetworkFlags.UseDevnet = network.Kind == models.Devnet // set globalNetworkFlags.UseDevnet to true if network is devnet for further use
-	luxdVersionSetting := dependencies.LuxGoVersionSettings{
+	luxdVersionSetting := dependencies.LuxdVersionSettings{
 		UseLuxgoVersionFromSubnet:       useLuxgoVersionFromSubnet,
 		UseLatestLuxgoReleaseVersion:    useLatestLuxgoReleaseVersion,
 		UseLatestLuxgoPreReleaseVersion: useLatestLuxgoPreReleaseVersion,
 		UseCustomLuxgoVersion:           useCustomLuxgoVersion,
 	}
-	luxGoVersion, err := dependencies.GetLuxGoVersion(app, luxdVersionSetting, network)
+	luxdVersion, err := dependencies.GetLuxdVersion(app, luxdVersionSetting, network)
 	if err != nil {
 		return err
 	}
@@ -594,9 +594,9 @@ func createNodes(cmd *cobra.Command, args []string) error {
 					networkName := fmt.Sprintf("%s-network", prefix)
 					firewallName := fmt.Sprintf("%s-%s-monitoring", networkName, strings.ReplaceAll(monitoringNodeConfig.PublicIPs[0], ".", ""))
 					ports := []string{
-						strconv.Itoa(constants.LuxGoMachineMetricsPort), strconv.Itoa(constants.LuxGoAPIPort),
-						strconv.Itoa(constants.LuxGoMonitoringPort), strconv.Itoa(constants.LuxGoGrafanaPort),
-						strconv.Itoa(constants.LuxGoLokiPort),
+						strconv.Itoa(constants.LuxdMachineMetricsPort), strconv.Itoa(constants.LuxdAPIPort),
+						strconv.Itoa(constants.LuxdMonitoringPort), strconv.Itoa(constants.LuxdGrafanaPort),
+						strconv.Itoa(constants.LuxdLokiPort),
 					}
 					if err = gcpClient.AddFirewall(
 						monitoringNodeConfig.PublicIPs[0],
@@ -670,7 +670,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 	wgResults := models.NodeResults{}
 	spinSession := ux.NewUserSpinner()
 	// setup monitoring in parallel with node setup
-	luxGoPorts, machinePorts, ltPorts, err := getPrometheusTargets(clusterName)
+	luxdPorts, machinePorts, ltPorts, err := getPrometheusTargets(clusterName)
 	if err != nil {
 		return err
 	}
@@ -714,13 +714,13 @@ func createNodes(cmd *cobra.Command, args []string) error {
 					return
 				}
 				ux.Logger.Info("RunSSHCopyMonitoringDashboards completed")
-				if err := ssh.RunSSHSetupPrometheusConfig(monitoringHost, luxGoPorts, machinePorts, ltPorts); err != nil {
+				if err := ssh.RunSSHSetupPrometheusConfig(monitoringHost, luxdPorts, machinePorts, ltPorts); err != nil {
 					nodeResults.AddResult(monitoringHost.IP, nil, err)
 					ux.SpinFailWithError(spinner, "", err)
 					return
 				}
 				ux.Logger.Info("RunSSHSetupPrometheusConfig completed")
-				if err := ssh.RunSSHSetupLokiConfig(monitoringHost, constants.LuxGoLokiPort); err != nil {
+				if err := ssh.RunSSHSetupLokiConfig(monitoringHost, constants.LuxdLokiPort); err != nil {
 					nodeResults.AddResult(monitoringHost.IP, nil, err)
 					ux.SpinFailWithError(spinner, "", err)
 					return
@@ -742,7 +742,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 		publicAccessToHTTPPort := slices.Contains(cloudConfigMap.GetAllAPIInstanceIDs(), host.GetCloudID()) || publicHTTPPortAccess
 		host.APINode = publicAccessToHTTPPort
 	}
-	if err = setup(hosts, luxGoVersion, network); err != nil {
+	if err = setup(hosts, luxdVersion, network); err != nil {
 		return err
 	}
 	if addMonitoring {
@@ -760,7 +760,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 						ux.SpinFailWithError(spinner, "", err)
 						return
 					}
-					if err = ssh.RunSSHSetupPromtailConfig(host, monitoringNodeConfig.PublicIPs[0], constants.LuxGoLokiPort, cloudID, nodeID.String(), ""); err != nil {
+					if err = ssh.RunSSHSetupPromtailConfig(host, monitoringNodeConfig.PublicIPs[0], constants.LuxdLokiPort, cloudID, nodeID.String(), ""); err != nil {
 						nodeResults.AddResult(host.IP, nil, err)
 						ux.SpinFailWithError(spinner, "", err)
 						return
@@ -793,7 +793,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			monitoringPublicIP = monitoringNodeConfig.PublicIPs[0]
 		}
 		printResults(cloudConfigMap, publicIPMap, monitoringPublicIP)
-		ux.Logger.PrintToUser(logging.Green.Wrap("LuxGo and Lux-CLI installed and node(s) are bootstrapping!"))
+		ux.Logger.PrintToUser(logging.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 	}
 	sendNodeCreateMetrics(cloudService, network.Name(), numNodesMetricsMap)
 	return nil
@@ -1174,7 +1174,7 @@ func getMonitoringHint(monitoringHostIP string) {
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintLineSeparator()
 	ux.Logger.PrintToUser("To view unified node %s, visit the following link in your browser: ", logging.LightBlue.Wrap("monitoring dashboard"))
-	ux.Logger.PrintToUser(logging.Green.Wrap(fmt.Sprintf("http://%s:%d/dashboards", monitoringHostIP, constants.LuxGoGrafanaPort)))
+	ux.Logger.PrintToUser(logging.Green.Wrap(fmt.Sprintf("http://%s:%d/dashboards", monitoringHostIP, constants.LuxdGrafanaPort)))
 	ux.Logger.PrintToUser("Log in with username: admin, password: admin")
 	ux.Logger.PrintLineSeparator()
 	ux.Logger.PrintToUser("")
@@ -1183,7 +1183,7 @@ func getMonitoringHint(monitoringHostIP string) {
 func waitForMonitoringEndpoint(monitoringHost *models.Host) error {
 	spinSession := ux.NewUserSpinner()
 	spinner := spinSession.SpinToUser("Waiting for monitoring endpoint to be available")
-	if err := monitoringHost.WaitForPort(constants.LuxGoGrafanaPort, constants.SSHLongRunningScriptTimeout); err != nil {
+	if err := monitoringHost.WaitForPort(constants.LuxdGrafanaPort, constants.SSHLongRunningScriptTimeout); err != nil {
 		spinner.Error()
 		return err
 	}
@@ -1328,7 +1328,7 @@ func getRegionsNodeNum(cloudName string) (
 		if err != nil {
 			return nil, err
 		}
-		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseFuji {
+		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseTestnet {
 			numAPINodes, err = app.Prompt.CaptureUint32(fmt.Sprintf("How many API nodes (nodes without stake) do you want to set up in %s %s?", userRegion, supportedClouds[cloudName].locationName))
 			if err != nil {
 				return nil, err
@@ -1339,7 +1339,7 @@ func getRegionsNodeNum(cloudName string) (
 		}
 		nodes[userRegion] = NumNodes{int(numNodes), int(numAPINodes)}
 		var currentInput []string
-		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseFuji {
+		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseTestnet {
 			currentInput = sdkutils.Map(maps.Keys(nodes), func(region string) string {
 				return fmt.Sprintf("[%s]: %d validator(s) %d api(s)", region, nodes[region].numValidators, nodes[region].numAPI)
 			})
@@ -1424,21 +1424,21 @@ func sendNodeCreateMetrics(cloudService, network string, nodes map[string]NumNod
 
 func getPrometheusTargets(clusterName string) ([]string, []string, []string, error) {
 	const loadTestPort = 8082
-	luxGoPorts := []string{}
+	luxdPorts := []string{}
 	machinePorts := []string{}
 	ltPorts := []string{}
 	inventoryHosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
 	if err != nil {
-		return luxGoPorts, machinePorts, ltPorts, err
+		return luxdPorts, machinePorts, ltPorts, err
 	}
 	for _, host := range inventoryHosts {
-		luxGoPorts = append(luxGoPorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(constants.LuxGoAPIPort)))
-		machinePorts = append(machinePorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(constants.LuxGoMachineMetricsPort)))
+		luxdPorts = append(luxdPorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(constants.LuxdAPIPort)))
+		machinePorts = append(machinePorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(constants.LuxdMachineMetricsPort)))
 	}
 	// no need to check error here as it's ok to have no load test instances
 	separateHosts, _ := ansible.GetInventoryFromAnsibleInventoryFile(app.GetLoadTestInventoryDir(clusterName))
 	for _, host := range separateHosts {
 		ltPorts = append(ltPorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(loadTestPort)))
 	}
-	return luxGoPorts, machinePorts, ltPorts, nil
+	return luxdPorts, machinePorts, ltPorts, nil
 }

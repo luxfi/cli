@@ -65,7 +65,7 @@ func TmpNetCreate(
 	ctx context.Context,
 	log logging.Logger,
 	networkDir string,
-	luxGoBinPath string,
+	luxdBinPath string,
 	pluginDir string,
 	networkID uint32,
 	bootstrapIPs []string,
@@ -86,7 +86,7 @@ func TmpNetCreate(
 		Genesis:      genesis,
 		NetworkID:    networkID,
 	}
-	if err := network.EnsureDefaultConfig(log, luxGoBinPath, pluginDir); err != nil {
+	if err := network.EnsureDefaultConfig(log, luxdBinPath, pluginDir); err != nil {
 		return nil, err
 	}
 	if len(bootstrapIPs) > 0 {
@@ -189,21 +189,21 @@ func GetTmpNetNetwork(networkDir string) (*tmpnet.Network, error) {
 }
 
 // Bootstrap a previously generated network
-// If [luxGoBinPath] is given, uses it instead of the persisted one
+// If [luxdBinPath] is given, uses it instead of the persisted one
 func TmpNetLoad(
 	ctx context.Context,
 	log logging.Logger,
 	networkDir string,
-	luxGoBinPath string,
+	luxdBinPath string,
 ) (*tmpnet.Network, error) {
 	network, err := GetTmpNetNetwork(networkDir)
 	if err != nil {
 		return nil, err
 	}
-	if luxGoBinPath != "" {
+	if luxdBinPath != "" {
 		for i := range network.Nodes {
 			network.Nodes[i].RuntimeConfig = &tmpnet.NodeRuntimeConfig{
-				LuxGoPath: luxGoBinPath,
+				LuxdPath: luxdBinPath,
 			}
 		}
 	}
@@ -1086,7 +1086,7 @@ func TmpNetStartNode(
 
 // Indicates wether a given network ID is for public network
 func IsPublicNetwork(networkID uint32) bool {
-	return networkID == luxdconstants.FujiID || networkID == luxdconstants.MainnetID
+	return networkID == luxdconstants.TestnetID || networkID == luxdconstants.MainnetID
 }
 
 // Returns Network ID of [network]
@@ -1115,12 +1115,12 @@ func GetTmpNetNodeNetworkID(node *tmpnet.Node) (uint32, error) {
 }
 
 // Returns luxd path persisted at [networkDir]
-func GetTmpNetLuxGoBinaryPath(networkDir string) (string, error) {
+func GetTmpNetLuxdBinaryPath(networkDir string) (string, error) {
 	network, err := GetTmpNetNetwork(networkDir)
 	if err != nil {
 		return "", err
 	}
-	return network.DefaultRuntimeConfig.LuxGoPath, nil
+	return network.DefaultRuntimeConfig.LuxdPath, nil
 }
 
 // when host is public, we avoid [::] but use public IP

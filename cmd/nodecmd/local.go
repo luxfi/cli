@@ -253,13 +253,13 @@ func localStartNode(_ *cobra.Command, args []string) error {
 
 	if useCustomLuxgoVersion != "" {
 		// TODO: we'll have to refactor all these when we consolidate input and flag handling for dependency versioning
-		if err = dependencies.CheckVersionIsOverMin(app, constants.LuxGoRepoName, network, useCustomLuxgoVersion); err != nil {
+		if err = dependencies.CheckVersionIsOverMin(app, constants.LuxdRepoName, network, useCustomLuxgoVersion); err != nil {
 			return err
 		}
 		latestLuxdPreReleaseVersion = false
 		latestLuxdReleaseVersion = false
 	}
-	luxdVersionSetting := dependencies.LuxGoVersionSettings{
+	luxdVersionSetting := dependencies.LuxdVersionSettings{
 		UseCustomLuxgoVersion:           useCustomLuxgoVersion,
 		UseLatestLuxgoPreReleaseVersion: latestLuxdPreReleaseVersion,
 		UseLatestLuxgoReleaseVersion:    latestLuxdReleaseVersion,

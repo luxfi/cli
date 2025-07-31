@@ -24,11 +24,11 @@ func ValidateComposeFile(host *models.Host, composeFile string, timeout time.Dur
 	return nil
 }
 
-// ComposeSSHSetupNode sets up an LuxGo node and dependencies on a remote host over SSH.
+// ComposeSSHSetupNode sets up an Luxd node and dependencies on a remote host over SSH.
 func ComposeSSHSetupNode(
 	host *models.Host,
 	network models.Network,
-	luxGoVersion string,
+	luxdVersion string,
 	luxdBootstrapIDs []string,
 	luxdBootstrapIPs []string,
 	partialSync bool,
@@ -46,16 +46,16 @@ func ComposeSSHSetupNode(
 	}
 	ux.Logger.Info("luxCLI folder structure created on remote host %s after %s ", folderStructure, time.Since(startTime))
 
-	luxdDockerImage := fmt.Sprintf("%s:%s", constants.LuxGoDockerImage, luxGoVersion)
-	ux.Logger.Info("Preparing LuxGo Docker image %s on %s[%s]", luxdDockerImage, host.NodeID, host.IP)
-	if err := PrepareDockerImageWithRepo(host, luxdDockerImage, constants.LuxGoGitRepo, luxGoVersion); err != nil {
+	luxdDockerImage := fmt.Sprintf("%s:%s", constants.LuxdDockerImage, luxdVersion)
+	ux.Logger.Info("Preparing Luxd Docker image %s on %s[%s]", luxdDockerImage, host.NodeID, host.IP)
+	if err := PrepareDockerImageWithRepo(host, luxdDockerImage, constants.LuxdGitRepo, luxdVersion); err != nil {
 		return err
 	}
-	ux.Logger.Info("LuxGo Docker image %s ready on %s[%s] after %s", luxdDockerImage, host.NodeID, host.IP, time.Since(startTime))
+	ux.Logger.Info("Luxd Docker image %s ready on %s[%s] after %s", luxdDockerImage, host.NodeID, host.IP, time.Since(startTime))
 	nodeConfFile, cChainConfFile, err := prepareLuxgoConfig(
 		host,
 		network,
-		LuxGoConfigOptions{
+		LuxdConfigOptions{
 			BootstrapIDs:      luxdBootstrapIDs,
 			BootstrapIPs:      luxdBootstrapIPs,
 			PartialSync:       partialSync,
@@ -92,13 +92,13 @@ func ComposeSSHSetupNode(
 			return err
 		}
 	}
-	ux.Logger.Info("LuxGo configs uploaded to %s[%s] after %s", host.NodeID, host.IP, time.Since(startTime))
+	ux.Logger.Info("Luxd configs uploaded to %s[%s] after %s", host.NodeID, host.IP, time.Since(startTime))
 	return ComposeOverSSH("Compose Node",
 		host,
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
 		DockerComposeInputs{
-			LuxgoVersion: luxGoVersion,
+			LuxgoVersion: luxdVersion,
 			WithMonitoring:     withMonitoring,
 			WithLuxgo:    true,
 			E2E:                utils.IsE2E(),
@@ -118,7 +118,7 @@ func ComposeSSHSetupLoadTest(host *models.Host) error {
 		})
 }
 
-// WasNodeSetupWithMonitoring checks if an LuxGo node was setup with monitoring on a remote host.
+// WasNodeSetupWithMonitoring checks if an Luxd node was setup with monitoring on a remote host.
 func WasNodeSetupWithMonitoring(host *models.Host) (bool, error) {
 	return HasRemoteComposeService(host, utils.GetRemoteComposeFile(), "promtail", constants.SSHScriptTimeout)
 }

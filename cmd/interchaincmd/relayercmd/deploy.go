@@ -454,8 +454,8 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			metricsPort = constants.LocalNetworkLocalWarpRelayerMetricsPort
 		case models.Devnet:
 			metricsPort = constants.DevnetLocalWarpRelayerMetricsPort
-		case models.Fuji:
-			metricsPort = constants.FujiLocalWarpRelayerMetricsPort
+		case models.Testnet:
+			metricsPort = constants.TestnetLocalWarpRelayerMetricsPort
 		}
 	}
 

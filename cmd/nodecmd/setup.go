@@ -59,7 +59,7 @@ Currently, only Ubuntu operating system is supported.`,
 	return cmd
 }
 
-func setup(hosts []*models.Host, luxGoVersion string, network models.Network) error {
+func setup(hosts []*models.Host, luxdVersion string, network models.Network) error {
 	if globalNetworkFlags.UseDevnet {
 		partialSync = false
 		ux.Logger.PrintToUser("disabling partial sync default for devnet")
@@ -93,11 +93,11 @@ func setup(hosts []*models.Host, luxGoVersion string, network models.Network) er
 				return
 			}
 			ux.SpinComplete(spinner)
-			spinner = spinSession.SpinToUser(utils.ScriptLog(host.IP, "Setup LuxGo"))
+			spinner = spinSession.SpinToUser(utils.ScriptLog(host.IP, "Setup Luxd"))
 			// check if host is a API host
 			if err := docker.ComposeSSHSetupNode(host,
 				network,
-				luxGoVersion,
+				luxdVersion,
 				bootstrapIDs,
 				bootstrapIPs,
 				partialSync,
@@ -123,7 +123,7 @@ func setup(hosts []*models.Host, luxGoVersion string, network models.Network) er
 	if wgResults.HasErrors() {
 		return fmt.Errorf("failed to deploy node(s) %s", wgResults.GetErrorHostMap())
 	} else {
-		ux.Logger.PrintToUser(logging.Green.Wrap("LuxGo and Lux-CLI installed and node(s) are bootstrapping!"))
+		ux.Logger.PrintToUser(logging.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 	}
 	return nil
 }
@@ -141,13 +141,13 @@ func setupNode(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	luxdVersionSetting := dependencies.LuxGoVersionSettings{
+	luxdVersionSetting := dependencies.LuxdVersionSettings{
 		UseLuxgoVersionFromSubnet:       useLuxgoVersionFromSubnet,
 		UseLatestLuxgoReleaseVersion:    useLatestLuxgoReleaseVersion,
 		UseLatestLuxgoPreReleaseVersion: useLatestLuxgoPreReleaseVersion,
 		UseCustomLuxgoVersion:           useCustomLuxgoVersion,
 	}
-	luxGoVersion, err := dependencies.GetLuxGoVersion(app, luxdVersionSetting, network)
+	luxdVersion, err := dependencies.GetLuxdVersion(app, luxdVersionSetting, network)
 	if err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func setupNode(_ *cobra.Command, _ []string) error {
 			SSHPrivateKeyPath: sshKeyPath,
 		})
 	}
-	if err = setup(hosts, luxGoVersion, network); err != nil {
+	if err = setup(hosts, luxdVersion, network); err != nil {
 		return err
 	}
 	printSetupResults(hosts)

@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	network := network.FujiNetwork()
+	network := network.TestnetNetwork()
 	aggregator, err := interchain.NewSignatureAggregator(
 		network,
 		logging.NewLogger(

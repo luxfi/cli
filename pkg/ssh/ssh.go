@@ -33,7 +33,7 @@ import (
 )
 
 type scriptInputs struct {
-	LuxGoVersion      string
+	LuxdVersion      string
 	SubnetExportFileName    string
 	SubnetName              string
 	ClusterName             string
@@ -179,7 +179,7 @@ func RunSSHStopWarpRelayerService(host *models.Host) error {
 }
 
 // RunSSHUpgradeLuxgo runs script to upgrade luxd
-func RunSSHUpgradeLuxgo(host *models.Host, luxGoVersion string) error {
+func RunSSHUpgradeLuxgo(host *models.Host, luxdVersion string) error {
 	withMonitoring, err := docker.WasNodeSetupWithMonitoring(host)
 	if err != nil {
 		return err
@@ -189,7 +189,7 @@ func RunSSHUpgradeLuxgo(host *models.Host, luxGoVersion string) error {
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
 		docker.DockerComposeInputs{
-			LuxgoVersion: luxGoVersion,
+			LuxgoVersion: luxdVersion,
 			WithMonitoring:     withMonitoring,
 			WithLuxgo:    true,
 			E2E:                utils.IsE2E(),
@@ -327,7 +327,7 @@ func RunSSHCopyYAMLFile(host *models.Host, yamlFilePath string) error {
 	return nil
 }
 
-func RunSSHSetupPrometheusConfig(host *models.Host, luxGoPorts, machinePorts, loadTestPorts []string) error {
+func RunSSHSetupPrometheusConfig(host *models.Host, luxdPorts, machinePorts, loadTestPorts []string) error {
 	for _, folder := range remoteconfig.PrometheusFoldersToCreate() {
 		if err := host.MkdirAll(folder, constants.SSHDirOpsTimeout); err != nil {
 			return err
@@ -339,7 +339,7 @@ func RunSSHSetupPrometheusConfig(host *models.Host, luxGoPorts, machinePorts, lo
 		return err
 	}
 	defer os.Remove(promConfig.Name())
-	if err := monitoring.WritePrometheusConfig(promConfig.Name(), luxGoPorts, machinePorts, loadTestPorts); err != nil {
+	if err := monitoring.WritePrometheusConfig(promConfig.Name(), luxdPorts, machinePorts, loadTestPorts); err != nil {
 		return err
 	}
 
@@ -511,7 +511,7 @@ func RunSSHRenderLuxdAliasConfigFile(
 	aliasToBlockchain := map[string]string{}
 	if aliasConfigFileExists(host) {
 		// load remote aliases
-		remoteAliases, err := getLuxGoAliasData(host)
+		remoteAliases, err := getLuxdAliasData(host)
 		if err != nil {
 			return err
 		}
@@ -580,7 +580,7 @@ func RunSSHRenderLuxNodeConfig(
 		if network.Kind == models.Local || network.Kind == models.Devnet || isAPIHost {
 			luxdConf.HTTPHost = "0.0.0.0"
 		}
-		remoteLuxdConf, err := getLuxGoConfigData(host)
+		remoteLuxdConf, err := getLuxdConfigData(host)
 		if err != nil {
 			return err
 		}
@@ -819,8 +819,8 @@ func RunSSHRunLoadTest(host *models.Host, loadTestCommand, loadTestName string) 
 	)
 }
 
-// RunSSHCheckLuxGoVersion checks node luxd version
-func RunSSHCheckLuxGoVersion(host *models.Host) ([]byte, error) {
+// RunSSHCheckLuxdVersion checks node luxd version
+func RunSSHCheckLuxdVersion(host *models.Host) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := "{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"info.getNodeVersion\"}"
 	return PostOverSSH(host, "", requestBody)
@@ -946,7 +946,7 @@ func aliasConfigFileExists(host *models.Host) bool {
 	return aliasConfigFileExists
 }
 
-func getLuxGoConfigData(host *models.Host) (map[string]interface{}, error) {
+func getLuxdConfigData(host *models.Host) (map[string]interface{}, error) {
 	// get remote node.json file
 	nodeJSONPath := filepath.Join(constants.CloudNodeConfigPath, constants.NodeConfigJSONFile)
 	// parse node.json file
@@ -961,7 +961,7 @@ func getLuxGoConfigData(host *models.Host) (map[string]interface{}, error) {
 	return luxdConfig, nil
 }
 
-func getLuxGoAliasData(host *models.Host) (map[string][]string, error) {
+func getLuxdAliasData(host *models.Host) (map[string][]string, error) {
 	// parse aliases.json file
 	aliasesJSON, err := host.ReadFileBytes(remoteconfig.GetRemoteLuxAliasesConfig(), constants.SSHFileOpsTimeout)
 	if err != nil {

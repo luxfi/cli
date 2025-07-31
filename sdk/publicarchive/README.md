@@ -31,7 +31,7 @@ import (
 
 func main() {
 	// Initialize the downloader
-	downloader, err := publicarchive.NewDownloader(network.FujiNetwork(), logging.Debug)
+	downloader, err := publicarchive.NewDownloader(network.TestnetNetwork(), logging.Debug)
 	if err != nil {
 		fmt.Printf("Failed to create downloader: %v\n", err)
 		os.Exit(1)

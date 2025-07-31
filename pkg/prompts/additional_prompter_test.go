@@ -1173,8 +1173,8 @@ func TestCapturePChainAddressWithMonkeyPatch(t *testing.T) {
 			switch tt.network {
 			case "devnet":
 				network = models.NewDevnetNetwork("", 0)
-			case "fuji":
-				network = models.NewFujiNetwork()
+			case "testnet":
+				network = models.NewTestnetNetwork()
 			case "mainnet":
 				network = models.NewMainnetNetwork()
 			default:
@@ -1295,8 +1295,8 @@ func TestCaptureXChainAddressWithMonkeyPatch(t *testing.T) {
 			switch tt.network {
 			case "devnet":
 				network = models.NewDevnetNetwork("", 0)
-			case "fuji":
-				network = models.NewFujiNetwork()
+			case "testnet":
+				network = models.NewTestnetNetwork()
 			case "mainnet":
 				network = models.NewMainnetNetwork()
 			default:
