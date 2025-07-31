@@ -89,7 +89,7 @@ var _ = ginkgo.Describe("[Node create]", func() {
 		luxdProcess := commands.NodeSSH(constants.E2EClusterName, "docker ps --no-trunc")
 		gomega.Expect(luxdProcess).To(gomega.ContainSubstring("avaplatform/luxd:" + luxdVersion))
 	})
-	ginkgo.It("can wait up 30 seconds for avago to startup", func() {
+	ginkgo.It("can wait up 30 seconds for luxd to startup", func() {
 		timeout := 30 * time.Second
 		address := fmt.Sprintf("%s:%d", utils.E2EConvertIP(ElasticIP), constants.LuxGoP2PPort)
 		deadline := time.Now().Add(timeout)
@@ -103,7 +103,7 @@ var _ = ginkgo.Describe("[Node create]", func() {
 			}
 			time.Sleep(2 * time.Second)
 		}
-		gomega.Expect(err).NotTo(gomega.HaveOccurred(), "Expected to connect to avago within 30 seconds")
+		gomega.Expect(err).NotTo(gomega.HaveOccurred(), "Expected to connect to luxd within 30 seconds")
 	})
 	ginkgo.It("configured luxd", func() {
 		luxdConfig := commands.NodeSSH(constants.E2EClusterName, "cat /home/ubuntu/.luxd/configs/node.json")
@@ -152,9 +152,9 @@ var _ = ginkgo.Describe("[Node create]", func() {
 	ginkgo.It("can upgrade the nodes", func() {
 		output := commands.NodeUpgrade()
 		fmt.Println(output)
-		latestAvagoVersion := commands.GetLatestAvagoVersionFromGithub()
+		latestLuxdVersion := commands.GetLatestLuxdVersionFromGithub()
 		luxdVersion := commands.NodeSSH(constants.E2EClusterName, "docker ps --no-trunc")
-		gomega.Expect(luxdVersion).To(gomega.ContainSubstring("avaplatform/luxd:" + latestAvagoVersion))
+		gomega.Expect(luxdVersion).To(gomega.ContainSubstring("avaplatform/luxd:" + latestLuxdVersion))
 	})
 	ginkgo.It("can whitelist ssh", func() {
 		output := commands.NodeWhitelistSSH("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC test@localhost")

@@ -15,7 +15,7 @@ import (
 
 	"github.com/luxfi/cli/sdk/constants"
 	"github.com/luxfi/cli/sdk/network"
-	avagoConstants "github.com/luxfi/node/utils/constants"
+	luxdConstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/cavaliergopher/grab/v3"
 	"go.uber.org/zap"
@@ -74,7 +74,7 @@ func NewDownloader(
 	}
 
 	switch network.ID {
-	case avagoConstants.FujiID:
+	case luxdConstants.FujiID:
 		if getter, err := newGetter(PChainArchiveFuji, tmpFile.Name()); err != nil {
 			return Downloader{}, err
 		} else {

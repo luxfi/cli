@@ -146,12 +146,12 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertSubnetToL1Validator, error
 		BLSProofOfPossession: pop,
 		ChangeOwnerAddr:      ewoqPChainAddress,
 	}
-	avaGoBootstrapValidators, err := blockchaincmd.ConvertToLuxGoSubnetValidator([]models.SubnetValidator{bootstrapValidator})
+	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxGoSubnetValidator([]models.SubnetValidator{bootstrapValidator})
 	if err != nil {
 		return nil, err
 	}
 
-	return avaGoBootstrapValidators, nil
+	return luxdBootstrapValidators, nil
 }
 
 var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func() {
@@ -201,7 +201,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		blockchainID, err := ids.FromString(blockchainIDStr)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		avaGoBootstrapValidators, err := getBootstrapValidator(uris[0])
+		luxdBootstrapValidators, err := getBootstrapValidator(uris[0])
 		gomega.Expect(err).Should(gomega.BeNil())
 		ownerAddress := common.HexToAddress(ewoqEVMAddress)
 		subnetSDK := blockchainSDK.Subnet{
@@ -209,7 +209,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 			BlockchainID:        blockchainID,
 			OwnerAddress:        &ownerAddress,
 			RPC:                 rpcURL,
-			BootstrapValidators: avaGoBootstrapValidators,
+			BootstrapValidators: luxdBootstrapValidators,
 		}
 
 		_, cancel := utils.GetSignatureAggregatorContext()

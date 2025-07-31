@@ -37,7 +37,7 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/ids"
-	avagoutils "github.com/luxfi/node/utils"
+	luxdutils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/set"
@@ -141,9 +141,9 @@ so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.
 
 	localNetworkGroup := flags.RegisterFlagGroup(cmd, "Local Network Flags", "show-local-network-flags", true, func(set *pflag.FlagSet) {
 		set.Uint32Var(&numNodes, "num-nodes", constants.LocalNetworkNumNodes, "number of nodes to be created on local network deploy")
-		set.StringVar(&deployFlags.LocalMachineFlags.AvagoBinaryPath, "luxd-path", "", "use this luxd binary path")
+		set.StringVar(&deployFlags.LocalMachineFlags.LuxdBinaryPath, "luxd-path", "", "use this luxd binary path")
 		set.StringVar(
-			&deployFlags.LocalMachineFlags.UserProvidedAvagoVersion,
+			&deployFlags.LocalMachineFlags.UserProvidedLuxdVersion,
 			"luxd-version",
 			constants.DefaultLuxGoVersion,
 			"use this version of luxd (ex: v1.17.12)",
@@ -582,23 +582,23 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 		app.Log.Debug("Deploy local")
 
-		avagoVersion := deployFlags.LocalMachineFlags.UserProvidedAvagoVersion
+		luxdVersion := deployFlags.LocalMachineFlags.UserProvidedLuxdVersion
 
-		if avagoVersion == constants.DefaultLuxGoVersion && deployFlags.LocalMachineFlags.AvagoBinaryPath == "" {
-			avagoVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sidecar.RPCVersion)
+		if luxdVersion == constants.DefaultLuxGoVersion && deployFlags.LocalMachineFlags.LuxdBinaryPath == "" {
+			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sidecar.RPCVersion)
 			if err != nil {
-				if err != dependencies.ErrNoAvagoVersion {
+				if err != dependencies.ErrNoLuxdVersion {
 					return err
 				}
-				avagoVersion = constants.LatestPreReleaseVersionTag
+				luxdVersion = constants.LatestPreReleaseVersionTag
 			}
 		}
 
 		ux.Logger.PrintToUser("")
 		if err := networkcmd.Start(
 			networkcmd.StartFlags{
-				UserProvidedAvagoVersion: avagoVersion,
-				AvagoBinaryPath:          deployFlags.LocalMachineFlags.AvagoBinaryPath,
+				UserProvidedLuxdVersion: luxdVersion,
+				LuxdBinaryPath:          deployFlags.LocalMachineFlags.LuxdBinaryPath,
 				NumNodes:                 numNodes,
 			},
 			false,
@@ -832,7 +832,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 	if sidecar.Sovereign {
 		validatorManagerStr := validatormanagerSDK.ValidatorProxyContractAddress
-		avaGoBootstrapValidators, cancel, savePartialTx, err := convertSubnetToL1(
+		luxdBootstrapValidators, cancel, savePartialTx, err := convertSubnetToL1(
 			bootstrapValidators,
 			deployer,
 			subnetID,
@@ -866,7 +866,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			subnetID,
 			blockchainID,
 			network,
-			avaGoBootstrapValidators,
+			luxdBootstrapValidators,
 			sidecar.ValidatorManagement == validatormanagertypes.ProofOfStake,
 			validatorManagerStr,
 			sidecar.ProxyContractOwner,
@@ -1042,11 +1042,11 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setBootstrapValidatorValidationID(avaGoBootstrapValidators []*txs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
-	for index, avagoValidator := range avaGoBootstrapValidators {
+func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
+	for index, luxdValidator := range luxdBootstrapValidators {
 		for bootstrapValidatorIndex, validator := range bootstrapValidators {
-			avagoValidatorNodeID, _ := ids.ToNodeID(avagoValidator.NodeID)
-			if validator.NodeID == avagoValidatorNodeID.String() {
+			luxdValidatorNodeID, _ := ids.ToNodeID(luxdValidator.NodeID)
+			if validator.NodeID == luxdValidatorNodeID.String() {
 				validationID := subnetID.Append(uint32(index))
 				bootstrapValidators[bootstrapValidatorIndex].ValidationID = validationID.String()
 			}
@@ -1119,7 +1119,7 @@ func ConvertToLuxGoSubnetValidator(subnetValidators []models.SubnetValidator) ([
 		}
 		bootstrapValidators = append(bootstrapValidators, bootstrapValidator)
 	}
-	avagoutils.Sort(bootstrapValidators)
+	luxdutils.Sort(bootstrapValidators)
 	return bootstrapValidators, nil
 }
 

@@ -67,7 +67,7 @@ func createEtnaSubnetEvmConfig(poa, pos bool) string {
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
-	return mapping[utils.LatestAvago2EVMKey]
+	return mapping[utils.LatestLuxd2EVMKey]
 }
 
 func createEtnaSubnetEvmConfigWithoutProxyOwner(poa, pos bool) {
@@ -342,7 +342,7 @@ func initValidatorManagerEtnaFlag(
 	return string(output), err
 }
 
-var avagoVersion string
+var luxdVersion string
 
 var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 	ginkgo.BeforeEach(func() {
@@ -385,9 +385,9 @@ var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 	})
 
 	ginkgo.It("Start Local Node on Etna & Deploy the Subnet To Etna Local Network using cluster flag", func() {
-		avagoVersion = createEtnaSubnetEvmConfig(true, false)
-		_ = commands.StartNetworkWithVersion(avagoVersion)
-		_, err := commands.CreateLocalEtnaNode(avagoVersion, utils.TestLocalNodeName, 1)
+		luxdVersion = createEtnaSubnetEvmConfig(true, false)
+		_ = commands.StartNetworkWithVersion(luxdVersion)
+		_, err := commands.CreateLocalEtnaNode(luxdVersion, utils.TestLocalNodeName, 1)
 		gomega.Expect(err).Should(gomega.BeNil())
 		deployEtnaSubnetClusterFlagConvertOnly(utils.TestLocalNodeName)
 		_, err = commands.TrackLocalEtnaSubnet(utils.TestLocalNodeName, utils.BlockchainName)
@@ -397,9 +397,9 @@ var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 	})
 
 	ginkgo.It("Mix and match network and cluster flags test 1", func() {
-		avagoVersion = createEtnaSubnetEvmConfig(true, false)
-		_ = commands.StartNetworkWithVersion(avagoVersion)
-		_, err := commands.CreateLocalEtnaNode(avagoVersion, utils.TestLocalNodeName, 1)
+		luxdVersion = createEtnaSubnetEvmConfig(true, false)
+		_ = commands.StartNetworkWithVersion(luxdVersion)
+		_, err := commands.CreateLocalEtnaNode(luxdVersion, utils.TestLocalNodeName, 1)
 		gomega.Expect(err).Should(gomega.BeNil())
 		deployEtnaSubnetClusterFlagConvertOnly(utils.TestLocalNodeName)
 		_, err = commands.TrackLocalEtnaSubnet(utils.TestLocalNodeName, utils.BlockchainName)

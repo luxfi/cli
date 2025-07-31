@@ -63,8 +63,8 @@ var (
 	delegationFee                uint16
 	minimumStakeDuration         uint64
 	rewardsRecipientAddr         string
-	latestAvagoReleaseVersion    bool
-	latestAvagoPreReleaseVersion bool
+	latestLuxdReleaseVersion    bool
+	latestLuxdPreReleaseVersion bool
 	validatorManagerAddress      string
 	useACP99                     bool
 	httpPorts                    []uint
@@ -112,8 +112,8 @@ You can check the bootstrapping status by running lux node status local.
 		PersistentPostRun: handlePostRun,
 	}
 	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
-	cmd.Flags().BoolVar(&latestAvagoReleaseVersion, "latest-luxd-version", true, "install latest luxd release version on node/s")
-	cmd.Flags().BoolVar(&latestAvagoPreReleaseVersion, "latest-luxd-pre-release-version", false, "install latest luxd pre-release version on node/s")
+	cmd.Flags().BoolVar(&latestLuxdReleaseVersion, "latest-luxd-version", true, "install latest luxd release version on node/s")
+	cmd.Flags().BoolVar(&latestLuxdPreReleaseVersion, "latest-luxd-pre-release-version", false, "install latest luxd pre-release version on node/s")
 	cmd.Flags().StringVar(&useCustomLuxgoVersion, "custom-luxd-version", "", "install given luxd version on node/s")
 	cmd.Flags().StringVar(&luxdBinaryPath, "luxd-path", "", "use this luxd binary path")
 	cmd.Flags().StringArrayVar(&bootstrapIDs, "bootstrap-id", []string{}, "nodeIDs of bootstrap nodes")
@@ -256,13 +256,13 @@ func localStartNode(_ *cobra.Command, args []string) error {
 		if err = dependencies.CheckVersionIsOverMin(app, constants.LuxGoRepoName, network, useCustomLuxgoVersion); err != nil {
 			return err
 		}
-		latestAvagoPreReleaseVersion = false
-		latestAvagoReleaseVersion = false
+		latestLuxdPreReleaseVersion = false
+		latestLuxdReleaseVersion = false
 	}
-	avaGoVersionSetting := dependencies.LuxGoVersionSettings{
+	luxdVersionSetting := dependencies.LuxGoVersionSettings{
 		UseCustomLuxgoVersion:           useCustomLuxgoVersion,
-		UseLatestLuxgoPreReleaseVersion: latestAvagoPreReleaseVersion,
-		UseLatestLuxgoReleaseVersion:    latestAvagoReleaseVersion,
+		UseLatestLuxgoPreReleaseVersion: latestLuxdPreReleaseVersion,
+		UseLatestLuxgoReleaseVersion:    latestLuxdReleaseVersion,
 	}
 	nodeConfig := make(map[string]interface{})
 	if nodeConfigPath != "" {
@@ -283,7 +283,7 @@ func localStartNode(_ *cobra.Command, args []string) error {
 		nodeConfig,
 		connectionSettings,
 		nodeSettings,
-		avaGoVersionSetting,
+		luxdVersionSetting,
 		network,
 	)
 }

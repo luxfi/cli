@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/sdk/network"
-	avagoconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/node/utils/constants"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
@@ -233,7 +233,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID,
-		avagoconstants.PlatformChainID,
+		luxdconstants.PlatformChainID,
 		subnetConversionAddressedCall.Bytes(),
 	)
 	if err != nil {
