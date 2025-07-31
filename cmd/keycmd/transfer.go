@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/ictt"
+	"github.com/luxfi/cli/pkg/warp"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
@@ -578,7 +578,7 @@ func interEvmSend(
 	amount = amount.Mul(amount, new(big.Float).SetFloat64(float64(units.Lux)))
 	amount = amount.Mul(amount, new(big.Float).SetFloat64(float64(units.Lux)))
 	amountInt, _ := amount.Int(nil)
-	receipt, receipt2, err := ictt.Send(
+	receipt, receipt2, err := warp.Send(
 		senderURL,
 		goethereumcommon.HexToAddress(originTransferrerAddress),
 		privateKey,
