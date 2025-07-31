@@ -228,7 +228,7 @@ func TestValidateMainnetL1StakingDuration(t *testing.T) {
 	}
 }
 
-func TestValidateFujiStakingDuration(t *testing.T) {
+func TestValidateTestnetStakingDuration(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
@@ -241,12 +241,12 @@ func TestValidateFujiStakingDuration(t *testing.T) {
 		},
 		{
 			name:    "minimum duration",
-			input:   genesis.FujiParams.MinStakeDuration.String(),
+			input:   genesis.TestnetParams.MinStakeDuration.String(),
 			wantErr: false,
 		},
 		{
 			name:    "maximum duration",
-			input:   genesis.FujiParams.MaxStakeDuration.String(),
+			input:   genesis.TestnetParams.MaxStakeDuration.String(),
 			wantErr: false,
 		},
 		{
@@ -268,7 +268,7 @@ func TestValidateFujiStakingDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateFujiStakingDuration(tt.input)
+			err := validateTestnetStakingDuration(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -814,8 +814,8 @@ func TestValidatePChainAddress(t *testing.T) {
 			wantErr:     true, // Parse succeeds but chainID != "P"
 		},
 		{
-			name:        "invalid Fuji P-Chain address - bad checksum",
-			input:       "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:        "invalid Testnet P-Chain address - bad checksum",
+			input:       "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			expectedHRP: "",
 			wantErr:     true, // This will fail checksum validation
 		},
@@ -833,25 +833,25 @@ func TestValidatePChainAddress(t *testing.T) {
 		},
 		{
 			name:        "invalid - not P-Chain (X-Chain prefix)",
-			input:       "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:       "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			expectedHRP: "",
 			wantErr:     true,
 		},
 		{
 			name:        "invalid - not P-Chain (C-Chain prefix)",
-			input:       "C-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:       "C-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			expectedHRP: "",
 			wantErr:     true,
 		},
 		{
 			name:        "invalid - unknown chain prefix",
-			input:       "Z-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:       "Z-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			expectedHRP: "",
 			wantErr:     true,
 		},
 		{
 			name:        "invalid - no chain prefix",
-			input:       "fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:       "testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			expectedHRP: "",
 			wantErr:     true,
 		},
@@ -882,25 +882,25 @@ func TestValidatePChainAddress(t *testing.T) {
 	}
 }
 
-func TestValidatePChainFujiAddress(t *testing.T) {
+func TestValidatePChainTestnetAddress(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
 		wantErr bool
 	}{
 		{
-			name:    "valid P-Chain address with Fuji HRP",
-			input:   "P-fuji18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
-			wantErr: false, // Parse succeeds and HRP == "fuji"
+			name:    "valid P-Chain address with Testnet HRP",
+			input:   "P-testnet18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			wantErr: false, // Parse succeeds and HRP == "testnet"
 		},
 		{
 			name:    "valid P-Chain address but wrong HRP - custom",
 			input:   "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // Parse succeeds but HRP != "fuji"
+			wantErr: true, // Parse succeeds but HRP != "testnet"
 		},
 		{
-			name:    "invalid Fuji P-Chain address - bad checksum",
-			input:   "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:    "invalid Testnet P-Chain address - bad checksum",
+			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true, // This will fail checksum validation
 		},
 		{
@@ -915,7 +915,7 @@ func TestValidatePChainFujiAddress(t *testing.T) {
 		},
 		{
 			name:    "invalid - not P-Chain",
-			input:   "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true,
 		},
 		{
@@ -927,7 +927,7 @@ func TestValidatePChainFujiAddress(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validatePChainFujiAddress(tt.input)
+			err := validatePChainTestnetAddress(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -959,8 +959,8 @@ func TestValidatePChainMainAddress(t *testing.T) {
 			wantErr: true, // This will fail checksum validation
 		},
 		{
-			name:    "invalid - Fuji address",
-			input:   "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:    "invalid - Testnet address",
+			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true,
 		},
 		{
@@ -1019,8 +1019,8 @@ func TestValidatePChainLocalAddress(t *testing.T) {
 			wantErr: true, // This will fail checksum validation
 		},
 		{
-			name:    "invalid - Fuji address",
-			input:   "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:    "invalid - Testnet address",
+			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true,
 		},
 		{
@@ -1060,28 +1060,28 @@ func TestGetPChainValidationFunc(t *testing.T) {
 		invalidAddr string
 	}{
 		{
-			name:        "Fuji network",
-			network:     models.NewFujiNetwork(),
-			validAddr:   "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:        "Testnet network",
+			network:     models.NewTestnetNetwork(),
+			validAddr:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			invalidAddr: "P-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
 		},
 		{
 			name:        "Mainnet network",
 			network:     models.NewMainnetNetwork(),
 			validAddr:   "P-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			invalidAddr: "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			invalidAddr: "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
 		{
 			name:        "Local network",
 			network:     models.NewLocalNetwork(),
 			validAddr:   "P-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			invalidAddr: "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			invalidAddr: "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
 		{
 			name:        "Devnet network",
 			network:     models.NewDevnetNetwork("", 0),
 			validAddr:   "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			invalidAddr: "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			invalidAddr: "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
 	}
 
@@ -1107,7 +1107,7 @@ func TestGetPChainValidationFunc(t *testing.T) {
 	t.Run("unsupported network", func(t *testing.T) {
 		unsupportedNetwork := models.Network{Kind: 999} // Use an invalid numeric value
 		validator := getPChainValidationFunc(unsupportedNetwork)
-		err := validator("P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
+		err := validator("P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "unsupported network")
 	})
@@ -1130,8 +1130,8 @@ func TestValidateXChainAddress(t *testing.T) {
 			wantErr: true, // chainID != "X"
 		},
 		{
-			name:    "invalid Fuji X-Chain address - bad checksum",
-			input:   "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:    "invalid Testnet X-Chain address - bad checksum",
+			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true, // This will fail checksum validation
 		},
 		{
@@ -1146,7 +1146,7 @@ func TestValidateXChainAddress(t *testing.T) {
 		},
 		{
 			name:    "invalid - not X-Chain",
-			input:   "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true,
 		},
 		{
@@ -1173,25 +1173,25 @@ func TestValidateXChainAddress(t *testing.T) {
 	}
 }
 
-func TestValidateXChainFujiAddress(t *testing.T) {
+func TestValidateXChainTestnetAddress(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
 		wantErr bool
 	}{
 		{
-			name:    "valid X-Chain address with Fuji HRP",
-			input:   "X-fuji18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			name:    "valid X-Chain address with Testnet HRP",
+			input:   "X-testnet18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
 			wantErr: false,
 		},
 		{
 			name:    "valid X-Chain address but wrong HRP - custom",
 			input:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // Parse succeeds but HRP != "fuji"
+			wantErr: true, // Parse succeeds but HRP != "testnet"
 		},
 		{
-			name:    "invalid Fuji X-Chain address - bad checksum",
-			input:   "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:    "invalid Testnet X-Chain address - bad checksum",
+			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true, // This will fail checksum validation
 		},
 		{
@@ -1206,7 +1206,7 @@ func TestValidateXChainFujiAddress(t *testing.T) {
 		},
 		{
 			name:    "invalid - not X-Chain",
-			input:   "P-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true,
 		},
 		{
@@ -1218,7 +1218,7 @@ func TestValidateXChainFujiAddress(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateXChainFujiAddress(tt.input)
+			err := validateXChainTestnetAddress(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -1250,8 +1250,8 @@ func TestValidateXChainMainAddress(t *testing.T) {
 			wantErr: true, // This will fail checksum validation
 		},
 		{
-			name:    "invalid - Fuji address",
-			input:   "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:    "invalid - Testnet address",
+			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true,
 		},
 		{
@@ -1301,7 +1301,7 @@ func TestValidateXChainLocalAddress(t *testing.T) {
 		},
 		{
 			name:    "invalid X-Chain address - unsupported HRP",
-			input:   "X-fuji18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			input:   "X-testnet18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
 			wantErr: true, // HRP is neither local nor custom
 		},
 		{
@@ -1351,28 +1351,28 @@ func TestGetXChainValidationFunc(t *testing.T) {
 		invalidAddr string
 	}{
 		{
-			name:        "Fuji network",
-			network:     models.NewFujiNetwork(),
-			validAddr:   "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			name:        "Testnet network",
+			network:     models.NewTestnetNetwork(),
+			validAddr:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			invalidAddr: "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
 		},
 		{
 			name:        "Mainnet network",
 			network:     models.NewMainnetNetwork(),
 			validAddr:   "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			invalidAddr: "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			invalidAddr: "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
 		{
 			name:        "Local network",
 			network:     models.NewLocalNetwork(),
 			validAddr:   "X-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			invalidAddr: "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			invalidAddr: "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
 		{
 			name:        "Devnet network",
 			network:     models.NewDevnetNetwork("", 0),
 			validAddr:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			invalidAddr: "X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			invalidAddr: "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
 	}
 
@@ -1398,7 +1398,7 @@ func TestGetXChainValidationFunc(t *testing.T) {
 	t.Run("unsupported network", func(t *testing.T) {
 		unsupportedNetwork := models.Network{Kind: 999} // Use an invalid numeric value
 		validator := getXChainValidationFunc(unsupportedNetwork)
-		err := validator("X-fuji1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
+		err := validator("X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "unsupported network")
 	})

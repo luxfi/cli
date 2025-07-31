@@ -76,7 +76,7 @@ func statusNode(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxGoHost)
+	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxdHost)
 	nodeIDs, err := utils.MapWithError(hostIDs, func(s string) (string, error) {
 		n, err := getNodeID(app.GetNodeInstanceDirPath(s))
 		return n.String(), err
@@ -121,14 +121,14 @@ func statusNode(_ *cobra.Command, args []string) error {
 		wg.Add(1)
 		go func(nodeResults *models.NodeResults, host *models.Host) {
 			defer wg.Done()
-			if resp, err := ssh.RunSSHCheckLuxGoVersion(host); err != nil {
+			if resp, err := ssh.RunSSHCheckLuxdVersion(host); err != nil {
 				nodeResults.AddResult(host.GetCloudID(), nil, err)
 				return
 			} else {
-				if luxGoVersion, _, err := node.ParseLuxGoOutput(resp); err != nil {
+				if luxdVersion, _, err := node.ParseLuxdOutput(resp); err != nil {
 					nodeResults.AddResult(host.GetCloudID(), nil, err)
 				} else {
-					nodeResults.AddResult(host.GetCloudID(), luxGoVersion, err)
+					nodeResults.AddResult(host.GetCloudID(), luxdVersion, err)
 				}
 			}
 		}(&wgResults, host)
@@ -272,7 +272,7 @@ func printOutput(
 		nodeIDStr := ""
 		luxdVersion := ""
 		roles := clusterConf.GetHostRoles(nodeConfigs[i])
-		if clusterConf.IsLuxGoHost(cloudID) {
+		if clusterConf.IsLuxdHost(cloudID) {
 			boostrappedStatus = logging.Green.Wrap("BOOTSTRAPPED")
 			if slices.Contains(notBootstrappedHosts, cloudID) {
 				boostrappedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")

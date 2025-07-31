@@ -35,7 +35,7 @@ var (
 	noRepoPath     string
 
 	errSubnetNotDeployed = errors.New(
-		"only blockchains which have already been deployed to either testnet (fuji) or mainnet can be published")
+		"only blockchains which have already been deployed to either testnet (testnet) or mainnet can be published")
 )
 
 type newPublisherFunc func(string, string, string) subnet.Publisher
@@ -79,10 +79,10 @@ func publish(_ *cobra.Command, args []string) error {
 	return doPublish(&sc, blockchainName, subnet.NewPublisher)
 }
 
-// isReadyToPublish currently means if deployed to fuji and/or main
+// isReadyToPublish currently means if deployed to testnet and/or main
 func isReadyToPublish(sc *models.Sidecar) bool {
-	if sc.Networks[models.Fuji.String()].SubnetID != ids.Empty &&
-		sc.Networks[models.Fuji.String()].BlockchainID != ids.Empty {
+	if sc.Networks[models.Testnet.String()].SubnetID != ids.Empty &&
+		sc.Networks[models.Testnet.String()].BlockchainID != ids.Empty {
 		return true
 	}
 	if sc.Networks[models.Mainnet.String()].SubnetID != ids.Empty &&
@@ -458,7 +458,7 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 
 	vm := &types.VM{
 		ID:            vmID,
-		Alias:         sc.Networks["Fuji"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
+		Alias:         sc.Networks["Testnet"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
 		Homepage:      "",
 		Description:   desc,
 		Maintainers:   maintrs,

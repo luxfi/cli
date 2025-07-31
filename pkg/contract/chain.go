@@ -451,9 +451,9 @@ func GetCChainWarpInfo(
 		}
 		messengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
 		registryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
-	case network.Kind == models.Fuji:
+	case network.Kind == models.Testnet:
 		messengerAddress = constants.DefaultWarpMessengerAddress
-		registryAddress = constants.FujiCChainWarpRegistryAddress
+		registryAddress = constants.TestnetCChainWarpRegistryAddress
 	case network.Kind == models.Mainnet:
 		messengerAddress = constants.DefaultWarpMessengerAddress
 		registryAddress = constants.MainnetCChainWarpRegistryAddress

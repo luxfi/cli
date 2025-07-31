@@ -262,8 +262,8 @@ func listKeys(*cobra.Command, []string) error {
 	if globalNetworkFlags.UseLocal || all {
 		networks = append(networks, models.NewLocalNetwork())
 	}
-	if globalNetworkFlags.UseFuji || all {
-		networks = append(networks, models.NewFujiNetwork())
+	if globalNetworkFlags.UseTestnet || all {
+		networks = append(networks, models.NewTestnetNetwork())
 	}
 	if globalNetworkFlags.UseMainnet || all {
 		networks = append(networks, models.NewMainnetNetwork())

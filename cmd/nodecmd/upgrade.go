@@ -26,7 +26,7 @@ import (
 )
 
 type nodeUpgradeInfo struct {
-	LuxGoVersion    string   // lux go version to update to on cloud server
+	LuxdVersion    string   // lux go version to update to on cloud server
 	SubnetEVMVersion      string   // subnet EVM version to update to on cloud server
 	SubnetEVMIDsToUpgrade []string // list of ID of Subnet EVM to be upgraded to subnet EVM version to update to
 }
@@ -71,9 +71,9 @@ func upgrade(_ *cobra.Command, args []string) error {
 	}
 	spinSession := ux.NewUserSpinner()
 	for host, upgradeInfo := range toUpgradeNodesMap {
-		if upgradeInfo.LuxGoVersion != "" {
-			spinner := spinSession.SpinToUser(utils.ScriptLog(host.NodeID, fmt.Sprintf("Upgrading luxd to version %s...", upgradeInfo.LuxGoVersion)))
-			if err := upgradeLuxGo(host, upgradeInfo.LuxGoVersion); err != nil {
+		if upgradeInfo.LuxdVersion != "" {
+			spinner := spinSession.SpinToUser(utils.ScriptLog(host.NodeID, fmt.Sprintf("Upgrading luxd to version %s...", upgradeInfo.LuxdVersion)))
+			if err := upgradeLuxd(host, upgradeInfo.LuxdVersion); err != nil {
 				ux.SpinFailWithError(spinner, "", err)
 				return err
 			}
@@ -117,7 +117,7 @@ func upgrade(_ *cobra.Command, args []string) error {
 func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo, error) {
 	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
 		constants.LuxOrg,
-		constants.LuxGoRepoName,
+		constants.LuxdRepoName,
 		"",
 	)
 	if err != nil {
@@ -144,7 +144,7 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 		wg.Add(1)
 		go func(nodeResults *models.NodeResults, host *models.Host) {
 			defer wg.Done()
-			if resp, err := ssh.RunSSHCheckLuxGoVersion(host); err != nil {
+			if resp, err := ssh.RunSSHCheckLuxdVersion(host); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 				return
 			} else {
@@ -171,8 +171,8 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 		if err != nil {
 			return nil, err
 		}
-		currentLuxGoVersion := vmVersions[constants.PlatformKeyName]
-		luxGoVersionToUpdateTo := latestLuxdVersion
+		currentLuxdVersion := vmVersions[constants.PlatformKeyName]
+		luxdVersionToUpdateTo := latestLuxdVersion
 		nodeUpgradeInfo := nodeUpgradeInfo{}
 		nodeUpgradeInfo.SubnetEVMIDsToUpgrade = []string{}
 		for vmName, vmVersion := range vmVersions {
@@ -187,7 +187,7 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 					nodeUpgradeInfo.SubnetEVMIDsToUpgrade = append(nodeUpgradeInfo.SubnetEVMIDsToUpgrade, vmName)
 				}
 				// find the highest version of lux go that is still compatible with current highest rpc
-				luxGoVersionToUpdateTo, err = dependencies.GetLatestLuxGoByProtocolVersion(app, rpcVersion)
+				luxdVersionToUpdateTo, err = dependencies.GetLatestLuxdByProtocolVersion(app, rpcVersion)
 				if err != nil {
 					nodeErrors[hostID] = err
 					continue
@@ -197,9 +197,9 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 		if _, hasFailed := nodeErrors[hostID]; hasFailed {
 			continue
 		}
-		if currentLuxGoVersion != luxGoVersionToUpdateTo {
-			ux.Logger.PrintToUser("Upgrading Lux Go version for node %s from version %s to version %s", hostID, currentLuxGoVersion, luxGoVersionToUpdateTo)
-			nodeUpgradeInfo.LuxGoVersion = luxGoVersionToUpdateTo
+		if currentLuxdVersion != luxdVersionToUpdateTo {
+			ux.Logger.PrintToUser("Upgrading Lux Go version for node %s from version %s to version %s", hostID, currentLuxdVersion, luxdVersionToUpdateTo)
+			nodeUpgradeInfo.LuxdVersion = luxdVersionToUpdateTo
 		}
 		nodesToUpgrade[nodeIDToHost[hostID]] = nodeUpgradeInfo
 	}
@@ -219,7 +219,7 @@ func checkIfKeyIsStandardVMName(vmName string) bool {
 	return slices.Contains(standardVMNames, vmName)
 }
 
-func upgradeLuxGo(
+func upgradeLuxd(
 	host *models.Host,
 	luxdVersionToUpdateTo string,
 ) error {

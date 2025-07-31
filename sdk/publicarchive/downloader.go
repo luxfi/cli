@@ -25,7 +25,7 @@ const (
 	updateInterval = 500 * time.Millisecond
 	maxFileSize    = 10 * 1024 * 1024 * 1024 // 10GB per file
 	// public archive
-	PChainArchiveFuji = "https://luxd-public-shared-database.lux-test.network/testnet/p-chain/luxd/data-tar/latest.tar"
+	PChainArchiveTestnet = "https://luxd-public-shared-database.lux-test.network/testnet/p-chain/luxd/data-tar/latest.tar"
 )
 
 type Getter struct {
@@ -61,7 +61,7 @@ func newGetter(endpoint string, target string) (Getter, error) {
 // TODO: improve locks to provide graceful recovery under signals such as SIGTERM
 
 // NewDownloader returns a new Downloader
-// network: the network to download from ( fuji only).
+// network: the network to download from ( testnet only).
 // target: the path to download to
 // logLevel: the log level
 func NewDownloader(
@@ -74,8 +74,8 @@ func NewDownloader(
 	}
 
 	switch network.ID {
-	case luxdConstants.FujiID:
-		if getter, err := newGetter(PChainArchiveFuji, tmpFile.Name()); err != nil {
+	case luxdConstants.TestnetID:
+		if getter, err := newGetter(PChainArchiveTestnet, tmpFile.Name()); err != nil {
 			return Downloader{}, err
 		} else {
 			return Downloader{
@@ -85,7 +85,7 @@ func NewDownloader(
 			}, nil
 		}
 	default:
-		return Downloader{}, fmt.Errorf("unsupported network ID: %d. Fuji only supported", network.ID)
+		return Downloader{}, fmt.Errorf("unsupported network ID: %d. Testnet only supported", network.ID)
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/types"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -47,11 +47,11 @@ func handleMetricsSettings(_ *cobra.Command, args []string) error {
 }
 
 func saveMetricsPreferences(enableMetrics bool) error {
-	config := models.Config{
+	cfg := types.Config{
 		MetricsEnabled: enableMetrics,
 	}
 
-	jsonBytes, err := json.Marshal(&config)
+	jsonBytes, err := json.Marshal(&cfg)
 	if err != nil {
 		return err
 	}

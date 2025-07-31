@@ -33,7 +33,7 @@ import (
 	"github.com/luxfi/node/wallet/chain/p/builder"
 	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/node/wallet/subnet/primary/common"
-	"github.com/luxfi/geth/plugin/evm/atomic"
+	"github.com/luxfi/node/wallet/chain/c"
 	goethereumcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
@@ -898,7 +898,7 @@ func importIntoC(
 	if err != nil {
 		return fmt.Errorf("error building tx: %w", err)
 	}
-	tx := atomic.Tx{UnsignedAtomicTx: unsignedTx}
+	tx := c.Tx{UnsignedAtomicTx: unsignedTx}
 	if err := wallet.C().Signer().SignAtomic(context.Background(), &tx); err != nil {
 		return fmt.Errorf("error signing tx: %w", err)
 	}
@@ -1012,7 +1012,7 @@ func exportFromC(
 	if err != nil {
 		return fmt.Errorf("error building tx: %w", err)
 	}
-	tx := atomic.Tx{UnsignedAtomicTx: unsignedTx}
+	tx := c.Tx{UnsignedAtomicTx: unsignedTx}
 	if err := wallet.C().Signer().SignAtomic(context.Background(), &tx); err != nil {
 		return fmt.Errorf("error signing tx: %w", err)
 	}

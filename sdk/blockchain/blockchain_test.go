@@ -50,7 +50,7 @@ func TestSubnetDeploy(t *testing.T) {
 	subnetParams := getDefaultSubnetEVMGenesis()
 	newSubnet, err := New(&subnetParams)
 	require.NoError(err)
-	network := network.FujiNetwork()
+	network := network.TestnetNetwork()
 
 	keychain, err := keychain.NewKeychain(network, "KEY_PATH", nil)
 	require.NoError(err)
@@ -86,7 +86,7 @@ func TestSubnetDeployMultiSig(t *testing.T) {
 	require := require.New(t)
 	subnetParams := getDefaultSubnetEVMGenesis()
 	newSubnet, _ := New(&subnetParams)
-	network := network.FujiNetwork()
+	network := network.TestnetNetwork()
 
 	keychainA, err := keychain.NewKeychain(network, "KEY_PATH_A", nil)
 	require.NoError(err)
@@ -122,7 +122,7 @@ func TestSubnetDeployMultiSig(t *testing.T) {
 	require.NoError(err)
 	fmt.Printf("subnetID %s \n", subnetID.String())
 
-	// we need to wait to allow the transaction to reach other nodes in Fuji
+	// we need to wait to allow the transaction to reach other nodes in Testnet
 	time.Sleep(2 * time.Second)
 
 	newSubnet.SetSubnetAuthKeys(subnetAuthKeys)
@@ -157,15 +157,15 @@ func TestSubnetDeployLedger(t *testing.T) {
 	subnetParams := getDefaultSubnetEVMGenesis()
 	newSubnet, err := New(&subnetParams)
 	require.NoError(err)
-	network := network.FujiNetwork()
+	network := network.TestnetNetwork()
 
 	ledgerInfo := keychain.LedgerParams{
-		LedgerAddresses: []string{"P-fujixxxxxxxxx"},
+		LedgerAddresses: []string{"P-testnetxxxxxxxxx"},
 	}
 	keychainA, err := keychain.NewKeychain(network, "", &ledgerInfo)
 	require.NoError(err)
 
-	addressesIDs, err := address.ParseToIDs([]string{"P-fujiyyyyyyyy"})
+	addressesIDs, err := address.ParseToIDs([]string{"P-testnetyyyyyyyy"})
 	require.NoError(err)
 	controlKeys := addressesIDs
 	subnetAuthKeys := addressesIDs
@@ -196,7 +196,7 @@ func TestSubnetDeployLedger(t *testing.T) {
 	require.NoError(err)
 
 	ledgerInfoB := keychain.LedgerParams{
-		LedgerAddresses: []string{"P-fujiyyyyyyyy"},
+		LedgerAddresses: []string{"P-testnetyyyyyyyy"},
 	}
 	err = keychainA.Ledger.LedgerDevice.Disconnect()
 	require.NoError(err)
