@@ -1,0 +1,321 @@
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+package nodecmd
+
+import (
+	"fmt"
+	"os"
+	"strings"
+	"sync"
+
+	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/pkg/ansible"
+	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/node"
+	"github.com/luxfi/cli/pkg/ssh"
+	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/vms/platformvm/status"
+
+	"github.com/olekukonko/tablewriter"
+	"github.com/pborman/ansi"
+	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
+)
+
+var blockchainName string
+
+func newStatusCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "status [clusterName]",
+		Short: "(ALPHA Warning) Get node bootstrap status",
+		Long: `(ALPHA Warning) This command is currently in experimental mode.
+
+The node status command gets the bootstrap status of all nodes in a cluster with the Primary Network. 
+If no cluster is given, defaults to node list behaviour.
+
+To get the bootstrap status of a node with a Blockchain, use --blockchain flag`,
+		Args: cobrautils.MinimumNArgs(0),
+		RunE: statusNode,
+	}
+	cmd.Flags().StringVar(&blockchainName, "subnet", "", "specify the blockchain the node is syncing with")
+	cmd.Flags().StringVar(&blockchainName, "blockchain", "", "specify the blockchain the node is syncing with")
+
+	return cmd
+}
+
+func statusNode(_ *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return list(nil, nil)
+	}
+	clusterName := args[0]
+	if err := node.CheckCluster(app, clusterName); err != nil {
+		return err
+	}
+	clusterConf, err := app.GetClusterConfig(clusterName)
+	if err != nil {
+		return err
+	}
+	// local cluster doesn't have nodes
+	if clusterConf.Local {
+		return notImplementedForLocal("status")
+	}
+	var blockchainID ids.ID
+	if blockchainName != "" {
+		sc, err := app.LoadSidecar(blockchainName)
+		if err != nil {
+			return err
+		}
+		blockchainID = sc.Networks[clusterConf.Network.Name()].BlockchainID
+		if blockchainID == ids.Empty {
+			return constants.ErrNoBlockchainID
+		}
+	}
+
+	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxGoHost)
+	nodeIDs, err := utils.MapWithError(hostIDs, func(s string) (string, error) {
+		n, err := getNodeID(app.GetNodeInstanceDirPath(s))
+		return n.String(), err
+	})
+	if err != nil {
+		return err
+	}
+	if blockchainName != "" {
+		// check subnet first
+		if _, err := blockchaincmd.ValidateSubnetNameAndGetChains([]string{blockchainName}); err != nil {
+			return err
+		}
+	}
+
+	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
+	if err != nil {
+		return err
+	}
+	defer node.DisconnectHosts(hosts)
+
+	spinSession := ux.NewUserSpinner()
+	spinner := spinSession.SpinToUser("Checking node(s) status...")
+	notBootstrappedNodes, err := node.GetNotBootstrappedNodes(hosts)
+	if err != nil {
+		ux.SpinFailWithError(spinner, "", err)
+		return err
+	}
+	ux.SpinComplete(spinner)
+
+	spinner = spinSession.SpinToUser("Checking if node(s) are healthy...")
+	unhealthyNodes, err := node.GetUnhealthyNodes(hosts)
+	if err != nil {
+		ux.SpinFailWithError(spinner, "", err)
+		return err
+	}
+	ux.SpinComplete(spinner)
+
+	spinner = spinSession.SpinToUser("Getting luxd version of node(s)...")
+	wg := sync.WaitGroup{}
+	wgResults := models.NodeResults{}
+	for _, host := range hosts {
+		wg.Add(1)
+		go func(nodeResults *models.NodeResults, host *models.Host) {
+			defer wg.Done()
+			if resp, err := ssh.RunSSHCheckLuxGoVersion(host); err != nil {
+				nodeResults.AddResult(host.GetCloudID(), nil, err)
+				return
+			} else {
+				if luxGoVersion, _, err := node.ParseLuxGoOutput(resp); err != nil {
+					nodeResults.AddResult(host.GetCloudID(), nil, err)
+				} else {
+					nodeResults.AddResult(host.GetCloudID(), luxGoVersion, err)
+				}
+			}
+		}(&wgResults, host)
+	}
+	wg.Wait()
+
+	if wgResults.HasErrors() {
+		e := fmt.Errorf("failed to get luxd version for node(s) %s", wgResults.GetErrorHostMap())
+		ux.SpinFailWithError(spinner, "", e)
+		return e
+	}
+	ux.SpinComplete(spinner)
+	spinSession.Stop()
+	luxdVersions := map[string]string{}
+	for nodeID, luxdVersion := range wgResults.GetResultMap() {
+		luxdVersions[nodeID] = fmt.Sprintf("%v", luxdVersion)
+	}
+
+	notSyncedNodes := []string{}
+	subnetSyncedNodes := []string{}
+	subnetValidatingNodes := []string{}
+	if blockchainName != "" {
+		hostsToCheckSyncStatus := []string{}
+		for _, hostID := range hostIDs {
+			if slices.Contains(notBootstrappedNodes, hostID) {
+				notSyncedNodes = append(notSyncedNodes, hostID)
+			} else {
+				hostsToCheckSyncStatus = append(hostsToCheckSyncStatus, hostID)
+			}
+		}
+		if len(hostsToCheckSyncStatus) != 0 {
+			ux.Logger.PrintToUser("Getting subnet sync status of node(s)")
+			hostsToCheck := utils.Filter(hosts, func(h *models.Host) bool { return slices.Contains(hostsToCheckSyncStatus, h.GetCloudID()) })
+			wg := sync.WaitGroup{}
+			wgResults := models.NodeResults{}
+			for _, host := range hostsToCheck {
+				wg.Add(1)
+				go func(nodeResults *models.NodeResults, host *models.Host) {
+					defer wg.Done()
+					if syncstatus, err := ssh.RunSSHSubnetSyncStatus(host, blockchainID.String()); err != nil {
+						nodeResults.AddResult(host.GetCloudID(), nil, err)
+						return
+					} else {
+						if subnetSyncStatus, err := parseSubnetSyncOutput(syncstatus); err != nil {
+							nodeResults.AddResult(host.GetCloudID(), nil, err)
+							return
+						} else {
+							nodeResults.AddResult(host.GetCloudID(), subnetSyncStatus, err)
+						}
+					}
+				}(&wgResults, host)
+			}
+			wg.Wait()
+			if wgResults.HasErrors() {
+				return fmt.Errorf("failed to check sync status for node(s) %s", wgResults.GetErrorHostMap())
+			}
+			for nodeID, subnetSyncStatus := range wgResults.GetResultMap() {
+				switch subnetSyncStatus {
+				case status.Syncing.String():
+					subnetSyncedNodes = append(subnetSyncedNodes, nodeID)
+				case status.Validating.String():
+					subnetValidatingNodes = append(subnetValidatingNodes, nodeID)
+				default:
+					notSyncedNodes = append(notSyncedNodes, nodeID)
+				}
+			}
+		}
+	}
+	if clusterConf.MonitoringInstance != "" {
+		hostIDs = append(hostIDs, clusterConf.MonitoringInstance)
+		nodeIDs = append(nodeIDs, "")
+	}
+	nodeConfigs := []models.NodeConfig{}
+	for _, hostID := range hostIDs {
+		nodeConfig, err := app.LoadClusterNodeConfig(hostID)
+		if err != nil {
+			return err
+		}
+		nodeConfigs = append(nodeConfigs, nodeConfig)
+	}
+	printOutput(
+		clusterConf,
+		hostIDs,
+		nodeIDs,
+		luxdVersions,
+		unhealthyNodes,
+		notBootstrappedNodes,
+		notSyncedNodes,
+		subnetSyncedNodes,
+		subnetValidatingNodes,
+		clusterName,
+		blockchainName,
+		nodeConfigs,
+	)
+	return nil
+}
+
+func printOutput(
+	clusterConf models.ClusterConfig,
+	cloudIDs []string,
+	nodeIDs []string,
+	luxdVersions map[string]string,
+	unhealthyHosts []string,
+	notBootstrappedHosts []string,
+	notSyncedHosts []string,
+	subnetSyncedHosts []string,
+	subnetValidatingHosts []string,
+	clusterName string,
+	blockchainName string,
+	nodeConfigs []models.NodeConfig,
+) {
+	if clusterConf.External {
+		ux.Logger.PrintToUser("Cluster %s (%s) is EXTERNAL", logging.LightBlue.Wrap(clusterName), clusterConf.Network.Kind.String())
+	}
+	if blockchainName == "" && len(notBootstrappedHosts) == 0 {
+		ux.Logger.PrintToUser("All nodes in cluster %s are bootstrapped to Primary Network!", clusterName)
+	}
+	if blockchainName != "" && len(notSyncedHosts) == 0 {
+		// all nodes are either synced to or validating subnet
+		status := "synced to"
+		if len(subnetSyncedHosts) == 0 {
+			status = "validators of"
+		}
+		ux.Logger.PrintToUser("All nodes in cluster %s are %s Subnet %s", logging.LightBlue.Wrap(clusterName), status, blockchainName)
+	}
+	ux.Logger.PrintToUser("")
+	tit := fmt.Sprintf("STATUS FOR CLUSTER: %s", logging.LightBlue.Wrap(clusterName))
+	ux.Logger.PrintToUser(tit)
+	ux.Logger.PrintToUser(strings.Repeat("=", len(removeColors(tit))))
+	ux.Logger.PrintToUser("")
+	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Role", "Avago Version", "Primary Network", "Healthy"}
+	if blockchainName != "" {
+		header = append(header, "Subnet "+blockchainName)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.SetRowLine(true)
+	for i, cloudID := range cloudIDs {
+		boostrappedStatus := ""
+		healthyStatus := ""
+		nodeIDStr := ""
+		luxdVersion := ""
+		roles := clusterConf.GetHostRoles(nodeConfigs[i])
+		if clusterConf.IsLuxGoHost(cloudID) {
+			boostrappedStatus = logging.Green.Wrap("BOOTSTRAPPED")
+			if slices.Contains(notBootstrappedHosts, cloudID) {
+				boostrappedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
+			}
+			healthyStatus = logging.Green.Wrap("OK")
+			if slices.Contains(unhealthyHosts, cloudID) {
+				healthyStatus = logging.Red.Wrap("UNHEALTHY")
+			}
+			nodeIDStr = nodeIDs[i]
+			luxdVersion = luxdVersions[cloudID]
+		}
+		row := []string{
+			cloudID,
+			logging.Green.Wrap(nodeIDStr),
+			nodeConfigs[i].ElasticIP,
+			clusterConf.Network.Kind.String(),
+			strings.Join(roles, ","),
+			luxdVersion,
+			boostrappedStatus,
+			healthyStatus,
+		}
+		if blockchainName != "" {
+			syncedStatus := ""
+			if clusterConf.MonitoringInstance != cloudID {
+				syncedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
+				if slices.Contains(subnetSyncedHosts, cloudID) {
+					syncedStatus = logging.Green.Wrap("SYNCED")
+				}
+				if slices.Contains(subnetValidatingHosts, cloudID) {
+					syncedStatus = logging.Green.Wrap("VALIDATING")
+				}
+			}
+			row = append(row, syncedStatus)
+		}
+		table.Append(row)
+	}
+	table.Render()
+}
+
+func removeColors(s string) string {
+	bs, err := ansi.Strip([]byte(s))
+	if err != nil {
+		return s
+	}
+	return string(bs)
+}

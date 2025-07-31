@@ -167,7 +167,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		sequencerOptions := []string{
 			"Lux (100ms blocks, lowest cost, based rollup)",
 			"Ethereum (12s blocks, highest security, based rollup)",
-			"Avalanche (2s blocks, fast finality, based rollup)",
+			"Lux (2s blocks, fast finality, based rollup)",
 			"OP Stack (Optimism compatible)",
 			"External (Traditional sequencer)",
 			"None (Deploy as sovereign L1)",
@@ -186,8 +186,8 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 			sequencer = "lux"
 		case "Ethereum (12s blocks, highest security, based rollup)":
 			sequencer = "ethereum"
-		case "Avalanche (2s blocks, fast finality, based rollup)":
-			sequencer = "avalanche"
+		case "Lux (2s blocks, fast finality, based rollup)":
+			sequencer = "lux"
 		case "OP Stack (Optimism compatible)":
 			sequencer = "op"
 		case "External (Traditional sequencer)":
