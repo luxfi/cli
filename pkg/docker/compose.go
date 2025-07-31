@@ -23,7 +23,7 @@ type DockerComposeInputs struct {
 	WithMonitoring     bool
 	WithLuxgo    bool
 	LuxgoVersion string
-	ICMRelayerVersion  string
+	WarpRelayerVersion  string
 	E2E                bool
 	E2EIP              string
 	E2ESuffix          string

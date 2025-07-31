@@ -58,7 +58,7 @@ func setMappingStorageValue(
 	return nil
 }
 
-func AddICMMessengerContractToAllocations(
+func AddWarpMessengerContractToAllocations(
 	allocs core.GenesisAlloc,
 ) {
 	const (
@@ -81,7 +81,7 @@ func AddICMMessengerContractToAllocations(
 	}
 }
 
-func AddICMRegistryContractToAllocations(
+func AddWarpRegistryContractToAllocations(
 	allocs core.GenesisAlloc,
 ) error {
 	const (
@@ -109,12 +109,12 @@ func AddICMRegistryContractToAllocations(
 
 // check if [genesisData] has
 // smart contracts (len(alloc.Code)>0) allocated for
-// ICM Messenger and ICM registry,
+// Warp Messenger and Warp registry,
 // based on their expected addresses [MessengerContractAddress] and
 // [RegistryContractAddress]
-// to be used by local blockchain deploy to determine if a ICM messenger or
+// to be used by local blockchain deploy to determine if a Warp messenger or
 // or registry deploy is needed
-func ICMAtGenesis(
+func WarpAtGenesis(
 	genesisData []byte,
 ) (bool, bool, error) {
 	messengerAtGenesis, err := contract.ContractAddressIsInGenesisData(genesisData, common.HexToAddress(MessengerContractAddress))

@@ -69,13 +69,13 @@ var (
 	skipCreatePrompt       bool
 	partialSync            bool
 	subnetOnly             bool
-	icmSpec                subnet.ICMSpec
+	warpSpec                subnet.WarpSpec
 	numNodes               uint32
 	relayerAmount          float64
 	relayerKeyName         string
 	relayCChain            bool
 	cChainFundingKey       string
-	icmKeyName             string
+	warpKeyName             string
 	cchainIcmKeyName       string
 	relayerAllowPrivateIPs bool
 
@@ -160,28 +160,28 @@ so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.
 	bootstrapValidatorGroup := flags.AddBootstrapValidatorFlagsToCmd(cmd, &deployFlags.BootstrapValidatorFlags)
 	localMachineGroup := flags.AddLocalMachineFlagsToCmd(cmd, &deployFlags.LocalMachineFlags)
 
-	icmGroup := flags.RegisterFlagGroup(cmd, "ICM Flags", "show-icm-flags", false, func(set *pflag.FlagSet) {
-		set.BoolVar(&icmSpec.SkipICMDeploy, "skip-icm-deploy", false, "Skip automatic ICM deploy")
-		set.BoolVar(&icmSpec.SkipRelayerDeploy, skipRelayerFlagName, false, "skip relayer deploy")
-		set.StringVar(&icmSpec.ICMVersion, "icm-version", constants.LatestReleaseVersionTag, "ICM version to deploy")
-		set.StringVar(&icmSpec.RelayerVersion, "relayer-version", constants.DefaultRelayerVersion, "relayer version to deploy")
-		set.StringVar(&icmSpec.RelayerBinPath, "relayer-path", "", "relayer binary to use")
-		set.StringVar(&icmSpec.RelayerLogLevel, "relayer-log-level", "info", "log level to be used for relayer logs")
+	warpGroup := flags.RegisterFlagGroup(cmd, "Warp Flags", "show-warp-flags", false, func(set *pflag.FlagSet) {
+		set.BoolVar(&warpSpec.SkipWarpDeploy, "skip-warp-deploy", false, "Skip automatic Warp deploy")
+		set.BoolVar(&warpSpec.SkipRelayerDeploy, skipRelayerFlagName, false, "skip relayer deploy")
+		set.StringVar(&warpSpec.WarpVersion, "warp-version", constants.LatestReleaseVersionTag, "Warp version to deploy")
+		set.StringVar(&warpSpec.RelayerVersion, "relayer-version", constants.DefaultRelayerVersion, "relayer version to deploy")
+		set.StringVar(&warpSpec.RelayerBinPath, "relayer-path", "", "relayer binary to use")
+		set.StringVar(&warpSpec.RelayerLogLevel, "relayer-log-level", "info", "log level to be used for relayer logs")
 		set.Float64Var(&relayerAmount, "relayer-amount", 0, "automatically fund relayer fee payments with the given amount")
 		set.StringVar(&relayerKeyName, "relayer-key", "", "key to be used by default both for rewards and to pay fees")
-		set.StringVar(&icmKeyName, "icm-key", constants.ICMKeyName, "key to be used to pay for ICM deploys")
-		set.StringVar(&cchainIcmKeyName, "cchain-icm-key", "", "key to be used to pay for ICM deploys on C-Chain")
+		set.StringVar(&warpKeyName, "warp-key", constants.WarpKeyName, "key to be used to pay for Warp deploys")
+		set.StringVar(&cchainIcmKeyName, "cchain-warp-key", "", "key to be used to pay for Warp deploys on C-Chain")
 		set.BoolVar(&relayCChain, "relay-cchain", true, "relay C-Chain as source and destination")
 		set.StringVar(&cChainFundingKey, "cchain-funding-key", "", "key to be used to fund relayer account on cchain")
 		set.BoolVar(&relayerAllowPrivateIPs, "relayer-allow-private-ips", true, "allow relayer to connec to private ips")
-		set.StringVar(&icmSpec.MessengerContractAddressPath, "teleporter-messenger-contract-address-path", "", "path to an ICM Messenger contract address file")
-		set.StringVar(&icmSpec.MessengerDeployerAddressPath, "teleporter-messenger-deployer-address-path", "", "path to an ICM Messenger deployer address file")
-		set.StringVar(&icmSpec.MessengerDeployerTxPath, "teleporter-messenger-deployer-tx-path", "", "path to an ICM Messenger deployer tx file")
-		set.StringVar(&icmSpec.RegistryBydecodePath, "teleporter-registry-bytecode-path", "", "path to an ICM Registry bytecode file")
+		set.StringVar(&warpSpec.MessengerContractAddressPath, "teleporter-messenger-contract-address-path", "", "path to an Warp Messenger contract address file")
+		set.StringVar(&warpSpec.MessengerDeployerAddressPath, "teleporter-messenger-deployer-address-path", "", "path to an Warp Messenger deployer address file")
+		set.StringVar(&warpSpec.MessengerDeployerTxPath, "teleporter-messenger-deployer-tx-path", "", "path to an Warp Messenger deployer tx file")
+		set.StringVar(&warpSpec.RegistryBydecodePath, "teleporter-registry-bytecode-path", "", "path to an Warp Registry bytecode file")
 	})
 	posGroup := flags.AddProofOfStakeToCmd(cmd, &deployFlags.ProofOfStakeFlags)
 
-	cmd.SetHelpFunc(flags.WithGroupedHelp([]flags.GroupedFlags{networkGroup, bootstrapValidatorGroup, localMachineGroup, localNetworkGroup, nonSovGroup, icmGroup, posGroup, sigAggGroup}))
+	cmd.SetHelpFunc(flags.WithGroupedHelp([]flags.GroupedFlags{networkGroup, bootstrapValidatorGroup, localMachineGroup, localNetworkGroup, nonSovGroup, warpGroup, posGroup, sigAggGroup}))
 	return cmd
 }
 
@@ -489,9 +489,9 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if icmSpec.MessengerContractAddressPath != "" || icmSpec.MessengerDeployerAddressPath != "" || icmSpec.MessengerDeployerTxPath != "" || icmSpec.RegistryBydecodePath != "" {
-		if icmSpec.MessengerContractAddressPath == "" || icmSpec.MessengerDeployerAddressPath == "" || icmSpec.MessengerDeployerTxPath == "" || icmSpec.RegistryBydecodePath == "" {
-			return fmt.Errorf("if setting any ICM asset path, you must set all ICM asset paths")
+	if warpSpec.MessengerContractAddressPath != "" || warpSpec.MessengerDeployerAddressPath != "" || warpSpec.MessengerDeployerTxPath != "" || warpSpec.RegistryBydecodePath != "" {
+		if warpSpec.MessengerContractAddressPath == "" || warpSpec.MessengerDeployerAddressPath == "" || warpSpec.MessengerDeployerTxPath == "" || warpSpec.RegistryBydecodePath == "" {
+			return fmt.Errorf("if setting any Warp asset path, you must set all Warp asset paths")
 		}
 	}
 
@@ -824,7 +824,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 
 	// needs to first stop relayer so non sovereign subnets successfully restart
-	if sidecar.TeleporterReady && !icmSpec.SkipICMDeploy && !icmSpec.SkipRelayerDeploy && network.Kind != models.Mainnet {
+	if sidecar.TeleporterReady && !warpSpec.SkipWarpDeploy && !warpSpec.SkipRelayerDeploy && network.Kind != models.Mainnet {
 		_ = relayercmd.CallStop(nil, relayercmd.StopFlags{}, network)
 	}
 
@@ -922,33 +922,33 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser(logging.Green.Wrap("Your L1 is ready for on-chain interactions."))
 	}
 
-	var icmErr, relayerErr error
-	if sidecar.TeleporterReady && tracked && !icmSpec.SkipICMDeploy {
+	var warpErr, relayerErr error
+	if sidecar.TeleporterReady && tracked && !warpSpec.SkipWarpDeploy {
 		chainSpec := contract.ChainSpec{
 			BlockchainName: blockchainName,
 		}
 		chainSpec.SetEnabled(true, false, false, false, false)
-		deployICMFlags := messengercmd.DeployFlags{
+		deployWarpFlags := messengercmd.DeployFlags{
 			ChainFlags: chainSpec,
 			PrivateKeyFlags: contract.PrivateKeyFlags{
-				KeyName: icmKeyName,
+				KeyName: warpKeyName,
 			},
 			DeployMessenger:              true,
 			DeployRegistry:               true,
 			ForceRegistryDeploy:          true,
-			Version:                      icmSpec.ICMVersion,
-			MessengerContractAddressPath: icmSpec.MessengerContractAddressPath,
-			MessengerDeployerAddressPath: icmSpec.MessengerDeployerAddressPath,
-			MessengerDeployerTxPath:      icmSpec.MessengerDeployerTxPath,
-			RegistryBydecodePath:         icmSpec.RegistryBydecodePath,
+			Version:                      warpSpec.WarpVersion,
+			MessengerContractAddressPath: warpSpec.MessengerContractAddressPath,
+			MessengerDeployerAddressPath: warpSpec.MessengerDeployerAddressPath,
+			MessengerDeployerTxPath:      warpSpec.MessengerDeployerTxPath,
+			RegistryBydecodePath:         warpSpec.RegistryBydecodePath,
 			CChainKeyName:                cchainIcmKeyName,
 		}
 		ux.Logger.PrintToUser("")
-		if err := messengercmd.CallDeploy([]string{}, deployICMFlags, network); err != nil {
-			icmErr = err
-			ux.Logger.RedXToUser("Interchain Messaging is not deployed due to: %v", icmErr)
+		if err := messengercmd.CallDeploy([]string{}, deployWarpFlags, network); err != nil {
+			warpErr = err
+			ux.Logger.RedXToUser("Interchain Messaging is not deployed due to: %v", warpErr)
 		} else {
-			ux.Logger.GreenCheckmarkToUser("ICM is successfully deployed")
+			ux.Logger.GreenCheckmarkToUser("Warp is successfully deployed")
 			if network.Kind != models.Local && !deployFlags.LocalMachineFlags.UseLocalMachine {
 				if flag := cmd.Flags().Lookup(skipRelayerFlagName); flag != nil && !flag.Changed {
 					ux.Logger.PrintToUser("")
@@ -956,21 +956,21 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 					if err != nil {
 						return err
 					}
-					icmSpec.SkipRelayerDeploy = !yes
+					warpSpec.SkipRelayerDeploy = !yes
 				}
 			}
-			if !icmSpec.SkipRelayerDeploy && network.Kind != models.Mainnet {
-				if network.Kind == models.Local && icmSpec.RelayerBinPath == "" && icmSpec.RelayerVersion == constants.DefaultRelayerVersion {
+			if !warpSpec.SkipRelayerDeploy && network.Kind != models.Mainnet {
+				if network.Kind == models.Local && warpSpec.RelayerBinPath == "" && warpSpec.RelayerVersion == constants.DefaultRelayerVersion {
 					if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 						return err
 					} else if b {
-						icmSpec.RelayerBinPath = extraLocalNetworkData.RelayerPath
+						warpSpec.RelayerBinPath = extraLocalNetworkData.RelayerPath
 					}
 				}
 				deployRelayerFlags := relayercmd.DeployFlags{
-					Version:            icmSpec.RelayerVersion,
-					BinPath:            icmSpec.RelayerBinPath,
-					LogLevel:           icmSpec.RelayerLogLevel,
+					Version:            warpSpec.RelayerVersion,
+					BinPath:            warpSpec.RelayerBinPath,
+					LogLevel:           warpSpec.RelayerLogLevel,
 					RelayCChain:        relayCChain,
 					CChainFundingKey:   cChainFundingKey,
 					BlockchainsToRelay: []string{blockchainName},
@@ -992,7 +992,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 					}
 					deployRelayerFlags.Key = relayerKeyName
 					deployRelayerFlags.Amount = constants.DefaultRelayerAmount
-					deployRelayerFlags.BlockchainFundingKey = constants.ICMKeyName
+					deployRelayerFlags.BlockchainFundingKey = constants.WarpKeyName
 				}
 				if network.Kind == models.Local {
 					deployRelayerFlags.CChainFundingKey = "ewoq"
@@ -1016,11 +1016,11 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("")
 		_ = PrintSubnetInfo(blockchainName, true)
 	}
-	if icmErr != nil {
+	if warpErr != nil {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("Interchain Messaging is not deployed due to: %v", icmErr)
+		ux.Logger.PrintToUser("Interchain Messaging is not deployed due to: %v", warpErr)
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("To deploy ICM later on, call `lux icm deploy`")
+		ux.Logger.PrintToUser("To deploy Warp later on, call `lux warp deploy`")
 		ux.Logger.PrintToUser("This does not affect L1 operations besides Interchain Messaging")
 	}
 	if relayerErr != nil {

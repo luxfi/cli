@@ -306,8 +306,8 @@ lux blockchain create [subcommand] [flags]
 --from-github-repo                  generate custom VM binary from github repository
 --genesis string                    file path of genesis to use
 -h, --help                          help for create
---icm                               interoperate with other blockchains using ICM
---icm-registry-at-genesis           setup ICM registry smart contract on genesis [experimental]
+--warp                               interoperate with other blockchains using Warp
+--warp-registry-at-genesis           setup Warp registry smart contract on genesis [experimental]
 --latest                            use latest Subnet-EVM released version, takes precedence over --vm-version
 --pre-release                       use latest Subnet-EVM pre-released version, takes precedence over --vm-version
 --production-defaults               use default production settings for your blockchain
@@ -316,12 +316,12 @@ lux blockchain create [subcommand] [flags]
 --proxy-contract-owner string       EVM address that controls ProxyAdmin for TransparentProxy of ValidatorManager contract
 --reward-basis-points uint          (PoS only) reward basis points for PoS Reward Calculator (default 100)
 --sovereign                         set to false if creating non-sovereign blockchain (default true)
---teleporter                        interoperate with other blockchains using ICM
+--teleporter                        interoperate with other blockchains using Warp
 --test-defaults                     use default test settings for your blockchain
 --validator-manager-owner string    EVM address that controls Validator Manager Owner
 --vm string                         file path of custom vm to use. alias to custom-vm-path
 --vm-version string                 version of Subnet-EVM template to use
---warp                              generate a vm with warp support (needed for ICM) (default true)
+--warp                              generate a vm with warp support (needed for Warp) (default true)
 --config string                     config file (default is $HOME/.lux-cli/config.json)
 --log-level string                  log level for the application (default "ERROR")
 --skip-update-check                 skip check for new versions
@@ -430,11 +430,11 @@ Non Subnet-Only-Validators (Non-SOV) Flags:
   --same-control-key          use the fee-paying key as control key
   --threshold uint32          required number of control key signatures to make blockchain changes
 
-ICM Flags:
+Warp Flags:
   --cchain-funding-key string                          key to be used to fund relayer account on cchain
-  --cchain-icm-key string                              key to be used to pay for ICM deploys on C-Chain
-  --icm-key string                                     key to be used to pay for ICM deploys
-  --icm-version string                                 ICM version to deploy
+  --cchain-warp-key string                              key to be used to pay for Warp deploys on C-Chain
+  --warp-key string                                     key to be used to pay for Warp deploys
+  --warp-version string                                 Warp version to deploy
   --relay-cchain                                       relay C-Chain as source and destination
   --relayer-allow-private-ips                          allow relayer to connec to private ips
   --relayer-amount float64                             automatically fund relayer fee payments with the given amount
@@ -442,12 +442,12 @@ ICM Flags:
   --relayer-log-level string                           log level to be used for relayer logs
   --relayer-path string                                relayer binary to use
   --relayer-version string                             relayer version to deploy
-  --skip-icm-deploy                                    Skip automatic ICM deploy
+  --skip-warp-deploy                                    Skip automatic Warp deploy
   --skip-relayer                                       skip relayer deploy
-  --teleporter-messenger-contract-address-path string  path to an ICM Messenger contract address file
-  --teleporter-messenger-deployer-address-path string  path to an ICM Messenger deployer address file
-  --teleporter-messenger-deployer-tx-path string       path to an ICM Messenger deployer tx file
-  --teleporter-registry-bytecode-path string           path to an ICM Registry bytecode file
+  --teleporter-messenger-contract-address-path string  path to an Warp Messenger contract address file
+  --teleporter-messenger-deployer-address-path string  path to an Warp Messenger deployer address file
+  --teleporter-messenger-deployer-tx-path string       path to an Warp Messenger deployer tx file
+  --teleporter-registry-bytecode-path string           path to an Warp Registry bytecode file
 
 Proof Of Stake Flags:
   --pos-maximum-stake-amount uint64     maximum stake amount
@@ -1158,7 +1158,7 @@ lux contract [subcommand] [flags]
 
 - [`deploy`](#lux-contract-deploy): The contract command suite provides a collection of tools for deploying
 smart contracts.
-- [`initValidatorManager`](#lux-contract-initvalidatormanager): Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/icm-contracts/tree/main/contracts/validator-manager
+- [`initValidatorManager`](#lux-contract-initvalidatormanager): Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager
 
 **Flags:**
 
@@ -1232,7 +1232,7 @@ lux contract deploy erc20 [subcommand] [flags]
 <a id="lux-contract-initvalidatormanager"></a>
 ### initValidatorManager
 
-Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/icm-contracts/tree/main/contracts/validator-manager
+Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager
 
 **Usage:**
 ```bash
@@ -1290,67 +1290,67 @@ lux help [subcommand] [flags]
 --skip-update-check    skip check for new versions
 ```
 
-<a id="lux-icm"></a>
-## lux icm
+<a id="lux-warp"></a>
+## lux warp
 
 The messenger command suite provides a collection of tools for interacting
-with ICM messenger contracts.
+with Warp messenger contracts.
 
 **Usage:**
 ```bash
-lux icm [subcommand] [flags]
+lux warp [subcommand] [flags]
 ```
 
 **Subcommands:**
 
-- [`deploy`](#lux-icm-deploy): Deploys ICM Messenger and Registry into a given L1.
-- [`sendMsg`](#lux-icm-sendmsg): Sends and wait reception for a ICM msg between two blockchains.
+- [`deploy`](#lux-warp-deploy): Deploys Warp Messenger and Registry into a given L1.
+- [`sendMsg`](#lux-warp-sendmsg): Sends and wait reception for a Warp msg between two blockchains.
 
 **Flags:**
 
 ```bash
--h, --help             help for icm
+-h, --help             help for warp
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
 ```
 
-<a id="lux-icm-deploy"></a>
+<a id="lux-warp-deploy"></a>
 ### deploy
 
-Deploys ICM Messenger and Registry into a given L1.
+Deploys Warp Messenger and Registry into a given L1.
 
 For Local Networks, it also deploys into C-Chain.
 
 **Usage:**
 ```bash
-lux icm deploy [subcommand] [flags]
+lux warp deploy [subcommand] [flags]
 ```
 
 **Flags:**
 
 ```bash
---blockchain string                         deploy ICM into the given CLI blockchain
---blockchain-id string                      deploy ICM into the given blockchain ID/Alias
---c-chain                                   deploy ICM into C-Chain
---cchain-key string                         key to be used to pay fees to deploy ICM to C-Chain
+--blockchain string                         deploy Warp into the given CLI blockchain
+--blockchain-id string                      deploy Warp into the given blockchain ID/Alias
+--c-chain                                   deploy Warp into C-Chain
+--cchain-key string                         key to be used to pay fees to deploy Warp to C-Chain
 --cluster string                            operate on the given cluster
---deploy-messenger                          deploy ICM Messenger (default true)
---deploy-registry                           deploy ICM Registry (default true)
+--deploy-messenger                          deploy Warp Messenger (default true)
+--deploy-registry                           deploy Warp Registry (default true)
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
---force-registry-deploy                     deploy ICM Registry even if Messenger has already been deployed
+--force-registry-deploy                     deploy Warp Registry even if Messenger has already been deployed
 -f, --fuji                                  testnet                             operate on fuji (alias to testnet
---genesis-key                               use genesis allocated key to fund ICM deploy
+--genesis-key                               use genesis allocated key to fund Warp deploy
 -h, --help                                  help for deploy
---include-cchain                            deploy ICM also to C-Chain
---key string                                CLI stored key to use to fund ICM deploy
+--include-cchain                            deploy Warp also to C-Chain
+--key string                                CLI stored key to use to fund Warp deploy
 -l, --local                                 operate on a local network
 -m, --mainnet                               operate on mainnet
 --messenger-contract-address-path string    path to a messenger contract address file
 --messenger-deployer-address-path string    path to a messenger deployer address file
 --messenger-deployer-tx-path string         path to a messenger deployer tx file
---private-key string                        private key to use to fund ICM deploy
+--private-key string                        private key to use to fund Warp deploy
 --registry-bytecode-path string             path to a registry bytecode file
 --rpc-url string                            use the given RPC URL to connect to the subnet
 -t, --testnet                               fuji                             operate on testnet (alias to fuji)
@@ -1360,14 +1360,14 @@ lux icm deploy [subcommand] [flags]
 --skip-update-check                         skip check for new versions
 ```
 
-<a id="lux-icm-sendmsg"></a>
+<a id="lux-warp-sendmsg"></a>
 ### sendMsg
 
-Sends and wait reception for a ICM msg between two blockchains.
+Sends and wait reception for a Warp msg between two blockchains.
 
 **Usage:**
 ```bash
-lux icm sendMsg [subcommand] [flags]
+lux warp sendMsg [subcommand] [flags]
 ```
 
 **Flags:**
@@ -1475,9 +1475,9 @@ lux interchain [subcommand] [flags]
 **Subcommands:**
 
 - [`messenger`](#lux-interchain-messenger): The messenger command suite provides a collection of tools for interacting
-with ICM messenger contracts.
+with Warp messenger contracts.
 - [`relayer`](#lux-interchain-relayer): The relayer command suite provides a collection of tools for deploying
-and configuring an ICM relayers.
+and configuring an Warp relayers.
 - [`tokenTransferrer`](#lux-interchain-tokentransferrer): The tokenTransfer command suite provides tools to deploy and manage Token Transferrers.
 
 **Flags:**
@@ -1493,7 +1493,7 @@ and configuring an ICM relayers.
 ### messenger
 
 The messenger command suite provides a collection of tools for interacting
-with ICM messenger contracts.
+with Warp messenger contracts.
 
 **Usage:**
 ```bash
@@ -1502,8 +1502,8 @@ lux interchain messenger [subcommand] [flags]
 
 **Subcommands:**
 
-- [`deploy`](#lux-interchain-messenger-deploy): Deploys ICM Messenger and Registry into a given L1.
-- [`sendMsg`](#lux-interchain-messenger-sendmsg): Sends and wait reception for a ICM msg between two blockchains.
+- [`deploy`](#lux-interchain-messenger-deploy): Deploys Warp Messenger and Registry into a given L1.
+- [`sendMsg`](#lux-interchain-messenger-sendmsg): Sends and wait reception for a Warp msg between two blockchains.
 
 **Flags:**
 
@@ -1517,7 +1517,7 @@ lux interchain messenger [subcommand] [flags]
 <a id="lux-interchain-messenger-deploy"></a>
 #### messenger deploy
 
-Deploys ICM Messenger and Registry into a given L1.
+Deploys Warp Messenger and Registry into a given L1.
 
 For Local Networks, it also deploys into C-Chain.
 
@@ -1529,27 +1529,27 @@ lux interchain messenger deploy [subcommand] [flags]
 **Flags:**
 
 ```bash
---blockchain string                         deploy ICM into the given CLI blockchain
---blockchain-id string                      deploy ICM into the given blockchain ID/Alias
---c-chain                                   deploy ICM into C-Chain
---cchain-key string                         key to be used to pay fees to deploy ICM to C-Chain
+--blockchain string                         deploy Warp into the given CLI blockchain
+--blockchain-id string                      deploy Warp into the given blockchain ID/Alias
+--c-chain                                   deploy Warp into C-Chain
+--cchain-key string                         key to be used to pay fees to deploy Warp to C-Chain
 --cluster string                            operate on the given cluster
---deploy-messenger                          deploy ICM Messenger (default true)
---deploy-registry                           deploy ICM Registry (default true)
+--deploy-messenger                          deploy Warp Messenger (default true)
+--deploy-registry                           deploy Warp Registry (default true)
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
---force-registry-deploy                     deploy ICM Registry even if Messenger has already been deployed
+--force-registry-deploy                     deploy Warp Registry even if Messenger has already been deployed
 -f, --fuji                                  testnet                             operate on fuji (alias to testnet
---genesis-key                               use genesis allocated key to fund ICM deploy
+--genesis-key                               use genesis allocated key to fund Warp deploy
 -h, --help                                  help for deploy
---include-cchain                            deploy ICM also to C-Chain
---key string                                CLI stored key to use to fund ICM deploy
+--include-cchain                            deploy Warp also to C-Chain
+--key string                                CLI stored key to use to fund Warp deploy
 -l, --local                                 operate on a local network
 -m, --mainnet                               operate on mainnet
 --messenger-contract-address-path string    path to a messenger contract address file
 --messenger-deployer-address-path string    path to a messenger deployer address file
 --messenger-deployer-tx-path string         path to a messenger deployer tx file
---private-key string                        private key to use to fund ICM deploy
+--private-key string                        private key to use to fund Warp deploy
 --registry-bytecode-path string             path to a registry bytecode file
 --rpc-url string                            use the given RPC URL to connect to the subnet
 -t, --testnet                               fuji                             operate on testnet (alias to fuji)
@@ -1562,7 +1562,7 @@ lux interchain messenger deploy [subcommand] [flags]
 <a id="lux-interchain-messenger-sendmsg"></a>
 #### messenger sendMsg
 
-Sends and wait reception for a ICM msg between two blockchains.
+Sends and wait reception for a Warp msg between two blockchains.
 
 **Usage:**
 ```bash
@@ -1596,7 +1596,7 @@ lux interchain messenger sendMsg [subcommand] [flags]
 ### relayer
 
 The relayer command suite provides a collection of tools for deploying
-and configuring an ICM relayers.
+and configuring an Warp relayers.
 
 **Usage:**
 ```bash
@@ -1605,7 +1605,7 @@ lux interchain relayer [subcommand] [flags]
 
 **Subcommands:**
 
-- [`deploy`](#lux-interchain-relayer-deploy): Deploys an ICM Relayer for the given Network.
+- [`deploy`](#lux-interchain-relayer-deploy): Deploys an Warp Relayer for the given Network.
 - [`logs`](#lux-interchain-relayer-logs): Shows pretty formatted AWM relayer logs
 - [`start`](#lux-interchain-relayer-start): Starts AWM relayer on the specified network (Currently only for local network).
 - [`stop`](#lux-interchain-relayer-stop): Stops AWM relayer on the specified network (Currently only for local network, cluster).
@@ -1622,7 +1622,7 @@ lux interchain relayer [subcommand] [flags]
 <a id="lux-interchain-relayer-deploy"></a>
 #### relayer deploy
 
-Deploys an ICM Relayer for the given Network.
+Deploys an Warp Relayer for the given Network.
 
 **Usage:**
 ```bash
@@ -2496,8 +2496,8 @@ lux node devnet wiz [subcommand] [flags]
 --custom-vm-build-script string                        custom vm build-script
 --custom-vm-repo-url string                            custom vm repository url
 --default-validator-params                             use default weight/start/duration params for subnet validator
---deploy-icm-messenger                                 deploy Interchain Messenger (default true)
---deploy-icm-registry                                  deploy Interchain Registry (default true)
+--deploy-warp-messenger                                 deploy Interchain Messenger (default true)
+--deploy-warp-registry                                  deploy Interchain Registry (default true)
 --deploy-teleporter-messenger                          deploy Interchain Messenger (default true)
 --deploy-teleporter-registry                           deploy Interchain Registry (default true)
 --enable-monitoring                                    set up Prometheus monitoring for created nodes. Please note that this option creates a separate monitoring instance and incures additional cost
@@ -2514,12 +2514,12 @@ lux node devnet wiz [subcommand] [flags]
 --gcp-project string                                   use given GCP project
 --grafana-pkg string                                   use grafana pkg instead of apt repo(by default), for example https://dl.grafana.com/oss/release/grafana_10.4.1_amd64.deb
 -h, --help                                             help for wiz
---icm                                                  generate an icm-ready vm
---icm-messenger-contract-address-path string           path to an icm messenger contract address file
---icm-messenger-deployer-address-path string           path to an icm messenger deployer address file
---icm-messenger-deployer-tx-path string                path to an icm messenger deployer tx file
---icm-registry-bytecode-path string                    path to an icm registry bytecode file
---icm-version string                                   icm version to deploy (default "latest")
+--warp                                                  generate an warp-ready vm
+--warp-messenger-contract-address-path string           path to an warp messenger contract address file
+--warp-messenger-deployer-address-path string           path to an warp messenger deployer address file
+--warp-messenger-deployer-tx-path string                path to an warp messenger deployer tx file
+--warp-registry-bytecode-path string                    path to an warp registry bytecode file
+--warp-version string                                   warp version to deploy (default "latest")
 --latest-luxd-pre-release-version               install latest luxd pre-release version on node/s
 --latest-luxd-version                           install latest luxd release version on node/s
 --latest-evm-version                                   use latest Subnet-EVM released version
@@ -2535,12 +2535,12 @@ lux node devnet wiz [subcommand] [flags]
 --subnet-aliases strings                               additional subnet aliases to be used for RPC calls in addition to subnet blockchain name
 --subnet-config string                                 path to the subnet configuration for subnet
 --subnet-genesis string                                file path of the subnet genesis
---teleporter                                           generate an icm-ready vm
---teleporter-messenger-contract-address-path string    path to an icm messenger contract address file
---teleporter-messenger-deployer-address-path string    path to an icm messenger deployer address file
---teleporter-messenger-deployer-tx-path string         path to an icm messenger deployer tx file
---teleporter-registry-bytecode-path string             path to an icm registry bytecode file
---teleporter-version string                            icm version to deploy (default "latest")
+--teleporter                                           generate an warp-ready vm
+--teleporter-messenger-contract-address-path string    path to an warp messenger contract address file
+--teleporter-messenger-deployer-address-path string    path to an warp messenger deployer address file
+--teleporter-messenger-deployer-tx-path string         path to an warp messenger deployer tx file
+--teleporter-registry-bytecode-path string             path to an warp registry bytecode file
+--teleporter-version string                            warp version to deploy (default "latest")
 --use-ssh-agent                                        use ssh agent for ssh
 --use-static-ip                                        attach static Public IP on cloud servers (default true)
 --validators strings                                   deploy subnet into given comma separated list of validators. defaults to all cluster nodes

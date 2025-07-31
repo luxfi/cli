@@ -414,7 +414,7 @@ func grantAccessToPublicIPViaFirewall(gcpClient *gcpAPI.GcpCloud, projectName st
 	return nil
 }
 
-func setGCPICMRelayerSecurityGroupRule(awmRelayerHost *models.Host) error {
+func setGCPWarpRelayerSecurityGroupRule(awmRelayerHost *models.Host) error {
 	gcpClient, _, _, _, projectName, err := getGCPConfig(true)
 	if err != nil {
 		return err

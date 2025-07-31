@@ -29,7 +29,7 @@ var globalFlags = utils.GlobalFlags{
 
 var evmClient evm.Client
 
-var _ = ginkgo.Describe("[ICM] deploy", func() {
+var _ = ginkgo.Describe("[Warp] deploy", func() {
 	ginkgo.Context("with valid input", func() {
 		ginkgo.BeforeEach(func() {
 			commands.StartNetwork()
@@ -44,7 +44,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			err := utils.DeleteConfigs(subnetName)
 			gomega.Expect(err).Should(gomega.BeNil())
 		})
-		ginkgo.It("should deploy ICM contracts into c-chain", func() {
+		ginkgo.It("should deploy Warp contracts into c-chain", func() {
 			testFlags := utils.TestFlags{
 				"key": ewoqKeyName,
 			}
@@ -52,15 +52,15 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 
 			// Check that contracts are actually deployed
-			messengerContract, registryContract, err := utils.ParseICMContractAddressesFromOutput("C-Chain", output)
+			messengerContract, registryContract, err := utils.ParseWarpContractAddressesFromOutput("C-Chain", output)
 			gomega.Expect(err).Should(gomega.BeNil())
 			deployed, err := evmClient.ContractAlreadyDeployed(messengerContract)
 			gomega.Expect(err).Should(gomega.BeNil())
@@ -70,7 +70,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			gomega.Expect(deployed).Should(gomega.BeTrue())
 		})
 
-		ginkgo.It("should deploy ICM contracts into subnet (including c-chain)", func() {
+		ginkgo.It("should deploy Warp contracts into subnet (including c-chain)", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 			output := commands.DeploySubnetLocallyNonSOV(subnetName)
 			rpcUrls, err := utils.ParseRPCsFromOutput(output)
@@ -84,19 +84,19 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			}
 			commandArguments := []string{}
 
-			output, err = utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err = utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to " + subnetName))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to " + subnetName))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to " + subnetName))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to " + subnetName))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to c-chain"))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to c-chain"))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to c-chain"))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to c-chain"))
 
 			// Check that contracts are actually deployed to C-Chain
-			messengerContract, registryContract, err := utils.ParseICMContractAddressesFromOutput(cChainSubnetName, output)
+			messengerContract, registryContract, err := utils.ParseWarpContractAddressesFromOutput(cChainSubnetName, output)
 			gomega.Expect(err).Should(gomega.BeNil())
 			deployed, err := evmClient.ContractAlreadyDeployed(messengerContract)
 			gomega.Expect(err).Should(gomega.BeNil())
@@ -106,7 +106,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			gomega.Expect(deployed).Should(gomega.BeTrue())
 
 			// Check that contracts are actually deployed to Subnet
-			messengerContract, registryContract, err = utils.ParseICMContractAddressesFromOutput(subnetName, output)
+			messengerContract, registryContract, err = utils.ParseWarpContractAddressesFromOutput(subnetName, output)
 			gomega.Expect(err).Should(gomega.BeNil())
 			deployed, err = client.ContractAlreadyDeployed(messengerContract)
 			gomega.Expect(err).Should(gomega.BeNil())
@@ -116,7 +116,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			gomega.Expect(deployed).Should(gomega.BeTrue())
 		})
 
-		ginkgo.It("should deploy ICM messenger into C-Chain", func() {
+		ginkgo.It("should deploy Warp messenger into C-Chain", func() {
 			testFlags := utils.TestFlags{
 				"key":             ewoqKeyName,
 				"deploy-registry": "false",
@@ -125,15 +125,15 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
 			gomega.Expect(output).
-				ShouldNot(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+				ShouldNot(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 
-		ginkgo.It("should deploy ICM registry into C-Chain", func() {
+		ginkgo.It("should deploy Warp registry into C-Chain", func() {
 			testFlags := utils.TestFlags{
 				"key":              ewoqKeyName,
 				"deploy-messenger": "false",
@@ -142,15 +142,15 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				ShouldNot(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
+				ShouldNot(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 
-		ginkgo.It("should deploy ICM messenger into subnet (including c-chain)", func() {
+		ginkgo.It("should deploy Warp messenger into subnet (including c-chain)", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 
@@ -161,19 +161,19 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			}
 			commandArguments := []string{}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to " + subnetName))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to " + subnetName))
 			gomega.Expect(output).
-				ShouldNot(gomega.ContainSubstring("ICM Registry successfully deployed to " + subnetName))
+				ShouldNot(gomega.ContainSubstring("Warp Registry successfully deployed to " + subnetName))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to c-chain"))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to c-chain"))
 			gomega.Expect(output).
-				ShouldNot(gomega.ContainSubstring("ICM Registry successfully deployed to c-chain"))
+				ShouldNot(gomega.ContainSubstring("Warp Registry successfully deployed to c-chain"))
 		})
 
-		ginkgo.It("should deploy ICM registry into subnet (including c-chain)", func() {
+		ginkgo.It("should deploy Warp registry into subnet (including c-chain)", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 
@@ -184,19 +184,19 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			}
 			commandArguments := []string{}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				ShouldNot(gomega.ContainSubstring("ICM Messenger successfully deployed to " + subnetName))
+				ShouldNot(gomega.ContainSubstring("Warp Messenger successfully deployed to " + subnetName))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to " + subnetName))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to " + subnetName))
 			gomega.Expect(output).
-				ShouldNot(gomega.ContainSubstring("ICM Messenger successfully deployed to c-chain"))
+				ShouldNot(gomega.ContainSubstring("Warp Messenger successfully deployed to c-chain"))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to c-chain"))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to c-chain"))
 		})
 
-		ginkgo.It("should not re-deploy ICM contracts if already deployed", func() {
+		ginkgo.It("should not re-deploy Warp contracts if already deployed", func() {
 			testFlags := utils.TestFlags{
 				"key": ewoqKeyName,
 			}
@@ -204,21 +204,21 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			_, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			_, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Messenger has already been deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Messenger has already been deployed to C-Chain"))
 		})
 
-		ginkgo.It("should force deploy ICM registry with messenger already deployed", func() {
+		ginkgo.It("should force deploy Warp registry with messenger already deployed", func() {
 			testFlags := utils.TestFlags{
 				"key": ewoqKeyName,
 			}
 
 			_, err := utils.TestCommand(
-				cmd.ICMCmd,
+				cmd.WarpCmd,
 				"deploy",
 				[]string{
 					"--c-chain",
@@ -228,7 +228,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err := utils.TestCommand(
-				cmd.ICMCmd,
+				cmd.WarpCmd,
 				"deploy",
 				[]string{
 					"--c-chain",
@@ -237,11 +237,11 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				globalFlags,
 				testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Messenger has already been deployed to C-Chain"))
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Messenger has already been deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 
-		ginkgo.It("should deploy ICM registry with messenger not deployed", func() {
+		ginkgo.It("should deploy Warp registry with messenger not deployed", func() {
 			testFlags := utils.TestFlags{
 				"deploy-messenger": "false",
 				"key":              ewoqKeyName,
@@ -250,17 +250,17 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			_, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			_, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("ICM Messenger has already been deployed to C-Chain"))
-			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Warp Messenger has already been deployed to C-Chain"))
+			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 
-		ginkgo.It("should force deploy ICM registry with messenger not deployed", func() {
+		ginkgo.It("should force deploy Warp registry with messenger not deployed", func() {
 			testFlags := utils.TestFlags{
 				"deploy-messenger": "false",
 				"key":              ewoqKeyName,
@@ -269,19 +269,19 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			_, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			_, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", append(commandArguments, "--force-registry-deploy"), globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", append(commandArguments, "--force-registry-deploy"), globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("ICM Messenger has already been deployed to C-Chain"))
-			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Warp Messenger has already been deployed to C-Chain"))
+			gomega.Expect(output).ShouldNot(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 
-		ginkgo.It("should deploy ICM messenger and force deploy registry", func() {
+		ginkgo.It("should deploy Warp messenger and force deploy registry", func() {
 			testFlags := utils.TestFlags{
 				"deploy-messenger": "false",
 				"key":              ewoqKeyName,
@@ -290,22 +290,22 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			_, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			_, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", append(commandArguments, "--force-registry-deploy"), globalFlags, utils.TestFlags{
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", append(commandArguments, "--force-registry-deploy"), globalFlags, utils.TestFlags{
 				"key": ewoqKeyName,
 			})
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			gomega.Expect(err).Should(gomega.BeNil())
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
-			gomega.Expect(output).Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
+			gomega.Expect(output).Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 
-		ginkgo.It("should deploy ICM contracts from paths", func() {
-			td := interchain.ICMDeployer{}
-			contractsDirPath := path.Join(utils.GetBaseDir(), constants.LuxCliBinDir, constants.ICMContractsInstallDir)
+		ginkgo.It("should deploy Warp contracts from paths", func() {
+			td := interchain.WarpDeployer{}
+			contractsDirPath := path.Join(utils.GetBaseDir(), constants.LuxCliBinDir, constants.WarpContractsInstallDir)
 			version := "v1.0.0"
 			// Download contracts
 			err := td.DownloadAssets(
@@ -325,17 +325,17 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 
 			_ = os.RemoveAll(filepath.Join(contractsDirPath, version))
 		})
 
-		ginkgo.It("should deploy ICM contracts with version", func() {
+		ginkgo.It("should deploy Warp contracts with version", func() {
 			testFlags := utils.TestFlags{
 				"key":     ewoqKeyName,
 				"version": "v1.0.0",
@@ -344,12 +344,12 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Messenger successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Messenger successfully deployed to C-Chain"))
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("ICM Registry successfully deployed to C-Chain"))
+				Should(gomega.ContainSubstring("Warp Registry successfully deployed to C-Chain"))
 		})
 	})
 	ginkgo.Context("with invalid input", func() {
@@ -367,7 +367,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 			}
 			commandArguments := []string{}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.HaveOccurred())
 			gomega.Expect(output).
 				Should(gomega.ContainSubstring("are mutually exclusive flags"))
@@ -382,7 +382,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.HaveOccurred())
 			gomega.Expect(output).
 				Should(gomega.ContainSubstring("you should set at least one of --deploy-messenger/--deploy-registry to true"))
@@ -397,10 +397,10 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.HaveOccurred())
 			gomega.Expect(output).
-				Should(gomega.ContainSubstring("if setting any ICM asset path, you must set all ICM asset paths"))
+				Should(gomega.ContainSubstring("if setting any Warp asset path, you must set all Warp asset paths"))
 		})
 
 		ginkgo.It("should fail with invalid version", func() {
@@ -412,7 +412,7 @@ var _ = ginkgo.Describe("[ICM] deploy", func() {
 				"--c-chain",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "deploy", commandArguments, globalFlags, testFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "deploy", commandArguments, globalFlags, testFlags)
 			gomega.Expect(err).Should(gomega.HaveOccurred())
 			gomega.Expect(output).
 				Should(gomega.ContainSubstring("failure downloading"))
