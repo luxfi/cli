@@ -4,7 +4,7 @@ package testutils
 
 import (
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/crypto"
+	"github.com/luxfi/crypto"
 )
 
 func GenerateEthAddrs(count int) ([]common.Address, error) {

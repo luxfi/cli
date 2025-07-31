@@ -22,8 +22,8 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
-	warp "github.com/luxfi/node/vms/platformvm/warp"
-	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	warp "github.com/luxfi/warp"
+	warpPayload "github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/warp/messages"
 

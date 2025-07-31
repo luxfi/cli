@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 
-	eth_crypto "github.com/luxfi/node/crypto"
+	eth_crypto "github.com/luxfi/crypto"
 	"go.uber.org/zap"
 )
 

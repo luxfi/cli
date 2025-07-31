@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/sdk/evm"
 	sdkUtils "github.com/luxfi/cli/sdk/utils"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/core/types"
 	"github.com/ethereum/go-ethereum/common"
