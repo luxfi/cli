@@ -491,19 +491,19 @@ func (c *AwsCloud) SetupSecurityGroup(ipAddress, securityGroupName string) (stri
 	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.SSHTCPPort); err != nil {
 		return "", err
 	}
-	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.LuxGoAPIPort); err != nil {
+	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.LuxdAPIPort); err != nil {
 		return "", err
 	}
-	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.LuxGoMonitoringPort); err != nil {
+	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.LuxdMonitoringPort); err != nil {
 		return "", err
 	}
-	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.LuxGoGrafanaPort); err != nil {
+	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", ipAddress, constants.LuxdGrafanaPort); err != nil {
 		return "", err
 	}
-	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", "0.0.0.0/0", constants.LuxGoLokiPort); err != nil {
+	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", "0.0.0.0/0", constants.LuxdLokiPort); err != nil {
 		return "", err
 	}
-	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", "0.0.0.0/0", constants.LuxGoP2PPort); err != nil {
+	if err := c.AddSecurityGroupRule(sgID, "ingress", "tcp", "0.0.0.0/0", constants.LuxdP2PPort); err != nil {
 		return "", err
 	}
 	return sgID, nil

@@ -505,7 +505,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		return err
 	}
 	var homeAddress common.Address
-	// TODO: need registry address, manager address, private key for the home chain (academy for fuji)
+	// TODO: need registry address, manager address, private key for the home chain (academy for testnet)
 	homeBlockchainID, err := contract.GetBlockchainID(app, network, flags.homeFlags.chainFlags)
 	if err != nil {
 		return err

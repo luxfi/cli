@@ -9,7 +9,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct{}
+type Config struct {
+	MetricsEnabled bool `json:"metricsEnabled"`
+}
 
 func New() *Config {
 	return &Config{}

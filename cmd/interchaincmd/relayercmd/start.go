@@ -22,7 +22,7 @@ import (
 var startNetworkOptions = []networkoptions.NetworkOption{
 	networkoptions.Local,
 	networkoptions.Cluster,
-	networkoptions.Fuji,
+	networkoptions.Testnet,
 }
 
 type StartFlags struct {

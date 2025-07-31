@@ -100,7 +100,7 @@ func newDeployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy [blockchainName]",
 		Short: "Deploys a blockchain configuration",
-		Long: `The blockchain deploy command deploys your Blockchain configuration to Local Network, to Fuji Testnet, DevNet or to Mainnet.
+		Long: `The blockchain deploy command deploys your Blockchain configuration to Local Network, to Testnet, DevNet or to Mainnet.
 
 At the end of the call, the command prints the RPC URL you can use to interact with the L1 / Subnet.
 
@@ -117,11 +117,11 @@ If using your own Lux Nodes as bootstrap validators:
 - Next, Initialize Validator Manager contract on the L1 using lux contract initValidatorManager [L1_Name]
 
 Lux-CLI only supports deploying an individual Blockchain once per network. Subsequent
-attempts to deploy the same Blockchain to the same network (Local Network, Fuji, Mainnet) aren't
+attempts to deploy the same Blockchain to the same network (Local Network, Testnet, Mainnet) aren't
 allowed. If you'd like to redeploy a Blockchain locally for testing, you must first call
 lux network clean to reset all deployed chain state. Subsequent local deploys
 redeploy the chain with fresh state. You can deploy the same Blockchain to multiple networks,
-so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.`,
+so you can take your locally tested Blockchain and deploy it on Testnet or Mainnet.`,
 		RunE:              deployBlockchain,
 		PersistentPostRun: handlePostRun,
 		PreRunE:           cobrautils.ExactArgs(1),
@@ -129,7 +129,7 @@ so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.
 	networkGroup := networkoptions.GetNetworkFlagsGroup(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
 	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &deployFlags.SigAggFlags)
 
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji/devnet deploy only]")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet deploy only]")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the blockchain creation tx (for multi-sig signing)")
 	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [local/devnet deploy only]")
 	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key")
@@ -145,7 +145,7 @@ so you can take your locally tested Blockchain and deploy it on Fuji or Mainnet.
 		set.StringVar(
 			&deployFlags.LocalMachineFlags.UserProvidedLuxdVersion,
 			"luxd-version",
-			constants.DefaultLuxGoVersion,
+			constants.DefaultLuxdVersion,
 			"use this version of luxd (ex: v1.17.12)",
 		)
 	})
@@ -320,7 +320,7 @@ func getSubnetEVMMainnetChainID(sc *models.Sidecar, blockchainName string) error
 		useSameChainID := "Use same ChainID"
 		useNewChainID := "Use new ChainID"
 		listOptions := []string{useNewChainID, useSameChainID}
-		newChainIDPrompt := "Using the same ChainID for both Fuji and Mainnet could lead to a replay attack. Do you want to use a different ChainID?"
+		newChainIDPrompt := "Using the same ChainID for both Testnet and Mainnet could lead to a replay attack. Do you want to use a different ChainID?"
 		var (
 			err      error
 			decision string
@@ -584,8 +584,8 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 		luxdVersion := deployFlags.LocalMachineFlags.UserProvidedLuxdVersion
 
-		if luxdVersion == constants.DefaultLuxGoVersion && deployFlags.LocalMachineFlags.LuxdBinaryPath == "" {
-			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, &sidecar.RPCVersion)
+		if luxdVersion == constants.DefaultLuxdVersion && deployFlags.LocalMachineFlags.LuxdBinaryPath == "" {
+			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, network, &sidecar.RPCVersion)
 			if err != nil {
 				if err != dependencies.ErrNoLuxdVersion {
 					return err
@@ -608,7 +608,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 		// check if blockchain rpc version matches what is currently running
 		// for the case version or binary was provided
-		_, _, networkRPCVersion, err := localnet.GetLocalNetworkLuxGoVersion(app)
+		_, _, networkRPCVersion, err := localnet.GetLocalNetworkLuxdVersion(app)
 		if err != nil {
 			return err
 		}
@@ -1064,7 +1064,7 @@ func getClusterBootstrapValidators(
 		return nil, err
 	}
 	subnetValidators := []models.SubnetValidator{}
-	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxGoHost)
+	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxdHost)
 	changeAddr := ""
 	for _, h := range hostIDs {
 		nodeID, pub, pop, err := utils.GetNodeParams(app.GetNodeInstanceDirPath(h))
@@ -1092,7 +1092,7 @@ func getClusterBootstrapValidators(
 }
 
 // TODO: add deactivation owner?
-func ConvertToLuxGoSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertSubnetToL1Validator, error) {
+func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertSubnetToL1Validator, error) {
 	bootstrapValidators := []*txs.ConvertSubnetToL1Validator{}
 	for _, validator := range subnetValidators {
 		nodeID, err := ids.NodeIDFromString(validator.NodeID)

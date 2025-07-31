@@ -268,10 +268,10 @@ func New(pChainTx *txs.Tx) (*Multisig)
 
 ### Functions
 
-#### FujiNetwork
+#### TestnetNetwork
 
 ```go
-func FujiNetwork() (Network)
+func TestnetNetwork() (Network)
 ```
 
 #### MainnetNetwork

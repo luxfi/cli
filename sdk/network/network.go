@@ -12,12 +12,12 @@ type NetworkKind int64
 const (
 	Undefined NetworkKind = iota
 	Mainnet
-	Fuji
+	Testnet
 	Devnet
 )
 
 const (
-	FujiAPIEndpoint    = "https://api.lux-test.network"
+	TestnetAPIEndpoint    = "https://api.lux-test.network"
 	MainnetAPIEndpoint = "https://api.lux.network"
 )
 
@@ -33,8 +33,8 @@ func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
 	case constants.MainnetID:
 		return MainnetNetwork()
-	case constants.FujiID:
-		return FujiNetwork()
+	case constants.TestnetID:
+		return TestnetNetwork()
 	}
 	return UndefinedNetwork
 }
@@ -47,8 +47,8 @@ func NewNetwork(kind NetworkKind, id uint32, endpoint string) Network {
 	}
 }
 
-func FujiNetwork() Network {
-	return NewNetwork(Fuji, constants.FujiID, FujiAPIEndpoint)
+func TestnetNetwork() Network {
+	return NewNetwork(Testnet, constants.TestnetID, TestnetAPIEndpoint)
 }
 
 func MainnetNetwork() Network {

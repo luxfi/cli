@@ -25,39 +25,39 @@ import (
 	"github.com/luxfi/node/vms/platformvm/signer"
 )
 
-func setupLuxGo(
+func setupLuxd(
 	app *application.Lux,
-	luxGoBinaryPath string,
-	luxdVersionSetting dependencies.LuxGoVersionSettings,
+	luxdBinaryPath string,
+	luxdVersionSetting dependencies.LuxdVersionSettings,
 	network models.Network,
 	printFunc func(msg string, args ...interface{}),
 ) (string, error) {
 	var err error
-	luxGoVersion := ""
-	if luxGoBinaryPath == "" {
-		luxGoVersion, err = dependencies.GetLuxGoVersion(app, luxdVersionSetting, network)
+	luxdVersion := ""
+	if luxdBinaryPath == "" {
+		luxdVersion, err = dependencies.GetLuxdVersion(app, luxdVersionSetting, network)
 		if err != nil {
 			return "", err
 		}
-		printFunc("Using LuxGo version: %s", luxGoVersion)
+		printFunc("Using Luxd version: %s", luxdVersion)
 	}
-	luxGoBinaryPath, err = localnet.SetupLuxGoBinary(app, luxGoVersion, luxGoBinaryPath)
+	luxdBinaryPath, err = localnet.SetupLuxdBinary(app, luxdVersion, luxdBinaryPath)
 	if err != nil {
 		return "", err
 	}
-	printFunc("LuxGo path: %s\n", luxGoBinaryPath)
-	return luxGoBinaryPath, err
+	printFunc("Luxd path: %s\n", luxdBinaryPath)
+	return luxdBinaryPath, err
 }
 
 func StartLocalNode(
 	app *application.Lux,
 	clusterName string,
-	luxGoBinaryPath string,
+	luxdBinaryPath string,
 	numNodes uint32,
 	defaultFlags map[string]interface{},
 	connectionSettings localnet.ConnectionSettings,
 	nodeSettings []localnet.NodeSetting,
-	luxdVersionSetting dependencies.LuxGoVersionSettings,
+	luxdVersionSetting dependencies.LuxdVersionSettings,
 	network models.Network,
 ) error {
 	// initializes directories
@@ -72,14 +72,14 @@ func StartLocalNode(
 
 	if localnet.LocalClusterExists(app, clusterName) {
 		ux.Logger.GreenCheckmarkToUser("Local cluster %s found. Booting up...", clusterName)
-		if err := localnet.LoadLocalCluster(app, clusterName, luxGoBinaryPath); err != nil {
+		if err := localnet.LoadLocalCluster(app, clusterName, luxdBinaryPath); err != nil {
 			return err
 		}
 	} else {
 		var err error
-		luxGoBinaryPath, err = setupLuxGo(
+		luxdBinaryPath, err = setupLuxd(
 			app,
-			luxGoBinaryPath,
+			luxdBinaryPath,
 			luxdVersionSetting,
 			network,
 			ux.Logger.PrintToUser,
@@ -92,8 +92,8 @@ func StartLocalNode(
 		network.ClusterName = clusterName
 
 		switch {
-		case network.Kind == models.Fuji:
-			ux.Logger.PrintToUser(logging.Yellow.Wrap("Warning: Fuji Bootstrapping can take several minutes"))
+		case network.Kind == models.Testnet:
+			ux.Logger.PrintToUser(logging.Yellow.Wrap("Warning: Testnet Bootstrapping can take several minutes"))
 			connectionSettings.NetworkID = network.ID
 		case network.Kind == models.Mainnet:
 			ux.Logger.PrintToUser(logging.Yellow.Wrap("Warning: Mainnet Bootstrapping can take 6-24 hours"))
@@ -120,7 +120,7 @@ func StartLocalNode(
 			app,
 			ux.Logger.PrintToUser,
 			clusterName,
-			luxGoBinaryPath,
+			luxdBinaryPath,
 			pluginDir,
 			defaultFlags,
 			connectionSettings,

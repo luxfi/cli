@@ -55,7 +55,7 @@ After you update your validator's config, you need to restart your validator man
 you provide the --luxd-config flag, this command attempts to edit the config file
 at that path.
 
-This command currently only supports Blockchains deployed on the Fuji Testnet and Mainnet.`,
+This command currently only supports Blockchains deployed on the Testnet and Mainnet.`,
 		RunE: joinCmd,
 		Args: cobrautils.ExactArgs(1),
 	}
@@ -69,8 +69,8 @@ This command currently only supports Blockchains deployed on the Fuji Testnet an
 	cmd.Flags().Uint64Var(&stakeAmount, "stake-amount", 0, "amount of tokens to stake on validator")
 	cmd.Flags().StringVar(&startTimeStr, "start-time", "", "start time that validator starts validating")
 	cmd.Flags().DurationVar(&duration, "staking-period", 0, "how long validator validates for after start time")
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [fuji only]")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on fuji)")
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet only]")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	return cmd
 }
