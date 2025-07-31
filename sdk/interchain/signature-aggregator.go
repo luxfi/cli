@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/warp"
 	signatureAggregator "github.com/luxfi/warp/signature-aggregator/api"
 	"go.uber.org/zap"
 )

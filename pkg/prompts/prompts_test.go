@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/stretchr/testify/require"
 )
 

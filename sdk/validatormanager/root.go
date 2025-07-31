@@ -9,15 +9,15 @@ import (
 
 	"github.com/luxfi/cli/sdk/network"
 	avagoconstants "github.com/luxfi/node/utils/constants"
-	warpMessage "github.com/luxfi/node/vms/platformvm/warp/message"
-	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	warpMessage "github.com/luxfi/warp"
+	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/warp"
 	"github.com/luxfi/evm/core/types"
 
 	"github.com/ethereum/go-ethereum/common"

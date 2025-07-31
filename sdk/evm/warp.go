@@ -5,7 +5,7 @@ package evm
 import (
 	"fmt"
 
-	warp "github.com/luxfi/node/vms/platformvm/warp"
+	warp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/core/types"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 )
