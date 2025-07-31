@@ -123,6 +123,6 @@ func LuxFolderToCreate() []string {
 		"/home/ubuntu/.luxd/configs/chains/C",
 		"/home/ubuntu/.luxd/staking",
 		"/home/ubuntu/.luxd/plugins",
-		"/home/ubuntu/.lux-cli/services/icm-relayer",
+		"/home/ubuntu/.lux-cli/services/warp-relayer",
 	}
 }

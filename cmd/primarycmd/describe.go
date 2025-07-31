@@ -60,8 +60,8 @@ func describe(_ *cobra.Command, _ []string) error {
 		return err
 	}
 	var (
-		icmMessengerAddress string
-		icmRegistryAddress  string
+		warpMessengerAddress string
+		warpRegistryAddress  string
 	)
 	blockchainID, err := utils.GetChainID(network.Endpoint, "C")
 	if err != nil {
@@ -79,15 +79,15 @@ func describe(_ *cobra.Command, _ []string) error {
 		if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 			return err
 		} else if b {
-			icmMessengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
-			icmRegistryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
+			warpMessengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
+			warpRegistryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
 		}
 	} else if network.ClusterName != "" {
 		if clusterConfig, err := app.GetClusterConfig(network.ClusterName); err != nil {
 			return err
 		} else {
-			icmMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
-			icmRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
+			warpMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
+			warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
 		}
 	}
 	fmt.Print(logging.LightBlue.Wrap(art))
@@ -134,11 +134,11 @@ func describe(_ *cobra.Command, _ []string) error {
 	table.Append([]string{"Private Key", privKey})
 	table.Append([]string{"BlockchainID (CB58)", blockchainID.String()})
 	table.Append([]string{"BlockchainID (HEX)", blockchainIDHexEncoding})
-	if icmMessengerAddress != "" {
-		table.Append([]string{"ICM Messenger Address", icmMessengerAddress})
+	if warpMessengerAddress != "" {
+		table.Append([]string{"Warp Messenger Address", warpMessengerAddress})
 	}
-	if icmRegistryAddress != "" {
-		table.Append([]string{"ICM Registry Address", icmRegistryAddress})
+	if warpRegistryAddress != "" {
+		table.Append([]string{"Warp Registry Address", warpRegistryAddress})
 	}
 	table.Render()
 	return nil

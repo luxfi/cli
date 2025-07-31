@@ -19,8 +19,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/node/api/info"
-	basecfg "github.com/luxfi/icm-services/config"
-	signatureAggregatorConfig "github.com/luxfi/icm-services/signature-aggregator/config"
+	basecfg "github.com/luxfi/warp/config"
+	signatureAggregatorConfig "github.com/luxfi/warp/signature-aggregator/config"
 
 	"go.uber.org/zap"
 
@@ -51,7 +51,7 @@ func GetLatestSignatureAggregatorReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
 	return downloader.GetLatestReleaseVersion(
 		constants.LuxOrg,
-		constants.ICMServicesRepoName,
+		constants.WarpServicesRepoName,
 		constants.SignatureAggregator,
 	)
 }
@@ -60,7 +60,7 @@ func GetLatestSignatureAggregatorPreReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
 	return downloader.GetLatestPreReleaseVersion(
 		constants.LuxOrg,
-		constants.ICMServicesRepoName,
+		constants.WarpServicesRepoName,
 		constants.SignatureAggregator,
 	)
 }
@@ -112,7 +112,7 @@ func getSignatureAggregatorURL(version string) (string, error) {
 		return fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/signature-aggregator%%2F%s/signature-aggregator_%s_%s_%s.tar.gz",
 			constants.LuxOrg,
-			constants.ICMServicesRepoName,
+			constants.WarpServicesRepoName,
 			semanticVersion,
 			strings.TrimPrefix(semanticVersion, "v"),
 			goos,
@@ -124,7 +124,7 @@ func getSignatureAggregatorURL(version string) (string, error) {
 		return fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/signature-aggregator-%s/signature-aggregator_%s_%s_%s.tar.gz",
 			constants.LuxOrg,
-			constants.ICMServicesRepoName,
+			constants.WarpServicesRepoName,
 			semanticVersion,
 			strings.TrimPrefix(semanticVersion, "v"),
 			goos,
@@ -134,7 +134,7 @@ func getSignatureAggregatorURL(version string) (string, error) {
 	return fmt.Sprintf(
 		"https://github.com/%s/%s/releases/download/%s/signature-aggregator_%s_%s_%s.tar.gz",
 		constants.LuxOrg,
-		constants.ICMServicesRepoName,
+		constants.WarpServicesRepoName,
 		semanticVersion,
 		strings.TrimPrefix(semanticVersion, "v"),
 		goos,

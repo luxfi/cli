@@ -54,7 +54,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	blockchainCmdArgs := []string{subnetName}
 	globalFlags := utils.GlobalFlags{
 		"local":             true,
-		"skip-icm-deploy":   true,
+		"skip-warp-deploy":   true,
 		"skip-update-check": true,
 	}
 	ginkgo.It("HAPPY PATH: local deploy default", func() {

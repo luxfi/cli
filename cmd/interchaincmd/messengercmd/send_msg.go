@@ -36,8 +36,8 @@ var msgFlags MsgFlags
 func NewSendMsgCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sendMsg [sourceBlockchainName] [destinationBlockchainName] [messageContent]",
-		Short: "Verifies exchange of ICM message between two blockchains",
-		Long:  `Sends and wait reception for a ICM msg between two blockchains.`,
+		Short: "Verifies exchange of Warp message between two blockchains",
+		Long:  `Sends and wait reception for a Warp msg between two blockchains.`,
 		RunE:  sendMsg,
 		Args:  cobrautils.ExactArgs(3),
 	}
@@ -129,7 +129,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	_, sourceMessengerAddress, err := contract.GetICMInfo(app, network, sourceChainSpec, false, false, true)
+	_, sourceMessengerAddress, err := contract.GetWarpInfo(app, network, sourceChainSpec, false, false, true)
 	if err != nil {
 		return err
 	}
@@ -137,13 +137,13 @@ func sendMsg(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	_, destMessengerAddress, err := contract.GetICMInfo(app, network, destChainSpec, false, false, true)
+	_, destMessengerAddress, err := contract.GetWarpInfo(app, network, destChainSpec, false, false, true)
 	if err != nil {
 		return err
 	}
 
 	if sourceMessengerAddress != destMessengerAddress {
-		return fmt.Errorf("different ICM messenger addresses among blockchains: %s vs %s", sourceMessengerAddress, destMessengerAddress)
+		return fmt.Errorf("different Warp messenger addresses among blockchains: %s vs %s", sourceMessengerAddress, destMessengerAddress)
 	}
 
 	messageBytes := []byte(message)
@@ -166,7 +166,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 		}
 		destAddr = common.HexToAddress(msgFlags.DestinationAddress)
 	}
-	// send tx to the ICM contract at the source
+	// send tx to the Warp contract at the source
 	ux.Logger.PrintToUser("Delivering message %q from source blockchain %q (%s)", message, sourceBlockchainName, sourceBlockchainID)
 	tx, receipt, err := interchain.SendCrossChainMessage(
 		sourceRPCEndpoint,

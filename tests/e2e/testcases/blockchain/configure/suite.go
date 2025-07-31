@@ -185,7 +185,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 				utils.BlockchainName,
 				utils.TestFlags{
 					"local":             true,
-					"skip-icm-deploy":   true,
+					"skip-warp-deploy":   true,
 					"skip-update-check": true,
 				},
 			)
@@ -217,7 +217,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 				utils.BlockchainName,
 				utils.TestFlags{
 					"local":             true,
-					"skip-icm-deploy":   true,
+					"skip-warp-deploy":   true,
 					"skip-update-check": true,
 				},
 			)
@@ -277,7 +277,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 					"staking-cert-key-path":    node1CertPath + "," + node2CertPath,
 					"staking-tls-key-path":     node1TLSPath + "," + node2TLSPath,
 					"staking-signer-key-path":  node1BLSPath + "," + node2BLSPath,
-					"skip-icm-deploy":          true,
+					"skip-warp-deploy":          true,
 					"skip-update-check":        true,
 				},
 			)
@@ -333,7 +333,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 				utils.BlockchainName,
 				utils.TestFlags{
 					"local":             true,
-					"skip-icm-deploy":   true,
+					"skip-warp-deploy":   true,
 					"skip-update-check": true,
 				},
 			)
@@ -385,7 +385,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 				utils.BlockchainName,
 				utils.TestFlags{
 					"local":             true,
-					"skip-icm-deploy":   true,
+					"skip-warp-deploy":   true,
 					"skip-update-check": true,
 				},
 			)

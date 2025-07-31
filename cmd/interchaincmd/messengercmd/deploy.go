@@ -48,28 +48,28 @@ var deployFlags DeployFlags
 func NewDeployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
-		Short: "Deploys ICM Messenger and Registry into a given L1",
-		Long: `Deploys ICM Messenger and Registry into a given L1.
+		Short: "Deploys Warp Messenger and Registry into a given L1",
+		Long: `Deploys Warp Messenger and Registry into a given L1.
 
 For Local Networks, it also deploys into C-Chain.`,
 		RunE: deploy,
 		Args: cobrautils.ExactArgs(0),
 	}
 	networkoptions.AddNetworkFlagsToCmd(cmd, &deployFlags.Network, true, networkoptions.DefaultSupportedNetworkOptions)
-	deployFlags.PrivateKeyFlags.AddToCmd(cmd, "to fund ICM deploy")
+	deployFlags.PrivateKeyFlags.AddToCmd(cmd, "to fund Warp deploy")
 	deployFlags.ChainFlags.SetEnabled(true, true, false, false, true)
-	deployFlags.ChainFlags.AddToCmd(cmd, "deploy ICM into %s")
-	cmd.Flags().BoolVar(&deployFlags.DeployMessenger, "deploy-messenger", true, "deploy ICM Messenger")
-	cmd.Flags().BoolVar(&deployFlags.DeployRegistry, "deploy-registry", true, "deploy ICM Registry")
-	cmd.Flags().BoolVar(&deployFlags.ForceRegistryDeploy, "force-registry-deploy", false, "deploy ICM Registry even if Messenger has already been deployed")
+	deployFlags.ChainFlags.AddToCmd(cmd, "deploy Warp into %s")
+	cmd.Flags().BoolVar(&deployFlags.DeployMessenger, "deploy-messenger", true, "deploy Warp Messenger")
+	cmd.Flags().BoolVar(&deployFlags.DeployRegistry, "deploy-registry", true, "deploy Warp Registry")
+	cmd.Flags().BoolVar(&deployFlags.ForceRegistryDeploy, "force-registry-deploy", false, "deploy Warp Registry even if Messenger has already been deployed")
 	cmd.Flags().StringVar(&deployFlags.RPCURL, "rpc-url", "", "use the given RPC URL to connect to the subnet")
 	cmd.Flags().StringVar(&deployFlags.Version, "version", "latest", "version to deploy")
 	cmd.Flags().StringVar(&deployFlags.MessengerContractAddressPath, "messenger-contract-address-path", "", "path to a messenger contract address file")
 	cmd.Flags().StringVar(&deployFlags.MessengerDeployerAddressPath, "messenger-deployer-address-path", "", "path to a messenger deployer address file")
 	cmd.Flags().StringVar(&deployFlags.MessengerDeployerTxPath, "messenger-deployer-tx-path", "", "path to a messenger deployer tx file")
 	cmd.Flags().StringVar(&deployFlags.RegistryBydecodePath, "registry-bytecode-path", "", "path to a registry bytecode file")
-	cmd.Flags().BoolVar(&deployFlags.IncludeCChain, "include-cchain", false, "deploy ICM also to C-Chain")
-	cmd.Flags().StringVar(&deployFlags.CChainKeyName, "cchain-key", "", "key to be used to pay fees to deploy ICM to C-Chain")
+	cmd.Flags().BoolVar(&deployFlags.IncludeCChain, "include-cchain", false, "deploy Warp also to C-Chain")
+	cmd.Flags().StringVar(&deployFlags.CChainKeyName, "cchain-key", "", "key to be used to pay fees to deploy Warp to C-Chain")
 	return cmd
 }
 
@@ -82,7 +82,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	if network == models.UndefinedNetwork {
 		network, err = networkoptions.GetNetworkFromCmdLineFlags(
 			app,
-			"On what Network do you want to deploy the ICM Messenger?",
+			"On what Network do you want to deploy the Warp Messenger?",
 			flags.Network,
 			true,
 			false,
@@ -100,7 +100,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		return fmt.Errorf("you should set at least one of --deploy-messenger/--deploy-registry to true")
 	}
 	if !flags.ChainFlags.Defined() {
-		prompt := "Which Blockchain would you like to deploy ICM to?"
+		prompt := "Which Blockchain would you like to deploy Warp to?"
 		if cancel, err := contract.PromptChain(
 			app,
 			network,
@@ -137,7 +137,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	if privateKey == "" {
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
-			"deploy ICM",
+			"deploy Warp",
 			app.GetKeyDir(),
 			app.GetKey,
 			genesisAddress,
@@ -147,23 +147,23 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			return err
 		}
 	}
-	var icmVersion string
+	var warpVersion string
 	switch {
 	case flags.MessengerContractAddressPath != "" || flags.MessengerDeployerAddressPath != "" || flags.MessengerDeployerTxPath != "" || flags.RegistryBydecodePath != "":
 		if flags.MessengerContractAddressPath == "" || flags.MessengerDeployerAddressPath == "" || flags.MessengerDeployerTxPath == "" || flags.RegistryBydecodePath == "" {
-			return fmt.Errorf("if setting any ICM asset path, you must set all ICM asset paths")
+			return fmt.Errorf("if setting any Warp asset path, you must set all Warp asset paths")
 		}
 	case flags.Version != "" && flags.Version != "latest":
-		icmVersion = flags.Version
+		warpVersion = flags.Version
 	default:
-		icmInfo, err := interchain.GetICMInfo(app)
+		warpInfo, err := interchain.GetWarpInfo(app)
 		if err != nil {
 			return err
 		}
-		icmVersion = icmInfo.Version
+		warpVersion = warpInfo.Version
 	}
 	// deploy to subnet
-	td := interchain.ICMDeployer{}
+	td := interchain.WarpDeployer{}
 	if flags.MessengerContractAddressPath != "" {
 		if err := td.SetAssetsFromPaths(
 			flags.MessengerContractAddressPath,
@@ -175,8 +175,8 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		}
 	} else {
 		if err := td.DownloadAssets(
-			app.GetICMContractsBinDir(),
-			icmVersion,
+			app.GetWarpContractsBinDir(),
+			warpVersion,
 		); err != nil {
 			return err
 		}
@@ -203,7 +203,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			return fmt.Errorf("failed to load sidecar: %w", err)
 		}
 		sc.TeleporterReady = true
-		sc.TeleporterVersion = icmVersion
+		sc.TeleporterVersion = warpVersion
 		networkInfo := sc.Networks[network.Name()]
 		if messengerAddress != "" {
 			networkInfo.TeleporterMessengerAddress = messengerAddress

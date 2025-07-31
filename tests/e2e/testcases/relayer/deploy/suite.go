@@ -56,8 +56,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 			})
 
 			ginkgo.It("should deploy the relayer between c-chain and subnet in both directions", func() {
-				// Deploy ICM contracts
-				_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnetName,
 				})
@@ -85,7 +85,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(output).Should(gomega.ContainSubstring("Executing Relayer"))
 
 				// Send message from c-chain to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						cChain,
 						subnetName,
@@ -97,7 +97,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet to c-chain
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						cChain,
@@ -113,14 +113,14 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				commands.CreateSubnetEvmConfigNonSOV(subnet2Name, utils.SubnetEvmGenesisPath, false)
 				commands.DeploySubnetLocallyNonSOV(subnet2Name)
 
-				// Deploy ICM contracts
-				_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnetName,
 				})
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+				_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnet2Name,
 				})
@@ -146,7 +146,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(output).Should(gomega.ContainSubstring("Executing Relayer"))
 
 				// Send message from subnet to subnet2
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						subnet2Name,
@@ -158,7 +158,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet2 to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						subnetName,
@@ -174,14 +174,14 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				commands.CreateSubnetEvmConfigNonSOV(subnet2Name, utils.SubnetEvmGenesisPath, false)
 				commands.DeploySubnetLocallyNonSOV(subnet2Name)
 
-				// Deploy ICM contracts
-				_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnetName,
 				})
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+				_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnet2Name,
 				})
@@ -209,7 +209,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(output).Should(gomega.ContainSubstring("Executing Relayer"))
 
 				// Send message from subnet to c-chain
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						cChain,
@@ -221,7 +221,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet2 to c-chain
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						cChain,
@@ -233,7 +233,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from c-chain to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						cChain,
 						subnetName,
@@ -245,7 +245,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from c-chain to subnet2
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						cChain,
 						subnet2Name,
@@ -257,7 +257,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet to subnet2
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						subnet2Name,
@@ -269,7 +269,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet2 to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						subnetName,
@@ -314,8 +314,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				_, err = commands.KeyTransferSend(commandArguments)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				// Deploy ICM contracts
-				_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnetName,
 				})
@@ -399,8 +399,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 			})
 
 			ginkgo.It("should deploy the relayer between c-chain and subnet (sov) in both directions", func() {
-				// Deploy ICM contracts
-				_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnet2Name,
 				})
@@ -428,7 +428,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(output).Should(gomega.ContainSubstring("Executing Relayer"))
 
 				// Send message from c-chain to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						cChain,
 						subnet2Name,
@@ -440,7 +440,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet to c-chain
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						cChain,
@@ -456,14 +456,14 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 				commands.DeploySubnetLocallyNonSOV(subnetName)
 
-				// Deploy ICM contracts
-				_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnetName,
 				})
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+				_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnet2Name,
 				})
@@ -489,7 +489,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(output).Should(gomega.ContainSubstring("Executing Relayer"))
 
 				// Send message from subnet to subnet2
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						subnet2Name,
@@ -501,7 +501,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet2 to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						subnetName,
@@ -517,14 +517,14 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				commands.CreateSubnetEvmConfigSOV(subnetName, utils.SubnetEvmGenesisPoaPath)
 				commands.DeploySubnetLocallyNonSOV(subnetName)
 
-				// Deploy ICM contracts
-				_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnetName,
 				})
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+				_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnet2Name,
 				})
@@ -552,7 +552,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(output).Should(gomega.ContainSubstring("Executing Relayer"))
 
 				// Send message from subnet to c-chain
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						cChain,
@@ -564,7 +564,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet2 to c-chain
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						cChain,
@@ -576,7 +576,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from c-chain to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						cChain,
 						subnetName,
@@ -588,7 +588,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from c-chain to subnet2
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						cChain,
 						subnet2Name,
@@ -600,7 +600,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet to subnet2
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnetName,
 						subnet2Name,
@@ -612,7 +612,7 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				// Send message from subnet2 to subnet
-				_, err = commands.SendICMMessage(
+				_, err = commands.SendWarpMessage(
 					[]string{
 						subnet2Name,
 						subnetName,
@@ -657,8 +657,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 				_, err = commands.KeyTransferSend(commandArguments)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				// Deploy ICM contracts
-				_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+				// Deploy Warp contracts
+				_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 					"key":        ewoqKeyName,
 					"blockchain": subnet2Name,
 				})
@@ -738,8 +738,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 		})
 
 		ginkgo.It("should fail if relayer is already deployed", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -794,8 +794,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 		})
 
 		ginkgo.It("should fail if funding key has no balance on C-Chain", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -840,8 +840,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 			_, err := commands.KeyTransferSend(commandArguments)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			// Deploy ICM contracts
-			_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -871,8 +871,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 		})
 
 		ginkgo.It("should fail if funding key on subnet has not enough funds", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -918,8 +918,8 @@ var _ = ginkgo.Describe("[Relayer] deploy", func() {
 			_, err := commands.KeyTransferSend(commandArguments)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			// Deploy ICM contracts
-			_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})

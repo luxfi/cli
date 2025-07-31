@@ -23,7 +23,7 @@ var globalFlags = utils.GlobalFlags{
 	"skip-update-check": true,
 }
 
-var _ = ginkgo.Describe("[ICM] sendMsg", func() {
+var _ = ginkgo.Describe("[Warp] sendMsg", func() {
 	ginkgo.BeforeEach(func() {
 		commands.StartNetwork()
 	})
@@ -49,8 +49,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 		})
 
 		ginkgo.It("should send a message from c-chain to subnet", func() {
-			// Deploy ICM
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -82,7 +82,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Delivering message \"%s\" from source blockchain \"%s\"", message, cChain)))
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Waiting for message to be delivered to destination blockchain \"%s\"", subnetName)))
@@ -90,8 +90,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 		})
 
 		ginkgo.It("should send a message from subnet to cchain", func() {
-			// Deploy ICM
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -123,7 +123,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Delivering message \"%s\" from source blockchain \"%s\"", message, subnetName)))
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Waiting for message to be delivered to destination blockchain \"%s\"", cChain)))
@@ -134,15 +134,15 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnet2Name, utils.SubnetEvmGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnet2Name)
 
-			// Deploy ICM to subnet1
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp to subnet1
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			// Deploy ICM to subnet2
-			_, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp to subnet2
+			_, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnet2Name,
 			})
@@ -174,7 +174,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Delivering message \"%s\" from source blockchain \"%s\"", message, subnet2Name)))
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Waiting for message to be delivered to destination blockchain \"%s\"", subnetName)))
@@ -185,8 +185,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnet2Name, utils.SubnetEvmGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnet2Name)
 
-			// Deploy ICM to subnet1
-			output, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp to subnet1
+			output, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -195,8 +195,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 			rpcs1, err := utils.ParseRPCsFromOutput(output)
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			// Deploy ICM to subnet2
-			output, err = commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp to subnet2
+			output, err = commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnet2Name,
 			})
@@ -233,7 +233,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err = utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err = utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Delivering message \"%s\" from source blockchain \"%s\"", message, subnet2Name)))
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Waiting for message to be delivered to destination blockchain \"%s\"", subnetName)))
@@ -241,8 +241,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 		})
 
 		ginkgo.It("should transfer hex encoded message", func() {
-			// Deploy ICM
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -276,7 +276,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				"--hex-encoded",
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Delivering message \"%s\" from source blockchain \"%s\"", hexEncodedMessage, cChain)))
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("Waiting for message to be delivered to destination blockchain \"%s\"", subnetName)))
@@ -296,7 +296,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).ShouldNot(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("subnet \"%s\" does not exist", subnetName)))
 		})
@@ -312,7 +312,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).ShouldNot(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring(fmt.Sprintf("subnet \"%s\" does not exist", subnetName)))
 		})
@@ -321,8 +321,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 
-			// Deploy ICM
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -355,7 +355,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).ShouldNot(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring("Post \"http://127.0.0.1:61171/ext/bc/invalid-subnet/rpc\": dial tcp 127.0.0.1:61171: connect: connection refused"))
 		})
@@ -364,8 +364,8 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 
-			// Deploy ICM
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -398,7 +398,7 @@ var _ = ginkgo.Describe("[ICM] sendMsg", func() {
 				message,
 			}
 
-			output, err := utils.TestCommand(cmd.ICMCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
+			output, err := utils.TestCommand(cmd.WarpCmd, "sendMsg", sendMessageArgs, globalFlags, sendMsgFlags)
 			gomega.Expect(err).ShouldNot(gomega.BeNil())
 			gomega.Expect(output).Should(gomega.ContainSubstring("Post \"http://127.0.0.1:61171/ext/bc/invalid-subnet/rpc\": dial tcp 127.0.0.1:61171: connect: connection refused"))
 		})

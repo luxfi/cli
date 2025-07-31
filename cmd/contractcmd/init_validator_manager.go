@@ -54,7 +54,7 @@ func newInitValidatorManagerCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "initValidatorManager blockchainName",
 		Short:   "Initializes Proof of Authority(PoA) or Proof of Stake(PoS) Validator Manager on a given Network and Blockchain",
-		Long:    "Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/icm-contracts/tree/main/contracts/validator-manager",
+		Long:    "Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager",
 		RunE:    initValidatorManager,
 		PreRunE: cobrautils.ExactArgs(1),
 	}

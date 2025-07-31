@@ -510,7 +510,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	if err != nil {
 		return err
 	}
-	homeRegistryAddress, _, err := contract.GetICMInfo(app, network, flags.homeFlags.chainFlags, true, false, true)
+	homeRegistryAddress, _, err := contract.GetWarpInfo(app, network, flags.homeFlags.chainFlags, true, false, true)
 	if err != nil {
 		return err
 	}
@@ -583,7 +583,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	if err != nil {
 		return err
 	}
-	remoteRegistryAddress, _, err := contract.GetICMInfo(app, network, flags.remoteFlags.chainFlags, true, false, true)
+	remoteRegistryAddress, _, err := contract.GetWarpInfo(app, network, flags.remoteFlags.chainFlags, true, false, true)
 	if err != nil {
 		return err
 	}

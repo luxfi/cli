@@ -40,7 +40,7 @@ func createEtnaSubnetEvmConfig(poa, pos bool) string {
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
-		"--icm=false",
+		"--warp=false",
 		"--" + constants.SkipUpdateFlag,
 	}
 	if poa {
@@ -86,7 +86,7 @@ func createEtnaSubnetEvmConfigWithoutProxyOwner(poa, pos bool) {
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
-		"--icm=false",
+		"--warp=false",
 		"--" + constants.SkipUpdateFlag,
 	}
 	if poa {
@@ -128,7 +128,7 @@ func createEtnaSubnetEvmConfigValidatorManagerFlagKeyname(poa, pos bool) {
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
-		"--icm=false",
+		"--warp=false",
 		"--" + constants.SkipUpdateFlag,
 	}
 	if poa {
@@ -170,7 +170,7 @@ func createEtnaSubnetEvmConfigValidatorManagerFlagPChain(poa, pos bool) {
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
-		"--icm=false",
+		"--warp=false",
 		"--" + constants.SkipUpdateFlag,
 	}
 	if poa {

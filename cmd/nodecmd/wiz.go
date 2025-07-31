@@ -68,15 +68,15 @@ var (
 	chainConf                       string
 	validators                      []string
 	customGrafanaDashboardPath      string
-	icmReady                        bool
+	warpReady                        bool
 	runRelayer                      bool
-	icmVersion                      string
-	icmMessengerContractAddressPath string
-	icmMessengerDeployerAddressPath string
-	icmMessengerDeployerTxPath      string
-	icmRegistryBydecodePath         string
-	deployICMMessenger              bool
-	deployICMRegistry               bool
+	warpVersion                      string
+	warpMessengerContractAddressPath string
+	warpMessengerDeployerAddressPath string
+	warpMessengerDeployerTxPath      string
+	warpRegistryBydecodePath         string
+	deployWarpMessenger              bool
+	deployWarpRegistry               bool
 	replaceKeyPair                  bool
 )
 
@@ -106,8 +106,8 @@ The node wiz command creates a devnet and deploys, sync and validate a subnet in
 	cmd.Flags().BoolVar(&defaultValidatorParams, "default-validator-params", false, "use default weight/start/duration params for subnet validator")
 	cmd.Flags().BoolVar(&forceSubnetCreate, "force-subnet-create", false, "overwrite the existing subnet configuration if one exists")
 	cmd.Flags().StringVar(&subnetGenesisFile, "subnet-genesis", "", "file path of the subnet genesis")
-	cmd.Flags().BoolVar(&icmReady, "teleporter", false, "generate an icm-ready vm")
-	cmd.Flags().BoolVar(&icmReady, "icm", false, "generate an icm-ready vm")
+	cmd.Flags().BoolVar(&warpReady, "teleporter", false, "generate an warp-ready vm")
+	cmd.Flags().BoolVar(&warpReady, "warp", false, "generate an warp-ready vm")
 	cmd.Flags().BoolVar(&runRelayer, "relayer", false, "run AWM relayer when deploying the vm")
 	cmd.Flags().BoolVar(&useEvmSubnet, "evm-subnet", false, "use Subnet-EVM as the subnet virtual machine")
 	cmd.Flags().BoolVar(&useCustomSubnet, "custom-subnet", false, "use a custom VM as the subnet virtual machine")
@@ -139,20 +139,20 @@ The node wiz command creates a devnet and deploys, sync and validate a subnet in
 	cmd.Flags().StringVar(&volumeType, "aws-volume-type", "gp3", "AWS volume type")
 	cmd.Flags().IntVar(&volumeSize, "aws-volume-size", constants.CloudServerStorageSize, "AWS volume size in GB")
 	cmd.Flags().StringVar(&grafanaPkg, "grafana-pkg", "", "use grafana pkg instead of apt repo(by default), for example https://dl.grafana.com/oss/release/grafana_10.4.1_amd64.deb")
-	cmd.Flags().StringVar(&icmVersion, "teleporter-version", "latest", "icm version to deploy")
-	cmd.Flags().StringVar(&icmMessengerContractAddressPath, "teleporter-messenger-contract-address-path", "", "path to an icm messenger contract address file")
-	cmd.Flags().StringVar(&icmMessengerDeployerAddressPath, "teleporter-messenger-deployer-address-path", "", "path to an icm messenger deployer address file")
-	cmd.Flags().StringVar(&icmMessengerDeployerTxPath, "teleporter-messenger-deployer-tx-path", "", "path to an icm messenger deployer tx file")
-	cmd.Flags().StringVar(&icmRegistryBydecodePath, "teleporter-registry-bytecode-path", "", "path to an icm registry bytecode file")
-	cmd.Flags().BoolVar(&deployICMMessenger, "deploy-teleporter-messenger", true, "deploy Interchain Messenger")
-	cmd.Flags().BoolVar(&deployICMRegistry, "deploy-teleporter-registry", true, "deploy Interchain Registry")
-	cmd.Flags().StringVar(&icmVersion, "icm-version", "latest", "icm version to deploy")
-	cmd.Flags().StringVar(&icmMessengerContractAddressPath, "icm-messenger-contract-address-path", "", "path to an icm messenger contract address file")
-	cmd.Flags().StringVar(&icmMessengerDeployerAddressPath, "icm-messenger-deployer-address-path", "", "path to an icm messenger deployer address file")
-	cmd.Flags().StringVar(&icmMessengerDeployerTxPath, "icm-messenger-deployer-tx-path", "", "path to an icm messenger deployer tx file")
-	cmd.Flags().StringVar(&icmRegistryBydecodePath, "icm-registry-bytecode-path", "", "path to an icm registry bytecode file")
-	cmd.Flags().BoolVar(&deployICMMessenger, "deploy-icm-messenger", true, "deploy Interchain Messenger")
-	cmd.Flags().BoolVar(&deployICMRegistry, "deploy-icm-registry", true, "deploy Interchain Registry")
+	cmd.Flags().StringVar(&warpVersion, "teleporter-version", "latest", "warp version to deploy")
+	cmd.Flags().StringVar(&warpMessengerContractAddressPath, "teleporter-messenger-contract-address-path", "", "path to an warp messenger contract address file")
+	cmd.Flags().StringVar(&warpMessengerDeployerAddressPath, "teleporter-messenger-deployer-address-path", "", "path to an warp messenger deployer address file")
+	cmd.Flags().StringVar(&warpMessengerDeployerTxPath, "teleporter-messenger-deployer-tx-path", "", "path to an warp messenger deployer tx file")
+	cmd.Flags().StringVar(&warpRegistryBydecodePath, "teleporter-registry-bytecode-path", "", "path to an warp registry bytecode file")
+	cmd.Flags().BoolVar(&deployWarpMessenger, "deploy-teleporter-messenger", true, "deploy Interchain Messenger")
+	cmd.Flags().BoolVar(&deployWarpRegistry, "deploy-teleporter-registry", true, "deploy Interchain Registry")
+	cmd.Flags().StringVar(&warpVersion, "warp-version", "latest", "warp version to deploy")
+	cmd.Flags().StringVar(&warpMessengerContractAddressPath, "warp-messenger-contract-address-path", "", "path to an warp messenger contract address file")
+	cmd.Flags().StringVar(&warpMessengerDeployerAddressPath, "warp-messenger-deployer-address-path", "", "path to an warp messenger deployer address file")
+	cmd.Flags().StringVar(&warpMessengerDeployerTxPath, "warp-messenger-deployer-tx-path", "", "path to an warp messenger deployer tx file")
+	cmd.Flags().StringVar(&warpRegistryBydecodePath, "warp-registry-bytecode-path", "", "path to an warp registry bytecode file")
+	cmd.Flags().BoolVar(&deployWarpMessenger, "deploy-warp-messenger", true, "deploy Interchain Messenger")
+	cmd.Flags().BoolVar(&deployWarpRegistry, "deploy-warp-registry", true, "deploy Interchain Registry")
 	cmd.Flags().BoolVar(&replaceKeyPair, "auto-replace-keypair", false, "automatically replaces key pair to access node if previous key pair is not found")
 	cmd.Flags().BoolVar(&publicHTTPPortAccess, "public-http-port", false, "allow public access to luxd HTTP port")
 	cmd.Flags().StringSliceVar(&subnetAliases, "subnet-aliases", nil, "additional subnet aliases to be used for RPC calls in addition to subnet blockchain name")
@@ -327,12 +327,12 @@ func wiz(cmd *cobra.Command, args []string) error {
 	var awmRelayerHost *models.Host
 	if sc.TeleporterReady && sc.RunRelayer && isEVMGenesis {
 		// get or set AWM Relayer host and configure/stop service
-		awmRelayerHost, err = node.GetICMRelayerHost(app, clusterName)
+		awmRelayerHost, err = node.GetWarpRelayerHost(app, clusterName)
 		if err != nil {
 			return err
 		}
 		if awmRelayerHost == nil {
-			awmRelayerHost, err = chooseICMRelayerHost(clusterName)
+			awmRelayerHost, err = chooseWarpRelayerHost(clusterName)
 			if err != nil {
 				return err
 			}
@@ -341,16 +341,16 @@ func wiz(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			if err := setICMRelayerHost(awmRelayerHost, relayerVersion); err != nil {
+			if err := setWarpRelayerHost(awmRelayerHost, relayerVersion); err != nil {
 				return err
 			}
-			if err := setICMRelayerSecurityGroupRule(clusterName, awmRelayerHost); err != nil {
+			if err := setWarpRelayerSecurityGroupRule(clusterName, awmRelayerHost); err != nil {
 				return err
 			}
 		} else {
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser(logging.Green.Wrap("Stopping AWM Relayer Service"))
-			if err := ssh.RunSSHStopICMRelayerService(awmRelayerHost); err != nil {
+			if err := ssh.RunSSHStopWarpRelayerService(awmRelayerHost); err != nil {
 				return err
 			}
 		}
@@ -380,40 +380,40 @@ func wiz(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if b, err := hasICMDeploys(clusterName); err != nil {
+	if b, err := hasWarpDeploys(clusterName); err != nil {
 		return err
 	} else if b {
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser(logging.Green.Wrap("Updating Proposer VMs"))
 		ux.Logger.PrintToUser("")
 		if err := updateProposerVMs(network); err != nil {
-			// not going to consider fatal, as icm messaging will be working fine after a failed first msg
+			// not going to consider fatal, as warp messaging will be working fine after a failed first msg
 			ux.Logger.PrintToUser(logging.Yellow.Wrap("failure setting proposer: %s"), err)
 		}
 	}
 
 	if sc.TeleporterReady && sc.RunRelayer && isEVMGenesis {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(logging.Green.Wrap("Setting up ICM on subnet"))
+		ux.Logger.PrintToUser(logging.Green.Wrap("Setting up Warp on subnet"))
 		ux.Logger.PrintToUser("")
 		flags := messengercmd.DeployFlags{
 			ChainFlags: contract.ChainSpec{
 				BlockchainName: subnetName,
 			},
 			PrivateKeyFlags: contract.PrivateKeyFlags{
-				KeyName: constants.ICMKeyName,
+				KeyName: constants.WarpKeyName,
 			},
 			Network: networkoptions.NetworkFlags{
 				ClusterName: clusterName,
 			},
-			DeployMessenger:              deployICMMessenger,
-			DeployRegistry:               deployICMRegistry,
+			DeployMessenger:              deployWarpMessenger,
+			DeployRegistry:               deployWarpRegistry,
 			ForceRegistryDeploy:          true,
-			Version:                      icmVersion,
-			MessengerContractAddressPath: icmMessengerContractAddressPath,
-			MessengerDeployerAddressPath: icmMessengerDeployerAddressPath,
-			MessengerDeployerTxPath:      icmMessengerDeployerTxPath,
-			RegistryBydecodePath:         icmRegistryBydecodePath,
+			Version:                      warpVersion,
+			MessengerContractAddressPath: warpMessengerContractAddressPath,
+			MessengerDeployerAddressPath: warpMessengerDeployerAddressPath,
+			MessengerDeployerTxPath:      warpMessengerDeployerTxPath,
+			RegistryBydecodePath:         warpRegistryBydecodePath,
 			IncludeCChain:                true,
 		}
 		if err := messengercmd.CallDeploy([]string{}, flags, models.UndefinedNetwork); err != nil {
@@ -422,10 +422,10 @@ func wiz(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser(logging.Green.Wrap("Starting AWM Relayer Service"))
 		ux.Logger.PrintToUser("")
-		if err := updateICMRelayerFunds(network, sc, blockchainID); err != nil {
+		if err := updateWarpRelayerFunds(network, sc, blockchainID); err != nil {
 			return err
 		}
-		if err := updateICMRelayerHostConfig(network, awmRelayerHost, subnetName); err != nil {
+		if err := updateWarpRelayerHostConfig(network, awmRelayerHost, subnetName); err != nil {
 			return err
 		}
 	}
@@ -461,7 +461,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func hasICMDeploys(
+func hasWarpDeploys(
 	clusterName string,
 ) (bool, error) {
 	clusterConfig, err := app.GetClusterConfig(clusterName)
@@ -515,7 +515,7 @@ func updateProposerVMs(
 	return interchain.SetProposerVM(app, network, "C", "")
 }
 
-func setICMRelayerHost(host *models.Host, relayerVersion string) error {
+func setWarpRelayerHost(host *models.Host, relayerVersion string) error {
 	cloudID := host.GetCloudID()
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("configuring AWM Relayer on host %s", cloudID)
@@ -523,25 +523,25 @@ func setICMRelayerHost(host *models.Host, relayerVersion string) error {
 	if err != nil {
 		return err
 	}
-	if err := ssh.ComposeSSHSetupICMRelayer(host, relayerVersion); err != nil {
+	if err := ssh.ComposeSSHSetupWarpRelayer(host, relayerVersion); err != nil {
 		return err
 	}
-	nodeConfig.IsICMRelayer = true
+	nodeConfig.IsWarpRelayer = true
 	return app.CreateNodeCloudConfigFile(cloudID, &nodeConfig)
 }
 
-func updateICMRelayerHostConfig(network models.Network, host *models.Host, blockchainName string) error {
+func updateWarpRelayerHostConfig(network models.Network, host *models.Host, blockchainName string) error {
 	ux.Logger.PrintToUser("setting AWM Relayer on host %s to relay blockchain %s", host.GetCloudID(), blockchainName)
 	if err := addBlockchainToRelayerConf(network, host.GetCloudID(), blockchainName); err != nil {
 		return err
 	}
-	if err := ssh.RunSSHUploadNodeICMRelayerConfig(host, app.GetNodeInstanceDirPath(host.GetCloudID())); err != nil {
+	if err := ssh.RunSSHUploadNodeWarpRelayerConfig(host, app.GetNodeInstanceDirPath(host.GetCloudID())); err != nil {
 		return err
 	}
-	return ssh.RunSSHStartICMRelayerService(host)
+	return ssh.RunSSHStartWarpRelayerService(host)
 }
 
-func chooseICMRelayerHost(clusterName string) (*models.Host, error) {
+func chooseWarpRelayerHost(clusterName string) (*models.Host, error) {
 	// first look up for separate monitoring host
 	monitoringInventoryFile := app.GetMonitoringInventoryDir(clusterName)
 	if utils.FileExists(monitoringInventoryFile) {
@@ -568,18 +568,18 @@ func chooseICMRelayerHost(clusterName string) (*models.Host, error) {
 	return nil, fmt.Errorf("no hosts found on cluster")
 }
 
-func updateICMRelayerFunds(network models.Network, sc models.Sidecar, blockchainID ids.ID) error {
+func updateWarpRelayerFunds(network models.Network, sc models.Sidecar, blockchainID ids.ID) error {
 	_, relayerAddress, _, err := relayer.GetDefaultRelayerKeyInfo(app)
 	if err != nil {
 		return err
 	}
-	icmKey, err := app.GetKey(sc.TeleporterKey, network, true)
+	warpKey, err := app.GetKey(sc.TeleporterKey, network, true)
 	if err != nil {
 		return err
 	}
 	if err := relayer.FundRelayer(
 		network.BlockchainEndpoint(blockchainID.String()),
-		icmKey.PrivKeyHex(),
+		warpKey.PrivKeyHex(),
 		relayerAddress,
 	); err != nil {
 		return nil
@@ -835,7 +835,7 @@ func filterHosts(hosts []*models.Host, nodes []string) ([]*models.Host, error) {
 	return filteredHosts, nil
 }
 
-func setICMRelayerSecurityGroupRule(clusterName string, awmRelayerHost *models.Host) error {
+func setWarpRelayerSecurityGroupRule(clusterName string, awmRelayerHost *models.Host) error {
 	clusterConfig, err := app.GetClusterConfig(clusterName)
 	if err != nil {
 		return err
@@ -882,7 +882,7 @@ func setICMRelayerSecurityGroupRule(clusterName string, awmRelayerHost *models.H
 		}
 	}
 	if hasGCPNodes {
-		if err := setGCPICMRelayerSecurityGroupRule(awmRelayerHost); err != nil {
+		if err := setGCPWarpRelayerSecurityGroupRule(awmRelayerHost); err != nil {
 			return err
 		}
 	}
@@ -973,10 +973,10 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 		return err
 	}
 
-	storageBasePath := constants.ICMRelayerDockerDir
+	storageBasePath := constants.WarpRelayerDockerDir
 	configBasePath := app.GetNodeInstanceDirPath(cloudNodeID)
 
-	configPath := app.GetICMRelayerServiceConfigPath(configBasePath)
+	configPath := app.GetWarpRelayerServiceConfigPath(configBasePath)
 	if err := os.MkdirAll(filepath.Dir(configPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -985,8 +985,8 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	if err := relayer.CreateBaseRelayerConfigIfMissing(
 		configPath,
 		logging.Info.LowerString(),
-		app.GetICMRelayerServiceStorageDir(storageBasePath),
-		constants.RemoteICMRelayerMetricsPort,
+		app.GetWarpRelayerServiceStorageDir(storageBasePath),
+		constants.RemoteWarpRelayerMetricsPort,
 		network,
 		true,
 	); err != nil {
@@ -1002,7 +1002,7 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	if err != nil {
 		return err
 	}
-	registryAddress, messengerAddress, err := contract.GetICMInfo(app, network, chainSpec, false, false, false)
+	registryAddress, messengerAddress, err := contract.GetWarpInfo(app, network, chainSpec, false, false, false)
 	if err != nil {
 		return err
 	}
@@ -1034,7 +1034,7 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	if err != nil {
 		return err
 	}
-	registryAddress, messengerAddress, err = contract.GetICMInfo(app, network, chainSpec, false, false, false)
+	registryAddress, messengerAddress, err = contract.GetWarpInfo(app, network, chainSpec, false, false, false)
 	if err != nil {
 		return err
 	}

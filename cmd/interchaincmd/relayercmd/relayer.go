@@ -14,9 +14,9 @@ var app *application.Lux
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "relayer",
-		Short: "Manage ICM relayers",
+		Short: "Manage Warp relayers",
 		Long: `The relayer command suite provides a collection of tools for deploying
-and configuring an ICM relayers.`,
+and configuring an Warp relayers.`,
 		RunE: cobrautils.CommandSuiteUsage,
 	}
 	app = injectedApp
