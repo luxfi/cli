@@ -71,7 +71,7 @@ func createEvmGenesis(
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	genesis := core.Genesis{}
-	conf := params.SubnetEVMDefaultChainConfig
+	conf := params.EVMDefaultChainConfig
 
 	const (
 		descriptorsState = "descriptors"

@@ -12,8 +12,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/node/utils/units"
-	gethmath "github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/ethclient"
+	gethmath "github.com/luxfi/node/evm/common/math"
+	"github.com/luxfi/node/evm/ethclient"
 	"go.uber.org/zap"
 
 	"github.com/luxfi/cli/pkg/constants"
@@ -29,7 +29,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/evm/common"
 	"github.com/spf13/cobra"
 )
 
