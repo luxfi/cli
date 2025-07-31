@@ -37,8 +37,8 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 
 	ginkgo.Context("With valid input", func() {
 		ginkgo.It("should stop the relayer", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})
@@ -91,8 +91,8 @@ var _ = ginkgo.Describe("[Relayer] stop", func() {
 		})
 
 		ginkgo.It("should fail to start the relayer when it is already running", func() {
-			// Deploy ICM contracts
-			_, err := commands.DeployICMContracts([]string{}, utils.TestFlags{
+			// Deploy Warp contracts
+			_, err := commands.DeployWarpContracts([]string{}, utils.TestFlags{
 				"key":        ewoqKeyName,
 				"blockchain": subnetName,
 			})

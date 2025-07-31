@@ -156,7 +156,7 @@ func MigrateANRToTmpNet(
 				if _, err := relayer.DeployRelayer(
 					constants.DefaultRelayerVersion,
 					relayerBinPath,
-					app.GetICMRelayerBinDir(),
+					app.GetWarpRelayerBinDir(),
 					relayerConfigPath,
 					app.GetLocalRelayerLogPath(clusterToReloadNetwork.Kind),
 					app.GetLocalRelayerRunPath(clusterToReloadNetwork.Kind),

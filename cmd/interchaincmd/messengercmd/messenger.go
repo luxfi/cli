@@ -14,9 +14,9 @@ var app *application.Lux
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "messenger",
-		Short: "Interact with ICM messenger contracts",
+		Short: "Interact with Warp messenger contracts",
 		Long: `The messenger command suite provides a collection of tools for interacting
-with ICM messenger contracts.`,
+with Warp messenger contracts.`,
 		RunE: cobrautils.CommandSuiteUsage,
 	}
 	app = injectedApp
