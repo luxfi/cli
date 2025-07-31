@@ -1,6 +1,6 @@
 // Copyright (C) 2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
-package ictt
+package warp
 
 import (
 	_ "embed"
@@ -520,7 +520,7 @@ func TokenHomeAddCollateral(
 	case NativeTokenRemote:
 		return fmt.Errorf("trying to add collateral to a native token remote endpoint")
 	}
-	return fmt.Errorf("unknown ictt endpoint")
+	return fmt.Errorf("unknown warp endpoint")
 }
 
 func Send(
@@ -583,5 +583,5 @@ func Send(
 		)
 		return receipt, nil, err
 	}
-	return nil, nil, fmt.Errorf("unknown ictt endpoint")
+	return nil, nil, fmt.Errorf("unknown warp endpoint")
 }
