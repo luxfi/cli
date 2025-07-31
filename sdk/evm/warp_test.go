@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/warp"
 	"github.com/luxfi/evm/core/types"
 	subnetevmwarp "github.com/luxfi/evm/precompile/contracts/warp"
 
