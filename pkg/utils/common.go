@@ -328,12 +328,12 @@ func ReadLongString(msg string, args ...interface{}) (string, error) {
 	return longString, nil
 }
 
-func SupportedAvagoArch() []string {
+func SupportedLuxdArch() []string {
 	return []string{string(types.ArchitectureTypeArm64), string(types.ArchitectureTypeX8664)}
 }
 
 func ArchSupported(arch string) bool {
-	return slices.Contains(SupportedAvagoArch(), arch)
+	return slices.Contains(SupportedLuxdArch(), arch)
 }
 
 // Get the host, port and path from a URL.

@@ -15,13 +15,13 @@ import (
 )
 
 var (
-	testAvagoCompat  = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
-	testAvagoCompat2 = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
-	testAvagoCompat3 = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
-	testAvagoCompat4 = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
-	testAvagoCompat5 = []byte("{\"39\": [\"v1.12.2\", \"v1.13.0\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
-	testAvagoCompat6 = []byte("{\"39\": [\"v1.12.2\", \"v1.13.0\", \"v1.13.1\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
-	testAvagoCompat7 = []byte("{\"40\": [\"v1.13.2\"],\"39\": [\"v1.12.2\", \"v1.13.0\", \"v1.13.1\"]}")
+	testLuxdCompat  = []byte("{\"19\": [\"v1.9.2\"],\"18\": [\"v1.9.1\"],\"17\": [\"v1.9.0\",\"v1.8.0\"]}")
+	testLuxdCompat2 = []byte("{\"19\": [\"v1.9.2\", \"v1.9.1\"],\"18\": [\"v1.9.0\"]}")
+	testLuxdCompat3 = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\"],\"18\": [\"v1.9.0\"]}")
+	testLuxdCompat4 = []byte("{\"19\": [\"v1.9.1\", \"v1.9.2\", \"v1.9.11\"],\"18\": [\"v1.9.0\"]}")
+	testLuxdCompat5 = []byte("{\"39\": [\"v1.12.2\", \"v1.13.0\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
+	testLuxdCompat6 = []byte("{\"39\": [\"v1.12.2\", \"v1.13.0\", \"v1.13.1\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
+	testLuxdCompat7 = []byte("{\"40\": [\"v1.13.2\"],\"39\": [\"v1.12.2\", \"v1.13.0\", \"v1.13.1\"]}")
 	testCLICompat    = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0"},"DevNet":{"latest-version":"v1.13.0"},"Fuji":{"latest-version":"v1.13.0"},"Mainnet":{"latest-version":"v1.13.0"}}}`)
 	testCLICompat2   = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0"},"DevNet":{"latest-version":"v1.13.0"},"Fuji":{"latest-version":"v1.13.0-fuji"},"Mainnet":{"latest-version":"v1.13.0"}}}`)
 )
@@ -40,7 +40,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, one entry",
 			rpc:             19,
-			testData:        testAvagoCompat,
+			testData:        testLuxdCompat,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -48,7 +48,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "older, one entry",
 			rpc:             18,
-			testData:        testAvagoCompat,
+			testData:        testLuxdCompat,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.1",
 			expectedErr:     nil,
@@ -56,7 +56,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry",
 			rpc:             19,
-			testData:        testAvagoCompat2,
+			testData:        testLuxdCompat2,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -64,7 +64,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry, reverse sorted",
 			rpc:             19,
-			testData:        testAvagoCompat3,
+			testData:        testLuxdCompat3,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -72,7 +72,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "latest, multiple entry, unreleased version",
 			rpc:             19,
-			testData:        testAvagoCompat2,
+			testData:        testLuxdCompat2,
 			latestVersion:   "v1.9.1",
 			expectedVersion: "v1.9.1",
 			expectedErr:     nil,
@@ -80,23 +80,23 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "no rpc version",
 			rpc:             20,
-			testData:        testAvagoCompat2,
+			testData:        testLuxdCompat2,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "",
-			expectedErr:     ErrNoAvagoVersion,
+			expectedErr:     ErrNoLuxdVersion,
 		},
 		{
 			name:            "existing rpc, but no eligible version",
 			rpc:             19,
-			testData:        testAvagoCompat,
+			testData:        testLuxdCompat,
 			latestVersion:   "v1.9.1",
 			expectedVersion: "",
-			expectedErr:     ErrNoAvagoVersion,
+			expectedErr:     ErrNoLuxdVersion,
 		},
 		{
 			name:            "string sorting test",
 			rpc:             19,
-			testData:        testAvagoCompat4,
+			testData:        testLuxdCompat4,
 			latestVersion:   "v1.9.11",
 			expectedVersion: "v1.9.11",
 			expectedErr:     nil,
@@ -104,7 +104,7 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 		{
 			name:            "string sorting test 2",
 			rpc:             19,
-			testData:        testAvagoCompat4,
+			testData:        testLuxdCompat4,
 			latestVersion:   "v1.9.2",
 			expectedVersion: "v1.9.2",
 			expectedErr:     nil,
@@ -121,13 +121,13 @@ func TestGetLatestLuxGoByProtocolVersion(t *testing.T) {
 			app := application.New()
 			app.Downloader = mockDownloader
 
-			avagoVersion, err := GetLatestLuxGoByProtocolVersion(app, tt.rpc)
+			luxdVersion, err := GetLatestLuxGoByProtocolVersion(app, tt.rpc)
 			if tt.expectedErr == nil {
 				require.NoError(err)
 			} else {
 				require.ErrorIs(err, tt.expectedErr)
 			}
-			require.Equal(tt.expectedVersion, avagoVersion)
+			require.Equal(tt.expectedVersion, luxdVersion)
 		})
 	}
 }
@@ -146,7 +146,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli supporting latest luxd release",
 			dependency:        constants.LuxGoRepoName,
 			cliDependencyData: testCLICompat,
-			luxGoData:   testAvagoCompat5,
+			luxGoData:   testLuxdCompat5,
 			latestVersion:     "v1.13.0",
 			expectedError:     false,
 			expectedResult:    "v1.13.0",
@@ -155,7 +155,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli not supporting latest luxd release, but same rpc",
 			dependency:        constants.LuxGoRepoName,
 			cliDependencyData: testCLICompat,
-			luxGoData:   testAvagoCompat6,
+			luxGoData:   testLuxdCompat6,
 			latestVersion:     "v1.13.1",
 			expectedError:     false,
 			expectedResult:    "v1.13.0",
@@ -164,7 +164,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli supporting lower rpc",
 			dependency:        constants.LuxGoRepoName,
 			cliDependencyData: testCLICompat,
-			luxGoData:   testAvagoCompat7,
+			luxGoData:   testLuxdCompat7,
 			latestVersion:     "v1.13.2",
 			expectedError:     false,
 			expectedResult:    "v1.13.0",
@@ -173,7 +173,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli requiring a prerelease",
 			dependency:        constants.LuxGoRepoName,
 			cliDependencyData: testCLICompat2,
-			luxGoData:   testAvagoCompat7,
+			luxGoData:   testLuxdCompat7,
 			latestVersion:     "v1.13.2",
 			expectedError:     false,
 			expectedResult:    "v1.13.0-fuji",
@@ -249,7 +249,7 @@ func TestGetLatestCLISupportedDependencyVersionWithLowerRPC(t *testing.T) {
 			name:              "luxd dependency with cli supporting latest luxd release, user using lower rpc",
 			dependency:        constants.LuxGoRepoName,
 			cliDependencyData: testCLICompat,
-			luxGoData:   testAvagoCompat5,
+			luxGoData:   testLuxdCompat5,
 			expectedError:     false,
 			expectedResult:    "v1.12.1",
 			latestVersion:     "v1.13.0",
@@ -258,7 +258,7 @@ func TestGetLatestCLISupportedDependencyVersionWithLowerRPC(t *testing.T) {
 			name:              "luxd dependency with cli supporting latest luxd release, user using lower rpc, prerelease required",
 			dependency:        constants.LuxGoRepoName,
 			cliDependencyData: testCLICompat2,
-			luxGoData:   testAvagoCompat6,
+			luxGoData:   testLuxdCompat6,
 			expectedError:     false,
 			expectedResult:    "v1.12.1",
 			latestVersion:     "v1.13.2",

@@ -19,18 +19,18 @@ const (
 	ewoqPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 )
 
-var avagoVersion string
+var luxdVersion string
 
 var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 	ginkgo.It("Create Etna Subnet Config", func() {
-		_, avagoVersion = commands.CreateEtnaSubnetEvmConfig(
+		_, luxdVersion = commands.CreateEtnaSubnetEvmConfig(
 			utils.BlockchainName,
 			ewoqEVMAddress,
 			commands.PoS,
 		)
 	})
 	ginkgo.It("Can deploy blockchain to localhost and upsize it", func() {
-		output := commands.StartNetworkWithVersion(avagoVersion)
+		output := commands.StartNetworkWithVersion(luxdVersion)
 		fmt.Println(output)
 		output, err := commands.DeployEtnaBlockchain(
 			utils.BlockchainName,

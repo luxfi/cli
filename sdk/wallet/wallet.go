@@ -7,7 +7,7 @@ import (
 
 	"github.com/luxfi/cli/sdk/keychain"
 	"github.com/luxfi/node/ids"
-	avagokeychain "github.com/luxfi/node/utils/crypto/keychain"
+	luxdkeychain "github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/subnet/primary"
@@ -21,7 +21,7 @@ type Wallet struct {
 	config   primary.WalletConfig
 }
 
-func New(ctx context.Context, uri string, luxKeychain avagokeychain.Keychain, config primary.WalletConfig) (Wallet, error) {
+func New(ctx context.Context, uri string, luxKeychain luxdkeychain.Keychain, config primary.WalletConfig) (Wallet, error) {
 	wallet, err := primary.MakeWallet(
 		ctx,
 		uri,

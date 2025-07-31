@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
-var ErrNoAvagoVersion = errors.New("unable to find a compatible luxd version")
+var ErrNoLuxdVersion = errors.New("unable to find a compatible luxd version")
 
 func GetLatestLuxGoByProtocolVersion(app *application.Lux, rpcVersion int) (string, error) {
 	useVersion, err := GetAvailableLuxGoVersions(app, rpcVersion, constants.LuxGoCompatibilityURL)
@@ -65,14 +65,14 @@ func GetLuxGoVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([
 		return nil, err
 	}
 
-	var parsedCompat models.AvagoCompatiblity
+	var parsedCompat models.LuxdCompatiblity
 	if err = json.Unmarshal(compatibilityBytes, &parsedCompat); err != nil {
 		return nil, err
 	}
 
 	eligibleVersions, ok := parsedCompat[strconv.Itoa(rpcVersion)]
 	if !ok {
-		return nil, ErrNoAvagoVersion
+		return nil, ErrNoLuxdVersion
 	}
 
 	// versions are not necessarily sorted, so we need to sort them, tho this puts them in ascending order
@@ -85,10 +85,10 @@ func GetLuxGoVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([
 func GetAvailableLuxGoVersions(app *application.Lux, rpcVersion int, url string) ([]string, error) {
 	eligibleVersions, err := GetLuxGoVersionsForRPC(app, rpcVersion, url)
 	if err != nil {
-		return nil, ErrNoAvagoVersion
+		return nil, ErrNoLuxdVersion
 	}
-	// get latest avago release to make sure we're not picking a release currently in progress but not available for download
-	latestAvagoVersion, err := app.Downloader.GetLatestReleaseVersion(
+	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
+	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
 		constants.LuxOrg,
 		constants.LuxGoRepoName,
 		"",
@@ -98,13 +98,13 @@ func GetAvailableLuxGoVersions(app *application.Lux, rpcVersion int, url string)
 	}
 	var availableVersions []string
 	for i := len(eligibleVersions) - 1; i >= 0; i-- {
-		versionComparison := semver.Compare(eligibleVersions[i], latestAvagoVersion)
+		versionComparison := semver.Compare(eligibleVersions[i], latestLuxdVersion)
 		if versionComparison != 1 {
 			availableVersions = append(availableVersions, eligibleVersions[i])
 		}
 	}
 	if len(availableVersions) == 0 {
-		return nil, ErrNoAvagoVersion
+		return nil, ErrNoLuxdVersion
 	}
 	return availableVersions, nil
 }
@@ -119,10 +119,10 @@ type LuxGoVersionSettings struct {
 // GetLuxGoVersion asks users whether they want to install the newest Lux Go version
 // or if they want to use the newest Lux Go Version that is still compatible with Subnet EVM
 // version of their choice
-func GetLuxGoVersion(app *application.Lux, avagoVersion LuxGoVersionSettings, network models.Network) (string, error) {
+func GetLuxGoVersion(app *application.Lux, luxdVersion LuxGoVersionSettings, network models.Network) (string, error) {
 	// skip this logic if custom-luxd-version flag is set
-	if avagoVersion.UseCustomLuxgoVersion != "" {
-		return avagoVersion.UseCustomLuxgoVersion, nil
+	if luxdVersion.UseCustomLuxgoVersion != "" {
+		return luxdVersion.UseCustomLuxgoVersion, nil
 	}
 	latestReleaseVersion, err := GetLatestCLISupportedDependencyVersion(app, constants.LuxGoRepoName, network, nil)
 	if err != nil {
@@ -137,8 +137,8 @@ func GetLuxGoVersion(app *application.Lux, avagoVersion LuxGoVersionSettings, ne
 		return "", err
 	}
 
-	if !avagoVersion.UseLatestLuxgoReleaseVersion && !avagoVersion.UseLatestLuxgoPreReleaseVersion && avagoVersion.UseCustomLuxgoVersion == "" && avagoVersion.UseLuxgoVersionFromSubnet == "" {
-		avagoVersion, err = promptLuxGoVersionChoice(app, latestReleaseVersion, latestPreReleaseVersion)
+	if !luxdVersion.UseLatestLuxgoReleaseVersion && !luxdVersion.UseLatestLuxgoPreReleaseVersion && luxdVersion.UseCustomLuxgoVersion == "" && luxdVersion.UseLuxgoVersionFromSubnet == "" {
+		luxdVersion, err = promptLuxGoVersionChoice(app, latestReleaseVersion, latestPreReleaseVersion)
 		if err != nil {
 			return "", err
 		}
@@ -146,14 +146,14 @@ func GetLuxGoVersion(app *application.Lux, avagoVersion LuxGoVersionSettings, ne
 
 	var version string
 	switch {
-	case avagoVersion.UseLatestLuxgoReleaseVersion:
+	case luxdVersion.UseLatestLuxgoReleaseVersion:
 		version = latestReleaseVersion
-	case avagoVersion.UseLatestLuxgoPreReleaseVersion:
+	case luxdVersion.UseLatestLuxgoPreReleaseVersion:
 		version = latestPreReleaseVersion
-	case avagoVersion.UseCustomLuxgoVersion != "":
-		version = avagoVersion.UseCustomLuxgoVersion
-	case avagoVersion.UseLuxgoVersionFromSubnet != "":
-		sc, err := app.LoadSidecar(avagoVersion.UseLuxgoVersionFromSubnet)
+	case luxdVersion.UseCustomLuxgoVersion != "":
+		version = luxdVersion.UseCustomLuxgoVersion
+	case luxdVersion.UseLuxgoVersionFromSubnet != "":
+		sc, err := app.LoadSidecar(luxdVersion.UseLuxgoVersionFromSubnet)
 		if err != nil {
 			return "", err
 		}

@@ -12,7 +12,7 @@ func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error
 	binDir := app.GetLuxgoBinDir()
 
 	installer := NewInstaller()
-	downloader := NewAvagoDownloader()
+	downloader := NewLuxdDownloader()
 	return InstallBinary(
 		app,
 		luxdVersion,

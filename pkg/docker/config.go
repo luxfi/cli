@@ -28,20 +28,20 @@ func prepareLuxgoConfig(
 	network models.Network,
 	luxGoConfig LuxGoConfigOptions,
 ) (string, string, error) {
-	avagoConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), nil)
+	luxdConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), nil)
 	if luxGoConfig.AllowPublicAccess || utils.IsE2E() {
-		avagoConf.HTTPHost = "0.0.0.0"
+		luxdConf.HTTPHost = "0.0.0.0"
 	}
-	avagoConf.PartialSync = luxGoConfig.PartialSync
-	avagoConf.BootstrapIPs = strings.Join(luxGoConfig.BootstrapIPs, ",")
-	avagoConf.BootstrapIDs = strings.Join(luxGoConfig.BootstrapIDs, ",")
+	luxdConf.PartialSync = luxGoConfig.PartialSync
+	luxdConf.BootstrapIPs = strings.Join(luxGoConfig.BootstrapIPs, ",")
+	luxdConf.BootstrapIDs = strings.Join(luxGoConfig.BootstrapIDs, ",")
 	if luxGoConfig.GenesisPath != "" {
-		avagoConf.GenesisPath = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
+		luxdConf.GenesisPath = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
 	}
 	if luxGoConfig.UpgradePath != "" {
-		avagoConf.UpgradePath = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
+		luxdConf.UpgradePath = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
 	}
-	nodeConf, err := remoteconfig.RenderLuxNodeConfig(avagoConf)
+	nodeConf, err := remoteconfig.RenderLuxNodeConfig(luxdConf)
 	if err != nil {
 		return "", "", err
 	}
@@ -52,7 +52,7 @@ func prepareLuxgoConfig(
 	if err := os.WriteFile(nodeConfFile.Name(), nodeConf, constants.WriteReadUserOnlyPerms); err != nil {
 		return "", "", err
 	}
-	cChainConf, err := remoteconfig.RenderLuxCChainConfig(avagoConf)
+	cChainConf, err := remoteconfig.RenderLuxCChainConfig(luxdConf)
 	if err != nil {
 		return "", "", err
 	}

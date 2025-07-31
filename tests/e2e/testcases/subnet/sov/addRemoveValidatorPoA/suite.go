@@ -23,12 +23,12 @@ const (
 var (
 	blockchainID     string
 	localClusterUris []string
-	avagoVersion     string
+	luxdVersion     string
 )
 
 var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 	ginkgo.It("Create Etna Subnet Config", func() {
-		_, avagoVersion = commands.CreateEtnaSubnetEvmConfig(
+		_, luxdVersion = commands.CreateEtnaSubnetEvmConfig(
 			utils.BlockchainName,
 			ewoqEVMAddress,
 			commands.PoA,
@@ -36,13 +36,13 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 	})
 
 	ginkgo.It("Can create an Etna Local Network", func() {
-		output := commands.StartNetworkWithVersion(avagoVersion)
+		output := commands.StartNetworkWithVersion(luxdVersion)
 		fmt.Println(output)
 	})
 
 	ginkgo.It("Can create a local node connected to Etna Local Network", func() {
 		output, err := commands.CreateLocalEtnaNode(
-			avagoVersion,
+			luxdVersion,
 			utils.TestLocalNodeName,
 			7,
 		)
@@ -105,7 +105,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 			localClusterUris[5],
 			ewoqPChainAddress,
 			1,
-			false, // use existing avago running
+			false, // use existing luxd running
 		)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println(output)
@@ -118,7 +118,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 			localClusterUris[6],
 			ewoqPChainAddress,
 			1,
-			false, // use existing avago running
+			false, // use existing luxd running
 		)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println(output)

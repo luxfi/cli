@@ -31,7 +31,7 @@ import (
 	"github.com/luxfi/cli/sdk/evm"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/node/ids"
-	avagoconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
@@ -891,7 +891,7 @@ func getTimeParameters(network models.Network, nodeID ids.NodeID, isValidator bo
 	var selectedDuration time.Duration
 	if useDefaultDuration {
 		// avoid setting both globals useDefaultDuration and duration
-		selectedDuration, err = utils.GetRemainingValidationTime(network.Endpoint, nodeID, avagoconstants.PrimaryNetworkID, start)
+		selectedDuration, err = utils.GetRemainingValidationTime(network.Endpoint, nodeID, luxdconstants.PrimaryNetworkID, start)
 		if err != nil {
 			return time.Time{}, 0, err
 		}

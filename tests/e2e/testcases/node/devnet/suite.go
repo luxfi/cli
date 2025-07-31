@@ -109,7 +109,7 @@ var _ = ginkgo.Describe("[Node devnet]", func() {
 		// make sure there is no API node in the genesis
 		gomega.Expect(genesisFile).To(gomega.Not(gomega.ContainSubstring(apiNodeID)))
 	})
-	ginkgo.It("can wait for 20 seconds for avago to startup", func() {
+	ginkgo.It("can wait for 20 seconds for luxd to startup", func() {
 		time.Sleep(20 * time.Second)
 	})
 	/*ginkgo.It("can get cluster status", func() {

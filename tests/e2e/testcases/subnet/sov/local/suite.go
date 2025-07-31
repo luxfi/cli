@@ -52,7 +52,7 @@ var _ = ginkgo.Describe("[Local Subnet SOV]", ginkgo.Ordered, func() {
 		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloSubnetEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
 		commands.CreateCustomVMConfigSOV(subnetName, utils.SubnetEvmGenesisPoaPath, customVMPath)
-		deployOutput := commands.DeploySubnetLocallyWithVersionSOV(subnetName, mapping[utils.SoloAvagoKey])
+		deployOutput := commands.DeploySubnetLocallyWithVersionSOV(subnetName, mapping[utils.SoloLuxdKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)

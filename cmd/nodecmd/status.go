@@ -259,7 +259,7 @@ func printOutput(
 	ux.Logger.PrintToUser(tit)
 	ux.Logger.PrintToUser(strings.Repeat("=", len(removeColors(tit))))
 	ux.Logger.PrintToUser("")
-	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Role", "Avago Version", "Primary Network", "Healthy"}
+	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Role", "Luxd Version", "Primary Network", "Healthy"}
 	if blockchainName != "" {
 		header = append(header, "Subnet "+blockchainName)
 	}

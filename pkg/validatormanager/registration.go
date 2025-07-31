@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/proto/pb/platformvm"
-	avagoconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
 	warpMessage "github.com/luxfi/warp"
@@ -341,7 +341,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID,
-		avagoconstants.PlatformChainID,
+		luxdconstants.PlatformChainID,
 		subnetValidatorRegistrationAddressedCall.Bytes(),
 	)
 	if err != nil {

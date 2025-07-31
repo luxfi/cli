@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/node/ids"
-	avagoconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
 	warpMessage "github.com/luxfi/warp"
@@ -358,7 +358,7 @@ func GetPChainL1ValidatorWeightMessage(
 	}
 	unsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID,
-		avagoconstants.PlatformChainID,
+		luxdconstants.PlatformChainID,
 		addressedCall.Bytes(),
 	)
 	if err != nil {

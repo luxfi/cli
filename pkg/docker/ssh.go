@@ -46,12 +46,12 @@ func ComposeSSHSetupNode(
 	}
 	ux.Logger.Info("luxCLI folder structure created on remote host %s after %s ", folderStructure, time.Since(startTime))
 
-	avagoDockerImage := fmt.Sprintf("%s:%s", constants.LuxGoDockerImage, luxGoVersion)
-	ux.Logger.Info("Preparing LuxGo Docker image %s on %s[%s]", avagoDockerImage, host.NodeID, host.IP)
-	if err := PrepareDockerImageWithRepo(host, avagoDockerImage, constants.LuxGoGitRepo, luxGoVersion); err != nil {
+	luxdDockerImage := fmt.Sprintf("%s:%s", constants.LuxGoDockerImage, luxGoVersion)
+	ux.Logger.Info("Preparing LuxGo Docker image %s on %s[%s]", luxdDockerImage, host.NodeID, host.IP)
+	if err := PrepareDockerImageWithRepo(host, luxdDockerImage, constants.LuxGoGitRepo, luxGoVersion); err != nil {
 		return err
 	}
-	ux.Logger.Info("LuxGo Docker image %s ready on %s[%s] after %s", avagoDockerImage, host.NodeID, host.IP, time.Since(startTime))
+	ux.Logger.Info("LuxGo Docker image %s ready on %s[%s] after %s", luxdDockerImage, host.NodeID, host.IP, time.Since(startTime))
 	nodeConfFile, cChainConfFile, err := prepareLuxgoConfig(
 		host,
 		network,

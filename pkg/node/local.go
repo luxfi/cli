@@ -28,14 +28,14 @@ import (
 func setupLuxGo(
 	app *application.Lux,
 	luxGoBinaryPath string,
-	avaGoVersionSetting dependencies.LuxGoVersionSettings,
+	luxdVersionSetting dependencies.LuxGoVersionSettings,
 	network models.Network,
 	printFunc func(msg string, args ...interface{}),
 ) (string, error) {
 	var err error
 	luxGoVersion := ""
 	if luxGoBinaryPath == "" {
-		luxGoVersion, err = dependencies.GetLuxGoVersion(app, avaGoVersionSetting, network)
+		luxGoVersion, err = dependencies.GetLuxGoVersion(app, luxdVersionSetting, network)
 		if err != nil {
 			return "", err
 		}
@@ -57,7 +57,7 @@ func StartLocalNode(
 	defaultFlags map[string]interface{},
 	connectionSettings localnet.ConnectionSettings,
 	nodeSettings []localnet.NodeSetting,
-	avaGoVersionSetting dependencies.LuxGoVersionSettings,
+	luxdVersionSetting dependencies.LuxGoVersionSettings,
 	network models.Network,
 ) error {
 	// initializes directories
@@ -80,7 +80,7 @@ func StartLocalNode(
 		luxGoBinaryPath, err = setupLuxGo(
 			app,
 			luxGoBinaryPath,
-			avaGoVersionSetting,
+			luxdVersionSetting,
 			network,
 			ux.Logger.PrintToUser,
 		)
@@ -218,11 +218,11 @@ func LocalStatus(
 			} else {
 				healthStatus = fmt.Sprintf(" [%s]", logging.Red.Wrap("Unhealthy"))
 			}
-			runningAvagoURIs, err := localnet.GetLocalClusterURIs(app, clusterName)
+			runningLuxdURIs, err := localnet.GetLocalClusterURIs(app, clusterName)
 			if err != nil {
 				return err
 			}
-			for _, luxdURI := range runningAvagoURIs {
+			for _, luxdURI := range runningLuxdURIs {
 				nodeID, nodePOP, isBoot, err := getInfo(luxdURI, blockchainID.String())
 				if err != nil {
 					ux.Logger.RedXToUser("failed to get node  %s info: %v", luxdURI, err)
