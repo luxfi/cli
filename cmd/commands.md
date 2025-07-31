@@ -1393,37 +1393,37 @@ lux warp sendMsg [subcommand] [flags]
 --skip-update-check             skip check for new versions
 ```
 
-<a id="lux-ictt"></a>
-## lux ictt
+<a id="lux-warp"></a>
+## lux warp
 
-The ictt command suite provides tools to deploy and manage Warp Transfers.
+The warp command suite provides tools to deploy and manage Warp Transfers.
 
 **Usage:**
 ```bash
-lux ictt [subcommand] [flags]
+lux warp [subcommand] [flags]
 ```
 
 **Subcommands:**
 
-- [`deploy`](#lux-ictt-deploy): Deploys a Token Transferrer into a given Network and Subnets
+- [`deploy`](#lux-warp-deploy): Deploys a Token Transferrer into a given Network and Subnets
 
 **Flags:**
 
 ```bash
--h, --help             help for ictt
+-h, --help             help for warp
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
 ```
 
-<a id="lux-ictt-deploy"></a>
+<a id="lux-warp-deploy"></a>
 ### deploy
 
 Deploys a Token Transferrer into a given Network and Subnets
 
 **Usage:**
 ```bash
-lux ictt deploy [subcommand] [flags]
+lux warp deploy [subcommand] [flags]
 ```
 
 **Flags:**
