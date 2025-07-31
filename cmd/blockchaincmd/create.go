@@ -45,12 +45,12 @@ type CreateFlags struct {
 	useTestDefaults               bool
 	useProductionDefaults         bool
 	useWarp                       bool
-	useICM                        bool
+	useWarp                        bool
 	vmVersion                     string
 	useLatestReleasedVMVersion    bool
 	useLatestPreReleasedVMVersion bool
 	useExternalGasToken           bool
-	addICMRegistryToGenesis       bool
+	addWarpRegistryToGenesis       bool
 	proofOfStake                  bool
 	proofOfAuthority              bool
 	rewardBasisPoints             uint64
@@ -130,15 +130,15 @@ configuration, pass the -f flag.`,
 		set.BoolVar(&useRepo, "from-github-repo", false, "generate custom VM binary from github repository")
 	})
 
-	icmGroup := flags.RegisterFlagGroup(cmd, "ICM Flags", "show-icm-flags", true, func(set *pflag.FlagSet) {
-		set.BoolVar(&createFlags.useWarp, "warp", true, "generate a vm with warp support (needed for ICM)")
-		set.BoolVar(&createFlags.useICM, "icm", false, "interoperate with other blockchains using ICM")
+	warpGroup := flags.RegisterFlagGroup(cmd, "Warp Flags", "show-warp-flags", true, func(set *pflag.FlagSet) {
+		set.BoolVar(&createFlags.useWarp, "warp", true, "generate a vm with warp support (needed for Warp)")
+		set.BoolVar(&createFlags.useWarp, "warp", false, "interoperate with other blockchains using Warp")
 		set.BoolVar(&createFlags.useExternalGasToken, "external-gas-token", false, "use a gas token from another blockchain")
-		set.BoolVar(&createFlags.addICMRegistryToGenesis, "icm-registry-at-genesis", false, "setup ICM registry smart contract on genesis [experimental]")
+		set.BoolVar(&createFlags.addWarpRegistryToGenesis, "warp-registry-at-genesis", false, "setup Warp registry smart contract on genesis [experimental]")
 		set.BoolVar(&createFlags.useProductionDefaults, "production-defaults", false, "use default production settings for your blockchain")
 		set.BoolVar(&createFlags.useTestDefaults, "test-defaults", false, "use default test settings for your blockchain")
 	})
-	cmd.SetHelpFunc(flags.WithGroupedHelp([]flags.GroupedFlags{sovGroup, evmGroup, customVMGroup, icmGroup}))
+	cmd.SetHelpFunc(flags.WithGroupedHelp([]flags.GroupedFlags{sovGroup, evmGroup, customVMGroup, warpGroup}))
 	return cmd
 }
 
@@ -250,23 +250,23 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 
 	var (
 		genesisBytes        []byte
-		useICMFlag          *bool
-		deployICM           bool
+		useWarpFlag          *bool
+		deployWarp           bool
 		useExternalGasToken bool
 	)
 
-	// get ICM flag as a pointer (3 values: undef/true/false)
+	// get Warp flag as a pointer (3 values: undef/true/false)
 	flagName := "teleporter"
 	if flag := cmd.Flags().Lookup(flagName); flag != nil && flag.Changed {
-		useICMFlag = &createFlags.useICM
+		useWarpFlag = &createFlags.useWarp
 	}
-	flagName = "icm"
+	flagName = "warp"
 	if flag := cmd.Flags().Lookup(flagName); flag != nil && flag.Changed {
-		useICMFlag = &createFlags.useICM
+		useWarpFlag = &createFlags.useWarp
 	}
 
-	// get ICM info
-	icmInfo, err := interchain.GetICMInfo(app)
+	// get Warp info
+	warpInfo, err := interchain.GetWarpInfo(app)
 	if err != nil {
 		return err
 	}
@@ -322,7 +322,7 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			deployICM, err = vm.PromptInterop(app, useICMFlag, defaultsKind, false)
+			deployWarp, err = vm.PromptInterop(app, useWarpFlag, defaultsKind, false)
 			if err != nil {
 				return err
 			}
@@ -340,7 +340,7 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 				createFlags.chainID,
 				createFlags.tokenSymbol,
 				blockchainName,
-				useICMFlag,
+				useWarpFlag,
 				defaultsKind,
 				createFlags.useWarp,
 				createFlags.useExternalGasToken,
@@ -348,13 +348,13 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			deployICM = params.UseICM
+			deployWarp = params.UseWarp
 			useExternalGasToken = params.UseExternalGasToken
 			genesisBytes, err = vm.CreateEVMGenesis(
 				app,
 				params,
-				icmInfo,
-				createFlags.addICMRegistryToGenesis,
+				warpInfo,
+				createFlags.addWarpRegistryToGenesis,
 				sc.ProxyContractOwner,
 				createFlags.rewardBasisPoints,
 				createFlags.useACP99,
@@ -397,7 +397,7 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			deployICM, err = vm.PromptInterop(app, useICMFlag, defaultsKind, false)
+			deployWarp, err = vm.PromptInterop(app, useWarpFlag, defaultsKind, false)
 			if err != nil {
 				return err
 			}
@@ -418,21 +418,21 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if deployICM || useExternalGasToken {
+	if deployWarp || useExternalGasToken {
 		sc.TeleporterReady = true
 		sc.RunRelayer = true // TODO: remove this once deploy asks if deploying relayer
 		sc.ExternalToken = useExternalGasToken
-		sc.TeleporterKey = constants.ICMKeyName
-		sc.TeleporterVersion = icmInfo.Version
+		sc.TeleporterKey = constants.WarpKeyName
+		sc.TeleporterVersion = warpInfo.Version
 		if genesisPath != "" {
 			if evmCompatibleGenesis, err := utils.FileIsSubnetEVMGenesis(genesisPath); err != nil {
 				return err
 			} else if evmCompatibleGenesis {
-				// evm genesis file was given. make appropriate checks and customizations for ICM
+				// evm genesis file was given. make appropriate checks and customizations for Warp
 				genesisBytes, err = addSubnetEVMGenesisPrefundedAddress(
 					genesisBytes,
-					icmInfo.FundedAddress,
-					icmInfo.FundedBalance.String(),
+					warpInfo.FundedAddress,
+					warpInfo.FundedBalance.String(),
 				)
 				if err != nil {
 					return err

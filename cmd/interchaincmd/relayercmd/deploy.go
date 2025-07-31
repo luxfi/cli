@@ -51,8 +51,8 @@ const (
 func newDeployCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "deploy",
-		Short: "Deploys an ICM Relayer for the given Network",
-		Long:  `Deploys an ICM Relayer for the given Network.`,
+		Short: "Deploys an Warp Relayer for the given Network",
+		Long:  `Deploys an Warp Relayer for the given Network.`,
 		RunE:  deploy,
 		Args:  cobrautils.ExactArgs(0),
 	}
@@ -447,15 +447,15 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	configPath := app.GetLocalRelayerConfigPath(network.Kind, localNetworkRootDir)
 	logPath := app.GetLocalRelayerLogPath(network.Kind)
 
-	metricsPort := constants.RemoteICMRelayerMetricsPort
+	metricsPort := constants.RemoteWarpRelayerMetricsPort
 	if !deployToRemote {
 		switch network.Kind {
 		case models.Local:
-			metricsPort = constants.LocalNetworkLocalICMRelayerMetricsPort
+			metricsPort = constants.LocalNetworkLocalWarpRelayerMetricsPort
 		case models.Devnet:
-			metricsPort = constants.DevnetLocalICMRelayerMetricsPort
+			metricsPort = constants.DevnetLocalWarpRelayerMetricsPort
 		case models.Fuji:
-			metricsPort = constants.FujiLocalICMRelayerMetricsPort
+			metricsPort = constants.FujiLocalWarpRelayerMetricsPort
 		}
 	}
 
@@ -479,8 +479,8 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			source.wsEndpoint,
 			source.subnetID,
 			source.blockchainID,
-			source.icmRegistryAddress,
-			source.icmMessengerAddress,
+			source.warpRegistryAddress,
+			source.warpMessengerAddress,
 			source.rewardAddress,
 		); err != nil {
 			return err
@@ -503,7 +503,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		binPath, err := relayer.DeployRelayer(
 			flags.Version,
 			flags.BinPath,
-			app.GetICMRelayerBinDir(),
+			app.GetWarpRelayerBinDir(),
 			configPath,
 			logPath,
 			runFilePath,

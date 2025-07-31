@@ -30,7 +30,7 @@ func GetHostWithCloudID(app *application.Lux, clusterName string, cloudID string
 	return nil, nil
 }
 
-func GetICMRelayerHost(app *application.Lux, clusterName string) (*models.Host, error) {
+func GetWarpRelayerHost(app *application.Lux, clusterName string) (*models.Host, error) {
 	clusterConfig, err := app.GetClusterConfig(clusterName)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func GetICMRelayerHost(app *application.Lux, clusterName string) (*models.Host, 
 	for _, cloudID := range clusterConfig.GetCloudIDs() {
 		if nodeConfig, err := app.LoadClusterNodeConfig(cloudID); err != nil {
 			return nil, err
-		} else if nodeConfig.IsICMRelayer {
+		} else if nodeConfig.IsWarpRelayer {
 			relayerCloudID = nodeConfig.NodeID
 		}
 	}
