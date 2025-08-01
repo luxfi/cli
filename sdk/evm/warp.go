@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	warp "github.com/luxfi/warp"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 )
 

@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/warp/messages"
 
 	"github.com/ethereum/go-ethereum/common"
