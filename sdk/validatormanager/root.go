@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/warp"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 
 	"github.com/ethereum/go-ethereum/common"
 )

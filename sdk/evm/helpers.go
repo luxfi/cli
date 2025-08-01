@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

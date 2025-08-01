@@ -37,6 +37,20 @@ const (
 	TestnetAPIEndpoint       = "https://api.lux-test.network"
 	MainnetAPIEndpoint    = "https://api.lux.network"
 
+	// Cloud service constants
+	GCPCloudService         = "gcp"
+	AWSCloudService         = "aws"
+	E2EDocker               = "e2e-docker"
+	GCPNodeAnsiblePrefix    = "gcp_node"
+	AWSNodeAnsiblePrefix    = "aws_node"
+	E2EDockerLoopbackHost   = "127.0.0.1"
+	GCPDefaultImageProvider = "canonical"
+	GCPImageFilter          = "ubuntu-os-cloud"
+
+	// SSH constants
+	SSHSleepBetweenChecks = 1 * time.Second
+	SSHFileOpsTimeout     = 10 * time.Second
+
 	// this depends on bootstrap snapshot
 	LocalAPIEndpoint = "http://127.0.0.1:9630"
 	LocalNetworkID   = 1337
@@ -98,6 +112,29 @@ const (
 	LatestEVMVersion = "v0.7.7"
 
 	LPMDir                = ".lpm"
+
+	// Network ports
+	SSHTCPPort = 22
+	LuxdAPIPort = 9650
+	LuxdGrafanaPort = 3000
+
+	// Node roles
+	APIRole         = "api"
+	ValidatorRole   = "validator"
+	MonitorRole     = "monitor"
+	WarpRelayerRole = "warp-relayer"
+)
+
+// HTTPAccess represents HTTP access configuration
+type HTTPAccess string
+
+const (
+	// HTTPAccess values
+	HTTPAccessPublic  HTTPAccess = "public"
+	HTTPAccessPrivate HTTPAccess = "private"
+
+	// SSH timeouts
+	SSHLongRunningScriptTimeout = 10 * time.Minute
 	LPMLogName            = "lpm.log"
 	DefaultLuxPackage = "luxfi/plugins-core"
 	LPMPluginDir          = "lpm_plugins"

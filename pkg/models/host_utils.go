@@ -12,7 +12,7 @@ import (
 )
 
 // timedFunction executes a function and returns its result with error
-func timedFunction(f func() (any, error), actionMsg string) (any, error) {
+func timedFunction(f func() (any, error), actionMsg string, timeout ...time.Duration) (any, error) {
 	fmt.Printf("  %s...", actionMsg)
 	start := time.Now()
 	result, err := f()
@@ -26,7 +26,7 @@ func timedFunction(f func() (any, error), actionMsg string) (any, error) {
 }
 
 // timedFunctionWithRetry executes a function with retry logic
-func timedFunctionWithRetry[T any](f func() (T, error), actionMsg string, numRetries int, sleepBetweenRetries time.Duration) (T, error) {
+func timedFunctionWithRetry[T any](f func() (T, error), actionMsg string, timeout time.Duration, numRetries int, sleepBetweenRetries time.Duration) (T, error) {
 	var result T
 	var err error
 	for i := 0; i <= numRetries; i++ {

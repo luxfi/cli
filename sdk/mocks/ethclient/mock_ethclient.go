@@ -15,7 +15,7 @@ import (
 	reflect "reflect"
 
 	ids "github.com/luxfi/node/ids"
-	types "github.com/luxfi/evm/core/types"
+	types "github.com/luxfi/geth/core/types"
 	interfaces "github.com/luxfi/evm/interfaces"
 	params "github.com/luxfi/evm/params"
 	rpc "github.com/luxfi/evm/rpc"
