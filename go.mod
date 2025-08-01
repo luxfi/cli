@@ -42,7 +42,7 @@ require (
 	github.com/spf13/afero v1.14.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.2
 	go.uber.org/zap v1.27.0
@@ -153,7 +153,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/database v1.1.4 // indirect
-	github.com/luxfi/metrics v0.1.0 // indirect
+	github.com/luxfi/metrics v1.1.1 // indirect
 	github.com/luxfi/trace v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
