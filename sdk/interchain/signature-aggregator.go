@@ -13,7 +13,6 @@ import (
 
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/warp"
-	signatureAggregator "github.com/luxfi/warp/signature-aggregator/api"
 	"go.uber.org/zap"
 )
 
@@ -24,6 +23,19 @@ const (
 	InitialBackoff                    = 1 * time.Second
 )
 
+// AggregateSignatureRequest defines the request structure for signature aggregation
+type AggregateSignatureRequest struct {
+	Message          string
+	SigningSubnetID  string
+	QuorumPercentage uint64
+	Justification    string
+}
+
+// AggregateSignatureResponse defines the response structure for signature aggregation
+type AggregateSignatureResponse struct {
+	SignedMessage string
+}
+
 // SignMessage sends a request to the signature aggregator to sign a message.
 // It returns the signed warp message or an error if the operation fails.
 func SignMessage(logger logging.Logger, signatureAggregatorEndpoint string, message, justification, signingSubnetID string, quorumPercentage uint64) (*warp.Message, error) {
@@ -32,7 +44,7 @@ func SignMessage(logger logging.Logger, signatureAggregatorEndpoint string, mess
 	} else if quorumPercentage > 100 {
 		return nil, fmt.Errorf("quorum percentage cannot be greater than 100")
 	}
-	request := signatureAggregator.AggregateSignatureRequest{
+	request := AggregateSignatureRequest{
 		Message:          message,
 		SigningSubnetID:  signingSubnetID,
 		QuorumPercentage: quorumPercentage,
@@ -111,7 +123,7 @@ func SignMessage(logger logging.Logger, signatureAggregatorEndpoint string, mess
 			continue
 		}
 
-		var response signatureAggregator.AggregateSignatureResponse
+		var response AggregateSignatureResponse
 		if err := json.Unmarshal(body, &response); err != nil {
 			lastErr = fmt.Errorf("failed to parse response: %w", err)
 			logger.Error("Error parsing response",

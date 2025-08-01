@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/staking"
-	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
+	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/node/utils/formatting"
 	"github.com/luxfi/node/vms/platformvm/signer"
 )

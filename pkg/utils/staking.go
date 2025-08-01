@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/staking"
-	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
+	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"

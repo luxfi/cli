@@ -9,7 +9,6 @@ import (
 	"github.com/luxfi/cli/sdk/utils"
 
 	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm"
 )
@@ -24,14 +23,9 @@ type LedgerDevice struct {
 }
 
 func New() (*LedgerDevice, error) {
-	luxdDev, err := ledger.New()
-	if err != nil {
-		return nil, err
-	}
-	dev := LedgerDevice{
-		Ledger: luxdDev,
-	}
-	return &dev, nil
+	// Ledger support is currently disabled in the node package
+	// Return an error until ledger support is re-enabled
+	return nil, fmt.Errorf("ledger support is currently disabled")
 }
 
 func (dev *LedgerDevice) FindAddresses(addresses []string, maxIndex uint32) (map[string]uint32, error) {
