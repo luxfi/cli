@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/node/genesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
-	"github.com/luxfi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/crypto/secp256k1"
 
 	"golang.org/x/exp/maps"
 )

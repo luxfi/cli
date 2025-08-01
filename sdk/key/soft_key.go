@@ -17,7 +17,7 @@ import (
 
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/cb58"
-	"github.com/luxfi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -314,7 +314,8 @@ func (m *SoftKey) Spends(outputs []*lux.UTXO, opts ...OpOption) (
 		// Convert to ids.ShortID to adhere with interface
 		pksigners := make([]ids.ShortID, len(psigners))
 		for i, psigner := range psigners {
-			pksigners[i] = psigner.PublicKey().Address()
+			addr := psigner.PublicKey().Address()
+			copy(pksigners[i][:], addr[:])
 		}
 		signers = append(signers, pksigners)
 		if ret.targetAmount > 0 &&
@@ -346,7 +347,10 @@ func (m *SoftKey) spend(output *lux.UTXO, time uint64) (
 }
 
 func (m *SoftKey) Addresses() []ids.ShortID {
-	return []ids.ShortID{m.privKey.PublicKey().Address()}
+	addr := m.privKey.PublicKey().Address()
+	shortID := ids.ShortID{}
+	copy(shortID[:], addr[:])
+	return []ids.ShortID{shortID}
 }
 
 func (m *SoftKey) Sign(pTx *txs.Tx, signers [][]ids.ShortID) error {
@@ -354,7 +358,9 @@ func (m *SoftKey) Sign(pTx *txs.Tx, signers [][]ids.ShortID) error {
 	for i, inputSigners := range signers {
 		privsigners[i] = make([]*secp256k1.PrivateKey, len(inputSigners))
 		for j, signer := range inputSigners {
-			if signer != m.privKey.PublicKey().Address() {
+			addr := m.privKey.PublicKey().Address()
+			// Compare the underlying bytes
+			if !bytes.Equal(signer[:], addr[:]) {
 				// Should never happen
 				return ErrCantSpend
 			}
@@ -369,7 +375,8 @@ func (m *SoftKey) Match(owners *secp256k1fx.OutputOwners, time uint64) ([]uint32
 	indices, privs, ok := m.keyChain.Match(owners, time)
 	pks := make([]ids.ShortID, len(privs))
 	for i, priv := range privs {
-		pks[i] = priv.PublicKey().Address()
+		addr := priv.PublicKey().Address()
+		copy(pks[i][:], addr[:])
 	}
 	return indices, pks, ok
 }

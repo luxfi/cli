@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/sdk/constants"
 	mockethclient "github.com/luxfi/cli/sdk/mocks/ethclient"
 	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	subnetethclient "github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"

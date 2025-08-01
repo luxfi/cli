@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 )
 
 const (

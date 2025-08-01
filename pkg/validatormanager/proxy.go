@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/sdk/evm"
 	validatorManagerSDK "github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 
 	"github.com/ethereum/go-ethereum/common"
 )
