@@ -28,7 +28,7 @@ import (
 	warp "github.com/luxfi/warp"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/interfaces"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/ethereum/go-ethereum/common"

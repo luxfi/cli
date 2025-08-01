@@ -19,7 +19,7 @@ require (
 	github.com/luxfi/crypto v1.1.1
 	github.com/luxfi/erc20-go v0.0.0-00010101000000-000000000000
 	github.com/luxfi/evm v0.7.12
-	github.com/luxfi/geth v1.16.2
+	github.com/luxfi/geth v1.16.6
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v0.1.1
@@ -68,7 +68,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.3 // indirect
-	github.com/StephenButtolph/canoto v0.17.1 // indirect
+	github.com/StephenButtolph/canoto v0.17.2 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.5 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.63 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect

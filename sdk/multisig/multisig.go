@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm"
 
 	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/secp256k1fx"
 
@@ -270,17 +270,17 @@ func (ms *Multisig) GetBlockchainID() (ids.ID, error) {
 	var blockchainID ids.ID
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveSubnetValidatorTx:
-		blockchainID = unsignedTx.BlockchainID
+		copy(blockchainID[:], unsignedTx.BlockchainID[:])
 	case *txs.AddSubnetValidatorTx:
-		blockchainID = unsignedTx.BlockchainID
+		copy(blockchainID[:], unsignedTx.BlockchainID[:])
 	case *txs.CreateChainTx:
-		blockchainID = unsignedTx.BlockchainID
+		copy(blockchainID[:], unsignedTx.BlockchainID[:])
 	case *txs.TransformSubnetTx:
-		blockchainID = unsignedTx.BlockchainID
+		copy(blockchainID[:], unsignedTx.BlockchainID[:])
 	case *txs.AddPermissionlessValidatorTx:
-		blockchainID = unsignedTx.BlockchainID
+		copy(blockchainID[:], unsignedTx.BlockchainID[:])
 	case *txs.TransferSubnetOwnershipTx:
-		blockchainID = unsignedTx.BlockchainID
+		copy(blockchainID[:], unsignedTx.BlockchainID[:])
 	default:
 		return ids.Empty, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
@@ -296,7 +296,7 @@ func (ms *Multisig) GetSubnetID() (ids.ID, error) {
 	var subnetID ids.ID
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveSubnetValidatorTx:
-		subnetID = unsignedTx.Subnet
+		copy(subnetID[:], unsignedTx.Subnet[:])
 	case *txs.AddSubnetValidatorTx:
 		subnetID = unsignedTx.SubnetValidator.Subnet
 	case *txs.CreateChainTx:
