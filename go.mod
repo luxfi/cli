@@ -17,15 +17,15 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.1.1
-	github.com/luxfi/erc20-go v0.0.0-00010101000000-000000000000
-	github.com/luxfi/evm v0.7.12
-	github.com/luxfi/geth v1.16.6
+	github.com/luxfi/erc20-go v0.2.0
+	github.com/luxfi/evm v0.8.3
+	github.com/luxfi/geth v1.16.7
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v0.1.1
-	github.com/luxfi/lpm v1.0.0
+	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/netrunner v1.8.4
-	github.com/luxfi/node v1.13.14
+	github.com/luxfi/node v1.13.13
 	github.com/luxfi/warp v0.1.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
