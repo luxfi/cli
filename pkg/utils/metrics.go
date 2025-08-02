@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package utils
 
@@ -13,9 +13,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/models"
-
-	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/types"
 
 	"github.com/luxfi/cli/pkg/ux"
 
@@ -55,16 +53,25 @@ func PrintMetricsOptOutPrompt() {
 		"You can also read our privacy statement <https://lux.network/privacy> to learn more.\n")
 }
 
-func saveMetricsConfig(app *application.Lux, metricsEnabled bool) {
-	config := models.Config{MetricsEnabled: metricsEnabled}
-	jsonBytes, _ := json.Marshal(&config)
-	_ = app.WriteConfigFile(jsonBytes)
+func saveMetricsConfig(writer types.ConfigWriter, metricsEnabled bool) {
+	cfg := types.Config{MetricsEnabled: metricsEnabled}
+	jsonBytes, _ := json.Marshal(&cfg)
+	_ = writer.WriteConfigFile(jsonBytes)
 }
 
-func HandleUserMetricsPreference(app *application.Lux) error {
+func HandleUserMetricsPreference(app interface{}) error {
+	writer, ok := app.(types.ConfigWriter)
+	if !ok {
+		return fmt.Errorf("app does not implement ConfigWriter")
+	}
+	prompter, ok := app.(types.PrompterInterface)
+	if !ok {
+		return fmt.Errorf("app does not implement PrompterInterface")
+	}
+	
 	PrintMetricsOptOutPrompt()
 	txt := "Press [Enter] to opt-in, or opt out by choosing 'No'"
-	yes, err := app.Prompt.CaptureYesNo(txt)
+	yes, err := prompter.CaptureYesNo(txt)
 	if err != nil {
 		return err
 	}
@@ -73,20 +80,24 @@ func HandleUserMetricsPreference(app *application.Lux) error {
 	} else {
 		ux.Logger.PrintToUser("Thank you for opting in Lux CLI usage metrics collection")
 	}
-	saveMetricsConfig(app, yes)
+	saveMetricsConfig(writer, yes)
 	return nil
 }
 
-func userIsOptedIn(app *application.Lux) bool {
+func userIsOptedIn(app interface{}) bool {
+	loader, ok := app.(types.ConfigLoader)
+	if !ok {
+		return false
+	}
 	// if config file is not found or unable to be read, will return false (user is not opted in)
-	config, err := app.LoadConfig()
+	config, err := loader.LoadConfig()
 	if err != nil {
 		return false
 	}
 	return config.MetricsEnabled
 }
 
-func HandleTracking(cmd *cobra.Command, app *application.Lux, flags map[string]string) {
+func HandleTracking(cmd *cobra.Command, app interface{}, flags map[string]string) {
 	if userIsOptedIn(app) {
 		if !cmd.HasSubCommands() && checkCommandIsNotCompletion(cmd) {
 			TrackMetrics(cmd, flags)

@@ -63,8 +63,8 @@ This command provides fine-grained control over node startup parameters.`,
 	cmd.Flags().BoolVar(&flags.enableAutomining, "enable-automining", false, "Enable automining in POA mode")
 	cmd.Flags().BoolVar(&flags.stakingEnabled, "staking-enabled", true, "Enable staking")
 	cmd.Flags().BoolVar(&flags.sybilProtection, "sybil-protection", true, "Enable sybil protection")
-	cmd.Flags().IntVar(&flags.consensusSampleSize, "consensus-sample-size", 20, "Snow sample size")
-	cmd.Flags().IntVar(&flags.consensusQuorumSize, "consensus-quorum-size", 14, "Snow quorum size")
+	cmd.Flags().IntVar(&flags.consensusSampleSize, "consensus-sample-size", 20, "Consensus sample size")
+	cmd.Flags().IntVar(&flags.consensusQuorumSize, "consensus-quorum-size", 14, "Consensus quorum size")
 	
 	// Advanced configuration
 	cmd.Flags().StringVar(&flags.publicIP, "public-ip", "", "Public IP address")

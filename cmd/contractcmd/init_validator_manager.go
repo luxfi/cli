@@ -1,0 +1,312 @@
+// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+package contractcmd
+
+import (
+	"fmt"
+	"math/big"
+
+	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/cli/pkg/blockchain"
+	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/networkoptions"
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/signatureaggregator"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/validatormanager"
+	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
+	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/spf13/cobra"
+)
+
+type POSManagerSpecFlags struct {
+	rewardCalculatorAddress string
+	minimumStakeAmount      uint64 // big.Int
+	maximumStakeAmount      uint64 // big.Int
+	minimumStakeDuration    uint64
+	minimumDelegationFee    uint16
+	maximumStakeMultiplier  uint8
+	weightToValueFactor     uint64 // big.Int
+}
+
+var (
+	initPOSManagerFlags       POSManagerSpecFlags
+	network                   networkoptions.NetworkFlags
+	privateKeyFlags           contract.PrivateKeyFlags
+	initValidatorManagerFlags ContractInitValidatorManagerFlags
+)
+
+type ContractInitValidatorManagerFlags struct {
+	RPC         string
+	SigAggFlags flags.SignatureAggregatorFlags
+}
+
+// lux contract initValidatorManager
+func newInitValidatorManagerCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "initValidatorManager blockchainName",
+		Short:   "Initializes Proof of Authority(PoA) or Proof of Stake(PoS) Validator Manager on a given Network and Blockchain",
+		Long:    "Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager",
+		RunE:    initValidatorManager,
+		PreRunE: cobrautils.ExactArgs(1),
+	}
+	networkoptions.AddNetworkFlagsToCmd(cmd, &network, true, networkoptions.DefaultSupportedNetworkOptions)
+	privateKeyFlags.AddToCmd(cmd, "as contract deployer")
+	flags.AddRPCFlagToCmd(cmd, app, &initValidatorManagerFlags.RPC)
+	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &initValidatorManagerFlags.SigAggFlags)
+
+	cmd.Flags().StringVar(&initPOSManagerFlags.rewardCalculatorAddress, "pos-reward-calculator-address", "", "(PoS only) initialize the ValidatorManager with reward calculator address")
+	cmd.Flags().Uint64Var(&initPOSManagerFlags.minimumStakeAmount, "pos-minimum-stake-amount", 1, "(PoS only) minimum stake amount")
+	cmd.Flags().Uint64Var(&initPOSManagerFlags.maximumStakeAmount, "pos-maximum-stake-amount", 1000, "(PoS only) maximum stake amount")
+	cmd.Flags().Uint64Var(&initPOSManagerFlags.minimumStakeDuration, "pos-minimum-stake-duration", constants.PoSL1MinimumStakeDurationSeconds, "(PoS only) minimum stake duration (in seconds)")
+	cmd.Flags().Uint16Var(&initPOSManagerFlags.minimumDelegationFee, "pos-minimum-delegation-fee", 1, "(PoS only) minimum delegation fee")
+	cmd.Flags().Uint8Var(&initPOSManagerFlags.maximumStakeMultiplier, "pos-maximum-stake-multiplier", 1, "(PoS only )maximum stake multiplier")
+	cmd.Flags().Uint64Var(&initPOSManagerFlags.weightToValueFactor, "pos-weight-to-value-factor", 1, "(PoS only) weight to value factor")
+	cmd.SetHelpFunc(flags.WithGroupedHelp([]flags.GroupedFlags{sigAggGroup}))
+	return cmd
+}
+
+func initValidatorManager(_ *cobra.Command, args []string) error {
+	blockchainName := args[0]
+	chainSpec := contract.ChainSpec{
+		BlockchainName: blockchainName,
+	}
+	network, err := networkoptions.GetNetworkFromCmdLineFlags(
+		app,
+		"",
+		network,
+		true,
+		false,
+		networkoptions.DefaultSupportedNetworkOptions,
+		"",
+	)
+	if err != nil {
+		return err
+	}
+	if network.ClusterName != "" {
+		network = models.ConvertClusterToNetwork(network)
+	}
+	if initValidatorManagerFlags.RPC == "" {
+		initValidatorManagerFlags.RPC, _, err = contract.GetBlockchainEndpoints(
+			app,
+			network,
+			chainSpec,
+			true,
+			false,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	ux.Logger.PrintToUser(logging.Yellow.Wrap("RPC Endpoint: %s"), initValidatorManagerFlags.RPC)
+	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+		app,
+		network,
+		chainSpec,
+	)
+	if err != nil {
+		return err
+	}
+	privateKey, err := privateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	if err != nil {
+		return err
+	}
+	if privateKey == "" {
+		privateKey, err = prompts.PromptPrivateKey(
+			app.Prompt,
+			"pay for initializing Proof of Authority Validator Manager contract? (Uses Blockchain gas token)",
+			app.GetKeyDir(),
+			app.GetKey,
+			genesisAddress,
+			genesisPrivateKey,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	sc, err := app.LoadSidecar(chainSpec.BlockchainName)
+	if err != nil {
+		return fmt.Errorf("failed to load sidecar: %w", err)
+	}
+	if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
+		return fmt.Errorf("unable to find Validator Manager address")
+	}
+	managerAddress := sc.Networks[network.Name()].ValidatorManagerAddress
+	scNetwork := sc.Networks[network.Name()]
+	if scNetwork.BlockchainID == ids.Empty {
+		return fmt.Errorf("blockchain has not been deployed to %s", network.Name())
+	}
+	bootstrapValidators := scNetwork.BootstrapValidators
+	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxdSubnetValidator(bootstrapValidators)
+	if err != nil {
+		return err
+	}
+	clusterName := scNetwork.ClusterName
+	extraAggregatorPeers, err := blockchain.GetAggregatorExtraPeers(app, clusterName)
+	if err != nil {
+		return err
+	}
+	aggregatorLogger, err := signatureaggregator.NewSignatureAggregatorLogger(
+		initValidatorManagerFlags.SigAggFlags.AggregatorLogLevel,
+		initValidatorManagerFlags.SigAggFlags.AggregatorLogToStdout,
+		app.GetAggregatorLogDir(clusterName),
+	)
+	if err != nil {
+		return err
+	}
+	subnetID, err := contract.GetSubnetID(
+		app,
+		network,
+		chainSpec,
+	)
+	if err != nil {
+		return err
+	}
+	blockchainID, err := contract.GetBlockchainID(
+		app,
+		network,
+		chainSpec,
+	)
+	if err != nil {
+		return err
+	}
+	ownerAddress := common.HexToAddress(sc.ProxyContractOwner)
+	subnetSDK := blockchainSDK.Subnet{
+		SubnetID:            subnetID,
+		BlockchainID:        blockchainID,
+		BootstrapValidators: luxdBootstrapValidators,
+		OwnerAddress:        &ownerAddress,
+		RPC:                 initValidatorManagerFlags.RPC,
+	}
+	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraAggregatorPeers, aggregatorLogger, "latest")
+	if err != nil {
+		return err
+	}
+	signatureAggregatorEndpoint, err := signatureaggregator.GetSignatureAggregatorEndpoint(app, network)
+	if err != nil {
+		return err
+	}
+	switch {
+	case sc.PoA(): // PoA
+		ux.Logger.PrintToUser(logging.Yellow.Wrap("Initializing Proof of Authority Validator Manager contract on blockchain %s"), blockchainName)
+		if err := validatormanager.SetupPoA(
+			app.Log,
+			subnetSDK,
+			network,
+			privateKey,
+			aggregatorLogger,
+			managerAddress,
+			sc.UseACP99,
+			signatureAggregatorEndpoint,
+		); err != nil {
+			return err
+		}
+		ux.Logger.GreenCheckmarkToUser("Proof of Authority Validator Manager contract successfully initialized on blockchain %s", blockchainName)
+	case sc.PoS(): // PoS
+		deployed, err := validatormanager.ValidatorProxyHasImplementationSet(initValidatorManagerFlags.RPC)
+		if err != nil {
+			return err
+		}
+		if !deployed {
+			// it is not in genesis
+			ux.Logger.PrintToUser("Deploying Proof of Stake Validator Manager contract on blockchain %s ...", blockchainName)
+			proxyOwnerPrivateKey, err := blockchaincmd.GetProxyOwnerPrivateKey(
+				app,
+				network,
+				sc.ProxyContractOwner,
+				ux.Logger.PrintToUser,
+			)
+			if err != nil {
+				return err
+			}
+			if sc.UseACP99 {
+				_, err := validatormanager.DeployAndRegisterValidatorManagerV2_0_0Contract(
+					initValidatorManagerFlags.RPC,
+					genesisPrivateKey,
+					proxyOwnerPrivateKey,
+				)
+				if err != nil {
+					return err
+				}
+				_, err = validatormanager.DeployAndRegisterPoSValidatorManagerV2_0_0Contract(
+					initValidatorManagerFlags.RPC,
+					genesisPrivateKey,
+					proxyOwnerPrivateKey,
+				)
+				if err != nil {
+					return err
+				}
+			} else {
+				if _, err := validatormanager.DeployAndRegisterPoSValidatorManagerV1_0_0Contract(
+					initValidatorManagerFlags.RPC,
+					genesisPrivateKey,
+					proxyOwnerPrivateKey,
+				); err != nil {
+					return err
+				}
+			}
+		}
+		ux.Logger.PrintToUser(logging.Yellow.Wrap("Initializing Proof of Stake Validator Manager contract on blockchain %s"), blockchainName)
+		if initPOSManagerFlags.rewardCalculatorAddress == "" {
+			initPOSManagerFlags.rewardCalculatorAddress = validatormanagerSDK.RewardCalculatorAddress
+		}
+		found, _, _, managerOwnerPrivateKey, err := contract.SearchForManagedKey(
+			app,
+			network,
+			ownerAddress,
+			true,
+		)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("could not find validator manager owner private key")
+		}
+		if err := validatormanager.SetupPoS(
+			app.Log,
+			subnetSDK,
+			network,
+			privateKey,
+			aggregatorLogger,
+			validatormanagerSDK.PoSParams{
+				MinimumStakeAmount:      big.NewInt(int64(initPOSManagerFlags.minimumStakeAmount)),
+				MaximumStakeAmount:      big.NewInt(int64(initPOSManagerFlags.maximumStakeAmount)),
+				MinimumStakeDuration:    initPOSManagerFlags.minimumStakeDuration,
+				MinimumDelegationFee:    initPOSManagerFlags.minimumDelegationFee,
+				MaximumStakeMultiplier:  initPOSManagerFlags.maximumStakeMultiplier,
+				WeightToValueFactor:     big.NewInt(int64(initPOSManagerFlags.weightToValueFactor)),
+				RewardCalculatorAddress: initPOSManagerFlags.rewardCalculatorAddress,
+				UptimeBlockchainID:      blockchainID,
+			},
+			managerAddress,
+			validatormanagerSDK.SpecializationProxyContractAddress,
+			managerOwnerPrivateKey,
+			sc.UseACP99,
+			signatureAggregatorEndpoint,
+		); err != nil {
+			return err
+		}
+		sidecar, err := app.LoadSidecar(blockchainName)
+		if err != nil {
+			return err
+		}
+		networkInfo := sidecar.Networks[network.Name()]
+		networkInfo.ValidatorManagerAddress = validatormanagerSDK.SpecializationProxyContractAddress
+		sidecar.Networks[network.Name()] = networkInfo
+		if err := app.UpdateSidecar(&sidecar); err != nil {
+			return err
+		}
+		ux.Logger.GreenCheckmarkToUser("Native Token Proof of Stake Validator Manager contract successfully initialized on blockchain %s", blockchainName)
+	default: // unsupported
+		return fmt.Errorf("only PoA and PoS supported")
+	}
+	return nil
+}

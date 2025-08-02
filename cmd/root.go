@@ -14,18 +14,23 @@ import (
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
+	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/databasecmd"
 	"github.com/luxfi/cli/cmd/genesiscmd"
+	"github.com/luxfi/cli/cmd/interchaincmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/l1cmd"
 	"github.com/luxfi/cli/cmd/l3cmd"
+	"github.com/luxfi/cli/cmd/localcmd"
 	"github.com/luxfi/cli/cmd/migratecmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
+	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
-	"github.com/luxfi/cli/cmd/localcmd"
+	"github.com/luxfi/cli/cmd/validatorcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/application"
@@ -46,7 +51,7 @@ var (
 	app *application.Lux
 
 	logLevel  string
-	Version   = ""
+	Version   = "1.9.0"
 	cfgFile   string
 	skipCheck bool
 )
@@ -91,6 +96,8 @@ Quick start:
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
 	// add sub commands
+	rootCmd.AddCommand(blockchaincmd.NewCmd(app))
+	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(l1cmd.NewCmd(app))
 	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
@@ -100,9 +107,6 @@ Quick start:
 	rootCmd.AddCommand(genesiscmd.NewCmd())    // Genesis integration
 	rootCmd.AddCommand(databasecmd.NewCmd())   // Database operations
 
-	// add hidden backend command
-	rootCmd.AddCommand(backendcmd.NewCmd(app))
-
 	// add transaction command
 	rootCmd.AddCommand(transactioncmd.NewCmd(app))
 
@@ -111,9 +115,22 @@ Quick start:
 
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
+
+	// add interchain command
+	rootCmd.AddCommand(interchaincmd.NewCmd(app))
+
+	// add contract command
+	rootCmd.AddCommand(contractcmd.NewCmd(app))
+
+	// add validator command
+	rootCmd.AddCommand(validatorcmd.NewCmd(app))
+
 	// add migrate command
 	rootCmd.AddCommand(migratecmd.NewCmd(app))
 	rootCmd.AddCommand(localcmd.NewCmd(app))
+
+	// add hidden backend command
+	rootCmd.AddCommand(backendcmd.NewCmd(app))
 	return rootCmd
 }
 
