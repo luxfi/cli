@@ -14,6 +14,8 @@ import (
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
+	"github.com/luxfi/cli/cmd/databasecmd"
+	"github.com/luxfi/cli/cmd/genesiscmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/l1cmd"
 	"github.com/luxfi/cli/cmd/l3cmd"
@@ -94,7 +96,9 @@ Quick start:
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
 	rootCmd.AddCommand(networkcmd.NewCmd(app))
 	rootCmd.AddCommand(nodecmd.NewCmd(app))
-	rootCmd.AddCommand(keycmd.NewCmd(app))
+	rootCmd.AddCommand(keycmd.NewCmd())        // Key management (from crypto package)
+	rootCmd.AddCommand(genesiscmd.NewCmd())    // Genesis integration
+	rootCmd.AddCommand(databasecmd.NewCmd())   // Database operations
 
 	// add hidden backend command
 	rootCmd.AddCommand(backendcmd.NewCmd(app))

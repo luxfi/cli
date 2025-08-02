@@ -5,7 +5,7 @@ package models
 import (
 	"time"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 type ElasticSubnetConfig struct {

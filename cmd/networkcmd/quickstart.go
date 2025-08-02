@@ -54,7 +54,11 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 	}
 
 	// Start network using the existing start command logic
-	if err := StartNetwork(cmd, args); err != nil {
+	networkName := "local"
+	if len(args) > 0 {
+		networkName = args[0]
+	}
+	if err := StartNetwork(cmd, networkName, int(numNodes)); err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
 

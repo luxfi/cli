@@ -14,6 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var snapshotName string
+
 func newStopCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stop",

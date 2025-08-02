@@ -366,7 +366,7 @@ func promptTxAllowListParams(precompiles *[]extras.PrecompileUpgrade, date time.
 	return nil
 }
 
-func getCClient(apiEndpoint string, blockchainID string) (ethclient.Client, error) {
+func getCClient(apiEndpoint string, blockchainID string) (*ethclient.Client, error) {
 	cClient, err := ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoint, blockchainID))
 	if err != nil {
 		return nil, err
@@ -425,7 +425,7 @@ func ensureAdminsHaveBalance(admins []common.Address, subnetName string) error {
 	return nil
 }
 
-func getAccountBalance(ctx context.Context, cClient ethclient.Client, addrStr string) (float64, error) {
+func getAccountBalance(ctx context.Context, cClient *ethclient.Client, addrStr string) (float64, error) {
 	addr := common.HexToAddress(addrStr)
 	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)

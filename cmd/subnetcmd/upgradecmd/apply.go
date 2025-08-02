@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	ANRclient "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/spf13/cobra"

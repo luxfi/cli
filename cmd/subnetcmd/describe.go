@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
@@ -203,7 +203,7 @@ func printPrecompileTable(genesis core.Genesis) {
 
 	// TX allow list
 	if genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[txallowlist.Module.ConfigKey].(*txallowlist.Config)
+		cfg := genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey].(*txallowlist.Config)
 		appendToAddressTable(table, "Tx Allow List", cfg.AdminAddresses, cfg.EnabledAddresses)
 		precompileSet = true
 	}
