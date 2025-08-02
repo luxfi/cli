@@ -10,7 +10,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 func removeSlashes(str string) string {

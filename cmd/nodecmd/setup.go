@@ -8,19 +8,19 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/luxfi/cli/v2/v2/pkg/dependencies"
+	"github.com/luxfi/cli/v2/pkg/dependencies"
 
-	"github.com/luxfi/cli/v2/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/prompts"
 
-	"github.com/luxfi/cli/v2/v2/pkg/docker"
+	"github.com/luxfi/cli/v2/pkg/docker"
 
-	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/networkoptions"
-	"github.com/luxfi/cli/v2/v2/pkg/ssh"
-	"github.com/luxfi/cli/v2/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/pkg/ssh"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/node/v2/v2/utils/logging"
 	"github.com/spf13/cobra"
 )

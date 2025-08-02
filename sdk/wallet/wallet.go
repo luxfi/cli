@@ -5,7 +5,7 @@ package wallet
 import (
 	"context"
 
-	"github.com/luxfi/cli/v2/v2/sdk/keychain"
+	"github.com/luxfi/cli/v2/sdk/keychain"
 	"github.com/luxfi/ids"
 	luxdkeychain "github.com/luxfi/node/v2/v2/utils/crypto/keychain"
 	"github.com/luxfi/node/v2/v2/utils/set"

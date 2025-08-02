@@ -3,7 +3,7 @@
 
 package remoteconfig
 
-import "github.com/luxfi/cli/v2/v2/pkg/utils"
+import "github.com/luxfi/cli/v2/pkg/utils"
 
 func RenderGrafanaLokiDataSourceConfig() ([]byte, error) {
 	return templates.ReadFile("templates/grafana-loki-datasource.yaml")

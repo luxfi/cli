@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/node/v2/v2/api/info"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/utils/rpc"

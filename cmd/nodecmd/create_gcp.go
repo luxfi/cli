@@ -12,17 +12,17 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/utils"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 
-	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 
-	gcpAPI "github.com/luxfi/cli/v2/v2/pkg/cloud/gcp"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	gcpAPI "github.com/luxfi/cli/v2/pkg/cloud/gcp"
+	"github.com/luxfi/cli/v2/pkg/ux"
 )
 
 func getServiceAccountKeyFilepath() (string, error) {

@@ -17,17 +17,17 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/node/v2/v2/api/info"
 	// Temporary config types until warp imports are fixed
 
 	"go.uber.org/zap"
 
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/binutils"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/node/v2/v2/utils/logging"
 )
 

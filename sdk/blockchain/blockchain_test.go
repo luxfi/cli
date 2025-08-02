@@ -14,10 +14,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/cli/v2/v2/sdk/keychain"
-	"github.com/luxfi/cli/v2/v2/sdk/network"
-	"github.com/luxfi/cli/v2/v2/sdk/vm"
-	"github.com/luxfi/cli/v2/v2/sdk/wallet"
+	"github.com/luxfi/cli/v2/sdk/keychain"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/vm"
+	"github.com/luxfi/cli/v2/sdk/wallet"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/utils/formatting/address"
 	"github.com/luxfi/node/v2/v2/wallet/subnet/primary"

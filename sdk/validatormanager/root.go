@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/v2/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/network"
 	luxdconstants "github.com/luxfi/node/v2/v2/utils/constants"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
-	"github.com/luxfi/cli/v2/v2/pkg/contract"
-	"github.com/luxfi/cli/v2/v2/sdk/validator"
-	"github.com/luxfi/cli/v2/v2/sdk/validatormanager/validatormanagertypes"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/sdk/validator"
+	"github.com/luxfi/cli/v2/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
 	"github.com/luxfi/warp"

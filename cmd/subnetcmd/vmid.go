@@ -3,7 +3,7 @@
 package subnetcmd
 
 import (
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/spf13/cobra"
 )

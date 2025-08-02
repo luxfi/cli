@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/sdk/constants"
-	mockethclient "github.com/luxfi/cli/v2/v2/sdk/mocks/ethclient"
+	"github.com/luxfi/cli/v2/sdk/constants"
+	mockethclient "github.com/luxfi/cli/v2/sdk/mocks/ethclient"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/geth/core/types"
 	subnetethclient "github.com/luxfi/evm/v2/ethclient"

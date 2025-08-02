@@ -8,14 +8,14 @@ import (
 	"os"
 	"strings"
 
-	nodePkg "github.com/luxfi/cli/v2/v2/pkg/node"
+	nodePkg "github.com/luxfi/cli/v2/pkg/node"
 
-	awsAPI "github.com/luxfi/cli/v2/v2/pkg/cloud/aws"
-	gcpAPI "github.com/luxfi/cli/v2/v2/pkg/cloud/gcp"
-	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	awsAPI "github.com/luxfi/cli/v2/pkg/cloud/aws"
+	gcpAPI "github.com/luxfi/cli/v2/pkg/cloud/gcp"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"golang.org/x/exp/maps"
 	"golang.org/x/net/context"
 

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/internal/mocks"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/node/v2/v2/api/info"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/utils/json"

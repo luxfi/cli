@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
 

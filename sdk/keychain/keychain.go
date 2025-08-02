@@ -5,10 +5,10 @@ package keychain
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/v2/sdk/key"
-	"github.com/luxfi/cli/v2/v2/sdk/ledger"
-	"github.com/luxfi/cli/v2/v2/sdk/network"
-	"github.com/luxfi/cli/v2/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/sdk/key"
+	"github.com/luxfi/cli/v2/sdk/ledger"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/utils"
 	"github.com/luxfi/node/v2/v2/utils/crypto/keychain"
 	"golang.org/x/exp/maps"
 )

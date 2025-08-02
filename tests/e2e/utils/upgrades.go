@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/evm/v2/params"
 	"github.com/luxfi/evm/v2/rpc"
 	"github.com/onsi/gomega"

@@ -6,9 +6,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/cli/v2/v2/cmd/flags"
-	"github.com/luxfi/cli/v2/v2/internal/mocks"
-	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/cmd/flags"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/application"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

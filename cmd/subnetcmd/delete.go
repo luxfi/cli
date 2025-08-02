@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/spf13/cobra"
 )
 

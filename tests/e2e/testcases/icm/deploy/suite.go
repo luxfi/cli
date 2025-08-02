@@ -5,12 +5,12 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/luxfi/cli/v2/v2/cmd"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/interchain"
-	"github.com/luxfi/cli/v2/v2/sdk/evm"
-	"github.com/luxfi/cli/v2/v2/tests/e2e/commands"
-	"github.com/luxfi/cli/v2/v2/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/cmd"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/interchain"
+	"github.com/luxfi/cli/v2/sdk/evm"
+	"github.com/luxfi/cli/v2/tests/e2e/commands"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

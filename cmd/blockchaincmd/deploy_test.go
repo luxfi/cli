@@ -5,7 +5,7 @@ package blockchaincmd
 import (
 	"testing"
 
-	"github.com/luxfi/cli/v2/v2/cmd/flags"
+	"github.com/luxfi/cli/v2/cmd/flags"
 	"github.com/stretchr/testify/require"
 )
 

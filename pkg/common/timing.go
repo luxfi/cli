@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 // TimedFunction executes a function and returns its result with error

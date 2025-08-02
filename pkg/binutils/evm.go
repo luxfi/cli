@@ -4,8 +4,8 @@
 package binutils
 
 import (
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
