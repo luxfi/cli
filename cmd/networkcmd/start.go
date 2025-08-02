@@ -3,6 +3,7 @@
 package networkcmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -26,6 +27,11 @@ var (
 	snapshotName             string
 	mainnet                  bool
 	testnet                  bool
+	// BadgerDB flags
+	dbEngine       string
+	archiveDir     string
+	archiveShared  bool
+	genesisImport  string
 )
 
 const latest = "latest"
@@ -49,6 +55,11 @@ already running.`,
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 21 validators")
 	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 11 validators")
+	// BadgerDB flags
+	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
+	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
+	cmd.Flags().BoolVar(&archiveShared, "archive-shared", false, "enable shared read-only access to archive database")
+	cmd.Flags().StringVar(&genesisImport, "genesis-path", "", "path to genesis database to import (PebbleDB or LevelDB)")
 
 	return cmd
 }
@@ -115,8 +126,36 @@ func StartNetwork(*cobra.Command, []string) error {
 	if err != nil {
 		return err
 	}
+	
+	// Build node config with BadgerDB options
+	nodeConfig := make(map[string]interface{})
 	if configStr != "" {
-		loadSnapshotOpts = append(loadSnapshotOpts, client.WithGlobalNodeConfig(configStr))
+		if err := json.Unmarshal([]byte(configStr), &nodeConfig); err != nil {
+			return fmt.Errorf("invalid node config: %w", err)
+		}
+	}
+	
+	// Add BadgerDB configuration if specified
+	if dbEngine != "" {
+		nodeConfig["db-engine"] = dbEngine
+	}
+	if archiveDir != "" {
+		nodeConfig["archive-dir"] = archiveDir
+		nodeConfig["archive-shared"] = archiveShared
+	}
+	if genesisImport != "" {
+		nodeConfig["genesis-import"] = genesisImport
+		nodeConfig["genesis-replay"] = true
+		nodeConfig["genesis-verify"] = true
+	}
+	
+	// Convert back to JSON
+	if len(nodeConfig) > 0 {
+		updatedConfigBytes, err := json.Marshal(nodeConfig)
+		if err != nil {
+			return fmt.Errorf("failed to marshal node config: %w", err)
+		}
+		loadSnapshotOpts = append(loadSnapshotOpts, client.WithGlobalNodeConfig(string(updatedConfigBytes)))
 	}
 
 	ctx := binutils.GetAsyncContext()
