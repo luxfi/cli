@@ -1,339 +1,321 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package nodecmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"strings"
+	"sync"
 
+	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/pkg/ansible"
+	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/node"
+	"github.com/luxfi/cli/pkg/ssh"
+	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/vms/platformvm/status"
+
+	"github.com/olekukonko/tablewriter"
+	"github.com/pborman/ansi"
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
 )
 
-var (
-	statusDataDir string
-	statusHost    string
-	statusPort    int
-	statusDetail  bool
-)
+var blockchainName string
 
 func newStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "status",
-		Short: "Check node status and health",
-		Long: `Check the status and health of a Lux node.
+		Use:   "status [clusterName]",
+		Short: "(ALPHA Warning) Get node bootstrap status",
+		Long: `(ALPHA Warning) This command is currently in experimental mode.
 
-This command checks:
-- Node health and uptime
-- Network connectivity
-- Validator status (if applicable)
-- Chain sync status
-- Performance metrics
+The node status command gets the bootstrap status of all nodes in a cluster with the Primary Network. 
+If no cluster is given, defaults to node list behaviour.
 
-Examples:
-  # Check local node status
-  lux node status
-
-  # Check remote node
-  lux node status --host node1.lux.network --port 443
-
-  # Check with detailed output
-  lux node status --detail`,
-		RunE: runStatusCmd,
+To get the bootstrap status of a node with a Blockchain, use --blockchain flag`,
+		Args: cobrautils.MinimumNArgs(0),
+		RunE: statusNode,
 	}
-
-	homeDir, _ := os.UserHomeDir()
-	defaultDataDir := filepath.Join(homeDir, ".luxd")
-
-	cmd.Flags().StringVar(&statusDataDir, "data-dir", defaultDataDir, "data directory")
-	cmd.Flags().StringVar(&statusHost, "host", "127.0.0.1", "node host")
-	cmd.Flags().IntVar(&statusPort, "port", 9650, "node API port")
-	cmd.Flags().BoolVar(&statusDetail, "detail", false, "show detailed status")
+	cmd.Flags().StringVar(&blockchainName, "subnet", "", "specify the blockchain the node is syncing with")
+	cmd.Flags().StringVar(&blockchainName, "blockchain", "", "specify the blockchain the node is syncing with")
 
 	return cmd
 }
 
-func runStatusCmd(cmd *cobra.Command, args []string) error {
-	ux.Logger.PrintToUser("🔍 Checking node status...")
-	ux.Logger.PrintToUser("   Host: %s:%d", statusHost, statusPort)
-
-	// Check node health
-	health, err := checkNodeHealth(statusHost, statusPort)
-	if err != nil {
-		ux.Logger.PrintToUser("❌ Node is not responding: %v", err)
+func statusNode(_ *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return list(nil, nil)
+	}
+	clusterName := args[0]
+	if err := node.CheckCluster(app, clusterName); err != nil {
 		return err
 	}
-
-	if health.Healthy {
-		ux.Logger.PrintToUser("✅ Node is healthy")
-	} else {
-		ux.Logger.PrintToUser("⚠️  Node is unhealthy")
+	clusterConf, err := app.GetClusterConfig(clusterName)
+	if err != nil {
+		return err
 	}
-
-	// Get node info
-	info, err := getNodeInfo(statusHost, statusPort)
-	if err == nil {
-		ux.Logger.PrintToUser("\n📊 Node Information:")
-		ux.Logger.PrintToUser("   Version: %s", info.Version)
-		ux.Logger.PrintToUser("   Network: %s", info.NetworkName)
-		ux.Logger.PrintToUser("   Node ID: %s", info.NodeID)
-		ux.Logger.PrintToUser("   Public IP: %s", info.PublicIP)
-		ux.Logger.PrintToUser("   Staking Port: %d", info.StakingPort)
+	// local cluster doesn't have nodes
+	if clusterConf.Local {
+		return notImplementedForLocal("status")
 	}
-
-	// Get validator info
-	if isValidator, valInfo := getValidatorInfo(statusHost, statusPort); isValidator {
-		ux.Logger.PrintToUser("\n💎 Validator Status:")
-		ux.Logger.PrintToUser("   Staking: %v", valInfo.Staking)
-		ux.Logger.PrintToUser("   Stake Amount: %s LUX", valInfo.StakeAmount)
-		ux.Logger.PrintToUser("   Delegation Fee: %.2f%%", valInfo.DelegationFee)
-		ux.Logger.PrintToUser("   Uptime: %.2f%%", valInfo.Uptime)
-	}
-
-	// Get chain status
-	chains := []string{"P", "C", "X"}
-	ux.Logger.PrintToUser("\n⛓️  Chain Status:")
-	
-	for _, chain := range chains {
-		if status, err := getChainStatus(statusHost, statusPort, chain); err == nil {
-			statusIcon := "✅"
-			if !status.Syncing {
-				statusIcon = "🔄"
-			}
-			ux.Logger.PrintToUser("   %s-Chain: %s Height: %d", chain, statusIcon, status.Height)
+	var blockchainID ids.ID
+	if blockchainName != "" {
+		sc, err := app.LoadSidecar(blockchainName)
+		if err != nil {
+			return err
+		}
+		blockchainID = sc.Networks[clusterConf.Network.Name()].BlockchainID
+		if blockchainID == ids.Empty {
+			return constants.ErrNoBlockchainID
 		}
 	}
 
-	// Get peers info
-	if peers, err := getPeersInfo(statusHost, statusPort); err == nil {
-		ux.Logger.PrintToUser("\n🌐 Network Peers:")
-		ux.Logger.PrintToUser("   Connected: %d", peers.Connected)
-		ux.Logger.PrintToUser("   Validators: %d", peers.Validators)
-		
-		if statusDetail && len(peers.Peers) > 0 {
-			ux.Logger.PrintToUser("\n   Top Peers:")
-			for i, peer := range peers.Peers {
-				if i >= 5 {
-					break
+	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxdHost)
+	nodeIDs, err := utils.MapWithError(hostIDs, func(s string) (string, error) {
+		n, err := getNodeID(app.GetNodeInstanceDirPath(s))
+		return n.String(), err
+	})
+	if err != nil {
+		return err
+	}
+	if blockchainName != "" {
+		// check subnet first
+		if _, err := blockchaincmd.ValidateSubnetNameAndGetChains([]string{blockchainName}); err != nil {
+			return err
+		}
+	}
+
+	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
+	if err != nil {
+		return err
+	}
+	defer node.DisconnectHosts(hosts)
+
+	spinSession := ux.NewUserSpinner()
+	spinner := spinSession.SpinToUser("Checking node(s) status...")
+	notBootstrappedNodes, err := node.GetNotBootstrappedNodes(hosts)
+	if err != nil {
+		ux.SpinFailWithError(spinner, "", err)
+		return err
+	}
+	ux.SpinComplete(spinner)
+
+	spinner = spinSession.SpinToUser("Checking if node(s) are healthy...")
+	unhealthyNodes, err := node.GetUnhealthyNodes(hosts)
+	if err != nil {
+		ux.SpinFailWithError(spinner, "", err)
+		return err
+	}
+	ux.SpinComplete(spinner)
+
+	spinner = spinSession.SpinToUser("Getting luxd version of node(s)...")
+	wg := sync.WaitGroup{}
+	wgResults := models.NodeResults{}
+	for _, host := range hosts {
+		wg.Add(1)
+		go func(nodeResults *models.NodeResults, host *models.Host) {
+			defer wg.Done()
+			if resp, err := ssh.RunSSHCheckLuxdVersion(host); err != nil {
+				nodeResults.AddResult(host.GetCloudID(), nil, err)
+				return
+			} else {
+				if luxdVersion, _, err := node.ParseLuxdOutput(resp); err != nil {
+					nodeResults.AddResult(host.GetCloudID(), nil, err)
+				} else {
+					nodeResults.AddResult(host.GetCloudID(), luxdVersion, err)
 				}
-				ux.Logger.PrintToUser("   - %s (%s)", peer.NodeID, peer.IP)
+			}
+		}(&wgResults, host)
+	}
+	wg.Wait()
+
+	if wgResults.HasErrors() {
+		e := fmt.Errorf("failed to get luxd version for node(s) %s", wgResults.GetErrorHostMap())
+		ux.SpinFailWithError(spinner, "", e)
+		return e
+	}
+	ux.SpinComplete(spinner)
+	spinSession.Stop()
+	luxdVersions := map[string]string{}
+	for nodeID, luxdVersion := range wgResults.GetResultMap() {
+		luxdVersions[nodeID] = fmt.Sprintf("%v", luxdVersion)
+	}
+
+	notSyncedNodes := []string{}
+	subnetSyncedNodes := []string{}
+	subnetValidatingNodes := []string{}
+	if blockchainName != "" {
+		hostsToCheckSyncStatus := []string{}
+		for _, hostID := range hostIDs {
+			if slices.Contains(notBootstrappedNodes, hostID) {
+				notSyncedNodes = append(notSyncedNodes, hostID)
+			} else {
+				hostsToCheckSyncStatus = append(hostsToCheckSyncStatus, hostID)
+			}
+		}
+		if len(hostsToCheckSyncStatus) != 0 {
+			ux.Logger.PrintToUser("Getting subnet sync status of node(s)")
+			hostsToCheck := utils.Filter(hosts, func(h *models.Host) bool { return slices.Contains(hostsToCheckSyncStatus, h.GetCloudID()) })
+			wg := sync.WaitGroup{}
+			wgResults := models.NodeResults{}
+			for _, host := range hostsToCheck {
+				wg.Add(1)
+				go func(nodeResults *models.NodeResults, host *models.Host) {
+					defer wg.Done()
+					if syncstatus, err := ssh.RunSSHSubnetSyncStatus(host, blockchainID.String()); err != nil {
+						nodeResults.AddResult(host.GetCloudID(), nil, err)
+						return
+					} else {
+						if subnetSyncStatus, err := parseSubnetSyncOutput(syncstatus); err != nil {
+							nodeResults.AddResult(host.GetCloudID(), nil, err)
+							return
+						} else {
+							nodeResults.AddResult(host.GetCloudID(), subnetSyncStatus, err)
+						}
+					}
+				}(&wgResults, host)
+			}
+			wg.Wait()
+			if wgResults.HasErrors() {
+				return fmt.Errorf("failed to check sync status for node(s) %s", wgResults.GetErrorHostMap())
+			}
+			for nodeID, subnetSyncStatus := range wgResults.GetResultMap() {
+				switch subnetSyncStatus {
+				case status.Syncing.String():
+					subnetSyncedNodes = append(subnetSyncedNodes, nodeID)
+				case status.Validating.String():
+					subnetValidatingNodes = append(subnetValidatingNodes, nodeID)
+				default:
+					notSyncedNodes = append(notSyncedNodes, nodeID)
+				}
 			}
 		}
 	}
-
-	// Performance metrics
-	if metrics, err := getPerformanceMetrics(statusHost, statusPort); err == nil {
-		ux.Logger.PrintToUser("\n📈 Performance:")
-		ux.Logger.PrintToUser("   CPU Usage: %.1f%%", metrics.CPUUsage)
-		ux.Logger.PrintToUser("   Memory: %.1f GB / %.1f GB", metrics.MemoryUsed, metrics.MemoryTotal)
-		ux.Logger.PrintToUser("   Disk: %.1f GB / %.1f GB", metrics.DiskUsed, metrics.DiskTotal)
+	if clusterConf.MonitoringInstance != "" {
+		hostIDs = append(hostIDs, clusterConf.MonitoringInstance)
+		nodeIDs = append(nodeIDs, "")
 	}
-
-	// Show logs location if local node
-	if statusHost == "127.0.0.1" || statusHost == "localhost" {
-		logPath := filepath.Join(statusDataDir, "logs", "main.log")
-		if _, err := os.Stat(logPath); err == nil {
-			ux.Logger.PrintToUser("\n📄 Logs: %s", logPath)
-			
-			// Show last few log lines if detail flag
-			if statusDetail {
-				showRecentLogs(logPath)
-			}
+	nodeConfigs := []models.NodeConfig{}
+	for _, hostID := range hostIDs {
+		nodeConfig, err := app.LoadClusterNodeConfig(hostID)
+		if err != nil {
+			return err
 		}
+		nodeConfigs = append(nodeConfigs, nodeConfig)
 	}
-
+	printOutput(
+		clusterConf,
+		hostIDs,
+		nodeIDs,
+		luxdVersions,
+		unhealthyNodes,
+		notBootstrappedNodes,
+		notSyncedNodes,
+		subnetSyncedNodes,
+		subnetValidatingNodes,
+		clusterName,
+		blockchainName,
+		nodeConfigs,
+	)
 	return nil
 }
 
-type HealthResponse struct {
-	Healthy bool `json:"healthy"`
-}
-
-func checkNodeHealth(host string, port int) (*HealthResponse, error) {
-	url := fmt.Sprintf("http://%s:%d/ext/health", host, port)
-	cmd := exec.Command("curl", "-s", "-X", "POST",
-		"--data", `{"jsonrpc":"2.0","method":"health.health","params":{},"id":1}`,
-		"-H", "content-type:application/json;",
-		url)
-	
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, err
+func printOutput(
+	clusterConf models.ClusterConfig,
+	cloudIDs []string,
+	nodeIDs []string,
+	luxdVersions map[string]string,
+	unhealthyHosts []string,
+	notBootstrappedHosts []string,
+	notSyncedHosts []string,
+	subnetSyncedHosts []string,
+	subnetValidatingHosts []string,
+	clusterName string,
+	blockchainName string,
+	nodeConfigs []models.NodeConfig,
+) {
+	if clusterConf.External {
+		ux.Logger.PrintToUser("Cluster %s (%s) is EXTERNAL", logging.LightBlue.Wrap(clusterName), clusterConf.Network.Kind.String())
 	}
-	
-	var response struct {
-		Result HealthResponse `json:"result"`
+	if blockchainName == "" && len(notBootstrappedHosts) == 0 {
+		ux.Logger.PrintToUser("All nodes in cluster %s are bootstrapped to Primary Network!", clusterName)
 	}
-	
-	if err := json.Unmarshal(output, &response); err != nil {
-		return nil, err
-	}
-	
-	return &response.Result, nil
-}
-
-type NodeInfo struct {
-	Version     string `json:"version"`
-	NetworkName string `json:"networkName"`
-	NetworkID   int    `json:"networkID"`
-	NodeID      string `json:"nodeID"`
-	PublicIP    string `json:"publicIP"`
-	StakingPort int    `json:"stakingPort"`
-}
-
-func getNodeInfo(host string, port int) (*NodeInfo, error) {
-	url := fmt.Sprintf("http://%s:%d/ext/info", host, port)
-	cmd := exec.Command("curl", "-s", "-X", "POST",
-		"--data", `{"jsonrpc":"2.0","method":"info.getNodeVersion","params":{},"id":1}`,
-		"-H", "content-type:application/json;",
-		url)
-	
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, err
-	}
-	
-	var response struct {
-		Result NodeInfo `json:"result"`
-	}
-	
-	json.Unmarshal(output, &response)
-	return &response.Result, nil
-}
-
-type ValidatorInfo struct {
-	Staking       bool    `json:"staking"`
-	StakeAmount   string  `json:"stakeAmount"`
-	DelegationFee float64 `json:"delegationFee"`
-	Uptime        float64 `json:"uptime"`
-}
-
-func getValidatorInfo(host string, port int) (bool, *ValidatorInfo) {
-	// This is a simplified version - actual implementation would query P-Chain
-	return false, nil
-}
-
-type ChainStatus struct {
-	Height  int64 `json:"height"`
-	Syncing bool  `json:"syncing"`
-}
-
-func getChainStatus(host string, port int, chain string) (*ChainStatus, error) {
-	var url string
-	var method string
-	
-	switch chain {
-	case "C":
-		url = fmt.Sprintf("http://%s:%d/ext/bc/C/rpc", host, port)
-		method = "eth_blockNumber"
-	case "P":
-		url = fmt.Sprintf("http://%s:%d/ext/bc/P", host, port)
-		method = "platform.getHeight"
-	case "X":
-		url = fmt.Sprintf("http://%s:%d/ext/bc/X", host, port)
-		method = "avm.getHeight"
-	}
-	
-	cmd := exec.Command("curl", "-s", "-X", "POST",
-		"--data", fmt.Sprintf(`{"jsonrpc":"2.0","method":"%s","params":{},"id":1}`, method),
-		"-H", "content-type:application/json;",
-		url)
-	
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, err
-	}
-	
-	// Parse response based on chain type
-	status := &ChainStatus{Syncing: true}
-	
-	if chain == "C" {
-		var response struct {
-			Result string `json:"result"`
+	if blockchainName != "" && len(notSyncedHosts) == 0 {
+		// all nodes are either synced to or validating subnet
+		status := "synced to"
+		if len(subnetSyncedHosts) == 0 {
+			status = "validators of"
 		}
-		if json.Unmarshal(output, &response) == nil && response.Result != "" {
-			// Convert hex to decimal
-			fmt.Sscanf(response.Result, "0x%x", &status.Height)
-		}
-	} else {
-		var response struct {
-			Result struct {
-				Height json.Number `json:"height"`
-			} `json:"result"`
-		}
-		if json.Unmarshal(output, &response) == nil {
-			status.Height, _ = response.Result.Height.Int64()
-		}
+		ux.Logger.PrintToUser("All nodes in cluster %s are %s Subnet %s", logging.LightBlue.Wrap(clusterName), status, blockchainName)
 	}
-	
-	return status, nil
+	ux.Logger.PrintToUser("")
+	tit := fmt.Sprintf("STATUS FOR CLUSTER: %s", logging.LightBlue.Wrap(clusterName))
+	ux.Logger.PrintToUser(tit)
+	ux.Logger.PrintToUser(strings.Repeat("=", len(removeColors(tit))))
+	ux.Logger.PrintToUser("")
+	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Role", "Luxd Version", "Primary Network", "Healthy"}
+	if blockchainName != "" {
+		header = append(header, "Subnet "+blockchainName)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.SetRowLine(true)
+	for i, cloudID := range cloudIDs {
+		boostrappedStatus := ""
+		healthyStatus := ""
+		nodeIDStr := ""
+		luxdVersion := ""
+		roles := clusterConf.GetHostRoles(nodeConfigs[i])
+		if clusterConf.IsLuxdHost(cloudID) {
+			boostrappedStatus = logging.Green.Wrap("BOOTSTRAPPED")
+			if slices.Contains(notBootstrappedHosts, cloudID) {
+				boostrappedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
+			}
+			healthyStatus = logging.Green.Wrap("OK")
+			if slices.Contains(unhealthyHosts, cloudID) {
+				healthyStatus = logging.Red.Wrap("UNHEALTHY")
+			}
+			nodeIDStr = nodeIDs[i]
+			luxdVersion = luxdVersions[cloudID]
+		}
+		row := []string{
+			cloudID,
+			logging.Green.Wrap(nodeIDStr),
+			nodeConfigs[i].ElasticIP,
+			clusterConf.Network.Kind.String(),
+			strings.Join(roles, ","),
+			luxdVersion,
+			boostrappedStatus,
+			healthyStatus,
+		}
+		if blockchainName != "" {
+			syncedStatus := ""
+			if clusterConf.MonitoringInstance != cloudID {
+				syncedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
+				if slices.Contains(subnetSyncedHosts, cloudID) {
+					syncedStatus = logging.Green.Wrap("SYNCED")
+				}
+				if slices.Contains(subnetValidatingHosts, cloudID) {
+					syncedStatus = logging.Green.Wrap("VALIDATING")
+				}
+			}
+			row = append(row, syncedStatus)
+		}
+		table.Append(row)
+	}
+	table.Render()
 }
 
-type PeersInfo struct {
-	Connected  int `json:"connected"`
-	Validators int `json:"validators"`
-	Peers      []struct {
-		NodeID string `json:"nodeID"`
-		IP     string `json:"ip"`
-	} `json:"peers"`
-}
-
-func getPeersInfo(host string, port int) (*PeersInfo, error) {
-	url := fmt.Sprintf("http://%s:%d/ext/info", host, port)
-	cmd := exec.Command("curl", "-s", "-X", "POST",
-		"--data", `{"jsonrpc":"2.0","method":"info.peers","params":{},"id":1}`,
-		"-H", "content-type:application/json;",
-		url)
-	
-	output, err := cmd.Output()
+func removeColors(s string) string {
+	bs, err := ansi.Strip([]byte(s))
 	if err != nil {
-		return nil, err
+		return s
 	}
-	
-	var response struct {
-		Result PeersInfo `json:"result"`
-	}
-	
-	json.Unmarshal(output, &response)
-	return &response.Result, nil
-}
-
-type PerformanceMetrics struct {
-	CPUUsage    float64 `json:"cpuUsage"`
-	MemoryUsed  float64 `json:"memoryUsed"`
-	MemoryTotal float64 `json:"memoryTotal"`
-	DiskUsed    float64 `json:"diskUsed"`
-	DiskTotal   float64 `json:"diskTotal"`
-}
-
-func getPerformanceMetrics(host string, port int) (*PerformanceMetrics, error) {
-	// Simplified - actual implementation would query metrics endpoint
-	return &PerformanceMetrics{
-		CPUUsage:    23.5,
-		MemoryUsed:  4.2,
-		MemoryTotal: 16.0,
-		DiskUsed:    150.3,
-		DiskTotal:   500.0,
-	}, nil
-}
-
-func showRecentLogs(logPath string) {
-	ux.Logger.PrintToUser("\n📜 Recent Logs:")
-	
-	cmd := exec.Command("tail", "-n", "10", logPath)
-	output, err := cmd.Output()
-	if err != nil {
-		return
-	}
-	
-	lines := strings.Split(string(output), "\n")
-	for _, line := range lines {
-		if line != "" {
-			ux.Logger.PrintToUser("   %s", line)
-		}
-	}
+	return string(bs)
 }

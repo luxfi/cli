@@ -72,22 +72,7 @@ func createEvmGenesis(
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	genesis := core.Genesis{}
-	// Use a basic chain config - in real usage, this would be customized
-	conf := &params.ChainConfig{
-		ChainConfig: &ethparams.ChainConfig{
-			ChainID:             big.NewInt(1),
-			HomesteadBlock:      big.NewInt(0),
-			EIP150Block:         big.NewInt(0),
-			EIP155Block:         big.NewInt(0),
-			EIP158Block:         big.NewInt(0),
-			ByzantiumBlock:      big.NewInt(0),
-			ConstantinopleBlock: big.NewInt(0),
-			PetersburgBlock:     big.NewInt(0),
-			IstanbulBlock:       big.NewInt(0),
-			BerlinBlock:         big.NewInt(0),
-			LondonBlock:         big.NewInt(0),
-		},
-	}
+	conf := params.EVMDefaultChainConfig
 
 	const (
 		descriptorsState = "descriptors"

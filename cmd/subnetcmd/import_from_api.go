@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/geth/core"
+	"github.com/luxfi/evm/core"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +44,6 @@ flag.`,
 
 	cmd.Flags().StringVar(&nodeURL, "node-url", "", "[optional] URL of an already running subnet validator")
 
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "import from `testnet` (alias for `testnet`)")
 	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "import from `mainnet`")
 	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "import a evm")

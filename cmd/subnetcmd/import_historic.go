@@ -72,7 +72,7 @@ func newImportHistoricCmd() *cobra.Command {
 This command imports historic subnets as modern L2s with various sequencer options:
 - Lux: Based rollup using Lux L1 (100ms blocks, lowest cost)
 - Ethereum: Based rollup using Ethereum L1 (12s blocks, highest security)
-- Avalanche: Based rollup using Avalanche (2s blocks, fast finality)
+- Lux: Based rollup using Lux (2s blocks, fast finality)
 - OP: OP Stack compatible (Optimism ecosystem compatibility)
 - External: Traditional external sequencer
 
@@ -87,7 +87,7 @@ The import process:
 
 	cmd.Flags().StringVar(&historicDataPath, "data-path", "/home/z/.lux-cli/runs/network_current/node1/chainData", "Path to historic blockchain data")
 	cmd.Flags().BoolVar(&autoRegister, "auto-register", true, "Automatically register subnets with the node")
-	cmd.Flags().StringVar(&sequencer, "sequencer", "lux", "Sequencer for the L2 (lux, ethereum, avalanche, op, external)")
+	cmd.Flags().StringVar(&sequencer, "sequencer", "lux", "Sequencer for the L2 (lux, ethereum, lux, op, external)")
 
 	return cmd
 }

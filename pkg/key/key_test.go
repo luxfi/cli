@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/node/utils/cb58"
-	"github.com/luxfi/node/utils/crypto/secp256k1"
+	"github.com/luxfi/crypto/secp256k1"
 )
 
 const (

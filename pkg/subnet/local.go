@@ -36,12 +36,10 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm"
-	platformapi "github.com/luxfi/node/vms/platformvm/api"
 	"github.com/luxfi/node/vms/platformvm/reward"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	walletpkg "github.com/luxfi/node/wallet"
 	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/geth/params"
@@ -105,7 +103,7 @@ func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, 
 	return d.doDeploy(chain, chainGenesis, genesisPath)
 }
 
-func getAssetID(wallet *primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
+func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
 	xWallet := wallet.X()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
@@ -113,7 +111,7 @@ func getAssetID(wallet *primary.Wallet, tokenName string, tokenSymbol string, ma
 			genesis.EWOQKey.PublicKey().Address(),
 		},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
+	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
 	subnetAssetTx, err := xWallet.IssueCreateAssetTx(
 		tokenName,
 		tokenSymbol,
@@ -126,7 +124,6 @@ func getAssetID(wallet *primary.Wallet, tokenName string, tokenSymbol string, ma
 				},
 			},
 		},
-		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	if err != nil {
@@ -135,9 +132,9 @@ func getAssetID(wallet *primary.Wallet, tokenName string, tokenSymbol string, ma
 	return subnetAssetTx.ID(), nil
 }
 
-func exportToPChain(wallet *primary.Wallet, owner *secp256k1fx.OutputOwners, subnetAssetID ids.ID, maxSupply uint64) error {
+func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, subnetAssetID ids.ID, maxSupply uint64) error {
 	xWallet := wallet.X()
-	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
+	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
 
 	_, err := xWallet.IssueExportTx(
 		ids.Empty,
@@ -152,20 +149,18 @@ func exportToPChain(wallet *primary.Wallet, owner *secp256k1fx.OutputOwners, sub
 				},
 			},
 		},
-		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	return err
 }
 
-func importFromXChain(wallet *primary.Wallet, owner *secp256k1fx.OutputOwners) error {
+func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) error {
 	pWallet := wallet.P()
 	xChainID := ids.FromStringOrPanic("2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM") // X-Chain ID
-	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
+	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
 	_, err := pWallet.IssueImportTx(
 		xChainID,
 		owner,
-		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	return err
@@ -189,8 +184,10 @@ func IssueTransformSubnetTx(
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{
-		SubnetIDs: []ids.ID{subnetID},
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:         api,
+		LUXKeychain: kc,
+		EthKeychain: ethKc,
 	})
 	if err != nil {
 		return ids.Empty, ids.Empty, err
@@ -220,7 +217,6 @@ func IssueTransformSubnetTx(
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
 		elasticSubnetConfig.MinDelegatorStake, elasticSubnetConfig.MaxValidatorWeightFactor, elasticSubnetConfig.UptimeRequirement,
-		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	if err != nil {
@@ -248,8 +244,10 @@ func IssueAddPermissionlessValidatorTx(
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{
-		SubnetIDs: []ids.ID{subnetID},
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:         api,
+		LUXKeychain: kc,
+		EthKeychain: ethKc,
 	})
 	if err != nil {
 		return ids.Empty, err
@@ -276,7 +274,6 @@ func IssueAddPermissionlessValidatorTx(
 		owner,
 		&secp256k1fx.OutputOwners{},
 		reward.PercentDenominator,
-		walletpkg.WithContext(ctx),
 	)
 	defer cancel()
 	if err != nil {
@@ -769,8 +766,10 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{
-		SubnetIDs: []ids.ID{subnetID},
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:         api,
+		LUXKeychain: kc,
+		EthKeychain: ethKc,
 	})
 	if err != nil {
 		return ids.Empty, err
@@ -800,7 +799,7 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 
 	// Get validators that will be active in the future (pending validators)
 	futureTime := uint64(time.Now().Add(time.Hour).Unix())
-	validators, err := pClient.GetValidatorsAt(ctx, subnetID, platformapi.Height(futureTime))
+	validators, err := pClient.GetValidatorsAt(ctx, subnetID, futureTime)
 	if err != nil {
 		return false, err
 	}
