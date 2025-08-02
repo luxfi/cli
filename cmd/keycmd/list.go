@@ -20,7 +20,7 @@ import (
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/vms/avm"
+	"github.com/luxfi/node/vms/xvm"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/geth/ethclient"
 
@@ -141,7 +141,7 @@ keys or for the ledger addresses associated to certain indices.`,
 }
 
 type Clients struct {
-	x             map[models.Network]avm.Client
+	x             map[models.Network]xvm.Client
 	p             map[models.Network]platformvm.Client
 	c             map[models.Network]ethclient.Client
 	cGeth         map[models.Network]*goethereumethclient.Client
@@ -155,7 +155,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 	error,
 ) {
 	var err error
-	xClients := map[models.Network]avm.Client{}
+	xClients := map[models.Network]xvm.Client{}
 	pClients := map[models.Network]platformvm.Client{}
 	cClients := map[models.Network]ethclient.Client{}
 	cGethClients := map[models.Network]*goethereumethclient.Client{}
@@ -167,7 +167,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 			pClients[network] = platformvm.NewClient(network.Endpoint)
 		}
 		if xchain {
-			xClients[network] = avm.NewClient(network.Endpoint, "X")
+			xClients[network] = xvm.NewClient(network.Endpoint, "X")
 		}
 		if cchain {
 			cClients[network], err = ethclient.Dial(network.CChainEndpoint())
@@ -511,7 +511,7 @@ func getPChainAddrInfo(
 }
 
 func getXChainAddrInfo(
-	xClients map[models.Network]avm.Client,
+	xClients map[models.Network]xvm.Client,
 	network models.Network,
 	xChainAddr string,
 	kind string,
@@ -690,7 +690,7 @@ func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error)
 	return balanceStr, nil
 }
 
-func getXChainBalanceStr(xClient avm.Client, addr string) (string, error) {
+func getXChainBalanceStr(xClient xvm.Client, addr string) (string, error) {
 	xID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err
