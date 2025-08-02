@@ -10,10 +10,10 @@ import (
 	"github.com/luxfi/cli/v2/pkg/key"
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/formatting/address"
-	"github.com/luxfi/node/v2/vms/platformvm"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
 )
 
 // get network model associated to tx

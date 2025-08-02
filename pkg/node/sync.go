@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/subnet"
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/utils/set"
+	"github.com/luxfi/node/v2/v2/utils/set"
 )
 
 func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidChecks bool, subnetAliases []string) error {

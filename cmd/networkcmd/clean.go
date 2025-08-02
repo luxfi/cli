@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/signatureaggregator"
 	"github.com/luxfi/cli/v2/pkg/subnet"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"github.com/spf13/cobra"
 )

@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/v2/utils/perms"
+	"github.com/luxfi/node/v2/v2/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"

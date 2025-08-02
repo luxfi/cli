@@ -16,10 +16,10 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/cli/v2/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/staking"
+	"github.com/luxfi/node/v2/v2/staking"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	"github.com/luxfi/node/v2/utils/formatting"
-	"github.com/luxfi/node/v2/vms/platformvm/signer"
+	"github.com/luxfi/node/v2/v2/utils/formatting"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/signer"
 )
 
 func getValidatorContractManagerAddr() (string, error) {

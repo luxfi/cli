@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/utils"
 	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 )
 
 type BlockchainInfo struct {

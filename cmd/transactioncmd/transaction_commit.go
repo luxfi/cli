@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/txutils"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 

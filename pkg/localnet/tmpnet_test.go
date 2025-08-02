@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/cli/v2/pkg/prompts"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"github.com/stretchr/testify/require"
 )

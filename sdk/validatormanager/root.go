@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/v2/sdk/network"
-	luxdconstants "github.com/luxfi/node/v2/utils/constants"
+	luxdconstants "github.com/luxfi/node/v2/v2/utils/constants"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/v2/sdk/validator"
 	"github.com/luxfi/cli/v2/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/geth/core/types"
 

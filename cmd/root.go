@@ -41,7 +41,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
-	"github.com/luxfi/node/v2/utils/perms"
+	"github.com/luxfi/node/v2/v2/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

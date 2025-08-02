@@ -17,7 +17,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/luxfi/node/v2/config"
+	"github.com/luxfi/node/v2/v2/config"
 
 	"github.com/luxfi/cli/v2/pkg/application"
 	"github.com/luxfi/cli/v2/pkg/binutils"

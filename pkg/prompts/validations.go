@@ -16,8 +16,8 @@ import (
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/v2/utils/constants"
-	"github.com/luxfi/node/v2/utils/formatting/address"
+	lux_constants "github.com/luxfi/node/v2/v2/utils/constants"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
 	"github.com/luxfi/geth/common"
 )
 

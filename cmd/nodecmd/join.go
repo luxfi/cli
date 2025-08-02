@@ -236,7 +236,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"github.com/luxfi/node/v2/staking"
+	"github.com/luxfi/node/v2/v2/staking"
 )
 
 func main() {

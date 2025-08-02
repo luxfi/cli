@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/vm"
 	validatorManagerSDK "github.com/luxfi/cli/v2/sdk/validatormanager"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 	"github.com/luxfi/evm/v2/core"
 	"github.com/luxfi/evm/v2/params"
 	"github.com/luxfi/evm/v2/precompile/contracts/deployerallowlist"

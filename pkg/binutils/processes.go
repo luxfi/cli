@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/netrunner/utils"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
-	"github.com/luxfi/node/v2/utils/perms"
+	"github.com/luxfi/node/v2/v2/utils/perms"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"

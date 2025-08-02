@@ -24,12 +24,12 @@ import (
 
 	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/cli/v2/sdk/utils"
-	"github.com/luxfi/node/v2/api/info"
+	"github.com/luxfi/node/v2/v2/api/info"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/logging"
-	"github.com/luxfi/node/v2/utils/set"
-	"github.com/luxfi/node/v2/vms/platformvm"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/set"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
 	"github.com/luxfi/evm/v2/core"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"

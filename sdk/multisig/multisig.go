@@ -6,15 +6,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 
 	"github.com/luxfi/cli/v2/sdk/network"
-	"github.com/luxfi/node/v2/utils/crypto/secp256k1"
-	"github.com/luxfi/node/v2/vms/components/verify"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/utils/crypto/secp256k1"
+	"github.com/luxfi/node/v2/v2/vms/components/verify"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
 )
 
 type TxKind int64

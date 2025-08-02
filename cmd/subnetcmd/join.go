@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/v2/pkg/prompts"
-	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
 
 	"github.com/luxfi/cli/v2/cmd/flags"
 	"github.com/luxfi/cli/v2/pkg/constants"
@@ -18,12 +18,12 @@ import (
 	"github.com/luxfi/cli/v2/pkg/plugins"
 	"github.com/luxfi/cli/v2/pkg/subnet"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/genesis"
+	"github.com/luxfi/node/v2/v2/genesis"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/v2/utils/rpc"
-	"github.com/luxfi/node/v2/vms/platformvm"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/utils/rpc"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 

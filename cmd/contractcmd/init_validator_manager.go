@@ -21,7 +21,7 @@ import (
 	blockchainSDK "github.com/luxfi/cli/v2/sdk/blockchain"
 	validatormanagerSDK "github.com/luxfi/cli/v2/sdk/validatormanager"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"

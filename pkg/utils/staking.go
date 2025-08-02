@@ -12,10 +12,10 @@ import (
 
 	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/staking"
+	"github.com/luxfi/node/v2/v2/staking"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 	evmclient "github.com/luxfi/evm/v2/plugin/evm/client"
 )
 

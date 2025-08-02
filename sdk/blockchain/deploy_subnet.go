@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/cli/v2/sdk/wallet"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
 )
 
 // CreateSubnetTx creates uncommitted CreateSubnetTx

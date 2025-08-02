@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/cli/v2/pkg/prompts"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/vms/platformvm/reward"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/reward"
 )
 
 // default elastic config parameter values are from

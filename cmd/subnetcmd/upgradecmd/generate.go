@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/node/v2/utils/units"
+	"github.com/luxfi/node/v2/v2/utils/units"
 	gethmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/ethclient"
 	"go.uber.org/zap"
