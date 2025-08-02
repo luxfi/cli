@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
 )
 
 func CopyFile(src, dest string) error {

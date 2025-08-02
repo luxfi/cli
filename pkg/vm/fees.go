@@ -4,9 +4,9 @@
 package vm
 
 import (
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/statemachine"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/statemachine"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/evm/v2/commontype"
 	"github.com/luxfi/evm/v2/params"
 )

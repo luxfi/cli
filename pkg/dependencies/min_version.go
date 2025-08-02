@@ -8,10 +8,10 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
 )
 
 func CheckVersionIsOverMin(app *application.Lux, dependencyName string, network models.Network, version string) error {

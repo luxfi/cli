@@ -5,14 +5,14 @@ package blockchaincmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/contract"
-	"github.com/luxfi/cli/v2/pkg/keychain"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/networkoptions"
-	"github.com/luxfi/cli/v2/pkg/prompts"
-	"github.com/luxfi/cli/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/v2/pkg/keychain"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/v2/pkg/txutils"
 	"github.com/luxfi/ids"
 
 	"github.com/ethereum/go-ethereum/common"

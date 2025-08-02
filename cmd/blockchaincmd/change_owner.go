@@ -5,14 +5,14 @@ package blockchaincmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/pkg/keychain"
-	"github.com/luxfi/cli/v2/pkg/networkoptions"
-	"github.com/luxfi/cli/v2/pkg/prompts"
-	"github.com/luxfi/cli/v2/pkg/subnet"
-	"github.com/luxfi/cli/v2/pkg/txutils"
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/v2/pkg/keychain"
+	"github.com/luxfi/cli/v2/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/ids"
 
 	"github.com/spf13/cobra"

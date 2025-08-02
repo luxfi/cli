@@ -7,9 +7,9 @@ import (
 	"io"
 	"testing"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/config"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/config"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )

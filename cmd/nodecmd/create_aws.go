@@ -9,14 +9,14 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/exp/slices"
 
-	awsAPI "github.com/luxfi/cli/v2/pkg/cloud/aws"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	awsAPI "github.com/luxfi/cli/v2/v2/pkg/cloud/aws"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 )
 
 func getNewKeyPairName(ec2Svc *awsAPI.AwsCloud) (string, error) {

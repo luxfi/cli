@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/key"
-	"github.com/luxfi/cli/v2/pkg/keychain"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/prompts"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/key"
+	"github.com/luxfi/cli/v2/v2/pkg/keychain"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 )
 
 func promptOwners(

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/v2/pkg/subnet"
-	"github.com/luxfi/cli/v2/tests/e2e/commands"
-	"github.com/luxfi/cli/v2/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/v2/tests/e2e/commands"
+	"github.com/luxfi/cli/v2/v2/tests/e2e/utils"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	ginkgo "github.com/onsi/ginkgo/v2"

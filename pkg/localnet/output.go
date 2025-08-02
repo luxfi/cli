@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/pkg/ux"
-	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	sdkutils "github.com/luxfi/cli/v2/v2/sdk/utils"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 )

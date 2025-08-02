@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"

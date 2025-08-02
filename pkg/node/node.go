@@ -3,10 +3,10 @@
 package node
 
 import (
-	"github.com/luxfi/cli/v2/pkg/ansible"
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ansible"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
 )
 
 func GetHostWithCloudID(app *application.Lux, clusterName string, cloudID string) (*models.Host, error) {

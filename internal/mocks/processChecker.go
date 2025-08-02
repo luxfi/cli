@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	application "github.com/luxfi/cli/v2/pkg/application"
+	application "github.com/luxfi/cli/v2/v2/pkg/application"
 
 	mock "github.com/stretchr/testify/mock"
 )
