@@ -7,7 +7,7 @@ PROJECT_NAME = lux
 BINARY_NAME = lux
 VERSION ?= $(shell git describe --tags --always --dirty)
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-LDFLAGS = -X 'github.com/luxfi/cli/cmd.Version=$(VERSION)' -extldflags '-Wl,-allow_commons'
+LDFLAGS = -X 'github.com/luxfi/cli/cmd.Version=$(VERSION)'
 
 # Default target
 .PHONY: all
