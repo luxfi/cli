@@ -177,7 +177,7 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 		nodeUpgradeInfo.SubnetEVMIDsToUpgrade = []string{}
 		for vmName, vmVersion := range vmVersions {
 			// when calling info.getNodeVersion, this is what we get
-			// "vmVersions":{"avm":"v1.10.12","evm":"v0.12.5","n8Anw9kErmgk7KHviddYtecCmziLZTphDwfL1V2DfnFjWZXbE":"v0.5.6","platform":"v1.10.12"}},
+			// "vmVersions":{"xvm":"v1.10.12","evm":"v0.12.5","n8Anw9kErmgk7KHviddYtecCmziLZTphDwfL1V2DfnFjWZXbE":"v0.5.6","platform":"v1.10.12"}},
 			// we need to get the VM ID of the subnets that the node is currently validating, in the example above it is n8Anw9kErmgk7KHviddYtecCmziLZTphDwfL1V2DfnFjWZXbE
 			if !checkIfKeyIsStandardVMName(vmName) {
 				if vmVersion != latestSubnetEVMVersion {
@@ -213,7 +213,7 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 	return nodesToUpgrade, nil
 }
 
-// checks if vmName is "avm", "evm" or "platform"
+// checks if vmName is "xvm", "evm" or "platform"
 func checkIfKeyIsStandardVMName(vmName string) bool {
 	standardVMNames := []string{constants.PlatformKeyName, constants.EVMKeyName, constants.AVMKeyName}
 	return slices.Contains(standardVMNames, vmName)

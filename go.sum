@@ -392,7 +392,7 @@ github.com/luxfi/ledger-lux-go v0.0.3/go.mod h1:BbL5bOv9OgEtzE+dQ180SmNRRc5APi/Y
 github.com/luxfi/log v0.1.1 h1:KRTOIGqyPTrN3nWcBMVI50B6EXTayYex2+HyGjJ06Ew=
 github.com/luxfi/log v0.1.1/go.mod h1:trb99HbI+YW6nu+So4jWKey20oHeRhlee70xbuR6Gak=
 github.com/luxfi/trace v0.1.0 h1:rwJb/1EtYbjcokLe8/fU0yD8oBGs9QF7DCBO+dk/WGs=
-github.com/luxfi/trace v0.1.0/go.mod h1:6jhCW0hPCFv7qzFsL0w/amHRv7PfNIyW77N4WDS3U5Q=
+github.com/luxfi/trace v0.1.0/go.mod h1:nxbVJybpgn9JI38vYrguYUYwQDaqCMG5hHy73k/j9e4=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/manifoldco/promptui v0.9.0 h1:3V4HzJk1TtXW1MTZMP7mdlwbBpIinw3HztaIlYthEiA=
 github.com/manifoldco/promptui v0.9.0/go.mod h1:ka04sppxSGFAtxX0qhlYQjISsg9mR4GWtQEhdbn6Pgg=
