@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/spf13/cobra"
 )
 

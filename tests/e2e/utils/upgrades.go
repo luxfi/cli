@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/evm/v2/params"
+	"github.com/luxfi/evm/v2/rpc"
 	"github.com/onsi/gomega"
 )
 

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/key"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/evm/v2/precompile/contracts/nativeminter"
 	"github.com/ethereum/go-ethereum/common"
 )
 

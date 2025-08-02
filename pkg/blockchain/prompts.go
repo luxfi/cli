@@ -3,10 +3,10 @@
 package blockchain
 
 import (
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/ux"
 )
 
 func PromptValidatorBalance(app *application.Lux, availableBalance float64, prompt string) (float64, error) {

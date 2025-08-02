@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/node/v2/utils/logging"
 
 	"go.uber.org/zap"
 	"golang.org/x/mod/modfile"

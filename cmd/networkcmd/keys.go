@@ -12,10 +12,10 @@ import (
 
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/staking"
+	"github.com/luxfi/node/v2/staking"
 	"github.com/spf13/cobra"
 )
 

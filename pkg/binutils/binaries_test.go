@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/cli/internal/testutils"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/internal/testutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/stretchr/testify/require"
 )
 

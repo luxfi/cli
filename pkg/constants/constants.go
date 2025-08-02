@@ -116,13 +116,22 @@ const (
 	// Network ports
 	SSHTCPPort = 22
 	LuxdAPIPort = 9650
+	LuxdP2PPort = 9651
 	LuxdGrafanaPort = 3000
+	LuxdMonitoringPort = 9090
+	LuxdLokiPort = 3100
 
 	// Node roles
 	APIRole         = "api"
 	ValidatorRole   = "validator"
 	MonitorRole     = "monitor"
 	WarpRelayerRole = "warp-relayer"
+
+	// Cloud constants
+	CloudOperationTimeout = 10 * time.Minute
+	GCPStaticIPPrefix = "lux-ip"
+	CloudServerStorageSize = 200
+	MonitoringCloudServerStorageSize = 500
 )
 
 // HTTPAccess represents HTTP access configuration
@@ -164,7 +173,10 @@ const (
 
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
+	LuxdCompatibilityURL         = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
 	EVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
+	CLILatestDependencyURL       = "https://raw.githubusercontent.com/luxfi/cli/main/cli.json"
+	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/minVersion.json"
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
@@ -181,4 +193,95 @@ const (
 	DefaultWalletCreationTimeout = 5 * time.Second
 
 	DefaultConfirmTxTimeout = 20 * time.Second
+
+	// API request timeouts
+	ANRRequestTimeout = 30 * time.Second
+	APIRequestTimeout = 2 * time.Minute
+	APIRequestLargeTimeout = 10 * time.Minute
+
+	// Environment variables
+	CodespaceNameEnvVar = "CODESPACE_NAME"
+
+	// More cloud constants
+	ErrReleasingGCPStaticIP = "error releasing GCP static IP"
+	IPAddressSuffix = "-ip"
+
+	// Bootstrap validator
+	BootstrapValidatorBalanceNanoLUX = 2000000000000 // 2000 LUX in nanoLUX
+
+	// Default versions
+	DefaultLuxdVersion = "latest"
+
+	// PoS constants
+	PoSL1MinimumStakeDurationSeconds = 86400 // 24 hours
+
+	// Repository names
+	LuxdRepoName = "node"
+	SubnetEVMRepoName = "evm"
+
+	// Binary names
+	SubnetEVMBin = "evm"
+
+	// Default log level
+	DefaultAggregatorLogLevel = "info"
+
+	// File permissions
+	WriteReadReadPerms = 0o644
+
+	// Cloud node configuration
+	CloudNodeCLIConfigBasePath = "/home/ubuntu/.config/lux"
+
+	// SSH constants
+	AnsibleSSHShellParams = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+	RemoteSSHUser = "ubuntu"
+	
+	// Ansible constants
+	AnsibleHostInventoryFileName = "hosts"
+	AnsibleSSHUseAgentParams     = "-o ForwardAgent=yes"
+	
+	// Staking constants
+	StakerCertFileName        = "staker.crt"
+	BLSKeyFileName           = "signer.key"
+	ValidatorUptimeDeductible = 20 * time.Minute
+	
+	// Warp constants
+	WarpRelayerKeyName    = "warp-relayer"
+	WarpServicesRepoName  = "warp-services"
+	WarpRelayerKind      = "warp-relayer"
+	WarpRelayerBin       = "warp-relayer"
+	
+	// Version tags
+	LatestPreReleaseVersionTag = "latest-prerelease"
+	LatestReleaseVersionTag    = "latest"
+	
+	// Monitoring constants
+	DashboardsDir = "dashboards"
+	
+	// Cloud constants
+	DevnetFlagsProposerVMUseCurrentHeight = "--proposervm-use-current-height"
+	CloudNodeConfigPath                   = "/home/ubuntu/.lux-cli"
+	UpgradeFileName                       = "upgrade.json"
+	AliasesFileName                       = "aliases.json"
+	AWSCloudServerRunningState            = "running"
+	
+	// Git constants
+	GitExtension = ".git"
+	
+	// Config constants
+	ConfigMetricsUserIDKey = "metrics.userID"
+	
+	// Signature Aggregator
+	SignatureAggregator = "signature-aggregator"
+	
+	// SSH constants
+	SSHScriptTimeout = 10 * time.Minute
+	
+	// APM constants
+	ConfigLPMAdminAPIEndpointKey = "lpm.admin.api.endpoint"
+	
+	// Metrics constants
+	ConfigMetricsEnabledKey = "metrics.enabled"
+	
+	// Model types
+	SubnetEvm = "SubnetEVM"
 )

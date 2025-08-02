@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/models"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/node/v2/genesis"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/tests/fixture/tmpnet"
 
 	dircopy "github.com/otiai10/copy"
 	"go.uber.org/zap"

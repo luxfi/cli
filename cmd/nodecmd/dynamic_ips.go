@@ -6,14 +6,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/ansible"
-	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
-	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	nodePkg "github.com/luxfi/cli/pkg/node"
-	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/cli/v2/pkg/ansible"
+	awsAPI "github.com/luxfi/cli/v2/pkg/cloud/aws"
+	gcpAPI "github.com/luxfi/cli/v2/pkg/cloud/gcp"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	nodePkg "github.com/luxfi/cli/v2/pkg/node"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 )
 
 func getNodesWithDynamicIP(clusterNodes []string) ([]models.NodeConfig, error) {

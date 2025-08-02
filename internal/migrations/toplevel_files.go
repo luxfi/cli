@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 // Up to version 1.0.0 the sidecar and genesis files were stored at

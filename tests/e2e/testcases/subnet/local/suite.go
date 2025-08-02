@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/tests/e2e/commands"
-	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/tests/e2e/commands"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
 	"github.com/luxfi/netrunner/api"
 	"github.com/luxfi/geth/common"
 	ginkgo "github.com/onsi/ginkgo/v2"

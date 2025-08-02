@@ -5,12 +5,12 @@ package ledger
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/utils"
 
-	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/vms/platformvm"
 )
 
 const (

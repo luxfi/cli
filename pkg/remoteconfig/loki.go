@@ -4,7 +4,7 @@
 package remoteconfig
 
 import (
-	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/utils"
 )
 
 func LokiFoldersToCreate() []string {

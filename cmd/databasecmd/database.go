@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/database"
 	"github.com/spf13/cobra"
 )

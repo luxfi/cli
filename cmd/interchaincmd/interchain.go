@@ -3,11 +3,11 @@
 package interchaincmd
 
 import (
-	"github.com/luxfi/cli/cmd/interchaincmd/messengercmd"
-	"github.com/luxfi/cli/cmd/interchaincmd/relayercmd"
-	"github.com/luxfi/cli/cmd/interchaincmd/tokentransferrercmd"
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/cmd/interchaincmd/messengercmd"
+	"github.com/luxfi/cli/v2/cmd/interchaincmd/relayercmd"
+	"github.com/luxfi/cli/v2/cmd/interchaincmd/tokentransferrercmd"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
 

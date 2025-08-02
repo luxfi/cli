@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/wallet/subnet/primary"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
 )
 
 // Update network given by [networkDir], with all blockchain config of [blockchainName]

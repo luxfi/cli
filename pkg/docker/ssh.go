@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/remoteconfig"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/remoteconfig"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 )
 
 // ValidateComposeFile validates a docker-compose file on a remote host.

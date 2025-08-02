@@ -13,9 +13,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/types"
+	"github.com/luxfi/cli/v2/pkg/types"
 
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 
 	"github.com/posthog/posthog-go"
 	"github.com/spf13/cobra"

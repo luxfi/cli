@@ -6,10 +6,10 @@ package vm
 import (
 	"testing"
 
-	"github.com/luxfi/cli/internal/mocks"
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/prompts/mocks"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/prompts/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )

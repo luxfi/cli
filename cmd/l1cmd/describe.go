@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/spf13/cobra"
 )
 

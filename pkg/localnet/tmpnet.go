@@ -15,23 +15,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/api/admin"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/config/node"
-	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/tests/fixture/tmpnet"
-	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/node/v2/api/admin"
+	"github.com/luxfi/node/v2/api/info"
+	"github.com/luxfi/node/v2/config"
+	"github.com/luxfi/node/v2/config/node"
+	"github.com/luxfi/node/v2/genesis"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/tests/fixture/tmpnet"
+	luxdconstants "github.com/luxfi/node/v2/utils/constants"
+	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/utils/set"
+	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	walletoptions "github.com/luxfi/node/v2/wallet"
 
 	dircopy "github.com/otiai10/copy"
 	"golang.org/x/exp/maps"
@@ -838,8 +838,8 @@ func TmpNetAddNonSovereignValidators(
 				},
 				Subnet: subnetID,
 			},
-			common.WithContext(ctx),
-			common.WithPollFrequency(100*time.Millisecond),
+			walletoptions.WithContext(ctx),
+			walletoptions.WithPollFrequency(100*time.Millisecond),
 		); err != nil {
 			return err
 		}

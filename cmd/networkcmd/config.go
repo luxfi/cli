@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/mitchellh/go-homedir"
 )
 

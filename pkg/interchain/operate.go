@@ -6,8 +6,8 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/geth/core/types"
 	"github.com/ethereum/go-ethereum/common"
 )

@@ -7,16 +7,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/luxfi/cli/pkg/config"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/lpm"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/types"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/config"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/key"
+	"github.com/luxfi/cli/v2/pkg/lpm"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/types"
+	"github.com/luxfi/cli/v2/pkg/prompts"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/evm/core"
+	"github.com/luxfi/geth/core"
 )
 
 const (
@@ -31,6 +33,8 @@ type Lux struct {
 	Lpm        *lpm.Client
 	LpmDir     string
 	Downloader Downloader
+	Apm        interface{} // APM client placeholder
+	ApmDir     string
 }
 
 func New() *Lux {
@@ -505,4 +509,111 @@ func (app *Lux) LoadElasticSubnetConfig(subnetName string) (models.ElasticSubnet
 	err = json.Unmarshal(jsonBytes, &esc)
 
 	return esc, err
+}
+
+// GetKeyPaths returns all key file paths in the key directory
+func (app *Lux) GetKeyPaths() ([]string, error) {
+	keyDir := app.GetKeyDir()
+	files, err := os.ReadDir(keyDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+	
+	var keyPaths []string
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), constants.KeySuffix) {
+			keyPaths = append(keyPaths, filepath.Join(keyDir, file.Name()))
+		}
+	}
+	return keyPaths, nil
+}
+
+// GetKey loads a key by name from the key directory
+func (app *Lux) GetKey(keyName string, network models.Network, createIfMissing bool) (*key.SoftKey, error) {
+	// This is a placeholder implementation
+	// In real implementation, this would load the key from disk
+	return nil, fmt.Errorf("GetKey not implemented")
+}
+
+// GetBlockchainNames returns all blockchain names from the subnet directory
+func (app *Lux) GetBlockchainNames() ([]string, error) {
+	subnetDir := app.GetSubnetDir()
+	files, err := os.ReadDir(subnetDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+	
+	var names []string
+	for _, file := range files {
+		if file.IsDir() {
+			// Check if it has a sidecar file to confirm it's a blockchain
+			sidecarPath := filepath.Join(subnetDir, file.Name(), constants.SidecarFileName)
+			if _, err := os.Stat(sidecarPath); err == nil {
+				names = append(names, file.Name())
+			}
+		}
+	}
+	return names, nil
+}
+
+// GetSignatureAggregatorBinDir returns the directory for signature aggregator binaries
+func (app *Lux) GetSignatureAggregatorBinDir() string {
+	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.SignatureAggregator)
+}
+
+// ChainConfigExists checks if a chain config file exists for the given blockchain
+func (app *Lux) ChainConfigExists(blockchainName string) bool {
+	configPath := app.GetChainConfigPath(blockchainName)
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// GetChainConfigPath returns the path to the chain config file for a blockchain
+func (app *Lux) GetChainConfigPath(blockchainName string) string {
+	return filepath.Join(app.GetSubnetDir(), blockchainName, constants.ChainConfigDir, constants.ChainConfigFileName)
+}
+
+// NetworkUpgradeExists checks if a network upgrade file exists for the given blockchain
+func (app *Lux) NetworkUpgradeExists(blockchainName string) bool {
+	upgradePath := app.GetUpgradeBytesFilepath(blockchainName)
+	_, err := os.Stat(upgradePath)
+	return err == nil
+}
+
+// LuxdSubnetConfigExists checks if a luxd subnet config file exists for the given blockchain
+func (app *Lux) LuxdSubnetConfigExists(blockchainName string) bool {
+	configPath := app.GetLuxdSubnetConfigPath(blockchainName)
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// GetLuxdSubnetConfigPath returns the path to the luxd subnet config file for a blockchain
+func (app *Lux) GetLuxdSubnetConfigPath(blockchainName string) string {
+	return filepath.Join(app.GetSubnetDir(), blockchainName, constants.SubnetConfigFileName)
+}
+
+// GetPerNodeBlockchainConfig returns per-node blockchain configuration for the given blockchain
+func (app *Lux) GetPerNodeBlockchainConfig(blockchainName string) (map[string]interface{}, error) {
+	perNodeConfigPath := filepath.Join(app.GetSubnetDir(), blockchainName, constants.PerNodeChainConfigFileName)
+	if _, err := os.Stat(perNodeConfigPath); os.IsNotExist(err) {
+		return nil, nil
+	}
+	
+	configBytes, err := os.ReadFile(perNodeConfigPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var config map[string]interface{}
+	if err := json.Unmarshal(configBytes, &config); err != nil {
+		return nil, err
+	}
+	
+	return config, nil
 }

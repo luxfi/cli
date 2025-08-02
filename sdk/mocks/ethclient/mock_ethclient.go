@@ -14,11 +14,11 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	ids "github.com/luxfi/node/ids"
+	ids "github.com/luxfi/ids"
 	types "github.com/luxfi/geth/core/types"
-	interfaces "github.com/luxfi/evm/interfaces"
-	params "github.com/luxfi/evm/params"
-	rpc "github.com/luxfi/evm/rpc"
+	interfaces "github.com/luxfi/evm/v2/iface"
+	params "github.com/luxfi/evm/v2/params"
+	rpc "github.com/luxfi/evm/v2/rpc"
 	common "github.com/ethereum/go-ethereum/common"
 	gomock "go.uber.org/mock/gomock"
 )

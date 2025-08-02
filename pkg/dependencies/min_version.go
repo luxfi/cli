@@ -8,10 +8,10 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 func CheckVersionIsOverMin(app *application.Lux, dependencyName string, network models.Network, version string) error {
@@ -28,7 +28,11 @@ func CheckVersionIsOverMin(app *application.Lux, dependencyName string, network 
 	switch dependencyName {
 	case constants.LuxdRepoName:
 		// version has to be at least higher than minimum version specified for the dependency
-		minVersion := parsedDependency.Luxd[network.Name()].MinimumVersion
+		networkDeps, ok := parsedDependency[network.String()]
+		if !ok {
+			return fmt.Errorf("no minimum version found for network: %s", network.String())
+		}
+		minVersion := networkDeps.Luxd
 		versionComparison := semver.Compare(version, minVersion)
 		if versionComparison == -1 {
 			return fmt.Errorf("minimum version of %s that is supported by CLI is %s, current version provided is %s", dependencyName, minVersion, version)

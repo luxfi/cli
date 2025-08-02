@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/pkg/ux"
+
+	"github.com/luxfi/cli/v2/pkg/ux"
 
 	"golang.org/x/mod/semver"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 var ErrNoLuxdVersion = errors.New("unable to find a compatible luxd version")
@@ -40,19 +40,22 @@ func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName
 		return "", err
 	}
 
+	networkDependencies, ok := parsedDependency[network.String()]
+	if !ok {
+		return "", fmt.Errorf("no dependencies found for network: %s", network.String())
+	}
+
 	switch dependencyName {
 	case constants.LuxdRepoName:
 		// if the user is using RPC that is lower than the latest RPC supported by CLI, user will get latest Luxd version for that RPC
 		// based on "https://raw.githubusercontent.com/luxfi/luxd/master/version/compatibility.json"
-		if rpcVersion != nil && parsedDependency.RPC > *rpcVersion {
+		if rpcVersion != nil && networkDependencies.LuxdRPC > *rpcVersion {
 			return GetLatestLuxdByProtocolVersion(
 				app,
 				*rpcVersion,
 			)
 		}
-		return parsedDependency.Luxd[network.Name()].LatestVersion, nil
-	case constants.SubnetEVMRepoName:
-		return parsedDependency.SubnetEVM, nil
+		return networkDependencies.Luxd, nil
 	default:
 		return "", fmt.Errorf("unsupported dependency: %s", dependencyName)
 	}
@@ -70,7 +73,7 @@ func GetLuxdVersionsForRPC(app *application.Lux, rpcVersion int, url string) ([]
 		return nil, err
 	}
 
-	eligibleVersions, ok := parsedCompat[strconv.Itoa(rpcVersion)]
+	eligibleVersions, ok := parsedCompat.RPCChainVMProtocolVersion[strconv.Itoa(rpcVersion)]
 	if !ok {
 		return nil, ErrNoLuxdVersion
 	}
@@ -88,11 +91,11 @@ func GetAvailableLuxdVersions(app *application.Lux, rpcVersion int, url string) 
 		return nil, ErrNoLuxdVersion
 	}
 	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
-	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
+	releaseURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest",
 		constants.LuxOrg,
 		constants.LuxdRepoName,
-		"",
 	)
+	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(releaseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -128,14 +131,18 @@ func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, netwo
 	if err != nil {
 		return "", err
 	}
-	latestPreReleaseVersion, err := app.Downloader.GetLatestPreReleaseVersion(
+	// Get all releases and find the latest prerelease
+	allReleases, err := app.Downloader.GetAllReleasesForRepo(
 		constants.LuxOrg,
 		constants.LuxdRepoName,
-		"",
 	)
 	if err != nil {
 		return "", err
 	}
+	if len(allReleases) == 0 {
+		return "", fmt.Errorf("no releases found")
+	}
+	latestPreReleaseVersion := allReleases[0]
 
 	if !luxdVersion.UseLatestLuxgoReleaseVersion && !luxdVersion.UseLatestLuxgoPreReleaseVersion && luxdVersion.UseCustomLuxgoVersion == "" && luxdVersion.UseLuxgoVersionFromSubnet == "" {
 		luxdVersion, err = promptLuxdVersionChoice(app, latestReleaseVersion, latestPreReleaseVersion)
@@ -205,10 +212,8 @@ func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, 
 			if err != nil {
 				return LuxdVersionSettings{}, err
 			}
-			_, err = subnet.ValidateSubnetNameAndGetChains(app, []string{useLuxgoVersionFromSubnet})
-			if err == nil {
-				break
-			}
+			// TODO: Add subnet validation when available
+			break
 			ux.Logger.PrintToUser(fmt.Sprintf("no blockchain named as %s found", useLuxgoVersionFromSubnet))
 		}
 		return LuxdVersionSettings{UseLuxgoVersionFromSubnet: useLuxgoVersionFromSubnet}, nil

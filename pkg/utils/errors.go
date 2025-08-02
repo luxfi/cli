@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 )
 
 const (
@@ -125,8 +125,4 @@ func alreadyFound(s string, found []string) bool {
 		}
 	}
 	return false
-}
-
-func ErrWrongArgCount(expected, got int) error {
-	return fmt.Errorf("requires %d arg(s), received %d arg(s)", expected, got)
 }

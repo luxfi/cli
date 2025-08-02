@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
-	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
-	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/models"
+	blockchainSDK "github.com/luxfi/cli/v2/sdk/blockchain"
+	validatormanagerSDK "github.com/luxfi/cli/v2/sdk/validatormanager"
+	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/evm/v2/core"
 
 	"github.com/ethereum/go-ethereum/common"
 )

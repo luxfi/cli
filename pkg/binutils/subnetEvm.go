@@ -6,18 +6,18 @@ package binutils
 import (
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, string, error) {
 	// Check if already installed
-	binDir := app.GetSubnetEVMBinDir()
+	binDir := app.GetEVMBinDir()
 	subDir := filepath.Join(binDir, subnetEVMBinPrefix+subnetEVMVersion)
 
 	installer := NewInstaller()
-	downloader := NewSubnetEVMDownloader()
-	version, vmDir, err := InstallBinary(
+	downloader := NewEVMDownloader()
+	vmDir, err := InstallBinary(
 		app,
 		subnetEVMVersion,
 		binDir,
@@ -25,9 +25,8 @@ func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, stri
 		subnetEVMBinPrefix,
 		constants.LuxOrg,
 		constants.SubnetEVMRepoName,
-		"",
 		downloader,
 		installer,
 	)
-	return version, filepath.Join(vmDir, constants.SubnetEVMBin), err
+	return subnetEVMVersion, filepath.Join(vmDir, constants.SubnetEVMBin), err
 }

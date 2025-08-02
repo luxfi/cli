@@ -5,9 +5,9 @@ package networkcmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/netrunner/local"
 	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"

@@ -5,8 +5,8 @@ package models
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
-	lux_constants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	lux_constants "github.com/luxfi/node/v2/utils/constants"
 )
 
 type Network int64
@@ -16,7 +16,13 @@ const (
 	Mainnet
 	Testnet
 	Local
+	Devnet
 )
+
+// Kind returns the network kind (same as the network itself for now)
+func (n Network) Kind() Network {
+	return n
+}
 
 func (s Network) String() string {
 	switch s {
@@ -26,6 +32,8 @@ func (s Network) String() string {
 		return "Testnet"
 	case Local:
 		return "Local Network"
+	case Devnet:
+		return "Devnet"
 	}
 	return "Unknown Network"
 }
@@ -38,8 +46,16 @@ func (s Network) NetworkID() (uint32, error) {
 		return lux_constants.TestnetID, nil
 	case Local:
 		return constants.LocalNetworkID, nil
+	case Devnet:
+		return constants.LocalNetworkID, nil // Devnet uses same ID as local for now
 	}
 	return 0, fmt.Errorf("unsupported network")
+}
+
+// ID returns the network ID as a uint32
+func (s Network) ID() uint32 {
+	id, _ := s.NetworkID()
+	return id
 }
 
 func NetworkFromString(s string) Network {
@@ -50,6 +66,8 @@ func NetworkFromString(s string) Network {
 		return Testnet
 	case Local.String():
 		return Local
+	case Devnet.String():
+		return Devnet
 	}
 	return Undefined
 }
@@ -64,4 +82,34 @@ func NetworkFromNetworkID(networkID uint32) Network {
 		return Local
 	}
 	return Undefined
+}
+
+// HandlePublicNetworkSimulation handles public network simulation logic
+func (n Network) HandlePublicNetworkSimulation() {
+	// This is a placeholder - implement simulation logic if needed
+}
+
+// Endpoint returns the network endpoint URL
+func (n Network) Endpoint() string {
+	switch n {
+	case Mainnet:
+		return constants.MainnetAPIEndpoint
+	case Testnet:
+		return constants.TestnetAPIEndpoint
+	case Local:
+		return constants.LocalAPIEndpoint
+	case Devnet:
+		return constants.LocalAPIEndpoint // Devnet uses local endpoint
+	}
+	return ""
+}
+
+// Name returns the network name (alias for String)
+func (n Network) Name() string {
+	return n.String()
+}
+
+// NewLocalNetwork creates a new Local network
+func NewLocalNetwork() Network {
+	return Local
 }

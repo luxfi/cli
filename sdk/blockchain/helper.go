@@ -4,12 +4,12 @@
 package blockchain
 
 import (
-	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm"
 
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/utils"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 func GetSubnet(subnetID ids.ID, network network.Network) (platformvm.GetSubnetClientResponse, error) {

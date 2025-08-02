@@ -10,10 +10,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
 )
 
 // Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
@@ -105,7 +105,11 @@ func EditConfigFile(
 	// Banf.10 changes from "whitelisted-subnets" to "track-subnets"
 	delete(luxdConfig, "whitelisted-subnets")
 	luxdConfig["track-subnets"] = newVal
-	luxdConfig["network-id"] = network.NetworkIDFlagValue()
+	networkID, err := network.NetworkID()
+	if err != nil {
+		return err
+	}
+	luxdConfig["network-id"] = networkID
 
 	writeBytes, err := json.MarshalIndent(luxdConfig, "", "  ")
 	if err != nil {

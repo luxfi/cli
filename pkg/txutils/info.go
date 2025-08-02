@@ -6,14 +6,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/key"
+	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/vms/secp256k1fx"
 )
 
 // get network model associated to tx

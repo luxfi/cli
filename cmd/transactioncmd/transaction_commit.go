@@ -3,12 +3,12 @@
 package transactioncmd
 
 import (
-	"github.com/luxfi/cli/cmd/subnetcmd"
-	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/pkg/txutils"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/cmd/subnetcmd"
+	"github.com/luxfi/cli/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 

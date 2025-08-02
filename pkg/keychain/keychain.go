@@ -7,21 +7,21 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/luxfi/cli/cmd/flags"
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/crypto/ledger"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/cli/v2/cmd/flags"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/key"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/utils/crypto/ledger"
+	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/utils/set"
+	"github.com/luxfi/node/v2/utils/units"
+	"github.com/luxfi/node/v2/vms/platformvm"
 )
 
 const (
@@ -66,7 +66,7 @@ func (kc *Keychain) PChainFormattedStrAddresses() ([]string, error) {
 	if len(addrs) == 0 {
 		return nil, fmt.Errorf("no addresses in keychain")
 	}
-	hrp := key.GetHRP(kc.Network.ID)
+	hrp := key.GetHRP(kc.Network.ID())
 	addrsStr := []string{}
 	for _, addr := range addrs {
 		addrStr, err := address.Format("P", hrp, addr[:])
@@ -124,37 +124,49 @@ func GetKeychainFromCmdLineFlags(
 		return nil, ErrMutuallyExlusiveKeySource
 	}
 	switch {
-	case network.Kind == models.Local:
+	case network.Kind() == models.Local:
 		// prompt the user if no key source was provided
 		if !useEwoq && !useLedger && keyName == "" {
-			var err error
-			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), true)
+			keyFiles, err := app.GetKeyPaths()
 			if err != nil {
 				return nil, err
 			}
-		}
-	case network.Kind == models.Devnet:
-		// prompt the user if no key source was provided
-		if !useEwoq && !useLedger && keyName == "" {
-			var err error
-			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), true)
+			keyName, ledgerIndex, err := prompts.GetKeyOrLedger(app.Prompt, keychainGoal, keyFiles, keychainGoal, true, nil)
 			if err != nil {
 				return nil, err
 			}
+			useLedger = ledgerIndex >= 0
 		}
-	case network.Kind == models.Testnet:
+	case network.Kind() == models.Devnet:
+		// prompt the user if no key source was provided
+		if !useEwoq && !useLedger && keyName == "" {
+			keyFiles, err := app.GetKeyPaths()
+			if err != nil {
+				return nil, err
+			}
+			keyName, ledgerIndex, err := prompts.GetKeyOrLedger(app.Prompt, keychainGoal, keyFiles, keychainGoal, true, nil)
+			if err != nil {
+				return nil, err
+			}
+			useLedger = ledgerIndex >= 0
+		}
+	case network.Kind() == models.Testnet:
 		if useEwoq || keyName == "ewoq" {
 			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
 		// prompt the user if no key source was provided
 		if !useLedger && keyName == "" {
-			var err error
-			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), false)
+			keyFiles, err := app.GetKeyPaths()
 			if err != nil {
 				return nil, err
 			}
+			keyName, ledgerIndex, err := prompts.GetKeyOrLedger(app.Prompt, keychainGoal, keyFiles, keychainGoal, false, nil)
+			if err != nil {
+				return nil, err
+			}
+			useLedger = ledgerIndex >= 0
 		}
-	case network.Kind == models.Mainnet:
+	case network.Kind() == models.Mainnet:
 		if useEwoq || keyName == "ewoq" {
 			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
@@ -162,7 +174,7 @@ func GetKeychainFromCmdLineFlags(
 			useLedger = true
 		} else {
 			ux.Logger.PrintToUser("")
-			ux.Logger.PrintToUser(logging.Red.Wrap("WARNING: Storing keys locally in plain text is insecure. A hardware wallet is recommended for Mainnet."))
+			ux.Logger.PrintToUser("WARNING: Storing keys locally in plain text is insecure. A hardware wallet is recommended for Mainnet.")
 			ux.Logger.PrintToUser("")
 		}
 	}

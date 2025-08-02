@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 type LuxConfigInputs struct {
@@ -45,7 +45,7 @@ func PrepareLuxConfig(publicIP string, networkID string, subnets []string) LuxCo
 		TrackSubnets:               strings.Join(subnets, ","),
 		Aliases:                    nil,
 		BlockChainID:               "",
-		ProposerVMUseCurrentHeight: constants.DevnetFlagsProposerVMUseCurrentHeight,
+		ProposerVMUseCurrentHeight: true, // For devnet, proposervm-use-current-height is enabled
 	}
 }
 

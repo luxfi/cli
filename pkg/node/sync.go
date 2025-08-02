@@ -8,14 +8,14 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/luxfi/cli/pkg/ansible"
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/ssh"
-	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/cli/v2/pkg/ansible"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ssh"
+	"github.com/luxfi/cli/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/node/v2/utils/set"
 )
 
 func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidChecks bool, subnetAliases []string) error {

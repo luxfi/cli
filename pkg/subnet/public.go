@@ -8,25 +8,25 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/components/verify"
+	"github.com/luxfi/node/v2/vms/components/lux"
+	"github.com/luxfi/node/v2/vms/components/verify"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/txutils"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/chain/c"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
+	"github.com/luxfi/node/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/utils/set"
+	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/wallet/chain/c"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	walletoptions "github.com/luxfi/node/v2/wallet"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")
@@ -417,7 +417,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 		// used for E2E testing of public related paths
 		api = constants.LocalAPIEndpoint
 	default:
-		return nil, fmt.Errorf("unsupported public network")
+		return primary.Wallet{}, fmt.Errorf("unsupported public network")
 	}
 
 	// Create empty EthKeychain if kc doesn't implement it
@@ -428,31 +428,27 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
-		URI:         api,
-		LUXKeychain: d.kc,
-		EthKeychain: ethKc,
-	})
+	wallet, err := primary.MakeWallet(ctx, api, d.kc, ethKc, primary.WalletConfig{})
 	if err != nil {
-		return nil, err
+		return primary.Wallet{}, err
 	}
-	return wallet, nil
+	return *wallet, nil
 }
 
-func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []common.Option {
-	options := []common.Option{}
+func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []walletoptions.Option {
+	options := []walletoptions.Option{}
 	walletAddr := d.kc.Addresses().List()[0]
 	// addrs to use for signing
 	customAddrsSet := set.Set[ids.ShortID]{}
 	customAddrsSet.Add(walletAddr)
 	customAddrsSet.Add(subnetAuthKeys...)
-	options = append(options, common.WithCustomAddresses(customAddrsSet))
+	options = append(options, walletoptions.WithCustomAddresses(customAddrsSet))
 	// set change to go to wallet addr (instead of any other subnet auth key)
 	changeOwner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs:     []ids.ShortID{walletAddr},
 	}
-	options = append(options, common.WithChangeOwner(changeOwner))
+	options = append(options, walletoptions.WithChangeOwner(changeOwner))
 	return options
 }
 
@@ -569,7 +565,7 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 		Threshold: threshold,
 		Locktime:  0,
 	}
-	opts := []common.Option{}
+	opts := []walletoptions.Option{}
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
 	}

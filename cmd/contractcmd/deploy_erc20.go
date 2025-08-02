@@ -5,12 +5,12 @@ package contractcmd
 import (
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/node/v2/utils/logging"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/spf13/cobra"

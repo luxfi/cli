@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 type CLIMinVersionMap struct {

@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/cli/sdk/constants"
-	mockethclient "github.com/luxfi/cli/sdk/mocks/ethclient"
+	"github.com/luxfi/cli/v2/sdk/constants"
+	mockethclient "github.com/luxfi/cli/v2/sdk/mocks/ethclient"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/geth/core/types"
-	subnetethclient "github.com/luxfi/evm/ethclient"
-	"github.com/luxfi/evm/interfaces"
+	subnetethclient "github.com/luxfi/evm/v2/ethclient"
+	"github.com/luxfi/evm/v2/iface"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 

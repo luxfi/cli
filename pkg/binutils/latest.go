@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/perms"
+	"github.com/luxfi/node/v2/utils/perms"
 	"go.uber.org/zap"
 )
 

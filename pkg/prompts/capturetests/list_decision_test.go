@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/cli/internal/mocks"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/prompts"
 	"github.com/luxfi/crypto"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -10,19 +10,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/v2/utils"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/cli/sdk/keychain"
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/vm"
-	"github.com/luxfi/cli/sdk/wallet"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/cli/v2/sdk/keychain"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/vm"
+	"github.com/luxfi/cli/v2/sdk/wallet"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	"github.com/luxfi/evm/v2/core"
+	"github.com/luxfi/evm/v2/params"
 	"github.com/ethereum/go-ethereum/common"
 )
 

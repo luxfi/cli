@@ -5,7 +5,7 @@ package upgradecmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/application"
 	"github.com/spf13/cobra"
 )
 

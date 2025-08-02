@@ -17,19 +17,54 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/api/info"
-	basecfg "github.com/luxfi/warp/config"
-	signatureAggregatorConfig "github.com/luxfi/warp/signature-aggregator/config"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/node/v2/api/info"
+	// Temporary config types until warp imports are fixed
 
 	"go.uber.org/zap"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/node/v2/utils/logging"
+)
+
+// Temporary config types until warp imports are fixed
+type signatureAggregatorConfig struct{}
+
+type Config struct {
+	LogLevel             string
+	PChainAPI            *APIConfig
+	InfoAPI              *APIConfig
+	SignatureCacheSize   int
+	AllowPrivateIPs      bool
+	TrackedSubnetIDs     []string
+	ManuallyTrackedPeers []*PeerConfig
+	APIPort              uint16
+	MetricsPort          uint16
+}
+
+type APIConfig struct {
+	BaseURL string
+}
+
+type PeerConfig struct {
+	IP         string
+	Signer     string
+	NodeID     string
+	PublicKey  string
+	SubnetID   string
+	BlsPubKey  string
+	BlsSig     string
+}
+
+type basecfg struct{}
+
+var (
+	signatureAggregatorConfig = struct{}
+	basecfg = struct{}
 )
 
 func NewSignatureAggregatorLogger(
@@ -49,11 +84,11 @@ func NewSignatureAggregatorLogger(
 
 func GetLatestSignatureAggregatorReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
-	return downloader.GetLatestReleaseVersion(
+	releaseURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest",
 		constants.LuxOrg,
 		constants.WarpServicesRepoName,
-		constants.SignatureAggregator,
 	)
+	return downloader.GetLatestReleaseVersion(releaseURL)
 }
 
 func GetLatestSignatureAggregatorPreReleaseVersion() (string, error) {
@@ -61,7 +96,6 @@ func GetLatestSignatureAggregatorPreReleaseVersion() (string, error) {
 	return downloader.GetLatestPreReleaseVersion(
 		constants.LuxOrg,
 		constants.WarpServicesRepoName,
-		constants.SignatureAggregator,
 	)
 }
 
@@ -245,7 +279,7 @@ func waitForAggregatorReady(url string, timeout time.Duration) error {
 }
 
 // readExistingConfig reads the existing signature aggregator configuration from a file.
-func readExistingConfig(configPath string) (*signatureAggregatorConfig.Config, error) {
+func readExistingConfig(configPath string) (*Config, error) {
 	// Check if file exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return nil, nil
@@ -258,7 +292,7 @@ func readExistingConfig(configPath string) (*signatureAggregatorConfig.Config, e
 	}
 
 	// Parse the config
-	var config signatureAggregatorConfig.Config
+	var config Config
 	if err := json.Unmarshal(configBytes, &config); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %w", err)
 	}
@@ -266,15 +300,15 @@ func readExistingConfig(configPath string) (*signatureAggregatorConfig.Config, e
 	return &config, nil
 }
 
-func CreateSignatureAggregatorConfig(subnetID string, networkEndpoint string, peers []info.Peer, apiPort, metricsPort uint16) *signatureAggregatorConfig.Config {
-	config := &signatureAggregatorConfig.Config{
+func CreateSignatureAggregatorConfig(subnetID string, networkEndpoint string, peers []info.Peer, apiPort, metricsPort uint16) *Config {
+	config := &Config{
 		LogLevel:             "debug",
-		PChainAPI:            &basecfg.APIConfig{BaseURL: networkEndpoint},
-		InfoAPI:              &basecfg.APIConfig{BaseURL: networkEndpoint},
+		PChainAPI:            &APIConfig{BaseURL: networkEndpoint},
+		InfoAPI:              &APIConfig{BaseURL: networkEndpoint},
 		SignatureCacheSize:   1048576,
 		AllowPrivateIPs:      true,
 		TrackedSubnetIDs:     []string{subnetID},
-		ManuallyTrackedPeers: make([]*basecfg.PeerConfig, 0),
+		ManuallyTrackedPeers: make([]*PeerConfig, 0),
 		APIPort:              apiPort,
 		MetricsPort:          metricsPort,
 	}
@@ -294,7 +328,7 @@ func CreateSignatureAggregatorConfig(subnetID string, networkEndpoint string, pe
 }
 
 // WriteSignatureAggregatorConfig writes the signature aggregator configuration to a file.
-func WriteSignatureAggregatorConfig(config *signatureAggregatorConfig.Config, configPath string) error {
+func WriteSignatureAggregatorConfig(config *Config, configPath string) error {
 	// Read existing config if it exists
 	existingConfig, err := readExistingConfig(configPath)
 	if err != nil {

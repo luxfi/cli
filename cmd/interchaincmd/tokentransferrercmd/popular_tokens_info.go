@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 )
 
 type PopularTokenInfo struct {

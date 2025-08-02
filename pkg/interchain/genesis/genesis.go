@@ -9,9 +9,9 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/evm/v2/core"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

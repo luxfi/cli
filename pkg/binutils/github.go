@@ -6,7 +6,7 @@ package binutils
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 const (

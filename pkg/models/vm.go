@@ -2,12 +2,13 @@
 // See the file LICENSE for licensing terms.
 package models
 
-import "github.com/luxfi/cli/pkg/constants"
+import "github.com/luxfi/cli/v2/pkg/constants"
 
 type VMType string
 
 const (
 	EVM         = "EVM"
+	SubnetEvm   = "SubnetEVM"
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
 	CustomVM    = "Custom"
@@ -17,6 +18,8 @@ func VMTypeFromString(s string) VMType {
 	switch s {
 	case EVM:
 		return EVM
+	case SubnetEvm:
+		return SubnetEvm
 	case BlobVM:
 		return BlobVM
 	case TimestampVM:

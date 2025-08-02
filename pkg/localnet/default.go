@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/tests/fixture/tmpnet"
-	"github.com/luxfi/crypto/secp256k1"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/node/v2/genesis"
+	"github.com/luxfi/node/v2/tests/fixture/tmpnet"
+	"github.com/luxfi/node/v2/utils/crypto/secp256k1"
 
 	"golang.org/x/exp/maps"
 )
@@ -51,9 +51,12 @@ func GetDefaultNetworkConf(numNodes uint32) (
 	}
 	nodes := []*tmpnet.Node{}
 	for i := range numNodes {
-		node := tmpnet.NewNode("")
+		node := tmpnet.NewNode()
 		if int(i) < len(networkConf.NodeConfigs) {
-			maps.Copy(node.Flags, networkConf.NodeConfigs[i].Flags)
+			// Copy flags manually since maps.Copy may not work with the type
+			for k, v := range networkConf.NodeConfigs[i].Flags {
+				node.Flags[k] = v
+			}
 		}
 		if err := node.EnsureKeys(); err != nil {
 			return 0, nil, nil, nil, nil, err

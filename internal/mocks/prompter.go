@@ -10,9 +10,9 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	models "github.com/luxfi/cli/pkg/models"
+	models "github.com/luxfi/cli/v2/pkg/models"
 
-	prompts "github.com/luxfi/cli/pkg/prompts"
+	prompts "github.com/luxfi/cli/v2/pkg/prompts"
 
 	time "time"
 

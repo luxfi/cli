@@ -3,7 +3,7 @@
 
 package remoteconfig
 
-import "github.com/luxfi/cli/pkg/utils"
+import "github.com/luxfi/cli/v2/pkg/utils"
 
 func PrometheusFoldersToCreate() []string {
 	return []string{

@@ -4,16 +4,16 @@
 package binutils
 
 import (
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error) {
-	binDir := app.GetLuxgoBinDir()
+	binDir := app.GetLuxBinDir()
 
 	installer := NewInstaller()
-	downloader := NewLuxdDownloader()
-	return InstallBinary(
+	downloader := NewLuxDownloader()
+	binPath, err := InstallBinary(
 		app,
 		luxdVersion,
 		binDir,
@@ -21,8 +21,8 @@ func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error
 		luxdBinPrefix,
 		constants.LuxOrg,
 		constants.LuxdRepoName,
-		"",
 		downloader,
 		installer,
 	)
+	return luxdVersion, binPath, err
 }

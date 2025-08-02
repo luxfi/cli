@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/cli/internal/mocks"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,7 +34,7 @@ func TestGetDownloadURL_Lux(t *testing.T) {
 			version:     "v1.17.1",
 			goarch:      "amd64",
 			goos:        "linux",
-			expectedURL: "https://github.com/luxfi/node/releases/download/v1.17.1/node-linux-amd64-v1.17.1.tar.gz",
+			expectedURL: "https://github.com/luxfi/node/v2/releases/download/v1.17.1/node-linux-amd64-v1.17.1.tar.gz",
 			expectedExt: tarExtension,
 			expectedErr: nil,
 		},
@@ -42,7 +42,7 @@ func TestGetDownloadURL_Lux(t *testing.T) {
 			version:     "v1.18.5",
 			goarch:      "arm64",
 			goos:        "darwin",
-			expectedURL: "https://github.com/luxfi/node/releases/download/v1.18.5/node-macos-v1.18.5.zip",
+			expectedURL: "https://github.com/luxfi/node/v2/releases/download/v1.18.5/node-macos-v1.18.5.zip",
 			expectedExt: zipExtension,
 			expectedErr: nil,
 		},
@@ -50,7 +50,7 @@ func TestGetDownloadURL_Lux(t *testing.T) {
 			version:     "v2.1.4",
 			goarch:      "amd64",
 			goos:        "windows",
-			expectedURL: "https://github.com/luxfi/node/releases/download/v2.1.4/node-win-v2.1.4-experimental.zip",
+			expectedURL: "https://github.com/luxfi/node/v2/releases/download/v2.1.4/node-win-v2.1.4-experimental.zip",
 			expectedExt: zipExtension,
 			expectedErr: nil,
 		},
@@ -84,7 +84,7 @@ func TestGetDownloadURL_EVM(t *testing.T) {
 			version:     "v1.17.1",
 			goarch:      "amd64",
 			goos:        "linux",
-			expectedURL: "https://github.com/luxfi/evm/releases/download/v1.17.1/evm_1.17.1_linux_amd64.tar.gz",
+			expectedURL: "https://github.com/luxfi/evm/v2/releases/download/v1.17.1/evm_1.17.1_linux_amd64.tar.gz",
 			expectedExt: tarExtension,
 			expectedErr: nil,
 		},
@@ -92,7 +92,7 @@ func TestGetDownloadURL_EVM(t *testing.T) {
 			version:     "v1.18.5",
 			goarch:      "arm64",
 			goos:        "darwin",
-			expectedURL: "https://github.com/luxfi/evm/releases/download/v1.18.5/evm_1.18.5_darwin_arm64.tar.gz",
+			expectedURL: "https://github.com/luxfi/evm/v2/releases/download/v1.18.5/evm_1.18.5_darwin_arm64.tar.gz",
 			expectedExt: tarExtension,
 			expectedErr: nil,
 		},

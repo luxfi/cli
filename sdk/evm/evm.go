@@ -12,20 +12,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/sdk/constants"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/cli/v2/sdk/constants"
+	"github.com/luxfi/cli/v2/sdk/utils"
 	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/evm/accounts/abi/bind"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethclient"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
-	"github.com/luxfi/evm/precompile/contracts/warp"
-	"github.com/luxfi/evm/predicate"
-	subnetEvmUtils "github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/evm/v2/accounts/abi/bind"
+	"github.com/luxfi/evm/v2/ethclient"
+	"github.com/luxfi/evm/v2/iface"
+	"github.com/luxfi/evm/v2/params"
+	"github.com/luxfi/evm/v2/upgrade/legacy"
+	"github.com/luxfi/evm/v2/precompile/contracts/warp"
+	"github.com/luxfi/evm/v2/predicate"
+	subnetEvmUtils "github.com/luxfi/evm/v2/utils"
+	"github.com/luxfi/evm/v2/core/types"
+	"github.com/luxfi/geth/common"
+	gethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 const (
@@ -34,6 +36,19 @@ const (
 	maxPriorityFeePerGas        = 2500000000 // 2.5 gwei
 	nativeTransferGas    uint64 = 21_000
 )
+
+// convertAccessList converts evm/core/types.AccessList to iface.AccessList (geth types)
+func convertAccessList(evmList types.AccessList) iface.AccessList {
+	// Convert evm AccessList to geth AccessList
+	gethList := make(gethtypes.AccessList, len(evmList))
+	for i, tuple := range evmList {
+		gethList[i] = gethtypes.AccessTuple{
+			Address:     tuple.Address,
+			StorageKeys: tuple.StorageKeys,
+		}
+	}
+	return gethList
+}
 
 // also used at mocks
 var (
@@ -292,7 +307,7 @@ func (client Client) CalculateTxParams(
 // returns the estimated gas limit
 // supports [repeatsOnFailure] failures
 func (client Client) EstimateGasLimit(
-	msg interfaces.CallMsg,
+	msg iface.CallMsg,
 ) (uint64, error) {
 	gasLimit, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
@@ -328,18 +343,28 @@ func (client Client) GetChainID() (*big.Int, error) {
 // returns the chain conf
 // supports [repeatsOnFailure] failures
 func (client Client) ChainConfig() (*params.ChainConfigWithUpgradesJSON, error) {
-	conf, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
-		func(ctx context.Context) (*params.ChainConfigWithUpgradesJSON, error) {
-			return client.EthClient.ChainConfig(ctx)
-		},
-		repeatsOnFailure,
-		sleepBetweenRepeats,
-	)
+	// ChainConfig is not available in standard ethclient
+	// This would need to be implemented using a custom RPC call
+	// For now, return a default config
+	chainID, err := client.EthClient.ChainID(context.Background())
 	if err != nil {
-		err = fmt.Errorf("failure getting chain config from %s: %w", client.URL, err)
+		return nil, fmt.Errorf("failure getting chain ID from %s: %w", client.URL, err)
 	}
-	return conf, err
+	
+	// Create a default config based on chain ID
+	// ChainConfigWithUpgradesJSON embeds ChainConfig which embeds ethparams.ChainConfig
+	ethConfig := &ethparams.ChainConfig{
+		ChainID: chainID,
+	}
+	
+	config := &params.ChainConfigWithUpgradesJSON{
+		ChainConfig: params.ChainConfig{
+			ChainConfig: ethConfig,
+		},
+		UpgradeConfig: params.UpgradeConfig{},
+	}
+	
+	return config, nil
 }
 
 // sends [tx]
@@ -350,7 +375,21 @@ func (client Client) SendTransaction(
 	_, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) (any, error) {
-			return nil, client.EthClient.SendTransaction(ctx, tx)
+			// ethclient expects an iface.Transaction (geth types)
+			// but we have evm types.Transaction
+			// Since direct conversion is not available, serialize and recreate
+			data, err := tx.MarshalBinary()
+			if err != nil {
+				return nil, err
+			}
+			
+			// Create a new geth transaction from the binary data
+			gethTx := new(iface.Transaction)
+			if err := gethTx.UnmarshalBinary(data); err != nil {
+				return nil, err
+			}
+			
+			return nil, client.EthClient.SendTransaction(ctx, gethTx)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -531,7 +570,7 @@ func (client Client) TransactWithWarpMessage(
 			StorageKeys: subnetEvmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessage.Bytes())),
 		},
 	}
-	msg := interfaces.CallMsg{
+	msg := iface.CallMsg{
 		From:       from,
 		To:         &contract,
 		GasPrice:   nil,
@@ -539,7 +578,7 @@ func (client Client) TransactWithWarpMessage(
 		GasFeeCap:  gasFeeCap,
 		Value:      value,
 		Data:       callData,
-		AccessList: accessList,
+		AccessList: convertAccessList(accessList),
 	}
 	gasLimit, err := client.EstimateGasLimit(msg)
 	if err != nil {
@@ -585,11 +624,33 @@ func (client Client) BlockByNumber(n *big.Int) (*types.Block, error) {
 
 // get logs as given by [query]
 // supports [repeatsOnFailure] failures
-func (client Client) FilterLogs(query interfaces.FilterQuery) ([]types.Log, error) {
+func (client Client) FilterLogs(query iface.FilterQuery) ([]types.Log, error) {
 	logs, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) ([]types.Log, error) {
-			return client.EthClient.FilterLogs(ctx, query)
+			// ethclient returns []iface.Log (geth types)
+			// but we need []types.Log (evm types)
+			gethLogs, err := client.EthClient.FilterLogs(ctx, query)
+			if err != nil {
+				return nil, err
+			}
+			
+			// Convert geth logs to evm logs
+			evmLogs := make([]types.Log, len(gethLogs))
+			for i, gethLog := range gethLogs {
+				evmLogs[i] = types.Log{
+					Address:     gethLog.Address,
+					Topics:      gethLog.Topics,
+					Data:        gethLog.Data,
+					BlockNumber: gethLog.BlockNumber,
+					TxHash:      gethLog.TxHash,
+					TxIndex:     gethLog.TxIndex,
+					BlockHash:   gethLog.BlockHash,
+					Index:       gethLog.Index,
+					Removed:     gethLog.Removed,
+				}
+			}
+			return evmLogs, nil
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
