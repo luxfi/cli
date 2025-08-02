@@ -12,8 +12,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/utils"
 )
 
 type configInputs struct {

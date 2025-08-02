@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/geth/core/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/node/v2/utils/units"
+	"github.com/luxfi/evm/v2/core/types"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 )
 
 // Returns the first log in 'logs' that is successfully parsed by 'parser'

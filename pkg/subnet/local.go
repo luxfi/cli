@@ -18,34 +18,35 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/vm"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/genesis"
+	"github.com/luxfi/node/v2/genesis"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/storage"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/components/verify"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/reward"
-	"github.com/luxfi/node/vms/platformvm/signer"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/chain/c"
-	"github.com/luxfi/node/wallet/subnet/primary"
+	"github.com/luxfi/node/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/utils/storage"
+	"github.com/luxfi/node/v2/vms/components/lux"
+	"github.com/luxfi/node/v2/vms/components/verify"
+	"github.com/luxfi/node/v2/vms/platformvm"
+	platformvmapi "github.com/luxfi/node/v2/vms/platformvm/api"
+	"github.com/luxfi/node/v2/vms/platformvm/reward"
+	"github.com/luxfi/node/v2/vms/platformvm/signer"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/wallet/chain/c"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
 	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/v2/core"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/v2/utils/set"
 	"go.uber.org/zap"
 )
 
@@ -184,15 +185,11 @@ func IssueTransformSubnetTx(
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
-		URI:         api,
-		LUXKeychain: kc,
-		EthKeychain: ethKc,
-	})
+	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{})
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
-	subnetAssetID, err := getAssetID(wallet, tokenName, tokenSymbol, maxSupply)
+	subnetAssetID, err := getAssetID(*wallet, tokenName, tokenSymbol, maxSupply)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
@@ -202,11 +199,11 @@ func IssueTransformSubnetTx(
 			genesis.EWOQKey.PublicKey().Address(),
 		},
 	}
-	err = exportToPChain(wallet, owner, subnetAssetID, maxSupply)
+	err = exportToPChain(*wallet, owner, subnetAssetID, maxSupply)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
-	err = importFromXChain(wallet, owner)
+	err = importFromXChain(*wallet, owner)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
@@ -244,11 +241,7 @@ func IssueAddPermissionlessValidatorTx(
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
-		URI:         api,
-		LUXKeychain: kc,
-		EthKeychain: ethKc,
-	})
+	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{})
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -558,7 +551,8 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 }
 
 func (d *LocalDeployer) setupLocalEnv() (string, error) {
-	return binutils.SetupLux(d.app, d.luxVersion)
+	_, binPath, err := binutils.SetupLuxgo(d.app, d.luxVersion)
+	return binPath, err
 }
 
 // WaitForHealthy polls continuously until the network is ready to be used
@@ -766,11 +760,7 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
-		URI:         api,
-		LUXKeychain: kc,
-		EthKeychain: ethKc,
-	})
+	wallet, err := primary.MakeWallet(ctx, api, kc, ethKc, primary.WalletConfig{})
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -799,7 +789,7 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 
 	// Get validators that will be active in the future (pending validators)
 	futureTime := uint64(time.Now().Add(time.Hour).Unix())
-	validators, err := pClient.GetValidatorsAt(ctx, subnetID, futureTime)
+	validators, err := pClient.GetValidatorsAt(ctx, subnetID, platformvmapi.Height(futureTime))
 	if err != nil {
 		return false, err
 	}

@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts/comparator"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/prompts/comparator"
 	"github.com/manifoldco/promptui"
 	"github.com/stretchr/testify/require"
 )

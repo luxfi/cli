@@ -5,8 +5,8 @@ package flags
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/node/v2/utils/units"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

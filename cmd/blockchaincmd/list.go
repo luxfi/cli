@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/ids"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

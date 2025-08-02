@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/staking"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/staking"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/signer"
-	evmclient "github.com/luxfi/evm/plugin/evm/client"
+	"github.com/luxfi/node/v2/vms/platformvm"
+	evmclient "github.com/luxfi/evm/v2/plugin/evm/client"
 )
 
 func NewBlsSecretKeyBytes() ([]byte, error) {
@@ -36,7 +36,12 @@ func ToNodeID(certBytes []byte) (ids.NodeID, error) {
 	if err != nil {
 		return ids.EmptyNodeID, err
 	}
-	return ids.NodeIDFromCert(cert), nil
+	// Convert staking.Certificate to ids.Certificate
+	idsCert := &ids.Certificate{
+		Raw:       cert.Raw,
+		PublicKey: cert.PublicKey,
+	}
+	return ids.NodeIDFromCert(idsCert), nil
 }
 
 func ToBLSPoP(keyBytes []byte) (
@@ -44,15 +49,23 @@ func ToBLSPoP(keyBytes []byte) (
 	[]byte, // bls proof of possession
 	error,
 ) {
-	sk, err := localsigner.FromBytes(keyBytes)
+	signer, err := localsigner.FromBytes(keyBytes)
 	if err != nil {
 		return nil, nil, err
 	}
-	pop, err := signer.NewProofOfPossession(sk)
+	
+	// Get the public key
+	pk := signer.PublicKey()
+	pkBytes := bls.PublicKeyToCompressedBytes(pk)
+	
+	// Create proof of possession
+	sig, err := signer.SignProofOfPossession(pkBytes)
 	if err != nil {
 		return nil, nil, err
 	}
-	return pop.PublicKey[:], pop.ProofOfPossession[:], nil
+	sigBytes := bls.SignatureToBytes(sig)
+	
+	return pkBytes, sigBytes, nil
 }
 
 // GetNodeParams returns node id, bls public key and bls proof of possession
@@ -112,7 +125,7 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 		return 0, err
 	}
 	if len(validators) > 0 {
-		return validators[0].UptimeSeconds - constants.ValidatorUptimeDeductible, nil
+		return validators[0].UptimeSeconds - uint64(constants.ValidatorUptimeDeductible.Seconds()), nil
 	}
 
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())

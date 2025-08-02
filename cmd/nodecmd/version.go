@@ -13,13 +13,13 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
 const (
 	defaultLuxdVersion = "v1.13.3"
-	luxdDownloadURL = "https://github.com/luxfi/node/releases/download/%s/luxd-linux-%s-%s.tar.gz"
+	luxdDownloadURL = "https://github.com/luxfi/node/v2/releases/download/%s/luxd-linux-%s-%s.tar.gz"
 )
 
 type versionFlags struct {

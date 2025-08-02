@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd/upgradecmd"
-	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/cmd/blockchaincmd/upgradecmd"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func newConfigureCmd() *cobra.Command {
 		Short: "Adds additional config files for the luxd nodes",
 		Long: `Luxd nodes support several different configuration files.
 Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
-Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for subnet-evm options).
+Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/v2/blob/master/plugin/evm/config/config.go for subnet-evm options).
 A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.`,
 		RunE: configure,

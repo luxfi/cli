@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	subnetethclient "github.com/luxfi/evm/ethclient"
-	"github.com/luxfi/evm/rpc"
+	subnetethclient "github.com/luxfi/evm/v2/ethclient"
+	"github.com/luxfi/evm/v2/rpc"
 	"github.com/stretchr/testify/require"
 )
 

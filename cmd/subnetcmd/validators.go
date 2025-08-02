@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/luxfi/cli/cmd/flags"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/v2/cmd/flags"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/subnet"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

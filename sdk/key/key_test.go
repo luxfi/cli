@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/node/utils/cb58"
-	"github.com/luxfi/crypto/secp256k1"
+	"github.com/luxfi/node/v2/utils/cb58"
+	"github.com/luxfi/node/v2/utils/crypto/secp256k1"
 )
 
 const ewoqPChainAddr = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"

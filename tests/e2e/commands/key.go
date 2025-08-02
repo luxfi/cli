@@ -5,7 +5,7 @@ package commands
 import (
 	"os/exec"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 /* #nosec G204 */

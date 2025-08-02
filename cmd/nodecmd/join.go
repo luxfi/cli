@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
@@ -236,7 +236,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"github.com/luxfi/node/staking"
+	"github.com/luxfi/node/v2/staking"
 )
 
 func main() {

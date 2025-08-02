@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -374,7 +374,7 @@ func (c *AwsCloud) DestroyInstance(instanceID, publicIP string, releasePublicIP 
 	}
 	if releasePublicIP {
 		if publicIP == "" {
-			ux.Logger.RedXToUser("Unable to remove public IP for instance %s: undefined", instanceID)
+			ux.Logger.PrintToUser("❌ Unable to remove public IP for instance %s: undefined", instanceID)
 		} else {
 			describeAddressInput := &ec2.DescribeAddressesInput{
 				Filters: []types.Filter{

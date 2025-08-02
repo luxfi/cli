@@ -5,10 +5,10 @@ package nodecmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/node"
+	"github.com/luxfi/cli/v2/pkg/node"
 
-	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/spf13/cobra"
 )
 

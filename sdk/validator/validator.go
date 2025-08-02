@@ -5,13 +5,13 @@ package validator
 import (
 	"encoding/json"
 
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/ids"
-	luxdjson "github.com/luxfi/node/utils/json"
-	"github.com/luxfi/node/utils/rpc"
-	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/ids"
+	luxdjson "github.com/luxfi/node/v2/utils/json"
+	"github.com/luxfi/node/v2/utils/rpc"
+	"github.com/luxfi/node/v2/vms/platformvm"
 
 	"github.com/ethereum/go-ethereum/common"
 )

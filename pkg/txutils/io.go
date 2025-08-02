@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/node/utils/formatting"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/utils/formatting"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
 )
 
 // saves a given [tx] to [txPath]

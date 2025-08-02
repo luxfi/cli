@@ -6,10 +6,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/node"
+	"github.com/luxfi/cli/v2/pkg/node"
 
-	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"

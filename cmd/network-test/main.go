@@ -4,8 +4,8 @@ package main
 import (
 	"os"
 	
-	"github.com/luxfi/cli/cmd/networkcmd"
-	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/v2/cmd/networkcmd"
+	"github.com/luxfi/cli/v2/pkg/application"
 )
 
 func main() {

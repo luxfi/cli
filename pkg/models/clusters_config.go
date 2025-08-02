@@ -5,7 +5,7 @@ package models
 import (
 	"golang.org/x/exp/slices"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 // filter is a helper function to filter slices based on a predicate

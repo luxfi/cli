@@ -3,9 +3,9 @@
 package blockchaincmd
 
 import (
-	"github.com/luxfi/cli/cmd/blockchaincmd/upgradecmd"
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/cmd/blockchaincmd/upgradecmd"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
 

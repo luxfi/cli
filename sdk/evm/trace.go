@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/evm/v2/rpc"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

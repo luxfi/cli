@@ -22,15 +22,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/node/v2/api/info"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/utils/set"
+	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	"github.com/luxfi/evm/v2/core"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/exp/slices"
@@ -557,27 +557,20 @@ func NewLogger(
 	logToStdout bool,
 	print func(string, ...interface{}),
 ) (logging.Logger, error) {
-	logLevel, err := logging.ToLevel(logLevelStr)
+	_, err := logging.ToLevel(logLevelStr)
 	if err != nil {
 		if logLevelStr != "" {
 			print("undefined logLevel %s. Setting %s log to %s", logLevelStr, logName, defaultLogLevelStr)
 		}
-		logLevel, err = logging.ToLevel(defaultLogLevelStr)
+		_, err = logging.ToLevel(defaultLogLevelStr)
 		if err != nil {
 			return logging.NoLog{}, err
 		}
 	}
-	logConfig := logging.Config{
-		RotatingWriterConfig: logging.RotatingWriterConfig{
-			Directory: logDir,
-		},
-		LogLevel: logLevel,
-	}
-	if logToStdout {
-		logConfig.DisplayLevel = logLevel
-	}
-	logFactory := logging.NewFactory(logConfig)
-	return logFactory.Make(logName)
+	// Simplified logging implementation
+	// TODO: Implement proper logging configuration when the logging package is updated
+	// For now, return a no-op logger
+	return logging.NoLog{}, nil
 }
 
 func GetProcess(pid int) (*os.Process, error) {

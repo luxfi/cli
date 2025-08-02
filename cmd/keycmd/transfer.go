@@ -8,32 +8,32 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/warp"
-	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/node/ids"
-	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/crypto/keychain"
-	ledger "github.com/luxfi/node/utils/crypto/ledger"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/units"
-	avmtxs "github.com/luxfi/node/vms/avm/txs"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	luxdfee "github.com/luxfi/node/vms/platformvm/txs/fee"
-	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/chain/p/builder"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
-	"github.com/luxfi/node/wallet/chain/c"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/warp"
+	"github.com/luxfi/cli/v2/pkg/key"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/vm"
+	"github.com/luxfi/cli/v2/sdk/evm"
+	"github.com/luxfi/ids"
+	luxdconstants "github.com/luxfi/node/v2/utils/constants"
+	"github.com/luxfi/node/v2/utils/crypto/keychain"
+	ledger "github.com/luxfi/node/v2/utils/crypto/ledger"
+	"github.com/luxfi/node/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/utils/units"
+	avmtxs "github.com/luxfi/node/v2/vms/xvm/txs"
+	"github.com/luxfi/node/v2/vms/components/lux"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	luxdfee "github.com/luxfi/node/v2/vms/platformvm/txs/fee"
+	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/wallet/chain/p/builder"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	walletoptions "github.com/luxfi/node/v2/wallet"
+	"github.com/luxfi/node/v2/wallet/chain/c"
 	goethereumcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 )
@@ -664,7 +664,7 @@ func pToPSend(
 	defer cancel()
 	err = wallet.P().IssueTx(
 		&tx,
-		common.WithContext(ctx),
+		walletoptions.WithContext(ctx),
 	)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -760,7 +760,7 @@ func exportFromP(
 	defer cancel()
 	err = wallet.P().IssueTx(
 		&tx,
-		common.WithContext(ctx),
+		walletoptions.WithContext(ctx),
 	)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -806,7 +806,7 @@ func importIntoX(
 	defer cancel()
 	err = wallet.X().IssueTx(
 		&tx,
-		common.WithContext(ctx),
+		walletoptions.WithContext(ctx),
 	)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -906,7 +906,7 @@ func importIntoC(
 	defer cancel()
 	err = wallet.C().IssueAtomicTx(
 		&tx,
-		common.WithContext(ctx),
+		walletoptions.WithContext(ctx),
 	)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -1020,7 +1020,7 @@ func exportFromC(
 	defer cancel()
 	err = wallet.C().IssueAtomicTx(
 		&tx,
-		common.WithContext(ctx),
+		walletoptions.WithContext(ctx),
 	)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -1064,7 +1064,7 @@ func importIntoP(
 	defer cancel()
 	err = wallet.P().IssueTx(
 		&tx,
-		common.WithContext(ctx),
+		walletoptions.WithContext(ctx),
 	)
 	if err != nil {
 		if ctx.Err() != nil {

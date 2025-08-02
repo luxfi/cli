@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/cli/internal/testutils"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/cli/v2/internal/testutils"
+	"github.com/luxfi/evm/v2/core"
 	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )

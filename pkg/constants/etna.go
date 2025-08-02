@@ -5,7 +5,7 @@ package constants
 import (
 	"time"
 
-	luxdconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/node/v2/utils/constants"
 )
 
 var EtnaActivationTime = map[uint32]time.Time{

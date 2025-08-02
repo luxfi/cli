@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	warp "github.com/luxfi/warp"
-	"github.com/luxfi/geth/core/types"
-	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/evm/v2/core/types"
+	subnetEvmWarp "github.com/luxfi/evm/v2/precompile/contracts/warp"
 )
 
 // get all unsigned warp messages contained in [logs]
@@ -16,9 +16,15 @@ func GetWarpMessagesFromLogs(
 ) []*warp.UnsignedMessage {
 	messages := []*warp.UnsignedMessage{}
 	for _, txLog := range logs {
-		msg, err := subnetEvmWarp.UnpackSendWarpEventDataToMessage(txLog.Data)
+		ifaceMsg, err := subnetEvmWarp.UnpackSendWarpEventDataToMessage(txLog.Data)
 		if err == nil {
-			messages = append(messages, msg)
+			// Convert iface.UnsignedMessage to warp.UnsignedMessage
+			warpMsg := &warp.UnsignedMessage{
+				NetworkID:     ifaceMsg.NetworkID,
+				SourceChainID: ifaceMsg.SourceChainID[:],
+				Payload:       ifaceMsg.Payload,
+			}
+			messages = append(messages, warpMsg)
 		}
 	}
 	return messages

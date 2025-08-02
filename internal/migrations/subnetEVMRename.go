@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/models"
 
-	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/application"
 )
 
 const oldEVM = "EVM"

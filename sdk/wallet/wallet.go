@@ -5,19 +5,19 @@ package wallet
 import (
 	"context"
 
-	"github.com/luxfi/cli/sdk/keychain"
-	"github.com/luxfi/node/ids"
-	luxdkeychain "github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
+	"github.com/luxfi/cli/v2/sdk/keychain"
+	"github.com/luxfi/ids"
+	luxdkeychain "github.com/luxfi/node/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/utils/set"
+	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	walletoptions "github.com/luxfi/node/v2/wallet"
 )
 
 type Wallet struct {
 	*primary.Wallet
 	Keychain keychain.Keychain
-	options  []common.Option
+	options  []walletoptions.Option
 	config   primary.WalletConfig
 }
 
@@ -48,7 +48,7 @@ func (w *Wallet) SecureWalletIsChangeOwner() {
 		Threshold: 1,
 		Addrs:     []ids.ShortID{changeAddr},
 	}
-	w.options = append(w.options, common.WithChangeOwner(changeOwner))
+	w.options = append(w.options, walletoptions.WithChangeOwner(changeOwner))
 	w.Wallet = primary.NewWalletWithOptions(w.Wallet, w.options...)
 }
 
@@ -59,7 +59,7 @@ func (w *Wallet) SetAuthKeys(authKeys []ids.ShortID) {
 	addrsSet := set.Set[ids.ShortID]{}
 	addrsSet.Add(addrs...)
 	addrsSet.Add(authKeys...)
-	w.options = append(w.options, common.WithCustomAddresses(addrsSet))
+	w.options = append(w.options, walletoptions.WithCustomAddresses(addrsSet))
 	w.Wallet = primary.NewWalletWithOptions(w.Wallet, w.options...)
 }
 

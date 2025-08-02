@@ -4,11 +4,11 @@
 package validatormanager
 
 import (
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/contract"
 	"github.com/luxfi/geth/core/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 // PoAValidatorManagerInitialize initializes contract [managerAddress] at [rpcURL], to

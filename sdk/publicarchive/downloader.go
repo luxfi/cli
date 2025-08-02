@@ -13,10 +13,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/cli/sdk/constants"
-	"github.com/luxfi/cli/sdk/network"
-	luxdConstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/cli/v2/sdk/constants"
+	"github.com/luxfi/cli/v2/sdk/network"
+	luxdConstants "github.com/luxfi/node/v2/utils/constants"
+	"github.com/luxfi/node/v2/utils/logging"
 	"github.com/cavaliergopher/grab/v3"
 	"go.uber.org/zap"
 )

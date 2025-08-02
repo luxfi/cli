@@ -6,7 +6,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/v2/commontype"
 	"github.com/luxfi/geth/common"
 )
 

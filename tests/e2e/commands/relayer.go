@@ -4,7 +4,7 @@
 package commands
 
 import (
-	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
 )
 
 /* #nosec G204 */

@@ -4,11 +4,11 @@
 package vm
 
 import (
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/statemachine"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/statemachine"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/evm/v2/commontype"
+	"github.com/luxfi/evm/v2/params"
 )
 
 func GetFeeConfig(config params.ChainConfig, app *application.Lux) (

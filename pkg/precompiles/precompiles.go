@@ -5,8 +5,8 @@ package precompiles
 import (
 	_ "embed"
 
-	"github.com/luxfi/evm/precompile/contracts/nativeminter"
-	"github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/evm/v2/precompile/contracts/nativeminter"
+	"github.com/luxfi/evm/v2/precompile/contracts/warp"
 )
 
 var (

@@ -12,14 +12,36 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/formatting/address"
+	lux_constants "github.com/luxfi/node/v2/utils/constants"
+	"github.com/luxfi/node/v2/utils/formatting/address"
 	"github.com/luxfi/geth/common"
 )
+
+// ValidateURLFormat validates if the provided string is a valid URL
+func ValidateURLFormat(input string) error {
+	if input == "" {
+		return errors.New("URL cannot be empty")
+	}
+	
+	u, err := url.Parse(input)
+	if err != nil {
+		return fmt.Errorf("invalid URL format: %w", err)
+	}
+	
+	if u.Scheme == "" {
+		return errors.New("URL must have a scheme (e.g., http:// or https://)")
+	}
+	
+	if u.Host == "" {
+		return errors.New("URL must have a host")
+	}
+	
+	return nil
+}
 
 func validateEmail(input string) error {
 	_, err := mail.ParseAddress(input)

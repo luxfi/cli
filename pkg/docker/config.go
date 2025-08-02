@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/remoteconfig"
-	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/remoteconfig"
+	"github.com/luxfi/cli/v2/pkg/utils"
 )
 
 type LuxdConfigOptions struct {

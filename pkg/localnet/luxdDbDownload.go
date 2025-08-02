@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/publicarchive"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/sdk/network"
+	"github.com/luxfi/cli/v2/sdk/publicarchive"
+	"github.com/luxfi/node/v2/utils/logging"
 
 	"go.uber.org/zap"
 )

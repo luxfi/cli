@@ -3,10 +3,10 @@ package deploy
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/cmd"
-	"github.com/luxfi/cli/tests/e2e/commands"
-	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/cli/v2/cmd"
+	"github.com/luxfi/cli/v2/tests/e2e/commands"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
+	"github.com/luxfi/node/v2/utils/units"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

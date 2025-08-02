@@ -16,17 +16,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
-	apiConfig "github.com/luxfi/warp/config"
-	offchainregistry "github.com/luxfi/warp/messages/off-chain-registry"
-	"github.com/luxfi/warp/relayer/config"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/key"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/sdk/evm"
+	// TODO: Fix warp imports
+	// apiConfig "github.com/luxfi/warp/config"
+	// offchainregistry "github.com/luxfi/warp/messages/off-chain-registry"
+	// "github.com/luxfi/warp/relayer/config"
 )
 
 const (
@@ -48,7 +49,7 @@ func GetDefaultRelayerKeyInfo(app *application.Lux) (string, string, string, err
 		err error
 	)
 	if utils.FileExists(keyPath) {
-		k, err = key.LoadSoft(models.NewLocalNetwork().ID, keyPath)
+		k, err = key.LoadSoft(constants.LocalNetworkID, keyPath)
 		if err != nil {
 			return "", "", "", err
 		}
@@ -164,7 +165,7 @@ func RelayerCleanup(
 						close(waitedCh)
 						return
 					} else {
-						ux.Logger.RedXToUser("failure checking to process pid %d aliveness due to: %s", proc.Pid, err)
+						ux.Logger.PrintToUser("failure checking to process pid %d aliveness due to: %s", proc.Pid, err)
 					}
 				}
 				time.Sleep(localRelayerCheckPoolTime)
@@ -214,20 +215,28 @@ func saveRelayerRunFile(runFilePath string, pid int) error {
 
 func GetLatestRelayerReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
-	return downloader.GetLatestReleaseVersion(
+	releaseURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest",
 		constants.LuxOrg,
 		constants.WarpServicesRepoName,
-		constants.WarpRelayerKind,
 	)
+	return downloader.GetLatestReleaseVersion(releaseURL)
 }
 
 func GetLatestRelayerPreReleaseVersion() (string, error) {
 	downloader := application.NewDownloader()
-	return downloader.GetLatestPreReleaseVersion(
+	// Get all releases and find the latest prerelease
+	allReleases, err := downloader.GetAllReleasesForRepo(
 		constants.LuxOrg,
 		constants.WarpServicesRepoName,
-		constants.WarpRelayerKind,
 	)
+	if err != nil {
+		return "", err
+	}
+	if len(allReleases) == 0 {
+		return "", fmt.Errorf("no releases found")
+	}
+	// Return the first one (most recent)
+	return allReleases[0], nil
 }
 
 func InstallRelayer(binDir, version string) (string, error) {
@@ -347,8 +356,8 @@ func getRelayerURL(version string) (string, error) {
 	), nil
 }
 
-func loadRelayerConfig(relayerConfigPath string) (*config.Config, error) {
-	awmRelayerConfig := config.Config{}
+func loadRelayerConfig(relayerConfigPath string) (*Config, error) {
+	awmRelayerConfig := Config{}
 	bs, err := os.ReadFile(relayerConfigPath)
 	if err != nil {
 		return nil, err
@@ -359,7 +368,7 @@ func loadRelayerConfig(relayerConfigPath string) (*config.Config, error) {
 	return &awmRelayerConfig, nil
 }
 
-func saveRelayerConfig(relayerConfig *config.Config, relayerConfigPath string) error {
+func saveRelayerConfig(relayerConfig *Config, relayerConfigPath string) error {
 	if err := os.MkdirAll(filepath.Dir(relayerConfigPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -399,20 +408,33 @@ func CreateBaseRelayerConfig(
 	network models.Network,
 	allowPrivateIPs bool,
 ) error {
-	awmRelayerConfig := &config.Config{
+	// Get the appropriate endpoint based on network type
+	var endpoint string
+	switch network {
+	case models.Mainnet:
+		endpoint = constants.MainnetAPIEndpoint
+	case models.Testnet:
+		endpoint = constants.TestnetAPIEndpoint
+	case models.Local:
+		endpoint = constants.LocalAPIEndpoint
+	default:
+		return fmt.Errorf("unsupported network: %s", network)
+	}
+	
+	awmRelayerConfig := &Config{
 		LogLevel: logLevel,
-		PChainAPI: &apiConfig.APIConfig{
-			BaseURL:     network.Endpoint,
+		PChainAPI: &APIConfig{
+			BaseURL:     endpoint,
 			QueryParams: map[string]string{},
 		},
-		InfoAPI: &apiConfig.APIConfig{
-			BaseURL:     network.Endpoint,
+		InfoAPI: &APIConfig{
+			BaseURL:     endpoint,
 			QueryParams: map[string]string{},
 		},
 		StorageLocation:                 storageLocation,
 		ProcessMissedBlocks:             false,
-		SourceBlockchains:               []*config.SourceBlockchain{},
-		DestinationBlockchains:          []*config.DestinationBlockchain{},
+		SourceBlockchains:               []*SourceBlockchain{},
+		DestinationBlockchains:          []*DestinationBlockchain{},
 		MetricsPort:                     metricsPort,
 		DBWriteIntervalSeconds:          defaultDBWriteIntervalSeconds,
 		SignatureCacheSize:              defaultSignatureCacheSize,
@@ -506,7 +528,7 @@ func AddDestinationToRelayerConfig(
 }
 
 func addSourceToRelayerConfig(
-	relayerConfig *config.Config,
+	relayerConfig *Config,
 	rpcEndpoint string,
 	wsEndpoint string,
 	subnetID string,
@@ -521,53 +543,53 @@ func addSourceToRelayerConfig(
 		wsEndpoint = strings.TrimSuffix(wsEndpoint, "rpc")
 		wsEndpoint = fmt.Sprintf("%s%s%s", "ws", wsEndpoint, "ws")
 	}
-	source := &config.SourceBlockchain{
+	source := &SourceBlockchain{
 		SubnetID:     subnetID,
 		BlockchainID: blockchainID,
-		VM:           config.EVM.String(),
-		RPCEndpoint: apiConfig.APIConfig{
+		VM:           EVM.String(),
+		RPCEndpoint: APIConfig{
 			BaseURL: rpcEndpoint,
 		},
-		WSEndpoint: apiConfig.APIConfig{
+		WSEndpoint: APIConfig{
 			BaseURL: wsEndpoint,
 		},
-		MessageContracts: map[string]config.MessageProtocolConfig{
+		MessageContracts: map[string]MessageProtocolConfig{
 			warpMessengerAddress: {
-				MessageFormat: config.TELEPORTER.String(),
+				MessageFormat: TELEPORTER.String(),
 				Settings: map[string]interface{}{
 					"reward-address": relayerRewardAddress,
 				},
 			},
-			offchainregistry.OffChainRegistrySourceAddress.Hex(): {
-				MessageFormat: config.OFF_CHAIN_REGISTRY.String(),
+			OffChainRegistrySourceAddress.Hex(): {
+				MessageFormat: OFF_CHAIN_REGISTRY.String(),
 				Settings: map[string]interface{}{
 					"teleporter-registry-address": warpRegistryAddress,
 				},
 			},
 		},
 	}
-	if !utils.Any(relayerConfig.SourceBlockchains, func(s *config.SourceBlockchain) bool { return s.BlockchainID == blockchainID }) {
+	if !utils.Any(relayerConfig.SourceBlockchains, func(s *SourceBlockchain) bool { return s.BlockchainID == blockchainID }) {
 		relayerConfig.SourceBlockchains = append(relayerConfig.SourceBlockchains, source)
 	}
 }
 
 func addDestinationToRelayerConfig(
-	relayerConfig *config.Config,
+	relayerConfig *Config,
 	rpcEndpoint string,
 	subnetID string,
 	blockchainID string,
 	relayerFundedAddressKey string,
 ) {
-	destination := &config.DestinationBlockchain{
+	destination := &DestinationBlockchain{
 		SubnetID:     subnetID,
 		BlockchainID: blockchainID,
-		VM:           config.EVM.String(),
-		RPCEndpoint: apiConfig.APIConfig{
+		VM:           EVM.String(),
+		RPCEndpoint: APIConfig{
 			BaseURL: rpcEndpoint,
 		},
 		AccountPrivateKey: relayerFundedAddressKey,
 	}
-	if !utils.Any(relayerConfig.DestinationBlockchains, func(s *config.DestinationBlockchain) bool { return s.BlockchainID == blockchainID }) {
+	if !utils.Any(relayerConfig.DestinationBlockchains, func(s *DestinationBlockchain) bool { return s.BlockchainID == blockchainID }) {
 		relayerConfig.DestinationBlockchains = append(relayerConfig.DestinationBlockchains, destination)
 	}
 }
@@ -578,12 +600,12 @@ func waitForRelayerInitialization(
 	checkInterval time.Duration,
 	checkTimeout time.Duration,
 ) error {
-	config, err := loadRelayerConfig(relayerConfigPath)
+	relayerConfig, err := loadRelayerConfig(relayerConfigPath)
 	if err != nil {
 		return err
 	}
 	sourceBlockchains := []string{}
-	for _, source := range config.SourceBlockchains {
+	for _, source := range relayerConfig.SourceBlockchains {
 		sourceBlockchains = append(sourceBlockchains, source.BlockchainID)
 	}
 	if checkInterval == 0 {

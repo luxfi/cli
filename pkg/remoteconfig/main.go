@@ -6,7 +6,7 @@ package remoteconfig
 import (
 	"embed"
 
-	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/utils"
 )
 
 //go:embed templates/*

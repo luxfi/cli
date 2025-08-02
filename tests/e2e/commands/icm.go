@@ -3,8 +3,8 @@
 package commands
 
 import (
-	"github.com/luxfi/cli/cmd"
-	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/cmd"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
 )
 
 const (

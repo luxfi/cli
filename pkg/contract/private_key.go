@@ -5,9 +5,9 @@ package contract
 import (
 	"fmt"
 
-	cmdflags "github.com/luxfi/cli/cmd/flags"
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	cmdflags "github.com/luxfi/cli/v2/cmd/flags"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/models"
 
 	"github.com/spf13/cobra"
 )

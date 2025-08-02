@@ -9,10 +9,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/vm"
 	"github.com/luxfi/ids"
 	"github.com/spf13/cobra"
 )

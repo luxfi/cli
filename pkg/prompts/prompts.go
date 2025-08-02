@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/geth/common"
 	"github.com/manifoldco/promptui"
@@ -87,6 +87,7 @@ type Prompter interface {
 	CapturePChainAddress(promptStr string, network models.Network) (string, error)
 	CaptureFutureDate(promptStr string, minDate time.Time) (time.Time, error)
 	ChooseKeyOrLedger(goal string) (bool, error)
+	CaptureURL(promptStr string, validateConnection bool) (string, error)
 }
 
 type realPrompter struct{}
@@ -658,4 +659,24 @@ func captureKeyName(prompt Prompter, goal string, keyDir string) (string, error)
 	}
 
 	return keyName, nil
+}
+
+// CaptureURL prompts for a URL and optionally validates the connection
+func (realPrompter) CaptureURL(promptStr string, validateConnection bool) (string, error) {
+	prompt := promptui.Prompt{
+		Label:    promptStr,
+		Validate: ValidateURLFormat,
+	}
+	
+	urlStr, err := prompt.Run()
+	if err != nil {
+		return "", err
+	}
+	
+	if validateConnection {
+		// TODO: Add connection validation if needed
+		// For now, just validate the format
+	}
+	
+	return urlStr, nil
 }

@@ -5,9 +5,9 @@ package subnetcmd
 import (
 	"testing"
 
-	"github.com/luxfi/cli/internal/mocks"
+	"github.com/luxfi/cli/v2/internal/mocks"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/v2/vms/platformvm"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

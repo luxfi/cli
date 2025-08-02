@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/luxfi/cli/cmd"
+	"github.com/luxfi/cli/v2/cmd"
 )
 
 func main() {

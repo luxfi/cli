@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"golang.org/x/mod/semver"
 )
 
@@ -22,6 +22,7 @@ const githubVersionTagName = "tag_name"
 type Downloader interface {
 	Download(url string) ([]byte, error)
 	GetLatestReleaseVersion(releaseURL string) (string, error)
+	GetLatestPreReleaseVersion(org, repo string) (string, error)
 	GetAllReleasesForRepo(org, repo string) ([]string, error)
 }
 
@@ -121,4 +122,17 @@ func (d downloader) GetLatestReleaseVersion(releaseURL string) (string, error) {
 	}
 
 	return version, nil
+}
+
+// GetLatestPreReleaseVersion returns the latest pre-release version
+func (d downloader) GetLatestPreReleaseVersion(org, repo string) (string, error) {
+	// Get all releases and return the first one (which includes pre-releases)
+	releases, err := d.GetAllReleasesForRepo(org, repo)
+	if err != nil {
+		return "", err
+	}
+	if len(releases) == 0 {
+		return "", fmt.Errorf("no releases found")
+	}
+	return releases[0], nil
 }

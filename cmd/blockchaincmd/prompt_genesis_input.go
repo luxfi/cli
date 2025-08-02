@@ -5,21 +5,21 @@ package blockchaincmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/cli/v2/cmd/flags"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/blockchain"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/staking"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/blockchain"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/sdk/validatormanager/validatormanagertypes"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/staking"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	"github.com/luxfi/node/utils/formatting"
-	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/node/v2/utils/formatting"
+	"github.com/luxfi/node/v2/vms/platformvm/signer"
 )
 
 func getValidatorContractManagerAddr() (string, error) {

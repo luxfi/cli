@@ -6,17 +6,17 @@ package vm
 import (
 	"errors"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/statemachine"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/precompile/allowlist"
-	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
-	"github.com/luxfi/evm/precompile/contracts/feemanager"
-	"github.com/luxfi/evm/precompile/contracts/nativeminter"
-	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
-	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/statemachine"
+	"github.com/luxfi/evm/v2/params"
+	"github.com/luxfi/evm/v2/precompile/allowlist"
+	"github.com/luxfi/evm/v2/precompile/contracts/deployerallowlist"
+	"github.com/luxfi/evm/v2/precompile/contracts/feemanager"
+	"github.com/luxfi/evm/v2/precompile/contracts/nativeminter"
+	"github.com/luxfi/evm/v2/precompile/contracts/rewardmanager"
+	"github.com/luxfi/evm/v2/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/v2/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
 )
 

@@ -7,10 +7,10 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/statemachine"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/statemachine"
+	"github.com/luxfi/evm/v2/core"
+	"github.com/luxfi/evm/v2/core/types"
 	"github.com/luxfi/geth/common"
 )
 

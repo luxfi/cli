@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/application"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/cli/v2/pkg/application"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/node/v2/api/info"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/tests/fixture/tmpnet"
 
 	"golang.org/x/exp/maps"
 )

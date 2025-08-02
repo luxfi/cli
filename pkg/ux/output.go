@@ -40,6 +40,23 @@ func (ul *UserLog) PrintToUser(msg string, args ...interface{}) {
 	ul.log.Info(formattedMsg)
 }
 
+// Info logs at info level
+func (ul *UserLog) Info(msg string, args ...interface{}) {
+	ul.log.Info(fmt.Sprintf(msg, args...))
+}
+
+// Error logs at error level
+func (ul *UserLog) Error(msg string, args ...interface{}) {
+	ul.log.Error(fmt.Sprintf(msg, args...))
+}
+
+// RedXToUser prints an error message with a red X prefix
+func (ul *UserLog) RedXToUser(msg string, args ...interface{}) {
+	formattedMsg := fmt.Sprintf("❌ " + msg, args...)
+	fmt.Fprintln(ul.writer, formattedMsg)
+	ul.log.Error(fmt.Sprintf(msg, args...))
+}
+
 // PrintWait does some dot printing to entertain the user
 func PrintWait(cancel chan struct{}) {
 	for {

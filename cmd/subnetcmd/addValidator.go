@@ -9,15 +9,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/pkg/txutils"
-	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/vms/platformvm"
+	lux_constants "github.com/luxfi/node/v2/utils/constants"
+	"github.com/luxfi/node/v2/vms/platformvm"
 	"github.com/spf13/cobra"
 )
 

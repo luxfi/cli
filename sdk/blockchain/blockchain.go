@@ -13,22 +13,22 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxfi/cli/sdk/interchain"
+	"github.com/luxfi/cli/v2/sdk/interchain"
 
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/cli/sdk/multisig"
-	"github.com/luxfi/cli/sdk/network"
-	utilsSDK "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/cli/sdk/vm"
-	"github.com/luxfi/cli/sdk/wallet"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	commonLuxd "github.com/luxfi/node/wallet/subnet/primary/common"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/cli/v2/sdk/evm"
+	"github.com/luxfi/cli/v2/sdk/multisig"
+	"github.com/luxfi/cli/v2/sdk/network"
+	utilsSDK "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/sdk/validatormanager"
+	"github.com/luxfi/cli/v2/sdk/vm"
+	"github.com/luxfi/cli/v2/sdk/wallet"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/vms/platformvm/txs"
+	walletoptions "github.com/luxfi/node/v2/wallet"
+	"github.com/luxfi/evm/v2/commontype"
+	"github.com/luxfi/evm/v2/core"
+	"github.com/luxfi/evm/v2/params"
 
 	"github.com/ethereum/go-ethereum/common"
 	"go.uber.org/zap"
@@ -310,9 +310,9 @@ func (c *Subnet) Commit(ms multisig.Multisig, wallet wallet.Wallet, waitForTxAcc
 	for i := 0; i < repeats; i++ {
 		ctx, cancel := utilsSDK.GetAPILargeContext()
 		defer cancel()
-		options := []commonLuxd.Option{commonLuxd.WithContext(ctx)}
+		options := []walletoptions.Option{walletoptions.WithContext(ctx)}
 		if !waitForTxAcceptance {
-			options = append(options, commonLuxd.WithAssumeDecided())
+			options = append(options, walletoptions.WithAssumeDecided())
 		}
 		// TODO: split error checking and recovery between issuing and waiting for status
 		issueTxErr = wallet.P().IssueTx(tx, options...)

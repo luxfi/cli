@@ -6,13 +6,13 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/sdk/evm"
+	"github.com/luxfi/ids"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-	"github.com/luxfi/evm/interfaces"
-	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/evm/v2/iface"
+	subnetEvmWarp "github.com/luxfi/evm/v2/precompile/contracts/warp"
 
 	"github.com/ethereum/go-ethereum/common"
 )

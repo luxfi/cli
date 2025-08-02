@@ -9,9 +9,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/config"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/node/v2/config"
 	luxlog "github.com/luxfi/log"
 	"github.com/kardianos/osext"
 	"github.com/shirou/gopsutil/process"

@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/luxfi/cli/tests/e2e/commands"
-	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/tests/e2e/commands"
+	"github.com/luxfi/cli/v2/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
