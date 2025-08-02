@@ -2,8 +2,6 @@ module github.com/luxfi/cli/v2
 
 go 1.24.5
 
-// All dependencies use proper tagged versions for reproducibility
-
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.10
@@ -24,7 +22,7 @@ require (
 	github.com/luxfi/ledger-lux-go v0.0.2
 	github.com/luxfi/log v0.1.1
 	github.com/luxfi/lpm v1.0.0
-	github.com/luxfi/netrunner v1.8.4
+	github.com/luxfi/netrunner/v2 v2.0.0-alpha.1
 	github.com/luxfi/node/v2 v2.0.0-alpha.1
 	github.com/luxfi/warp v0.1.0
 	github.com/manifoldco/promptui v0.9.0
@@ -242,33 +240,8 @@ require (
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
-replace github.com/luxfi/erc20-go => github.com/liyue201/erc20-go v0.0.0-20210521034206-b2824246def0
-
-// Temporary replace directives for local development
-replace github.com/luxfi/node/v2 => ../node
-
-replace github.com/luxfi/evm/v2 => ../evm
-
-replace github.com/luxfi/geth => ../geth
-
-replace github.com/luxfi/database => ../database
-
-replace github.com/luxfi/crypto => ../crypto
-
-replace github.com/luxfi/log => ../log
-
-replace github.com/luxfi/ids => ../ids
-
-replace github.com/luxfi/netrunner => ../netrunner
-
-replace github.com/luxfi/lpm => ../lpm
-
-replace github.com/luxfi/warp => ../warp
-
-replace github.com/luxfi/ledger-lux-go => ../ledger-lux-go
-
 exclude (
+	google.golang.org/genproto v0.0.0-20210402141018-6c239bbf2bb1
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
-	google.golang.org/genproto v0.0.0-20210402141018-6c239bbf2bb1
 )
