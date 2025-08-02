@@ -226,21 +226,4 @@ require (
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
-// Local package replacements for development
-replace github.com/luxfi/node => ../node
-
-replace github.com/luxfi/evm => ../evm
-
-replace github.com/luxfi/geth => ../geth
-
-replace github.com/luxfi/warp => ../warp
-
-replace github.com/luxfi/metrics => ../metrics
-
-replace github.com/luxfi/netrunner => ../netrunner
-
-replace github.com/luxfi/lpm => ../lpm
-
-replace github.com/luxfi/crypto => ../crypto
-
-replace github.com/luxfi/erc20-go => ../erc20-go
+// All local replace directives removed for v1 genesis launch
