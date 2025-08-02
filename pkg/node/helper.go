@@ -8,14 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/ansible"
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/ssh"
-	"github.com/luxfi/cli/v2/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
-	sdkutils "github.com/luxfi/cli/v2/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/pkg/ansible"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ssh"
+	"github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 	"github.com/luxfi/node/v2/v2/api/info"
 )
 

@@ -5,14 +5,14 @@ package messengercmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/v2/pkg/contract"
-	"github.com/luxfi/cli/v2/v2/pkg/interchain"
-	"github.com/luxfi/cli/v2/v2/pkg/localnet"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/networkoptions"
-	"github.com/luxfi/cli/v2/v2/pkg/prompts"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/interchain"
+	"github.com/luxfi/cli/v2/pkg/localnet"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"github.com/spf13/cobra"

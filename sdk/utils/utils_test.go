@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/sdk/constants"
+	"github.com/luxfi/cli/v2/sdk/constants"
 
 	"github.com/stretchr/testify/require"
 )

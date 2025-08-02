@@ -7,9 +7,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/cli/v2/v2/internal/mocks"
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/statemachine"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/statemachine"
 	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/mock"
 )

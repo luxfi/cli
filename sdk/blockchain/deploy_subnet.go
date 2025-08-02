@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/v2/v2/sdk/multisig"
-	"github.com/luxfi/cli/v2/v2/sdk/wallet"
+	"github.com/luxfi/cli/v2/sdk/multisig"
+	"github.com/luxfi/cli/v2/sdk/wallet"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"

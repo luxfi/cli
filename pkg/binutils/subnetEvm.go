@@ -6,8 +6,8 @@ package binutils
 import (
 	"path/filepath"
 
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
 )
 
 func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, string, error) {

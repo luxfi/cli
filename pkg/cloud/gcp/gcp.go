@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
-	sdkutils "github.com/luxfi/cli/v2/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 
 	"golang.org/x/exp/rand"
 	"golang.org/x/exp/slices"

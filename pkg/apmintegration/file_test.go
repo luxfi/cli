@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/luxfi/lpm/types"
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/prompts"
 	"github.com/luxfi/node/v2/v2/utils/logging"
 	"github.com/stretchr/testify/require"
 )

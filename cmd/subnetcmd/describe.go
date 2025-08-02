@@ -9,9 +9,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/v2/core"

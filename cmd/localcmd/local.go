@@ -5,10 +5,10 @@ package localcmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/binutils"
-	"github.com/luxfi/cli/v2/v2/pkg/subnet"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"

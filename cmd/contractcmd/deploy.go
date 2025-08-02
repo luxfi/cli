@@ -3,7 +3,7 @@
 package contractcmd
 
 import (
-	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
 

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/node/v2/v2/config"
 	"github.com/stretchr/testify/require"
 )

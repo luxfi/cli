@@ -6,10 +6,10 @@ package dependencies
 import (
 	"testing"
 
-	"github.com/luxfi/cli/v2/v2/internal/mocks"
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/internal/mocks"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

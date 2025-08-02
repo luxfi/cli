@@ -5,9 +5,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	// Commented out unused imports for now
-	// "github.com/luxfi/cli/v2/v2/pkg/constants"
-	// "github.com/luxfi/cli/v2/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	// "github.com/luxfi/cli/v2/pkg/constants"
+	// "github.com/luxfi/cli/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/pkg/ux"
 )
 
 func runMigration(sourceDB, destDB string, chainID int64) error {

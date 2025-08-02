@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/cli/v2/v2/pkg/contract"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/geth/core/types"
 	"github.com/ethereum/go-ethereum/common"

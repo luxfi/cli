@@ -8,10 +8,10 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
-	"github.com/luxfi/cli/v2/v2/pkg/vm"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/vm"
 	"github.com/spf13/cobra"
 )
 

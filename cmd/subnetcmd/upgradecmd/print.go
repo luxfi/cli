@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/spf13/cobra"
 )
 

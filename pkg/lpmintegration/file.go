@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/application"
 	"gopkg.in/yaml.v3"
 )
 

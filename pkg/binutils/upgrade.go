@@ -5,8 +5,8 @@ package binutils
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/models"
 )
 
 func UpgradeVM(app *application.Lux, vmID string, vmBinPath string) error {

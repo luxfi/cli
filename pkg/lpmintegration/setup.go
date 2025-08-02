@@ -6,9 +6,9 @@ package lpmintegration
 import (
 	"os"
 
-	"github.com/luxfi/cli/v2/v2/pkg/application"
-	"github.com/luxfi/cli/v2/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/v2/pkg/lpm"
+	"github.com/luxfi/cli/v2/pkg/application"
+	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/pkg/lpm"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
