@@ -19,16 +19,16 @@ import (
 
 	"github.com/luxfi/node/v2/v2/config"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/binutils"
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/docker"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/monitoring"
-	"github.com/luxfi/cli/v2/pkg/remoteconfig"
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/pkg/ux"
-	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/docker"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/monitoring"
+	"github.com/luxfi/cli/v2/v2/pkg/remoteconfig"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	sdkutils "github.com/luxfi/cli/v2/v2/sdk/utils"
 	"github.com/luxfi/ids"
 )
 

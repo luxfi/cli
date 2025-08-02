@@ -3,8 +3,8 @@
 package nodecmd
 
 import (
-	"github.com/luxfi/cli/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/pkg/node"
+	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/v2/pkg/node"
 	"github.com/spf13/cobra"
 )
 

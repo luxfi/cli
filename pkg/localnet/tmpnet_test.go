@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/config"
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/config"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/prompts"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/utils/logging"
 

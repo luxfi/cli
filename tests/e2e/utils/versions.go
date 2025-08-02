@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/binutils"
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/vm"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/binutils"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/vm"
 	luxlog "github.com/luxfi/log"
 	"golang.org/x/mod/semver"
 )

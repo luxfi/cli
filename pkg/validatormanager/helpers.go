@@ -6,8 +6,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/sdk/evm"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/sdk/evm"
 	"github.com/luxfi/ids"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"

@@ -8,14 +8,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/contract"
-	"github.com/luxfi/cli/v2/pkg/key"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/cli/v2/sdk/evm"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/v2/pkg/key"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/sdk/evm"
 	"github.com/ethereum/go-ethereum/common"
 )
 

@@ -6,7 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
 	"github.com/luxfi/ids"
 )
 

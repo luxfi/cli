@@ -3,9 +3,9 @@
 package nodecmd
 
 import (
-	"github.com/luxfi/cli/v2/pkg/ansible"
-	"github.com/luxfi/cli/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/pkg/ssh"
+	"github.com/luxfi/cli/v2/v2/pkg/ansible"
+	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/v2/pkg/ssh"
 	"github.com/spf13/cobra"
 )
 

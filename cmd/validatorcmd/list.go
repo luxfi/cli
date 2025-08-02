@@ -5,11 +5,11 @@ package validatorcmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/pkg/contract"
-	"github.com/luxfi/cli/v2/pkg/networkoptions"
-	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/cli/v2/sdk/validator"
+	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/v2/pkg/networkoptions"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/sdk/validator"
 	"github.com/luxfi/node/v2/v2/utils/units"
 
 	"github.com/jedib0t/go-pretty/v6/table"

@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/cli/v2/pkg/application"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/application"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/wallet/subnet/primary"
 )

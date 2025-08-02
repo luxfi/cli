@@ -11,9 +11,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/cli/v2/sdk/evm"
-	sdkUtils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/sdk/evm"
+	sdkUtils "github.com/luxfi/cli/v2/v2/sdk/utils"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/v2/accounts/abi/bind"
 	"github.com/luxfi/geth/core/types"

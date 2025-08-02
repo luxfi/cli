@@ -12,8 +12,8 @@ import (
 
 	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/crypto/validator"
 	"github.com/spf13/cobra"
 )

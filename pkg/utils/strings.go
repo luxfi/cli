@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/v2/sdk/utils"
 )
 
 // SplitComaSeparatedString splits and trims a comma-separated string into a slice of strings.

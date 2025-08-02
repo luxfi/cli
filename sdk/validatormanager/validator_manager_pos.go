@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/v2/pkg/contract"
+	"github.com/luxfi/cli/v2/v2/pkg/contract"
 	"github.com/luxfi/geth/core/types"
 
 	"github.com/ethereum/go-ethereum/common"

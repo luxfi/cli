@@ -5,8 +5,8 @@ package transactioncmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/v2/pkg/txutils"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/utils/units"
 	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"

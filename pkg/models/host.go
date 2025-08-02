@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 )

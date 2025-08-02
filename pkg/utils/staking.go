@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/staking"
 	"github.com/luxfi/crypto/bls"

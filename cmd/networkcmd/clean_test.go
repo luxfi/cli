@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/luxfi/cli/v2/internal/testutils"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/internal/testutils"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"

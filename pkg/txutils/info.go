@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/key"
-	"github.com/luxfi/cli/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/key"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/v2/v2/utils/formatting/address"
 	"github.com/luxfi/node/v2/v2/vms/platformvm"

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
-	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	sdkutils "github.com/luxfi/cli/v2/v2/sdk/utils"
 	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"go.uber.org/zap"

@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package models
 
-import "github.com/luxfi/cli/v2/pkg/constants"
+import "github.com/luxfi/cli/v2/v2/pkg/constants"
 
 type VMType string
 

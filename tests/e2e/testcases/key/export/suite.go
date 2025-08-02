@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxfi/cli/v2/tests/e2e/commands"
-	"github.com/luxfi/cli/v2/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/v2/tests/e2e/commands"
+	"github.com/luxfi/cli/v2/v2/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

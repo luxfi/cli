@@ -3,7 +3,7 @@
 
 package binutils
 
-import "github.com/luxfi/cli/v2/pkg/application"
+import "github.com/luxfi/cli/v2/v2/pkg/application"
 
 func SetupCustomBin(app *application.Lux, subnetName string) string {
 	// Just need to get the path of the vm

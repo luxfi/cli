@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/v2/pkg/cobrautils"
-	"github.com/luxfi/cli/v2/pkg/subnet"
-	"github.com/luxfi/cli/v2/sdk/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/cobrautils"
+	"github.com/luxfi/cli/v2/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/v2/sdk/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -5,12 +5,12 @@ package transactioncmd
 import (
 	"errors"
 
-	"github.com/luxfi/cli/v2/cmd/subnetcmd"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/prompts"
-	"github.com/luxfi/cli/v2/pkg/subnet"
-	"github.com/luxfi/cli/v2/pkg/txutils"
-	"github.com/luxfi/cli/v2/pkg/ux"
+	"github.com/luxfi/cli/v2/v2/cmd/subnetcmd"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/prompts"
+	"github.com/luxfi/cli/v2/v2/pkg/subnet"
+	"github.com/luxfi/cli/v2/v2/pkg/txutils"
+	"github.com/luxfi/cli/v2/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/spf13/cobra"
 )

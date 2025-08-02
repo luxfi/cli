@@ -13,11 +13,11 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/luxfi/cli/v2/pkg/constants"
-	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/cli/v2/pkg/utils"
-	"github.com/luxfi/cli/v2/tests/e2e/commands"
-	e2eUtils "github.com/luxfi/cli/v2/tests/e2e/utils"
+	"github.com/luxfi/cli/v2/v2/pkg/constants"
+	"github.com/luxfi/cli/v2/v2/pkg/models"
+	"github.com/luxfi/cli/v2/v2/pkg/utils"
+	"github.com/luxfi/cli/v2/v2/tests/e2e/commands"
+	e2eUtils "github.com/luxfi/cli/v2/v2/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
