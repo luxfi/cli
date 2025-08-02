@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/geth/common"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string, evmVersion string) ([]byte, *models.Sidecar, error) {
@@ -71,7 +72,22 @@ func createEvmGenesis(
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	genesis := core.Genesis{}
-	conf := params.SubnetEVMDefaultChainConfig
+	// Use a basic chain config - in real usage, this would be customized
+	conf := &params.ChainConfig{
+		ChainConfig: &ethparams.ChainConfig{
+			ChainID:             big.NewInt(1),
+			HomesteadBlock:      big.NewInt(0),
+			EIP150Block:         big.NewInt(0),
+			EIP155Block:         big.NewInt(0),
+			EIP158Block:         big.NewInt(0),
+			ByzantiumBlock:      big.NewInt(0),
+			ConstantinopleBlock: big.NewInt(0),
+			PetersburgBlock:     big.NewInt(0),
+			IstanbulBlock:       big.NewInt(0),
+			BerlinBlock:         big.NewInt(0),
+			LondonBlock:         big.NewInt(0),
+		},
+	}
 
 	const (
 		descriptorsState = "descriptors"

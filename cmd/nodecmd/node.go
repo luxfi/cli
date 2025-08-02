@@ -15,19 +15,39 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "node",
 		Short: "Manage Lux node operations",
-		Long: `The node command suite provides tools for managing Lux node operations including
-development mode, automining, and advanced node configurations.`,
+		Long: `The node command suite provides tools for managing Lux node operations including:
+
+• Join existing networks (mainnet/testnet) as a validator
+• Run local development nodes
+• Manage validator operations and staking
+• Configure automining and advanced settings
+• Monitor node status and health
+
+Examples:
+  # Join mainnet as a validator
+  lux node join --mainnet --stake
+
+  # Join testnet 
+  lux node join --testnet
+
+  # Run local development node
+  lux node dev
+
+  # Check node status
+  lux node status`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
 	// Add subcommands
-	cmd.AddCommand(newDevCmd())
-	cmd.AddCommand(newStartCmd())
-	cmd.AddCommand(newAutominingCmd())
-	cmd.AddCommand(newValidatorCmd())
-	cmd.AddCommand(newVersionCmd())
+	cmd.AddCommand(newJoinCmd())      // Join existing networks
+	cmd.AddCommand(newDevCmd())       // Development mode
+	cmd.AddCommand(newStartCmd())     // Start node
+	cmd.AddCommand(newAutominingCmd()) // Automining config
+	cmd.AddCommand(newValidatorCmd()) // Validator operations
+	cmd.AddCommand(newVersionCmd())   // Version info
+	cmd.AddCommand(newStatusCmd())    // Node status
 	
 	return cmd
 }
