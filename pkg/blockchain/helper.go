@@ -15,11 +15,11 @@ import (
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/api/info"
-	"github.com/luxfi/node/v2/network/peer"
-	"github.com/luxfi/node/v2/utils/set"
-	"github.com/luxfi/node/v2/vms/platformvm"
-	"github.com/luxfi/node/v2/vms/platformvm/signer"
+	"github.com/luxfi/node/v2/v2/api/info"
+	"github.com/luxfi/node/v2/v2/network/peer"
+	"github.com/luxfi/node/v2/v2/utils/set"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/signer"
 )
 
 func GetAggregatorExtraPeers(

@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 	"github.com/olekukonko/tablewriter"
 )
 

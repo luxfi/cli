@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/v2/pkg/constants"
-	lux_constants "github.com/luxfi/node/v2/utils/constants"
+	lux_constants "github.com/luxfi/node/v2/v2/utils/constants"
 )
 
 type Network int64

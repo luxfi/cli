@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/cli/v2/pkg/vm"
 	luxSDK "github.com/luxfi/cli/v2/sdk/vm"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 	"github.com/luxfi/evm/v2/commontype"
 	"github.com/luxfi/evm/v2/params"
 	"github.com/luxfi/evm/v2/precompile/contracts/deployerallowlist"

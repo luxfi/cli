@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/v2/vms/components/lux"
-	"github.com/luxfi/node/v2/vms/components/verify"
+	"github.com/luxfi/node/v2/v2/vms/components/lux"
+	"github.com/luxfi/node/v2/v2/vms/components/verify"
 
 	"github.com/luxfi/cli/v2/pkg/application"
 	"github.com/luxfi/cli/v2/pkg/constants"
@@ -18,15 +18,15 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/crypto/keychain"
-	"github.com/luxfi/node/v2/utils/formatting/address"
-	"github.com/luxfi/node/v2/utils/set"
-	"github.com/luxfi/node/v2/vms/platformvm"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
-	"github.com/luxfi/node/v2/wallet/chain/c"
-	"github.com/luxfi/node/v2/wallet/subnet/primary"
-	walletoptions "github.com/luxfi/node/v2/wallet"
+	"github.com/luxfi/node/v2/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/v2/utils/set"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/wallet/chain/c"
+	"github.com/luxfi/node/v2/v2/wallet/subnet/primary"
+	walletoptions "github.com/luxfi/node/v2/v2/wallet"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")

@@ -31,8 +31,8 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/staking"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/staking"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/spf13/cobra"

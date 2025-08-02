@@ -7,11 +7,11 @@ import (
 
 	"github.com/luxfi/cli/v2/sdk/keychain"
 	"github.com/luxfi/ids"
-	luxdkeychain "github.com/luxfi/node/v2/utils/crypto/keychain"
-	"github.com/luxfi/node/v2/utils/set"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
-	"github.com/luxfi/node/v2/wallet/subnet/primary"
-	walletoptions "github.com/luxfi/node/v2/wallet"
+	luxdkeychain "github.com/luxfi/node/v2/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/v2/utils/set"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/wallet/subnet/primary"
+	walletoptions "github.com/luxfi/node/v2/v2/wallet"
 )
 
 type Wallet struct {

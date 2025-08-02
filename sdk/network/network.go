@@ -4,7 +4,7 @@
 package network
 
 import (
-	"github.com/luxfi/node/v2/utils/constants"
+	"github.com/luxfi/node/v2/v2/utils/constants"
 )
 
 type NetworkKind int64

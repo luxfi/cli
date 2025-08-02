@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	"github.com/luxfi/node/v2/v2/wallet/subnet/primary"
 )
 
 // Update network given by [networkDir], with all blockchain config of [blockchainName]

@@ -13,7 +13,7 @@ import (
 
 	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/node/v2/genesis"
+	"github.com/luxfi/node/v2/v2/genesis"
 	"github.com/luxfi/ids"
 	"github.com/stretchr/testify/require"
 )

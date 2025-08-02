@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/networkoptions"
 	"github.com/luxfi/cli/v2/pkg/prompts"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/spf13/cobra"

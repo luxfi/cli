@@ -15,9 +15,9 @@ import (
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/cli/v2/pkg/networkoptions"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/api/info"
+	"github.com/luxfi/node/v2/v2/api/info"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

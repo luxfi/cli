@@ -15,13 +15,13 @@ import (
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/crypto/keychain"
-	"github.com/luxfi/node/v2/utils/crypto/ledger"
-	"github.com/luxfi/node/v2/utils/formatting/address"
-	"github.com/luxfi/node/v2/utils/logging"
-	"github.com/luxfi/node/v2/utils/set"
-	"github.com/luxfi/node/v2/utils/units"
-	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/utils/crypto/keychain"
+	"github.com/luxfi/node/v2/v2/utils/crypto/ledger"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/set"
+	"github.com/luxfi/node/v2/v2/utils/units"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 )
 
 const (

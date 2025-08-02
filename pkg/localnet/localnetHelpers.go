@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
-	"github.com/luxfi/node/v2/wallet/subnet/primary"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/wallet/subnet/primary"
 )
 
 // information that is persisted alongside the local network

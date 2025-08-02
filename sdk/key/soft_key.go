@@ -16,13 +16,13 @@ import (
 	"github.com/luxfi/cli/v2/sdk/utils"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/cb58"
-	"github.com/luxfi/node/v2/utils/formatting/address"
-	"github.com/luxfi/node/v2/vms/components/lux"
-	"github.com/luxfi/node/v2/vms/platformvm/txs"
-	"github.com/luxfi/node/v2/vms/secp256k1fx"
+	"github.com/luxfi/node/v2/v2/utils/cb58"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/v2/vms/components/lux"
+	"github.com/luxfi/node/v2/v2/vms/platformvm/txs"
+	"github.com/luxfi/node/v2/v2/vms/secp256k1fx"
 
-	"github.com/luxfi/node/v2/utils/crypto/secp256k1"
+	"github.com/luxfi/node/v2/v2/utils/crypto/secp256k1"
 	eth_crypto "github.com/ethereum/go-ethereum/crypto"
 	"go.uber.org/zap"
 )

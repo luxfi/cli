@@ -9,9 +9,9 @@ import (
 	"github.com/luxfi/cli/v2/sdk/network"
 	"github.com/luxfi/cli/v2/sdk/utils"
 	"github.com/luxfi/ids"
-	luxdjson "github.com/luxfi/node/v2/utils/json"
-	"github.com/luxfi/node/v2/utils/rpc"
-	"github.com/luxfi/node/v2/vms/platformvm"
+	luxdjson "github.com/luxfi/node/v2/v2/utils/json"
+	"github.com/luxfi/node/v2/v2/utils/rpc"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 
 	"github.com/ethereum/go-ethereum/common"
 )

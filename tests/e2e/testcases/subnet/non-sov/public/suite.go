@@ -15,9 +15,9 @@ import (
 	"github.com/luxfi/cli/v2/tests/e2e/commands"
 	"github.com/luxfi/cli/v2/tests/e2e/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/utils/formatting/address"
-	"github.com/luxfi/node/v2/utils/logging"
-	"github.com/luxfi/node/v2/utils/units"
+	"github.com/luxfi/node/v2/v2/utils/formatting/address"
+	"github.com/luxfi/node/v2/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/units"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

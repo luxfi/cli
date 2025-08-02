@@ -17,8 +17,8 @@ import (
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/cli/v2/sdk/evm"
-	"github.com/luxfi/node/v2/utils/logging"
-	"github.com/luxfi/node/v2/utils/units"
+	"github.com/luxfi/node/v2/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/units"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

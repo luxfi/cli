@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/node/v2/utils/units"
+	"github.com/luxfi/node/v2/v2/utils/units"
 	"github.com/luxfi/evm/v2/core/types"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"

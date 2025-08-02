@@ -4,7 +4,7 @@
 package blockchain
 
 import (
-	"github.com/luxfi/node/v2/vms/platformvm"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 
 	"github.com/luxfi/cli/v2/sdk/network"
 	"github.com/luxfi/cli/v2/sdk/utils"

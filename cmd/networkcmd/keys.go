@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/v2/staking"
+	"github.com/luxfi/node/v2/v2/staking"
 	"github.com/spf13/cobra"
 )
 

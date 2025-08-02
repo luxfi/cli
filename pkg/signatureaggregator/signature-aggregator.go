@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/v2/pkg/models"
-	"github.com/luxfi/node/v2/api/info"
+	"github.com/luxfi/node/v2/v2/api/info"
 	// Temporary config types until warp imports are fixed
 
 	"go.uber.org/zap"
@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/cli/v2/pkg/utils"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 )
 
 // Temporary config types until warp imports are fixed

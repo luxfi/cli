@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/utils"
 	sdkutils "github.com/luxfi/cli/v2/sdk/utils"
 	"github.com/luxfi/netrunner/network"
-	luxdconfig "github.com/luxfi/node/v2/config"
+	luxdconfig "github.com/luxfi/node/v2/v2/config"
 	"github.com/luxfi/ids"
 
 	dircopy "github.com/otiai10/copy"

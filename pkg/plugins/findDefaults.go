@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/cli/v2/pkg/constants"
 	"github.com/luxfi/cli/v2/pkg/ux"
-	"github.com/luxfi/node/v2/config"
+	"github.com/luxfi/node/v2/v2/config"
 	luxlog "github.com/luxfi/log"
 	"github.com/kardianos/osext"
 	"github.com/shirou/gopsutil/process"

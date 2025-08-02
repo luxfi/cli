@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/v2/version"
+	"github.com/luxfi/node/v2/v2/version"
 	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/v2/pkg/models"
 	"github.com/luxfi/cli/v2/sdk/network"
 	"github.com/luxfi/cli/v2/sdk/publicarchive"
-	"github.com/luxfi/node/v2/utils/logging"
+	"github.com/luxfi/node/v2/v2/utils/logging"
 
 	"go.uber.org/zap"
 )

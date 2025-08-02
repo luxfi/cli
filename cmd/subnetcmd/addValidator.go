@@ -16,8 +16,8 @@ import (
 	"github.com/luxfi/cli/v2/pkg/txutils"
 	"github.com/luxfi/cli/v2/pkg/ux"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/v2/utils/constants"
-	"github.com/luxfi/node/v2/vms/platformvm"
+	lux_constants "github.com/luxfi/node/v2/v2/utils/constants"
+	"github.com/luxfi/node/v2/v2/vms/platformvm"
 	"github.com/spf13/cobra"
 )
 

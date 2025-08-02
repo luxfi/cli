@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/cli/v2/pkg/constants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/v2/utils/perms"
+	"github.com/luxfi/node/v2/v2/utils/perms"
 	"go.uber.org/zap"
 )
 
