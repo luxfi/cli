@@ -25,7 +25,7 @@ import (
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
-	avmtxs "github.com/luxfi/node/vms/avm/txs"
+	xvmtxs "github.com/luxfi/node/vms/xvm/txs"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	luxdfee "github.com/luxfi/node/vms/platformvm/txs/fee"
@@ -798,7 +798,7 @@ func importIntoX(
 	if err != nil {
 		return fmt.Errorf("error building tx: %w", err)
 	}
-	tx := avmtxs.Tx{Unsigned: unsignedTx}
+	tx := xvmtxs.Tx{Unsigned: unsignedTx}
 	if err := wallet.X().Signer().Sign(context.Background(), &tx); err != nil {
 		return fmt.Errorf("error signing tx: %w", err)
 	}
