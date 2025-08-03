@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/evm/core"
+	"github.com/luxfi/evm/core"
 )
 
 const (

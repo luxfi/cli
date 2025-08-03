@@ -14,7 +14,7 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	ids "github.com/luxfi/node/ids"
+	ids "github.com/luxfi/ids"
 	types "github.com/luxfi/geth/core/types"
 	interfaces "github.com/luxfi/evm/interfaces"
 	params "github.com/luxfi/evm/params"
