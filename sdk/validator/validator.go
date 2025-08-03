@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/sdk/network"
 	"github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	luxdjson "github.com/luxfi/node/utils/json"
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"

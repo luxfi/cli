@@ -5,7 +5,7 @@ package evm
 import (
 	"testing"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/geth/core/types"
 	subnetevmwarp "github.com/luxfi/evm/precompile/contracts/warp"
