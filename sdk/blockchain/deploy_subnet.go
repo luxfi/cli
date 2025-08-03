@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/cli/sdk/multisig"
 	"github.com/luxfi/cli/sdk/wallet"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 )

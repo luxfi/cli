@@ -4,7 +4,7 @@ package models
 
 import (
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 type TokenInfo struct {

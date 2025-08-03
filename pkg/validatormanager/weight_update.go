@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/sdk/interchain"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
