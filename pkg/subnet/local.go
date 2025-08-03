@@ -30,7 +30,7 @@ import (
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"

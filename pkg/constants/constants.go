@@ -181,4 +181,15 @@ const (
 	DefaultWalletCreationTimeout = 5 * time.Second
 
 	DefaultConfirmTxTimeout = 20 * time.Second
+
+	// Cloud and network constants
+	CloudOperationTimeout = 5 * time.Minute
+	LuxdP2PPort = 9651
+	LuxdMonitoringPort = 9090
+	LuxdLokiPort = 23101
+	GCPStaticIPPrefix = "lux-"
+	CloudServerStorageSize = 100 // GB
+	MonitoringCloudServerStorageSize = 200 // GB
+	ErrReleasingGCPStaticIP = "error releasing GCP static IP"
+	IPAddressSuffix = "-ip"
 )

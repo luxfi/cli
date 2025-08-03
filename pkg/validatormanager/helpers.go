@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/interfaces"

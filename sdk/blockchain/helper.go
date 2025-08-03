@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/sdk/network"
 	"github.com/luxfi/cli/sdk/utils"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 func GetSubnet(subnetID ids.ID, network network.Network) (platformvm.GetSubnetClientResponse, error) {

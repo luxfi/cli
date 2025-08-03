@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/geth/core/types"
