@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/sdk/network"
 	"github.com/luxfi/cli/sdk/vm"
 	"github.com/luxfi/cli/sdk/wallet"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/evm/core"

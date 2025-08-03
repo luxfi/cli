@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/luxfi/cli/sdk/keychain"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	luxdkeychain "github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/secp256k1fx"
@@ -15,7 +15,7 @@ import (
 )
 
 type Wallet struct {
-	*primary.Wallet
+	primary.Wallet
 	Keychain keychain.Keychain
 	options  []common.Option
 	config   primary.WalletConfig
@@ -24,10 +24,7 @@ type Wallet struct {
 func New(ctx context.Context, uri string, luxKeychain luxdkeychain.Keychain, config primary.WalletConfig) (Wallet, error) {
 	wallet, err := primary.MakeWallet(
 		ctx,
-		uri,
-		luxKeychain,
-		nil,
-		config,
+		&config,
 	)
 	return Wallet{
 		Wallet: wallet,

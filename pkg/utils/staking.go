@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/node/vms/platformvm"

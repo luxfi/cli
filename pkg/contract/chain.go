@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/spf13/cobra"
 )
 

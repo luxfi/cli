@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/ethereum/go-ethereum/common"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 // PoAValidatorManagerInitialize initializes contract [managerAddress] at [rpcURL], to

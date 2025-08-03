@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/cli/sdk/vm"
 	"github.com/luxfi/cli/sdk/wallet"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	commonLuxd "github.com/luxfi/node/wallet/subnet/primary/common"

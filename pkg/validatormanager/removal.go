@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/sdk/evm"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"

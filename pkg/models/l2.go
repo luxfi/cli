@@ -4,7 +4,7 @@ package models
 
 import (
 	// Reserved for future use with IDs
-	// "github.com/luxfi/node/ids"
+	// "github.com/luxfi/ids"
 )
 
 // L2Config represents a based rollup configuration
