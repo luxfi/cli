@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/core"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 )
 
