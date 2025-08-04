@@ -34,7 +34,7 @@ import (
 	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/node/wallet/subnet/primary/common"
 	"github.com/luxfi/node/wallet/chain/c"
-	goethereumcommon "github.com/ethereum/go-ethereum/common"
+	goethereumcommon "github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 )
 

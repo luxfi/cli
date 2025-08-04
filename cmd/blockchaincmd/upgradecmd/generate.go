@@ -26,8 +26,8 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	subnetevmutils "github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	goethereummath "github.com/ethereum/go-ethereum/common/math"
+	"github.com/luxfi/geth/common"
+	goethereummath "github.com/luxfi/geth/common/math"
 	"github.com/spf13/cobra"
 )
 

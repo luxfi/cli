@@ -26,7 +26,7 @@ import (
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/node/utils/formatting/address"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
 )

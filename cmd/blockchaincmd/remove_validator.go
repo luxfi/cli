@@ -32,7 +32,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/logging"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 )
 
