@@ -18,13 +18,13 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.2.1
 	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v0.8.4
+	github.com/luxfi/evm v0.8.5
 	github.com/luxfi/geth v1.16.24
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v0.1.1
 	github.com/luxfi/lpm v1.0.3
-	github.com/luxfi/netrunner v1.7.9
+	github.com/luxfi/netrunner v1.7.9.1
 	github.com/luxfi/node v1.13.4-lux.1
 	github.com/luxfi/warp v0.1.0
 	github.com/manifoldco/promptui v0.9.0
