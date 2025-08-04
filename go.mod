@@ -16,16 +16,16 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.1.1
+	github.com/luxfi/crypto v1.2.1
 	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v0.8.3
-	github.com/luxfi/geth v1.16.7
+	github.com/luxfi/evm v0.8.4
+	github.com/luxfi/geth v1.16.24
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v0.1.1
 	github.com/luxfi/lpm v1.0.3
-	github.com/luxfi/netrunner v1.8.4
-	github.com/luxfi/node v1.13.13
+	github.com/luxfi/netrunner v1.7.9
+	github.com/luxfi/node v1.13.4-lux.1
 	github.com/luxfi/warp v0.1.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -157,9 +157,9 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/database v1.1.4 // indirect
+	github.com/luxfi/database v1.1.5 // indirect
 	github.com/luxfi/metrics v1.1.1 // indirect
-	github.com/luxfi/trace v0.1.0 // indirect
+	github.com/luxfi/trace v0.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -227,3 +227,5 @@ require (
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
 // All local replace directives removed for v1 genesis launch
+
+
