@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 
 	"github.com/spf13/cobra"
 )
