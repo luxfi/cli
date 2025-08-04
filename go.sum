@@ -383,16 +383,12 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/database v1.1.4 h1:C8yFA7ilwYnde/+tjSif9RgBlC9mN8Lj52jIIv/Vayk=
 github.com/luxfi/database v1.1.4/go.mod h1:/dUq+IYFvgFitQEXr4zj/9jJ0cjT/bf5558pB1rKpX8=
-github.com/luxfi/go-bip39 v1.1.0 h1:wU1LmWYXB3gbUV+k0hFImWSUVIK1iYNoQNisbTiVl9M=
-github.com/luxfi/go-bip39 v1.1.0/go.mod h1:OxPL7QXUfnqqk7nOTPWgNfShxqg69OYJ4+ATKCmZWP8=
 github.com/luxfi/ids v1.0.2 h1:OnbCWBgdmuBPZat1r1vRikk1FFrdHMfSknpfKmX0KBg=
 github.com/luxfi/ids v1.0.2/go.mod h1:cMbto3Q8N3IaBxdz4Lzaq9wYl33coGXUdlr2+YwXeUw=
 github.com/luxfi/ledger-lux-go v0.0.3 h1:HDJvwQpPZgbB0AsSiasQUWD8O7/oQ5+9sPzje4pBoGw=
 github.com/luxfi/ledger-lux-go v0.0.3/go.mod h1:BbL5bOv9OgEtzE+dQ180SmNRRc5APi/YksT20qt5TsQ=
 github.com/luxfi/log v0.1.1 h1:KRTOIGqyPTrN3nWcBMVI50B6EXTayYex2+HyGjJ06Ew=
 github.com/luxfi/log v0.1.1/go.mod h1:trb99HbI+YW6nu+So4jWKey20oHeRhlee70xbuR6Gak=
-github.com/luxfi/trace v0.1.0 h1:rwJb/1EtYbjcokLe8/fU0yD8oBGs9QF7DCBO+dk/WGs=
-github.com/luxfi/trace v0.1.0/go.mod h1:nxbVJybpgn9JI38vYrguYUYwQDaqCMG5hHy73k/j9e4=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/manifoldco/promptui v0.9.0 h1:3V4HzJk1TtXW1MTZMP7mdlwbBpIinw3HztaIlYthEiA=
 github.com/manifoldco/promptui v0.9.0/go.mod h1:ka04sppxSGFAtxX0qhlYQjISsg9mR4GWtQEhdbn6Pgg=
