@@ -75,21 +75,25 @@ func NewDownloader(
 
 	switch network.ID {
 	case luxdConstants.TestnetID:
-		if getter, err := newGetter(PChainArchiveTestnet, tmpFile.Name()); err != nil {
+		getter, err := newGetter(PChainArchiveTestnet, tmpFile.Name())
+		if err != nil {
 			return Downloader{}, err
-		} else {
-			return Downloader{
-				getter:    getter,
-				logger:    logger,
-				currentOp: &sync.Mutex{},
-			}, nil
 		}
+		return Downloader{
+			getter:    getter,
+			logger:    logger,
+			currentOp: &sync.Mutex{},
+		}, nil
 	default:
 		return Downloader{}, fmt.Errorf("unsupported network ID: %d. Testnet only supported", network.ID)
 	}
 }
 
 func (d Downloader) Download() error {
+	if d.getter.client == nil || d.getter.request == nil {
+		return fmt.Errorf("downloader not properly initialized")
+	}
+	
 	d.logger.Info("Download started from", zap.String("url", d.getter.request.URL().String()))
 
 	d.currentOp.Lock()

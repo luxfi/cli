@@ -24,8 +24,8 @@ import (
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/geth/ethclient"
 
-	"github.com/ethereum/go-ethereum/common"
-	goethereumethclient "github.com/ethereum/go-ethereum/ethclient"
+	"github.com/luxfi/geth/common"
+	goethereumethclient "github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/erc20-go/erc20"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

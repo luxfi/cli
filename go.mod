@@ -11,7 +11,7 @@ require (
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/chelnak/ysmrr v0.5.0
 	github.com/docker/docker v28.3.2+incompatible
-	github.com/ethereum/go-ethereum v1.16.1
+	github.com/luxfi/geth v1.16.1
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213

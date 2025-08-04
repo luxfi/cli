@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/geth/ethclient"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"go.uber.org/zap"
 )
 
