@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/sdk/evm"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 
 	"github.com/spf13/cobra"
 )

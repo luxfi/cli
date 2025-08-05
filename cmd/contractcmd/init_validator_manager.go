@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/pkg/validatormanager"
 	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
 	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 
 	"github.com/luxfi/geth/common"
