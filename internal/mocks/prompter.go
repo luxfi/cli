@@ -6,7 +6,7 @@ import (
 	big "math/big"
 
 	common "github.com/luxfi/geth/common"
-	ids "github.com/luxfi/node/ids"
+	ids "github.com/luxfi/ids"
 
 	mock "github.com/stretchr/testify/mock"
 

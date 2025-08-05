@@ -31,7 +31,7 @@ import (
 	"github.com/luxfi/cli/pkg/validatormanager"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"

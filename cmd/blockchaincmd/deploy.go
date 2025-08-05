@@ -36,7 +36,7 @@ import (
 	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	luxdutils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"

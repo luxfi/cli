@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/pkg/warp"
 	"github.com/luxfi/cli/sdk/evm"
 	goethereumcommon "github.com/luxfi/geth/common"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"

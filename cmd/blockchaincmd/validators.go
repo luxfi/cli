@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/subnet"
 	validatorsdk "github.com/luxfi/cli/sdk/validator"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
