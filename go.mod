@@ -16,11 +16,11 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.2.1
-	github.com/luxfi/database v1.1.7
+	github.com/luxfi/crypto v1.2.2
+	github.com/luxfi/database v1.1.9
 	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v0.7.8
-	github.com/luxfi/geth v1.16.24
+	github.com/luxfi/evm v0.7.9
+	github.com/luxfi/geth v1.16.26
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v0.1.1
