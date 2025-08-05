@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.22.5
+go 1.24.5
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -19,14 +19,14 @@ require (
 	github.com/luxfi/crypto v1.2.2
 	github.com/luxfi/database v1.1.9
 	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v0.7.9
-	github.com/luxfi/geth v1.16.26
+	github.com/luxfi/evm v0.7.8-lux
+	github.com/luxfi/geth v1.16.1-lux
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v0.1.1
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/netrunner v1.8.3
-	github.com/luxfi/node v1.13.16
+	github.com/luxfi/node v1.13.4-lux
 	github.com/luxfi/warp v0.1.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -228,24 +228,8 @@ require (
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
-// replace github.com/luxfi/node => ../node
-
-replace github.com/luxfi/geth => ../geth
-
-replace github.com/luxfi/evm => ../evm
-
-// replace github.com/luxfi/database => ../database
-
-replace github.com/luxfi/crypto => ../crypto
-
-replace github.com/luxfi/ids => ../ids
-
-replace github.com/luxfi/log => ../log
-
-replace github.com/luxfi/metrics => ../metrics
-
-replace github.com/luxfi/netrunner => ../netrunner
-
 replace github.com/luxfi/lpm => ../lpm
+
+replace github.com/luxfi/warp => ../warp
 
 // All local replace directives removed for v1 genesis launch
