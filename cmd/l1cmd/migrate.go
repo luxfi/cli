@@ -83,7 +83,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 			"Annual (1,000 LUX/year - save 200 LUX)",
 			"Perpetual (10,000 LUX - one-time)",
 		}
-		
+
 		choice, err := app.Prompt.CaptureList(
 			"Choose L1 sovereignty rental plan",
 			plans,
@@ -147,11 +147,11 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 
 	// Perform migration
 	ux.Logger.PrintToUser("\n🚀 Starting migration process...")
-	
+
 	// Step 1: Create migration transaction
 	ux.Logger.PrintToUser("1️⃣ Creating migration transaction...")
 	_ = createMigrationTransaction(&sc, validatorManagement, rentalPlan)
-	
+
 	// Step 2: Notify validators
 	ux.Logger.PrintToUser("2️⃣ Notifying validators of migration...")
 	if err := notifyValidators(&sc); err != nil {
@@ -161,13 +161,13 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	// Step 3: Execute migration
 	ux.Logger.PrintToUser("3️⃣ Executing migration...")
 	time.Sleep(2 * time.Second) // Simulate migration
-	
+
 	// Step 4: Update configuration
 	sc.Sovereign = true
 	sc.ValidatorManagement = validatorManagement
 	sc.RentalPlan = rentalPlan
 	sc.MigratedAt = time.Now().Unix()
-	
+
 	if err := app.WriteSidecarFile(&sc); err != nil {
 		return fmt.Errorf("failed to update configuration: %w", err)
 	}
@@ -196,7 +196,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   1. Validators can remove primary network stake")
 	ux.Logger.PrintToUser("   2. Deploy L2/L3 chains: lux l2 create %s-l2 --l1 %s", subnetName, subnetName)
 	ux.Logger.PrintToUser("   3. Enable cross-protocol bridges: lux bridge enable %s", subnetName)
-	
+
 	if rentalPlan == "monthly" {
 		ux.Logger.PrintToUser("   4. Next payment due: %s", time.Now().AddDate(0, 1, 0).Format("2006-01-02"))
 	}

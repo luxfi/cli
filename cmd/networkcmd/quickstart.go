@@ -47,7 +47,7 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 
 	// Start the network
 	ux.Logger.PrintToUser("🌐 Starting local primary network...")
-	
+
 	// Use latest version if not specified
 	if luxdVersion == "latest" {
 		luxdVersion = "latest"
@@ -65,7 +65,7 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 	// Import historic subnets if requested
 	if withHistoricSubnets {
 		ux.Logger.PrintToUser("\n📥 Importing historic subnet configurations...")
-		
+
 		// Run the import-historic command
 		if err := importHistoricSubnetsForQuickstart(); err != nil {
 			return fmt.Errorf("failed to import historic subnets: %w", err)
@@ -73,7 +73,7 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 
 		if !skipSubnetDeploy {
 			ux.Logger.PrintToUser("\n🚀 Deploying historic subnets...")
-			
+
 			// Deploy each subnet
 			subnets := []string{"LUX", "ZOO", "SPC"}
 			for _, subnetName := range subnets {
@@ -92,7 +92,7 @@ func quickstartNetwork(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("\n📊 Network Status:")
 	ux.Logger.PrintToUser("  Primary Network: Running")
 	ux.Logger.PrintToUser("  RPC Endpoint: http://localhost:9630")
-	
+
 	if withHistoricSubnets && !skipSubnetDeploy {
 		ux.Logger.PrintToUser("\n🌐 Subnet RPC Endpoints:")
 		ux.Logger.PrintToUser("  LUX: http://localhost:9630/ext/bc/dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ/rpc")

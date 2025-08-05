@@ -26,7 +26,7 @@ var (
 	useLedger       bool
 	useEwoq         bool
 	ledgerAddresses []string
-	balanceLUX     float64
+	balanceLUX      float64
 )
 
 func NewIncreaseBalanceCmd() *cobra.Command {

@@ -22,8 +22,8 @@ var (
 	testLuxdCompat5 = []byte("{\"39\": [\"v1.12.2\", \"v1.13.0\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
 	testLuxdCompat6 = []byte("{\"39\": [\"v1.12.2\", \"v1.13.0\", \"v1.13.1\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
 	testLuxdCompat7 = []byte("{\"40\": [\"v1.13.2\"],\"39\": [\"v1.12.2\", \"v1.13.0\", \"v1.13.1\"]}")
-	testCLICompat    = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0"},"DevNet":{"latest-version":"v1.13.0"},"Testnet":{"latest-version":"v1.13.0"},"Mainnet":{"latest-version":"v1.13.0"}}}`)
-	testCLICompat2   = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0"},"DevNet":{"latest-version":"v1.13.0"},"Testnet":{"latest-version":"v1.13.0-testnet"},"Mainnet":{"latest-version":"v1.13.0"}}}`)
+	testCLICompat   = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0"},"DevNet":{"latest-version":"v1.13.0"},"Testnet":{"latest-version":"v1.13.0"},"Mainnet":{"latest-version":"v1.13.0"}}}`)
+	testCLICompat2  = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0"},"DevNet":{"latest-version":"v1.13.0"},"Testnet":{"latest-version":"v1.13.0-testnet"},"Mainnet":{"latest-version":"v1.13.0"}}}`)
 )
 
 func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
@@ -139,14 +139,14 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 		expectedError     bool
 		expectedResult    string
 		cliDependencyData []byte
-		luxdData   []byte
+		luxdData          []byte
 		latestVersion     string
 	}{
 		{
 			name:              "luxd dependency with cli supporting latest luxd release",
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLICompat,
-			luxdData:   testLuxdCompat5,
+			luxdData:          testLuxdCompat5,
 			latestVersion:     "v1.13.0",
 			expectedError:     false,
 			expectedResult:    "v1.13.0",
@@ -155,7 +155,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli not supporting latest luxd release, but same rpc",
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLICompat,
-			luxdData:   testLuxdCompat6,
+			luxdData:          testLuxdCompat6,
 			latestVersion:     "v1.13.1",
 			expectedError:     false,
 			expectedResult:    "v1.13.0",
@@ -164,7 +164,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli supporting lower rpc",
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLICompat,
-			luxdData:   testLuxdCompat7,
+			luxdData:          testLuxdCompat7,
 			latestVersion:     "v1.13.2",
 			expectedError:     false,
 			expectedResult:    "v1.13.0",
@@ -173,7 +173,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			name:              "luxd dependency with cli requiring a prerelease",
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLICompat2,
-			luxdData:   testLuxdCompat7,
+			luxdData:          testLuxdCompat7,
 			latestVersion:     "v1.13.2",
 			expectedError:     false,
 			expectedResult:    "v1.13.0-testnet",
@@ -242,14 +242,14 @@ func TestGetLatestCLISupportedDependencyVersionWithLowerRPC(t *testing.T) {
 		expectedError     bool
 		expectedResult    string
 		cliDependencyData []byte
-		luxdData   []byte
+		luxdData          []byte
 		latestVersion     string
 	}{
 		{
 			name:              "luxd dependency with cli supporting latest luxd release, user using lower rpc",
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLICompat,
-			luxdData:   testLuxdCompat5,
+			luxdData:          testLuxdCompat5,
 			expectedError:     false,
 			expectedResult:    "v1.12.1",
 			latestVersion:     "v1.13.0",
@@ -258,7 +258,7 @@ func TestGetLatestCLISupportedDependencyVersionWithLowerRPC(t *testing.T) {
 			name:              "luxd dependency with cli supporting latest luxd release, user using lower rpc, prerelease required",
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLICompat2,
-			luxdData:   testLuxdCompat6,
+			luxdData:          testLuxdCompat6,
 			expectedError:     false,
 			expectedResult:    "v1.12.1",
 			latestVersion:     "v1.13.2",

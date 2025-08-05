@@ -20,12 +20,12 @@ import (
 	"github.com/luxfi/cli/sdk/evm"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/evm/warp/messages"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/warp/messages"
 
 	"github.com/ethereum/go-ethereum/common"
 )

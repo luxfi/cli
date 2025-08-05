@@ -21,8 +21,8 @@ import (
 	"github.com/luxfi/cli/pkg/vm"
 	validatorManagerSDK "github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
-	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/core"
+	"github.com/luxfi/node/ids"
 
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"

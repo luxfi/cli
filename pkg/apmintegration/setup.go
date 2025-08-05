@@ -6,11 +6,11 @@ package lpmintegration
 import (
 	"os"
 
-	"github.com/luxfi/lpm/lpm"
-	"github.com/luxfi/lpm/config"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/luxfi/lpm/config"
+	"github.com/luxfi/lpm/lpm"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v2"
 )

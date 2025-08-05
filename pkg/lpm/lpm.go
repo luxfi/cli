@@ -23,12 +23,12 @@ func NewClient(lpmDir string, pluginDir string, adminAPIEndpoint string) (*Clien
 		PluginDir:        pluginDir,
 		Fs:               afero.NewOsFs(),
 	}
-	
+
 	lpmInstance, err := luxlpm.New(config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create LPM instance: %w", err)
 	}
-	
+
 	return &Client{lpm: lpmInstance}, nil
 }
 
@@ -74,7 +74,7 @@ func (c *Client) GetVM(alias string, version string) (*VMUpload, error) {
 	return nil, fmt.Errorf("GetVM not implemented in LPM - use Install instead")
 }
 
-// AddVM is a placeholder to maintain compatibility  
+// AddVM is a placeholder to maintain compatibility
 func (c *Client) AddVM(vm *VMUpload) error {
 	return fmt.Errorf("AddVM not implemented in LPM - use repository-based installation")
 }

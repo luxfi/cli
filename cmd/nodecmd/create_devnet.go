@@ -23,14 +23,14 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	sdkutils "github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/crypto/bls/signer/localsigner"
+	coreth_params "github.com/luxfi/geth/params"
 	"github.com/luxfi/node/config"
 	luxd_upgrade "github.com/luxfi/node/upgrade"
 	luxd_constants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/node/utils/formatting"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/signer"
-	coreth_params "github.com/luxfi/geth/params"
 
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -148,7 +148,7 @@ func generateCustomGenesis(
 	lockTime := startTime + genesisLocktimeStartimeDelta
 	allocations := []interface{}{}
 	alloc := map[string]interface{}{
-		"luxAddr":      walletAddr,
+		"luxAddr":       walletAddr,
 		"ethAddr":       allocationCommonEthAddress,
 		"initialAmount": 300000000000000000,
 		"unlockSchedule": []interface{}{
@@ -158,7 +158,7 @@ func generateCustomGenesis(
 	}
 	allocations = append(allocations, alloc)
 	alloc = map[string]interface{}{
-		"luxAddr":      stakingAddr,
+		"luxAddr":       stakingAddr,
 		"ethAddr":       allocationCommonEthAddress,
 		"initialAmount": 0,
 		"unlockSchedule": []interface{}{

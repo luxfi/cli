@@ -26,7 +26,7 @@ import (
 )
 
 type nodeUpgradeInfo struct {
-	LuxdVersion    string   // lux go version to update to on cloud server
+	LuxdVersion           string   // lux go version to update to on cloud server
 	SubnetEVMVersion      string   // subnet EVM version to update to on cloud server
 	SubnetEVMIDsToUpgrade []string // list of ID of Subnet EVM to be upgraded to subnet EVM version to update to
 }

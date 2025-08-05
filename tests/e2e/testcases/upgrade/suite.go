@@ -19,10 +19,10 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	anr_utils "github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/evm/params"
+	anr_utils "github.com/luxfi/netrunner/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

@@ -24,18 +24,18 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/evm/ethclient"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/ids"
 	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/evm/ethclient"
 )
 
 const (

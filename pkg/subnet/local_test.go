@@ -18,9 +18,9 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -119,7 +119,7 @@ func TestDeployToLocal(t *testing.T) {
 		binaryDownloader:   binDownloader,
 		app:                app,
 		setDefaultSnapshot: fakeSetDefaultSnapshot,
-		luxVersion:       luxVersion,
+		luxVersion:         luxVersion,
 	}
 
 	// create a simple genesis for the test

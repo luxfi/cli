@@ -30,7 +30,7 @@ var (
 	useCustom        bool
 	vmVersion        string
 	useLatestVersion bool
-	
+
 	// L2/Sequencer flags
 	sequencer        string
 	enablePreconfirm bool
@@ -72,7 +72,7 @@ Use -f to overwrite existing configurations.`,
 	cmd.Flags().BoolVar(&useCustom, "custom", false, "use a custom VM template")
 	cmd.Flags().BoolVar(&useLatestVersion, latest, false, "use latest VM version, takes precedence over --vm-version")
 	cmd.Flags().BoolVarP(&forceCreate, forceFlag, "f", false, "overwrite the existing configuration if one exists")
-	
+
 	// L2/Sequencer flags
 	cmd.Flags().StringVar(&sequencer, "sequencer", "", "sequencer for the L2 (lux, ethereum, lux, op, external)")
 	cmd.Flags().BoolVar(&enablePreconfirm, "enable-preconfirm", false, "enable pre-confirmations for fast UX")
@@ -172,7 +172,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 			"External (Traditional sequencer)",
 			"None (Deploy as sovereign L1)",
 		}
-		
+
 		choice, err := app.Prompt.CaptureList(
 			"Select sequencer for your L2",
 			sequencerOptions,
@@ -180,7 +180,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		
+
 		switch choice {
 		case "Lux (100ms blocks, lowest cost, based rollup)":
 			sequencer = "lux"
@@ -205,7 +205,7 @@ func createSubnetConfig(cmd *cobra.Command, args []string) error {
 		sc.SequencerType = sequencer
 		sc.L1BlockTime = getBlockTime(sequencer)
 		sc.PreconfirmEnabled = enablePreconfirm
-		
+
 		ux.Logger.PrintToUser("🔧 L2 Configuration:")
 		ux.Logger.PrintToUser("   Sequencer: %s", sequencer)
 		if isBasedRollup(sequencer) {
@@ -250,4 +250,3 @@ func checkInvalidSubnetNames(name string) error {
 
 	return nil
 }
-

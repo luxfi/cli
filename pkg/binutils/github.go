@@ -23,8 +23,8 @@ type GithubDownloader interface {
 }
 
 type (
-	subnetEVMDownloader   struct{}
-	nodeDownloader struct{}
+	subnetEVMDownloader struct{}
+	nodeDownloader      struct{}
 )
 
 var (

@@ -53,7 +53,7 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 3. Generating node configurations for bootstrap validators`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ux.Logger.PrintToUser("Preparing Lux mainnet migration...")
-			
+
 			// Create output directory structure
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("failed to create output directory: %w", err)

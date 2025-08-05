@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // returns information for the blockchain default allocation key

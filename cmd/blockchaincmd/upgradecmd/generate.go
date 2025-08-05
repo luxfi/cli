@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	luxSDK "github.com/luxfi/cli/sdk/vm"
-	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
@@ -28,6 +27,7 @@ import (
 	subnetevmutils "github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	goethereummath "github.com/luxfi/geth/common/math"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/spf13/cobra"
 )
 

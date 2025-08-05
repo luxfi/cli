@@ -12,9 +12,9 @@ const (
 	BaseDirName = ".cli"
 	LogDir      = "logs"
 
-	ServerRunFile      = "gRPCserver.run"
-	LuxCliBinDir = "bin"
-	RunDir             = "runs"
+	ServerRunFile = "gRPCserver.run"
+	LuxCliBinDir  = "bin"
+	RunDir        = "runs"
 
 	SuffixSeparator             = "_"
 	SidecarFileName             = "sidecar.json"
@@ -34,7 +34,7 @@ const (
 	E2ERequestTimeout = 30 * time.Second
 
 	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
-	TestnetAPIEndpoint       = "https://api.lux-test.network"
+	TestnetAPIEndpoint    = "https://api.lux-test.network"
 	MainnetAPIEndpoint    = "https://api.lux.network"
 
 	// Cloud service constants
@@ -96,13 +96,13 @@ const (
 
 	CustomVMDir = "vms"
 
-	LuxOrg          = "luxfi"
+	LuxOrg      = "luxfi"
 	LuxRepoName = "node"
-	EVMRepoName   = "evm"
-	CliRepoName         = "cli"
+	EVMRepoName = "evm"
+	CliRepoName = "cli"
 
 	LuxInstallDir = "node"
-	EVMInstallDir   = "evm"
+	EVMInstallDir = "evm"
 
 	EVMBin = "evm"
 
@@ -111,11 +111,11 @@ const (
 	// Latest EVM version
 	LatestEVMVersion = "v0.7.7"
 
-	LPMDir                = ".lpm"
+	LPMDir = ".lpm"
 
 	// Network ports
-	SSHTCPPort = 22
-	LuxdAPIPort = 9650
+	SSHTCPPort      = 22
+	LuxdAPIPort     = 9650
 	LuxdGrafanaPort = 3000
 
 	// Node roles
@@ -135,9 +135,9 @@ const (
 
 	// SSH timeouts
 	SSHLongRunningScriptTimeout = 10 * time.Minute
-	LPMLogName            = "lpm.log"
-	DefaultLuxPackage = "luxfi/plugins-core"
-	LPMPluginDir          = "lpm_plugins"
+	LPMLogName                  = "lpm.log"
+	DefaultLuxPackage           = "luxfi/plugins-core"
+	LPMPluginDir                = "lpm_plugins"
 
 	// #nosec G101
 	GithubAPITokenEnvVarName = "LUX_CLI_GITHUB_TOKEN"
@@ -164,7 +164,7 @@ const (
 
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
-	EVMRPCCompatibilityURL         = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
+	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
@@ -183,13 +183,13 @@ const (
 	DefaultConfirmTxTimeout = 20 * time.Second
 
 	// Cloud and network constants
-	CloudOperationTimeout = 5 * time.Minute
-	LuxdP2PPort = 9651
-	LuxdMonitoringPort = 9090
-	LuxdLokiPort = 23101
-	GCPStaticIPPrefix = "lux-"
-	CloudServerStorageSize = 100 // GB
+	CloudOperationTimeout            = 5 * time.Minute
+	LuxdP2PPort                      = 9651
+	LuxdMonitoringPort               = 9090
+	LuxdLokiPort                     = 23101
+	GCPStaticIPPrefix                = "lux-"
+	CloudServerStorageSize           = 100 // GB
 	MonitoringCloudServerStorageSize = 200 // GB
-	ErrReleasingGCPStaticIP = "error releasing GCP static IP"
-	IPAddressSuffix = "-ip"
+	ErrReleasingGCPStaticIP          = "error releasing GCP static IP"
+	IPAddressSuffix                  = "-ip"
 )

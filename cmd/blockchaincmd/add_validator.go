@@ -44,7 +44,7 @@ import (
 var (
 	nodeIDStr                           string
 	nodeEndpoint                        string
-	balanceLUX                         float64
+	balanceLUX                          float64
 	weight                              uint64
 	startTimeStr                        string
 	duration                            time.Duration

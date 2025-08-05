@@ -16,8 +16,8 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/netrunner/api"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/netrunner/api"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -460,8 +460,8 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 
 	ginkgo.It("can't deploy conflicting vm versions", func() {
 		// Using versions with different RPC protocols
-		subnetEVMVersion1 := "v0.7.9"  // RPC 42
-		subnetEVMVersion2 := "v0.7.5"  // RPC 41
+		subnetEVMVersion1 := "v0.7.9" // RPC 42
+		subnetEVMVersion2 := "v0.7.5" // RPC 41
 
 		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1)
 		commands.CreateSubnetEvmConfigWithVersion(secondSubnetName, utils.SubnetEvmGenesis2Path, subnetEVMVersion2)

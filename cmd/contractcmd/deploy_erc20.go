@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/utils/logging"
 
 	"github.com/spf13/cobra"
 )

@@ -9,26 +9,26 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
-	
+
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
 type devFlags struct {
-	instanceID int
-	httpPort   int
+	instanceID  int
+	httpPort    int
 	stakingPort int
-	dataDir    string
-	chainID    uint32
-	automine   bool
-	blockTime  int
-	accounts   []string
-	balance    string
+	dataDir     string
+	chainID     uint32
+	automine    bool
+	blockTime   int
+	accounts    []string
+	balance     string
 }
 
 func newDevCmd() *cobra.Command {
 	flags := &devFlags{}
-	
+
 	cmd := &cobra.Command{
 		Use:   "dev",
 		Short: "Start Lux node in development mode",
@@ -70,18 +70,18 @@ similar to 'geth --dev'. This mode includes:
 
 func runDev(flags *devFlags) error {
 	ux.Logger.PrintToUser("Starting Lux node in development mode...")
-	
+
 	// Adjust ports based on instance ID
 	if flags.instanceID > 1 {
 		flags.httpPort += (flags.instanceID - 1) * 10
 		flags.stakingPort += (flags.instanceID - 1) * 10
 	}
-	
+
 	// Create data directory
 	if flags.dataDir == "" {
 		flags.dataDir = filepath.Join(os.TempDir(), fmt.Sprintf("lux-dev-%d", flags.instanceID))
 	}
-	
+
 	// Ensure directories exist
 	dirs := []string{
 		filepath.Join(flags.dataDir, "staking"),
@@ -93,22 +93,22 @@ func runDev(flags *devFlags) error {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
-	
+
 	// Generate ephemeral staking credentials
 	if err := generateStakingCredentials(flags.dataDir); err != nil {
 		return fmt.Errorf("failed to generate staking credentials: %w", err)
 	}
-	
+
 	// Create C-Chain config with automining settings
 	if err := createCChainConfig(flags); err != nil {
 		return fmt.Errorf("failed to create C-Chain config: %w", err)
 	}
-	
+
 	// Create genesis with pre-funded accounts
 	if err := createDevGenesis(flags); err != nil {
 		return fmt.Errorf("failed to create genesis: %w", err)
 	}
-	
+
 	// Build luxd command
 	luxdPath := filepath.Join(app.GetBaseDir(), "bin", "luxd")
 	if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
@@ -118,7 +118,7 @@ func runDev(flags *devFlags) error {
 			return fmt.Errorf("luxd binary not found. Please build it first with './scripts/build.sh'")
 		}
 	}
-	
+
 	args := []string{
 		"--network-id", fmt.Sprintf("%d", flags.chainID),
 		"--data-dir", flags.dataDir,
@@ -142,11 +142,11 @@ func runDev(flags *devFlags) error {
 		"--index-enabled=true",
 		"--log-level=info",
 	}
-	
+
 	cmd := exec.Command(luxdPath, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	
+
 	ux.Logger.PrintToUser("Dev Mode Configuration:")
 	ux.Logger.PrintToUser("- Instance ID: %d", flags.instanceID)
 	ux.Logger.PrintToUser("- HTTP Port: %d", flags.httpPort)
@@ -160,16 +160,16 @@ func runDev(flags *devFlags) error {
 	ux.Logger.PrintToUser("- Pre-funded Accounts: %v", flags.accounts)
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Starting luxd...")
-	
+
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start luxd: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("Node started with PID: %d", cmd.Process.Pid)
-	
+
 	// Wait for node to initialize
 	time.Sleep(10 * time.Second)
-	
+
 	// Display connection information
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Connection Information:")
@@ -180,7 +180,7 @@ func runDev(flags *devFlags) error {
 	ux.Logger.PrintToUser("- Private Key: 56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("To stop the node, press Ctrl+C")
-	
+
 	// Wait for the process
 	return cmd.Wait()
 }
@@ -188,17 +188,17 @@ func runDev(flags *devFlags) error {
 func generateStakingCredentials(dataDir string) error {
 	// For dev mode, we use fixed ephemeral credentials
 	stakingDir := filepath.Join(dataDir, "staking")
-	
+
 	keyPath := filepath.Join(stakingDir, "staker.key")
 	certPath := filepath.Join(stakingDir, "staker.crt")
-	
+
 	// Dev mode staking key
 	key := `-----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgWRQr2aIqVmXJIqSK
 oLmJLqv1HqP4h1XuJopnYdT9KROhRANCAAQKRdbyne7H1M7nz2hEoMqjfFRXLaVl
 qcr7sLvSk/bPLOYdmKR5s5B9fS3TCoNEL9fEp2xz0UbpVxK3z7T2tLWj
 -----END PRIVATE KEY-----`
-	
+
 	// Dev mode staking cert
 	cert := `-----BEGIN CERTIFICATE-----
 MIIBwzCCAWqgAwIBAgIJAJmtmKQYj0GsMAoGCCqGSM49BAMCMDwxFDASBgNVBAMM
@@ -212,17 +212,17 @@ AYcECgAAAYcEwKgAATAKBggqhkjOPQQDAgNHADBEAiB5NLOtpWn6xnYAaLKQNqaZ
 jIx4eNBEerJtA2hMqGEQvAIgVDD+NYn6K/B7gNqBi7efvBg0OYdmf0Ij3yPWGWdX
 Cqc=
 -----END CERTIFICATE-----`
-	
+
 	if err := os.WriteFile(keyPath, []byte(key), 0600); err != nil {
 		return err
 	}
-	
+
 	return os.WriteFile(certPath, []byte(cert), 0644)
 }
 
 func createCChainConfig(flags *devFlags) error {
 	config := map[string]interface{}{
-		"linear-api-enabled":       false,
+		"linear-api-enabled":        false,
 		"geth-admin-api-enabled":    true,
 		"eth-apis":                  []string{"eth", "eth-filter", "net", "web3", "admin", "debug", "personal", "txpool", "miner"},
 		"local-txs-enabled":         true,
@@ -233,14 +233,14 @@ func createCChainConfig(flags *devFlags) error {
 		"metrics-enabled":           true,
 		"tx-lookup-limit":           0,
 	}
-	
+
 	if flags.automine {
 		config["dev-mode"] = true
 		config["dev-etherbase"] = flags.accounts[0]
 		config["dev-gas-limit"] = 99999999
 		config["dev-period"] = flags.blockTime
 	}
-	
+
 	configPath := filepath.Join(flags.dataDir, "configs", "chains", "C", "config.json")
 	return writeJSON(configPath, config)
 }
@@ -258,14 +258,14 @@ func createDevGenesis(flags *devFlags) error {
 			"balance": "0x33b2e3c9fd0803ce8000000", // 1000000 ETH in wei
 		}
 	}
-	
+
 	genesis := map[string]interface{}{
 		"networkID": flags.chainID,
 		"allocations": []map[string]interface{}{
 			{
-				"ethAddr":       flags.accounts[0],
-				"luxAddr":      "X-lux1npswupzlgs3kng2q965as2la8rw4787hcn9p7q",
-				"initialAmount": "1000000000000000000000000000",
+				"ethAddr":        flags.accounts[0],
+				"luxAddr":        "X-lux1npswupzlgs3kng2q965as2la8rw4787hcn9p7q",
+				"initialAmount":  "1000000000000000000000000000",
 				"unlockSchedule": []interface{}{},
 			},
 		},
@@ -276,21 +276,21 @@ func createDevGenesis(flags *devFlags) error {
 		"initialStakers":             []interface{}{},
 		"cChainGenesis": map[string]interface{}{
 			"config": map[string]interface{}{
-				"chainId":                      flags.chainID,
-				"homesteadBlock":               0,
-				"eip150Block":                  0,
-				"eip155Block":                  0,
-				"eip158Block":                  0,
-				"byzantiumBlock":               0,
-				"constantinopleBlock":          0,
-				"petersburgBlock":              0,
-				"istanbulBlock":                0,
-				"muirGlacierBlock":             0,
-				"apricotPhase1BlockTimestamp":  0,
-				"apricotPhase2BlockTimestamp":  0,
-				"apricotPhase3BlockTimestamp":  0,
-				"apricotPhase4BlockTimestamp":  0,
-				"apricotPhase5BlockTimestamp":  0,
+				"chainId":                     flags.chainID,
+				"homesteadBlock":              0,
+				"eip150Block":                 0,
+				"eip155Block":                 0,
+				"eip158Block":                 0,
+				"byzantiumBlock":              0,
+				"constantinopleBlock":         0,
+				"petersburgBlock":             0,
+				"istanbulBlock":               0,
+				"muirGlacierBlock":            0,
+				"apricotPhase1BlockTimestamp": 0,
+				"apricotPhase2BlockTimestamp": 0,
+				"apricotPhase3BlockTimestamp": 0,
+				"apricotPhase4BlockTimestamp": 0,
+				"apricotPhase5BlockTimestamp": 0,
 			},
 			"nonce":      "0x0",
 			"timestamp":  "0x0",
@@ -306,7 +306,7 @@ func createDevGenesis(flags *devFlags) error {
 		},
 		"message": "Lux Dev Mode",
 	}
-	
+
 	genesisPath := filepath.Join(flags.dataDir, "genesis.json")
 	return writeJSON(genesisPath, genesis)
 }
@@ -317,7 +317,7 @@ func writeJSON(path string, data interface{}) error {
 		return err
 	}
 	defer file.Close()
-	
+
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(data)

@@ -13,9 +13,9 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/subnet"

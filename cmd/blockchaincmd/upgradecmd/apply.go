@@ -21,11 +21,11 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	ANRclient "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

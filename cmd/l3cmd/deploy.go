@@ -20,12 +20,12 @@ func newDeployCmd() *cobra.Command {
 
 func deployL3(cmd *cobra.Command, args []string) error {
 	l3Name := args[0]
-	
+
 	ux.Logger.PrintToUser("🚀 Deploying L3: %s", l3Name)
 	ux.Logger.PrintToUser("==================")
-	
+
 	// TODO: Implement L3 deployment logic
 	ux.Logger.PrintToUser("✅ L3 deployment initiated")
-	
+
 	return nil
 }

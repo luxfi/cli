@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/cli/sdk/constants"
 	"github.com/luxfi/cli/sdk/utils"
-	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/accounts/abi/bind"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
@@ -24,8 +24,8 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/evm/predicate"
 	subnetEvmUtils "github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/core/types"
+	luxWarp "github.com/luxfi/warp"
 )
 
 const (

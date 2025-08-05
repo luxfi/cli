@@ -31,7 +31,7 @@ const (
 
 var (
 	ErrMutuallyExlusiveKeySource = errors.New("key source flags --key, --ewoq, --ledger/--ledger-addrs are mutually exclusive")
-	ErrEwoqKeyOnTestnetOrMainnet    = errors.New("key source ewoq is not available for mainnet/testnet operations")
+	ErrEwoqKeyOnTestnetOrMainnet = errors.New("key source ewoq is not available for mainnet/testnet operations")
 )
 
 type Keychain struct {

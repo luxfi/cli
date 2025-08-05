@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
@@ -21,7 +22,6 @@ import (
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/version"
-	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

@@ -18,18 +18,18 @@ import (
 )
 
 const (
-	nodeBin = "node"
-	pluginDirName  = "plugins"
-	evmBin         = "evm"
-	buildDirName   = "build"
-	subnetEVMBin   = "evm"
-	readme         = "README.md"
-	license        = "LICENSE"
+	nodeBin       = "node"
+	pluginDirName = "plugins"
+	evmBin        = "evm"
+	buildDirName  = "build"
+	subnetEVMBin  = "evm"
+	readme        = "README.md"
+	license       = "LICENSE"
 
 	nodeBinPrefix = "node-"
 
-	luxTar     = "/tmp/lux.tar.gz"
-	luxZip     = "/tmp/lux.zip"
+	luxTar       = "/tmp/lux.tar.gz"
+	luxZip       = "/tmp/lux.zip"
 	subnetEVMTar = "/tmp/subevm.tar.gz"
 )
 

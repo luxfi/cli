@@ -17,12 +17,12 @@ import (
 )
 
 var (
-	importGenesisPath    string
-	importGenesisType    string
-	importArchivePath    string
-	importDBBackend      string
-	importVerify         bool
-	importBatchSize      uint64
+	importGenesisPath string
+	importGenesisType string
+	importArchivePath string
+	importDBBackend   string
+	importVerify      bool
+	importBatchSize   uint64
 )
 
 func newImportCmd() *cobra.Command {
@@ -82,13 +82,13 @@ func ImportGenesis(*cobra.Command, []string) error {
 
 	// Build node configuration for import
 	nodeConfig := map[string]interface{}{
-		"db-engine":          importDBBackend,
-		"archive-dir":        importArchivePath,
-		"genesis-import":     importGenesisPath,
+		"db-engine":           importDBBackend,
+		"archive-dir":         importArchivePath,
+		"genesis-import":      importGenesisPath,
 		"genesis-import-type": importGenesisType,
-		"genesis-replay":     true,
-		"genesis-verify":     importVerify,
-		"genesis-batch-size": importBatchSize,
+		"genesis-replay":      true,
+		"genesis-verify":      importVerify,
+		"genesis-batch-size":  importBatchSize,
 	}
 
 	nodeConfigBytes, err := json.Marshal(nodeConfig)

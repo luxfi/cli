@@ -46,7 +46,7 @@ func newListCmd() *cobra.Command {
 				if showDeployed && sc.BlockchainID.String() != "" {
 					ux.Logger.PrintToUser("   Blockchain ID: %s", sc.BlockchainID)
 					ux.Logger.PrintToUser("   Status: Deployed")
-					
+
 					// Check which protocols this L1 supports
 					ux.Logger.PrintToUser("   Protocols: Lux")
 					// TODO: Check for Lux compatibility, OP Stack, etc.

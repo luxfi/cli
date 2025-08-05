@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )

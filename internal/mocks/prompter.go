@@ -5,8 +5,8 @@ package mocks
 import (
 	big "math/big"
 
-	ids "github.com/luxfi/node/ids"
 	common "github.com/luxfi/geth/common"
+	ids "github.com/luxfi/node/ids"
 
 	mock "github.com/stretchr/testify/mock"
 

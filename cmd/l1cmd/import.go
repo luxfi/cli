@@ -142,8 +142,8 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 		// Add PoA validator manager
 		genesis["contractConfig"] = map[string]interface{}{
 			"poaValidatorManager": map[string]interface{}{
-				"enabled":              true,
-				"churnPeriodSeconds":   3600,
+				"enabled":                true,
+				"churnPeriodSeconds":     3600,
 				"maximumChurnPercentage": 20,
 			},
 		}
