@@ -174,13 +174,13 @@ func TestGetVersionMapping(t *testing.T) {
 			expected: map[string]string{
 				SoloEVMKey1:      "v0.4.2",
 				SoloEVMKey2:      "v0.4.1",
-				SoloLuxKey:           "v1.9.1",
-				OnlyLuxKey:           OnlyLuxValue,
-				MultiLux1Key:         "v1.9.3",
-				MultiLux2Key:         "v1.9.2",
-				MultiLuxEVMKey: "v0.4.3",
-				LatestEVM2LuxKey:     "v0.4.3",
-				LatestLux2EVMKey:     "v1.9.3",
+				SoloLuxKey:       "v1.9.1",
+				OnlyLuxKey:       OnlyLuxValue,
+				MultiLux1Key:     "v1.9.3",
+				MultiLux2Key:     "v1.9.2",
+				MultiLuxEVMKey:   "v0.4.3",
+				LatestEVM2LuxKey: "v0.4.3",
+				LatestLux2EVMKey: "v1.9.3",
 			},
 			sourceEVM: `{
 						"rpcChainVMProtocolVersion": {
@@ -212,13 +212,13 @@ func TestGetVersionMapping(t *testing.T) {
 			expected: map[string]string{
 				SoloEVMKey1:      "v0.9.9",
 				SoloEVMKey2:      "v0.9.8",
-				SoloLuxKey:           "v2.3.4",
-				OnlyLuxKey:           OnlyLuxValue,
-				MultiLux1Key:         "v2.3.4",
-				MultiLux2Key:         "v2.3.3",
-				MultiLuxEVMKey: "v0.9.9",
-				LatestEVM2LuxKey:     "v0.9.9",
-				LatestLux2EVMKey:     "v2.3.4",
+				SoloLuxKey:       "v2.3.4",
+				OnlyLuxKey:       OnlyLuxValue,
+				MultiLux1Key:     "v2.3.4",
+				MultiLux2Key:     "v2.3.3",
+				MultiLuxEVMKey:   "v0.9.9",
+				LatestEVM2LuxKey: "v0.9.9",
+				LatestLux2EVMKey: "v2.3.4",
 			},
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
@@ -251,13 +251,13 @@ func TestGetVersionMapping(t *testing.T) {
 			expected: map[string]string{
 				SoloEVMKey1:      "v0.4.2",
 				SoloEVMKey2:      "v0.4.1",
-				SoloLuxKey:           "v2.1.1",
-				OnlyLuxKey:           OnlyLuxValue,
-				MultiLux1Key:         "v2.1.1",
-				MultiLux2Key:         "v2.1.0",
-				MultiLuxEVMKey: "v0.4.2",
-				LatestEVM2LuxKey:     "v0.9.9",
-				LatestLux2EVMKey:     "v4.3.2",
+				SoloLuxKey:       "v2.1.1",
+				OnlyLuxKey:       OnlyLuxValue,
+				MultiLux1Key:     "v2.1.1",
+				MultiLux2Key:     "v2.1.0",
+				MultiLuxEVMKey:   "v0.4.2",
+				LatestEVM2LuxKey: "v0.9.9",
+				LatestLux2EVMKey: "v4.3.2",
 			},
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
@@ -299,20 +299,20 @@ func TestGetVersionMapping(t *testing.T) {
 		{
 			// this test should fail, simulating that
 			// the APIs would return empty releases for some reason
-			name:        "all-empty responses",
-			shouldFail:  true,
-			expected:    map[string]string{},
-			sourceEVM:   `{}`,
-			sourceLux: `{}`,
+			name:       "all-empty responses",
+			shouldFail: true,
+			expected:   map[string]string{},
+			sourceEVM:  `{}`,
+			sourceLux:  `{}`,
 		},
 		{
 			// this test should fail, simulating that
 			// the APIs would return empty releases for some reason
 			// but only got sourceEVM versions
-			name:        "only evm",
-			shouldFail:  true,
-			expected:    map[string]string{},
-			sourceLux: `{}`,
+			name:       "only evm",
+			shouldFail: true,
+			expected:   map[string]string{},
+			sourceLux:  `{}`,
 			sourceEVM: `{
 					"rpcChainVMProtocolVersion": {
 						"v1.0.0": 100,

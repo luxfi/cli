@@ -45,12 +45,12 @@ type CreateFlags struct {
 	useTestDefaults               bool
 	useProductionDefaults         bool
 	useWarp                       bool
-	useWarp                        bool
+	useWarp                       bool
 	vmVersion                     string
 	useLatestReleasedVMVersion    bool
 	useLatestPreReleasedVMVersion bool
 	useExternalGasToken           bool
-	addWarpRegistryToGenesis       bool
+	addWarpRegistryToGenesis      bool
 	proofOfStake                  bool
 	proofOfAuthority              bool
 	rewardBasisPoints             uint64
@@ -250,8 +250,8 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 
 	var (
 		genesisBytes        []byte
-		useWarpFlag          *bool
-		deployWarp           bool
+		useWarpFlag         *bool
+		deployWarp          bool
 		useExternalGasToken bool
 	)
 

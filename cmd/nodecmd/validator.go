@@ -26,23 +26,23 @@ import (
 )
 
 type validatorConfig struct {
-	Name         string    `json:"name"`
-	Seed         string    `json:"seed"`
-	Account      int       `json:"account"`
-	HTTPPort     int       `json:"http_port"`
-	StakingPort  int       `json:"staking_port"`
-	Bootstrap    string    `json:"bootstrap"`
-	Group        string    `json:"group"`
-	NetworkID    uint32    `json:"network_id"`
-	Created      time.Time `json:"created"`
+	Name        string    `json:"name"`
+	Seed        string    `json:"seed"`
+	Account     int       `json:"account"`
+	HTTPPort    int       `json:"http_port"`
+	StakingPort int       `json:"staking_port"`
+	Bootstrap   string    `json:"bootstrap"`
+	Group       string    `json:"group"`
+	NetworkID   uint32    `json:"network_id"`
+	Created     time.Time `json:"created"`
 }
 
 type validatorRuntime struct {
-	PID      int       `json:"pid"`
-	Started  time.Time `json:"started"`
-	HTTPUrl  string    `json:"http_url"`
-	RPCUrl   string    `json:"rpc_url"`
-	WSUrl    string    `json:"ws_url"`
+	PID     int       `json:"pid"`
+	Started time.Time `json:"started"`
+	HTTPUrl string    `json:"http_url"`
+	RPCUrl  string    `json:"rpc_url"`
+	WSUrl   string    `json:"ws_url"`
 }
 
 func newValidatorCmd() *cobra.Command {
@@ -209,9 +209,9 @@ func newValidatorRemoveCmd() *cobra.Command {
 	var name string
 
 	cmd := &cobra.Command{
-		Use:   "remove",
-		Short: "Remove a validator configuration",
-		Long:  `Remove a validator configuration and optionally its data.`,
+		Use:     "remove",
+		Short:   "Remove a validator configuration",
+		Long:    `Remove a validator configuration and optionally its data.`,
 		Example: `  lux node validator remove --name mainnet-0`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return removeValidator(name)
@@ -228,9 +228,9 @@ func newValidatorExportCmd() *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "export",
-		Short: "Export validator configurations",
-		Long:  `Export validator configurations to a JSON file for backup or migration.`,
+		Use:     "export",
+		Short:   "Export validator configurations",
+		Long:    `Export validator configurations to a JSON file for backup or migration.`,
 		Example: `  lux node validator export --file validators-backup.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return exportValidators(file)
@@ -246,9 +246,9 @@ func newValidatorImportCmd() *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "import",
-		Short: "Import validator configurations",
-		Long:  `Import validator configurations from a JSON file.`,
+		Use:     "import",
+		Short:   "Import validator configurations",
+		Long:    `Import validator configurations from a JSON file.`,
 		Example: `  lux node validator import --file validators-backup.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return importValidators(file)
@@ -380,18 +380,18 @@ func startSingleValidator(name string) error {
 	configDir := getValidatorConfigDir()
 	valDir := filepath.Join(configDir, name)
 	configFile := filepath.Join(valDir, "config.json")
-	
+
 	// Load configuration
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to read config: %v", err)
 	}
-	
+
 	var config validatorConfig
 	if err := json.Unmarshal(data, &config); err != nil {
 		return fmt.Errorf("failed to parse config: %v", err)
 	}
-	
+
 	// Check if already running
 	pidFile := filepath.Join(valDir, "validator.pid")
 	if data, err := ioutil.ReadFile(pidFile); err == nil {
@@ -402,35 +402,35 @@ func startSingleValidator(name string) error {
 			return nil
 		}
 	}
-	
+
 	// Create data directory
 	dataDir := filepath.Join(valDir, "data")
 	if err := os.MkdirAll(dataDir, 0755); err != nil {
 		return err
 	}
-	
+
 	// Generate staking certificates if not exist
 	stakingDir := filepath.Join(dataDir, "staking")
 	if err := os.MkdirAll(stakingDir, 0755); err != nil {
 		return err
 	}
-	
+
 	stakingKeyPath := filepath.Join(stakingDir, "staker.key")
 	stakingCertPath := filepath.Join(stakingDir, "staker.crt")
-	
+
 	if _, err := os.Stat(stakingKeyPath); os.IsNotExist(err) {
 		// Generate new staking credentials
 		if err := generateStakingCreds(stakingKeyPath, stakingCertPath); err != nil {
 			return fmt.Errorf("failed to generate staking credentials: %v", err)
 		}
 	}
-	
+
 	// Build luxd command
 	luxdPath := filepath.Join(app.GetBaseDir(), "..", "..", "node", "build", "luxd")
 	if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
 		return fmt.Errorf("luxd binary not found at %s", luxdPath)
 	}
-	
+
 	args := []string{
 		"--network-id", fmt.Sprintf("%d", config.NetworkID),
 		"--data-dir", dataDir,
@@ -447,17 +447,17 @@ func startSingleValidator(name string) error {
 		"--index-enabled", "true",
 		"--log-level", "info",
 	}
-	
+
 	// Add bootstrap nodes if provided
 	if config.Bootstrap != "" {
 		args = append(args, "--bootstrap-ips", config.Bootstrap)
 	}
-	
+
 	// Set environment variables for wallet
 	env := os.Environ()
 	env = append(env, fmt.Sprintf("WALLET_SEED=%s", config.Seed))
 	env = append(env, fmt.Sprintf("WALLET_ACCOUNT=%d", config.Account))
-	
+
 	// Create log file
 	logFile := filepath.Join(valDir, "validator.log")
 	log, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -465,47 +465,47 @@ func startSingleValidator(name string) error {
 		return err
 	}
 	defer log.Close()
-	
+
 	// Start the process
 	cmd := exec.Command(luxdPath, args...)
 	cmd.Env = env
 	cmd.Stdout = log
 	cmd.Stderr = log
-	
+
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start luxd: %v", err)
 	}
-	
+
 	// Save PID
 	if err := ioutil.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0644); err != nil {
 		cmd.Process.Kill()
 		return err
 	}
-	
+
 	// Save runtime info
 	runtime := validatorRuntime{
-		PID:      cmd.Process.Pid,
-		Started:  time.Now(),
-		HTTPUrl:  fmt.Sprintf("http://localhost:%d", config.HTTPPort),
-		RPCUrl:   fmt.Sprintf("http://localhost:%d/ext/bc/C/rpc", config.HTTPPort),
-		WSUrl:    fmt.Sprintf("ws://localhost:%d/ext/bc/C/ws", config.HTTPPort),
+		PID:     cmd.Process.Pid,
+		Started: time.Now(),
+		HTTPUrl: fmt.Sprintf("http://localhost:%d", config.HTTPPort),
+		RPCUrl:  fmt.Sprintf("http://localhost:%d/ext/bc/C/rpc", config.HTTPPort),
+		WSUrl:   fmt.Sprintf("ws://localhost:%d/ext/bc/C/ws", config.HTTPPort),
 	}
-	
+
 	runtimeData, _ := json.MarshalIndent(runtime, "", "  ")
 	ioutil.WriteFile(filepath.Join(valDir, "runtime.json"), runtimeData, 0644)
-	
+
 	ux.Logger.PrintToUser("Started validator %s", name)
 	ux.Logger.PrintToUser("  PID: %d", cmd.Process.Pid)
 	ux.Logger.PrintToUser("  HTTP: %s", runtime.HTTPUrl)
 	ux.Logger.PrintToUser("  RPC: %s", runtime.RPCUrl)
 	ux.Logger.PrintToUser("  Logs: %s", logFile)
-	
+
 	return nil
 }
 
 func stopValidator(name, group string) error {
 	configDir := getValidatorConfigDir()
-	
+
 	if group != "" && name == "" {
 		// Stop all validators in group
 		ux.Logger.PrintToUser("Stopping validators in group: %s", group)
@@ -529,7 +529,7 @@ func stopValidator(name, group string) error {
 		ux.Logger.PrintToUser("Stopped %d validators in group %s", count, group)
 		return nil
 	}
-	
+
 	// Stop single validator
 	return stopSingleValidator(name)
 }
@@ -537,29 +537,29 @@ func stopValidator(name, group string) error {
 func stopSingleValidator(name string) error {
 	configDir := getValidatorConfigDir()
 	pidFile := filepath.Join(configDir, name, "validator.pid")
-	
+
 	data, err := ioutil.ReadFile(pidFile)
 	if err != nil {
 		return fmt.Errorf("validator %s is not running", name)
 	}
-	
+
 	pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
 	if err != nil {
 		return fmt.Errorf("invalid PID in %s", pidFile)
 	}
-	
+
 	// Check if process exists
 	if err := syscall.Kill(pid, 0); err != nil {
 		// Process doesn't exist, clean up PID file
 		os.Remove(pidFile)
 		return fmt.Errorf("validator %s is not running (stale PID file)", name)
 	}
-	
+
 	// Send SIGTERM
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
 		return fmt.Errorf("failed to stop validator: %v", err)
 	}
-	
+
 	// Wait for process to exit (up to 10 seconds)
 	for i := 0; i < 10; i++ {
 		if err := syscall.Kill(pid, 0); err != nil {
@@ -568,25 +568,25 @@ func stopSingleValidator(name string) error {
 		}
 		time.Sleep(time.Second)
 	}
-	
+
 	// Clean up files
 	os.Remove(pidFile)
 	os.Remove(filepath.Join(configDir, name, "runtime.json"))
-	
+
 	ux.Logger.PrintToUser("Stopped validator %s (PID: %d)", name, pid)
 	return nil
 }
 
 func checkValidatorStatus(name string) error {
 	configDir := getValidatorConfigDir()
-	
+
 	// If no name specified, show all validators
 	if name == "" {
 		entries, err := ioutil.ReadDir(configDir)
 		if err != nil {
 			return err
 		}
-		
+
 		ux.Logger.PrintToUser("=== Validator Status ===")
 		for _, entry := range entries {
 			if entry.IsDir() {
@@ -595,7 +595,7 @@ func checkValidatorStatus(name string) error {
 		}
 		return nil
 	}
-	
+
 	// Show specific validator
 	return showValidatorStatus(name)
 }
@@ -603,7 +603,7 @@ func checkValidatorStatus(name string) error {
 func showValidatorStatus(name string) error {
 	configDir := getValidatorConfigDir()
 	valDir := filepath.Join(configDir, name)
-	
+
 	// Load config
 	configFile := filepath.Join(valDir, "config.json")
 	data, err := ioutil.ReadFile(configFile)
@@ -611,19 +611,19 @@ func showValidatorStatus(name string) error {
 		ux.Logger.PrintToUser("  %s: Not configured", name)
 		return nil
 	}
-	
+
 	var config validatorConfig
 	if err := json.Unmarshal(data, &config); err != nil {
 		return err
 	}
-	
+
 	// Check if running
 	pidFile := filepath.Join(valDir, "validator.pid")
 	runtimeFile := filepath.Join(valDir, "runtime.json")
-	
+
 	if pidData, err := ioutil.ReadFile(pidFile); err == nil {
 		pid, _ := strconv.Atoi(strings.TrimSpace(string(pidData)))
-		
+
 		// Check if process is still running
 		if err := syscall.Kill(pid, 0); err == nil {
 			// Running - load runtime info
@@ -631,7 +631,7 @@ func showValidatorStatus(name string) error {
 			if rtData, err := ioutil.ReadFile(runtimeFile); err == nil {
 				json.Unmarshal(rtData, &runtime)
 			}
-			
+
 			// Try to check health
 			healthStatus := "Unknown"
 			resp, err := http.Get(fmt.Sprintf("http://localhost:%d/ext/health", config.HTTPPort))
@@ -646,7 +646,7 @@ func showValidatorStatus(name string) error {
 					}
 				}
 			}
-			
+
 			ux.Logger.PrintToUser("\n%s:", name)
 			ux.Logger.PrintToUser("  Status: Running")
 			ux.Logger.PrintToUser("  PID: %d", pid)
@@ -668,21 +668,21 @@ func showValidatorStatus(name string) error {
 		ux.Logger.PrintToUser("  Group: %s", config.Group)
 		ux.Logger.PrintToUser("  HTTP Port: %d", config.HTTPPort)
 	}
-	
+
 	return nil
 }
 
 func listValidators() error {
 	configDir := getValidatorConfigDir()
-	
+
 	// Group validators by group
 	groups := make(map[string][]validatorConfig)
-	
+
 	entries, err := ioutil.ReadDir(configDir)
 	if err != nil {
 		return err
 	}
-	
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			configFile := filepath.Join(configDir, entry.Name(), "config.json")
@@ -694,7 +694,7 @@ func listValidators() error {
 			}
 		}
 	}
-	
+
 	ux.Logger.PrintToUser("=== Configured Validators ===")
 	for group, validators := range groups {
 		ux.Logger.PrintToUser("\nGroup: %s", group)
@@ -702,19 +702,19 @@ func listValidators() error {
 			ux.Logger.PrintToUser("  - %s (account: %d, port: %d)", val.Name, val.Account, val.HTTPPort)
 		}
 	}
-	
+
 	return nil
 }
 
 func removeValidator(name string) error {
 	configDir := getValidatorConfigDir()
 	valDir := filepath.Join(configDir, name)
-	
+
 	// Check if validator exists
 	if _, err := os.Stat(valDir); os.IsNotExist(err) {
 		return fmt.Errorf("validator %s does not exist", name)
 	}
-	
+
 	// Check if running
 	pidFile := filepath.Join(valDir, "validator.pid")
 	if data, err := ioutil.ReadFile(pidFile); err == nil {
@@ -723,27 +723,27 @@ func removeValidator(name string) error {
 			return fmt.Errorf("validator %s is still running - stop it first", name)
 		}
 	}
-	
+
 	// Remove directory
 	if err := os.RemoveAll(valDir); err != nil {
 		return fmt.Errorf("failed to remove validator: %v", err)
 	}
-	
+
 	ux.Logger.PrintToUser("Removed validator %s", name)
 	return nil
 }
 
 func exportValidators(file string) error {
 	configDir := getValidatorConfigDir()
-	
+
 	// Collect all validator configs
 	var validators []validatorConfig
-	
+
 	entries, err := ioutil.ReadDir(configDir)
 	if err != nil {
 		return err
 	}
-	
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			configFile := filepath.Join(configDir, entry.Name(), "config.json")
@@ -755,17 +755,17 @@ func exportValidators(file string) error {
 			}
 		}
 	}
-	
+
 	// Write to file
 	data, err := json.MarshalIndent(validators, "", "  ")
 	if err != nil {
 		return err
 	}
-	
+
 	if err := ioutil.WriteFile(file, data, 0644); err != nil {
 		return err
 	}
-	
+
 	ux.Logger.PrintToUser("Exported %d validators to %s", len(validators), file)
 	return nil
 }
@@ -776,12 +776,12 @@ func importValidators(file string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
 	}
-	
+
 	var validators []validatorConfig
 	if err := json.Unmarshal(data, &validators); err != nil {
 		return fmt.Errorf("failed to parse JSON: %v", err)
 	}
-	
+
 	imported := 0
 	for _, val := range validators {
 		if err := addValidator(val.Name, val.Seed, val.Account, val.HTTPPort, val.StakingPort, val.Bootstrap, val.Group, val.NetworkID); err != nil {
@@ -790,7 +790,7 @@ func importValidators(file string) error {
 			imported++
 		}
 	}
-	
+
 	ux.Logger.PrintToUser("Imported %d validators from %s", imported, file)
 	return nil
 }
@@ -802,7 +802,7 @@ func generateStakingCreds(keyPath, certPath string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Create certificate template
 	template := x509.Certificate{
 		SerialNumber: big.NewInt(1),
@@ -820,45 +820,45 @@ func generateStakingCreds(keyPath, certPath string) error {
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
 	}
-	
+
 	// Create the certificate
 	certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 	if err != nil {
 		return err
 	}
-	
+
 	// Write key
 	keyOut, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
 	defer keyOut.Close()
-	
+
 	privKeyBytes, err := x509.MarshalPKCS8PrivateKey(priv)
 	if err != nil {
 		return err
 	}
-	
+
 	if err := pem.Encode(keyOut, &pem.Block{
 		Type:  "PRIVATE KEY",
 		Bytes: privKeyBytes,
 	}); err != nil {
 		return err
 	}
-	
+
 	// Write certificate
 	certOut, err := os.Create(certPath)
 	if err != nil {
 		return err
 	}
 	defer certOut.Close()
-	
+
 	if err := pem.Encode(certOut, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: certBytes,
 	}); err != nil {
 		return err
 	}
-	
+
 	return nil
 }

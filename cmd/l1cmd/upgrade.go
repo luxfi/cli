@@ -63,26 +63,26 @@ Common upgrades:
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			l1Name := args[0]
-			
+
 			sc, err := app.LoadSidecar(l1Name)
 			if err != nil {
 				return err
 			}
 
 			ux.Logger.PrintToUser("Current validator management: %s", sc.ValidatorManagement)
-			
+
 			if sc.ValidatorManagement == "proof-of-authority" {
 				ux.Logger.PrintToUser("\n🔄 Available upgrades:")
 				ux.Logger.PrintToUser("1. Migrate to Proof of Stake")
 				ux.Logger.PrintToUser("   - Enable permissionless validation")
 				ux.Logger.PrintToUser("   - Implement token staking")
 				ux.Logger.PrintToUser("   - Add delegation support")
-				
+
 				migrate, err := app.Prompt.CaptureYesNo("Migrate to Proof of Stake?")
 				if err != nil {
 					return err
 				}
-				
+
 				if migrate {
 					ux.Logger.PrintToUser("\n📋 PoS Migration Parameters:")
 					// TODO: Capture PoS parameters and implement migration
@@ -106,14 +106,14 @@ func newUpgradeProtocolCmd() *cobra.Command {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_ = args[0] // l1Name already defined
-			
+
 			protocols := []string{
 				"Lux Compatibility",
 				"OP Stack Support",
 				"Cosmos IBC",
 				"Ethereum Bridge",
 			}
-			
+
 			choice, err := app.Prompt.CaptureList(
 				"Choose protocol to add",
 				protocols,
@@ -130,7 +130,7 @@ func newUpgradeProtocolCmd() *cobra.Command {
 				ux.Logger.PrintToUser("- Support Lux Warp messaging")
 				ux.Logger.PrintToUser("- Bridge with Lux C-Chain")
 				// TODO: Implement
-				
+
 			case "OP Stack Support":
 				ux.Logger.PrintToUser("\n🟦 Enabling OP Stack support...")
 				ux.Logger.PrintToUser("This allows your L1 to:")

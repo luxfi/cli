@@ -34,16 +34,16 @@ type Subnet struct {
 }
 
 type VM struct {
-	ID           string
-	Alias        string
-	VMType       string
-	Binary       string
-	ChainConfig  string
-	Subnet       string
-	Genesis      string
-	Version      string
-	URL          string
-	Checksum     string
-	Runtime      string
-	Description  string
+	ID          string
+	Alias       string
+	VMType      string
+	Binary      string
+	ChainConfig string
+	Subnet      string
+	Genesis     string
+	Version     string
+	URL         string
+	Checksum    string
+	Runtime     string
+	Description string
 }

@@ -138,9 +138,9 @@ func createL1(cmd *cobra.Command, args []string) error {
 		// PoA configuration
 		genesis["contractConfig"] = map[string]interface{}{
 			"poaValidatorManager": map[string]interface{}{
-				"enabled":              true,
-				"churnPeriodSeconds":   3600,  // 1 hour
-				"maximumChurnPercentage": 20,  // 20% max churn
+				"enabled":                true,
+				"churnPeriodSeconds":     3600, // 1 hour
+				"maximumChurnPercentage": 20,   // 20% max churn
 			},
 		}
 		ux.Logger.PrintToUser("Configured Proof of Authority validator management")
@@ -148,13 +148,13 @@ func createL1(cmd *cobra.Command, args []string) error {
 		// PoS configuration
 		genesis["contractConfig"] = map[string]interface{}{
 			"nativeTokenStakingManager": map[string]interface{}{
-				"enabled":                true,
-				"minimumStakeAmount":     "1000000000000000000", // 1 token
-				"maximumStakeAmount":     "1000000000000000000000000", // 1M tokens
-				"minimumStakeDuration":   86400, // 1 day
-				"minimumDelegationFeeBips": 100, // 1%
-				"maximumStakeMultiplier": 10,
-				"weightToValueFactor":    1,
+				"enabled":                  true,
+				"minimumStakeAmount":       "1000000000000000000",       // 1 token
+				"maximumStakeAmount":       "1000000000000000000000000", // 1M tokens
+				"minimumStakeDuration":     86400,                       // 1 day
+				"minimumDelegationFeeBips": 100,                         // 1%
+				"maximumStakeMultiplier":   10,
+				"weightToValueFactor":      1,
 			},
 		}
 		ux.Logger.PrintToUser("Configured Proof of Stake validator management")

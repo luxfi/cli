@@ -3,8 +3,8 @@
 package models
 
 import (
-	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/netrunner/utils"
 )
 
 type TokenInfo struct {
@@ -48,30 +48,30 @@ type Sidecar struct {
 	ElasticSubnet   map[string]ElasticSubnet
 	ImportedFromLPM bool
 	ImportedVMID    string
-	
+
 	// L1/L2 Architecture (2025)
-	Sovereign       bool   `json:"sovereign"`        // true for L1, false for L2/subnet
-	BaseChain       string `json:"baseChain"`        // For L2s: ethereum, lux-l1, lux, op-mainnet
-	BasedRollup     bool   `json:"basedRollup"`      // true for L1-sequenced rollups
-	SequencerType   string `json:"sequencerType"`    // based, centralized, distributed
-	
+	Sovereign     bool   `json:"sovereign"`     // true for L1, false for L2/subnet
+	BaseChain     string `json:"baseChain"`     // For L2s: ethereum, lux-l1, lux, op-mainnet
+	BasedRollup   bool   `json:"basedRollup"`   // true for L1-sequenced rollups
+	SequencerType string `json:"sequencerType"` // based, centralized, distributed
+
 	// Based Rollup Configuration
-	InboxContract   string `json:"inboxContract"`    // Contract on base chain
-	L1BlockTime     int    `json:"l1BlockTime"`      // Base chain block time in ms
-	PreconfirmEnabled bool `json:"preconfirmEnabled"` // Fast confirmations
-	
+	InboxContract     string `json:"inboxContract"`     // Contract on base chain
+	L1BlockTime       int    `json:"l1BlockTime"`       // Base chain block time in ms
+	PreconfirmEnabled bool   `json:"preconfirmEnabled"` // Fast confirmations
+
 	// Token & Economics
-	TokenInfo       TokenInfo `json:"tokenInfo"`
-	RentalPlan      string    `json:"rentalPlan"`      // For L1s: monthly, annual, perpetual
-	
+	TokenInfo  TokenInfo `json:"tokenInfo"`
+	RentalPlan string    `json:"rentalPlan"` // For L1s: monthly, annual, perpetual
+
 	// Validator Management
 	ValidatorManagement string `json:"validatorManagement"` // proof-of-authority, proof-of-stake
-	
+
 	// Migration info
-	MigratedAt      int64  `json:"migratedAt"`      // When subnet became L1
-	
+	MigratedAt int64 `json:"migratedAt"` // When subnet became L1
+
 	// Chain layer (1=L1, 2=L2, 3=L3)
-	ChainLayer      int    `json:"chainLayer"`      // Default 2 for backward compat
+	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
 }
 
 func (sc Sidecar) GetVMID() (string, error) {

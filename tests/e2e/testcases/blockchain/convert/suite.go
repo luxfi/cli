@@ -41,7 +41,7 @@ var _ = ginkgo.Describe("[Blockchain Convert]", ginkgo.Ordered, func() {
 			"evm":               true,
 			"evm-token":         "TOK",
 			"sovereign":         false,
-			"warp":               false,
+			"warp":              false,
 			"skip-update-check": true,
 			"genesis":           utils.SubnetEvmGenesisPoaPath,
 		}

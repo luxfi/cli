@@ -69,13 +69,13 @@ var (
 	skipCreatePrompt       bool
 	partialSync            bool
 	subnetOnly             bool
-	warpSpec                subnet.WarpSpec
+	warpSpec               subnet.WarpSpec
 	numNodes               uint32
 	relayerAmount          float64
 	relayerKeyName         string
 	relayCChain            bool
 	cChainFundingKey       string
-	warpKeyName             string
+	warpKeyName            string
 	cchainIcmKeyName       string
 	relayerAllowPrivateIPs bool
 
@@ -599,7 +599,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			networkcmd.StartFlags{
 				UserProvidedLuxdVersion: luxdVersion,
 				LuxdBinaryPath:          deployFlags.LocalMachineFlags.LuxdBinaryPath,
-				NumNodes:                 numNodes,
+				NumNodes:                numNodes,
 			},
 			false,
 		); err != nil {

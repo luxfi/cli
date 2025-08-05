@@ -96,7 +96,7 @@ func NetworkOptionFromString(s string) NetworkOption {
 type NetworkFlags struct {
 	UseLocal    bool
 	UseDevnet   bool
-	UseTestnet     bool
+	UseTestnet  bool
 	UseMainnet  bool
 	Endpoint    string
 	ClusterName string
@@ -273,7 +273,7 @@ func GetNetworkFromCmdLineFlags(
 	networkFlagsMap := map[NetworkOption]string{
 		Local:   "--local",
 		Devnet:  "--devnet",
-		Testnet:    "--testnet/--testnet",
+		Testnet: "--testnet/--testnet",
 		Mainnet: "--mainnet",
 		Cluster: "--cluster",
 	}

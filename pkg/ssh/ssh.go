@@ -33,7 +33,7 @@ import (
 )
 
 type scriptInputs struct {
-	LuxdVersion      string
+	LuxdVersion             string
 	SubnetExportFileName    string
 	SubnetName              string
 	ClusterName             string
@@ -189,12 +189,12 @@ func RunSSHUpgradeLuxgo(host *models.Host, luxdVersion string) error {
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
 		docker.DockerComposeInputs{
-			LuxgoVersion: luxdVersion,
-			WithMonitoring:     withMonitoring,
-			WithLuxgo:    true,
-			E2E:                utils.IsE2E(),
-			E2EIP:              utils.E2EConvertIP(host.IP),
-			E2ESuffix:          utils.E2ESuffix(host.IP),
+			LuxgoVersion:   luxdVersion,
+			WithMonitoring: withMonitoring,
+			WithLuxgo:      true,
+			E2E:            utils.IsE2E(),
+			E2EIP:          utils.E2EConvertIP(host.IP),
+			E2ESuffix:      utils.E2ESuffix(host.IP),
 		}); err != nil {
 		return err
 	}

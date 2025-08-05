@@ -21,14 +21,14 @@ import (
 const (
 	futureDeployment  = "Update config for future deployments"
 	localDeployment   = "Existing local deployment"
-	testnetDeployment    = "Testnet"
+	testnetDeployment = "Testnet"
 	mainnetDeployment = "Mainnet"
 )
 
 var (
 	pluginDir string
 
-	useTestnet       bool
+	useTestnet    bool
 	useMainnet    bool
 	useLocal      bool
 	useConfig     bool

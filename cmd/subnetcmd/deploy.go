@@ -23,14 +23,14 @@ import (
 	utilspkg "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/crypto/keychain"
-	ledger "github.com/luxfi/ledger-lux-go"
-	"github.com/luxfi/node/utils/formatting/address"
-	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/ids"
+	ledger "github.com/luxfi/ledger-lux-go"
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -40,19 +40,19 @@ import (
 const numLedgerAddressesToSearch = 1000
 
 var (
-	deployLocal              bool
-	deployTestnet            bool
-	deployMainnet            bool
-	sameControlKey           bool
-	keyName                  string
-	threshold                uint32
-	controlKeys              []string
-	subnetAuthKeys           []string
+	deployLocal            bool
+	deployTestnet          bool
+	deployMainnet          bool
+	sameControlKey         bool
+	keyName                string
+	threshold              uint32
+	controlKeys            []string
+	subnetAuthKeys         []string
 	userProvidedLuxVersion string
-	outputTxPath             string
-	useLedger                bool
-	ledgerAddresses          []string
-	subnetIDStr              string
+	outputTxPath           string
+	useLedger              bool
+	ledgerAddresses        []string
+	subnetIDStr            string
 
 	errMutuallyExlusiveNetworks    = errors.New("--local, --testnet (resp. --testnet) and --mainnet are mutually exclusive")
 	errMutuallyExlusiveControlKeys = errors.New("--control-keys and --same-control-key are mutually exclusive")

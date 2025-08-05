@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"runtime"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/cmd"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/models"
@@ -16,7 +17,6 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/ethereum/go-ethereum/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -54,7 +54,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	blockchainCmdArgs := []string{subnetName}
 	globalFlags := utils.GlobalFlags{
 		"local":             true,
-		"skip-warp-deploy":   true,
+		"skip-warp-deploy":  true,
 		"skip-update-check": true,
 	}
 	ginkgo.It("HAPPY PATH: local deploy default", func() {

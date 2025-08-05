@@ -44,9 +44,9 @@ This allows a single node to validate across multiple blockchain ecosystems.`,
 
 func newValidatorAddCmd() *cobra.Command {
 	var (
-		nodeID       string
-		weight       uint64
-		protocol     string
+		nodeID        string
+		weight        uint64
+		protocol      string
 		validatorType string
 	)
 
@@ -62,9 +62,9 @@ The validator can be added to:
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			l1Name := args[0]
-			
+
 			ux.Logger.PrintToUser("Adding validator to L1: %s", l1Name)
-			
+
 			// Load L1 configuration
 			sc, err := app.LoadSidecar(l1Name)
 			if err != nil {
@@ -82,7 +82,7 @@ The validator can be added to:
 			ux.Logger.PrintToUser("✅ Validator configuration prepared")
 			ux.Logger.PrintToUser("   Node ID: %s", nodeID)
 			ux.Logger.PrintToUser("   Protocol: %s", protocol)
-			
+
 			return nil
 		},
 	}

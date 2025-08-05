@@ -45,33 +45,33 @@ const (
 )
 
 var (
-	globalNetworkFlags                    networkoptions.NetworkFlags
-	useAWS                                bool
-	useGCP                                bool
-	cmdLineRegion                         []string
-	authorizeAccess                       bool
-	numValidatorsNodes                    []int
-	nodeType                              string
-	existingSeparateInstance              string
-	existingMonitoringInstance            string
+	globalNetworkFlags              networkoptions.NetworkFlags
+	useAWS                          bool
+	useGCP                          bool
+	cmdLineRegion                   []string
+	authorizeAccess                 bool
+	numValidatorsNodes              []int
+	nodeType                        string
+	existingSeparateInstance        string
+	existingMonitoringInstance      string
 	useLatestLuxgoReleaseVersion    bool
 	useLatestLuxgoPreReleaseVersion bool
 	useCustomLuxgoVersion           string
 	useLuxgoVersionFromSubnet       string
-	cmdLineGCPCredentialsPath             string
-	cmdLineGCPProjectName                 string
-	cmdLineAlternativeKeyPairName         string
-	addMonitoring                         bool
-	useSSHAgent                           bool
-	sshIdentity                           string
-	numAPINodes                           []int
-	throughput                            int
-	iops                                  int
-	volumeType                            string
-	volumeSize                            int
-	grafanaPkg                            string
-	wizSubnet                             string
-	publicHTTPPortAccess                  bool
+	cmdLineGCPCredentialsPath       string
+	cmdLineGCPProjectName           string
+	cmdLineAlternativeKeyPairName   string
+	addMonitoring                   bool
+	useSSHAgent                     bool
+	sshIdentity                     string
+	numAPINodes                     []int
+	throughput                      int
+	iops                            int
+	volumeType                      string
+	volumeSize                      int
+	grafanaPkg                      string
+	wizSubnet                       string
+	publicHTTPPortAccess            bool
 )
 
 func newCreateCmd() *cobra.Command {

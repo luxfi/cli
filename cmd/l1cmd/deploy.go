@@ -125,7 +125,7 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 
 	// Deploy L1
 	ux.Logger.PrintToUser("Creating L1 blockchain...")
-	
+
 	// If using existing data, restore it
 	if useExisting && sc.BlockchainID.String() != "" {
 		ux.Logger.PrintToUser("Restoring blockchain state from existing data...")

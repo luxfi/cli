@@ -9,11 +9,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/kardianos/osext"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/config"
 	luxlog "github.com/luxfi/log"
-	"github.com/kardianos/osext"
+	"github.com/luxfi/node/config"
 	"github.com/shirou/gopsutil/process"
 )
 

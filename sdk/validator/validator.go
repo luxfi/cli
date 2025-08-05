@@ -28,8 +28,8 @@ const (
 // To enable querying validation IDs from P-Chain
 type CurrentValidatorInfo struct {
 	Weight       luxdjson.Uint64 `json:"weight"`
-	NodeID       ids.NodeID             `json:"nodeID"`
-	ValidationID ids.ID                 `json:"validationID"`
+	NodeID       ids.NodeID      `json:"nodeID"`
+	ValidationID ids.ID          `json:"validationID"`
 	Balance      luxdjson.Uint64 `json:"balance"`
 }
 

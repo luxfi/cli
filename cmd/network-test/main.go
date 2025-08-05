@@ -3,7 +3,7 @@ package main
 
 import (
 	"os"
-	
+
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/application"
 )

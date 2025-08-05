@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	l2Base         string
-	vmType         string
-	preconfirm     bool
-	daLayer        string
+	l2Base     string
+	vmType     string
+	preconfirm bool
+	daLayer    string
 )
 
 func newCreateCmd() *cobra.Command {
@@ -90,13 +90,13 @@ func createL3(cmd *cobra.Command, args []string) error {
 		Name:    l3Name,
 		Subnet:  l3Name,
 		Version: "2.0.0",
-		
+
 		// L3 specific
-		Sovereign:      false, // L3s are never sovereign
-		BaseChain:      l2Base,
-		SequencerType:  "inherit", // Inherits from L2
+		Sovereign:         false, // L3s are never sovereign
+		BaseChain:         l2Base,
+		SequencerType:     "inherit", // Inherits from L2
 		PreconfirmEnabled: preconfirm,
-		
+
 		// Layer identifier
 		ChainLayer: 3,
 	}
@@ -105,12 +105,12 @@ func createL3(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("\n💰 Token Configuration")
 	tokenName, _ := app.Prompt.CaptureString("Token name")
 	tokenSymbol, _ := app.Prompt.CaptureString("Token symbol")
-	
+
 	sc.TokenInfo = models.TokenInfo{
-		Name:   tokenName,
-		Symbol: tokenSymbol,
+		Name:     tokenName,
+		Symbol:   tokenSymbol,
 		Decimals: 18,
-		Supply: "0",
+		Supply:   "0",
 	}
 
 	// Save configuration
@@ -127,7 +127,7 @@ func createL3(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   VM Type: %s", vmType)
 	ux.Logger.PrintToUser("   Token: %s (%s)", tokenName, tokenSymbol)
 	ux.Logger.PrintToUser("   Pre-confirmations: %v", preconfirm)
-	
+
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("💡 Next steps:")
 	ux.Logger.PrintToUser("   1. Deploy: lux l3 deploy %s", l3Name)

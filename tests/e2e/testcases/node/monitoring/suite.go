@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	luxdVersion = "v1.10.18"
+	luxdVersion        = "v1.10.18"
 	network            = "testnet"
 	networkCapitalized = "Testnet"
 	numNodes           = 2

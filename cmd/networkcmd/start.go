@@ -24,14 +24,14 @@ import (
 
 var (
 	userProvidedLuxVersion string
-	snapshotName             string
-	mainnet                  bool
-	testnet                  bool
+	snapshotName           string
+	mainnet                bool
+	testnet                bool
 	// BadgerDB flags
-	dbEngine       string
-	archiveDir     string
-	archiveShared  bool
-	genesisImport  string
+	dbEngine      string
+	archiveDir    string
+	archiveShared bool
+	genesisImport string
 )
 
 const latest = "latest"
@@ -126,7 +126,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Build node config with BadgerDB options
 	nodeConfig := make(map[string]interface{})
 	if configStr != "" {
@@ -134,7 +134,7 @@ func StartNetwork(*cobra.Command, []string) error {
 			return fmt.Errorf("invalid node config: %w", err)
 		}
 	}
-	
+
 	// Add BadgerDB configuration if specified
 	if dbEngine != "" {
 		nodeConfig["db-engine"] = dbEngine
@@ -148,7 +148,7 @@ func StartNetwork(*cobra.Command, []string) error {
 		nodeConfig["genesis-replay"] = true
 		nodeConfig["genesis-verify"] = true
 	}
-	
+
 	// Convert back to JSON
 	if len(nodeConfig) > 0 {
 		updatedConfigBytes, err := json.Marshal(nodeConfig)
@@ -252,37 +252,37 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 // StartMainnet starts a mainnet network with 21 validator nodes
 func StartMainnet() error {
 	ux.Logger.PrintToUser("Starting Lux mainnet with 21 validator nodes...")
-	
+
 	// Check if local luxd binary exists
 	localLuxdPath := "/home/z/work/lux/node/build/luxd"
 	if _, err := os.Stat(localLuxdPath); os.IsNotExist(err) {
 		return fmt.Errorf("luxd binary not found at %s. Please run 'make build-node' first", localLuxdPath)
 	}
-	
+
 	// Use local binary instead of downloading
 	sd := subnet.NewLocalDeployer(app, "", "")
-	
+
 	// Start netrunner server
 	if err := sd.StartServer(); err != nil {
 		return err
 	}
-	
+
 	// Use local binary path
 	nodeBinPath := localLuxdPath
-	
+
 	// Get gRPC client
 	cli, err := binutils.NewGRPCClient()
 	if err != nil {
 		return err
 	}
-	
+
 	// Historic chaindata setup
 	historicChainData := "/home/z/work/lux/mainnet-data/chainData/C/db"
 	if _, err := os.Stat(historicChainData); err == nil {
 		ux.Logger.PrintToUser("Found historic C-Chain data at %s", historicChainData)
 		// Copy to first validator's data directory will be handled post-launch
 	}
-	
+
 	// Build mainnet configuration with proper consensus parameters
 	globalNodeConfig := `{
 		"network-id": "96369",
@@ -313,11 +313,11 @@ func StartMainnet() error {
 		"stake-minting-period": 31536000,
 		"log-level": "info"
 	}`
-	
+
 	// Prepare chain configs with genesis files
 	chainConfigs := map[string]string{}
 	genesisPath := "/home/z/work/lux/genesis/configs/mainnet"
-	
+
 	// Read genesis files and add to chain configs
 	for _, chain := range []string{"C", "P", "X"} {
 		genesisFile := fmt.Sprintf("%s/%s/genesis.json", genesisPath, chain)
@@ -327,10 +327,10 @@ func StartMainnet() error {
 			ux.Logger.PrintToUser("Warning: Could not read %s genesis file: %v", chain, err)
 		}
 	}
-	
+
 	// Build start options
 	rootDataDir := path.Join(app.GetRunDir(), "mainnet-"+time.Now().Format("20060102-150405"))
-	
+
 	opts := []client.OpOption{
 		client.WithExecPath(nodeBinPath),
 		client.WithNumNodes(21),
@@ -340,30 +340,30 @@ func StartMainnet() error {
 		client.WithDynamicPorts(false), // Use fixed ports starting from 9630
 		client.WithChainConfigs(chainConfigs),
 	}
-	
+
 	// Add plugin directory if it exists
 	pluginDir := path.Join(app.GetPluginsDir(), "evm")
 	if _, err := os.Stat(pluginDir); err == nil {
 		opts = append(opts, client.WithPluginDir(pluginDir))
 	}
-	
+
 	ctx := binutils.GetAsyncContext()
-	
+
 	ux.Logger.PrintToUser("Starting network with 21 validators...")
 	ux.Logger.PrintToUser("Network ID: 96369")
 	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
-	
+
 	// Start the network
 	startResp, err := cli.Start(ctx, path.Join(rootDataDir, "netrunner.log"), opts...)
 	if err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
-	
+
 	// Wait for healthy network
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
 	healthCheckStart := time.Now()
 	healthy := false
-	
+
 	for !healthy && time.Since(healthCheckStart) < 5*time.Minute {
 		statusResp, err := cli.Status(ctx)
 		if err == nil && statusResp != nil && statusResp.ClusterInfo != nil {
@@ -376,18 +376,18 @@ func StartMainnet() error {
 		}
 		time.Sleep(5 * time.Second)
 	}
-	
+
 	if !healthy {
 		return fmt.Errorf("network failed to become healthy after 5 minutes")
 	}
-	
+
 	// Copy historic chaindata to first validator
 	if _, err := os.Stat(historicChainData); err == nil && len(startResp.ClusterInfo.NodeNames) > 0 {
 		firstNodeName := startResp.ClusterInfo.NodeNames[0]
 		if firstNodeInfo, ok := startResp.ClusterInfo.NodeInfos[firstNodeName]; ok && firstNodeInfo != nil {
 			firstNodeDataDir := firstNodeInfo.DbDir
 			targetCChainDir := path.Join(firstNodeDataDir, "C")
-			
+
 			if _, err := os.Stat(targetCChainDir); os.IsNotExist(err) {
 				ux.Logger.PrintToUser("Copying historic C-Chain data to first validator...")
 				cmd := exec.Command("cp", "-r", historicChainData, targetCChainDir)
@@ -399,34 +399,34 @@ func StartMainnet() error {
 			}
 		}
 	}
-	
+
 	// Display endpoints
 	ux.Logger.PrintToUser("\nMainnet started successfully with 21 validators!")
 	ux.Logger.PrintToUser("\nRPC Endpoints:")
-	
+
 	if startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {
 		for i, nodeName := range startResp.ClusterInfo.NodeNames {
 			if nodeInfo, ok := startResp.ClusterInfo.NodeInfos[nodeName]; ok && nodeInfo != nil && nodeInfo.Uri != "" {
 				ux.Logger.PrintToUser("  Validator %d: %s", i+1, nodeInfo.Uri)
 			}
 		}
-		
+
 		// Get first node's URI
 		if firstNodeInfo, ok := startResp.ClusterInfo.NodeInfos[startResp.ClusterInfo.NodeNames[0]]; ok && firstNodeInfo != nil {
 			ux.Logger.PrintToUser("\nPrimary RPC endpoint: %s", firstNodeInfo.Uri)
 		}
 	}
-	
+
 	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
 	ux.Logger.PrintToUser("Network is ready for use!")
-	
+
 	return nil
 }
 
 // StartTestnet starts a testnet network with 11 validator nodes
 func StartTestnet() error {
 	ux.Logger.PrintToUser("Starting Lux testnet with 11 validator nodes...")
-	
+
 	// First, ensure we have validator keys generated
 	keysDir := "/home/z/.luxd/keys/testnet"
 	if _, err := os.Stat(keysDir + "/validator-0/staking.crt"); os.IsNotExist(err) {
@@ -438,17 +438,17 @@ func StartTestnet() error {
 			return fmt.Errorf("failed to generate keys: %w", err)
 		}
 	}
-	
+
 	ux.Logger.PrintToUser("Using keys from %s", keysDir)
-	
+
 	// Build the command to start luxd with testnet configuration
 	luxdPath := "/home/z/work/lux/node/bin/luxd"
-	
+
 	// Check if luxd exists
 	if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
 		return fmt.Errorf("luxd binary not found at %s. Please build it first with 'make build-node'", luxdPath)
 	}
-	
+
 	// Testnet configuration (faster parameters)
 	args := []string{
 		"--network-id=96368",
@@ -457,7 +457,7 @@ func StartTestnet() error {
 		"--consensus-shutdown-timeout=3s",
 		"--consensus-gossip-frequency=5s",
 		"--consensus-k=11",
-		"--consensus-alpha-preference=7", 
+		"--consensus-alpha-preference=7",
 		"--consensus-alpha-confidence=9",
 		"--consensus-beta=5",
 		"--consensus-concurrent-repolls=5",
@@ -473,18 +473,18 @@ func StartTestnet() error {
 		"--http-port=9650",
 		"--staking-port=9651",
 	}
-	
+
 	// Execute luxd
 	cmd := exec.Command(luxdPath, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	
+
 	ux.Logger.PrintToUser("Starting luxd with command: %s %v", luxdPath, args)
-	
+
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start luxd: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("Testnet started successfully!")
 	ux.Logger.PrintToUser("RPC endpoint: http://localhost:9650")
 	ux.Logger.PrintToUser("Node logs: ~/.luxd/testnet-logs/")

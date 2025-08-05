@@ -3,8 +3,8 @@
 package testutils
 
 import (
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 )
 
 func GenerateEthAddrs(count int) ([]common.Address, error) {

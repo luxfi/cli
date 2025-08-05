@@ -31,7 +31,7 @@ To get started, use the l1 create command to configure your L1, then deploy it w
 		},
 	}
 	app = injectedApp
-	
+
 	// l1 create
 	cmd.AddCommand(newCreateCmd())
 	// l1 deploy
@@ -48,6 +48,6 @@ To get started, use the l1 create command to configure your L1, then deploy it w
 	cmd.AddCommand(newImportCmd())
 	// l1 migrate
 	cmd.AddCommand(newMigrateCmd())
-	
+
 	return cmd
 }

@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 type WarpFeeInfo struct {
@@ -20,8 +20,8 @@ type WarpFeeInfo struct {
 }
 
 type TokenRemoteSettings struct {
-	WarpRegistryAddress    common.Address
-	WarpManager            common.Address
+	WarpRegistryAddress   common.Address
+	WarpManager           common.Address
 	TokenHomeBlockchainID [32]byte
 	TokenHomeAddress      common.Address
 	TokenHomeDecimals     uint8
@@ -70,8 +70,8 @@ func DeployERC20Remote(
 		return common.Address{}, err
 	}
 	tokenRemoteSettings := TokenRemoteSettings{
-		WarpRegistryAddress:    warpRegistryAddress,
-		WarpManager:            warpManagerAddress,
+		WarpRegistryAddress:   warpRegistryAddress,
+		WarpManager:           warpManagerAddress,
 		TokenHomeBlockchainID: tokenHomeBlockchainID,
 		TokenHomeAddress:      tokenHomeAddress,
 		TokenHomeDecimals:     tokenHomeDecimals,
@@ -107,8 +107,8 @@ func DeployNativeRemote(
 		return common.Address{}, err
 	}
 	tokenRemoteSettings := TokenRemoteSettings{
-		WarpRegistryAddress:    warpRegistryAddress,
-		WarpManager:            warpManagerAddress,
+		WarpRegistryAddress:   warpRegistryAddress,
+		WarpManager:           warpManagerAddress,
 		TokenHomeBlockchainID: tokenHomeBlockchainID,
 		TokenHomeAddress:      tokenHomeAddress,
 		TokenHomeDecimals:     tokenHomeDecimals,

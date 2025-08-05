@@ -73,62 +73,62 @@ func Test_determineLuxVersion(t *testing.T) {
 	}
 
 	type test struct {
-		name          string
+		name        string
 		userLux     string
-		sidecars      []models.Sidecar
+		sidecars    []models.Sidecar
 		expectedLux string
-		expectedErr   bool
+		expectedErr bool
 	}
 
 	tests := []test{
 		{
-			name:          "user not latest",
+			name:        "user not latest",
 			userLux:     "v1.9.5",
-			sidecars:      []models.Sidecar{sc1},
+			sidecars:    []models.Sidecar{sc1},
 			expectedLux: "v1.9.5",
-			expectedErr:   false,
+			expectedErr: false,
 		},
 		{
-			name:          "single sc",
+			name:        "single sc",
 			userLux:     "latest",
-			sidecars:      []models.Sidecar{sc1},
+			sidecars:    []models.Sidecar{sc1},
 			expectedLux: "v1.9.1",
-			expectedErr:   false,
+			expectedErr: false,
 		},
 		{
-			name:          "multi sc matching",
+			name:        "multi sc matching",
 			userLux:     "latest",
-			sidecars:      []models.Sidecar{sc1, sc2},
+			sidecars:    []models.Sidecar{sc1, sc2},
 			expectedLux: "v1.9.1",
-			expectedErr:   false,
+			expectedErr: false,
 		},
 		{
-			name:          "multi sc mismatch",
+			name:        "multi sc mismatch",
 			userLux:     "latest",
-			sidecars:      []models.Sidecar{sc1, sc3},
+			sidecars:    []models.Sidecar{sc1, sc3},
 			expectedLux: "",
-			expectedErr:   true,
+			expectedErr: true,
 		},
 		{
-			name:          "single custom",
+			name:        "single custom",
 			userLux:     "latest",
-			sidecars:      []models.Sidecar{scCustom},
+			sidecars:    []models.Sidecar{scCustom},
 			expectedLux: "latest",
-			expectedErr:   false,
+			expectedErr: false,
 		},
 		{
-			name:          "custom plus user selected",
+			name:        "custom plus user selected",
 			userLux:     "v1.9.1",
-			sidecars:      []models.Sidecar{scCustom},
+			sidecars:    []models.Sidecar{scCustom},
 			expectedLux: "v1.9.1",
-			expectedErr:   false,
+			expectedErr: false,
 		},
 		{
-			name:          "multi sc matching plus custom",
+			name:        "multi sc matching plus custom",
 			userLux:     "latest",
-			sidecars:      []models.Sidecar{sc1, sc2, scCustom},
+			sidecars:    []models.Sidecar{sc1, sc2, scCustom},
 			expectedLux: "v1.9.1",
-			expectedErr:   false,
+			expectedErr: false,
 		},
 	}
 

@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/cli/sdk/utils"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/crypto"
 )
 
 var ErrUnknownErrorSelector = fmt.Errorf("unknown error selector")

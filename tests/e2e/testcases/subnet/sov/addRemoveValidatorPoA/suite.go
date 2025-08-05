@@ -23,7 +23,7 @@ const (
 var (
 	blockchainID     string
 	localClusterUris []string
-	luxdVersion     string
+	luxdVersion      string
 )
 
 var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {

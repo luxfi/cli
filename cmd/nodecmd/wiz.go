@@ -49,27 +49,27 @@ const (
 )
 
 var (
-	forceSubnetCreate               bool
-	subnetGenesisFile               string
-	useEvmSubnet                    bool
-	useCustomSubnet                 bool
-	evmVersion                      string
-	evmChainID                      uint64
-	evmToken                        string
-	evmTestDefaults                 bool
-	evmProductionDefaults           bool
-	useLatestEvmReleasedVersion     bool
-	useLatestEvmPreReleasedVersion  bool
-	customVMRepoURL                 string
-	customVMBranch                  string
-	customVMBuildScript             string
-	nodeConf                        string
-	subnetConf                      string
-	chainConf                       string
-	validators                      []string
-	customGrafanaDashboardPath      string
+	forceSubnetCreate                bool
+	subnetGenesisFile                string
+	useEvmSubnet                     bool
+	useCustomSubnet                  bool
+	evmVersion                       string
+	evmChainID                       uint64
+	evmToken                         string
+	evmTestDefaults                  bool
+	evmProductionDefaults            bool
+	useLatestEvmReleasedVersion      bool
+	useLatestEvmPreReleasedVersion   bool
+	customVMRepoURL                  string
+	customVMBranch                   string
+	customVMBuildScript              string
+	nodeConf                         string
+	subnetConf                       string
+	chainConf                        string
+	validators                       []string
+	customGrafanaDashboardPath       string
 	warpReady                        bool
-	runRelayer                      bool
+	runRelayer                       bool
 	warpVersion                      string
 	warpMessengerContractAddressPath string
 	warpMessengerDeployerAddressPath string
@@ -77,7 +77,7 @@ var (
 	warpRegistryBydecodePath         string
 	deployWarpMessenger              bool
 	deployWarpRegistry               bool
-	replaceKeyPair                  bool
+	replaceKeyPair                   bool
 )
 
 func newWizCmd() *cobra.Command {
