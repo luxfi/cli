@@ -19,7 +19,7 @@ import (
 
 const (
 	defaultLuxdVersion = "v1.13.3"
-	luxdDownloadURL = "https://github.com/luxfi/node/releases/download/%s/luxd-linux-%s-%s.tar.gz"
+	luxdDownloadURL    = "https://github.com/luxfi/node/releases/download/%s/luxd-linux-%s-%s.tar.gz"
 )
 
 type versionFlags struct {
@@ -29,7 +29,7 @@ type versionFlags struct {
 
 func newVersionCmd() *cobra.Command {
 	flags := &versionFlags{}
-	
+
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Manage luxd node versions",
@@ -43,7 +43,7 @@ func newVersionCmd() *cobra.Command {
 	cmd.AddCommand(newInstallCmd(flags))
 	cmd.AddCommand(newListCmd())
 	cmd.AddCommand(newUseCmd())
-	
+
 	return cmd
 }
 
@@ -71,9 +71,9 @@ func newInstallCmd(flags *versionFlags) *cobra.Command {
 			return installLuxd(version, flags.force)
 		},
 	}
-	
+
 	cmd.Flags().BoolVar(&flags.force, "force", false, "Force reinstall even if version exists")
-	
+
 	return cmd
 }
 
@@ -106,18 +106,18 @@ func installLuxd(version string, force bool) error {
 	binDir := filepath.Join(app.GetBaseDir(), "bin")
 	versionDir := filepath.Join(binDir, "versions", version)
 	luxdPath := filepath.Join(versionDir, "luxd")
-	
+
 	// Check if already installed
 	if _, err := os.Stat(luxdPath); err == nil && !force {
 		ux.Logger.PrintToUser("Version %s is already installed", version)
 		return useVersion(version)
 	}
-	
+
 	// Create directories
 	if err := os.MkdirAll(versionDir, 0755); err != nil {
 		return fmt.Errorf("failed to create version directory: %w", err)
 	}
-	
+
 	// Determine architecture
 	arch := runtime.GOARCH
 	if arch == "amd64" {
@@ -125,50 +125,50 @@ func installLuxd(version string, force bool) error {
 	} else if arch == "arm64" {
 		arch = "arm64"
 	}
-	
+
 	// Download URL
 	url := fmt.Sprintf(luxdDownloadURL, version, runtime.GOOS, arch)
-	
+
 	ux.Logger.PrintToUser("Downloading luxd %s from %s...", version, url)
-	
+
 	// Download file
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("failed to download: %w", err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("download failed with status: %s", resp.Status)
 	}
-	
+
 	// Create temp file
 	tmpFile, err := os.CreateTemp("", "luxd-*.tar.gz")
 	if err != nil {
 		return fmt.Errorf("failed to create temp file: %w", err)
 	}
 	defer os.Remove(tmpFile.Name())
-	
+
 	// Download to temp file
 	_, err = io.Copy(tmpFile, resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to download: %w", err)
 	}
 	tmpFile.Close()
-	
+
 	// Extract tar.gz
 	ux.Logger.PrintToUser("Extracting luxd...")
 	if err := extractTarGz(tmpFile.Name(), versionDir); err != nil {
 		return fmt.Errorf("failed to extract: %w", err)
 	}
-	
+
 	// Make executable
 	if err := os.Chmod(luxdPath, 0755); err != nil {
 		return fmt.Errorf("failed to make executable: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("Successfully installed luxd %s", version)
-	
+
 	// Set as current version
 	return useVersion(version)
 }
@@ -179,15 +179,15 @@ func extractTarGz(src, dst string) error {
 		return err
 	}
 	defer f.Close()
-	
+
 	gz, err := gzip.NewReader(f)
 	if err != nil {
 		return err
 	}
 	defer gz.Close()
-	
+
 	tr := tar.NewReader(gz)
-	
+
 	for {
 		header, err := tr.Next()
 		if err == io.EOF {
@@ -196,9 +196,9 @@ func extractTarGz(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		
+
 		target := filepath.Join(dst, header.Name)
-		
+
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if err := os.MkdirAll(target, 0755); err != nil {
@@ -219,32 +219,32 @@ func extractTarGz(src, dst string) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
 func listVersions() error {
 	binDir := filepath.Join(app.GetBaseDir(), "bin")
 	versionsDir := filepath.Join(binDir, "versions")
-	
+
 	// Create if not exists
 	if err := os.MkdirAll(versionsDir, 0755); err != nil {
 		return err
 	}
-	
+
 	// List versions
 	entries, err := os.ReadDir(versionsDir)
 	if err != nil {
 		return fmt.Errorf("failed to list versions: %w", err)
 	}
-	
+
 	// Get current version
 	currentPath, _ := os.Readlink(filepath.Join(binDir, "luxd"))
 	currentVersion := ""
 	if currentPath != "" {
 		currentVersion = filepath.Base(filepath.Dir(currentPath))
 	}
-	
+
 	ux.Logger.PrintToUser("Installed luxd versions:")
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -256,7 +256,7 @@ func listVersions() error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -265,20 +265,20 @@ func useVersion(version string) error {
 	versionDir := filepath.Join(binDir, "versions", version)
 	luxdPath := filepath.Join(versionDir, "luxd")
 	linkPath := filepath.Join(binDir, "luxd")
-	
+
 	// Check if version exists
 	if _, err := os.Stat(luxdPath); err != nil {
 		return fmt.Errorf("version %s is not installed. Run 'lux node version install %s' first", version, version)
 	}
-	
+
 	// Remove existing symlink
 	os.Remove(linkPath)
-	
+
 	// Create new symlink
 	if err := os.Symlink(luxdPath, linkPath); err != nil {
 		return fmt.Errorf("failed to create symlink: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("Now using luxd %s", version)
 	return nil
 }

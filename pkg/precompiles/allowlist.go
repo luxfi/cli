@@ -6,8 +6,8 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/contract"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/cli/pkg/contract"
 )
 
 func SetAdmin(

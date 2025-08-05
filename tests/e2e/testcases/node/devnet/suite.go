@@ -28,8 +28,8 @@ var (
 )
 
 const (
-	NumNodes           = 1
-	NumAPINodes        = 1
+	NumNodes    = 1
+	NumAPINodes = 1
 	luxdVersion = "v1.13.0"
 )
 

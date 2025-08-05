@@ -17,7 +17,7 @@ const (
 )
 
 const (
-	TestnetAPIEndpoint    = "https://api.lux-test.network"
+	TestnetAPIEndpoint = "https://api.lux-test.network"
 	MainnetAPIEndpoint = "https://api.lux.network"
 )
 

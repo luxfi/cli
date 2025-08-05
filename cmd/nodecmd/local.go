@@ -46,30 +46,30 @@ import (
 var (
 	luxdBinaryPath string
 
-	bootstrapIDs                 []string
-	bootstrapIPs                 []string
-	genesisPath                  string
-	upgradePath                  string
-	stakingTLSKeyPaths           []string
-	stakingCertKeyPaths          []string
-	stakingSignerKeyPaths        []string
-	numNodes                     uint32
-	nodeConfigPath               string
-	partialSync                  bool
-	stakeAmount                  uint64
+	bootstrapIDs                []string
+	bootstrapIPs                []string
+	genesisPath                 string
+	upgradePath                 string
+	stakingTLSKeyPaths          []string
+	stakingCertKeyPaths         []string
+	stakingSignerKeyPaths       []string
+	numNodes                    uint32
+	nodeConfigPath              string
+	partialSync                 bool
+	stakeAmount                 uint64
 	balanceLUX                  float64
-	remainingBalanceOwnerAddr    string
-	disableOwnerAddr             string
-	delegationFee                uint16
-	minimumStakeDuration         uint64
-	rewardsRecipientAddr         string
+	remainingBalanceOwnerAddr   string
+	disableOwnerAddr            string
+	delegationFee               uint16
+	minimumStakeDuration        uint64
+	rewardsRecipientAddr        string
 	latestLuxdReleaseVersion    bool
 	latestLuxdPreReleaseVersion bool
-	validatorManagerAddress      string
-	useACP99                     bool
-	httpPorts                    []uint
-	stakingPorts                 []uint
-	localValidateFlags           NodeLocalValidateFlags
+	validatorManagerAddress     string
+	useACP99                    bool
+	httpPorts                   []uint
+	stakingPorts                []uint
+	localValidateFlags          NodeLocalValidateFlags
 )
 
 // const snapshotName = "local_snapshot"

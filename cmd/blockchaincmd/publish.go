@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -22,6 +21,7 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/version"
 	"gopkg.in/yaml.v3"

@@ -129,7 +129,7 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 
 	// Create governance proposal
 	ux.Logger.PrintToUser("\n📝 Creating Governance Proposal...")
-	
+
 	// In a real implementation, this would create and submit a governance proposal
 	// proposal := &models.GovernanceProposal{
 	// 	Type:        "base-migration",
@@ -145,7 +145,7 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 	// Simulate proposal submission
 	ux.Logger.PrintToUser("   Submitting proposal...")
 	time.Sleep(2 * time.Second)
-	
+
 	proposalID := fmt.Sprintf("PROP-%d", time.Now().Unix())
 	ux.Logger.PrintToUser("   ✅ Proposal submitted: %s", proposalID)
 	ux.Logger.PrintToUser("")
@@ -156,7 +156,7 @@ func migrateBase(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   Status: Voting Active")
 	ux.Logger.PrintToUser("   Ends: %s", time.Now().Add(7*24*time.Hour).Format("2006-01-02 15:04"))
 	ux.Logger.PrintToUser("")
-	
+
 	ux.Logger.PrintToUser("💡 Next steps:")
 	ux.Logger.PrintToUser("   1. Share proposal: lux governance share %s", proposalID)
 	ux.Logger.PrintToUser("   2. Monitor votes: lux governance status %s", proposalID)
@@ -193,7 +193,7 @@ func showMigrationImpact(from, to string) {
 	// Block time changes
 	fromTime := getBlockTime(from)
 	toTime := getBlockTime(to)
-	
+
 	if toTime < fromTime {
 		ux.Logger.PrintToUser("   ⬆️  Faster block times: %dms → %dms", fromTime, toTime)
 		ux.Logger.PrintToUser("   ✅ Lower latency for users")
@@ -218,4 +218,3 @@ func showMigrationImpact(from, to string) {
 	// MEV implications
 	ux.Logger.PrintToUser("   🔀 MEV flows to %s builders", to)
 }
-

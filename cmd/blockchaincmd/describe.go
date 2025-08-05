@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/contract"
@@ -22,8 +24,6 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	validatorManagerSDK "github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
@@ -33,8 +33,8 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth/common"
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

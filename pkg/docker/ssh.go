@@ -98,12 +98,12 @@ func ComposeSSHSetupNode(
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
 		DockerComposeInputs{
-			LuxgoVersion: luxdVersion,
-			WithMonitoring:     withMonitoring,
-			WithLuxgo:    true,
-			E2E:                utils.IsE2E(),
-			E2EIP:              utils.E2EConvertIP(host.IP),
-			E2ESuffix:          utils.E2ESuffix(host.IP),
+			LuxgoVersion:   luxdVersion,
+			WithMonitoring: withMonitoring,
+			WithLuxgo:      true,
+			E2E:            utils.IsE2E(),
+			E2EIP:          utils.E2EConvertIP(host.IP),
+			E2ESuffix:      utils.E2ESuffix(host.IP),
 		})
 }
 
@@ -113,8 +113,8 @@ func ComposeSSHSetupLoadTest(host *models.Host) error {
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
 		DockerComposeInputs{
-			WithMonitoring:  true,
-			WithLuxgo: false,
+			WithMonitoring: true,
+			WithLuxgo:      false,
 		})
 }
 

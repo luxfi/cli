@@ -38,7 +38,7 @@ Examples:
 		},
 	}
 	app = injectedApp
-	
+
 	// l3 create
 	cmd.AddCommand(newCreateCmd())
 	// l3 deploy
@@ -49,6 +49,6 @@ Examples:
 	cmd.AddCommand(newDescribeCmd())
 	// l3 bridge
 	cmd.AddCommand(newBridgeCmd())
-	
+
 	return cmd
 }

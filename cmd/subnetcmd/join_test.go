@@ -28,7 +28,6 @@ func TestIsNodeValidatingSubnet(t *testing.T) {
 			},
 		}, nil)
 
-
 	// first pass: should return true for the GetCurrentValidators
 	isValidating, err := checkIsValidating(subnetID, nodeID, pClient)
 	require.NoError(err)

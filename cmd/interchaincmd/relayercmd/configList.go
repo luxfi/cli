@@ -17,12 +17,12 @@ import (
 )
 
 type SourceSpec struct {
-	blockchainDesc      string
-	rpcEndpoint         string
-	wsEndpoint          string
-	blockchainID        string
-	subnetID            string
-	rewardAddress       string
+	blockchainDesc       string
+	rpcEndpoint          string
+	wsEndpoint           string
+	blockchainID         string
+	subnetID             string
+	rewardAddress        string
 	warpMessengerAddress string
 	warpRegistryAddress  string
 }
@@ -175,14 +175,14 @@ func addSource(
 		}
 	}
 	configSpec.sources = append(configSpec.sources, SourceSpec{
-		blockchainDesc:      blockchainDesc,
-		blockchainID:        blockchainID.String(),
-		subnetID:            subnetID.String(),
-		rewardAddress:       rewardAddress,
+		blockchainDesc:       blockchainDesc,
+		blockchainID:         blockchainID.String(),
+		subnetID:             subnetID.String(),
+		rewardAddress:        rewardAddress,
 		warpRegistryAddress:  warpRegistryAddress,
 		warpMessengerAddress: warpMessengerAddress,
-		rpcEndpoint:         rpcEndpoint,
-		wsEndpoint:          wsEndpoint,
+		rpcEndpoint:          rpcEndpoint,
+		wsEndpoint:           wsEndpoint,
 	})
 	return configSpec, nil
 }

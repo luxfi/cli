@@ -13,7 +13,7 @@ import (
 func runMigration(sourceDB, destDB string, chainID int64) error {
 	// TODO: Fix GetCLIRootDir
 	migrationToolPath := filepath.Join(".", "migration-tools")
-	
+
 	// Run go build
 	buildCmd := exec.Command("go", "build", "-o", filepath.Join(migrationToolPath, "migrate"), filepath.Join(migrationToolPath, "migrate.go"))
 	buildCmd.Dir = migrationToolPath
@@ -28,12 +28,12 @@ func runMigration(sourceDB, destDB string, chainID int64) error {
 		"--dst-leveldb", destDB,
 		"--chain-id", fmt.Sprintf("%d", chainID),
 	)
-	
+
 	output, err := migrateCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("migration failed: %w\n%s", err, output)
 	}
-	
+
 	ux.Logger.PrintToUser("%s", string(output))
 	return nil
 }

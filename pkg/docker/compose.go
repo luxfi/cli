@@ -21,9 +21,9 @@ import (
 
 type DockerComposeInputs struct {
 	WithMonitoring     bool
-	WithLuxgo    bool
-	LuxgoVersion string
-	WarpRelayerVersion  string
+	WithLuxgo          bool
+	LuxgoVersion       string
+	WarpRelayerVersion string
 	E2E                bool
 	E2EIP              string
 	E2ESuffix          string

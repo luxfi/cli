@@ -16,17 +16,17 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/sdk/evm"
 	sdkUtils "github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/node/ids"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/vms/xvm"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/geth/ethclient"
+	"github.com/luxfi/node/vms/xvm"
 
+	"github.com/luxfi/erc20-go/erc20"
 	"github.com/luxfi/geth/common"
 	goethereumethclient "github.com/luxfi/geth/ethclient"
-	"github.com/luxfi/erc20-go/erc20"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ const (
 	cchainFlag        = "cchain"
 	xchainFlag        = "xchain"
 	ledgerIndicesFlag = "ledger"
-	useNanoLuxFlag   = "use-nano-lux"
+	useNanoLuxFlag    = "use-nano-lux"
 	keysFlag          = "keys"
 )
 
@@ -47,7 +47,7 @@ var (
 	pchain             bool
 	cchain             bool
 	xchain             bool
-	useNanoLux        bool
+	useNanoLux         bool
 	useGwei            bool
 	ledgerIndices      []uint
 	keys               []string
