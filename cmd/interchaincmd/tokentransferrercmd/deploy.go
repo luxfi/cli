@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	cmdflags "github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/cobrautils"
