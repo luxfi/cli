@@ -29,7 +29,7 @@ import (
 	validatorsdk "github.com/luxfi/cli/sdk/validator"
 	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 
 	"github.com/luxfi/geth/common"

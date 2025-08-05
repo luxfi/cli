@@ -7,7 +7,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/txs"
 
