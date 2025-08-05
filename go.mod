@@ -26,7 +26,7 @@ require (
 	github.com/luxfi/log v0.1.1
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/netrunner v1.8.3
-	github.com/luxfi/node v1.13.13
+	github.com/luxfi/node v1.13.16
 	github.com/luxfi/warp v0.1.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -228,13 +228,13 @@ require (
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
-replace github.com/luxfi/node => ../node
+// replace github.com/luxfi/node => ../node
 
 replace github.com/luxfi/geth => ../geth
 
 replace github.com/luxfi/evm => ../evm
 
-replace github.com/luxfi/database => ../database
+// replace github.com/luxfi/database => ../database
 
 replace github.com/luxfi/crypto => ../crypto
 
