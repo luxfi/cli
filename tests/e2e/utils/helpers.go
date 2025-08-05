@@ -28,7 +28,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"

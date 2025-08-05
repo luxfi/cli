@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

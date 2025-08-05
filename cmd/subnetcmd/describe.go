@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"

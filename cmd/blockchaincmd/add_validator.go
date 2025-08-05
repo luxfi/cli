@@ -30,7 +30,7 @@ import (
 	"github.com/luxfi/cli/pkg/validatormanager"
 	"github.com/luxfi/cli/sdk/evm"
 	"github.com/luxfi/cli/sdk/validator"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"

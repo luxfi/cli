@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/sdk/evm"
 	sdkUtils "github.com/luxfi/cli/sdk/utils"
 	"github.com/luxfi/geth/ethclient"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
