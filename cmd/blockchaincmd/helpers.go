@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/txutils"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"

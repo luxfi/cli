@@ -27,7 +27,7 @@ import (
 	es "github.com/luxfi/cli/pkg/elasticsubnet"
 	"github.com/luxfi/cli/pkg/models"
 	subnet "github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

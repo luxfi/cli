@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/spf13/cobra"

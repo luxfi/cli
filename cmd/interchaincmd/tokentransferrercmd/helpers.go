@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 func validateSubnet(network models.Network, subnetName string) error {
