@@ -8,9 +8,9 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/node/genesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
-	"github.com/luxfi/crypto/secp256k1"
 
 	"golang.org/x/exp/maps"
 )

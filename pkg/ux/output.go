@@ -12,8 +12,8 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 
-	"github.com/luxfi/netrunner/rpcpb"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/olekukonko/tablewriter"
 )
 

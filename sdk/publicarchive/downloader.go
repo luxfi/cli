@@ -13,11 +13,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cavaliergopher/grab/v3"
 	"github.com/luxfi/cli/sdk/constants"
 	"github.com/luxfi/cli/sdk/network"
 	luxdConstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/cavaliergopher/grab/v3"
 	"go.uber.org/zap"
 )
 
@@ -93,7 +93,7 @@ func (d Downloader) Download() error {
 	if d.getter.client == nil || d.getter.request == nil {
 		return fmt.Errorf("downloader not properly initialized")
 	}
-	
+
 	d.logger.Info("Download started from", zap.String("url", d.getter.request.URL().String()))
 
 	d.currentOp.Lock()

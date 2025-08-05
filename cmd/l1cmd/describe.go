@@ -86,7 +86,7 @@ func newDescribeCmd() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				
+
 				ux.Logger.PrintToUser("📄 Genesis Configuration:")
 				ux.Logger.PrintToUser("```json")
 				formatted, _ := json.MarshalIndent(genesis, "", "  ")

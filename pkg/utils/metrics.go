@@ -68,7 +68,7 @@ func HandleUserMetricsPreference(app interface{}) error {
 	if !ok {
 		return fmt.Errorf("app does not implement PrompterInterface")
 	}
-	
+
 	PrintMetricsOptOutPrompt()
 	txt := "Press [Enter] to opt-in, or opt out by choosing 'No'"
 	yes, err := prompter.CaptureYesNo(txt)

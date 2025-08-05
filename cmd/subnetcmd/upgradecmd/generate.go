@@ -11,16 +11,15 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/node/utils/units"
 	gethmath "github.com/luxfi/node/evm/common/math"
 	"github.com/luxfi/node/evm/ethclient"
+	"github.com/luxfi/node/utils/units"
 	"go.uber.org/zap"
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
@@ -29,6 +28,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/evm/common"
 	"github.com/spf13/cobra"
 )
@@ -69,15 +69,15 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Yellow.Wrap(
 		"Performing a network upgrade requires coordinating the upgrade network-wide.")))
 	ux.Logger.PrintToUser("%s", luxlog.White.Wrap(luxlog.Reset.Wrap(
-		"A network upgrade changes the rule set used to process and verify blocks, " +
-			"such that any node that upgrades incorrectly or fails to upgrade by the time " +
+		"A network upgrade changes the rule set used to process and verify blocks, "+
+			"such that any node that upgrades incorrectly or fails to upgrade by the time "+
 			"that upgrade goes into effect may become out of sync with the rest of the network.\n")))
 	ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Red.Wrap(
-		"Any mistakes in configuring network upgrades or coordinating them on validators " +
+		"Any mistakes in configuring network upgrades or coordinating them on validators "+
 			"may cause the network to halt and recovering may be difficult.")))
 	ux.Logger.PrintToUser("%s", luxlog.Reset.Wrap(
-		"Please consult " + luxlog.Cyan.Wrap(
-			"https://docs.lux.network/subnets/customize-a-subnet#network-upgrades-enabledisable-precompiles ") +
+		"Please consult "+luxlog.Cyan.Wrap(
+			"https://docs.lux.network/subnets/customize-a-subnet#network-upgrades-enabledisable-precompiles ")+
 			luxlog.Reset.Wrap("for more information")))
 
 	txt := "Press [Enter] to continue, or abort by choosing 'no'"
@@ -100,7 +100,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	fmt.Println()
 	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(
-		"Lux and this tool support configuring multiple precompiles. " +
+		"Lux and this tool support configuring multiple precompiles. "+
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 

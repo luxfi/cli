@@ -15,23 +15,23 @@ const (
 	partialSyncFlag          = "partial-sync"
 	httpPortFlag             = "http-port"
 	stakingPortFlag          = "staking-port"
-	luxdPathFlag      = "luxd-path"
-	luxdVersionFlag   = "luxd-version"
+	luxdPathFlag             = "luxd-path"
+	luxdVersionFlag          = "luxd-version"
 	stakingTLSKeyPathFlag    = "staking-tls-key-path"
 	stakingCertKeyPathFlag   = "staking-cert-key-path"
 	stakingSignerKeyPathFlag = "staking-signer-key-path"
 )
 
 type LocalMachineFlags struct {
-	UseLocalMachine          bool
-	PartialSync              bool
-	HTTPPorts                []uint
-	StakingPorts             []uint
+	UseLocalMachine         bool
+	PartialSync             bool
+	HTTPPorts               []uint
+	StakingPorts            []uint
 	LuxdBinaryPath          string
 	UserProvidedLuxdVersion string
-	StakingTLSKeyPaths       []string
-	StakingCertKeyPaths      []string
-	StakingSignerKeyPaths    []string
+	StakingTLSKeyPaths      []string
+	StakingCertKeyPaths     []string
+	StakingSignerKeyPaths   []string
 }
 
 func validateLocalMachineFlags(localMachineFlags LocalMachineFlags) error {

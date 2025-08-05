@@ -3,9 +3,9 @@
 package lpm
 
 type Config struct {
-	RepositoryURL   string
-	Auth            string
-	RegistryURL     string
+	RepositoryURL string
+	Auth          string
+	RegistryURL   string
 }
 
 type Credential struct {

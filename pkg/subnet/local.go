@@ -25,13 +25,17 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/params"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
@@ -42,10 +46,6 @@ import (
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/utils/set"
 	"go.uber.org/zap"
 )
 
@@ -72,7 +72,7 @@ type LocalDeployer struct {
 	app                *application.Lux
 	backendStartedHere bool
 	setDefaultSnapshot setDefaultSnapshotFunc
-	luxVersion       string
+	luxVersion         string
 	vmBin              string
 }
 
@@ -84,7 +84,7 @@ func NewLocalDeployer(app *application.Lux, luxVersion string, vmBin string) *Lo
 		binaryDownloader:   binutils.NewPluginBinaryDownloader(app),
 		app:                app,
 		setDefaultSnapshot: SetDefaultSnapshot,
-		luxVersion:       luxVersion,
+		luxVersion:         luxVersion,
 		vmBin:              vmBin,
 	}
 }
@@ -803,19 +803,19 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 	if err != nil {
 		return false, err
 	}
-	
+
 	// Convert nodeID string to ids.NodeID for comparison
 	nID, err := ids.NodeIDFromString(nodeID)
 	if err != nil {
 		return false, err
 	}
-	
+
 	// Check current validators
 	currentValidators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
 	if err != nil {
 		return false, err
 	}
-	
+
 	// Check if the node is in future validators but not in current validators
 	inFuture := false
 	for id := range validators {
@@ -824,17 +824,17 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 			break
 		}
 	}
-	
+
 	if !inFuture {
 		return false, nil
 	}
-	
+
 	// Check if it's already a current validator
 	for _, v := range currentValidators {
 		if v.NodeID == nID {
 			return false, nil // Already active, not pending
 		}
 	}
-	
+
 	return true, nil // In future but not current = pending
 }
