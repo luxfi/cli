@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
 	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/node/utils/logging"
 
 	"github.com/ethereum/go-ethereum/common"
 )

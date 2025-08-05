@@ -5,9 +5,9 @@ package evm
 import (
 	"fmt"
 
-	warp "github.com/luxfi/warp"
-	"github.com/luxfi/geth/core/types"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/geth/core/types"
+	warp "github.com/luxfi/warp"
 )
 
 // get all unsigned warp messages contained in [logs]

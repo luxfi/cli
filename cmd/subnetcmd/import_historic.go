@@ -121,13 +121,13 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 				Symbol: subnet.TokenSymbol,
 			},
 			Version: constants.SidecarVersion,
-			
+
 			// L2 Configuration
-			Sovereign:      false, // These are L2s, not sovereign L1s
-			BaseChain:      sequencer,
-			BasedRollup:    isBasedRollup(sequencer), // true if using L1 sequencer
-			SequencerType:  sequencer, // lux, ethereum, lux, or external
-			L1BlockTime:    getBlockTime(sequencer),
+			Sovereign:         false, // These are L2s, not sovereign L1s
+			BaseChain:         sequencer,
+			BasedRollup:       isBasedRollup(sequencer), // true if using L1 sequencer
+			SequencerType:     sequencer,                // lux, ethereum, lux, or external
+			L1BlockTime:       getBlockTime(sequencer),
 			PreconfirmEnabled: false, // Can enable later
 		}
 
@@ -189,15 +189,14 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 	} else {
 		ux.Logger.PrintToUser("   Type: External sequencer")
 	}
-	
+
 	ux.Logger.PrintToUser("\nTo deploy these L2s locally, run:")
 	ux.Logger.PrintToUser("  lux subnet deploy LUX --local")
 	ux.Logger.PrintToUser("  lux subnet deploy ZOO --local")
 	ux.Logger.PrintToUser("  lux subnet deploy SPC --local")
-	
+
 	ux.Logger.PrintToUser("\nTo migrate to sovereign L1s later:")
 	ux.Logger.PrintToUser("  lux l1 migrate LUX")
 
 	return nil
 }
-

@@ -35,7 +35,7 @@ import (
 
 const (
 	localDeployment      = "Existing local deployment"
-	testnetDeployment       = "Testnet"
+	testnetDeployment    = "Testnet"
 	mainnetDeployment    = "Mainnet (coming soon)"
 	subnetIsElasticError = "subnet is already elastic"
 )

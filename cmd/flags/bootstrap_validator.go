@@ -25,7 +25,7 @@ type BootstrapValidatorFlags struct {
 	GenerateNodeID                  bool
 	BootstrapEndpoints              []string
 	NumBootstrapValidators          int
-	DeployBalanceLUX               float64
+	DeployBalanceLUX                float64
 	ChangeOwnerAddress              string
 }
 

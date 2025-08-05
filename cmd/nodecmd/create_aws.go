@@ -9,10 +9,10 @@ import (
 
 	"golang.org/x/exp/maps"
 
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/exp/slices"
 
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"

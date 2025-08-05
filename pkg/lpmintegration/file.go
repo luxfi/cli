@@ -62,18 +62,18 @@ type Subnet struct {
 }
 
 type VM struct {
-	ID           string `yaml:"id"`
-	Alias        string `yaml:"alias"`
-	VMType       string `yaml:"vm_type"`
-	Binary       string `yaml:"binary"`
-	ChainConfig  string `yaml:"chain_config"`
-	Subnet       string `yaml:"subnet"`
-	Genesis      string `yaml:"genesis"`
-	Version      string `yaml:"version"`
-	URL          string `yaml:"url"`
-	Checksum     string `yaml:"checksum"`
-	Runtime      string `yaml:"runtime"`
-	Description  string `yaml:"description"`
+	ID          string `yaml:"id"`
+	Alias       string `yaml:"alias"`
+	VMType      string `yaml:"vm_type"`
+	Binary      string `yaml:"binary"`
+	ChainConfig string `yaml:"chain_config"`
+	Subnet      string `yaml:"subnet"`
+	Genesis     string `yaml:"genesis"`
+	Version     string `yaml:"version"`
+	URL         string `yaml:"url"`
+	Checksum    string `yaml:"checksum"`
+	Runtime     string `yaml:"runtime"`
+	Description string `yaml:"description"`
 }
 
 type SubnetWrapper struct {
