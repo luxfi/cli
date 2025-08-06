@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/utils/logging"
+	"github.com/spf13/cobra"
 
 	"github.com/posthog/posthog-go"
 )
@@ -66,8 +67,10 @@ func HandleTracking(
 	if !userIsOptedIn(app) {
 		return
 	}
-	if !app.Cmd.HasSubCommands() && CheckCommandIsNotCompletion(app.Cmd.CommandPath()) {
-		trackMetrics(app, flags, err)
+	if cmd, ok := app.Cmd.(*cobra.Command); ok {
+		if !cmd.HasSubCommands() && CheckCommandIsNotCompletion(cmd.CommandPath()) {
+			trackMetrics(app, flags, err)
+		}
 	}
 }
 
@@ -99,7 +102,11 @@ func trackMetrics(app *application.Lux, flags map[string]string, cmdErr error) {
 	userID := getMetricsUserID(app)
 
 	telemetryProperties := make(map[string]interface{})
-	telemetryProperties["command"] = app.Cmd.CommandPath()
+	commandPath := ""
+	if cmd, ok := app.Cmd.(*cobra.Command); ok {
+		commandPath = cmd.CommandPath()
+	}
+	telemetryProperties["command"] = commandPath
 	telemetryProperties["cli_version"] = version
 	telemetryProperties["os"] = runtime.GOOS
 	telemetryProperties["was_successful"] = true

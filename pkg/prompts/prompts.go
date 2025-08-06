@@ -581,8 +581,19 @@ func contains[T comparable](list []T, element T) bool {
 }
 
 // GetKeyOrLedger prompts user to choose between key or ledger
-func GetKeyOrLedger(prompter Prompter, goal string) (bool, error) {
-	return prompter.ChooseKeyOrLedger(goal)
+func GetKeyOrLedger(prompter Prompter, goal string, keyDir string, includeEwoq bool) (bool, string, error) {
+	useStoredKey, err := prompter.ChooseKeyOrLedger(goal)
+	if err != nil {
+		return false, "", err
+	}
+	if !useStoredKey {
+		return true, "", nil
+	}
+	keyName, err := captureKeyName(prompter, goal, keyDir, includeEwoq)
+	if err != nil {
+		return false, "", err
+	}
+	return false, keyName, nil
 }
 
 func getIndexInSlice[T comparable](list []T, element T) (int, error) {
@@ -651,7 +662,7 @@ func GetTestnetKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, s
 	if !useStoredKey {
 		return true, "", nil
 	}
-	keyName, err := captureKeyName(prompt, goal, keyDir)
+	keyName, err := captureKeyName(prompt, goal, keyDir, true) // include ewoq by default
 	if err != nil {
 		if errors.Is(err, errNoKeys) {
 			ux.Logger.PrintToUser("No private keys have been found. Signing transactions on Testnet without a private key " +
@@ -662,7 +673,7 @@ func GetTestnetKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, s
 	return false, keyName, nil
 }
 
-func captureKeyName(prompt Prompter, goal string, keyDir string) (string, error) {
+func captureKeyName(prompt Prompter, goal string, keyDir string, includeEwoq bool) (string, error) {
 	files, err := os.ReadDir(keyDir)
 	if err != nil {
 		return "", err
@@ -675,7 +686,12 @@ func captureKeyName(prompt Prompter, goal string, keyDir string) (string, error)
 	keys := []string{}
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), constants.KeySuffix) {
-			keys = append(keys, strings.TrimSuffix(f.Name(), constants.KeySuffix))
+			keyName := strings.TrimSuffix(f.Name(), constants.KeySuffix)
+			// Skip ewoq key if includeEwoq is false
+			if !includeEwoq && keyName == "ewoq" {
+				continue
+			}
+			keys = append(keys, keyName)
 		}
 	}
 

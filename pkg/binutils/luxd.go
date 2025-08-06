@@ -8,7 +8,11 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
-func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error) {
+const (
+	luxdBinPrefix = "luxd"
+)
+
+func SetupLuxgo(app *application.Lux, luxdVersion string) (string, error) {
 	binDir := app.GetLuxgoBinDir()
 
 	installer := NewInstaller()
@@ -21,7 +25,6 @@ func SetupLuxgo(app *application.Lux, luxdVersion string) (string, string, error
 		luxdBinPrefix,
 		constants.LuxOrg,
 		constants.LuxdRepoName,
-		"",
 		downloader,
 		installer,
 	)
