@@ -3,15 +3,9 @@
 package transactioncmd
 
 import (
-	"fmt"
-
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/txs"
-
-	"github.com/luxfi/geth/common"
 )
 
 func validateConvertOperation(tx *txs.Tx, action string) (bool, error) {
@@ -19,6 +13,14 @@ func validateConvertOperation(tx *txs.Tx, action string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	// TODO: ConvertSubnetToL1Tx is not yet implemented in the node package
+	// This function is stubbed for now and will need to be implemented when
+	// the transaction type is available
+	_ = network // suppress unused variable warning
+	_ = action  // suppress unused variable warning
+	ux.Logger.PrintToUser("ConvertSubnetToL1Tx validation is not yet implemented")
+	return true, nil
+	/* Original code commented out until ConvertSubnetToL1Tx is available:
 	convertToL1Tx, ok := tx.Unsigned.(*txs.ConvertSubnetToL1Tx)
 	if !ok {
 		return false, fmt.Errorf("expected tx to be of type txs.ConvertSubnetToL1Tx, found %T", tx.Unsigned)
@@ -41,4 +43,5 @@ func validateConvertOperation(tx *txs.Tx, action string) (bool, error) {
 	ux.Logger.PrintToUser("Please review the details of the ConvertSubnetToL1 Transaction")
 	ux.Logger.PrintToUser("")
 	return app.Prompt.CaptureYesNo(fmt.Sprintf("Do you want to %s the transaction?", action))
+	*/
 }
