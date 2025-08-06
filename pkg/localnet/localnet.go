@@ -257,7 +257,7 @@ func CreateLocalNetwork(
 	defer cancel()
 	if _, err := TmpNetCreate(
 		ctx,
-		app.Log,
+		NewLoggerAdapter(app.Log),
 		networkDir,
 		luxdBinPath,
 		pluginDir,
@@ -308,7 +308,7 @@ func LoadLocalNetwork(
 	// local network
 	ctx, cancel := GetLocalNetworkDefaultContext()
 	defer cancel()
-	if _, err := TmpNetLoad(ctx, app.Log, networkDir, luxdBinPath); err != nil {
+	if _, err := TmpNetLoad(ctx, NewLoggerAdapter(app.Log), networkDir, luxdBinPath); err != nil {
 		_ = TmpNetStop(networkDir)
 		return err
 	}

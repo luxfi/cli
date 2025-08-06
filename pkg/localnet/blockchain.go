@@ -45,7 +45,7 @@ func GetBlockchainsInfo(endpoint string) ([]BlockchainInfo, error) {
 
 // Gathers blockchain info for all blockchains of [network] managed by CLI
 func GetManagedBlockchainsInfo(app *application.Lux, network models.Network) ([]BlockchainInfo, error) {
-	managedBlockchains, err := app.GetBlockchainNames()
+	managedBlockchains, err := app.GetSidecarNames()
 	if err != nil {
 		return nil, err
 	}

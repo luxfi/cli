@@ -68,10 +68,21 @@ func UpdateBlockchainConfig(
 			return err
 		}
 	}
-	perNodeBlockchainConfig, err := app.GetPerNodeBlockchainConfig(blockchainName)
-	if err != nil {
-		return err
+	// Convert per-node config from map[string]interface{} to map[ids.NodeID][]byte
+	rawPerNodeConfig := app.GetPerNodeBlockchainConfig(blockchainName)
+	perNodeBlockchainConfig := make(map[ids.NodeID][]byte)
+	for nodeIDStr, config := range rawPerNodeConfig {
+		nodeID, err := ids.NodeIDFromString(nodeIDStr)
+		if err != nil {
+			return fmt.Errorf("invalid node ID %s: %w", nodeIDStr, err)
+		}
+		configBytes, err := json.Marshal(config)
+		if err != nil {
+			return fmt.Errorf("failed to marshal config for node %s: %w", nodeIDStr, err)
+		}
+		perNodeBlockchainConfig[nodeID] = configBytes
 	}
+	
 	// general node config
 	nodeConfigStr, err := app.Conf.LoadNodeConfig()
 	if err != nil {
@@ -82,8 +93,8 @@ func UpdateBlockchainConfig(
 	}
 	// blockchain node config
 	if app.LuxdNodeConfigExists(blockchainName) {
-		blockchainNodeConfig, err := utils.ReadJSON(app.GetLuxdNodeConfigPath(blockchainName))
-		if err != nil {
+		var blockchainNodeConfig map[string]interface{}
+		if err := utils.ReadJSON(app.GetLuxdNodeConfigPath(blockchainName), &blockchainNodeConfig); err != nil {
 			return err
 		}
 		for k, v := range blockchainNodeConfig {
@@ -91,7 +102,7 @@ func UpdateBlockchainConfig(
 		}
 	}
 	return TmpNetUpdateBlockchainConfig(
-		app.Log,
+		NewLoggerAdapter(app.Log),
 		networkDir,
 		subnetID,
 		blockchainID,
@@ -114,7 +125,7 @@ func TrackSubnet(
 	printFunc func(msg string, args ...interface{}),
 	blockchainName string,
 	networkDir string,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 ) error {
 	if err := UpdateBlockchainConfig(
 		app,
@@ -140,7 +151,7 @@ func TrackSubnet(
 	defer cancel()
 	if err := TmpNetTrackSubnet(
 		ctx,
-		app.Log,
+		NewLoggerAdapter(app.Log),
 		printFunc,
 		networkDir,
 		sc.Sovereign,
@@ -164,7 +175,7 @@ func TrackSubnet(
 		return err
 	}
 	ux.Logger.GreenCheckmarkToUser("%s successfully tracking %s", networkModel.Name(), blockchainName)
-	if networkModel.Kind == models.Local {
+	if networkModel.Kind() == models.Local {
 		if err := TmpNetSetDefaultAliases(ctx, networkDir); err != nil {
 			return err
 		}
@@ -187,11 +198,11 @@ func GetNetworkModel(
 ) (models.Network, error) {
 	network, err := GetTmpNetNetwork(networkDir)
 	if err != nil {
-		return models.UndefinedNetwork, err
+		return models.Undefined, err
 	}
 	networkID, err := GetTmpNetNetworkID(network)
 	if err != nil {
-		return models.UndefinedNetwork, err
+		return models.Undefined, err
 	}
 	return models.NetworkFromNetworkID(networkID), nil
 }

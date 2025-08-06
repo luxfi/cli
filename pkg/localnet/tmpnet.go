@@ -694,7 +694,7 @@ func TmpNetTrackSubnet(
 	sovereign bool,
 	blockchainID ids.ID,
 	subnetID ids.ID,
-	wallet *primary.Wallet,
+	wallet primary.Wallet,
 ) error {
 	network, err := GetTmpNetNetwork(networkDir)
 	if err != nil {
