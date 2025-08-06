@@ -8,6 +8,7 @@ type VMType string
 
 const (
 	EVM         = "EVM"
+	SubnetEvm   = EVM // Alias for backward compatibility
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
 	CustomVM    = "Custom"

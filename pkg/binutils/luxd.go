@@ -29,3 +29,8 @@ func SetupLuxgo(app *application.Lux, luxdVersion string) (string, error) {
 		installer,
 	)
 }
+
+// SetupLux is an alias for SetupLuxgo for backward compatibility
+func SetupLux(app *application.Lux, luxdVersion string) (string, error) {
+	return SetupLuxgo(app, luxdVersion)
+}

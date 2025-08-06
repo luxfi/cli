@@ -22,6 +22,7 @@ const githubVersionTagName = "tag_name"
 type Downloader interface {
 	Download(url string) ([]byte, error)
 	GetLatestReleaseVersion(releaseURL string) (string, error)
+	GetLatestPreReleaseVersion(releaseURL string) (string, error)
 	GetAllReleasesForRepo(org, repo string) ([]string, error)
 }
 
@@ -121,4 +122,11 @@ func (d downloader) GetLatestReleaseVersion(releaseURL string) (string, error) {
 	}
 
 	return version, nil
+}
+
+// GetLatestPreReleaseVersion returns the latest pre-release version from github
+func (d downloader) GetLatestPreReleaseVersion(releaseURL string) (string, error) {
+	// For now, just return the latest release version
+	// This can be enhanced later to specifically look for pre-releases
+	return d.GetLatestReleaseVersion(releaseURL)
 }

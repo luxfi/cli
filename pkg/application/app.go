@@ -522,3 +522,52 @@ func (app *Lux) LoadElasticSubnetConfig(subnetName string) (models.ElasticSubnet
 
 	return esc, err
 }
+
+// GetNodesDir returns the nodes directory path
+func (app *Lux) GetNodesDir() string {
+	return filepath.Join(app.baseDir, "nodes")
+}
+
+// GetLuxdNodeConfigPath returns the node config path for a subnet
+func (app *Lux) GetLuxdNodeConfigPath(subnetName string) string {
+	return filepath.Join(app.GetSubnetDir(), subnetName, "node-config.json")
+}
+
+// LuxdSubnetConfigExists checks if subnet config exists
+func (app *Lux) LuxdSubnetConfigExists(subnetName string) bool {
+	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "subnet-config.json")
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// LoadRawLuxdSubnetConfig loads raw subnet config
+func (app *Lux) LoadRawLuxdSubnetConfig(subnetName string) ([]byte, error) {
+	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "subnet-config.json")
+	return os.ReadFile(configPath)
+}
+
+// ChainConfigExists checks if chain config exists
+func (app *Lux) ChainConfigExists(subnetName string) bool {
+	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "chain-config.json")
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// LoadRawChainConfig loads raw chain config
+func (app *Lux) LoadRawChainConfig(subnetName string) ([]byte, error) {
+	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "chain-config.json")
+	return os.ReadFile(configPath)
+}
+
+// NetworkUpgradeExists checks if network upgrade file exists
+func (app *Lux) NetworkUpgradeExists(subnetName string) bool {
+	upgradePath := filepath.Join(app.GetSubnetDir(), subnetName, "upgrade.json")
+	_, err := os.Stat(upgradePath)
+	return err == nil
+}
+
+// LoadRawNetworkUpgrades loads raw network upgrades
+func (app *Lux) LoadRawNetworkUpgrades(subnetName string) ([]byte, error) {
+	upgradePath := filepath.Join(app.GetSubnetDir(), subnetName, "upgrade.json")
+	return os.ReadFile(upgradePath)
+}

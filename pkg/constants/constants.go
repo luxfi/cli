@@ -21,6 +21,7 @@ const (
 	SidecarFileName             = "sidecar.json"
 	GenesisFileName             = "genesis.json"
 	ElasticSubnetConfigFileName = "elastic_subnet_config.json"
+	NodeConfigJSONFile          = "node-config.json"
 	SidecarSuffix               = SuffixSeparator + SidecarFileName
 	GenesisSuffix               = SuffixSeparator + GenesisFileName
 	NodeFileName                = "node.json"
@@ -55,6 +56,7 @@ const (
 	AnsibleSSHShellParams      = "-o StrictHostKeyChecking=no"
 	RemoteSSHUser              = "ubuntu"
 	StakerCertFileName         = "staker.crt"
+	StakerKeyFileName          = "staker.key"
 	BLSKeyFileName             = "bls.key"
 	ValidatorUptimeDeductible  = 5 * time.Minute
 
@@ -62,6 +64,8 @@ const (
 	SSHSleepBetweenChecks = 1 * time.Second
 	SSHFileOpsTimeout     = 10 * time.Second
 	SSHScriptTimeout      = 120 * time.Second
+	SSHPOSTTimeout        = 30 * time.Second
+	SSHDirOpsTimeout      = 30 * time.Second
 	
 	// Docker constants
 	DockerNodeConfigPath   = "/data/.luxgo/configs"
@@ -95,7 +99,13 @@ const (
 	
 	// Cloud node
 	CloudNodeConfigPath = "/home/ubuntu/.luxgo/configs"
+	CloudNodePrometheusConfigPath = "/home/ubuntu/.luxgo/configs/prometheus"
+	CloudNodeStakingPath = "/home/ubuntu/.luxgo/staking"
 	UpgradeFileName     = "upgrade.json"
+	NodePrometheusConfigFileName = "prometheus.yml"
+	ServicesDir = "services"
+	WarpRelayerInstallDir = "warp-relayer"
+	WarpRelayerConfigFilename = "warp-relayer.yml"
 	
 	// Config keys
 	ConfigSnapshotsAutoSaveKey   = "SnapshotsAutoSaveEnabled"
@@ -131,6 +141,9 @@ const (
 	KeyDir       = "keys"
 	LPMPluginDir = "lpm-plugins"
 	
+	// Cloud node paths
+	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.cli/bin/subnet-evm"
+	
 	// File names
 	UpgradeBytesFileName = "upgrade.json"
 	LPMLogName          = "lpm.log"
@@ -147,6 +160,9 @@ const (
 	
 	// Directories
 	DashboardsDir = "dashboards"
+	
+	// Grafana
+	CustomGrafanaDashboardJSON = "custom_dashboard.json"
 	
 	// Config metrics keys
 	ConfigMetricsUserIDKey         = "metrics-user-id"
@@ -249,8 +265,11 @@ const (
 
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
+	LuxdCompatibilityURL         = LuxCompatibilityURL // Alias for backward compatibility
 	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
+	CLILatestDependencyURL       = CLIMinVersionURL // Alias for backward compatibility
+	SubnetEVMRepoName            = EVMRepoName       // Alias for backward compatibility
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
