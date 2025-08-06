@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/netrunner/utils"
@@ -71,16 +72,18 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	}
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
 		DisplayLevel: logLevel,
-		LogLevel:     luxlog.OffLevel,
+		LogLevel:     level.Fatal,
 	})
 	log, err := logFactory.Make("grpc-client")
 	if err != nil {
 		return nil, err
 	}
+	// Adapt the logger to the interface expected by netrunner
+	adaptedLog := NewLoggerAdapter(log)
 	client, err := client.New(client.Config{
 		Endpoint:    gRPCServerEndpoint,
 		DialTimeout: gRPCDialTimeout,
-	}, log)
+	}, adaptedLog)
 	if errors.Is(err, context.DeadlineExceeded) {
 		err = ErrGRPCTimeout
 	}
@@ -106,20 +109,22 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 // NewGRPCClient hides away the details (params) of creating a gRPC server
 func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
-		DisplayLevel: luxlog.InfoLevel,
-		LogLevel:     luxlog.OffLevel,
+		DisplayLevel: level.Info,
+		LogLevel:     level.Fatal,
 	})
 	log, err := logFactory.Make("grpc-server")
 	if err != nil {
 		return nil, err
 	}
+	// Adapt the logger to the interface expected by netrunner
+	adaptedLog := NewLoggerAdapter(log)
 	return server.New(server.Config{
 		Port:                gRPCServerEndpoint,
 		GwPort:              gRPCGatewayEndpoint,
 		DialTimeout:         gRPCDialTimeout,
 		SnapshotsDir:        snapshotsDir,
 		RedirectNodesOutput: false,
-	}, log)
+	}, adaptedLog)
 }
 
 // IsServerProcessRunning returns true if the gRPC server is running,
@@ -277,17 +282,17 @@ func KillgRPCServerProcess(app *application.Lux) error {
 	return nil
 }
 
-func WatchServerProcess(serverCancel context.CancelFunc, errc chan error, log luxlog.Logger) {
+func WatchServerProcess(serverCancel context.CancelFunc, errc chan error, logger luxlog.Logger) {
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	select {
 	case sig := <-sigc:
-		log.Warn("signal received: %s; closing server", zap.String("signal", sig.String()))
+		logger.Warn("signal received; closing server", "signal", sig.String())
 		serverCancel()
 		err := <-errc
-		log.Warn("closed server: %s", zap.Error(err))
+		logger.Warn("closed server", "error", err)
 	case err := <-errc:
-		log.Warn("server closed: %s", zap.Error(err))
+		logger.Warn("server closed", "error", err)
 		serverCancel()
 	}
 }

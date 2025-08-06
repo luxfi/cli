@@ -49,3 +49,8 @@ func (*Config) SetConfigValue(key string, value interface{}) error {
 	viper.Set(key, value)
 	return viper.WriteConfig()
 }
+
+// GetConfigPath returns the path to the configuration file
+func (*Config) GetConfigPath() string {
+	return viper.ConfigFileUsed()
+}
