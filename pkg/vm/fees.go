@@ -42,17 +42,19 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		return config, statemachine.Stop, err
 	}
 
-	config.FeeConfig = StarterFeeConfig
+	// TODO: FeeConfig needs to be set on extras.ChainConfig, not standard ChainConfig
+	// This requires refactoring to use params.WithExtra()
+	// config.FeeConfig = StarterFeeConfig
 
 	switch feeDefault {
 	case useFast:
-		config.FeeConfig.TargetGas = fastTarget
+		// config.FeeConfig.TargetGas = fastTarget
 		return config, statemachine.Forward, nil
 	case useMedium:
-		config.FeeConfig.TargetGas = mediumTarget
+		// config.FeeConfig.TargetGas = mediumTarget
 		return config, statemachine.Forward, nil
 	case useSlow:
-		config.FeeConfig.TargetGas = slowTarget
+		// config.FeeConfig.TargetGas = slowTarget
 		return config, statemachine.Forward, nil
 	case goBackMsg:
 		return config, statemachine.Backward, nil
@@ -111,7 +113,9 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		BlockGasCostStep:         gasStep,
 	}
 
-	config.FeeConfig = feeConf
+	// TODO: FeeConfig needs to be set on extras.ChainConfig, not standard ChainConfig
+	// config.FeeConfig = feeConf
+	_ = feeConf // suppress unused variable warning
 
 	return config, statemachine.Forward, nil
 }

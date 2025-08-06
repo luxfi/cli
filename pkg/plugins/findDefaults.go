@@ -19,7 +19,7 @@ import (
 
 var (
 	// env var for node data dir
-	defaultUnexpandedDataDir = "$" + config.LuxDataDirVar
+	defaultUnexpandedDataDir = "$" + config.LuxNodeDataDirVar
 	// expected file name for the config
 	// TODO should other file names be supported? e.g. conf.json, etc.
 	defaultConfigFileName = "config.json"

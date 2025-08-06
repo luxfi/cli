@@ -18,7 +18,8 @@ import (
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	// "github.com/luxfi/evm/precompile/contracts/txallowlist" // TODO: uncomment when fixed
+	"github.com/luxfi/geth/common"
 )
 
 func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string, evmVersion string) ([]byte, *models.Sidecar, error) {
@@ -71,7 +72,7 @@ func createEvmGenesis(
 	ux.Logger.PrintToUser("creating subnet %s", subnetName)
 
 	genesis := core.Genesis{}
-	conf := params.EVMDefaultChainConfig
+	conf := params.SubnetEVMDefaultChainConfig
 
 	const (
 		descriptorsState = "descriptors"
@@ -114,25 +115,28 @@ func createEvmGenesis(
 		subnetEvmState.NextState(direction)
 	}
 
-	if conf != nil && conf.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
-		allowListCfg, ok := conf.GenesisPrecompiles[txallowlist.ConfigKey].(*txallowlist.Config)
-		if !ok {
-			return nil, nil, fmt.Errorf("expected config of type txallowlist.AllowListConfig, but got %T", allowListCfg)
-		}
+	// TODO: GenesisPrecompiles needs to be accessed from extras.ChainConfig
+	// if conf != nil && conf.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
+	// 	allowListCfg, ok := conf.GenesisPrecompiles[txallowlist.ConfigKey].(*txallowlist.Config)
+	// 	if !ok {
+	// 		return nil, nil, fmt.Errorf("expected config of type txallowlist.AllowListConfig, but got %T", allowListCfg)
+	// 	}
 
-		if err := ensureAdminsHaveBalance(
-			allowListCfg.AdminAddresses,
-			allocation); err != nil {
-			return nil, nil, err
-		}
-	}
+	// 	if err := ensureAdminsHaveBalance(
+	// 		allowListCfg.AdminAddresses,
+	// 		allocation); err != nil {
+	// 		return nil, nil, err
+	// 	}
+	// }
 
 	conf.ChainID = chainID
 
 	genesis.Alloc = allocation
 	genesis.Config = conf
 	genesis.Difficulty = Difficulty
-	genesis.GasLimit = conf.FeeConfig.GasLimit.Uint64()
+	// TODO: FeeConfig needs to be accessed from extras.ChainConfig
+	// genesis.GasLimit = conf.FeeConfig.GasLimit.Uint64()
+	genesis.GasLimit = 8000000 // Default gas limit
 
 	jsonBytes, err := genesis.MarshalJSON()
 	if err != nil {
@@ -169,7 +173,8 @@ func ensureAdminsHaveBalance(admins []crypto.Address, alloc core.GenesisAlloc) e
 
 	for _, admin := range admins {
 		// we can break at the first admin who has a non-zero balance
-		if bal, ok := alloc[admin]; ok &&
+		commonAddr := common.Address(admin)
+		if bal, ok := alloc[commonAddr]; ok &&
 			bal.Balance != nil &&
 			bal.Balance.Uint64() > uint64(0) {
 			return nil

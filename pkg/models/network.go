@@ -62,6 +62,11 @@ func (s Network) Kind() Network {
 	return s
 }
 
+// Name returns the network name as a string
+func (s Network) Name() string {
+	return s.String()
+}
+
 func (s Network) HandlePublicNetworkSimulation() bool {
 	return s == Local
 }
