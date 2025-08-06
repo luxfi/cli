@@ -2,10 +2,8 @@
 // See the file LICENSE for licensing terms.
 package models
 
-import (
 // Reserved for future use with IDs
 // "github.com/luxfi/ids"
-)
 
 // L2Config represents a based rollup configuration
 type L2Config struct {

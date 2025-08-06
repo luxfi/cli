@@ -4,9 +4,10 @@ package relayer
 
 import (
 	"errors"
+	"os/exec"
+
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/models"
-	"os/exec"
 )
 
 // Minimal stub implementation until warp packages are available

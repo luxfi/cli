@@ -7,8 +7,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
 	"github.com/stretchr/testify/require"
 )
@@ -76,7 +75,7 @@ func TestGetEventFromLogs(t *testing.T) {
 }
 
 func TestTransactionError(t *testing.T) {
-	tx := types.NewTransaction(0, common.Address{}, nil, 0, nil, nil)
+	tx := types.NewTransaction(0, crypto.Address{}, nil, 0, nil, nil)
 	tests := []struct {
 		name          string
 		tx            *types.Transaction
@@ -118,8 +117,8 @@ func TestTransactionError(t *testing.T) {
 
 func TestTxDump(t *testing.T) {
 	testData := []byte{1, 2, 3, 4, 5, 6}
-	tx := types.NewTransaction(0, common.Address{}, nil, 0, nil, testData)
-	testAddress := common.HexToAddress("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed")
+	tx := types.NewTransaction(0, crypto.Address{}, nil, 0, nil, testData)
+	testAddress := crypto.HexToAddress("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed")
 	txWithAccessList := types.NewTx(&types.DynamicFeeTx{
 		Data: testData,
 		AccessList: types.AccessList{
@@ -187,7 +186,7 @@ func TestPrivateKeyToAddress(t *testing.T) {
 		name        string
 		privateKey  string
 		expectError bool
-		expected    common.Address
+		expected    crypto.Address
 	}{
 		{
 			name:        "valid private key",

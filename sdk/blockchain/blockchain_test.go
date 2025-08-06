@@ -14,13 +14,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/sdk/keychain"
 	"github.com/luxfi/cli/sdk/network"
 	"github.com/luxfi/cli/sdk/vm"
 	"github.com/luxfi/cli/sdk/wallet"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/wallet/subnet/primary"

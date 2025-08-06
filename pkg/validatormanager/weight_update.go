@@ -20,6 +20,7 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/evm/interfaces"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
@@ -28,14 +29,14 @@ import (
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 func InitializeValidatorWeightChange(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	generateRawTxOnly bool,
-	managerOwnerAddress common.Address,
+	managerOwnerAddress crypto.Address,
 	privateKey string,
 	validationID ids.ID,
 	weight uint64,
@@ -88,8 +89,8 @@ func InitValidatorWeightChange(
 	if err != nil {
 		return nil, ids.Empty, nil, err
 	}
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
-	ownerAddress := common.HexToAddress(ownerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
+	ownerAddress := crypto.HexToAddress(ownerAddressStr)
 	validationID, err := validator.GetValidationID(
 		rpcURL,
 		managerAddress,
@@ -178,9 +179,9 @@ func InitValidatorWeightChange(
 
 func CompleteValidatorWeightChange(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	generateRawTxOnly bool,
-	ownerAddress common.Address,
+	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
 	pchainL1ValidatorRegistrationSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -215,7 +216,7 @@ func FinishValidatorWeightChange(
 	weight uint64,
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
 	subnetID, err := contract.GetSubnetID(
 		app,
 		network,
@@ -255,7 +256,7 @@ func FinishValidatorWeightChange(
 			client.Close()
 		}
 	}
-	ownerAddress := common.HexToAddress(ownerAddressStr)
+	ownerAddress := crypto.HexToAddress(ownerAddressStr)
 	tx, _, err := CompleteValidatorWeightChange(
 		rpcURL,
 		managerAddress,
@@ -280,7 +281,7 @@ func GetL1ValidatorWeightMessage(
 	unsignedMessage *warp.UnsignedMessage,
 	subnetID ids.ID,
 	blockchainID ids.ID,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	validationID ids.ID,
 	nonce uint64,
 	weight uint64,
@@ -430,7 +431,7 @@ func SearchForL1ValidatorWeightMessage(
 		logs, err := client.FilterLogs(interfaces.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []common.Address{subnetEvmWarp.Module.Address},
+			Addresses: []crypto.Address{subnetEvmWarp.Module.Address},
 		})
 		if err != nil {
 			return nil, err

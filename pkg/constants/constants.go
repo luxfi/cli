@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	DefaultPerms755 = 0o755
+	DefaultPerms755    = 0o755
+	WriteReadReadPerms = 0o644
 
 	BaseDirName = ".cli"
 	LogDir      = "logs"
@@ -30,32 +31,96 @@ const (
 	MaxNumOfLogFiles = 5
 	RetainOldFiles   = 0 // retain all old log files
 
-	RequestTimeout    = 3 * time.Minute
-	E2ERequestTimeout = 30 * time.Second
+	RequestTimeout         = 3 * time.Minute
+	E2ERequestTimeout      = 30 * time.Second
+	ANRRequestTimeout      = 3 * time.Minute
+	APIRequestTimeout      = 30 * time.Second
+	APIRequestLargeTimeout = 2 * time.Minute
 
 	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
 	TestnetAPIEndpoint    = "https://api.lux-test.network"
 	MainnetAPIEndpoint    = "https://api.lux.network"
 
 	// Cloud service constants
-	GCPCloudService         = "gcp"
-	AWSCloudService         = "aws"
-	E2EDocker               = "e2e-docker"
-	GCPNodeAnsiblePrefix    = "gcp_node"
-	AWSNodeAnsiblePrefix    = "aws_node"
-	E2EDockerLoopbackHost   = "127.0.0.1"
-	GCPDefaultImageProvider = "canonical"
-	GCPImageFilter          = "ubuntu-os-cloud"
+	GCPCloudService            = "gcp"
+	AWSCloudService            = "aws"
+	E2EDocker                  = "e2e-docker"
+	GCPNodeAnsiblePrefix       = "gcp_node"
+	AWSNodeAnsiblePrefix       = "aws_node"
+	E2EDockerLoopbackHost      = "127.0.0.1"
+	GCPDefaultImageProvider    = "canonical"
+	GCPImageFilter             = "ubuntu-os-cloud"
+	CloudNodeCLIConfigBasePath = "/home/ubuntu/.cli"
+	CodespaceNameEnvVar        = "CODESPACE_NAME"
+	AnsibleSSHShellParams      = "-o StrictHostKeyChecking=no"
+	RemoteSSHUser              = "ubuntu"
+	StakerCertFileName         = "staker.crt"
+	BLSKeyFileName             = "bls.key"
+	ValidatorUptimeDeductible  = 5 * time.Minute
 
 	// SSH constants
 	SSHSleepBetweenChecks = 1 * time.Second
 	SSHFileOpsTimeout     = 10 * time.Second
+	SSHScriptTimeout      = 120 * time.Second
+	
+	// Docker constants
+	DockerNodeConfigPath   = "/data/.luxgo/configs"
+	WriteReadUserOnlyPerms = 0o600
+	
+	// AWS constants  
+	AWSCloudServerRunningState = "running"
 
 	// this depends on bootstrap snapshot
 	LocalAPIEndpoint = "http://127.0.0.1:9630"
 	LocalNetworkID   = 1337
 
 	DefaultTokenName = "TEST"
+	
+	// Default versions
+	DefaultLuxdVersion = "v1.13.4"
+	
+	// Staking constants
+	BootstrapValidatorBalanceNanoLUX = 1_000_000_000_000 // 1000 LUX
+	PoSL1MinimumStakeDurationSeconds = 86400             // 24 hours
+	
+	// Logging
+	DefaultAggregatorLogLevel = "INFO"
+	
+	// Git
+	GitExtension = ".git"
+	
+	// Ansible
+	AnsibleHostInventoryFileName = "hosts"
+	AnsibleSSHUseAgentParams     = "-o ForwardAgent=yes"
+	
+	// Cloud node
+	CloudNodeConfigPath = "/home/ubuntu/.luxgo/configs"
+	UpgradeFileName     = "upgrade.json"
+	
+	// Config keys
+	ConfigLPMAdminAPIEndpointKey = "lpm-admin-api-endpoint"
+	ConfigLPMCredentialsFileKey  = "lpm-credentials-file"
+	
+	// Devnet flags
+	DevnetFlagsProposerVMUseCurrentHeight = true // This is a boolean flag
+	
+	// File names
+	AliasesFileName = "aliases.json"
+	
+	// Directories
+	DashboardsDir = "dashboards"
+	
+	// Config metrics keys
+	ConfigMetricsUserIDKey         = "metrics-user-id"
+	ConfigMetricsEnabledKey        = "metrics-enabled"
+	ConfigAuthorizeCloudAccessKey  = "authorize-cloud-access"
+	
+	// Config file names
+	OldConfigFileName        = ".cli.json"
+	OldMetricsConfigFileName = ".cli.metrics"
+	
+	// Environment variables
+	MetricsAPITokenEnvVarName = "METRICS_API_TOKEN"
 
 	HealthCheckInterval = 100 * time.Millisecond
 
@@ -165,6 +230,7 @@ const (
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
 	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
+	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
 
 	YesLabel = "Yes"
 	NoLabel  = "No"

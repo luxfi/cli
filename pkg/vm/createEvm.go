@@ -15,10 +15,10 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/geth/common"
 )
 
 func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string, evmVersion string) ([]byte, *models.Sidecar, error) {
@@ -162,7 +162,7 @@ func createEvmGenesis(
 	return prettyJSON.Bytes(), sc, nil
 }
 
-func ensureAdminsHaveBalance(admins []common.Address, alloc core.GenesisAlloc) error {
+func ensureAdminsHaveBalance(admins []crypto.Address, alloc core.GenesisAlloc) error {
 	if len(admins) < 1 {
 		return nil
 	}

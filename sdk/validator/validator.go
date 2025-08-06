@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 type ValidatorKind int64
@@ -77,7 +77,7 @@ func GetValidatorInfo(net network.Network, validationID ids.ID) (platformvm.L1Va
 // Will return ids.Empty in case it is not registered
 func GetValidationID(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	nodeID ids.NodeID,
 ) (ids.ID, error) {
 	// if specialized, need to retrieve underlying manager
@@ -88,7 +88,7 @@ func GetValidationID(
 		"getStakingManagerSettings()->(address,uint256,uint256,uint64,uint16,uint8,uint256,address,bytes32)",
 	)
 	if err == nil && len(out) == 9 {
-		validatorManager, ok := out[0].(common.Address)
+		validatorManager, ok := out[0].(crypto.Address)
 		if ok {
 			managerAddress = validatorManager
 		}

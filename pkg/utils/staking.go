@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/signer"
 )
 
 func NewBlsSecretKeyBytes() ([]byte, error) {
@@ -36,7 +36,11 @@ func ToNodeID(certBytes []byte) (ids.NodeID, error) {
 	if err != nil {
 		return ids.EmptyNodeID, err
 	}
-	return ids.NodeIDFromCert(cert), nil
+	idsCert := &ids.Certificate{
+		Raw:       cert.Raw,
+		PublicKey: cert.PublicKey,
+	}
+	return ids.NodeIDFromCert(idsCert), nil
 }
 
 func ToBLSPoP(keyBytes []byte) (
@@ -44,15 +48,20 @@ func ToBLSPoP(keyBytes []byte) (
 	[]byte, // bls proof of possession
 	error,
 ) {
-	sk, err := localsigner.FromBytes(keyBytes)
+	localSigner, err := localsigner.FromBytes(keyBytes)
 	if err != nil {
 		return nil, nil, err
 	}
-	pop, err := signer.NewProofOfPossession(sk)
+	// LocalSigner has the secret key as a private field, but we can get the public key
+	// and sign a proof of possession directly
+	pk := localSigner.PublicKey()
+	pkBytes := bls.PublicKeyToCompressedBytes(pk)
+	sig, err := localSigner.SignProofOfPossession(pkBytes)
 	if err != nil {
 		return nil, nil, err
 	}
-	return pop.PublicKey[:], pop.ProofOfPossession[:], nil
+	sigBytes := bls.SignatureToBytes(sig)
+	return pkBytes, sigBytes, nil
 }
 
 // GetNodeParams returns node id, bls public key and bls proof of possession
@@ -112,7 +121,11 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 		return 0, err
 	}
 	if len(validators) > 0 {
-		return validators[0].UptimeSeconds - constants.ValidatorUptimeDeductible, nil
+		deductibleSeconds := uint64(constants.ValidatorUptimeDeductible.Seconds())
+		if validators[0].UptimeSeconds > deductibleSeconds {
+			return validators[0].UptimeSeconds - deductibleSeconds, nil
+		}
+		return 0, nil
 	}
 
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())

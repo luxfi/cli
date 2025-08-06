@@ -35,8 +35,8 @@ import (
 	sdkutils "github.com/luxfi/cli/sdk/utils"
 	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
-	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/api/info"
 	luxdutils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/logging"
@@ -45,7 +45,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/fx"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/warp"
+	warpMessage "github.com/luxfi/warp"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -1112,7 +1112,7 @@ func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]
 			Weight:  validator.Weight,
 			Balance: validator.Balance,
 			Signer:  blsInfo,
-			RemainingBalanceOwner: message.PChainOwner{
+			RemainingBalanceOwner: warpMessage.PChainOwner{
 				Threshold: 1,
 				Addresses: addrs,
 			},

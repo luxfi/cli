@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/contract"
@@ -17,6 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/sdk/evm"
+	"github.com/luxfi/crypto"
 )
 
 const (
@@ -318,10 +318,10 @@ func (t *WarpDeployer) DeployRegistry(
 	if err := t.CheckAssets(); err != nil {
 		return "", err
 	}
-	messengerContractAddress := common.HexToAddress(t.messengerContractAddress)
+	messengerContractAddress := crypto.HexToAddress(t.messengerContractAddress)
 	type ProtocolRegistryEntry struct {
 		Version         *big.Int
-		ProtocolAddress common.Address
+		ProtocolAddress crypto.Address
 	}
 	constructorInput := []ProtocolRegistryEntry{
 		{

@@ -4,8 +4,8 @@
 package validatormanager
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
 
 	"github.com/luxfi/ids"
@@ -16,10 +16,10 @@ import (
 // owner given by [ownerAddress]
 func PoAValidatorManagerInitialize(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	privateKey string,
 	subnetID ids.ID,
-	ownerAddress common.Address,
+	ownerAddress crypto.Address,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
 	const (
@@ -30,7 +30,7 @@ func PoAValidatorManagerInitialize(
 		return contract.TxToMethod(
 			rpcURL,
 			false,
-			common.Address{},
+			crypto.Address{},
 			privateKey,
 			managerAddress,
 			nil,
@@ -48,7 +48,7 @@ func PoAValidatorManagerInitialize(
 	return contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		managerAddress,
 		nil,

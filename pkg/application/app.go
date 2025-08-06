@@ -30,7 +30,10 @@ type Lux struct {
 	Prompt     prompts.Prompter
 	Lpm        *lpm.Client
 	LpmDir     string
+	Apm        *lpm.Client // APM is similar to LPM
+	ApmDir     func() string
 	Downloader Downloader
+	Cmd        interface{} // Current command being executed (cobra.Command)
 }
 
 func New() *Lux {
@@ -43,6 +46,9 @@ func (app *Lux) Setup(baseDir string, log luxlog.Logger, conf *config.Config, pr
 	app.Conf = conf
 	app.Prompt = prompt
 	app.Downloader = downloader
+	app.ApmDir = func() string {
+		return filepath.Join(baseDir, "apm")
+	}
 }
 
 func (app *Lux) GetRunFile() string {
@@ -447,6 +453,16 @@ func (*Lux) writeFile(path string, bytes []byte) error {
 	return os.WriteFile(path, bytes, WriteReadReadPerms)
 }
 
+func (app *Lux) GetVersion() string {
+	// Return a default version for now
+	return "1.0.0"
+}
+
+func (app *Lux) WriteConfigFile(data []byte) error {
+	configPath := app.GetConfigPath()
+	return app.writeFile(configPath, data)
+}
+
 func (app *Lux) LoadConfig() (types.Config, error) {
 	configPath := app.GetConfigPath()
 	jsonBytes, err := os.ReadFile(configPath)
@@ -475,10 +491,6 @@ func (app *Lux) CaptureYesNo(prompt string) (bool, error) {
 	return app.Prompt.CaptureYesNo(prompt)
 }
 
-func (app *Lux) WriteConfigFile(bytes []byte) error {
-	configPath := app.GetConfigPath()
-	return app.writeFile(configPath, bytes)
-}
 
 func (app *Lux) CreateElasticSubnetConfig(subnetName string, es *models.ElasticSubnetConfig) error {
 	elasticSubetConfigPath := app.GetElasticSubnetConfigPath(subnetName)

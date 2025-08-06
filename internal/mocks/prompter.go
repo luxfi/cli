@@ -5,7 +5,7 @@ package mocks
 import (
 	big "math/big"
 
-	common "github.com/luxfi/geth/common"
+	"github.com/luxfi/crypto"
 	ids "github.com/luxfi/ids"
 
 	mock "github.com/stretchr/testify/mock"
@@ -25,19 +25,19 @@ type Prompter struct {
 }
 
 // CaptureAddress provides a mock function with given fields: promptStr
-func (_m *Prompter) CaptureAddress(promptStr string) (common.Address, error) {
+func (_m *Prompter) CaptureAddress(promptStr string) (crypto.Address, error) {
 	ret := _m.Called(promptStr)
 
-	var r0 common.Address
+	var r0 crypto.Address
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (common.Address, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (crypto.Address, error)); ok {
 		return rf(promptStr)
 	}
-	if rf, ok := ret.Get(0).(func(string) common.Address); ok {
+	if rf, ok := ret.Get(0).(func(string) crypto.Address); ok {
 		r0 = rf(promptStr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(common.Address)
+			r0 = ret.Get(0).(crypto.Address)
 		}
 	}
 

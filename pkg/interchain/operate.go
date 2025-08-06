@@ -6,15 +6,15 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 )
 
 func GetNextMessageID(
 	rpcURL string,
-	messengerAddress common.Address,
+	messengerAddress crypto.Address,
 	destinationBlockchainID ids.ID,
 ) (ids.ID, error) {
 	out, err := contract.CallToMethod(
@@ -31,7 +31,7 @@ func GetNextMessageID(
 
 func MessageReceived(
 	rpcURL string,
-	messengerAddress common.Address,
+	messengerAddress crypto.Address,
 	messageID ids.ID,
 ) (bool, error) {
 	out, err := contract.CallToMethod(
@@ -48,39 +48,39 @@ func MessageReceived(
 
 func SendCrossChainMessage(
 	rpcURL string,
-	messengerAddress common.Address,
+	messengerAddress crypto.Address,
 	privateKey string,
 	destinationBlockchainID ids.ID,
-	destinationAddress common.Address,
+	destinationAddress crypto.Address,
 	message []byte,
 ) (*types.Transaction, *types.Receipt, error) {
 	type FeeInfo struct {
-		FeeTokenAddress common.Address
+		FeeTokenAddress crypto.Address
 		Amount          *big.Int
 	}
 	type Params struct {
 		DestinationBlockchainID [32]byte
-		DestinationAddress      common.Address
+		DestinationAddress      crypto.Address
 		FeeInfo                 FeeInfo
 		RequiredGasLimit        *big.Int
-		AllowedRelayerAddresses []common.Address
+		AllowedRelayerAddresses []crypto.Address
 		Message                 []byte
 	}
 	params := Params{
 		DestinationBlockchainID: destinationBlockchainID,
 		DestinationAddress:      destinationAddress,
 		FeeInfo: FeeInfo{
-			FeeTokenAddress: common.Address{},
+			FeeTokenAddress: crypto.Address{},
 			Amount:          big.NewInt(0),
 		},
 		RequiredGasLimit:        big.NewInt(1),
-		AllowedRelayerAddresses: []common.Address{},
+		AllowedRelayerAddresses: []crypto.Address{},
 		Message:                 message,
 	}
 	return contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		messengerAddress,
 		nil,
@@ -95,19 +95,19 @@ func SendCrossChainMessage(
 
 type WarpMessageReceipt struct {
 	ReceivedMessageNonce *big.Int
-	RelayerRewardAddress common.Address
+	RelayerRewardAddress crypto.Address
 }
 type WarpFeeInfo struct {
-	FeeTokenAddress common.Address
+	FeeTokenAddress crypto.Address
 	Amount          *big.Int
 }
 type WarpMessage struct {
 	MessageNonce            *big.Int
-	OriginSenderAddress     common.Address
+	OriginSenderAddress     crypto.Address
 	DestinationBlockchainID [32]byte
-	DestinationAddress      common.Address
+	DestinationAddress      crypto.Address
 	RequiredGasLimit        *big.Int
-	AllowedRelayerAddresses []common.Address
+	AllowedRelayerAddresses []crypto.Address
 	Receipts                []WarpMessageReceipt
 	Message                 []byte
 }

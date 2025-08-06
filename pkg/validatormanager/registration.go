@@ -11,7 +11,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/models"
@@ -22,8 +21,10 @@ import (
 	sdkutils "github.com/luxfi/cli/sdk/utils"
 	"github.com/luxfi/cli/sdk/validator"
 	"github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/interfaces"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/proto/pb/platformvm"
@@ -37,7 +38,7 @@ import (
 
 func InitializeValidatorRegistrationPoSNative(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	managerOwnerPrivateKey string,
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
@@ -47,12 +48,12 @@ func InitializeValidatorRegistrationPoSNative(
 	delegationFeeBips uint16,
 	minStakeDuration time.Duration,
 	stakeAmount *big.Int,
-	rewardRecipient common.Address,
+	rewardRecipient crypto.Address,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
 	type PChainOwner struct {
 		Threshold uint32
-		Addresses []common.Address
+		Addresses []crypto.Address
 	}
 
 	type ValidatorRegistrationInput struct {
@@ -65,14 +66,14 @@ func InitializeValidatorRegistrationPoSNative(
 
 	balanceOwnersAux := PChainOwner{
 		Threshold: balanceOwners.Threshold,
-		Addresses: sdkutils.Map(balanceOwners.Addresses, func(addr ids.ShortID) common.Address {
-			return common.BytesToAddress(addr[:])
+		Addresses: sdkutils.Map(balanceOwners.Addresses, func(addr ids.ShortID) crypto.Address {
+			return crypto.BytesToAddress(addr[:])
 		}),
 	}
 	disableOwnersAux := PChainOwner{
 		Threshold: disableOwners.Threshold,
-		Addresses: sdkutils.Map(disableOwners.Addresses, func(addr ids.ShortID) common.Address {
-			return common.BytesToAddress(addr[:])
+		Addresses: sdkutils.Map(disableOwners.Addresses, func(addr ids.ShortID) crypto.Address {
+			return crypto.BytesToAddress(addr[:])
 		}),
 	}
 
@@ -80,7 +81,7 @@ func InitializeValidatorRegistrationPoSNative(
 		return contract.TxToMethod(
 			rpcURL,
 			false,
-			common.Address{},
+			crypto.Address{},
 			managerOwnerPrivateKey,
 			managerAddress,
 			stakeAmount,
@@ -100,7 +101,7 @@ func InitializeValidatorRegistrationPoSNative(
 	return contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		managerOwnerPrivateKey,
 		managerAddress,
 		stakeAmount,
@@ -122,9 +123,9 @@ func InitializeValidatorRegistrationPoSNative(
 // step 1 of flow for adding a new validator
 func InitializeValidatorRegistrationPoA(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	generateRawTxOnly bool,
-	managerOwnerAddress common.Address,
+	managerOwnerAddress crypto.Address,
 	managerOwnerPrivateKey string,
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
@@ -136,18 +137,18 @@ func InitializeValidatorRegistrationPoA(
 ) (*types.Transaction, *types.Receipt, error) {
 	type PChainOwner struct {
 		Threshold uint32
-		Addresses []common.Address
+		Addresses []crypto.Address
 	}
 	balanceOwnersAux := PChainOwner{
 		Threshold: balanceOwners.Threshold,
-		Addresses: sdkutils.Map(balanceOwners.Addresses, func(addr ids.ShortID) common.Address {
-			return common.BytesToAddress(addr[:])
+		Addresses: sdkutils.Map(balanceOwners.Addresses, func(addr ids.ShortID) crypto.Address {
+			return crypto.BytesToAddress(addr[:])
 		}),
 	}
 	disableOwnersAux := PChainOwner{
 		Threshold: disableOwners.Threshold,
-		Addresses: sdkutils.Map(disableOwners.Addresses, func(addr ids.ShortID) common.Address {
-			return common.BytesToAddress(addr[:])
+		Addresses: sdkutils.Map(disableOwners.Addresses, func(addr ids.ShortID) crypto.Address {
+			return crypto.BytesToAddress(addr[:])
 		}),
 	}
 	if useACP99 {
@@ -204,7 +205,7 @@ func GetRegisterL1ValidatorMessage(
 	aggregatorQuorumPercentage uint64,
 	subnetID ids.ID,
 	blockchainID ids.ID,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	nodeID ids.NodeID,
 	blsPublicKey [48]byte,
 	expiry uint64,
@@ -302,7 +303,7 @@ func GetRegisterL1ValidatorMessage(
 
 func PoSWeightToValue(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	weight uint64,
 ) (*big.Int, error) {
 	out, err := contract.CallToMethod(
@@ -362,9 +363,9 @@ func GetPChainL1ValidatorRegistrationMessage(
 // last step of flow for adding a new validator
 func CompleteValidatorRegistration(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	generateRawTxOnly bool,
-	ownerAddress common.Address,
+	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
 	l1ValidatorRegistrationSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -402,7 +403,7 @@ func InitValidatorRegistration(
 	isPos bool,
 	delegationFee uint16,
 	stakeDuration time.Duration,
-	rewardRecipient common.Address,
+	rewardRecipient crypto.Address,
 	validatorManagerAddressStr string,
 	useACP99 bool,
 	initiateTxHash string,
@@ -424,8 +425,8 @@ func InitValidatorRegistration(
 	if err != nil {
 		return nil, ids.Empty, nil, err
 	}
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
-	ownerAddress := common.HexToAddress(ownerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
+	ownerAddress := crypto.HexToAddress(ownerAddressStr)
 
 	alreadyInitialized := initiateTxHash != ""
 	if validationID, err := validator.GetValidationID(
@@ -481,7 +482,7 @@ func InitValidatorRegistration(
 			}
 			ux.Logger.PrintToUser(fmt.Sprintf("Validator staked amount: %d", stakeAmount))
 		} else {
-			managerAddress = common.HexToAddress(validatorManagerAddressStr)
+			managerAddress = crypto.HexToAddress(validatorManagerAddressStr)
 			tx, receipt, err = InitializeValidatorRegistrationPoA(
 				rpcURL,
 				managerAddress,
@@ -565,7 +566,7 @@ func FinishValidatorRegistration(
 	if err != nil {
 		return nil, err
 	}
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
 	signedMessage, err := GetPChainL1ValidatorRegistrationMessage(
 		ctx,
 		network,
@@ -590,7 +591,7 @@ func FinishValidatorRegistration(
 			client.Close()
 		}
 	}
-	ownerAddress := common.HexToAddress(ownerAddressStr)
+	ownerAddress := crypto.HexToAddress(ownerAddressStr)
 	tx, _, err := CompleteValidatorRegistration(
 		rpcURL,
 		managerAddress,
@@ -642,7 +643,7 @@ func SearchForRegisterL1ValidatorMessage(
 		logs, err := client.FilterLogs(interfaces.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []common.Address{subnetEvmWarp.Module.Address},
+			Addresses: []crypto.Address{subnetEvmWarp.Module.Address},
 		})
 		if err != nil {
 			return nil, err

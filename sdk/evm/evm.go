@@ -5,6 +5,7 @@ package evm
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -12,19 +13,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/cli/sdk/constants"
 	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/params"
+	evmParams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/evm/predicate"
 	subnetEvmUtils "github.com/luxfi/evm/utils"
+	ethereum "github.com/luxfi/geth"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/params"
 	luxWarp "github.com/luxfi/warp"
 )
 
@@ -52,6 +54,27 @@ type Client struct {
 }
 
 // indicates if the given rpc url has schema or not
+// HexToAddress converts hex string to crypto.Address
+func HexToAddress(s string) crypto.Address {
+	// Remove 0x prefix if present
+	if len(s) >= 2 && s[0:2] == "0x" {
+		s = s[2:]
+	}
+	b, _ := hex.DecodeString(s)
+	return crypto.BytesToAddress(b)
+}
+
+// toCommon converts crypto.Address to common.Address for geth compatibility
+func toCommon(addr crypto.Address) common.Address {
+	return common.BytesToAddress(addr[:])
+}
+
+// toCommonPtr converts crypto.Address to *common.Address for geth compatibility
+func toCommonPtr(addr crypto.Address) *common.Address {
+	a := toCommon(addr)
+	return &a
+}
+
 func HasScheme(rpcURL string) (bool, error) {
 	if parsedURL, err := url.Parse(rpcURL); err != nil {
 		if !strings.Contains(err.Error(), "first path segment in URL cannot contain colon") {
@@ -161,11 +184,11 @@ func (client Client) ContractAlreadyDeployed(
 func (client Client) GetContractBytecode(
 	contractAddressStr string,
 ) ([]byte, error) {
-	contractAddress := common.HexToAddress(contractAddressStr)
+	contractAddress := HexToAddress(contractAddressStr)
 	code, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) ([]byte, error) {
-			return client.EthClient.CodeAt(ctx, contractAddress, nil)
+			return client.EthClient.CodeAt(ctx, toCommon(contractAddress), nil)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -198,11 +221,11 @@ func (client Client) GetPrivateKeyBalance(
 func (client Client) GetAddressBalance(
 	addressStr string,
 ) (*big.Int, error) {
-	address := common.HexToAddress(addressStr)
+	address := HexToAddress(addressStr)
 	balance, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) (*big.Int, error) {
-			return client.EthClient.BalanceAt(ctx, address, nil)
+			return client.EthClient.BalanceAt(ctx, toCommon(address), nil)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -218,11 +241,11 @@ func (client Client) GetAddressBalance(
 func (client Client) NonceAt(
 	addressStr string,
 ) (uint64, error) {
-	address := common.HexToAddress(addressStr)
+	address := HexToAddress(addressStr)
 	nonce, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) (uint64, error) {
-			return client.EthClient.NonceAt(ctx, address, nil)
+			return client.EthClient.NonceAt(ctx, toCommon(address), nil)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -292,7 +315,7 @@ func (client Client) CalculateTxParams(
 // returns the estimated gas limit
 // supports [repeatsOnFailure] failures
 func (client Client) EstimateGasLimit(
-	msg interfaces.CallMsg,
+	msg ethereum.CallMsg,
 ) (uint64, error) {
 	gasLimit, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
@@ -327,10 +350,10 @@ func (client Client) GetChainID() (*big.Int, error) {
 
 // returns the chain conf
 // supports [repeatsOnFailure] failures
-func (client Client) ChainConfig() (*params.ChainConfigWithUpgradesJSON, error) {
+func (client Client) ChainConfig() (*evmParams.ChainConfigWithUpgradesJSON, error) {
 	conf, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
-		func(ctx context.Context) (*params.ChainConfigWithUpgradesJSON, error) {
+		func(ctx context.Context) (*evmParams.ChainConfigWithUpgradesJSON, error) {
 			return client.EthClient.ChainConfig(ctx)
 		},
 		repeatsOnFailure,
@@ -399,7 +422,7 @@ func (client Client) FundAddress(
 	if err != nil {
 		return nil, err
 	}
-	targetAddress := common.HexToAddress(targetAddressStr)
+	targetAddress := HexToAddress(targetAddressStr)
 	chainID, err := client.GetChainID()
 	if err != nil {
 		return nil, err
@@ -407,7 +430,7 @@ func (client Client) FundAddress(
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:   chainID,
 		Nonce:     nonce,
-		To:        &targetAddress,
+		To:        toCommonPtr(targetAddress),
 		Gas:       nativeTransferGas,
 		GasFeeCap: gasFeeCap,
 		GasTipCap: gasTipCap,
@@ -436,7 +459,11 @@ func (client Client) IssueTx(
 	txStr string,
 ) error {
 	tx := new(types.Transaction)
-	if err := tx.UnmarshalBinary(common.FromHex(txStr)); err != nil {
+	txBytes, err := hex.DecodeString(txStr)
+	if err != nil {
+		return err
+	}
+	if err := tx.UnmarshalBinary(txBytes); err != nil {
 		return err
 	}
 	if err := client.SendTransaction(tx); err != nil {
@@ -489,10 +516,10 @@ func (client Client) WaitForEVMBootstrapped(timeout time.Duration) error {
 // including [warpMessage] in the tx accesslist
 // if [generateRawTxOnly] is set, it generates a similar, unsigned tx, with given [from] address
 func (client Client) TransactWithWarpMessage(
-	from common.Address,
+	from crypto.Address,
 	privateKeyStr string,
 	warpMessage *luxWarp.Message,
-	contract common.Address,
+	contract crypto.Address,
 	callData []byte,
 	value *big.Int,
 	generateRawTxOnly bool,
@@ -502,7 +529,7 @@ func (client Client) TransactWithWarpMessage(
 		privateKey *ecdsa.PrivateKey
 		err        error
 	)
-	if privateKeyStr == "" && from == (common.Address{}) {
+	if privateKeyStr == "" && from == (crypto.Address{}) {
 		return nil, fmt.Errorf("from address and private key can't be both empty at GetTxToMethodWithWarpMessage")
 	}
 	if !generateRawTxOnly && privateKeyStr == "" {
@@ -513,7 +540,7 @@ func (client Client) TransactWithWarpMessage(
 		if err != nil {
 			return nil, err
 		}
-		if from == (common.Address{}) {
+		if from == (crypto.Address{}) {
 			from = crypto.PubkeyToAddress(privateKey.PublicKey)
 		}
 	}
@@ -531,9 +558,9 @@ func (client Client) TransactWithWarpMessage(
 			StorageKeys: subnetEvmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessage.Bytes())),
 		},
 	}
-	msg := interfaces.CallMsg{
-		From:       from,
-		To:         &contract,
+	msg := ethereum.CallMsg{
+		From:       toCommon(from),
+		To:         toCommonPtr(contract),
 		GasPrice:   nil,
 		GasTipCap:  gasTipCap,
 		GasFeeCap:  gasFeeCap,
@@ -551,7 +578,7 @@ func (client Client) TransactWithWarpMessage(
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:    chainID,
 		Nonce:      nonce,
-		To:         &contract,
+		To:         toCommonPtr(contract),
 		Gas:        gasLimit,
 		GasFeeCap:  gasFeeCap,
 		GasTipCap:  gasTipCap,
@@ -585,7 +612,7 @@ func (client Client) BlockByNumber(n *big.Int) (*types.Block, error) {
 
 // get logs as given by [query]
 // supports [repeatsOnFailure] failures
-func (client Client) FilterLogs(query interfaces.FilterQuery) ([]types.Log, error) {
+func (client Client) FilterLogs(query ethereum.FilterQuery) ([]types.Log, error) {
 	logs, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) ([]types.Log, error) {
@@ -699,7 +726,7 @@ func (client Client) CreateDummyBlocks(
 			nonce = nonceFromAPI
 		}
 		// send Big1 to himself
-		tx := types.NewTransaction(nonce, addr, common.Big1, params.TxGas, gasPrice, nil)
+		tx := types.NewTransaction(nonce, toCommon(addr), common.Big1, params.TxGas, gasPrice, nil)
 		triggerTx, err := types.SignTx(tx, txSigner, privKey)
 		if err != nil {
 			return fmt.Errorf("types.SignTx failure at step %d: %w", i, err)

@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 
-	eth_crypto "github.com/ethereum/go-ethereum/crypto"
+	eth_crypto "github.com/luxfi/crypto"
 	"go.uber.org/zap"
 )
 
@@ -246,7 +246,12 @@ func decodePrivateKey(enc string) (*secp256k1.PrivateKey, error) {
 }
 
 func (m *SoftKey) C() string {
-	ecdsaPrv := m.privKey.ToECDSA()
+	// Convert private key bytes to ECDSA format
+	privKeyBytes := m.privKey.Bytes()
+	ecdsaPrv, err := eth_crypto.ToECDSA(privKeyBytes[:])
+	if err != nil {
+		return ""
+	}
 	pub := ecdsaPrv.PublicKey
 
 	addr := eth_crypto.PubkeyToAddress(pub)

@@ -11,13 +11,13 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/sdk/evm"
 	sdkUtils "github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
 	luxWarp "github.com/luxfi/warp"
 )
@@ -289,7 +289,7 @@ func ParseSpec(
 }
 
 func idempotentSigner(
-	_ common.Address,
+	_ crypto.Address,
 	tx *types.Transaction,
 ) (*types.Transaction, error) {
 	return tx, nil
@@ -301,16 +301,16 @@ func idempotentSigner(
 func TxToMethod(
 	rpcURL string,
 	generateRawTxOnly bool,
-	from common.Address,
+	from crypto.Address,
 	privateKey string,
-	contractAddress common.Address,
+	contractAddress crypto.Address,
 	payment *big.Int,
 	description string,
 	errorSignatureToError map[string]error,
 	methodSpec string,
 	params ...interface{},
 ) (*types.Transaction, *types.Receipt, error) {
-	if privateKey == "" && from == (common.Address{}) {
+	if privateKey == "" && from == (crypto.Address{}) {
 		return nil, nil, fmt.Errorf("from address and private key can't be both empty at TxToMethod")
 	}
 	if !generateRawTxOnly && privateKey == "" {
@@ -398,9 +398,9 @@ func TxToMethod(
 func TxToMethodWithWarpMessage(
 	rpcURL string,
 	generateRawTxOnly bool,
-	from common.Address,
+	from crypto.Address,
 	privateKey string,
-	contractAddress common.Address,
+	contractAddress crypto.Address,
 	warpMessage *luxWarp.Message,
 	payment *big.Int,
 	description string,
@@ -408,7 +408,7 @@ func TxToMethodWithWarpMessage(
 	methodSpec string,
 	params ...interface{},
 ) (*types.Transaction, *types.Receipt, error) {
-	if privateKey == "" && from == (common.Address{}) {
+	if privateKey == "" && from == (crypto.Address{}) {
 		return nil, nil, fmt.Errorf("from address and private key can't be both empty at TxToMethodWithWarpMessage")
 	}
 	if !generateRawTxOnly && privateKey == "" {
@@ -509,9 +509,9 @@ func handleFailedReceiptStatus(
 
 func DebugTraceCall(
 	rpcURL string,
-	from common.Address,
+	from crypto.Address,
 	privateKey string,
-	contractAddress common.Address,
+	contractAddress crypto.Address,
 	payment *big.Int,
 	methodSpec string,
 	params ...interface{},
@@ -536,7 +536,7 @@ func DebugTraceCall(
 		return nil, err
 	}
 	defer client.Close()
-	if from == (common.Address{}) {
+	if from == (crypto.Address{}) {
 		pk, err := crypto.HexToECDSA(privateKey)
 		if err != nil {
 			return nil, err
@@ -557,7 +557,7 @@ func DebugTraceCall(
 
 func CallToMethod(
 	rpcURL string,
-	contractAddress common.Address,
+	contractAddress crypto.Address,
 	methodSpec string,
 	params ...interface{},
 ) ([]interface{}, error) {
@@ -607,10 +607,10 @@ func DeployContract(
 	binBytes []byte,
 	methodSpec string,
 	params ...interface{},
-) (common.Address, error) {
+) (crypto.Address, error) {
 	_, methodABI, err := ParseSpec(methodSpec, nil, true, false, false, false, params...)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	metadata := &bind.MetaData{
 		ABI: methodABI,
@@ -618,29 +618,29 @@ func DeployContract(
 	}
 	abi, err := metadata.GetAbi()
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	bin := common.FromHex(metadata.Bin)
 	if len(bin) == 0 {
-		return common.Address{}, fmt.Errorf("failure on given binary for smart contract: zero len")
+		return crypto.Address{}, fmt.Errorf("failure on given binary for smart contract: zero len")
 	}
 	client, err := evm.GetClient(rpcURL)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	defer client.Close()
 	txOpts, err := client.GetTxOptsWithSigner(privateKey)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	address, tx, _, err := bind.DeployContract(txOpts, *abi, bin, client.EthClient, params...)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	if _, success, err := client.WaitForTransaction(tx); err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	} else if !success {
-		return common.Address{}, ErrFailedReceiptStatus
+		return crypto.Address{}, ErrFailedReceiptStatus
 	}
 	return address, nil
 }
@@ -662,6 +662,6 @@ func UnpackLog(
 	if err != nil {
 		return err
 	}
-	contract := bind.NewBoundContract(common.Address{}, *abi, nil, nil, nil)
+	contract := bind.NewBoundContract(crypto.Address{}, *abi, nil, nil, nil)
 	return contract.UnpackLog(event, eventName, log)
 }

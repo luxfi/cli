@@ -7,7 +7,7 @@ import (
 
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth/core/types"
-	warp "github.com/luxfi/warp"
+	warp "github.com/luxfi/node/vms/platformvm/warp"
 )
 
 // get all unsigned warp messages contained in [logs]

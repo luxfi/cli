@@ -20,6 +20,11 @@ type NetworkData struct {
 	RPCVersion   int
 }
 
+type MultisigTxInfo struct {
+	Threshold uint32   `json:"threshold"`
+	Addresses []string `json:"addresses"`
+}
+
 type PermissionlessValidators struct {
 	TxID ids.ID
 }
