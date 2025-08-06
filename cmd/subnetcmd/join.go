@@ -318,7 +318,9 @@ but until the node is whitelisted, it will not be able to validate this subnet.`
 
 	ux.Logger.PrintToUser("VM binary written to %s", vmPath)
 
-	if err := plugins.EditConfigFile(app, subnetIDStr, networkLower, luxConfigPath, forceWrite); err != nil {
+	// Get subnet luxd config file path (empty for now, can be set later if needed)
+	subnetLuxdConfigFile := ""
+	if err := plugins.EditConfigFile(app, subnetIDStr, network, luxConfigPath, forceWrite, subnetLuxdConfigFile); err != nil {
 		return err
 	}
 	return nil
@@ -560,7 +562,7 @@ take effect.`
 	ux.Logger.PrintToUser(msg, vmPath, subnetID, networkID, subnetID, subnetID)
 }
 
-func getAssetBalance(ctx context.Context, pClient *platformvm.Client, addr string, assetID ids.ID) (uint64, error) {
+func getAssetBalance(ctx context.Context, pClient platformvm.Client, addr string, assetID ids.ID) (uint64, error) {
 	pID, err := address.ParseToID(addr)
 	if err != nil {
 		return 0, err
