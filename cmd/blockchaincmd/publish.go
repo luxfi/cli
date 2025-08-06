@@ -21,8 +21,8 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/lpm/types"
 	"github.com/luxfi/node/version"
 	"gopkg.in/yaml.v3"
 )

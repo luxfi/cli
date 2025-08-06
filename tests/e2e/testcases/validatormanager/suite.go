@@ -18,12 +18,12 @@ import (
 	"github.com/luxfi/cli/sdk/evm"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/txs"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

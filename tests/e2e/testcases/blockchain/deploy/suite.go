@@ -9,7 +9,6 @@ import (
 	"regexp"
 	"runtime"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/cmd"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/models"
@@ -17,6 +16,7 @@ import (
 	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/geth/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

@@ -20,11 +20,11 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/warp"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 type ACP99ValidatorManagerSettings struct {
-	Admin                  common.Address
+	Admin                  crypto.Address
 	SubnetID               [32]byte
 	ChurnPeriodSeconds     uint64
 	MaximumChurnPercentage uint8
@@ -44,19 +44,19 @@ type NativeTokenValidatorManagerSettingsV1_0_0 struct {
 	MinimumDelegationFeeBips uint16
 	MaximumStakeMultiplier   uint8
 	WeightToValueFactor      *big.Int
-	RewardCalculator         common.Address
+	RewardCalculator         crypto.Address
 	UptimeBlockchainID       [32]byte
 }
 
 type NativeTokenValidatorManagerSettingsV2_0_0 struct {
-	Manager                  common.Address
+	Manager                  crypto.Address
 	MinimumStakeAmount       *big.Int
 	MaximumStakeAmount       *big.Int
 	MinimumStakeDuration     uint64
 	MinimumDelegationFeeBips uint16
 	MaximumStakeMultiplier   uint8
 	WeightToValueFactor      *big.Int
-	RewardCalculator         common.Address
+	RewardCalculator         crypto.Address
 	UptimeBlockchainID       [32]byte
 }
 
@@ -199,7 +199,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	network network.Network,
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
 ) (*warp.UnsignedMessage, error) {
 	validators := []warpMessage.SubnetToL1ConversionValidatorData{}
@@ -248,7 +248,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 // to verify p-chain already processed the associated ConvertSubnetToL1Tx
 func InitializeValidatorsSet(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	privateKey string,
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
@@ -263,7 +263,7 @@ func InitializeValidatorsSet(
 	type SubnetConversionData struct {
 		SubnetID                     [32]byte
 		ValidatorManagerBlockchainID [32]byte
-		ValidatorManagerAddress      common.Address
+		ValidatorManagerAddress      crypto.Address
 		InitialValidators            []InitialValidator
 	}
 	validators := []InitialValidator{}
@@ -283,7 +283,7 @@ func InitializeValidatorsSet(
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		managerAddress,
 		subnetConversionSignedMessage,
@@ -301,7 +301,7 @@ func InitializeValidatorsSet(
 // In other cases, returns validatormanagertypes.UndefinedValidatorManagement
 func GetValidatorManagerType(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 ) validatormanagertypes.ValidatorManagementType {
 	// verify it is PoS
 	if _, err := PoSWeightToValue(rpcURL, managerAddress, 0); err == nil {

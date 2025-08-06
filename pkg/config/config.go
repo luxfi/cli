@@ -28,3 +28,24 @@ func (*Config) LoadNodeConfig() (string, error) {
 	}
 	return string(configStr), nil
 }
+
+func (*Config) GetConfigStringValue(key string) string {
+	return viper.GetString(key)
+}
+
+func (*Config) ConfigValueIsSet(key string) bool {
+	return viper.IsSet(key)
+}
+
+func (*Config) ConfigFileExists() bool {
+	return viper.ConfigFileUsed() != ""
+}
+
+func (*Config) GetConfigBoolValue(key string) bool {
+	return viper.GetBool(key)
+}
+
+func (*Config) SetConfigValue(key string, value interface{}) error {
+	viper.Set(key, value)
+	return viper.WriteConfig()
+}

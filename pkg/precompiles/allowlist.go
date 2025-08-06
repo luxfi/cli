@@ -6,20 +6,20 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/crypto"
 )
 
 func SetAdmin(
 	rpcURL string,
-	precompile common.Address,
+	precompile crypto.Address,
 	privateKey string,
-	toSet common.Address,
+	toSet crypto.Address,
 ) error {
 	_, _, err := contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		precompile,
 		nil,
@@ -33,14 +33,14 @@ func SetAdmin(
 
 func SetManager(
 	rpcURL string,
-	precompile common.Address,
+	precompile crypto.Address,
 	privateKey string,
-	toSet common.Address,
+	toSet crypto.Address,
 ) error {
 	_, _, err := contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		precompile,
 		nil,
@@ -54,14 +54,14 @@ func SetManager(
 
 func SetEnabled(
 	rpcURL string,
-	precompile common.Address,
+	precompile crypto.Address,
 	privateKey string,
-	toSet common.Address,
+	toSet crypto.Address,
 ) error {
 	_, _, err := contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		precompile,
 		nil,
@@ -75,14 +75,14 @@ func SetEnabled(
 
 func SetNone(
 	rpcURL string,
-	precompile common.Address,
+	precompile crypto.Address,
 	privateKey string,
-	toSet common.Address,
+	toSet crypto.Address,
 ) error {
 	_, _, err := contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		precompile,
 		nil,
@@ -96,8 +96,8 @@ func SetNone(
 
 func ReadAllowList(
 	rpcURL string,
-	precompile common.Address,
-	toQuery common.Address,
+	precompile crypto.Address,
+	toQuery crypto.Address,
 ) (*big.Int, error) {
 	out, err := contract.CallToMethod(
 		rpcURL,

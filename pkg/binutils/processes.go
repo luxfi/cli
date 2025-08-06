@@ -18,7 +18,6 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/log/level"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/netrunner/utils"
@@ -72,7 +71,7 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	}
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
 		DisplayLevel: logLevel,
-		LogLevel:     level.Off,
+		LogLevel:     luxlog.OffLevel,
 	})
 	log, err := logFactory.Make("grpc-client")
 	if err != nil {
@@ -107,8 +106,8 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 // NewGRPCClient hides away the details (params) of creating a gRPC server
 func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
-		DisplayLevel: level.Info,
-		LogLevel:     level.Off,
+		DisplayLevel: luxlog.InfoLevel,
+		LogLevel:     luxlog.OffLevel,
 	})
 	log, err := logFactory.Make("grpc-server")
 	if err != nil {

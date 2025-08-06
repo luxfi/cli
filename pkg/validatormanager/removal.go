@@ -27,14 +27,14 @@ import (
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 func InitializeValidatorRemoval(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	generateRawTxOnly bool,
-	managerOwnerAddress common.Address,
+	managerOwnerAddress crypto.Address,
 	privateKey string,
 	validationID ids.ID,
 	isPoS bool,
@@ -48,7 +48,7 @@ func InitializeValidatorRemoval(
 				return contract.TxToMethod(
 					rpcURL,
 					false,
-					common.Address{},
+					crypto.Address{},
 					privateKey,
 					managerAddress,
 					big.NewInt(0),
@@ -64,7 +64,7 @@ func InitializeValidatorRemoval(
 			return contract.TxToMethodWithWarpMessage(
 				rpcURL,
 				false,
-				common.Address{},
+				crypto.Address{},
 				privateKey,
 				managerAddress,
 				uptimeProofSignedMessage,
@@ -81,7 +81,7 @@ func InitializeValidatorRemoval(
 			return contract.TxToMethod(
 				rpcURL,
 				false,
-				common.Address{},
+				crypto.Address{},
 				privateKey,
 				managerAddress,
 				big.NewInt(0),
@@ -97,7 +97,7 @@ func InitializeValidatorRemoval(
 		return contract.TxToMethodWithWarpMessage(
 			rpcURL,
 			false,
-			common.Address{},
+			crypto.Address{},
 			privateKey,
 			managerAddress,
 			uptimeProofSignedMessage,
@@ -205,8 +205,8 @@ func InitValidatorRemoval(
 	if err != nil {
 		return nil, ids.Empty, nil, err
 	}
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
-	ownerAddress := common.HexToAddress(ownerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
+	ownerAddress := crypto.HexToAddress(ownerAddressStr)
 	validationID, err := validator.GetValidationID(
 		rpcURL,
 		managerAddress,
@@ -317,9 +317,9 @@ func InitValidatorRemoval(
 
 func CompleteValidatorRemoval(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	generateRawTxOnly bool,
-	ownerAddress common.Address,
+	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
 	subnetValidatorRegistrationSignedMessage *warp.Message,
 	useACP99 bool,
@@ -369,7 +369,7 @@ func FinishValidatorRemoval(
 	useACP99 bool,
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
 	subnetID, err := contract.GetSubnetID(
 		app,
 		network,
@@ -402,7 +402,7 @@ func FinishValidatorRemoval(
 			client.Close()
 		}
 	}
-	ownerAddress := common.HexToAddress(ownerAddressStr)
+	ownerAddress := crypto.HexToAddress(ownerAddressStr)
 	tx, _, err := CompleteValidatorRemoval(
 		rpcURL,
 		managerAddress,

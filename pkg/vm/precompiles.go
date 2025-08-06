@@ -9,6 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
@@ -17,7 +18,6 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/geth/common"
 )
 
 type Precompile string
@@ -112,7 +112,7 @@ func ConfigureInitialRewardConfig(app *application.Lux) (*rewardmanager.InitialR
 	return config, nil
 }
 
-func getAddressList(initialPrompt string, info string, app *application.Lux) ([]common.Address, bool, error) {
+func getAddressList(initialPrompt string, info string, app *application.Lux) ([]crypto.Address, bool, error) {
 	label := "Address"
 
 	return prompts.CaptureListDecision(

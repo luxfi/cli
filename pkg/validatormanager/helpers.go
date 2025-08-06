@@ -14,7 +14,7 @@ import (
 	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 func GetValidatorNonce(
@@ -48,7 +48,7 @@ func GetValidatorNonce(
 		logs, err := client.FilterLogs(interfaces.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []common.Address{subnetEvmWarp.Module.Address},
+			Addresses: []crypto.Address{subnetEvmWarp.Module.Address},
 		})
 		if err != nil {
 			return 0, err
