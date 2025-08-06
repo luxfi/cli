@@ -13,4 +13,14 @@ type LuxCompatiblity map[string][]string
 type LuxdCompatiblity = LuxCompatiblity
 
 // CLIDependencyMap represents CLI dependency versions
-type CLIDependencyMap map[string]string
+type CLIDependencyMap struct {
+	RPC       int                        `json:"rpc"`
+	Luxd      map[string]NetworkVersions `json:"luxd"`
+	SubnetEVM string                     `json:"subnetevm"`
+}
+
+// NetworkVersions represents versions for a network
+type NetworkVersions struct {
+	LatestVersion  string `json:"latestVersion"`
+	MinimumVersion string `json:"minimumVersion"`
+}
