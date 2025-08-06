@@ -25,3 +25,17 @@ func ValidateJSON(path string) ([]byte, error) {
 
 	return contentBytes, nil
 }
+
+// ReadJSON reads a JSON file and unmarshals it into the provided interface
+func ReadJSON(path string, v interface{}) error {
+	contentBytes, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(contentBytes, v); err != nil {
+		return fmt.Errorf("failed to unmarshal JSON from %s: %w", path, err)
+	}
+
+	return nil
+}

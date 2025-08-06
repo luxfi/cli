@@ -36,7 +36,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	require.NoError(t, err)
 	_, err = TmpNetCreate(
 		context.Background(),
-		app.Log,
+		NewLoggerAdapter(app.Log),
 		networkDir,
 		"",
 		"",

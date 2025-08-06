@@ -26,7 +26,7 @@ func DownloadLuxdDB(
 	printFunc func(msg string, args ...interface{}),
 ) error {
 	// only for testnet
-	if clusterNetwork.Kind != models.Testnet {
+	if clusterNetwork.Kind() != models.Testnet {
 		return nil
 	}
 	network := network.TestnetNetwork()

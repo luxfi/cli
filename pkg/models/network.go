@@ -3,7 +3,9 @@
 package models
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
 	lux_constants "github.com/luxfi/node/utils/constants"
@@ -93,4 +95,15 @@ func NetworkFromNetworkID(networkID uint32) Network {
 		return Local
 	}
 	return Undefined
+}
+
+// NewLocalNetwork creates a new Local network instance
+func NewLocalNetwork() Network {
+	return Local
+}
+
+// BootstrappingContext returns a context for bootstrapping operations
+func (s Network) BootstrappingContext() (context.Context, func()) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	return ctx, cancel
 }

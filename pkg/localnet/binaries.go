@@ -32,7 +32,7 @@ func SetupLuxdBinary(
 				return "", err
 			}
 		}
-		_, luxdDir, err := binutils.SetupLuxgo(app, luxdVersion)
+		luxdDir, err := binutils.SetupLuxgo(app, luxdVersion)
 		if err != nil {
 			return "", fmt.Errorf("failed setting up luxd binary: %w", err)
 		}

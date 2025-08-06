@@ -25,7 +25,6 @@ import (
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
-	ledger "github.com/luxfi/ledger-lux-go"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/utils/crypto/keychain"
@@ -699,7 +698,7 @@ func GetKeychain(
 		return kc, err
 	}
 	if useLedger {
-		ledgerDevice, err := ledger.New()
+		ledgerDevice, err := binutils.NewLedgerAdapter()
 		if err != nil {
 			return kc, err
 		}
