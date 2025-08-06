@@ -40,6 +40,11 @@ func NewLuxDownloader() GithubDownloader {
 	return &nodeDownloader{}
 }
 
+// NewLuxdDownloader is an alias for NewLuxDownloader for compatibility
+func NewLuxdDownloader() GithubDownloader {
+	return NewLuxDownloader()
+}
+
 func (nodeDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
 	// NOTE: if any of the underlying URLs change (github changes, release file names, etc.) this fails
 	goarch, goos := installer.GetArch()

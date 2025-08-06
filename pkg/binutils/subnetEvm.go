@@ -12,22 +12,24 @@ import (
 
 func SetupSubnetEVM(app *application.Lux, subnetEVMVersion string) (string, string, error) {
 	// Check if already installed
-	binDir := app.GetSubnetEVMBinDir()
+	binDir := filepath.Join(app.GetBaseDir(), constants.EVMInstallDir)
 	subDir := filepath.Join(binDir, subnetEVMBinPrefix+subnetEVMVersion)
 
 	installer := NewInstaller()
-	downloader := NewSubnetEVMDownloader()
-	version, vmDir, err := InstallBinary(
+	downloader := NewEVMDownloader() // Use the existing EVM downloader
+	vmDir, err := InstallBinary(
 		app,
 		subnetEVMVersion,
 		binDir,
 		subDir,
 		subnetEVMBinPrefix,
 		constants.LuxOrg,
-		constants.SubnetEVMRepoName,
-		"",
+		constants.EVMRepoName,
 		downloader,
 		installer,
 	)
-	return version, filepath.Join(vmDir, constants.SubnetEVMBin), err
+	if err != nil {
+		return "", "", err
+	}
+	return subnetEVMVersion, filepath.Join(vmDir, constants.EVMBin), nil
 }

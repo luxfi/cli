@@ -41,6 +41,23 @@ func ErrWrongArgCount(expected, got int) error {
 	return fmt.Errorf("requires %d arg(s), got %d", expected, got)
 }
 
+// E2EConvertIP maps an IP address to an E2E IP address.
+func E2EConvertIP(ip string) string {
+	if suffix := E2ESuffix(ip); suffix != "" {
+		return fmt.Sprintf("172.16.10%s", suffix)
+	}
+	return ""
+}
+
+// E2ESuffix extracts the last octet from an IP address
+func E2ESuffix(ip string) string {
+	addressBits := strings.Split(ip, ".")
+	if len(addressBits) != 4 {
+		return ""
+	}
+	return addressBits[3]
+}
+
 func SetupRealtimeCLIOutput(
 	cmd *exec.Cmd,
 	redirectStdout bool,
@@ -619,4 +636,26 @@ func PointersSlice[T any](input []T) []*T {
 // IsE2E checks if we're running in E2E test mode
 func IsE2E() bool {
 	return os.Getenv("E2E_TEST") == "true"
+}
+
+// GetKeyNames returns all key names in the key directory
+func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
+	files, err := os.ReadDir(keyDir)
+	if err != nil {
+		return nil, err
+	}
+
+	keys := []string{}
+	for _, f := range files {
+		if strings.HasSuffix(f.Name(), ".pk") {
+			keyName := strings.TrimSuffix(f.Name(), ".pk")
+			// Skip ewoq key if includeEwoq is false
+			if !includeEwoq && keyName == "ewoq" {
+				continue
+			}
+			keys = append(keys, keyName)
+		}
+	}
+
+	return keys, nil
 }
