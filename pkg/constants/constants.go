@@ -98,6 +98,44 @@ const (
 	UpgradeFileName     = "upgrade.json"
 	
 	// Config keys
+	ConfigSnapshotsAutoSaveKey   = "SnapshotsAutoSaveEnabled"
+	ConfigUpdatesDisabledKey     = "UpdatesDisabled"
+	
+	// Build environment
+	BuildEnvGolangVersion = "1.24.5"
+	
+	// Docker images and repos
+	LuxdDockerImage = "luxfi/luxd"
+	LuxdGitRepo     = "https://github.com/luxfi/node"
+	LuxdRepoName    = "luxfi/node"
+	
+	// Organizations
+	LuxOrg = "luxfi"
+	
+	// Repo names
+	LuxRepoName = "node"
+	EVMRepoName = "evm"
+	
+	// Install directories
+	LuxInstallDir   = "lux"
+	LuxGoInstallDir = "luxgo"
+	EVMInstallDir   = "evm"
+	
+	// Directories
+	SubnetDir    = "subnets"
+	ReposDir     = "repos"
+	SnapshotsDirName = "snapshots"
+	CustomVMDir  = "customvms"
+	PluginDir    = "plugins"
+	ConfigDir    = "config"
+	KeyDir       = "keys"
+	LPMPluginDir = "lpm-plugins"
+	
+	// File names
+	UpgradeBytesFileName = "upgrade.json"
+	LPMLogName          = "lpm.log"
+	OldConfigFileName   = ".cli-config.json"
+	OldMetricsConfigFileName = ".cli-metrics.json"
 	ConfigLPMAdminAPIEndpointKey = "lpm-admin-api-endpoint"
 	ConfigLPMCredentialsFileKey  = "lpm-credentials-file"
 	
@@ -115,9 +153,7 @@ const (
 	ConfigMetricsEnabledKey        = "metrics-enabled"
 	ConfigAuthorizeCloudAccessKey  = "authorize-cloud-access"
 	
-	// Config file names
-	OldConfigFileName        = ".cli.json"
-	OldMetricsConfigFileName = ".cli.metrics"
+	// Duplicate constants removed - these are already defined above
 	
 	// Environment variables
 	MetricsAPITokenEnvVarName = "METRICS_API_TOKEN"
@@ -126,7 +162,6 @@ const (
 
 	// it's unlikely anyone would want to name a snapshot `default`
 	// but let's add some more entropy
-	SnapshotsDirName             = "snapshots"
 	DefaultSnapshotName          = "default-1654102509"
 	BootstrapSnapshotArchiveName = "bootstrapSnapshot.tar.gz"
 	BootstrapSnapshotLocalPath   = "assets/" + BootstrapSnapshotArchiveName
@@ -136,10 +171,8 @@ const (
 	CliInstallationURL    = "https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh"
 	ExpectedCliInstallErr = "resource temporarily unavailable"
 
-	KeyDir     = "key"
 	KeySuffix  = ".pk"
 	YAMLSuffix = ".yml"
-	ConfigDir  = "config"
 
 	Enable = "enable"
 
@@ -159,15 +192,7 @@ const (
 	DefaultConfigFileName = ".cli"
 	DefaultConfigFileType = "json"
 
-	CustomVMDir = "vms"
-
-	LuxOrg      = "luxfi"
-	LuxRepoName = "node"
-	EVMRepoName = "evm"
 	CliRepoName = "cli"
-
-	LuxInstallDir = "node"
-	EVMInstallDir = "evm"
 
 	EVMBin = "evm"
 
@@ -200,15 +225,11 @@ const (
 
 	// SSH timeouts
 	SSHLongRunningScriptTimeout = 10 * time.Minute
-	LPMLogName                  = "lpm.log"
 	DefaultLuxPackage           = "luxfi/plugins-core"
-	LPMPluginDir                = "lpm_plugins"
 
 	// #nosec G101
 	GithubAPITokenEnvVarName = "LUX_CLI_GITHUB_TOKEN"
 
-	ReposDir       = "repos"
-	SubnetDir      = "subnets"
 	VMDir          = "vms"
 	ChainConfigDir = "chains"
 
@@ -222,7 +243,6 @@ const (
 
 	LuxMaintainers = "luxfi"
 
-	UpgradeBytesFileName      = "upgrade.json"
 	UpgradeBytesLockExtension = ".lock"
 	NotAvailableLabel         = "Not available"
 	BackendCmd                = "cli-backend"
@@ -237,8 +257,6 @@ const (
 
 	SubnetIDLabel     = "SubnetID: "
 	BlockchainIDLabel = "BlockchainID: "
-
-	PluginDir = "plugins"
 
 	Network        = "network"
 	SkipUpdateFlag = "skip-update-check"

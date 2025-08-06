@@ -94,6 +94,10 @@ func (app *Lux) GetLuxBinDir() string {
 	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxInstallDir)
 }
 
+func (app *Lux) GetLuxgoBinDir() string {
+	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxGoInstallDir)
+}
+
 func (app *Lux) GetEVMBinDir() string {
 	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.EVMInstallDir)
 }

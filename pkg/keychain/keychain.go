@@ -66,7 +66,7 @@ func (kc *Keychain) PChainFormattedStrAddresses() ([]string, error) {
 	if len(addrs) == 0 {
 		return nil, fmt.Errorf("no addresses in keychain")
 	}
-	hrp := key.GetHRP(kc.Network.ID)
+	hrp := key.GetHRP(kc.Network.ID())
 	addrsStr := []string{}
 	for _, addr := range addrs {
 		addrStr, err := address.Format("P", hrp, addr[:])
@@ -124,7 +124,7 @@ func GetKeychainFromCmdLineFlags(
 		return nil, ErrMutuallyExlusiveKeySource
 	}
 	switch {
-	case network.Kind == models.Local:
+	case network == models.Local:
 		// prompt the user if no key source was provided
 		if !useEwoq && !useLedger && keyName == "" {
 			var err error
@@ -133,7 +133,7 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network.Kind == models.Devnet:
+	case network == models.Devnet:
 		// prompt the user if no key source was provided
 		if !useEwoq && !useLedger && keyName == "" {
 			var err error
@@ -142,7 +142,7 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network.Kind == models.Testnet:
+	case network == models.Testnet:
 		if useEwoq || keyName == "ewoq" {
 			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
@@ -154,7 +154,7 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network.Kind == models.Mainnet:
+	case network == models.Mainnet:
 		if useEwoq || keyName == "ewoq" {
 			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
@@ -221,14 +221,16 @@ func GetKeychain(
 		return NewKeychain(network, kc, ledgerDevice, ledgerIndices), nil
 	}
 	if useEwoq {
-		sf, err := app.GetKey("ewoq", network, false)
+		keyPath := app.GetKeyPath("ewoq")
+		sf, err := key.LoadSoft(network.ID(), keyPath)
 		if err != nil {
 			return nil, err
 		}
 		kc := sf.KeyChain()
 		return NewKeychain(network, kc, nil, nil), nil
 	}
-	sf, err := app.GetKey(keyName, network, false)
+	keyPath := app.GetKeyPath(keyName)
+	sf, err := key.LoadSoft(network.ID(), keyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -273,10 +275,25 @@ func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]ui
 	return ledgerIndices, nil
 }
 
+// getNetworkEndpoint returns the endpoint for the given network
+func getNetworkEndpoint(network models.Network) string {
+	switch network {
+	case models.Mainnet:
+		return "https://api.lux-test.network" 
+	case models.Testnet:
+		return "https://api.lux-test.network"
+	case models.Local:
+		return "http://127.0.0.1:9630"
+	default:
+		return "http://127.0.0.1:9630"
+	}
+}
+
 // search for a set of indices that pay a given amount
 func searchForFundedLedgerIndices(network models.Network, ledgerDevice keychain.Ledger, amount uint64) ([]uint32, error) {
 	ux.Logger.PrintToUser("Looking for ledger indices to pay for %.9f LUX...", float64(amount)/float64(units.Lux))
-	pClient := platformvm.NewClient(network.Endpoint)
+	endpoint := getNetworkEndpoint(network)
+	pClient := platformvm.NewClient(endpoint)
 	totalBalance := uint64(0)
 	ledgerIndices := []uint32{}
 	for ledgerIndex := uint32(0); ledgerIndex < numLedgerIndicesToSearchForBalance; ledgerIndex++ {
@@ -314,7 +331,7 @@ func showLedgerAddresses(network models.Network, ledgerDevice keychain.Ledger, l
 	}
 	addrStrs := []string{}
 	for _, addr := range addresses {
-		addrStr, err := address.Format("P", key.GetHRP(network.ID), addr[:])
+		addrStr, err := address.Format("P", key.GetHRP(network.ID()), addr[:])
 		if err != nil {
 			return err
 		}
