@@ -4,11 +4,10 @@ package testutils
 
 import (
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/common"
 )
 
-func GenerateEthAddrs(count int) ([]common.Address, error) {
-	addrs := make([]common.Address, count)
+func GenerateEthAddrs(count int) ([]crypto.Address, error) {
+	addrs := make([]crypto.Address, count)
 	for i := 0; i < count; i++ {
 		pk, err := crypto.GenerateKey()
 		if err != nil {

@@ -3,6 +3,7 @@
 package prompts
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -15,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/mod/semver"
@@ -64,7 +65,7 @@ func (comparator *Comparator) Validate(val uint64) error {
 
 type Prompter interface {
 	CapturePositiveBigInt(promptStr string) (*big.Int, error)
-	CaptureAddress(promptStr string) (common.Address, error)
+	CaptureAddress(promptStr string) (crypto.Address, error)
 	CaptureNewFilepath(promptStr string) (string, error)
 	CaptureExistingFilepath(promptStr string) (string, error)
 	CaptureYesNo(promptStr string) (bool, error)
@@ -72,6 +73,7 @@ type Prompter interface {
 	CaptureList(promptStr string, options []string) (string, error)
 	CaptureString(promptStr string) (string, error)
 	CaptureGitURL(promptStr string) (*url.URL, error)
+	CaptureURL(promptStr string) (string, error)
 	CaptureStringAllowEmpty(promptStr string) (string, error)
 	CaptureEmail(promptStr string) (string, error)
 	CaptureIndex(promptStr string, options []any) (int, error)
@@ -331,7 +333,7 @@ func (*realPrompter) CapturePChainAddress(promptStr string, network models.Netwo
 	return prompt.Run()
 }
 
-func (*realPrompter) CaptureAddress(promptStr string) (common.Address, error) {
+func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
 		Validate: validateAddress,
@@ -339,10 +341,16 @@ func (*realPrompter) CaptureAddress(promptStr string) (common.Address, error) {
 
 	addressStr, err := prompt.Run()
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 
-	addressHex := common.HexToAddress(addressStr)
+	// Remove 0x prefix if present
+	addr := addressStr
+	if len(addressStr) >= 2 && addressStr[0:2] == "0x" {
+		addr = addressStr[2:]
+	}
+	b, _ := hex.DecodeString(addr)
+	addressHex := crypto.BytesToAddress(b)
 	return addressHex, nil
 }
 
@@ -419,6 +427,20 @@ func (*realPrompter) CaptureEmail(promptStr string) (string, error) {
 	}
 
 	return str, nil
+}
+
+func (*realPrompter) CaptureURL(promptStr string) (string, error) {
+	prompt := promptui.Prompt{
+		Label:    promptStr,
+		Validate: ValidateURLFormat,
+	}
+
+	urlStr, err := prompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	return urlStr, nil
 }
 
 func (*realPrompter) CaptureStringAllowEmpty(promptStr string) (string, error) {
@@ -556,6 +578,11 @@ func contains[T comparable](list []T, element T) bool {
 		}
 	}
 	return false
+}
+
+// GetKeyOrLedger prompts user to choose between key or ledger
+func GetKeyOrLedger(prompter Prompter, goal string) (bool, error) {
+	return prompter.ChooseKeyOrLedger(goal)
 }
 
 func getIndexInSlice[T comparable](list []T, element T) (int, error) {

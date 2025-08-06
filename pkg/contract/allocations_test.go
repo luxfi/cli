@@ -5,7 +5,7 @@ package contract
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,7 +15,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
 	type test struct {
 		desc            string
 		genesisData     []byte
-		contractAddress common.Address
+		contractAddress crypto.Address
 		expected        bool
 		shouldErr       bool
 	}
@@ -24,21 +24,21 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
 		{
 			desc:            "nil data",
 			genesisData:     nil,
-			contractAddress: common.Address{},
+			contractAddress: crypto.Address{},
 			expected:        false,
 			shouldErr:       true,
 		},
 		{
 			desc:            "not json",
 			genesisData:     []byte("not json"),
-			contractAddress: common.Address{},
+			contractAddress: crypto.Address{},
 			expected:        false,
 			shouldErr:       true,
 		},
 		{
 			desc:            "not evm",
 			genesisData:     []byte("{}"),
-			contractAddress: common.Address{},
+			contractAddress: crypto.Address{},
 			expected:        false,
 			shouldErr:       true,
 		},
@@ -69,7 +69,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
     "alloc": {}
 }
             `),
-			contractAddress: common.Address{},
+			contractAddress: crypto.Address{},
 			expected:        false,
 			shouldErr:       false,
 		},
@@ -105,7 +105,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
     }
 }
             `),
-			contractAddress: common.HexToAddress("0x253b2784c75e510dd0ff1da844684a1ac0aa5fcf"),
+			contractAddress: crypto.HexToAddress("0x253b2784c75e510dd0ff1da844684a1ac0aa5fcf"),
 			expected:        true,
 			shouldErr:       false,
 		},
@@ -140,7 +140,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
     }
 }
             `),
-			contractAddress: common.HexToAddress("0x253b2784c75e510dd0ff1da844684a1ac0aa5fcf"),
+			contractAddress: crypto.HexToAddress("0x253b2784c75e510dd0ff1da844684a1ac0aa5fcf"),
 			expected:        false,
 			shouldErr:       false,
 		},
@@ -176,7 +176,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
     }
 }
             `),
-			contractAddress: common.HexToAddress("0x253b2724c75e510dd0ff1da844684a1ac0aa5fcc"),
+			contractAddress: crypto.HexToAddress("0x253b2724c75e510dd0ff1da844684a1ac0aa5fcc"),
 			expected:        false,
 			shouldErr:       false,
 		},

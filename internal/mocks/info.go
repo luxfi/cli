@@ -5,8 +5,8 @@ package mocks
 import (
 	context "context"
 
-	info "github.com/luxfi/node/api/info"
 	ids "github.com/luxfi/ids"
+	info "github.com/luxfi/node/api/info"
 
 	mock "github.com/stretchr/testify/mock"
 

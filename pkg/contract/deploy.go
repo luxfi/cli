@@ -6,7 +6,7 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 //go:embed contracts/bin/Token.bin
@@ -16,9 +16,9 @@ func DeployERC20(
 	rpcURL string,
 	privateKey string,
 	symbol string,
-	funded common.Address,
+	funded crypto.Address,
 	supply *big.Int,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	return DeployContract(
 		rpcURL,
 		privateKey,

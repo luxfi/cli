@@ -30,7 +30,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	commonLuxd "github.com/luxfi/node/wallet/subnet/primary/common"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 	"go.uber.org/zap"
 )
 
@@ -129,7 +129,7 @@ type Subnet struct {
 	RPC string
 
 	// OwnerAddress is address of the owner of the Validator Manager Contract
-	OwnerAddress *common.Address
+	OwnerAddress *crypto.Address
 
 	// BootstrapValidators are bootstrap validators that are included in the ConvertSubnetToL1Tx call
 	// that made Subnet a sovereign L1
@@ -377,7 +377,7 @@ func (c *Subnet) InitializeProofOfAuthority(
 		}
 		client.Close()
 	}
-	managerAddress := common.HexToAddress(validatorManagerAddressStr)
+	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
 	tx, _, err := validatormanager.PoAValidatorManagerInitialize(
 		c.RPC,
 		managerAddress,
@@ -454,7 +454,7 @@ func (c *Subnet) InitializeProofOfStake(
 		}
 		tx, _, err := validatormanager.PoAValidatorManagerInitialize(
 			c.RPC,
-			common.HexToAddress(managerAddress),
+			crypto.HexToAddress(managerAddress),
 			privateKey,
 			c.SubnetID,
 			managerOwnerAddress,
@@ -469,8 +469,8 @@ func (c *Subnet) InitializeProofOfStake(
 	}
 	tx, _, err := validatormanager.PoSValidatorManagerInitialize(
 		c.RPC,
-		common.HexToAddress(managerAddress),
-		common.HexToAddress(specializedManagerAddress),
+		crypto.HexToAddress(managerAddress),
+		crypto.HexToAddress(specializedManagerAddress),
 		managerOwnerPrivateKey,
 		privateKey,
 		c.SubnetID,
@@ -487,7 +487,7 @@ func (c *Subnet) InitializeProofOfStake(
 		network,
 		c.SubnetID,
 		c.BlockchainID,
-		common.HexToAddress(managerAddress),
+		crypto.HexToAddress(managerAddress),
 		c.BootstrapValidators,
 	)
 	if err != nil {
@@ -504,7 +504,7 @@ func (c *Subnet) InitializeProofOfStake(
 
 	tx, _, err = validatormanager.InitializeValidatorsSet(
 		c.RPC,
-		common.HexToAddress(managerAddress),
+		crypto.HexToAddress(managerAddress),
 		privateKey,
 		c.SubnetID,
 		c.BlockchainID,

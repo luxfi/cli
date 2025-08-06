@@ -10,15 +10,15 @@ import (
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/geth/core/types"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 // initializes contract [managerAddress] at [rpcURL], to
 // manage validators on [subnetID] using PoS specific settings
 func PoSValidatorManagerInitialize(
 	rpcURL string,
-	managerAddress common.Address,
-	specializedManagerAddress common.Address,
+	managerAddress crypto.Address,
+	specializedManagerAddress crypto.Address,
 	managerOwnerPrivateKey string,
 	privateKey string,
 	subnetID [32]byte,
@@ -36,7 +36,7 @@ func PoSValidatorManagerInitialize(
 		if tx, receipt, err := contract.TxToMethod(
 			rpcURL,
 			false,
-			common.Address{},
+			crypto.Address{},
 			privateKey,
 			specializedManagerAddress,
 			nil,
@@ -51,7 +51,7 @@ func PoSValidatorManagerInitialize(
 				MinimumDelegationFeeBips: posParams.MinimumDelegationFee,
 				MaximumStakeMultiplier:   posParams.MaximumStakeMultiplier,
 				WeightToValueFactor:      posParams.WeightToValueFactor,
-				RewardCalculator:         common.HexToAddress(posParams.RewardCalculatorAddress),
+				RewardCalculator:         crypto.HexToAddress(posParams.RewardCalculatorAddress),
 				UptimeBlockchainID:       posParams.UptimeBlockchainID,
 			},
 		); err != nil {
@@ -68,7 +68,7 @@ func PoSValidatorManagerInitialize(
 	return contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		managerAddress,
 		nil,
@@ -87,7 +87,7 @@ func PoSValidatorManagerInitialize(
 			MinimumDelegationFeeBips: posParams.MinimumDelegationFee,
 			MaximumStakeMultiplier:   posParams.MaximumStakeMultiplier,
 			WeightToValueFactor:      posParams.WeightToValueFactor,
-			RewardCalculator:         common.HexToAddress(posParams.RewardCalculatorAddress),
+			RewardCalculator:         crypto.HexToAddress(posParams.RewardCalculatorAddress),
 			UptimeBlockchainID:       posParams.UptimeBlockchainID,
 		},
 	)
@@ -95,7 +95,7 @@ func PoSValidatorManagerInitialize(
 
 func PoSWeightToValue(
 	rpcURL string,
-	managerAddress common.Address,
+	managerAddress crypto.Address,
 	weight uint64,
 ) (*big.Int, error) {
 	out, err := contract.CallToMethod(
