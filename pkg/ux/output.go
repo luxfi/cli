@@ -59,6 +59,13 @@ func (ul *UserLog) RedXToUser(msg string, args ...interface{}) {
 	ul.log.Error(formattedMsg)
 }
 
+// GreenCheckmarkToUser prints a green checkmark success message to the user
+func (ul *UserLog) GreenCheckmarkToUser(msg string, args ...interface{}) {
+	formattedMsg := fmt.Sprintf("✓ %s", fmt.Sprintf(msg, args...))
+	fmt.Fprintln(ul.writer, formattedMsg)
+	ul.log.Info(formattedMsg)
+}
+
 // PrintWait does some dot printing to entertain the user
 func PrintWait(cancel chan struct{}) {
 	for {

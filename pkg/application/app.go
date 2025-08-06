@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/types"
+	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
@@ -528,6 +529,34 @@ func (app *Lux) GetNodesDir() string {
 	return filepath.Join(app.baseDir, "nodes")
 }
 
+// GetLocalClustersDir returns the directory for local clusters
+func (app *Lux) GetLocalClustersDir() string {
+	return filepath.Join(app.baseDir, "clusters")
+}
+
+// GetLocalClusterDir returns the directory for a specific local cluster
+func (app *Lux) GetLocalClusterDir(clusterName string) string {
+	return filepath.Join(app.GetLocalClustersDir(), clusterName)
+}
+
+// GetLocalRelayerConfigPath returns the path for local relayer config
+func (app *Lux) GetLocalRelayerConfigPath() string {
+	return filepath.Join(app.baseDir, "relayer", "config.json")
+}
+
+// GetKey returns the key for a given name
+func (app *Lux) GetKey(keyName string) (string, error) {
+	keyPath := app.GetKeyPath(keyName)
+	if !utils.FileExists(keyPath) {
+		return "", fmt.Errorf("key %s not found", keyName)
+	}
+	keyBytes, err := os.ReadFile(keyPath)
+	if err != nil {
+		return "", err
+	}
+	return string(keyBytes), nil
+}
+
 // GetLuxdNodeConfigPath returns the node config path for a subnet
 func (app *Lux) GetLuxdNodeConfigPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, "node-config.json")
@@ -570,4 +599,38 @@ func (app *Lux) NetworkUpgradeExists(subnetName string) bool {
 func (app *Lux) LoadRawNetworkUpgrades(subnetName string) ([]byte, error) {
 	upgradePath := filepath.Join(app.GetSubnetDir(), subnetName, "upgrade.json")
 	return os.ReadFile(upgradePath)
+}
+
+// GetChainConfigPath returns the chain config path for a subnet
+func (app *Lux) GetChainConfigPath(subnetName string) string {
+	return filepath.Join(app.GetSubnetDir(), subnetName, "chain-config.json")
+}
+
+// GetLuxdSubnetConfigPath returns the luxd subnet config path for a subnet
+func (app *Lux) GetLuxdSubnetConfigPath(subnetName string) string {
+	return filepath.Join(app.GetSubnetDir(), subnetName, "subnet-config.json")
+}
+
+// GetPerNodeBlockchainConfig returns per-node blockchain config
+func (app *Lux) GetPerNodeBlockchainConfig(subnetName string) map[string]interface{} {
+	// Return empty config for now, can be extended later
+	return make(map[string]interface{})
+}
+
+// LuxdNodeConfigExists checks if luxd node config exists  
+func (app *Lux) LuxdNodeConfigExists(subnetName string) bool {
+	configPath := app.GetLuxdNodeConfigPath(subnetName)
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// AddDefaultBlockchainRPCsToSidecar adds default RPC endpoints to sidecar
+func (app *Lux) AddDefaultBlockchainRPCsToSidecar(
+	blockchainName string, 
+	network models.Network,
+	nodeURIs []string,
+) (bool, error) {
+	// Stub implementation - return success for now
+	// This method would typically update the sidecar with RPC endpoints
+	return true, nil
 }

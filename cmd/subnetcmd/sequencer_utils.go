@@ -9,7 +9,7 @@ func getBlockTime(sequencer string) int {
 		return 100 // 100ms
 	case "ethereum":
 		return 12000 // 12s
-	case "lux":
+	case "avalanche":
 		return 2000 // 2s
 	case "op":
 		return 2000 // 2s (OP Stack block time)
@@ -23,7 +23,7 @@ func getBlockTime(sequencer string) int {
 // isBasedRollup returns true if the sequencer represents a based rollup (L1-sequenced)
 func isBasedRollup(sequencer string) bool {
 	switch sequencer {
-	case "lux", "ethereum", "lux":
+	case "lux", "ethereum", "avalanche":
 		return true // These are L1s, so it's a based rollup
 	case "op", "external":
 		return false // OP Stack and external sequencers are not based rollups

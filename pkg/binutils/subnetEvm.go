@@ -33,3 +33,13 @@ func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
 	}
 	return filepath.Join(vmDir, constants.EVMBin), nil
 }
+
+// SetupSubnetEVM is an alias for SetupEVM for backward compatibility
+func SetupSubnetEVM(app *application.Lux, evmVersion string) (string, string, error) {
+	binaryPath, err := SetupEVM(app, evmVersion)
+	if err != nil {
+		return "", "", err
+	}
+	// Return empty string for first param, binary path for second param  
+	return "", binaryPath, nil
+}

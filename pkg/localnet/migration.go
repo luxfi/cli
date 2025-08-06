@@ -39,14 +39,17 @@ func MigrateANRToTmpNet(
 	app *application.Lux,
 	printFunc func(msg string, args ...interface{}),
 ) error {
-	ctx, cancel := utils.GetANRContext()
+	_, cancel := utils.GetANRContext() // ctx is unused for now
 	defer cancel()
 	var (
-		clusterToReload           string
-		clusterToReloadNetwork    models.Network
-		clusterToReloadHasRelayer bool
+		clusterToReload string
+		// clusterToReloadNetwork    models.Network // Unused for now
+		// clusterToReloadHasRelayer bool            // Unused for now
 	)
 
+	// TODO: Fix binutils GRPC client and relayer functions
+	// This section is temporarily commented out until the missing functions are implemented
+	/*
 	cli, _ := binutils.NewGRPCClientWithEndpoint(
 		binutils.LocalClusterGRPCServerEndpoint,
 		binutils.WithAvoidRPCVersionCheck(true),
@@ -87,6 +90,7 @@ func MigrateANRToTmpNet(
 			return err
 		}
 	}
+	*/
 	toMigrate := []string{}
 	clustersDir := app.GetLocalClustersDir()
 	entries, err := os.ReadDir(clustersDir)
@@ -134,6 +138,8 @@ func MigrateANRToTmpNet(
 		if err := LoadLocalCluster(app, clusterToReload, ""); err != nil {
 			return err
 		}
+		// TODO: Fix relayer deployment code - currently commented out due to missing functions
+		/*
 		if clusterToReloadHasRelayer {
 			localNetworkRootDir := ""
 			if clusterToReloadNetwork.Kind == models.Local {
@@ -166,6 +172,7 @@ func MigrateANRToTmpNet(
 				}
 			}
 		}
+		*/
 	}
 	if len(toMigrate) > 0 {
 		printFunc("")

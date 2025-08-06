@@ -295,4 +295,9 @@ const (
 	MonitoringCloudServerStorageSize = 200 // GB
 	ErrReleasingGCPStaticIP          = "error releasing GCP static IP"
 	IPAddressSuffix                  = "-ip"
+
+	// Local network constants
+	ExtraLocalNetworkDataFilename = "extra_local_network_data.json"
+	LocalNetworkMetaFile           = "local_network_meta.json"
+	FastGRPCDialTimeout            = 3 * time.Second
 )

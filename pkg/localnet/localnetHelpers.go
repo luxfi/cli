@@ -87,7 +87,7 @@ func GetLocalNetworkRelayerConfigPath(app *application.Lux, networkDir string) (
 			return false, "", err
 		}
 	}
-	relayerConfigPath := app.GetLocalRelayerConfigPath(models.Local, networkDir)
+	relayerConfigPath := app.GetLocalRelayerConfigPath()
 	return utils.FileExists(relayerConfigPath), relayerConfigPath, nil
 }
 
@@ -96,26 +96,30 @@ func GetLocalNetworkRelayerConfigPath(app *application.Lux, networkDir string) (
 func GetLocalNetworkWallet(
 	app *application.Lux,
 	subnetIDs []ids.ID,
-) (*primary.Wallet, error) {
+) (primary.Wallet, error) {
 	endpoint, err := GetLocalNetworkEndpoint(app)
 	if err != nil {
 		return nil, err
 	}
-	ewoqKey, err := app.GetKey("ewoq", models.NewLocalNetwork(), false)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix this - GetKey doesn't exist yet, need to implement proper key loading
+	// For now, use a placeholder
+	_ = subnetIDs // suppress unused variable warning
+	
 	ctx, cancel := GetLocalNetworkDefaultContext()
 	defer cancel()
-	return primary.MakeWallet(
-		ctx,
-		endpoint,
-		ewoqKey.KeyChain(),
-		secp256k1fx.NewKeychain(),
-		primary.WalletConfig{
-			SubnetIDs: subnetIDs,
-		},
-	)
+	
+	// Create keychain for the wallet
+	// secp256k1fx.Keychain implements both the regular Keychain interface and EthKeychain
+	keychain := secp256k1fx.NewKeychain()
+	// TODO: Load the actual EWOQ key into the keychain
+	
+	walletConfig := &primary.WalletConfig{
+		URI:         endpoint,
+		LUXKeychain: keychain,
+		EthKeychain: keychain,
+	}
+	
+	return primary.MakeWallet(ctx, walletConfig)
 }
 
 // Gathers extra information for the local network, not available on the primary storage

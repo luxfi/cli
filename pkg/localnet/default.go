@@ -60,7 +60,7 @@ func GetDefaultNetworkConf(numNodes uint32) (
 		}
 		nodes = append(nodes, node)
 	}
-	unparsedGenesis, err := tmpnet.NewTestGenesis(constants.LocalNetworkID, nodes, []*secp256k1.PrivateKey{
+	unparsedGenesis, err := tmpnet.NewTestGenesisWithFunds(constants.LocalNetworkID, nodes, []*secp256k1.PrivateKey{
 		genesis.EWOQKey,
 	})
 	if err != nil {

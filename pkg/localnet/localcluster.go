@@ -71,7 +71,7 @@ func CreateLocalCluster(
 	networkDir := GetLocalClusterDir(app, clusterName)
 	network, err := TmpNetCreate(
 		ctx,
-		app.Log,
+		NewLoggerAdapter(app.Log),
 		networkDir,
 		luxdBinPath,
 		pluginDir,
@@ -97,12 +97,12 @@ func CreateLocalCluster(
 		for _, node := range network.Nodes {
 			nodeIDs = append(nodeIDs, node.NodeID.String())
 		}
-		if err := DownloadLuxdDB(networkModel, networkDir, nodeIDs, app.Log, printFunc); err != nil {
+		if err := DownloadLuxdDB(networkModel, networkDir, nodeIDs, NewLoggerAdapter(app.Log), printFunc); err != nil {
 			app.Log.Info("seeding public archive data finished with error: %v. Ignored if any", zap.Error(err))
 		}
 	}
 	if bootstrap {
-		if err := TmpNetBootstrap(ctx, app.Log, networkDir); err != nil {
+		if err := TmpNetBootstrap(ctx, NewLoggerAdapter(app.Log), networkDir); err != nil {
 			return nil, err
 		}
 	}
@@ -148,7 +148,7 @@ func AddNodeToLocalCluster(
 	if err != nil {
 		return nil, err
 	}
-	if err := DownloadLuxdDB(networkModel, networkDir, nodeIDs, app.Log, printFunc); err != nil {
+	if err := DownloadLuxdDB(networkModel, networkDir, nodeIDs, NewLoggerAdapter(app.Log), printFunc); err != nil {
 		app.Log.Info("seeding public archive data finished with error: %v. Ignored if any", zap.Error(err))
 	}
 	printFunc("Waiting for node: %s to be bootstrapping P-Chain", newNode.NodeID)
@@ -156,7 +156,7 @@ func AddNodeToLocalCluster(
 	defer cancel()
 	if err = TmpNetAddNode(
 		ctx,
-		app.Log,
+		NewLoggerAdapter(app.Log),
 		network,
 		newNode,
 		httpPort,
@@ -280,7 +280,7 @@ func LocalClusterIsConnectedToNetwork(
 	if err != nil {
 		return false, err
 	}
-	return networkID == networkModel.ID, nil
+	return networkID == networkModel.ID(), nil
 }
 
 // Returns the network model the local cluster given by [clusterName]
@@ -299,7 +299,7 @@ func GetRunningLocalClustersConnectedToLocalNetwork(app *application.Lux) ([]str
 
 // Gets a list of clusters that are running
 func GetRunningLocalClusters(app *application.Lux) ([]string, error) {
-	return GetFilteredLocalClusters(app, true, models.UndefinedNetwork, "")
+	return GetFilteredLocalClusters(app, true, models.Undefined, "")
 }
 
 // Gets a list of clusters filtered by running status, network model, and
@@ -333,7 +333,7 @@ func GetFilteredLocalClusters(
 				}
 			}
 		}
-		if network != models.UndefinedNetwork {
+		if network != models.Undefined {
 			if isForNetwork, err := LocalClusterIsConnectedToNetwork(app, clusterName, network); err != nil {
 				return nil, err
 			} else if !isForNetwork {
@@ -623,7 +623,7 @@ func LoadLocalCluster(
 	}
 	ctx, cancel := networkModel.BootstrappingContext()
 	defer cancel()
-	if _, err := TmpNetLoad(ctx, app.Log, networkDir, luxdBinaryPath); err != nil {
+	if _, err := TmpNetLoad(ctx, NewLoggerAdapter(app.Log), networkDir, luxdBinaryPath); err != nil {
 		return err
 	}
 	blockchains, err = GetLocalClusterTrackedBlockchains(app, clusterName)
@@ -641,7 +641,7 @@ func LoadLocalCluster(
 			return err
 		}
 	}
-	if networkModel.Kind == models.Local {
+	if networkModel.Kind() == models.Local {
 		return TmpNetSetDefaultAliases(ctx, networkDir)
 	}
 	return nil
