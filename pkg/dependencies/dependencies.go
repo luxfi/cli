@@ -88,11 +88,8 @@ func GetAvailableLuxdVersions(app *application.Lux, rpcVersion int, url string) 
 		return nil, ErrNoLuxdVersion
 	}
 	// get latest luxd release to make sure we're not picking a release currently in progress but not available for download
-	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
-		constants.LuxOrg,
-		constants.LuxdRepoName,
-		"",
-	)
+	releaseURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", constants.LuxOrg, constants.LuxdRepoName)
+	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(releaseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -128,11 +125,8 @@ func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, netwo
 	if err != nil {
 		return "", err
 	}
-	latestPreReleaseVersion, err := app.Downloader.GetLatestPreReleaseVersion(
-		constants.LuxOrg,
-		constants.LuxdRepoName,
-		"",
-	)
+	preReleaseURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", constants.LuxOrg, constants.LuxdRepoName)
+	latestPreReleaseVersion, err := app.Downloader.GetLatestPreReleaseVersion(preReleaseURL)
 	if err != nil {
 		return "", err
 	}
@@ -205,7 +199,7 @@ func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, 
 			if err != nil {
 				return LuxdVersionSettings{}, err
 			}
-			_, err = subnet.ValidateSubnetNameAndGetChains(app, []string{useLuxgoVersionFromSubnet})
+			err = subnet.ValidateSubnetNameAndGetChains(useLuxgoVersionFromSubnet)
 			if err == nil {
 				break
 			}
