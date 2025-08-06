@@ -11,12 +11,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/cli/sdk/constants"
 	mockethclient "github.com/luxfi/cli/sdk/mocks/ethclient"
+	"github.com/luxfi/crypto"
 	subnetethclient "github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	luxWarp "github.com/luxfi/warp"
 
@@ -880,7 +880,7 @@ func TestSendTransaction(t *testing.T) {
 		EthClient: mockClient,
 		URL:       "http://localhost:8545",
 	}
-	tx := types.NewTransaction(0, common.Address{}, nil, 0, nil, nil)
+	tx := types.NewTransaction(0, crypto.Address{}, nil, 0, nil, nil)
 	tests := []struct {
 		name        string
 		setupMock   func()
@@ -944,7 +944,7 @@ func TestWaitForTransaction(t *testing.T) {
 		EthClient: mockClient,
 		URL:       "http://localhost:8545",
 	}
-	tx := types.NewTransaction(0, common.Address{}, nil, 0, nil, nil)
+	tx := types.NewTransaction(0, crypto.Address{}, nil, 0, nil, nil)
 	successfulReceipt := &types.Receipt{Status: types.ReceiptStatusSuccessful}
 	failedReceipt := &types.Receipt{Status: types.ReceiptStatusFailed}
 	tests := []struct {
@@ -1078,8 +1078,8 @@ func TestFilterLogs(t *testing.T) {
 		URL:       "http://localhost:8545",
 	}
 	logs := []types.Log{
-		{Address: common.HexToAddress("0x123")},
-		{Address: common.HexToAddress("0x456")},
+		{Address: crypto.HexToAddress("0x123")},
+		{Address: crypto.HexToAddress("0x456")},
 	}
 	tests := []struct {
 		name        string
@@ -1333,7 +1333,7 @@ func TestCalculateTxParams(t *testing.T) {
 		EthClient: mockClient,
 		URL:       "http://localhost:8545",
 	}
-	address := common.HexToAddress("0x1234567890123456789012345678901234567890")
+	address := crypto.HexToAddress("0x1234567890123456789012345678901234567890")
 	tests := []struct {
 		name          string
 		address       string
@@ -1441,7 +1441,7 @@ func TestFundAddress(t *testing.T) {
 	require.NoError(t, err)
 	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
 	sourceAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
-	targetAddress := common.HexToAddress("0x1234567890123456789012345678901234567890")
+	targetAddress := crypto.HexToAddress("0x1234567890123456789012345678901234567890")
 	amount := big.NewInt(1000000000000000000) // 1 ETH
 	tests := []struct {
 		name        string
@@ -1569,7 +1569,7 @@ func TestIssueTx(t *testing.T) {
 		EthClient: mockClient,
 		URL:       "http://localhost:8545",
 	}
-	tx := types.NewTransaction(0, common.Address{}, nil, 0, nil, nil)
+	tx := types.NewTransaction(0, crypto.Address{}, nil, 0, nil, nil)
 	txBytes, err := tx.MarshalBinary()
 	require.NoError(t, err)
 	txHex := hex.EncodeToString(txBytes)
@@ -1800,7 +1800,7 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	require.NoError(t, err)
 	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
 	fromAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
-	contractAddress := common.HexToAddress("0x1234567890123456789012345678901234567890")
+	contractAddress := crypto.HexToAddress("0x1234567890123456789012345678901234567890")
 	callData := []byte{1, 2, 3, 4, 5}
 	value := big.NewInt(1000000000000000000) // 1 ETH
 	unsignedMessage := luxWarp.UnsignedMessage{
@@ -1812,10 +1812,10 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	}
 	tests := []struct {
 		name              string
-		from              common.Address
+		from              crypto.Address
 		privateKey        string
 		warpMessage       *luxWarp.Message
-		contract          common.Address
+		contract          crypto.Address
 		callData          []byte
 		value             *big.Int
 		generateRawTxOnly bool
@@ -1824,7 +1824,7 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	}{
 		{
 			name:              "successful transaction with private key",
-			from:              common.Address{},
+			from:              crypto.Address{},
 			privateKey:        privateKeyHex,
 			warpMessage:       warpMessage,
 			contract:          contractAddress,
@@ -1876,7 +1876,7 @@ func TestTransactWithWarpMessage(t *testing.T) {
 		},
 		{
 			name:              "error calculating tx params",
-			from:              common.Address{},
+			from:              crypto.Address{},
 			privateKey:        privateKeyHex,
 			warpMessage:       warpMessage,
 			contract:          contractAddress,
@@ -1893,7 +1893,7 @@ func TestTransactWithWarpMessage(t *testing.T) {
 		},
 		{
 			name:              "error getting chain ID",
-			from:              common.Address{},
+			from:              crypto.Address{},
 			privateKey:        privateKeyHex,
 			warpMessage:       warpMessage,
 			contract:          contractAddress,
@@ -1918,7 +1918,7 @@ func TestTransactWithWarpMessage(t *testing.T) {
 		},
 		{
 			name:              "error estimating gas limit",
-			from:              common.Address{},
+			from:              crypto.Address{},
 			privateKey:        privateKeyHex,
 			warpMessage:       warpMessage,
 			contract:          contractAddress,

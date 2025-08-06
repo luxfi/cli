@@ -11,8 +11,9 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/models"
-	gethmath "github.com/luxfi/node/evm/common/math"
-	"github.com/luxfi/node/evm/ethclient"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/node/utils/units"
 	"go.uber.org/zap"
 
@@ -29,7 +30,6 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/evm/common"
 	"github.com/spf13/cobra"
 )
 
@@ -206,7 +206,7 @@ func promptParams(precomp string, precompiles *[]extras.PrecompileUpgrade) error
 }
 
 func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.Time) error {
-	initialMint := map[common.Address]*gethmath.HexOrDecimal256{}
+	initialMint := map[crypto.Address]*math.HexOrDecimal256{}
 
 	adminAddrs, enabledAddrs, err := promptAdminAndEnabledAddresses()
 	if err != nil {
@@ -374,7 +374,7 @@ func getCClient(apiEndpoint string, blockchainID string) (ethclient.Client, erro
 	return cClient, nil
 }
 
-func ensureAdminsHaveBalanceLocalNetwork(admins []common.Address, blockchainID string) error {
+func ensureAdminsHaveBalanceLocalNetwork(admins []crypto.Address, blockchainID string) error {
 	cClient, err := getCClient(constants.LocalAPIEndpoint, blockchainID)
 	if err != nil {
 		return err
@@ -394,7 +394,7 @@ func ensureAdminsHaveBalanceLocalNetwork(admins []common.Address, blockchainID s
 	return errors.New("at least one of the admin addresses requires a positive token balance")
 }
 
-func ensureAdminsHaveBalance(admins []common.Address, subnetName string) error {
+func ensureAdminsHaveBalance(admins []crypto.Address, subnetName string) error {
 	if len(admins) < 1 {
 		return nil
 	}
@@ -426,7 +426,7 @@ func ensureAdminsHaveBalance(admins []common.Address, subnetName string) error {
 }
 
 func getAccountBalance(ctx context.Context, cClient ethclient.Client, addrStr string) (float64, error) {
-	addr := common.HexToAddress(addrStr)
+	addr := crypto.HexToAddress(addrStr)
 	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
 	defer cancel()
@@ -441,8 +441,8 @@ func getAccountBalance(ctx context.Context, cClient ethclient.Client, addrStr st
 	return float64(balance.Uint64()) / float64(units.Lux), nil
 }
 
-func promptAdminAndEnabledAddresses() ([]common.Address, []common.Address, error) {
-	var admin, enabled []common.Address
+func promptAdminAndEnabledAddresses() ([]crypto.Address, []crypto.Address, error) {
+	var admin, enabled []crypto.Address
 
 	for {
 		if err := captureAddress(adminLabel, &admin); err != nil {
@@ -466,7 +466,7 @@ func promptAdminAndEnabledAddresses() ([]common.Address, []common.Address, error
 	}
 }
 
-func captureAddress(which string, addrsField *[]common.Address) error {
+func captureAddress(which string, addrsField *[]crypto.Address) error {
 	yes, err := app.Prompt.CaptureYesNo(fmt.Sprintf("Add '%sAddresses'?", which))
 	if err != nil {
 		return err

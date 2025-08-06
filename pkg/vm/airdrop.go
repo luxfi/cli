@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 )
 
@@ -58,7 +58,7 @@ func getAllocation(
 		return allocation, statemachine.Backward, nil
 	}
 
-	var addressHex common.Address
+	var addressHex crypto.Address
 
 	for {
 		addressHex, err = app.Prompt.CaptureAddress("Address to airdrop to")

@@ -127,6 +127,4 @@ func alreadyFound(s string, found []string) bool {
 	return false
 }
 
-func ErrWrongArgCount(expected, got int) error {
-	return fmt.Errorf("requires %d arg(s), received %d arg(s)", expected, got)
-}
+// Removed duplicate - defined in common.go

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 )
 
@@ -95,7 +95,7 @@ func GetBlockchainAirdropKeyInfo(
 func SearchForManagedKey(
 	app *application.Lux,
 	network models.Network,
-	address common.Address,
+	address crypto.Address,
 	includeEwoq bool,
 ) (bool, string, string, string, error) {
 	keyNames, err := utils.GetKeyNames(app.GetKeyDir(), includeEwoq)
@@ -301,7 +301,7 @@ func GetEVMSubnetGenesisNativeMinterManager(
 
 func ContractAddressIsInGenesisData(
 	genesisData []byte,
-	contractAddress common.Address,
+	contractAddress crypto.Address,
 ) (bool, error) {
 	genesis, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
 	if err != nil {
