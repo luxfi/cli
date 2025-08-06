@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/node/utils/units"
 )
@@ -71,10 +70,10 @@ func TxDump(description string, tx *types.Transaction) (string, error) {
 }
 
 // returns the public address associated with [privateKey]
-func PrivateKeyToAddress(privateKey string) (common.Address, error) {
+func PrivateKeyToAddress(privateKey string) (crypto.Address, error) {
 	pk, err := crypto.HexToECDSA(privateKey)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return crypto.PubkeyToAddress(pk.PublicKey), nil
 }

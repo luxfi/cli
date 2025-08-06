@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	subnetevmwarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/warp"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,7 +36,7 @@ func TestGetWarpMessagesFromLogs(t *testing.T) {
 	)
 	require.NoError(t, err)
 	_, validPayload, err := subnetevmwarp.PackSendWarpMessageEvent(
-		common.Address{},
+		crypto.Address{},
 		common.Hash{},
 		unsignedWarpMessage.Bytes(),
 	)
@@ -77,7 +78,7 @@ func TestExtractWarpMessageFromLogs(t *testing.T) {
 	)
 	require.NoError(t, err)
 	_, validPayload, err := subnetevmwarp.PackSendWarpMessageEvent(
-		common.Address{},
+		crypto.Address{},
 		common.Hash{},
 		unsignedWarpMessage.Bytes(),
 	)
@@ -130,7 +131,7 @@ func TestExtractWarpMessageFromReceipt(t *testing.T) {
 	)
 	require.NoError(t, err)
 	_, validPayload, err := subnetevmwarp.PackSendWarpMessageEvent(
-		common.Address{},
+		crypto.Address{},
 		common.Hash{},
 		unsignedWarpMessage.Bytes(),
 	)

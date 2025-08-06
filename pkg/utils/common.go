@@ -615,3 +615,8 @@ func PointersSlice[T any](input []T) []*T {
 	}
 	return output
 }
+
+// IsE2E checks if we're running in E2E test mode
+func IsE2E() bool {
+	return os.Getenv("E2E_TEST") == "true"
+}

@@ -233,7 +233,12 @@ func decodePrivateKey(enc string) (*secp256k1.PrivateKey, error) {
 }
 
 func (m *SoftKey) C() string {
-	ecdsaPrv := m.privKey.ToECDSA()
+	// Convert private key bytes to ECDSA format
+	privKeyBytes := m.privKey.Bytes()
+	ecdsaPrv, err := eth_crypto.ToECDSA(privKeyBytes[:])
+	if err != nil {
+		return ""
+	}
 	pub := ecdsaPrv.PublicKey
 
 	addr := eth_crypto.PubkeyToAddress(pub)

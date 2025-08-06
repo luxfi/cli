@@ -9,9 +9,9 @@ import (
 
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/json"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/api"

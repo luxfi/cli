@@ -9,11 +9,11 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/common"
 )
 
 const (

@@ -38,7 +38,6 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/log/level"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -309,7 +308,7 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 	var err error
 
 	config := luxlog.Config{}
-	config.LogLevel = level.Info
+	config.LogLevel = luxlog.InfoLevel
 	config.DisplayLevel, err = luxlog.ToLevel(logLevel)
 	if err != nil {
 		return nil, fmt.Errorf("invalid log level configured: %s", logLevel)

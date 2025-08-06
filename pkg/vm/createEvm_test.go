@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/internal/testutils"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +20,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 	type test struct {
 		name       string
 		alloc      core.GenesisAlloc
-		admins     []common.Address
+		admins     []crypto.Address
 		shouldFail bool
 	}
 	tests := []test{
@@ -33,7 +33,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 				},
 				addrs[2]: {},
 			},
-			admins:     []common.Address{addrs[1]},
+			admins:     []crypto.Address{addrs[1]},
 			shouldFail: false,
 		},
 		{
@@ -47,7 +47,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 					Balance: big.NewInt(42),
 				},
 			},
-			admins:     []common.Address{addrs[3], addrs[4]},
+			admins:     []crypto.Address{addrs[3], addrs[4]},
 			shouldFail: false,
 		},
 		{
@@ -59,7 +59,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 				addrs[1]: {},
 				addrs[2]: {},
 			},
-			admins:     []common.Address{addrs[0], addrs[2]},
+			admins:     []crypto.Address{addrs[0], addrs[2]},
 			shouldFail: true,
 		},
 		{
@@ -69,7 +69,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 				addrs[1]: {},
 				addrs[2]: {},
 			},
-			admins:     []common.Address{addrs[3], addrs[4]},
+			admins:     []crypto.Address{addrs[3], addrs[4]},
 			shouldFail: true,
 		},
 	}

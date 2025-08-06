@@ -16,7 +16,7 @@ import (
 const yamlExt = ".yaml"
 
 func GetRepos(app *application.Lux) ([]string, error) {
-	repositoryDir := filepath.Join(app.ApmDir, "repositories")
+	repositoryDir := filepath.Join(app.ApmDir(), "repositories")
 	orgs, err := os.ReadDir(repositoryDir)
 	if err != nil {
 		return []string{}, err
@@ -39,7 +39,7 @@ func GetRepos(app *application.Lux) ([]string, error) {
 }
 
 func GetSubnets(app *application.Lux, repoAlias string) ([]string, error) {
-	subnetDir := filepath.Join(app.ApmDir, "repositories", repoAlias, "subnets")
+	subnetDir := filepath.Join(app.ApmDir(), "repositories", repoAlias, "subnets")
 	subnets, err := os.ReadDir(subnetDir)
 	if err != nil {
 		return []string{}, err
@@ -67,7 +67,7 @@ func LoadSubnetFile(app *application.Lux, subnetKey string) (types.Subnet, error
 		return types.Subnet{}, err
 	}
 
-	subnetYamlPath := filepath.Join(app.ApmDir, "repositories", repoAlias, "subnets", subnetName+yamlExt)
+	subnetYamlPath := filepath.Join(app.ApmDir(), "repositories", repoAlias, "subnets", subnetName+yamlExt)
 	var subnetWrapper SubnetWrapper
 
 	subnetYamlBytes, err := os.ReadFile(subnetYamlPath)
@@ -93,7 +93,7 @@ func getVMsInSubnet(app *application.Lux, subnetKey string) ([]string, error) {
 }
 
 func LoadVMFile(app *application.Lux, repo, vm string) (types.VM, error) {
-	vmYamlPath := filepath.Join(app.ApmDir, "repositories", repo, "vms", vm+yamlExt)
+	vmYamlPath := filepath.Join(app.ApmDir(), "repositories", repo, "vms", vm+yamlExt)
 	var vmWrapper VMWrapper
 
 	vmYamlBytes, err := os.ReadFile(vmYamlPath)

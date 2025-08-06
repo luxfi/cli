@@ -5,12 +5,12 @@ package warp
 import (
 	_ "embed"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/erc20-go/erc20"
+	"github.com/luxfi/geth/ethclient"
 )
 
-func GetTokenParams(endpoint string, tokenAddress common.Address) (string, string, uint8, error) {
+func GetTokenParams(endpoint string, tokenAddress crypto.Address) (string, string, uint8, error) {
 	client, err := ethclient.Dial(endpoint)
 	if err != nil {
 		return "", "", 0, err
@@ -34,7 +34,7 @@ func GetTokenParams(endpoint string, tokenAddress common.Address) (string, strin
 	return tokenSymbol, tokenName, tokenDecimals, nil
 }
 
-func GetTokenDecimals(endpoint string, tokenAddress common.Address) (uint8, error) {
+func GetTokenDecimals(endpoint string, tokenAddress crypto.Address) (uint8, error) {
 	client, err := ethclient.Dial(endpoint)
 	if err != nil {
 		return 0, err

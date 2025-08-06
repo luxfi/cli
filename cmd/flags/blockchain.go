@@ -38,7 +38,7 @@ func ValidateRPC(app *application.Lux, rpc *string, cmd *cobra.Command, args []s
 	// TODO: modify check below to extend prompting for rpc to commands other than addValidator
 	if *rpc == "" {
 		if cmd.Name() == "addValidator" && len(args) == 0 {
-			*rpc, err = app.Prompt.CaptureURL("What is the RPC endpoint?", false)
+			*rpc, err = app.Prompt.CaptureURL("What is the RPC endpoint?")
 			if err != nil {
 				return err
 			}

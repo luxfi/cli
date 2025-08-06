@@ -8,7 +8,6 @@ import (
 	"path"
 
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/client"

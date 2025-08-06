@@ -8,29 +8,29 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/crypto"
 )
 
 type WarpFeeInfo struct {
-	FeeTokenAddress common.Address
+	FeeTokenAddress crypto.Address
 	Amount          *big.Int
 }
 
 type TokenRemoteSettings struct {
-	WarpRegistryAddress   common.Address
-	WarpManager           common.Address
+	WarpRegistryAddress   crypto.Address
+	WarpManager           crypto.Address
 	TokenHomeBlockchainID [32]byte
-	TokenHomeAddress      common.Address
+	TokenHomeAddress      crypto.Address
 	TokenHomeDecimals     uint8
 }
 
 func RegisterRemote(
 	rpcURL string,
 	privateKey string,
-	remoteAddress common.Address,
+	remoteAddress crypto.Address,
 ) error {
 	ux.Logger.PrintToUser("Registering remote contract with home contract")
 	feeInfo := WarpFeeInfo{
@@ -39,7 +39,7 @@ func RegisterRemote(
 	_, _, err := contract.TxToMethod(
 		rpcURL,
 		false,
-		common.Address{},
+		crypto.Address{},
 		privateKey,
 		remoteAddress,
 		nil,
@@ -55,19 +55,19 @@ func DeployERC20Remote(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	warpRegistryAddress common.Address,
-	warpManagerAddress common.Address,
+	warpRegistryAddress crypto.Address,
+	warpManagerAddress crypto.Address,
 	tokenHomeBlockchainID [32]byte,
-	tokenHomeAddress common.Address,
+	tokenHomeAddress crypto.Address,
 	tokenHomeDecimals uint8,
 	tokenRemoteName string,
 	tokenRemoteSymbol string,
 	tokenRemoteDecimals uint8,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/ERC20TokenRemote.sol/ERC20TokenRemote.bin")
 	binBytes, err := os.ReadFile(binPath)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	tokenRemoteSettings := TokenRemoteSettings{
 		WarpRegistryAddress:   warpRegistryAddress,
@@ -92,19 +92,19 @@ func DeployNativeRemote(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	warpRegistryAddress common.Address,
-	warpManagerAddress common.Address,
+	warpRegistryAddress crypto.Address,
+	warpManagerAddress crypto.Address,
 	tokenHomeBlockchainID [32]byte,
-	tokenHomeAddress common.Address,
+	tokenHomeAddress crypto.Address,
 	tokenHomeDecimals uint8,
 	nativeAssetSymbol string,
 	initialReserveImbalance *big.Int,
 	burnedFeesReportingRewardPercentage *big.Int,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/NativeTokenRemote.sol/NativeTokenRemote.bin")
 	binBytes, err := os.ReadFile(binPath)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	tokenRemoteSettings := TokenRemoteSettings{
 		WarpRegistryAddress:   warpRegistryAddress,
@@ -129,15 +129,15 @@ func DeployERC20Home(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	warpRegistryAddress common.Address,
-	warpManagerAddress common.Address,
-	erc20TokenAddress common.Address,
+	warpRegistryAddress crypto.Address,
+	warpManagerAddress crypto.Address,
+	erc20TokenAddress crypto.Address,
 	erc20TokenDecimals uint8,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/ERC20TokenHome.sol/ERC20TokenHome.bin")
 	binBytes, err := os.ReadFile(binPath)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return contract.DeployContract(
 		rpcURL,
@@ -155,14 +155,14 @@ func DeployNativeHome(
 	srcDir string,
 	rpcURL string,
 	privateKey string,
-	warpRegistryAddress common.Address,
-	warpManagerAddress common.Address,
-	wrappedNativeTokenAddress common.Address,
-) (common.Address, error) {
+	warpRegistryAddress crypto.Address,
+	warpManagerAddress crypto.Address,
+	wrappedNativeTokenAddress crypto.Address,
+) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/NativeTokenHome.sol/NativeTokenHome.bin")
 	binBytes, err := os.ReadFile(binPath)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return contract.DeployContract(
 		rpcURL,
@@ -180,11 +180,11 @@ func DeployWrappedNativeToken(
 	rpcURL string,
 	privateKey string,
 	tokenSymbol string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	binPath := filepath.Join(utils.ExpandHome(srcDir), "contracts/out/WrappedNativeToken.sol/WrappedNativeToken.bin")
 	binBytes, err := os.ReadFile(binPath)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return contract.DeployContract(
 		rpcURL,

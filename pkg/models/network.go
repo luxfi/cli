@@ -16,6 +16,7 @@ const (
 	Mainnet
 	Testnet
 	Local
+	Devnet
 )
 
 func (s Network) String() string {
@@ -26,6 +27,8 @@ func (s Network) String() string {
 		return "Testnet"
 	case Local:
 		return "Local Network"
+	case Devnet:
+		return "Devnet"
 	}
 	return "Unknown Network"
 }
@@ -40,6 +43,27 @@ func (s Network) NetworkID() (uint32, error) {
 		return constants.LocalNetworkID, nil
 	}
 	return 0, fmt.Errorf("unsupported network")
+}
+
+func (s Network) NetworkIDFlagValue() string {
+	id, err := s.NetworkID()
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%d", id)
+}
+
+func (s Network) ID() uint32 {
+	id, _ := s.NetworkID()
+	return id
+}
+
+func (s Network) Kind() Network {
+	return s
+}
+
+func (s Network) HandlePublicNetworkSimulation() bool {
+	return s == Local
 }
 
 func NetworkFromString(s string) Network {

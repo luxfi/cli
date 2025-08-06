@@ -26,6 +26,14 @@ func validateEmail(input string) error {
 	return err
 }
 
+func ValidateURLFormat(input string) error {
+	if input == "" {
+		return errors.New("URL cannot be empty")
+	}
+	_, err := url.Parse(input)
+	return err
+}
+
 func validatePositiveBigInt(input string) error {
 	n := new(big.Int)
 	n, ok := n.SetString(input, 10)

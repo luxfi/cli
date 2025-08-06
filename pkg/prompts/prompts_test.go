@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,7 +21,7 @@ func TestContains(t *testing.T) {
 	addr2 := crypto.PubkeyToAddress(k2.PublicKey)
 	addr3 := crypto.PubkeyToAddress(k3.PublicKey)
 
-	addrList := []common.Address{
+	addrList := []crypto.Address{
 		addr1,
 		addr2,
 	}

@@ -4,10 +4,10 @@ package signatureaggregator
 
 import (
 	"errors"
+
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/node/utils/logging"
-	"os/exec"
 )
 
 // Minimal stub implementation until warp packages are available

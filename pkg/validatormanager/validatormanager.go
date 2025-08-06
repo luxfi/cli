@@ -12,9 +12,10 @@ import (
 	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
 	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
 )
 
 //go:embed smart_contracts/deployed_validator_messages_bytecode_v2.0.0.txt
@@ -24,7 +25,7 @@ func AddValidatorMessagesV2_0_0ContractToAllocations(
 	allocs core.GenesisAlloc,
 ) {
 	deployedValidatorMessagesBytes := common.FromHex(strings.TrimSpace(string(deployedValidatorMessagesV2_0_0Bytecode)))
-	allocs[common.HexToAddress(validatormanagerSDK.ValidatorMessagesContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorMessagesContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedValidatorMessagesBytes,
 		Nonce:   1,
@@ -48,7 +49,7 @@ func AddPoAValidatorManagerV1_0_0ContractToAllocations(
 	deployedPoaValidatorManagerString := strings.TrimSpace(string(deployedPoAValidatorManagerV1_0_0Bytecode))
 	deployedPoaValidatorManagerString = fillValidatorMessagesAddressPlaceholder(deployedPoaValidatorManagerString)
 	deployedPoaValidatorManagerBytes := common.FromHex(deployedPoaValidatorManagerString)
-	allocs[common.HexToAddress(validatormanagerSDK.ValidatorContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedPoaValidatorManagerBytes,
 		Nonce:   1,
@@ -64,7 +65,7 @@ func AddValidatorManagerV2_0_0ContractToAllocations(
 	deployedValidatorManagerString := strings.TrimSpace(string(deployedValidatorManagerV2_0_0Bytecode))
 	deployedValidatorManagerString = fillValidatorMessagesAddressPlaceholder(deployedValidatorManagerString)
 	deployedValidatorManagerBytes := common.FromHex(deployedValidatorManagerString)
-	allocs[common.HexToAddress(validatormanagerSDK.ValidatorContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedValidatorManagerBytes,
 		Nonce:   1,
@@ -77,7 +78,7 @@ var validatorManagerV2_0_0Bytecode []byte
 func DeployValidatorManagerV2_0_0Contract(
 	rpcURL string,
 	privateKey string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	validatorManagerString := strings.TrimSpace(string(validatorManagerV2_0_0Bytecode))
 	validatorManagerString = fillValidatorMessagesAddressPlaceholder(validatorManagerString)
 	validatorManagerBytes := []byte(validatorManagerString)
@@ -94,20 +95,20 @@ func DeployAndRegisterValidatorManagerV2_0_0Contract(
 	rpcURL string,
 	privateKey string,
 	proxyOwnerPrivateKey string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	validatorManagerAddress, err := DeployValidatorManagerV2_0_0Contract(
 		rpcURL,
 		privateKey,
 	)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	if _, _, err := SetupValidatorProxyImplementation(
 		rpcURL,
 		proxyOwnerPrivateKey,
 		validatorManagerAddress,
 	); err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return validatorManagerAddress, nil
 }
@@ -118,7 +119,7 @@ var posValidatorManagerV1_0_0Bytecode []byte
 func DeployPoSValidatorManagerV1_0_0Contract(
 	rpcURL string,
 	privateKey string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	posValidatorManagerString := strings.TrimSpace(string(posValidatorManagerV1_0_0Bytecode))
 	posValidatorManagerString = fillValidatorMessagesAddressPlaceholder(posValidatorManagerString)
 	posValidatorManagerBytes := []byte(posValidatorManagerString)
@@ -135,20 +136,20 @@ func DeployAndRegisterPoSValidatorManagerV1_0_0Contract(
 	rpcURL string,
 	privateKey string,
 	proxyOwnerPrivateKey string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	posValidatorManagerAddress, err := DeployPoSValidatorManagerV1_0_0Contract(
 		rpcURL,
 		privateKey,
 	)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	if _, _, err := SetupValidatorProxyImplementation(
 		rpcURL,
 		proxyOwnerPrivateKey,
 		posValidatorManagerAddress,
 	); err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return posValidatorManagerAddress, nil
 }
@@ -159,7 +160,7 @@ var posValidatorManagerV2_0_0Bytecode []byte
 func DeployPoSValidatorManagerV2_0_0Contract(
 	rpcURL string,
 	privateKey string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	posValidatorManagerString := strings.TrimSpace(string(posValidatorManagerV2_0_0Bytecode))
 	posValidatorManagerString = fillValidatorMessagesAddressPlaceholder(posValidatorManagerString)
 	posValidatorManagerBytes := []byte(posValidatorManagerString)
@@ -176,20 +177,20 @@ func DeployAndRegisterPoSValidatorManagerV2_0_0Contract(
 	rpcURL string,
 	privateKey string,
 	proxyOwnerPrivateKey string,
-) (common.Address, error) {
+) (crypto.Address, error) {
 	posValidatorManagerAddress, err := DeployPoSValidatorManagerV2_0_0Contract(
 		rpcURL,
 		privateKey,
 	)
 	if err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	if _, _, err := SetupSpecializationProxyImplementation(
 		rpcURL,
 		proxyOwnerPrivateKey,
 		posValidatorManagerAddress,
 	); err != nil {
-		return common.Address{}, err
+		return crypto.Address{}, err
 	}
 	return posValidatorManagerAddress, nil
 }
@@ -204,15 +205,15 @@ func AddValidatorTransparentProxyContractToAllocations(
 	allocs core.GenesisAlloc,
 	proxyManager string,
 ) {
-	if _, found := allocs[common.HexToAddress(proxyManager)]; !found {
+	if _, found := allocs[crypto.HexToAddress(proxyManager)]; !found {
 		ownerBalance := big.NewInt(0).Mul(big.NewInt(1e18), big.NewInt(1))
-		allocs[common.HexToAddress(proxyManager)] = core.GenesisAccount{
+		allocs[crypto.HexToAddress(proxyManager)] = core.GenesisAccount{
 			Balance: ownerBalance,
 		}
 	}
 	// proxy admin
 	deployedProxyAdmin := common.FromHex(strings.TrimSpace(string(deployedProxyAdminBytecode)))
-	allocs[common.HexToAddress(validatormanagerSDK.ValidatorProxyAdminContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorProxyAdminContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedProxyAdmin,
 		Nonce:   1,
@@ -223,7 +224,7 @@ func AddValidatorTransparentProxyContractToAllocations(
 
 	// transparent proxy
 	deployedTransparentProxy := common.FromHex(strings.TrimSpace(string(deployedTransparentProxyBytecode)))
-	allocs[common.HexToAddress(validatormanagerSDK.ValidatorProxyContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorProxyContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedTransparentProxy,
 		Nonce:   1,
@@ -239,15 +240,15 @@ func AddSpecializationTransparentProxyContractToAllocations(
 	allocs core.GenesisAlloc,
 	proxyManager string,
 ) {
-	if _, found := allocs[common.HexToAddress(proxyManager)]; !found {
+	if _, found := allocs[crypto.HexToAddress(proxyManager)]; !found {
 		ownerBalance := big.NewInt(0).Mul(big.NewInt(1e18), big.NewInt(1))
-		allocs[common.HexToAddress(proxyManager)] = core.GenesisAccount{
+		allocs[crypto.HexToAddress(proxyManager)] = core.GenesisAccount{
 			Balance: ownerBalance,
 		}
 	}
 	// proxy admin
 	deployedProxyAdmin := common.FromHex(strings.TrimSpace(string(deployedProxyAdminBytecode)))
-	allocs[common.HexToAddress(validatormanagerSDK.SpecializationProxyAdminContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.SpecializationProxyAdminContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedProxyAdmin,
 		Nonce:   1,
@@ -258,7 +259,7 @@ func AddSpecializationTransparentProxyContractToAllocations(
 
 	// transparent proxy
 	deployedTransparentProxy := common.FromHex(strings.TrimSpace(string(deployedTransparentProxyBytecode)))
-	allocs[common.HexToAddress(validatormanagerSDK.SpecializationProxyContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.SpecializationProxyContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedTransparentProxy,
 		Nonce:   1,
@@ -278,7 +279,7 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 	rewardBasisPoints uint64,
 ) {
 	deployedRewardCalculatorBytes := common.FromHex(strings.TrimSpace(string(deployedRewardCalculatorV2_0_0Bytecode)))
-	allocs[common.HexToAddress(validatormanagerSDK.RewardCalculatorAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(validatormanagerSDK.RewardCalculatorAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedRewardCalculatorBytes,
 		Nonce:   1,
