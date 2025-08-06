@@ -560,7 +560,7 @@ func RunSSHRenderLuxNodeConfig(
 		if err != nil {
 			return "", err
 		} else {
-			return sc.Networks[network.Name()].SubnetID.String(), nil
+			return sc.Networks[network.String()].SubnetID.String(), nil
 		}
 	})
 	if err != nil {
@@ -577,7 +577,7 @@ func RunSSHRenderLuxNodeConfig(
 		if upgradeFileExists(host) {
 			luxdConf.UpgradePath = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
 		}
-		if network.Kind == models.Local || network.Kind == models.Devnet || isAPIHost {
+		if network.Kind() == models.Local || network.Kind() == models.Devnet || isAPIHost {
 			luxdConf.HTTPHost = "0.0.0.0"
 		}
 		remoteLuxdConf, err := getLuxdConfigData(host)
@@ -709,12 +709,12 @@ func RunSSHSyncSubnetData(app *application.Lux, host *models.Host, network model
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.Name()].SubnetID
+	subnetID := sc.Networks[network.String()].SubnetID
 	if subnetID == ids.Empty {
 		return errors.New("subnet id is empty")
 	}
 	subnetIDStr := subnetID.String()
-	blockchainID := sc.Networks[network.Name()].BlockchainID
+	blockchainID := sc.Networks[network.String()].BlockchainID
 	// genesis config
 	genesisFilename := filepath.Join(app.GetNodesDir(), host.GetCloudID(), constants.GenesisFileName)
 	if utils.FileExists(genesisFilename) {

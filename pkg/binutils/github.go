@@ -93,6 +93,11 @@ func NewEVMDownloader() GithubDownloader {
 	return &subnetEVMDownloader{}
 }
 
+// NewSubnetEVMDownloader is an alias for backward compatibility
+func NewSubnetEVMDownloader() GithubDownloader {
+	return NewEVMDownloader()
+}
+
 func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
 	// NOTE: if any of the underlying URLs change (github changes, release file names, etc.) this fails
 	goarch, goos := installer.GetArch()

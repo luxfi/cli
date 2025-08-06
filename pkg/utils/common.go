@@ -638,6 +638,11 @@ func IsE2E() bool {
 	return os.Getenv("E2E_TEST") == "true"
 }
 
+// E2EDocker checks if we're running E2E tests in Docker mode
+func E2EDocker() bool {
+	return os.Getenv("E2E_DOCKER") == "true"
+}
+
 // GetKeyNames returns all key names in the key directory
 func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
 	files, err := os.ReadDir(keyDir)

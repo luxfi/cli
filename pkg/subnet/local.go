@@ -25,8 +25,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/client"
@@ -56,12 +56,12 @@ const (
 // emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
 type emptyEthKeychain struct{}
 
-func (e *emptyEthKeychain) GetEth(addr crypto.Address) (keychain.Signer, bool) {
+func (e *emptyEthKeychain) GetEth(addr common.Address) (keychain.Signer, bool) {
 	return nil, false
 }
 
-func (e *emptyEthKeychain) EthAddresses() set.Set[crypto.Address] {
-	return set.NewSet[crypto.Address](0)
+func (e *emptyEthKeychain) EthAddresses() set.Set[common.Address] {
+	return set.NewSet[common.Address](0)
 }
 
 type LocalDeployer struct {

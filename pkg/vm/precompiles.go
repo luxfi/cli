@@ -18,7 +18,17 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/geth/common"
 )
+
+// convertAddresses converts []crypto.Address to []common.Address
+func convertAddresses(addrs []crypto.Address) []common.Address {
+	result := make([]common.Address, len(addrs))
+	for i, addr := range addrs {
+		result[i] = common.Address(addr)
+	}
+	return result
+}
 
 type Precompile string
 
@@ -66,8 +76,8 @@ func configureRewardManager(app *application.Lux) (rewardmanager.Config, bool, e
 	}
 
 	config.AllowListConfig = allowlist.AllowListConfig{
-		AdminAddresses:   admins,
-		EnabledAddresses: enabled,
+		AdminAddresses:   convertAddresses(admins),
+		EnabledAddresses: convertAddresses(enabled),
 	}
 	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
@@ -108,7 +118,7 @@ func ConfigureInitialRewardConfig(app *application.Lux) (*rewardmanager.InitialR
 	if err != nil {
 		return config, err
 	}
-	config.RewardAddress = rewardAddress
+	config.RewardAddress = common.Address(rewardAddress)
 	return config, nil
 }
 
@@ -144,8 +154,8 @@ func configureContractAllowList(app *application.Lux) (deployerallowlist.Config,
 	}
 
 	config.AllowListConfig = allowlist.AllowListConfig{
-		AdminAddresses:   admins,
-		EnabledAddresses: enabled,
+		AdminAddresses:   convertAddresses(admins),
+		EnabledAddresses: convertAddresses(enabled),
 	}
 	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
@@ -174,8 +184,8 @@ func configureTransactionAllowList(app *application.Lux) (txallowlist.Config, bo
 	}
 
 	config.AllowListConfig = allowlist.AllowListConfig{
-		AdminAddresses:   admins,
-		EnabledAddresses: enabled,
+		AdminAddresses:   convertAddresses(admins),
+		EnabledAddresses: convertAddresses(enabled),
 	}
 	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
@@ -204,8 +214,8 @@ func configureMinterList(app *application.Lux) (nativeminter.Config, bool, error
 	}
 
 	config.AllowListConfig = allowlist.AllowListConfig{
-		AdminAddresses:   admins,
-		EnabledAddresses: enabled,
+		AdminAddresses:   convertAddresses(admins),
+		EnabledAddresses: convertAddresses(enabled),
 	}
 	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
@@ -234,8 +244,8 @@ func configureFeeConfigAllowList(app *application.Lux) (feemanager.Config, bool,
 	}
 
 	config.AllowListConfig = allowlist.AllowListConfig{
-		AdminAddresses:   admins,
-		EnabledAddresses: enabled,
+		AdminAddresses:   convertAddresses(admins),
+		EnabledAddresses: convertAddresses(enabled),
 	}
 	zero := uint64(0)
 	config.Upgrade = precompileconfig.Upgrade{
@@ -297,60 +307,65 @@ func getPrecompiles(config params.ChainConfig, app *application.Lux) (
 
 		switch precompileDecision {
 		case NativeMint:
-			mintConfig, cancelled, err := configureMinterList(app)
+			_, cancelled, err := configureMinterList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				config.GenesisPrecompiles[nativeminter.ConfigKey] = &mintConfig
+				// TODO: GenesisPrecompiles needs extras.ChainConfig
+				// mintConfig would be used here: config.GenesisPrecompiles[nativeminter.ConfigKey] = &mintConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, NativeMint)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case ContractAllowList:
-			contractConfig, cancelled, err := configureContractAllowList(app)
+			_, cancelled, err := configureContractAllowList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				config.GenesisPrecompiles[deployerallowlist.ConfigKey] = &contractConfig
+				// TODO: GenesisPrecompiles needs extras.ChainConfig
+				// contractConfig would be used here: config.GenesisPrecompiles[deployerallowlist.ConfigKey] = &contractConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, ContractAllowList)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case TxAllowList:
-			txConfig, cancelled, err := configureTransactionAllowList(app)
+			_, cancelled, err := configureTransactionAllowList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				config.GenesisPrecompiles[txallowlist.ConfigKey] = &txConfig
+				// TODO: GenesisPrecompiles needs extras.ChainConfig
+				// txConfig would be used here: config.GenesisPrecompiles[txallowlist.ConfigKey] = &txConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, TxAllowList)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case FeeManager:
-			feeConfig, cancelled, err := configureFeeConfigAllowList(app)
+			_, cancelled, err := configureFeeConfigAllowList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				config.GenesisPrecompiles[feemanager.ConfigKey] = &feeConfig
+				// TODO: GenesisPrecompiles needs extras.ChainConfig
+				// feeConfig would be used here: config.GenesisPrecompiles[feemanager.ConfigKey] = &feeConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, FeeManager)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case RewardManager:
-			rewardManagerConfig, cancelled, err := configureRewardManager(app)
+			_, cancelled, err := configureRewardManager(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				config.GenesisPrecompiles[rewardmanager.ConfigKey] = &rewardManagerConfig
+				// TODO: GenesisPrecompiles needs extras.ChainConfig
+				// rewardManagerConfig would be used here: config.GenesisPrecompiles[rewardmanager.ConfigKey] = &rewardManagerConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, RewardManager)
 				if err != nil {
 					return config, statemachine.Stop, err
