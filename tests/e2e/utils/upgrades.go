@@ -9,14 +9,14 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/rpc"
 	"github.com/onsi/gomega"
 )
 
 const chainConfigAPI = "eth_getChainConfig"
 
-func CheckUpgradeIsDeployed(rpcEndpoint string, deployedUpgrades params.UpgradeConfig) error {
+func CheckUpgradeIsDeployed(rpcEndpoint string, deployedUpgrades extras.UpgradeConfig) error {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
@@ -54,7 +54,7 @@ func CheckUpgradeIsDeployed(rpcEndpoint string, deployedUpgrades params.UpgradeC
 	}
 
 	// ...so that we finally can unmarshal to the object we need
-	var appliedUpgrades params.UpgradeConfig
+	var appliedUpgrades extras.UpgradeConfig
 	if err := json.Unmarshal(serialized, &appliedUpgrades); err != nil {
 		return fmt.Errorf("failed to unpack JSON strings to params.UpgradeConfig")
 	}

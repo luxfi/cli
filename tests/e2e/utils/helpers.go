@@ -694,8 +694,12 @@ func FundLedgerAddress() error {
 	}
 	var kc keychain.Keychain
 	kc = sk.KeyChain()
-	// Create wallet without ETH keychain (use nil)
-	wallet, err := primary.MakeWallet(context.Background(), constants.LocalAPIEndpoint, kc, nil, primary.WalletConfig{})
+	// Create wallet with new API
+	wallet, err := primary.MakeWallet(context.Background(), &primary.WalletConfig{
+		URI:         constants.LocalAPIEndpoint,
+		LUXKeychain: kc,
+		EthKeychain: nil,
+	})
 	if err != nil {
 		return err
 	}
@@ -722,7 +726,11 @@ func FundLedgerAddress() error {
 	if err != nil {
 		return err
 	}
-	wallet, err = primary.MakeWallet(context.Background(), constants.LocalAPIEndpoint, kc, nil, primary.WalletConfig{})
+	wallet, err = primary.MakeWallet(context.Background(), &primary.WalletConfig{
+		URI:         constants.LocalAPIEndpoint,
+		LUXKeychain: kc,
+		EthKeychain: nil,
+	})
 	if err != nil {
 		return err
 	}

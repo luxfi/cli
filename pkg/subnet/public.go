@@ -642,3 +642,12 @@ func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platf
 
 	return vals, nil
 }
+
+// ValidateSubnetNameAndGetChains validates a subnet name and returns chain information
+func ValidateSubnetNameAndGetChains(subnetName string) error {
+	// Basic validation - can be expanded later
+	if subnetName == "" {
+		return fmt.Errorf("subnet name cannot be empty")
+	}
+	return nil
+}

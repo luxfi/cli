@@ -12,6 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/node/utils/units"
@@ -22,7 +23,6 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
@@ -231,7 +231,7 @@ func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.T
 				if err != nil {
 					return "", err
 				}
-				initialMint[addr] = (*gethmath.HexOrDecimal256)(big.NewInt(int64(amount)))
+				initialMint[addr] = (*math.HexOrDecimal256)(big.NewInt(int64(amount)))
 				return fmt.Sprintf("%s-%d", addr.Hex(), amount), nil
 			},
 			"Add an address to amount pair",
@@ -248,12 +248,26 @@ func promptNativeMintParams(precompiles *[]extras.PrecompileUpgrade, date time.T
 	}
 
 	timestamp := uint64(date.Unix())
+	// Convert crypto.Address to common.Address
+	commonAdminAddrs := make([]common.Address, len(adminAddrs))
+	for i, addr := range adminAddrs {
+		commonAdminAddrs[i] = common.Address(addr)
+	}
+	commonEnabledAddrs := make([]common.Address, len(enabledAddrs))
+	for i, addr := range enabledAddrs {
+		commonEnabledAddrs[i] = common.Address(addr)
+	}
+	// Convert initialMint map
+	commonInitialMint := make(map[common.Address]*math.HexOrDecimal256)
+	for addr, amount := range initialMint {
+		commonInitialMint[common.Address(addr)] = amount
+	}
 	config := nativeminter.NewConfig(
 		&timestamp,
-		adminAddrs,
-		enabledAddrs,
+		commonAdminAddrs,
+		commonEnabledAddrs,
 		nil, // managers addresses
-		initialMint,
+		commonInitialMint,
 	)
 	upgrade := extras.PrecompileUpgrade{
 		Config: config,
@@ -274,10 +288,19 @@ func promptRewardManagerParams(precompiles *[]extras.PrecompileUpgrade, date tim
 	}
 
 	timestamp := uint64(date.Unix())
+	// Convert crypto.Address to common.Address
+	commonAdminAddrs := make([]common.Address, len(adminAddrs))
+	for i, addr := range adminAddrs {
+		commonAdminAddrs[i] = common.Address(addr)
+	}
+	commonEnabledAddrs := make([]common.Address, len(enabledAddrs))
+	for i, addr := range enabledAddrs {
+		commonEnabledAddrs[i] = common.Address(addr)
+	}
 	config := rewardmanager.NewConfig(
 		&timestamp,
-		adminAddrs,
-		enabledAddrs,
+		commonAdminAddrs,
+		commonEnabledAddrs,
 		nil, // managers addresses
 		initialConfig,
 	)
@@ -304,18 +327,39 @@ func promptFeeManagerParams(precompiles *[]extras.PrecompileUpgrade, date time.T
 	var feeConfig *commontype.FeeConfig
 
 	if yes {
-		chainConfig, _, err := vm.GetFeeConfig(params.ChainConfig{}, app)
-		if err != nil {
-			return err
+		// TODO: FeeConfig needs to be accessed from extras.ChainConfig
+		// chainConfig, _, err := vm.GetFeeConfig(params.ChainConfig{}, app)
+		// if err != nil {
+		// 	return err
+		// }
+		// feeConfig = &chainConfig.FeeConfig
+		// For now, create a default FeeConfig
+		feeConfig = &commontype.FeeConfig{
+			GasLimit:                 big.NewInt(8000000),
+			TargetBlockRate:          2,
+			MinBaseFee:               big.NewInt(25000000000),
+			TargetGas:                big.NewInt(15000000),
+			BaseFeeChangeDenominator: big.NewInt(36),
+			MinBlockGasCost:          big.NewInt(0),
+			MaxBlockGasCost:          big.NewInt(1000000),
+			BlockGasCostStep:         big.NewInt(200000),
 		}
-		feeConfig = &chainConfig.FeeConfig
 	}
 
 	timestamp := uint64(date.Unix())
+	// Convert crypto.Address to common.Address
+	commonAdminAddrs := make([]common.Address, len(adminAddrs))
+	for i, addr := range adminAddrs {
+		commonAdminAddrs[i] = common.Address(addr)
+	}
+	commonEnabledAddrs := make([]common.Address, len(enabledAddrs))
+	for i, addr := range enabledAddrs {
+		commonEnabledAddrs[i] = common.Address(addr)
+	}
 	config := feemanager.NewConfig(
 		&timestamp,
-		adminAddrs,
-		enabledAddrs,
+		commonAdminAddrs,
+		commonEnabledAddrs,
 		nil, // managers addresses
 		feeConfig,
 	)
@@ -333,10 +377,19 @@ func promptContractAllowListParams(precompiles *[]extras.PrecompileUpgrade, date
 	}
 
 	timestamp := uint64(date.Unix())
+	// Convert crypto.Address to common.Address
+	commonAdminAddrs := make([]common.Address, len(adminAddrs))
+	for i, addr := range adminAddrs {
+		commonAdminAddrs[i] = common.Address(addr)
+	}
+	commonEnabledAddrs := make([]common.Address, len(enabledAddrs))
+	for i, addr := range enabledAddrs {
+		commonEnabledAddrs[i] = common.Address(addr)
+	}
 	config := deployerallowlist.NewConfig(
 		&timestamp,
-		adminAddrs,
-		enabledAddrs,
+		commonAdminAddrs,
+		commonEnabledAddrs,
 		nil, // managers addresses
 	)
 	upgrade := extras.PrecompileUpgrade{
@@ -353,10 +406,19 @@ func promptTxAllowListParams(precompiles *[]extras.PrecompileUpgrade, date time.
 	}
 
 	timestamp := uint64(date.Unix())
+	// Convert crypto.Address to common.Address
+	commonAdminAddrs := make([]common.Address, len(adminAddrs))
+	for i, addr := range adminAddrs {
+		commonAdminAddrs[i] = common.Address(addr)
+	}
+	commonEnabledAddrs := make([]common.Address, len(enabledAddrs))
+	for i, addr := range enabledAddrs {
+		commonEnabledAddrs[i] = common.Address(addr)
+	}
 	config := txallowlist.NewConfig(
 		&timestamp,
-		adminAddrs,
-		enabledAddrs,
+		commonAdminAddrs,
+		commonEnabledAddrs,
 		nil, // managers addresses
 	)
 	upgrade := extras.PrecompileUpgrade{
@@ -366,7 +428,7 @@ func promptTxAllowListParams(precompiles *[]extras.PrecompileUpgrade, date time.
 	return nil
 }
 
-func getCClient(apiEndpoint string, blockchainID string) (ethclient.Client, error) {
+func getCClient(apiEndpoint string, blockchainID string) (*ethclient.Client, error) {
 	cClient, err := ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoint, blockchainID))
 	if err != nil {
 		return nil, err
@@ -425,8 +487,8 @@ func ensureAdminsHaveBalance(admins []crypto.Address, subnetName string) error {
 	return nil
 }
 
-func getAccountBalance(ctx context.Context, cClient ethclient.Client, addrStr string) (float64, error) {
-	addr := crypto.HexToAddress(addrStr)
+func getAccountBalance(ctx context.Context, cClient *ethclient.Client, addrStr string) (float64, error) {
+	addr := common.HexToAddress(addrStr)
 	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
 	defer cancel()

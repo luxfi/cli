@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
@@ -342,7 +343,12 @@ func validateUpgrade(subnetName, networkKey string, sc *models.Sidecar, skipProm
 			continue
 		}
 		if allowListCfg != nil {
-			if err := ensureAdminsHaveBalance(allowListCfg.AdminAddresses, subnetName); err != nil {
+			// Convert common.Address to crypto.Address
+			cryptoAddrs := make([]crypto.Address, len(allowListCfg.AdminAddresses))
+			for i, addr := range allowListCfg.AdminAddresses {
+				cryptoAddrs[i] = crypto.Address(addr)
+			}
+			if err := ensureAdminsHaveBalance(cryptoAddrs, subnetName); err != nil {
 				return nil, "", err
 			}
 		}
