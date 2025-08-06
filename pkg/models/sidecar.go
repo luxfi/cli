@@ -54,6 +54,11 @@ type Sidecar struct {
 	ImportedFromLPM bool
 	ImportedVMID    string
 
+	// Custom VM support
+	CustomVMRepoURL     string
+	CustomVMBranch      string
+	CustomVMBuildScript string
+
 	// L1/L2 Architecture (2025)
 	Sovereign     bool   `json:"sovereign"`     // true for L1, false for L2/subnet
 	BaseChain     string `json:"baseChain"`     // For L2s: ethereum, lux-l1, lux, op-mainnet
