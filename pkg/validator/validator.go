@@ -4,10 +4,11 @@ package validator
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	luxdjson "github.com/luxfi/node/utils/json"
 	"github.com/luxfi/node/utils/rpc"
@@ -33,7 +34,7 @@ type CurrentValidatorInfo struct {
 	Balance      luxdjson.Uint64 `json:"balance"`
 }
 
-func GetTotalWeight(network network.Network, subnetID ids.ID) (uint64, error) {
+func GetTotalWeight(network models.Network, subnetID ids.ID) (uint64, error) {
 	validators, err := GetCurrentValidators(network, subnetID)
 	if err != nil {
 		return 0, err
@@ -45,7 +46,7 @@ func GetTotalWeight(network network.Network, subnetID ids.ID) (uint64, error) {
 	return weight, nil
 }
 
-func IsValidator(network network.Network, subnetID ids.ID, nodeID ids.NodeID) (bool, error) {
+func IsValidator(network models.Network, subnetID ids.ID, nodeID ids.NodeID) (bool, error) {
 	validators, err := GetCurrentValidators(network, subnetID)
 	if err != nil {
 		return false, err
@@ -54,23 +55,20 @@ func IsValidator(network network.Network, subnetID ids.ID, nodeID ids.NodeID) (b
 	return utils.Belongs(nodeIDs, nodeID), nil
 }
 
-func GetValidatorBalance(net network.Network, validationID ids.ID) (uint64, error) {
-	vdrInfo, err := GetValidatorInfo(net, validationID)
+func GetValidatorBalance(net models.Network, validationID ids.ID) (uint64, error) {
+	_, err := GetValidatorInfo(net, validationID)
 	if err != nil {
 		return 0, err
 	}
-	return vdrInfo.Balance, nil
+	// TODO: Balance field doesn't exist in ClientPermissionlessValidator
+	// Need to determine how to get balance
+	return 0, fmt.Errorf("validator balance not available in current implementation")
 }
 
-func GetValidatorInfo(net network.Network, validationID ids.ID) (platformvm.L1Validator, error) {
-	pClient := platformvm.NewClient(net.Endpoint)
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	vdrInfo, _, err := pClient.GetL1Validator(ctx, validationID)
-	if err != nil {
-		return platformvm.L1Validator{}, err
-	}
-	return vdrInfo, nil
+func GetValidatorInfo(net models.Network, validationID ids.ID) (platformvm.ClientPermissionlessValidator, error) {
+	// TODO: GetL1Validator doesn't exist yet in platformvm
+	// This needs to be implemented when L1 validation is added
+	return platformvm.ClientPermissionlessValidator{}, fmt.Errorf("L1 validator info not yet implemented")
 }
 
 // Returns the validation ID for the Node ID, as registered at the validator manager
@@ -106,11 +104,11 @@ func GetValidationID(
 }
 
 func GetValidatorKind(
-	network network.Network,
+	network models.Network,
 	subnetID ids.ID,
 	nodeID ids.NodeID,
 ) (ValidatorKind, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
+	pClient := platformvm.NewClient(network.Endpoint())
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
 	vs, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
@@ -129,10 +127,10 @@ func GetValidatorKind(
 }
 
 // Enables querying the validation IDs from P-Chain
-func GetCurrentValidators(network network.Network, subnetID ids.ID) ([]CurrentValidatorInfo, error) {
+func GetCurrentValidators(network models.Network, subnetID ids.ID) ([]CurrentValidatorInfo, error) {
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
-	requester := rpc.NewEndpointRequester(network.Endpoint + "/ext/P")
+	requester := rpc.NewEndpointRequester(network.Endpoint() + "/ext/P")
 	res := &platformvm.GetCurrentValidatorsReply{}
 	if err := requester.SendRequest(
 		ctx,

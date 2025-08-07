@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func getCClient(apiEndpoint string, blockchainID string) (ethclient.Client, error) {
+func getCClient(apiEndpoint string, blockchainID string) (*ethclient.Client, error) {
 	cClient, err := ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoint, blockchainID))
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func ensureHaveBalance(
 	return nil
 }
 
-func getAccountBalance(cClient ethclient.Client, addrStr string) (float64, error) {
+func getAccountBalance(cClient *ethclient.Client, addrStr string) (float64, error) {
 	addr := common.HexToAddress(addrStr)
 	ctx, cancel := utils.GetAPIContext()
 	balance, err := cClient.BalanceAt(ctx, addr, nil)

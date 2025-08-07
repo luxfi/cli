@@ -14,8 +14,8 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 
 	"github.com/spf13/cobra"
@@ -96,7 +96,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
 		app,
 		network,
 		contract.ChainSpec{
@@ -115,10 +115,6 @@ func sendMsg(_ *cobra.Command, args []string) error {
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"pay for fees at source blockchain",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			genesisPrivateKey,
 		)
 		if err != nil {
 			return err
@@ -159,18 +155,18 @@ func sendMsg(_ *cobra.Command, args []string) error {
 			return fmt.Errorf("invalid hex format at %s", message)
 		}
 	}
-	destAddr := common.Address{}
+	destAddr := crypto.Address{}
 	if msgFlags.DestinationAddress != "" {
 		if err := prompts.ValidateAddress(msgFlags.DestinationAddress); err != nil {
 			return fmt.Errorf("failure validating address %s: %w", msgFlags.DestinationAddress, err)
 		}
-		destAddr = common.HexToAddress(msgFlags.DestinationAddress)
+		destAddr = crypto.HexToAddress(msgFlags.DestinationAddress)
 	}
 	// send tx to the Warp contract at the source
 	ux.Logger.PrintToUser("Delivering message %q from source blockchain %q (%s)", message, sourceBlockchainName, sourceBlockchainID)
 	tx, receipt, err := interchain.SendCrossChainMessage(
 		sourceRPCEndpoint,
-		common.HexToAddress(sourceMessengerAddress),
+		crypto.HexToAddress(sourceMessengerAddress),
 		privateKey,
 		destBlockchainID,
 		destAddr,
@@ -205,7 +201,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 
 	receivedMessage := string(event.Message.Message)
 	if msgFlags.HexEncodedMessage {
-		receivedMessage = common.Bytes2Hex(event.Message.Message)
+		receivedMessage = hex.EncodeToString(event.Message.Message)
 	}
 	if string(messageBytes) != string(event.Message.Message) {
 		return fmt.Errorf("invalid message content at source event, expected %s, got %s", message, receivedMessage)
@@ -220,7 +216,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 	for {
 		if b, err := interchain.MessageReceived(
 			destRPCEndpoint,
-			common.HexToAddress(destMessengerAddress),
+			crypto.HexToAddress(destMessengerAddress),
 			event.MessageID,
 		); err != nil {
 			return err

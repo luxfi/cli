@@ -529,6 +529,11 @@ func (app *Lux) GetNodesDir() string {
 	return filepath.Join(app.baseDir, "nodes")
 }
 
+// GetLogDir returns the log directory path
+func (app *Lux) GetLogDir() string {
+	return filepath.Join(app.baseDir, constants.LogDir)
+}
+
 // GetLocalClustersDir returns the directory for local clusters
 func (app *Lux) GetLocalClustersDir() string {
 	return filepath.Join(app.baseDir, "clusters")
@@ -544,6 +549,21 @@ func (app *Lux) GetLocalRelayerConfigPath() string {
 	return filepath.Join(app.baseDir, "relayer", "config.json")
 }
 
+// GetLocalRelayerRunPath returns the path to the relayer run file
+func (app *Lux) GetLocalRelayerRunPath(network models.Network) string {
+	return filepath.Join(app.GetRunDir(), fmt.Sprintf("relayer-%s.run", network.String()))
+}
+
+// GetLocalRelayerLogPath returns the path to the relayer log file
+func (app *Lux) GetLocalRelayerLogPath(network models.Network) string {
+	return filepath.Join(app.GetLogDir(), fmt.Sprintf("relayer-%s.log", network.String()))
+}
+
+// GetLocalRelayerStorageDir returns the path to the relayer storage directory
+func (app *Lux) GetLocalRelayerStorageDir(network models.Network) string {
+	return filepath.Join(app.baseDir, "relayer-storage", network.String())
+}
+
 // GetKey returns the key for a given name
 func (app *Lux) GetKey(keyName string) (string, error) {
 	keyPath := app.GetKeyPath(keyName)
@@ -555,6 +575,11 @@ func (app *Lux) GetKey(keyName string) (string, error) {
 		return "", err
 	}
 	return string(keyBytes), nil
+}
+
+// GetBasePath returns the base directory path for the CLI
+func (app *Lux) GetBasePath() string {
+	return app.baseDir
 }
 
 // GetLuxdNodeConfigPath returns the node config path for a subnet
@@ -633,4 +658,160 @@ func (app *Lux) AddDefaultBlockchainRPCsToSidecar(
 	// Stub implementation - return success for now
 	// This method would typically update the sidecar with RPC endpoints
 	return true, nil
+}
+
+// ListClusterNames returns a list of cluster names
+func (app *Lux) ListClusterNames() ([]string, error) {
+	clustersDir := app.GetLocalClustersDir()
+	entries, err := os.ReadDir(clustersDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+	
+	var clusterNames []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			clusterNames = append(clusterNames, entry.Name())
+		}
+	}
+	return clusterNames, nil
+}
+
+// ClustersConfigExists checks if clusters config exists
+func (app *Lux) ClustersConfigExists() bool {
+	// Stub implementation - check for clusters config file
+	configPath := filepath.Join(app.GetBaseDir(), constants.ClustersConfigFileName)
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// LoadClustersConfig loads the clusters configuration
+func (app *Lux) LoadClustersConfig() (map[string]interface{}, error) {
+	configPath := filepath.Join(app.GetBaseDir(), constants.ClustersConfigFileName)
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return config, nil
+}
+
+// LoadClusterNodeConfig loads node configuration for a cluster
+func (app *Lux) LoadClusterNodeConfig(clusterName string, nodeID string) (map[string]interface{}, error) {
+	configPath := filepath.Join(app.GetLocalClusterDir(clusterName), nodeID, "config.json")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return config, nil
+}
+
+// GetClusterConfig returns cluster configuration
+func (app *Lux) GetClusterConfig(clusterName string) (map[string]interface{}, error) {
+	configPath := filepath.Join(app.GetLocalClusterDir(clusterName), "config.json")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return config, nil
+}
+
+// GetAnsibleInventoryDirPath returns the ansible inventory directory path
+func (app *Lux) GetAnsibleInventoryDirPath(clusterName string) string {
+	return filepath.Join(app.GetLocalClusterDir(clusterName), "ansible", "inventories")
+}
+
+// GetMonitoringInventoryDir returns the monitoring inventory directory path
+func (app *Lux) GetMonitoringInventoryDir(clusterName string) string {
+	return filepath.Join(app.GetLocalClusterDir(clusterName), "monitoring", "inventory")
+}
+
+// ResetPluginsDir resets the plugins directory
+func (app *Lux) ResetPluginsDir() error {
+	pluginsDir := filepath.Join(app.baseDir, constants.PluginDir)
+	if err := os.RemoveAll(pluginsDir); err != nil {
+		return err
+	}
+	return os.MkdirAll(pluginsDir, constants.DefaultPerms755)
+}
+
+// GetSnapshotPath returns the path to a snapshot
+func (app *Lux) GetSnapshotPath(snapshotName string) string {
+	return filepath.Join(app.baseDir, constants.SnapshotsDirName, snapshotName)
+}
+
+// BlockchainConfigExists checks if blockchain config exists
+func (app *Lux) BlockchainConfigExists(blockchainName string) bool {
+	configPath := filepath.Join(app.GetSubnetDir(), blockchainName, "blockchain-config.json")
+	_, err := os.Stat(configPath)
+	return err == nil
+}
+
+// GetClusterNetwork returns the network for a given cluster
+func (app *Lux) GetClusterNetwork(clusterName string) (models.Network, error) {
+	// For now, all clusters are local networks
+	// This could be extended to read from cluster config
+	return models.NewLocalNetwork(), nil
+}
+
+// GetNetworkFromSidecarNetworkName returns the network from sidecar network name
+func (app *Lux) GetNetworkFromSidecarNetworkName(name string) (models.Network, error) {
+	network := models.GetNetworkFromSidecarNetworkName(name)
+	if network == models.Undefined {
+		return models.Undefined, fmt.Errorf("unknown network name: %s", name)
+	}
+	return network, nil
+}
+
+// GetBlockchainNamesOnNetwork returns blockchain names deployed on a network
+func (app *Lux) GetBlockchainNamesOnNetwork(network models.Network, onlySOV bool) ([]string, error) {
+	// Get all blockchain names from sidecar files
+	blockchainNames := []string{}
+	
+	subnetDir := app.GetSubnetDir()
+	entries, err := os.ReadDir(subnetDir)
+	if err != nil {
+		return nil, err
+	}
+	
+	for _, entry := range entries {
+		if entry.IsDir() {
+			// Check if sidecar exists for this blockchain
+			sidecarPath := filepath.Join(subnetDir, entry.Name(), "sidecar.json")
+			if _, err := os.Stat(sidecarPath); err == nil {
+				// Load sidecar to check if it's deployed on this network
+				sc, err := app.LoadSidecar(entry.Name())
+				if err != nil {
+					continue
+				}
+				
+				// Check if blockchain is deployed on the specified network
+				if _, ok := sc.Networks[network.Name()]; ok {
+					// If onlySOV is true, only include sovereign chains
+					if !onlySOV || sc.Sovereign {
+						blockchainNames = append(blockchainNames, entry.Name())
+					}
+				}
+			}
+		}
+	}
+	
+	return blockchainNames, nil
 }

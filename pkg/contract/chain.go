@@ -215,13 +215,13 @@ func GetBlockchainEndpoints(
 		return "", "", err
 	}
 	if rpcEndpoint == "" && promptForRPCEndpoint {
-		rpcEndpoint, err = app.Prompt.CaptureURL("What is the RPC endpoint for "+blockchainDesc, false)
+		rpcEndpoint, err = app.Prompt.CaptureURL("What is the RPC endpoint for " + blockchainDesc)
 		if err != nil {
 			return "", "", err
 		}
 	}
 	if wsEndpoint == "" && promptForWSEndpoint {
-		wsEndpoint, err = app.Prompt.CaptureURL("What is the WS endpoint for "+blockchainDesc, false)
+		wsEndpoint, err = app.Prompt.CaptureURL("What is the WS endpoint for " + blockchainDesc)
 		if err != nil {
 			return "", "", err
 		}
@@ -241,13 +241,13 @@ func GetBlockchainID(
 		blockchainID, err = ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			// it should be an alias at this point
-			blockchainID, err = utils.GetChainID(network.Endpoint, chainSpec.BlockchainID)
+			blockchainID, err = utils.GetChainID(network.Endpoint(), chainSpec.BlockchainID)
 			if err != nil {
 				return ids.Empty, err
 			}
 		}
 	case chainSpec.CChain:
-		chainID, err := utils.GetChainID(network.Endpoint, "C")
+		chainID, err := utils.GetChainID(network.Endpoint(), "C")
 		if err != nil {
 			return ids.Empty, err
 		}
@@ -290,7 +290,7 @@ func GetSubnetID(
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failure parsing %s as id: %w", chainSpec.BlockchainID, err)
 		}
-		tx, err := utils.GetBlockchainTx(network.Endpoint, blockchainID)
+		tx, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
 		if err != nil {
 			return ids.Empty, err
 		}
@@ -412,7 +412,7 @@ func PromptChain(
 		chainID, err := ids.FromString(blockchainID)
 		if err != nil {
 			// map from alias to blockchain ID (or identity)
-			chainID, err = utils.GetChainID(network.Endpoint, blockchainID)
+			chainID, err = utils.GetChainID(network.Endpoint(), blockchainID)
 			if err != nil {
 				return cancel, err
 			}
@@ -434,7 +434,7 @@ func GetCChainWarpInfo(
 	messengerAddress := ""
 	registryAddress := ""
 	switch {
-	case network.Kind == models.Local:
+	case network.Kind() == models.Local:
 		b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, "")
 		if err != nil {
 			return "", "", err
@@ -444,17 +444,25 @@ func GetCChainWarpInfo(
 		}
 		messengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
 		registryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
-	case network.ClusterName != "":
-		clusterConfig, err := app.GetClusterConfig(network.ClusterName)
+	case network.ClusterName() != "":
+		clusterConfig, err := app.GetClusterConfig(network.ClusterName())
 		if err != nil {
 			return "", "", err
 		}
-		messengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
-		registryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
-	case network.Kind == models.Testnet:
+		// Type assertion for ExtraNetworkData field
+		extraData, ok := clusterConfig["extraNetworkData"].(map[string]interface{})
+		if ok {
+			if msg, ok := extraData["CChainTeleporterMessengerAddress"].(string); ok {
+				messengerAddress = msg
+			}
+			if reg, ok := extraData["CChainTeleporterRegistryAddress"].(string); ok {
+				registryAddress = reg
+			}
+		}
+	case network.Kind() == models.Testnet:
 		messengerAddress = constants.DefaultWarpMessengerAddress
-		registryAddress = constants.TestnetCChainWarpRegistryAddress
-	case network.Kind == models.Mainnet:
+		registryAddress = "" // TODO: Add TestnetCChainWarpRegistryAddress when available
+	case network.Kind() == models.Mainnet:
 		messengerAddress = constants.DefaultWarpMessengerAddress
 		registryAddress = constants.MainnetCChainWarpRegistryAddress
 	}
