@@ -651,3 +651,14 @@ func ValidateSubnetNameAndGetChains(subnetName string) error {
 	}
 	return nil
 }
+
+// IncreaseValidatorPChainBalance increases a validator's balance on P-chain
+func (d *PublicDeployer) IncreaseValidatorPChainBalance(
+	validationID ids.ID,
+	balance uint64,
+) error {
+	// TODO: Implement P-chain balance increase for validators
+	// This would involve creating and signing a transaction to add funds
+	// to the validator's staking balance
+	return fmt.Errorf("IncreaseValidatorPChainBalance not yet implemented")
+}

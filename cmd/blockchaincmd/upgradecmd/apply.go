@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/ids"
 	ANRclient "github.com/luxfi/netrunner/client"
@@ -186,7 +186,7 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 	// save a temporary snapshot
 	snapName := blockchainName + tmpSnapshotInfix + time.Now().Format(timestampFormat)
 	app.Log.Debug("saving temporary snapshot for upgrade bytes", zap.String("snapshot-name", snapName))
-	_, err = cli.SaveSnapshot(ctx, snapName, false)
+	_, err = cli.SaveSnapshot(ctx, snapName)
 	if err != nil {
 		return err
 	}
@@ -198,12 +198,12 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 	}
 	// restart the network setting the upgrade bytes file
 	opts := ANRclient.WithUpgradeConfigs(netUpgradeConfs)
-	_, err = cli.LoadSnapshot(
-		ctx,
-		snapName,
-		app.Conf.GetConfigBoolValue(constants.ConfigSnapshotsAutoSaveKey),
-		opts,
-	)
+	// LoadSnapshot takes options, not bool as parameter
+	if app.Conf.GetConfigBoolValue(constants.ConfigSnapshotsAutoSaveKey) {
+		_, err = cli.LoadSnapshot(ctx, snapName, opts)
+	} else {
+		_, err = cli.LoadSnapshot(ctx, snapName, opts)
+	}
 	if err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func applyPublicNetworkUpgrade(blockchainName, networkKey string, sc *models.Sid
 	if print {
 		blockchainIDstr := "<your-blockchain-id>"
 		if sc.Networks != nil &&
-			!sc.NetworkDataIsEmpty(networkKey) &&
+			!sc.NetworkDataIsEmpty() &&
 			sc.Networks[networkKey].BlockchainID != ids.Empty {
 			blockchainIDstr = sc.Networks[networkKey].BlockchainID.String()
 		}
@@ -317,9 +317,9 @@ func applyPublicNetworkUpgrade(blockchainName, networkKey string, sc *models.Sid
 	return nil
 }
 
-func validateUpgrade(blockchainName, networkKey string, sc *models.Sidecar, skipPrompting bool) ([]params.PrecompileUpgrade, string, error) {
+func validateUpgrade(blockchainName, networkKey string, sc *models.Sidecar, skipPrompting bool) ([]extras.PrecompileUpgrade, string, error) {
 	// if there's no entry in the Sidecar, we assume there hasn't been a deploy yet
-	if sc.NetworkDataIsEmpty(networkKey) {
+	if sc.NetworkDataIsEmpty() {
 		return nil, "", subnetNotYetDeployed()
 	}
 	chainID := sc.Networks[networkKey].BlockchainID
@@ -376,11 +376,11 @@ func subnetNotYetDeployed() error {
 	return errSubnetNotYetDeployed
 }
 
-func writeLockFile(precmpUpgrades []params.PrecompileUpgrade, blockchainName string) {
+func writeLockFile(precmpUpgrades []extras.PrecompileUpgrade, blockchainName string) {
 	// it seems all went well this far, now we try to write/update the lock file
 	// if this fails, we probably don't want to cause an error to the user?
 	// so we are silently failing, just write a log entry
-	wrapper := params.UpgradeConfig{
+	wrapper := extras.UpgradeConfig{
 		PrecompileUpgrades: precmpUpgrades,
 	}
 	jsonBytes, err := json.Marshal(wrapper)
@@ -392,7 +392,7 @@ func writeLockFile(precmpUpgrades []params.PrecompileUpgrade, blockchainName str
 	}
 }
 
-func validateUpgradeBytes(file, lockFile []byte, skipPrompting bool) ([]params.PrecompileUpgrade, error) {
+func validateUpgradeBytes(file, lockFile []byte, skipPrompting bool) ([]extras.PrecompileUpgrade, error) {
 	upgrades, err := getAllUpgrades(file)
 	if err != nil {
 		return nil, err
@@ -447,7 +447,7 @@ func validateUpgradeBytes(file, lockFile []byte, skipPrompting bool) ([]params.P
 	return upgrades, nil
 }
 
-func getAllTimestamps(upgrades []params.PrecompileUpgrade) ([]int64, error) {
+func getAllTimestamps(upgrades []extras.PrecompileUpgrade) ([]int64, error) {
 	allTimestamps := []int64{}
 
 	if len(upgrades) == 0 {
@@ -477,7 +477,7 @@ func validateTimestamp(ts *uint64) (int64, error) {
 	return int64(val), nil
 }
 
-func getEarliestUpcomingTimestamp(upgrades []params.PrecompileUpgrade) (int64, error) {
+func getEarliestUpcomingTimestamp(upgrades []extras.PrecompileUpgrade) (int64, error) {
 	allTimestamps, err := getAllTimestamps(upgrades)
 	if err != nil {
 		return 0, err
@@ -503,8 +503,8 @@ func getEarliestUpcomingTimestamp(upgrades []params.PrecompileUpgrade) (int64, e
 	return earliest, nil
 }
 
-func getAllUpgrades(file []byte) ([]params.PrecompileUpgrade, error) {
-	var precompiles params.UpgradeConfig
+func getAllUpgrades(file []byte) ([]extras.PrecompileUpgrade, error) {
+	var precompiles extras.UpgradeConfig
 
 	if err := json.Unmarshal(file, &precompiles); err != nil {
 		cause := fmt.Errorf("failed parsing JSON: %w", err)

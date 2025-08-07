@@ -42,6 +42,12 @@ const (
 	TestnetAPIEndpoint    = "https://api.lux-test.network"
 	MainnetAPIEndpoint    = "https://api.lux.network"
 
+	// WebSocket endpoints
+	MainnetWSEndpoint = "wss://api.lux.network/ext/bc/C/ws"
+	TestnetWSEndpoint = "wss://api.lux-test.network/ext/bc/C/ws"
+	LocalWSEndpoint   = "ws://127.0.0.1:9630/ext/bc/C/ws"
+	DevnetWSEndpoint  = "wss://api.lux-dev.network/ext/bc/C/ws"
+
 	// Cloud service constants
 	GCPCloudService            = "gcp"
 	AWSCloudService            = "aws"
@@ -76,6 +82,7 @@ const (
 
 	// this depends on bootstrap snapshot
 	LocalAPIEndpoint = "http://127.0.0.1:9630"
+	DevnetAPIEndpoint = "https://api.lux-dev.network"
 	LocalNetworkID   = 1337
 
 	DefaultTokenName = "TEST"
@@ -227,8 +234,27 @@ const (
 	// Node roles
 	APIRole         = "api"
 	ValidatorRole   = "validator"
+	
+	// Cluster config
+	ClustersConfigFileName = "clusters.json"
 	MonitorRole     = "monitor"
 	WarpRelayerRole = "warp-relayer"
+	
+	// Warp constants
+	WarpDir     = "warp"
+	WarpBranch  = "main"
+	WarpURL     = "https://github.com/luxfi/warp.git"
+	WarpKeyName = "warp"
+	WarpVersion = "v1.0.0"
+	
+	// Relayer constants
+	DefaultRelayerVersion = "v1.0.0"
+	
+	// Payment messages
+	PayTxsFeesMsg = "pay transaction fees"
+	
+	// Units
+	OneLux = 1_000_000_000 // 1 LUX = 1e9 nLUX
 )
 
 // HTTPAccess represents HTTP access configuration
@@ -273,6 +299,12 @@ const (
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
+
+	// Default Warp Messenger Address
+	DefaultWarpMessengerAddress = "0x0000000000000000000000000000000000000005"
+	
+	// C-Chain Warp Registry Addresses
+	MainnetCChainWarpRegistryAddress = "0x0000000000000000000000000000000000000006"
 
 	SubnetIDLabel     = "SubnetID: "
 	BlockchainIDLabel = "BlockchainID: "

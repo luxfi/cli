@@ -4,6 +4,7 @@ package relayercmd
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -74,8 +75,8 @@ func CallStart(_ []string, flags StartFlags, network models.Network) error {
 		}
 	}
 	switch {
-	case network.ClusterName != "":
-		host, err := node.GetWarpRelayerHost(app, network.ClusterName)
+	case network.ClusterName() != "":
+		host, err := node.GetWarpRelayerHost(app, network.ClusterName())
 		if err != nil {
 			return err
 		}
@@ -85,21 +86,21 @@ func CallStart(_ []string, flags StartFlags, network models.Network) error {
 		ux.Logger.GreenCheckmarkToUser("Remote AWM Relayer on %s successfully started", host.GetCloudID())
 	default:
 		if relayerIsUp, _, _, err := relayer.RelayerIsUp(
-			app.GetLocalRelayerRunPath(network.Kind),
+			app.GetLocalRelayerRunPath(network.Kind()),
 		); err != nil {
 			return err
 		} else if relayerIsUp {
-			return fmt.Errorf("local AWM relayer is already running for %s", network.Kind)
+			return fmt.Errorf("local AWM relayer is already running for %s", network.Kind())
 		}
-		localNetworkRootDir := ""
-		if network.Kind == models.Local {
-			localNetworkRootDir, err = localnet.GetLocalNetworkDir(app)
+		// localNetworkRootDir := ""
+		if network.Kind() == models.Local {
+			_, err = localnet.GetLocalNetworkDir(app)
 			if err != nil {
 				return err
 			}
 		}
-		relayerConfigPath := app.GetLocalRelayerConfigPath(network.Kind, localNetworkRootDir)
-		if network.Kind == models.Local && flags.BinPath == "" && flags.Version == constants.DefaultRelayerVersion {
+		relayerConfigPath := app.GetLocalRelayerConfigPath()
+		if network.Kind() == models.Local && flags.BinPath == "" && flags.Version == constants.DefaultRelayerVersion {
 			if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 				return err
 			} else if b {
@@ -111,20 +112,20 @@ func CallStart(_ []string, flags StartFlags, network models.Network) error {
 		} else if binPath, err := relayer.DeployRelayer(
 			flags.Version,
 			flags.BinPath,
-			app.GetWarpRelayerBinDir(),
+			filepath.Join(app.GetBaseDir(), "bin", "warp-relayer"),
 			relayerConfigPath,
-			app.GetLocalRelayerLogPath(network.Kind),
-			app.GetLocalRelayerRunPath(network.Kind),
-			app.GetLocalRelayerStorageDir(network.Kind),
+			app.GetLocalRelayerLogPath(network.Kind()),
+			app.GetLocalRelayerRunPath(network.Kind()),
+			app.GetLocalRelayerStorageDir(network.Kind()),
 		); err != nil {
 			return err
-		} else if network.Kind == models.Local {
+		} else if network.Kind() == models.Local {
 			if err := localnet.WriteExtraLocalNetworkData(app, "", binPath, "", ""); err != nil {
 				return err
 			}
 		}
-		ux.Logger.GreenCheckmarkToUser("Local AWM Relayer successfully started for %s", network.Kind)
-		ux.Logger.PrintToUser("Logs can be found at %s", app.GetLocalRelayerLogPath(network.Kind))
+		ux.Logger.GreenCheckmarkToUser("Local AWM Relayer successfully started for %s", network.Kind())
+		ux.Logger.PrintToUser("Logs can be found at %s", app.GetLocalRelayerLogPath(network.Kind()))
 	}
 	return nil
 }

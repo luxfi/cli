@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/cli/pkg/warp"
-	"github.com/luxfi/cli/sdk/evm"
+	"github.com/luxfi/sdk/evm"
 	goethereumcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"

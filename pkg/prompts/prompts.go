@@ -35,9 +35,18 @@ const (
 	LessThanEq = "Less Than Or Eq"
 	MoreThanEq = "More Than Or Eq"
 	MoreThan   = "More Than"
+
+	// Address formats
+	PChainFormat = "P-Chain"
+	CChainFormat = "C-Chain"
 )
 
 var errNoKeys = errors.New("no keys")
+
+// promptUIRunner is a variable for testing purposes to allow mocking prompt.Run()
+var promptUIRunner = func(prompt promptui.Prompt) (string, error) {
+	return prompt.Run()
+}
 
 type Comparator struct {
 	Label string // Label that identifies reference value
@@ -89,6 +98,9 @@ type Prompter interface {
 	CapturePChainAddress(promptStr string, network models.Network) (string, error)
 	CaptureFutureDate(promptStr string, minDate time.Time) (time.Time, error)
 	ChooseKeyOrLedger(goal string) (bool, error)
+	CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error)
+	CaptureListWithSize(prompt string, options []string, size int) ([]string, error)
+	CaptureFloat(promptStr string) (float64, error)
 }
 
 type realPrompter struct{}
@@ -701,4 +713,241 @@ func captureKeyName(prompt Prompter, goal string, keyDir string, includeEwoq boo
 	}
 
 	return keyName, nil
+}
+
+func (*realPrompter) CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error) {
+	prompt := promptui.Prompt{
+		Label: promptStr,
+		Validate: func(input string) error {
+			val, err := strconv.ParseFloat(input, 64)
+			if err != nil {
+				return err
+			}
+			if val < minBalance {
+				return fmt.Errorf("balance must be at least %f", minBalance)
+			}
+			if val > availableBalance {
+				return fmt.Errorf("balance cannot exceed available balance of %f", availableBalance)
+			}
+			return nil
+		},
+	}
+	result, err := prompt.Run()
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseFloat(result, 64)
+}
+
+// PromptChain prompts the user to select a chain
+func PromptChain(
+	prompt Prompter,
+	message string,
+	blockchainNames []string,
+	pChainEnabled bool,
+	xChainEnabled bool,
+	cChainEnabled bool,
+	blockchainNameToAvoid string,
+	blockchainIDEnabled bool,
+) (bool, bool, bool, bool, string, string, error) {
+	// Build options
+	options := []string{}
+	
+	if pChainEnabled {
+		options = append(options, "P-Chain")
+	}
+	if xChainEnabled {
+		options = append(options, "X-Chain")
+	}
+	if cChainEnabled {
+		options = append(options, "C-Chain")
+	}
+	
+	// Add blockchain names
+	for _, name := range blockchainNames {
+		if name != blockchainNameToAvoid {
+			options = append(options, name)
+		}
+	}
+	
+	if blockchainIDEnabled {
+		options = append(options, "Enter blockchain ID")
+	}
+	
+	options = append(options, Cancel)
+	
+	choice, err := prompt.CaptureList(message, options)
+	if err != nil {
+		return false, false, false, false, "", "", err
+	}
+	
+	if choice == Cancel {
+		return true, false, false, false, "", "", nil
+	}
+	
+	// Return flags based on choice
+	pChain := choice == "P-Chain"
+	xChain := choice == "X-Chain"
+	cChain := choice == "C-Chain"
+	
+	blockchainName := ""
+	blockchainID := ""
+	
+	if choice == "Enter blockchain ID" {
+		blockchainID, err = prompt.CaptureString("Enter blockchain ID")
+		if err != nil {
+			return false, false, false, false, "", "", err
+		}
+	} else if !pChain && !xChain && !cChain {
+		// It's a blockchain name
+		blockchainName = choice
+	}
+	
+	return false, pChain, xChain, cChain, blockchainName, blockchainID, nil
+}
+
+// CaptureKeyAddress prompts the user to select a key address
+func CaptureKeyAddress(
+	prompt Prompter,
+	goal string,
+	keyDir string,
+	getKey func(string) (string, error),
+	network models.Network,
+	addressFormat string,
+) (string, error) {
+	// Read available keys from keyDir
+	entries, err := os.ReadDir(keyDir)
+	if err != nil {
+		return "", err
+	}
+	
+	keys := []string{}
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".pk") {
+			keyName := strings.TrimSuffix(entry.Name(), ".pk")
+			keys = append(keys, keyName)
+		}
+	}
+	
+	if len(keys) == 0 {
+		return "", errNoKeys
+	}
+	
+	keyName, err := prompt.CaptureList(fmt.Sprintf("Which key should %s?", goal), keys)
+	if err != nil {
+		return "", err
+	}
+	
+	keyPath, err := getKey(keyName)
+	if err != nil {
+		return "", err
+	}
+	
+	// For now, return the key path
+	// In a real implementation, this would convert the key to the appropriate address format
+	return keyPath, nil
+}
+
+// CaptureListWithSize allows selection of multiple items from a list
+func (p realPrompter) CaptureListWithSize(prompt string, options []string, size int) ([]string, error) {
+	if len(options) == 0 {
+		return nil, errors.New("no options provided")
+	}
+	
+	selected := []string{}
+	remaining := make([]string, len(options))
+	copy(remaining, options)
+	
+	for i := 0; i < size && len(remaining) > 0; i++ {
+		if i > 0 {
+			prompt = fmt.Sprintf("Select item %d of %d", i+1, size)
+		}
+		
+		choice, err := p.CaptureList(prompt, append(remaining, Done))
+		if err != nil {
+			return nil, err
+		}
+		
+		if choice == Done {
+			break
+		}
+		
+		selected = append(selected, choice)
+		// Remove selected item from remaining options
+		newRemaining := []string{}
+		for _, opt := range remaining {
+			if opt != choice {
+				newRemaining = append(newRemaining, opt)
+			}
+		}
+		remaining = newRemaining
+	}
+	
+	return selected, nil
+}
+
+// CaptureFloat prompts the user for a floating point number
+func (*realPrompter) CaptureFloat(promptStr string) (float64, error) {
+	prompt := promptui.Prompt{
+		Label: promptStr,
+		Validate: func(input string) error {
+			_, err := strconv.ParseFloat(input, 64)
+			if err != nil {
+				return errors.New("please enter a valid number")
+			}
+			return nil
+		},
+	}
+	
+	result, err := prompt.Run()
+	if err != nil {
+		return 0, err
+	}
+	
+	return strconv.ParseFloat(result, 64)
+}
+
+func (*realPrompter) CaptureUint16(promptStr string) (uint16, error) {
+	prompt := promptui.Prompt{
+		Label: promptStr,
+		Validate: func(input string) error {
+			val, err := strconv.ParseUint(input, 10, 16)
+			if err != nil {
+				return errors.New("please enter a valid uint16 number (0-65535)")
+			}
+			if val > 65535 {
+				return errors.New("value must be between 0 and 65535")
+			}
+			return nil
+		},
+	}
+	
+	result, err := prompt.Run()
+	if err != nil {
+		return 0, err
+	}
+	
+	val, _ := strconv.ParseUint(result, 10, 16)
+	return uint16(val), nil
+}
+
+func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
+	prompt := promptui.Prompt{
+		Label: promptStr,
+		Validate: func(input string) error {
+			_, err := strconv.ParseUint(input, 10, 32)
+			if err != nil {
+				return errors.New("please enter a valid uint32 number")
+			}
+			return nil
+		},
+	}
+	
+	result, err := prompt.Run()
+	if err != nil {
+		return 0, err
+	}
+	
+	val, _ := strconv.ParseUint(result, 10, 32)
+	return uint32(val), nil
 }
