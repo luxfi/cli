@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.24.5
+go 1.23.0
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -17,10 +17,13 @@ require (
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/erc20-go v0.2.0
 	github.com/luxfi/evm v0.7.8-lux.1
+	github.com/luxfi/geth v1.16.27
+	github.com/luxfi/ids v1.0.2
+	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v1.0.2
 	github.com/luxfi/lpm v1.7.12
-	github.com/luxfi/netrunner v1.8.3-lux
-	github.com/luxfi/node v1.13.4-lux
+	github.com/luxfi/netrunner v1.13.5-lux.2
+	github.com/luxfi/node v1.16.15
 	github.com/luxfi/sdk v0.2.0
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
@@ -225,4 +228,10 @@ require (
 	google.golang.org/grpc v1.74.2 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
+)
+
+replace (
+	github.com/luxfi/evm v0.7.8-lux.1 => ../evm
+	github.com/luxfi/node v1.13.4-lux => ../node
+	github.com/luxfi/sdk v0.2.0 => ../sdk
 )

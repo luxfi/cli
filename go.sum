@@ -342,10 +342,8 @@ github.com/luxfi/database v1.1.10 h1:3TZC33NRWEy505KrfjARYWpZaBsuKU+rIWVfcJxS+h8
 github.com/luxfi/database v1.1.10/go.mod h1:lDOxPN07eYUv2WeXVN2A4bTIe6Kq/ay4NaEPkOgPoXI=
 github.com/luxfi/erc20-go v0.2.0 h1:6RB2sz816SaTG2hK7JL0mwhyikjNt23pvZrbi3kT3b4=
 github.com/luxfi/erc20-go v0.2.0/go.mod h1:R2Jt7XHGrQwDxgDTBnV+zUdUQkgZuhb/xIc5Vi6A39g=
-github.com/luxfi/evm v0.7.8-lux.1 h1:9paQPH7BQXev5kjpkwcFZoZ7R8C2T8HmGlHdW4qRHyo=
-github.com/luxfi/evm v0.7.8-lux.1/go.mod h1:gZAT8uGduELkYuj6Nm8wL7A7If3wbDTtjt3suvAHdnM=
-github.com/luxfi/geth v1.16.2-lux.2 h1:+Vxlv1+TJxtYxXWABA9AGcc3lkZUzUm96jFg2ZJhD5c=
-github.com/luxfi/geth v1.16.2-lux.2/go.mod h1:mAOPKiWjcA0pyTrLKbPxRWgqP+rXntGBtvDMpmRfCRo=
+github.com/luxfi/geth v1.16.27 h1:RB76flDobiR0wl7ERhryiOvUCiZROF1zkjZHN4dRGEo=
+github.com/luxfi/geth v1.16.27/go.mod h1:tyImjG7dtt4KUxbYNjsRVpBon3j07TXypoXXPnvBbY8=
 github.com/luxfi/go-bip39 v1.1.1 h1:Z/2H3Pc7P1CQXzXxev945ifxHZ9fpuvsJQFTMP1u8Ts=
 github.com/luxfi/go-bip39 v1.1.1/go.mod h1:OxPL7QXUfnqqk7nOTPWgNfShxqg69OYJ4+ATKCmZWP8=
 github.com/luxfi/ids v1.0.2 h1:OnbCWBgdmuBPZat1r1vRikk1FFrdHMfSknpfKmX0KBg=
@@ -362,6 +360,8 @@ github.com/luxfi/netrunner v1.13.5-lux.2 h1:QPIhsC0MpqA9IpCfZ/BNINGq8rM/QLdhHb15
 github.com/luxfi/netrunner v1.13.5-lux.2/go.mod h1:ut9bz6y6jrUI1b9npk9UI9NUO8fCOa9zm/y8Ms9rJXQ=
 github.com/luxfi/netrunner-sdk v0.3.0 h1:bX68U8zb2JCwdTq8Wb2YY9Lf8vY0gu0rt2EHkjt0TTY=
 github.com/luxfi/netrunner-sdk v0.3.0/go.mod h1:nMOlNg1ukj/sWjcJHmLarZSBdzzD6EXDOL06y2S2VRA=
+github.com/luxfi/node v1.16.15 h1:ZRsteUu6ObB7Or3E6ZliNY2w/cL4tByGaSm7J37sVU8=
+github.com/luxfi/node v1.16.15/go.mod h1:05FhncqqiDSp5XfSPjoPvTBBUVokCdKpHL72aRCxs4Y=
 github.com/luxfi/trace v0.1.1 h1:T/ReB1MvwAJpgQaPWGsBLUx96rr5OMlJocWRo5JSvkU=
 github.com/luxfi/trace v0.1.1/go.mod h1:6jhCW0hPCFv7qzFsL0w/amHRv7PfNIyW77N4WDS3U5Q=
 github.com/luxfi/warp v0.1.1 h1:PL+cW7BDWpi5rtIP8DWJPHEAVe/CA2T52zo1HzvfYvg=
