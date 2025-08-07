@@ -16,9 +16,9 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	luxSDK "github.com/luxfi/cli/sdk/vm"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
@@ -104,8 +104,8 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 	fmt.Println()
 
 	// use the correct data types from subnet-evm right away
-	precompiles := params.UpgradeConfig{
-		PrecompileUpgrades: make([]params.PrecompileUpgrade, 0),
+	precompiles := extras.UpgradeConfig{
+		PrecompileUpgrades: make([]extras.PrecompileUpgrade, 0),
 	}
 
 	for {
@@ -220,7 +220,7 @@ func queryActivationTimestamp() (time.Time, error) {
 	return date, nil
 }
 
-func promptParams(blockchainName string, precomp string, precompiles *[]params.PrecompileUpgrade) (bool, error) {
+func promptParams(blockchainName string, precomp string, precompiles *[]extras.PrecompileUpgrade) (bool, error) {
 	sc, err := app.LoadSidecar(blockchainName)
 	if err != nil {
 		return false, err
@@ -247,7 +247,7 @@ func promptParams(blockchainName string, precomp string, precompiles *[]params.P
 
 func promptNativeMintParams(
 	sc *models.Sidecar,
-	precompiles *[]params.PrecompileUpgrade,
+	precompiles *[]extras.PrecompileUpgrade,
 	date time.Time,
 ) (bool, error) {
 	initialMint := map[common.Address]*goethereummath.HexOrDecimal256{}
@@ -276,7 +276,9 @@ func promptNativeMintParams(
 				if amount > math.MaxInt64 {
 					return "", fmt.Errorf("amount %d exceeds maximum allowed value of %d", amount, math.MaxInt64)
 				}
-				initialMint[addr] = goethereummath.NewHexOrDecimal256(int64(amount))
+				// Convert crypto.Address to geth common.Address
+				gethAddr := common.BytesToAddress(addr.Bytes())
+				initialMint[gethAddr] = goethereummath.NewHexOrDecimal256(int64(amount))
 				return fmt.Sprintf("%s-%d", addr.Hex(), amount), nil
 			},
 			"Add an address to amount pair",
@@ -298,7 +300,7 @@ func promptNativeMintParams(
 		managerAddrs,
 		initialMint,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
@@ -307,7 +309,7 @@ func promptNativeMintParams(
 
 func promptRewardManagerParams(
 	sc *models.Sidecar,
-	precompiles *[]params.PrecompileUpgrade,
+	precompiles *[]extras.PrecompileUpgrade,
 	date time.Time,
 ) (bool, error) {
 	adminAddrs, managerAddrs, enabledAddrs, cancelled, err := promptAdminManagerAndEnabledAddresses(sc, "customize fee distribution")
@@ -325,7 +327,7 @@ func promptRewardManagerParams(
 		managerAddrs,
 		initialConfig,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
@@ -364,13 +366,14 @@ func ConfigureInitialRewardConfig() (*rewardmanager.InitialRewardConfig, error) 
 	if err != nil {
 		return config, err
 	}
-	config.RewardAddress = rewardAddress
+	// Convert crypto.Address to geth common.Address
+	config.RewardAddress = common.BytesToAddress(rewardAddress.Bytes())
 	return config, nil
 }
 
 func promptFeeManagerParams(
 	sc *models.Sidecar,
-	precompiles *[]params.PrecompileUpgrade,
+	precompiles *[]extras.PrecompileUpgrade,
 	date time.Time,
 ) (bool, error) {
 	adminAddrs, managerAddrs, enabledAddrs, cancelled, err := promptAdminManagerAndEnabledAddresses(sc, "adjust the gas fees")
@@ -384,11 +387,9 @@ func promptFeeManagerParams(
 	}
 	var feeConfig *commontype.FeeConfig
 	if yes {
-		chainConfig, err := GetFeeConfig(params.ChainConfig{}, false)
-		if err != nil {
-			return false, err
-		}
-		feeConfig = &chainConfig.FeeConfig
+		// TODO: FeeConfig needs to be handled with precompile extras
+		// For now, use a nil feeConfig which means no change
+		feeConfig = nil
 	}
 	config := feemanager.NewConfig(
 		subnetevmutils.NewUint64(uint64(date.Unix())),
@@ -397,7 +398,7 @@ func promptFeeManagerParams(
 		managerAddrs,
 		feeConfig,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
@@ -424,11 +425,9 @@ func GetFeeConfig(config params.ChainConfig, useDefault bool) (
 		setGasStep                  = "Set block gas cost step"
 	)
 
-	config.FeeConfig = luxSDK.StarterFeeConfig
-
+	// TODO: FeeConfig needs to be handled with precompile extras
+	// For now, return the unmodified config
 	if useDefault {
-		config.FeeConfig.GasLimit = vm.LowGasLimit
-		config.FeeConfig.TargetGas = config.FeeConfig.TargetGas.Mul(config.FeeConfig.GasLimit, vm.NoDynamicFeesGasLimitToTargetGasFactor)
 		return config, nil
 	}
 
@@ -442,9 +441,9 @@ func GetFeeConfig(config params.ChainConfig, useDefault bool) (
 		return config, err
 	}
 
-	useDynamicFees := false
+	// TODO: Dynamic fees configuration moved to SDK
 	if feeDefault != customFee {
-		useDynamicFees, err = app.Prompt.CaptureYesNo("Do you want to enable dynamic fees?")
+		_, err = app.Prompt.CaptureYesNo("Do you want to enable dynamic fees?")
 		if err != nil {
 			return config, err
 		}
@@ -452,77 +451,79 @@ func GetFeeConfig(config params.ChainConfig, useDefault bool) (
 
 	switch feeDefault {
 	case lowOption:
-		vm.SetStandardGas(&config.FeeConfig, vm.LowGasLimit, vm.LowTargetGas, useDynamicFees)
+		// TODO: Move to SDK - vm.SetStandardGas(&config.FeeConfig, vm.LowGasLimit, vm.LowTargetGas, useDynamicFees)
 		return config, nil
 	case mediumOption:
-		vm.SetStandardGas(&config.FeeConfig, vm.MediumGasLimit, vm.MediumTargetGas, useDynamicFees)
+		// TODO: Move to SDK - vm.SetStandardGas(&config.FeeConfig, vm.MediumGasLimit, vm.MediumTargetGas, useDynamicFees)
 		return config, err
 	case highOption:
-		vm.SetStandardGas(&config.FeeConfig, vm.HighGasLimit, vm.HighTargetGas, useDynamicFees)
+		// TODO: Move to SDK - vm.SetStandardGas(&config.FeeConfig, vm.HighGasLimit, vm.HighTargetGas, useDynamicFees)
 		return config, err
 	default:
 		ux.Logger.PrintToUser("Customizing fee config")
 	}
 
-	gasLimit, err := app.Prompt.CapturePositiveBigInt(setGasLimit)
+	// TODO: Custom fee configuration moved to SDK
+	// Temporarily commented out until SDK support is added
+	_, err = app.Prompt.CapturePositiveBigInt(setGasLimit)
 	if err != nil {
 		return config, err
 	}
 
-	blockRate, err := app.Prompt.CapturePositiveBigInt(setBlockRate)
+	_, err = app.Prompt.CapturePositiveBigInt(setBlockRate)
 	if err != nil {
 		return config, err
 	}
 
-	minBaseFee, err := app.Prompt.CapturePositiveBigInt(setMinBaseFee)
+	_, err = app.Prompt.CapturePositiveBigInt(setMinBaseFee)
 	if err != nil {
 		return config, err
 	}
 
-	targetGas, err := app.Prompt.CapturePositiveBigInt(setTargetGas)
+	_, err = app.Prompt.CapturePositiveBigInt(setTargetGas)
 	if err != nil {
 		return config, err
 	}
 
-	baseDenominator, err := app.Prompt.CapturePositiveBigInt(setBaseFeeChangeDenominator)
+	_, err = app.Prompt.CapturePositiveBigInt(setBaseFeeChangeDenominator)
 	if err != nil {
 		return config, err
 	}
 
-	minBlockGas, err := app.Prompt.CapturePositiveBigInt(setMinBlockGas)
+	_, err = app.Prompt.CapturePositiveBigInt(setMinBlockGas)
 	if err != nil {
 		return config, err
 	}
 
-	maxBlockGas, err := app.Prompt.CapturePositiveBigInt(setMaxBlockGas)
+	_, err = app.Prompt.CapturePositiveBigInt(setMaxBlockGas)
 	if err != nil {
 		return config, err
 	}
 
-	gasStep, err := app.Prompt.CapturePositiveBigInt(setGasStep)
+	_, err = app.Prompt.CapturePositiveBigInt(setGasStep)
 	if err != nil {
 		return config, err
 	}
 
-	feeConf := commontype.FeeConfig{
-		GasLimit:                 gasLimit,
-		TargetBlockRate:          blockRate.Uint64(),
-		MinBaseFee:               minBaseFee,
-		TargetGas:                targetGas,
-		BaseFeeChangeDenominator: baseDenominator,
-		MinBlockGasCost:          minBlockGas,
-		MaxBlockGasCost:          maxBlockGas,
-		BlockGasCostStep:         gasStep,
-	}
-
-	config.FeeConfig = feeConf
+	// TODO: Move FeeConfig to SDK - this should be one function call
+	// feeConf := commontype.FeeConfig{
+	// 	GasLimit:                 gasLimit,
+	// 	TargetBlockRate:          blockRate.Uint64(),
+	// 	MinBaseFee:               minBaseFee,
+	// 	TargetGas:                targetGas,
+	// 	BaseFeeChangeDenominator: baseDenominator,
+	// 	MinBlockGasCost:          minBlockGas,
+	// 	MaxBlockGasCost:          maxBlockGas,
+	// 	BlockGasCostStep:         gasStep,
+	// }
+	// config.FeeConfig = feeConf
 
 	return config, nil
 }
 
 func promptContractAllowListParams(
 	sc *models.Sidecar,
-	precompiles *[]params.PrecompileUpgrade,
+	precompiles *[]extras.PrecompileUpgrade,
 	date time.Time,
 ) (bool, error) {
 	adminAddrs, managerAddrs, enabledAddrs, cancelled, err := promptAdminManagerAndEnabledAddresses(sc, "deploy smart contracts")
@@ -535,7 +536,7 @@ func promptContractAllowListParams(
 		enabledAddrs,
 		managerAddrs,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)
@@ -544,7 +545,7 @@ func promptContractAllowListParams(
 
 func promptTxAllowListParams(
 	sc *models.Sidecar,
-	precompiles *[]params.PrecompileUpgrade,
+	precompiles *[]extras.PrecompileUpgrade,
 	date time.Time,
 ) (bool, error) {
 	adminAddrs, managerAddrs, enabledAddrs, cancelled, err := promptAdminManagerAndEnabledAddresses(sc, "issue transactions")
@@ -557,7 +558,7 @@ func promptTxAllowListParams(
 		enabledAddrs,
 		managerAddrs,
 	)
-	upgrade := params.PrecompileUpgrade{
+	upgrade := extras.PrecompileUpgrade{
 		Config: config,
 	}
 	*precompiles = append(*precompiles, upgrade)

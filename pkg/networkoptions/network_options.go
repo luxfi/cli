@@ -17,8 +17,8 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/node/api/info"
+	sdkutils "github.com/luxfi/sdk/utils"
+	// "github.com/luxfi/node/api/info" // TODO: Uncomment when custom endpoint support is added
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
@@ -388,7 +388,7 @@ func GetNetworkFromCmdLineFlags(
 				return models.UndefinedNetwork, err
 			}
 		} else {
-			networkFlags.Endpoint, err = app.Prompt.CaptureURL(fmt.Sprintf("%s Endpoint", networkOption.String()), false)
+			networkFlags.Endpoint, err = app.Prompt.CaptureURL(fmt.Sprintf("%s Endpoint", networkOption.String()))
 			if err != nil {
 				return models.UndefinedNetwork, err
 			}
@@ -411,17 +411,17 @@ func GetNetworkFromCmdLineFlags(
 	case Local:
 		network = models.NewLocalNetwork()
 	case Devnet:
-		networkID := uint32(0)
-		if networkFlags.Endpoint != "" {
-			infoClient := info.NewClient(networkFlags.Endpoint)
-			ctx, cancel := utils.GetAPIContext()
-			defer cancel()
-			networkID, err = infoClient.GetNetworkID(ctx)
-			if err != nil {
-				return models.UndefinedNetwork, err
-			}
-		}
-		network = models.NewDevnetNetwork(networkFlags.Endpoint, networkID)
+		// TODO: Get network ID from devnet endpoint if provided
+		// if networkFlags.Endpoint != "" {
+		//     infoClient := info.NewClient(networkFlags.Endpoint)
+		//     ctx, cancel := utils.GetAPIContext()
+		//     defer cancel()
+		//     networkID, err = infoClient.GetNetworkID(ctx)
+		//     if err != nil {
+		//         return models.UndefinedNetwork, err
+		//     }
+		// }
+		network = models.NewDevnetNetwork()
 	case Testnet:
 		network = models.NewTestnetNetwork()
 	case Mainnet:
@@ -440,10 +440,11 @@ func GetNetworkFromCmdLineFlags(
 		}
 	}
 
-	// on all cases, enable user setting specific endpoint
-	if networkFlags.Endpoint != "" {
-		network.Endpoint = networkFlags.Endpoint
-	}
+	// TODO: Add support for custom endpoints
+	// Currently Network is immutable, need to refactor to support custom endpoints
+	// if networkFlags.Endpoint != "" {
+	//     network.Endpoint = networkFlags.Endpoint
+	// }
 
 	return network, nil
 }

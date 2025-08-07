@@ -14,10 +14,9 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/cli/sdk/interchain"
-	"github.com/luxfi/cli/sdk/validator"
-	"github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/sdk/evm"
+	sdkwarp "github.com/luxfi/sdk/warp"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/evm/interfaces"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth/common"
@@ -49,7 +48,7 @@ func InitializeValidatorWeightChange(
 		managerAddress,
 		big.NewInt(0),
 		"POA validator weight change initialization",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"initiateValidatorWeightUpdate(bytes32,uint64)",
 		validationID,
 		weight,
@@ -194,7 +193,7 @@ func CompleteValidatorWeightChange(
 		pchainL1ValidatorRegistrationSignedMessage,
 		big.NewInt(0),
 		"complete poa validator weight change",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"completeValidatorWeightUpdate(uint32)",
 		uint32(0),
 	)
@@ -313,7 +312,7 @@ func GetL1ValidatorWeightMessage(
 		}
 	}
 	messageHexStr := hex.EncodeToString(unsignedMessage.Bytes())
-	return interchain.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), 0)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), 0)
 }
 
 func GetPChainL1ValidatorWeightMessage(
@@ -366,7 +365,7 @@ func GetPChainL1ValidatorWeightMessage(
 		return nil, err
 	}
 	messageHexStr := hex.EncodeToString(unsignedMessage.Bytes())
-	return interchain.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
 }
 
 func GetL1ValidatorWeightMessageFromTx(

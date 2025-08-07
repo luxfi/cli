@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/spf13/pflag"
 
@@ -28,8 +28,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/validatormanager"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/cli/sdk/validator"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"

@@ -54,7 +54,10 @@ func setMappingStorageValue(
 	if err != nil {
 		return err
 	}
-	storage[crypto.Keccak256Hash(storageKeyBytes)] = common.HexToHash(value)
+	// Convert crypto.Hash to geth common.Hash
+	cryptoHash := crypto.Keccak256Hash(storageKeyBytes)
+	gethHash := common.BytesToHash(cryptoHash[:])
+	storage[gethHash] = common.HexToHash(value)
 	return nil
 }
 
@@ -117,11 +120,15 @@ func AddWarpRegistryContractToAllocations(
 func WarpAtGenesis(
 	genesisData []byte,
 ) (bool, bool, error) {
-	messengerAtGenesis, err := contract.ContractAddressIsInGenesisData(genesisData, common.HexToAddress(MessengerContractAddress))
+	// Convert geth common.Address to crypto.Address
+	messengerAddr := crypto.BytesToAddress(common.HexToAddress(MessengerContractAddress).Bytes())
+	messengerAtGenesis, err := contract.ContractAddressIsInGenesisData(genesisData, messengerAddr)
 	if err != nil {
 		return false, false, err
 	}
-	registryAtGenesis, err := contract.ContractAddressIsInGenesisData(genesisData, common.HexToAddress(RegistryContractAddress))
+	// Convert geth common.Address to crypto.Address
+	registryAddr := crypto.BytesToAddress(common.HexToAddress(RegistryContractAddress).Bytes())
+	registryAtGenesis, err := contract.ContractAddressIsInGenesisData(genesisData, registryAddr)
 	if err != nil {
 		return false, false, err
 	}

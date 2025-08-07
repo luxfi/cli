@@ -7,8 +7,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/sdk/evm"
-	validatorManagerSDK "github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/geth/core/types"
 
 	"github.com/luxfi/crypto"
@@ -24,12 +23,12 @@ func SetupValidatorProxyImplementation(
 		false,
 		crypto.Address{},
 		proxyManagerPrivateKey,
-		crypto.HexToAddress(validatorManagerSDK.ValidatorProxyAdminContractAddress),
+		crypto.HexToAddress(ValidatorProxyAdminContractAddress),
 		big.NewInt(0),
 		"set validator proxy implementation",
-		validatorManagerSDK.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"upgrade(address,address)",
-		crypto.HexToAddress(validatorManagerSDK.ValidatorProxyContractAddress),
+		crypto.HexToAddress(ValidatorProxyContractAddress),
 		validatorManager,
 	)
 }
@@ -39,9 +38,9 @@ func GetValidatorProxyImplementation(
 ) (crypto.Address, error) {
 	out, err := contract.CallToMethod(
 		rpcURL,
-		crypto.HexToAddress(validatorManagerSDK.ValidatorProxyAdminContractAddress),
+		crypto.HexToAddress(ValidatorProxyAdminContractAddress),
 		"getProxyImplementation(address)->(address)",
-		crypto.HexToAddress(validatorManagerSDK.ValidatorProxyContractAddress),
+		crypto.HexToAddress(ValidatorProxyContractAddress),
 	)
 	if err != nil {
 		return crypto.Address{}, err
@@ -70,9 +69,9 @@ func GetSpecializedValidatorProxyImplementation(
 ) (crypto.Address, error) {
 	out, err := contract.CallToMethod(
 		rpcURL,
-		crypto.HexToAddress(validatorManagerSDK.SpecializationProxyAdminContractAddress),
+		crypto.HexToAddress(SpecializationProxyAdminContractAddress),
 		"getProxyImplementation(address)->(address)",
-		crypto.HexToAddress(validatorManagerSDK.SpecializationProxyContractAddress),
+		crypto.HexToAddress(SpecializationProxyContractAddress),
 	)
 	if err != nil {
 		return crypto.Address{}, err
@@ -90,12 +89,12 @@ func SetupSpecializationProxyImplementation(
 		false,
 		crypto.Address{},
 		proxyManagerPrivateKey,
-		crypto.HexToAddress(validatorManagerSDK.SpecializationProxyAdminContractAddress),
+		crypto.HexToAddress(SpecializationProxyAdminContractAddress),
 		big.NewInt(0),
 		"set specialization proxy implementation",
-		validatorManagerSDK.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"upgrade(address,address)",
-		crypto.HexToAddress(validatorManagerSDK.SpecializationProxyContractAddress),
+		crypto.HexToAddress(SpecializationProxyContractAddress),
 		validatorManager,
 	)
 }

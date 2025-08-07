@@ -12,14 +12,14 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
-	sdkUtils "github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/sdk/evm"
+	sdkUtils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
-	luxWarp "github.com/luxfi/warp"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 )
 
 var ErrFailedReceiptStatus = fmt.Errorf("failed receipt status")
@@ -332,12 +332,22 @@ func TxToMethod(
 		return nil, nil, err
 	}
 	defer client.Close()
-	contract := bind.NewBoundContract(contractAddress, *abi, client.EthClient, client.EthClient, client.EthClient)
+	// Convert crypto.Address to geth common.Address
+	gethContractAddr := common.BytesToAddress(contractAddress.Bytes())
+	contract := bind.NewBoundContract(gethContractAddr, *abi, client.EthClient, client.EthClient, client.EthClient)
 	var txOpts *bind.TransactOpts
 	if generateRawTxOnly {
+		// Convert crypto.Address to geth common.Address
+		gethFrom := common.BytesToAddress(from.Bytes())
+		// Convert signer function signature
+		gethSigner := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
+			// Convert back to crypto.Address for the original signer
+			cryptoAddr := crypto.BytesToAddress(address.Bytes())
+			return idempotentSigner(cryptoAddr, tx)
+		}
 		txOpts = &bind.TransactOpts{
-			From:   from,
-			Signer: idempotentSigner,
+			From:   gethFrom,
+			Signer: gethSigner,
 			NoSend: true,
 		}
 	} else {
@@ -577,7 +587,9 @@ func CallToMethod(
 		return nil, err
 	}
 	defer client.Close()
-	contract := bind.NewBoundContract(contractAddress, *abi, client.EthClient, client.EthClient, client.EthClient)
+	// Convert crypto.Address to geth common.Address
+	gethContractAddr := common.BytesToAddress(contractAddress.Bytes())
+	contract := bind.NewBoundContract(gethContractAddr, *abi, client.EthClient, client.EthClient, client.EthClient)
 	var out []interface{}
 	err = contract.Call(&bind.CallOpts{}, &out, methodName, params...)
 	if err != nil {
@@ -642,7 +654,8 @@ func DeployContract(
 	} else if !success {
 		return crypto.Address{}, ErrFailedReceiptStatus
 	}
-	return address, nil
+	// Convert geth common.Address to crypto.Address
+	return crypto.BytesToAddress(address.Bytes()), nil
 }
 
 func UnpackLog(
@@ -662,6 +675,7 @@ func UnpackLog(
 	if err != nil {
 		return err
 	}
-	contract := bind.NewBoundContract(crypto.Address{}, *abi, nil, nil, nil)
+	// Use empty geth common.Address for log unpacking
+	contract := bind.NewBoundContract(common.Address{}, *abi, nil, nil, nil)
 	return contract.UnpackLog(event, eventName, log)
 }

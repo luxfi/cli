@@ -10,16 +10,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/sdk/interchain"
+	sdkwarp "github.com/luxfi/sdk/warp"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/cli/sdk/validator"
-	"github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
@@ -53,7 +52,7 @@ func InitializeValidatorRemoval(
 					managerAddress,
 					big.NewInt(0),
 					"force POS validator removal",
-					validatormanager.ErrorSignatureToError,
+					ErrorSignatureToError,
 					"forceInitiateValidatorRemoval(bytes32,bool,uint32)",
 					validationID,
 					false, // no uptime proof if force
@@ -70,7 +69,7 @@ func InitializeValidatorRemoval(
 				uptimeProofSignedMessage,
 				big.NewInt(0),
 				"POS validator removal with uptime proof",
-				validatormanager.ErrorSignatureToError,
+				ErrorSignatureToError,
 				"initiateValidatorRemoval(bytes32,bool,uint32)",
 				validationID,
 				true, // submit uptime proof
@@ -86,7 +85,7 @@ func InitializeValidatorRemoval(
 				managerAddress,
 				big.NewInt(0),
 				"force POS validator removal",
-				validatormanager.ErrorSignatureToError,
+				ErrorSignatureToError,
 				"forceInitializeEndValidation(bytes32,bool,uint32)",
 				validationID,
 				false, // no uptime proof if force
@@ -103,7 +102,7 @@ func InitializeValidatorRemoval(
 			uptimeProofSignedMessage,
 			big.NewInt(0),
 			"POS validator removal with uptime proof",
-			validatormanager.ErrorSignatureToError,
+			ErrorSignatureToError,
 			"initializeEndValidation(bytes32,bool,uint32)",
 			validationID,
 			true, // submit uptime proof
@@ -120,7 +119,7 @@ func InitializeValidatorRemoval(
 			managerAddress,
 			big.NewInt(0),
 			"POA validator removal initialization",
-			validatormanager.ErrorSignatureToError,
+			ErrorSignatureToError,
 			"initiateValidatorRemoval(bytes32)",
 			validationID,
 		)
@@ -133,7 +132,7 @@ func InitializeValidatorRemoval(
 		managerAddress,
 		big.NewInt(0),
 		"POA validator removal initialization",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"initializeEndValidation(bytes32)",
 		validationID,
 	)
@@ -167,7 +166,7 @@ func GetUptimeProofMessage(
 	}
 
 	messageHexStr := hex.EncodeToString(uptimeProofUnsignedMessage.Bytes())
-	return interchain.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
 }
 
 func InitValidatorRemoval(
@@ -272,7 +271,7 @@ func InitValidatorRemoval(
 		)
 		switch {
 		case err != nil:
-			if !errors.Is(err, validatormanager.ErrInvalidValidatorStatus) {
+			if !errors.Is(err, ErrInvalidValidatorStatus) {
 				return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator removal")
 			}
 			ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
@@ -334,7 +333,7 @@ func CompleteValidatorRemoval(
 			subnetValidatorRegistrationSignedMessage,
 			big.NewInt(0),
 			"complete validator removal",
-			validatormanager.ErrorSignatureToError,
+			ErrorSignatureToError,
 			"completeValidatorRemoval(uint32)",
 			uint32(0),
 		)
@@ -348,7 +347,7 @@ func CompleteValidatorRemoval(
 		subnetValidatorRegistrationSignedMessage,
 		big.NewInt(0),
 		"complete validator removal",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"completeEndValidation(uint32)",
 		uint32(0),
 	)

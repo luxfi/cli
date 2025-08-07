@@ -7,6 +7,7 @@ import (
 
 	cmdflags "github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
 
 	"github.com/spf13/cobra"
@@ -92,7 +93,10 @@ func (pkf *PrivateKeyFlags) GetPrivateKey(
 	}
 	privateKey := pkf.PrivateKey
 	if pkf.KeyName != "" {
-		k, err := app.GetKey(pkf.KeyName, models.NewLocalNetwork(), false)
+		// Load the key to get the private key hex
+		network := models.NewLocalNetwork()
+		keyPath := app.GetKeyPath(pkf.KeyName)
+		k, err := key.LoadSoft(network.ID(), keyPath)
 		if err != nil {
 			return "", err
 		}

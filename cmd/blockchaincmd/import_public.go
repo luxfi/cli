@@ -19,8 +19,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	validatorManagerSDK "github.com/luxfi/cli/sdk/validatormanager"
-	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
+	validatorManagerSDK "github.com/luxfi/cli/pkg/validatormanager"
+	"github.com/luxfi/cli/pkg/validatormanager/validatormanagertypes"
 	"github.com/luxfi/geth/core"
 	"github.com/luxfi/ids"
 

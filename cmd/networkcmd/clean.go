@@ -9,9 +9,9 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
+	"github.com/luxfi/cli/pkg/interchain/signatureaggregator"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/utils/logging"
@@ -51,7 +51,11 @@ func clean(*cobra.Command, []string) error {
 	}
 
 	// Clean up signature aggregator
-	if err := signatureaggregator.SignatureAggregatorCleanup(app, models.NewLocalNetwork()); err != nil {
+	network := models.NewLocalNetwork()
+	if err := signatureaggregator.SignatureAggregatorCleanup(
+		app.GetLocalRelayerRunPath(network),
+		app.GetLocalRelayerStorageDir(network),
+	); err != nil {
 		return err
 	}
 

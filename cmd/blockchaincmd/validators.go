@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/subnet"
-	validatorsdk "github.com/luxfi/cli/sdk/validator"
+	validatorsdk "github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/olekukonko/tablewriter"

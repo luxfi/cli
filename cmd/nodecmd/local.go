@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/cli/pkg/dependencies"
 

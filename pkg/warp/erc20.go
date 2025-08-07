@@ -7,6 +7,7 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/erc20-go/erc20"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 )
 
@@ -15,7 +16,9 @@ func GetTokenParams(endpoint string, tokenAddress crypto.Address) (string, strin
 	if err != nil {
 		return "", "", 0, err
 	}
-	token, err := erc20.NewGGToken(tokenAddress, client)
+	// Convert crypto.Address to geth common.Address
+	gethAddr := common.BytesToAddress(tokenAddress.Bytes())
+	token, err := erc20.NewGGToken(gethAddr, client)
 	if err != nil {
 		return "", "", 0, err
 	}
@@ -39,7 +42,9 @@ func GetTokenDecimals(endpoint string, tokenAddress crypto.Address) (uint8, erro
 	if err != nil {
 		return 0, err
 	}
-	token, err := erc20.NewGGToken(tokenAddress, client)
+	// Convert crypto.Address to geth common.Address
+	gethAddr := common.BytesToAddress(tokenAddress.Bytes())
+	token, err := erc20.NewGGToken(gethAddr, client)
 	if err != nil {
 		return 0, err
 	}

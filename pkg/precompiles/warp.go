@@ -6,15 +6,18 @@ import (
 	_ "embed"
 
 	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 )
 
 func WarpPrecompileGetBlockchainID(
 	rpcURL string,
 ) (ids.ID, error) {
+	// Convert geth common.Address to crypto.Address
+	warpAddr := crypto.BytesToAddress(WarpPrecompile.Bytes())
 	out, err := contract.CallToMethod(
 		rpcURL,
-		WarpPrecompile,
+		warpAddr,
 		"getBlockchainID()->(bytes32)",
 	)
 	if err != nil {

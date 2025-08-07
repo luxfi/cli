@@ -18,8 +18,8 @@ import (
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/validatormanager"
-	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
-	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
+	blockchainSDK "github.com/luxfi/sdk/blockchain"
+	validatormanagerSDK "github.com/luxfi/cli/pkg/validatormanager"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 

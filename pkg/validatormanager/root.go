@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/sdk/network"
+	"github.com/luxfi/sdk/network"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/sdk/validator"
-	"github.com/luxfi/cli/sdk/validatormanager/validatormanagertypes"
+	"github.com/luxfi/cli/pkg/validator"
+	"github.com/luxfi/cli/pkg/validatormanager/txs"
+	"github.com/luxfi/cli/pkg/validatormanager/validatormanagertypes"
+	warpMessage "github.com/luxfi/cli/pkg/validatormanager/warp"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/warp"
 
 	"github.com/luxfi/crypto"
@@ -233,7 +233,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID,
-		luxdconstants.PlatformChainID,
+		luxdconstants.PlatformChainID[:],
 		subnetConversionAddressedCall.Bytes(),
 	)
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/blockchain"
@@ -25,9 +25,9 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/validatormanager"
-	"github.com/luxfi/cli/sdk/evm"
-	validatorsdk "github.com/luxfi/cli/sdk/validator"
-	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/sdk/evm"
+	validatorsdk "github.com/luxfi/cli/pkg/validator"
+	validatormanagerSDK "github.com/luxfi/cli/pkg/validatormanager"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/utils/logging"

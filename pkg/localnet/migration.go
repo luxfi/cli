@@ -12,12 +12,12 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/binutils"
+	// "github.com/luxfi/cli/pkg/binutils" // TODO: Uncomment when binutils GRPC functions are implemented
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/interchain/relayer"
+	// "github.com/luxfi/cli/pkg/interchain/relayer" // TODO: Uncomment when relayer functions are implemented
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/network"
 	luxdconfig "github.com/luxfi/node/config"
@@ -201,8 +201,13 @@ func migrateCluster(
 	if err := json.Unmarshal(bs, &config); err != nil {
 		return err
 	}
+	// Get network ID from genesis
+	networkID, err := utils.NetworkIDFromGenesis([]byte(config.Genesis))
+	if err != nil {
+		return fmt.Errorf("couldn't get network ID from genesis: %w", err)
+	}
 	connectionSettings := ConnectionSettings{
-		NetworkID: config.NetworkID,
+		NetworkID: networkID,
 	}
 	trackSubnetsStr := ""
 	nodeSettings := []NodeSetting{}
@@ -242,7 +247,7 @@ func migrateCluster(
 	binPath := config.BinaryPath
 	// local connection info
 	networkModel := models.NetworkFromNetworkID(connectionSettings.NetworkID)
-	if networkModel.Kind == models.Local {
+	if networkModel.Kind() == models.Local {
 		genesisPath := filepath.Join(anrDir, "node1", "configs", "genesis.json")
 		if !utils.FileExists(genesisPath) {
 			return fmt.Errorf("genesis path not found at %s for local network cluster", genesisPath)
@@ -259,9 +264,13 @@ func migrateCluster(
 		if err != nil {
 			return err
 		}
-		for nodeID, nodeIP := range config.BeaconConfig {
-			connectionSettings.BootstrapIDs = append(connectionSettings.BootstrapIDs, nodeID.String())
-			connectionSettings.BootstrapIPs = append(connectionSettings.BootstrapIPs, nodeIP.String())
+		// BeaconConfig is no longer used in the new version
+		// We need to extract bootstrap info from node configs instead
+		for _, nodeConfig := range config.NodeConfigs {
+			if nodeConfig.IsBeacon {
+				// TODO: Need to determine how to get node ID and IP from node config
+				// For now, skip this part
+			}
 		}
 	}
 	//

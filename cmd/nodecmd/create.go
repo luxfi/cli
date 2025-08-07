@@ -29,7 +29,7 @@ import (
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
 	"github.com/luxfi/node/utils/logging"

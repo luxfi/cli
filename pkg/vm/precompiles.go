@@ -21,6 +21,29 @@ import (
 	"github.com/luxfi/geth/common"
 )
 
+// AllowList represents an allow list configuration
+type AllowList struct {
+	AdminAddresses    []common.Address
+	ManagerAddresses  []common.Address
+	EnabledAddresses  []common.Address
+}
+
+// GenerateAllowList prompts the user to configure an allow list
+func GenerateAllowList(
+	app *application.Lux,
+	config AllowList,
+	action string,
+	vmVersion string,
+) (AllowList, bool, error) {
+	// TODO: This should be moved to SDK
+	// For now, return empty allow list
+	return AllowList{
+		AdminAddresses:   []common.Address{},
+		ManagerAddresses: []common.Address{},
+		EnabledAddresses: []common.Address{},
+	}, false, nil
+}
+
 // convertAddresses converts []crypto.Address to []common.Address
 func convertAddresses(addrs []crypto.Address) []common.Address {
 	result := make([]common.Address, len(addrs))

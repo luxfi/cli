@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/cli/sdk/validator"
+	sdkutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
 
@@ -70,7 +70,7 @@ func getBalance(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("the specified node is not a L1 validator")
 	}
 
-	balance, err := validator.GetValidatorBalance(network.SDKNetwork(), validationID)
+	balance, err := validator.GetValidatorBalance(network, validationID)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func getNodeValidationID(
 		if err != nil {
 			return ids.Empty, false, err
 		}
-		validators, err := validator.GetCurrentValidators(network.SDKNetwork(), subnetID)
+		validators, err := validator.GetCurrentValidators(network, subnetID)
 		if err != nil {
 			return ids.Empty, false, err
 		}
@@ -165,10 +165,15 @@ func getNodeValidationID(
 		if nodeIDStr == "" {
 			nodeIDStrs := sdkutils.Map(validators, func(v validator.CurrentValidatorInfo) string { return v.NodeID.String() })
 			sort.Strings(nodeIDStrs)
-			nodeIDStr, err = app.Prompt.CaptureListWithSize("Choose Node ID of the validator", nodeIDStrs, 8)
+			// CaptureListWithSize returns a slice, we want the first (and only) element
+			selected, err := app.Prompt.CaptureListWithSize("Choose Node ID of the validator", nodeIDStrs, 1)
 			if err != nil {
 				return ids.Empty, false, err
 			}
+			if len(selected) == 0 {
+				return ids.Empty, false, fmt.Errorf("no node ID selected")
+			}
+			nodeIDStr = selected[0]
 		}
 		nodeID, err := ids.NodeIDFromString(nodeIDStr)
 		if err != nil {

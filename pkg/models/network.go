@@ -21,6 +21,9 @@ const (
 	Devnet
 )
 
+// Aliases for compatibility
+const UndefinedNetwork = Undefined
+
 func (s Network) String() string {
 	switch s {
 	case Mainnet:
@@ -102,8 +105,120 @@ func NewLocalNetwork() Network {
 	return Local
 }
 
+// NewTestnetNetwork creates a new Testnet network instance
+func NewTestnetNetwork() Network {
+	return Testnet
+}
+
+// NewMainnetNetwork creates a new Mainnet network instance
+func NewMainnetNetwork() Network {
+	return Mainnet
+}
+
+// NewDevnetNetwork creates a new Devnet network instance
+func NewDevnetNetwork() Network {
+	return Devnet
+}
+
 // BootstrappingContext returns a context for bootstrapping operations
 func (s Network) BootstrappingContext() (context.Context, func()) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	return ctx, cancel
+}
+
+// Endpoint returns the RPC endpoint for the network
+func (s Network) Endpoint() string {
+	switch s {
+	case Mainnet:
+		return constants.MainnetAPIEndpoint
+	case Testnet:
+		return constants.TestnetAPIEndpoint
+	case Local:
+		return constants.LocalAPIEndpoint
+	case Devnet:
+		return constants.DevnetAPIEndpoint
+	default:
+		return constants.LocalAPIEndpoint
+	}
+}
+
+// ClusterName returns the cluster name for the network
+func (s Network) ClusterName() string {
+	switch s {
+	case Local:
+		return "local"
+	default:
+		return ""
+	}
+}
+
+// WSEndpoints returns the WebSocket endpoints for the network
+func (s Network) WSEndpoints() []string {
+	switch s {
+	case Mainnet:
+		return []string{constants.MainnetWSEndpoint}
+	case Testnet:
+		return []string{constants.TestnetWSEndpoint}
+	case Local:
+		return []string{constants.LocalWSEndpoint}
+	case Devnet:
+		return []string{constants.DevnetWSEndpoint}
+	default:
+		return []string{constants.LocalWSEndpoint}
+	}
+}
+
+// CChainEndpoint returns the C-Chain endpoint for the network
+func (s Network) CChainEndpoint() string {
+	baseEndpoint := s.Endpoint()
+	return fmt.Sprintf("%s/ext/bc/C/rpc", baseEndpoint)
+}
+
+// CChainWSEndpoint returns the C-Chain WebSocket endpoint for the network
+func (s Network) CChainWSEndpoint() string {
+	wsEndpoints := s.WSEndpoints()
+	if len(wsEndpoints) > 0 {
+		return wsEndpoints[0]
+	}
+	return ""
+}
+
+// Equals checks if two networks are equal
+func (s Network) Equals(other Network) bool {
+	return s == other
+}
+
+// SDKNetwork returns the network as an SDK network type
+// This is for compatibility with the SDK package
+func (s Network) SDKNetwork() interface{} {
+	// Convert to SDK network type
+	// This returns an interface{} to avoid circular dependencies
+	// The caller should type assert to the appropriate SDK network type
+	return s
+}
+
+// GetNetworkFromSidecarNetworkName returns a network based on sidecar network name
+func GetNetworkFromSidecarNetworkName(name string) Network {
+	switch name {
+	case "mainnet", "Mainnet":
+		return Mainnet
+	case "testnet", "Testnet", "fuji":
+		return Testnet
+	case "local", "Local":
+		return Local
+	case "devnet", "Devnet":
+		return Devnet
+	default:
+		return Undefined
+	}
+}
+
+// GetRPCEndpoint returns the RPC endpoint for a given base endpoint and blockchain ID
+func GetRPCEndpoint(baseEndpoint string, blockchainID string) string {
+	return fmt.Sprintf("%s/ext/bc/%s/rpc", baseEndpoint, blockchainID)
+}
+
+// GetWSEndpoint returns the WebSocket endpoint for a given base endpoint and blockchain ID
+func GetWSEndpoint(baseEndpoint string, blockchainID string) string {
+	return fmt.Sprintf("%s/ext/bc/%s/ws", baseEndpoint, blockchainID)
 }

@@ -9,8 +9,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/models"
-	blockchainSDK "github.com/luxfi/cli/sdk/blockchain"
-	validatormanagerSDK "github.com/luxfi/cli/sdk/validatormanager"
+	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
@@ -25,7 +24,7 @@ func AddValidatorMessagesV2_0_0ContractToAllocations(
 	allocs core.GenesisAlloc,
 ) {
 	deployedValidatorMessagesBytes := common.FromHex(strings.TrimSpace(string(deployedValidatorMessagesV2_0_0Bytecode)))
-	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorMessagesContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(ValidatorMessagesContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedValidatorMessagesBytes,
 		Nonce:   1,
@@ -36,7 +35,7 @@ func fillValidatorMessagesAddressPlaceholder(contract string) string {
 	return strings.ReplaceAll(
 		contract,
 		"__$fd0c147b4031eef6079b0498cbafa865f0$__",
-		validatormanagerSDK.ValidatorMessagesContractAddress[2:],
+		ValidatorMessagesContractAddress[2:],
 	)
 }
 
@@ -49,7 +48,7 @@ func AddPoAValidatorManagerV1_0_0ContractToAllocations(
 	deployedPoaValidatorManagerString := strings.TrimSpace(string(deployedPoAValidatorManagerV1_0_0Bytecode))
 	deployedPoaValidatorManagerString = fillValidatorMessagesAddressPlaceholder(deployedPoaValidatorManagerString)
 	deployedPoaValidatorManagerBytes := common.FromHex(deployedPoaValidatorManagerString)
-	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(ValidatorContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedPoaValidatorManagerBytes,
 		Nonce:   1,
@@ -65,7 +64,7 @@ func AddValidatorManagerV2_0_0ContractToAllocations(
 	deployedValidatorManagerString := strings.TrimSpace(string(deployedValidatorManagerV2_0_0Bytecode))
 	deployedValidatorManagerString = fillValidatorMessagesAddressPlaceholder(deployedValidatorManagerString)
 	deployedValidatorManagerBytes := common.FromHex(deployedValidatorManagerString)
-	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(ValidatorContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedValidatorManagerBytes,
 		Nonce:   1,
@@ -213,7 +212,7 @@ func AddValidatorTransparentProxyContractToAllocations(
 	}
 	// proxy admin
 	deployedProxyAdmin := common.FromHex(strings.TrimSpace(string(deployedProxyAdminBytecode)))
-	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorProxyAdminContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(ValidatorProxyAdminContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedProxyAdmin,
 		Nonce:   1,
@@ -224,13 +223,13 @@ func AddValidatorTransparentProxyContractToAllocations(
 
 	// transparent proxy
 	deployedTransparentProxy := common.FromHex(strings.TrimSpace(string(deployedTransparentProxyBytecode)))
-	allocs[crypto.HexToAddress(validatormanagerSDK.ValidatorProxyContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(ValidatorProxyContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedTransparentProxy,
 		Nonce:   1,
 		Storage: map[common.Hash]common.Hash{
-			common.HexToHash("0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"): common.HexToHash(validatormanagerSDK.ValidatorContractAddress),           // sslot for address of ValidatorManager logic -> bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
-			common.HexToHash("0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"): common.HexToHash(validatormanagerSDK.ValidatorProxyAdminContractAddress), // sslot for address of ProxyAdmin -> bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
+			common.HexToHash("0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"): common.HexToHash(ValidatorContractAddress),           // sslot for address of ValidatorManager logic -> bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
+			common.HexToHash("0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"): common.HexToHash(ValidatorProxyAdminContractAddress), // sslot for address of ProxyAdmin -> bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
 			// we can omit 3rd sslot for _data, as we initialize ValidatorManager after chain is live
 		},
 	}
@@ -248,7 +247,7 @@ func AddSpecializationTransparentProxyContractToAllocations(
 	}
 	// proxy admin
 	deployedProxyAdmin := common.FromHex(strings.TrimSpace(string(deployedProxyAdminBytecode)))
-	allocs[crypto.HexToAddress(validatormanagerSDK.SpecializationProxyAdminContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(SpecializationProxyAdminContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedProxyAdmin,
 		Nonce:   1,
@@ -259,13 +258,13 @@ func AddSpecializationTransparentProxyContractToAllocations(
 
 	// transparent proxy
 	deployedTransparentProxy := common.FromHex(strings.TrimSpace(string(deployedTransparentProxyBytecode)))
-	allocs[crypto.HexToAddress(validatormanagerSDK.SpecializationProxyContractAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(SpecializationProxyContractAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedTransparentProxy,
 		Nonce:   1,
 		Storage: map[common.Hash]common.Hash{
-			common.HexToHash("0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"): common.HexToHash(validatormanagerSDK.ValidatorContractAddress),                // sslot for address of ValidatorManager logic -> bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
-			common.HexToHash("0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"): common.HexToHash(validatormanagerSDK.SpecializationProxyAdminContractAddress), // sslot for address of ProxyAdmin -> bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
+			common.HexToHash("0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"): common.HexToHash(ValidatorContractAddress),                // sslot for address of ValidatorManager logic -> bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
+			common.HexToHash("0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"): common.HexToHash(SpecializationProxyAdminContractAddress), // sslot for address of ProxyAdmin -> bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
 			// we can omit 3rd sslot for _data, as we initialize ValidatorManager after chain is live
 		},
 	}
@@ -279,7 +278,7 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 	rewardBasisPoints uint64,
 ) {
 	deployedRewardCalculatorBytes := common.FromHex(strings.TrimSpace(string(deployedRewardCalculatorV2_0_0Bytecode)))
-	allocs[crypto.HexToAddress(validatormanagerSDK.RewardCalculatorAddress)] = core.GenesisAccount{
+	allocs[crypto.HexToAddress(RewardCalculatorAddress)] = core.GenesisAccount{
 		Balance: big.NewInt(0),
 		Code:    deployedRewardCalculatorBytes,
 		Nonce:   1,
@@ -326,7 +325,7 @@ func SetupPoS(
 	network models.Network,
 	privateKey string,
 	aggregatorLogger logging.Logger,
-	posParams validatormanagerSDK.PoSParams,
+	posParams PoSParams,
 	managerAddress string,
 	specializedManagerAddress string,
 	managerOwnerPrivateKey string,

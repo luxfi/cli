@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/sdk/utils"
 	"github.com/spf13/cobra"
 )
 

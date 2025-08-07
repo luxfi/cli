@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
