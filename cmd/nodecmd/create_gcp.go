@@ -19,7 +19,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
 	"github.com/luxfi/cli/pkg/ux"

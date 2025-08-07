@@ -10,7 +10,7 @@ import (
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	nodePkg "github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ux"
 	sdkutils "github.com/luxfi/sdk/utils"

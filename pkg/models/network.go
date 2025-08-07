@@ -202,7 +202,7 @@ func GetNetworkFromSidecarNetworkName(name string) Network {
 	switch name {
 	case "mainnet", "Mainnet":
 		return Mainnet
-	case "testnet", "Testnet", "fuji":
+	case "testnet", "Testnet":
 		return Testnet
 	case "local", "Local":
 		return Local

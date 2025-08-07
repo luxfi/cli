@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/cmd/blockchaincmd"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/cli/tests/e2e/commands"

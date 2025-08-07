@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 )
 
 // CreateBaseRelayerConfig creates a base configuration for the relayer

@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/genesis"

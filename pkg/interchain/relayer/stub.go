@@ -9,7 +9,7 @@ import (
 	"errors"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 )
 
 // Stub implementations when warp is not available

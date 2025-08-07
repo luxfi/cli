@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	sdkutils "github.com/luxfi/sdk/utils"
@@ -73,7 +73,7 @@ func addBoth(network models.Network, configSpec ConfigSpec, chainSpec contract.C
 			return ConfigSpec{}, err
 		}
 	}
-	rpcEndpoint, wsEndpoint, err := contract.GetBlockchainEndpoints(app, network, chainSpec, true, true)
+	rpcEndpoint, wsEndpoint, err := contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, true, true)
 	if err != nil {
 		return ConfigSpec{}, err
 	}
@@ -92,7 +92,7 @@ func getBlockchain(network models.Network, prompt string) (contract.ChainSpec, e
 	chainSpec := contract.ChainSpec{}
 	chainSpec.SetEnabled(true, true, false, false, true)
 	if cancel, err := contract.PromptChain(
-		app,
+		app.GetSDKApp(),
 		network,
 		prompt,
 		"",
@@ -120,12 +120,12 @@ func addSource(
 		if err != nil {
 			return ConfigSpec{}, err
 		}
-		rpcEndpoint, wsEndpoint, err = contract.GetBlockchainEndpoints(app, network, chainSpec, true, true)
+		rpcEndpoint, wsEndpoint, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, true, true)
 		if err != nil {
 			return ConfigSpec{}, err
 		}
 	}
-	blockchainID, err := contract.GetBlockchainID(app, network, chainSpec)
+	blockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return ConfigSpec{}, err
 	}
@@ -137,11 +137,11 @@ func addSource(
 	if err != nil {
 		return ConfigSpec{}, err
 	}
-	subnetID, err := contract.GetSubnetID(app, network, chainSpec)
+	subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return ConfigSpec{}, err
 	}
-	warpRegistryAddress, warpMessengerAddress, err := contract.GetWarpInfo(app, network, chainSpec, true, true, false)
+	warpRegistryAddress, warpMessengerAddress, err := contract.GetWarpInfo(app.GetSDKApp(), network, chainSpec, true, true, false)
 	if err != nil {
 		return ConfigSpec{}, err
 	}
@@ -159,7 +159,7 @@ func addSource(
 		rewardAddress = k.C()
 	} else {
 		_, _, err := contract.GetEVMSubnetPrefundedKey(
-			app,
+			app.GetSDKApp(),
 			network,
 			chainSpec,
 		)
@@ -201,12 +201,12 @@ func addDestination(
 		if err != nil {
 			return ConfigSpec{}, err
 		}
-		rpcEndpoint, _, err = contract.GetBlockchainEndpoints(app, network, chainSpec, true, false)
+		rpcEndpoint, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, true, false)
 		if err != nil {
 			return ConfigSpec{}, err
 		}
 	}
-	blockchainID, err := contract.GetBlockchainID(app, network, chainSpec)
+	blockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return ConfigSpec{}, err
 	}
@@ -218,7 +218,7 @@ func addDestination(
 	if err != nil {
 		return ConfigSpec{}, err
 	}
-	subnetID, err := contract.GetSubnetID(app, network, chainSpec)
+	subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return ConfigSpec{}, err
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 )
 
 func UpgradeVM(app *application.Lux, vmID string, vmBinPath string) error {

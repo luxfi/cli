@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -44,7 +44,6 @@ type CreateFlags struct {
 	tokenSymbol                   string
 	useTestDefaults               bool
 	useProductionDefaults         bool
-	useWarp                       bool
 	useWarp                       bool
 	vmVersion                     string
 	useLatestReleasedVMVersion    bool

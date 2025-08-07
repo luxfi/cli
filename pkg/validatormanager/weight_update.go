@@ -10,14 +10,14 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/evm"
 	sdkwarp "github.com/luxfi/sdk/warp"
-	"github.com/luxfi/cli/pkg/validator"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/sdk/validator"
+	ethereum "github.com/luxfi/geth"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
@@ -25,8 +25,8 @@ import (
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
-	warpMessage "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
+	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -73,7 +73,7 @@ func InitValidatorWeightChange(
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, ids.ID, *types.Transaction, error) {
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -81,7 +81,7 @@ func InitValidatorWeightChange(
 		return nil, ids.Empty, nil, err
 	}
 	blockchainID, err := contract.GetBlockchainID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -147,9 +147,20 @@ func InitValidatorWeightChange(
 	}
 
 	if receipt != nil {
-		unsignedMessage, err = evm.ExtractWarpMessageFromReceipt(receipt)
+		nodeWarpMsg, err := evm.ExtractWarpMessageFromReceipt(receipt)
 		if err != nil {
 			return nil, ids.Empty, nil, err
+		}
+		// Convert node warp to standalone warp
+		if nodeWarpMsg != nil {
+			unsignedMessage, err = warp.NewUnsignedMessage(
+				nodeWarpMsg.NetworkID,
+				nodeWarpMsg.SourceChainID[:],
+				nodeWarpMsg.Payload,
+			)
+			if err != nil {
+				return nil, ids.Empty, nil, err
+			}
 		}
 	}
 
@@ -184,13 +195,16 @@ func CompleteValidatorWeightChange(
 	privateKey string, // not need to be owner atm
 	pchainL1ValidatorRegistrationSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
+	// Convert standalone warp to node warp for contract
+	nodeWarpMsg := convertStandaloneToNodeWarpMsg(pchainL1ValidatorRegistrationSignedMessage)
+	
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		generateRawTxOnly,
 		ownerAddress,
 		privateKey,
 		managerAddress,
-		pchainL1ValidatorRegistrationSignedMessage,
+		nodeWarpMsg,
 		big.NewInt(0),
 		"complete poa validator weight change",
 		ErrorSignatureToError,
@@ -217,7 +231,7 @@ func FinishValidatorWeightChange(
 ) (*types.Transaction, error) {
 	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -287,7 +301,7 @@ func GetL1ValidatorWeightMessage(
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, error) {
 	if unsignedMessage == nil {
-		addressedCallPayload, err := warpMessage.NewL1ValidatorWeight(
+		addressedCallPayload, err := localWarpMessage.NewL1ValidatorWeight(
 			validationID,
 			nonce,
 			weight,
@@ -303,8 +317,8 @@ func GetL1ValidatorWeightMessage(
 			return nil, err
 		}
 		unsignedMessage, err = warp.NewUnsignedMessage(
-			network.ID,
-			blockchainID,
+			network.ID(),
+			blockchainID[:],
 			addressedCall.Bytes(),
 		)
 		if err != nil {
@@ -333,7 +347,7 @@ func GetPChainL1ValidatorWeightMessage(
 		if err != nil {
 			return nil, err
 		}
-		weightMsg, err := warpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
+		weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 		if err != nil {
 			return nil, err
 		}
@@ -341,7 +355,7 @@ func GetPChainL1ValidatorWeightMessage(
 		nonce = weightMsg.Nonce
 		weight = weightMsg.Weight
 	}
-	addressedCallPayload, err := warpMessage.NewL1ValidatorWeight(
+	addressedCallPayload, err := localWarpMessage.NewL1ValidatorWeight(
 		validationID,
 		nonce,
 		weight,
@@ -357,8 +371,8 @@ func GetPChainL1ValidatorWeightMessage(
 		return nil, err
 	}
 	unsignedMessage, err := warp.NewUnsignedMessage(
-		network.ID,
-		luxdconstants.PlatformChainID,
+		network.ID(),
+		luxdconstants.PlatformChainID[:],
 		addressedCall.Bytes(),
 	)
 	if err != nil {
@@ -387,10 +401,19 @@ func GetL1ValidatorWeightMessageFromTx(
 		payload := msg.Payload
 		addressedCall, err := warpPayload.ParseAddressedCall(payload)
 		if err == nil {
-			weightMsg, err := warpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
+			weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 			if err == nil {
 				if weightMsg.ValidationID == validationID && weightMsg.Weight == weight {
-					return msg, nil
+					// Convert node warp message to standalone
+					standaloneMsg, err := warp.NewUnsignedMessage(
+						msg.NetworkID,
+						msg.SourceChainID[:],
+						msg.Payload,
+					)
+					if err != nil {
+						return nil, err
+					}
+					return standaloneMsg, nil
 				}
 			}
 		}
@@ -427,10 +450,10 @@ func SearchForL1ValidatorWeightMessage(
 			fromBlock = big.NewInt(0)
 		}
 		toBlock := big.NewInt(blockNumber)
-		logs, err := client.FilterLogs(interfaces.FilterQuery{
+		logs, err := client.FilterLogs(ethereum.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []crypto.Address{subnetEvmWarp.Module.Address},
+			Addresses: []common.Address{subnetEvmWarp.Module.Address},
 		})
 		if err != nil {
 			return nil, err
@@ -440,10 +463,19 @@ func SearchForL1ValidatorWeightMessage(
 			payload := msg.Payload
 			addressedCall, err := warpPayload.ParseAddressedCall(payload)
 			if err == nil {
-				weightMsg, err := warpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
+				weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 				if err == nil {
 					if weightMsg.ValidationID == validationID && weightMsg.Weight == weight {
-						return msg, nil
+						// Convert node warp message to standalone
+						standaloneMsg, err := warp.NewUnsignedMessage(
+							msg.NetworkID,
+							msg.SourceChainID[:],
+							msg.Payload,
+						)
+						if err != nil {
+							return nil, err
+						}
+						return standaloneMsg, nil
 					} else {
 						return nil, nil
 					}
@@ -453,3 +485,4 @@ func SearchForL1ValidatorWeightMessage(
 	}
 	return nil, nil
 }
+

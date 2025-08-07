@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/validator"
+	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
 	"github.com/spf13/cobra"

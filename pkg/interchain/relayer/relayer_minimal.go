@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 )
 
 // Minimal stub implementation until warp packages are available

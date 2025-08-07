@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"

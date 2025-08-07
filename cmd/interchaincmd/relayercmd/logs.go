@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	sdkutils "github.com/luxfi/sdk/utils"
@@ -198,13 +198,13 @@ func getBlockchainIDToBlockchainNameMap(network models.Network) (map[string]stri
 	}
 	blockchainIDToBlockchainName := map[string]string{}
 	for _, blockchainName := range blockchainNames {
-		blockchainID, err := contract.GetBlockchainID(app, network, contract.ChainSpec{BlockchainName: blockchainName})
+		blockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, contract.ChainSpec{BlockchainName: blockchainName})
 		if err != nil {
 			return nil, err
 		}
 		blockchainIDToBlockchainName[blockchainID.String()] = blockchainName
 	}
-	blockchainID, err := contract.GetBlockchainID(app, network, contract.ChainSpec{CChain: true})
+	blockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, contract.ChainSpec{CChain: true})
 	if err != nil {
 		return nil, err
 	}

@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

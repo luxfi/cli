@@ -6,34 +6,34 @@ import (
 	"context"
 	_ "embed"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/evm"
 	sdkwarp "github.com/luxfi/sdk/warp"
 	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/cli/pkg/validator"
-	localWarpMessage "github.com/luxfi/cli/pkg/validatormanager/warp"
+	"github.com/luxfi/sdk/validator"
+	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/evm/interfaces"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/proto/pb/platformvm"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
-	warp "github.com/luxfi/warp"
-	warpMessage "github.com/luxfi/warp"
-	warpPayload "github.com/luxfi/warp/payload"
-	"google.golang.org/protobuf/proto"
+	warp "github.com/luxfi/node/vms/platformvm/warp"
+	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 )
 
 func InitializeValidatorRegistrationPoSNative(
@@ -254,7 +254,7 @@ func GetRegisterL1ValidatorMessage(
 			addressedCallPayload, err := warpMessage.NewRegisterL1Validator(
 				subnetID,
 				nodeID,
-				blsPublicKey,
+				blsPublicKey[:],
 				expiry,
 				balanceOwners,
 				disableOwners,
@@ -272,7 +272,7 @@ func GetRegisterL1ValidatorMessage(
 				return nil, ids.Empty, err
 			}
 			registerSubnetValidatorUnsignedMessage, err = warp.NewUnsignedMessage(
-				network.ID,
+				network.ID(),
 				blockchainID,
 				registerSubnetValidatorAddressedCall.Bytes(),
 			)
@@ -294,29 +294,18 @@ func GetRegisterL1ValidatorMessage(
 	}
 
 	messageHexStr := hex.EncodeToString(registerSubnetValidatorUnsignedMessage.Bytes())
-	signedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	standaloneSignedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("failed to get signed message: %w", err)
 	}
-	return signedMessage, validationID, err
+	signedMessageInterface, err := warpMessage.ConvertStandaloneToNodeWarpMessage(standaloneSignedMessage)
+	if err != nil {
+		return nil, ids.Empty, fmt.Errorf("failed to convert warp message: %w", err)
+	}
+	signedMessage := signedMessageInterface.(*warp.Message)
+	return signedMessage, validationID, nil
 }
 
-func PoSWeightToValue(
-	rpcURL string,
-	managerAddress crypto.Address,
-	weight uint64,
-) (*big.Int, error) {
-	out, err := contract.CallToMethod(
-		rpcURL,
-		managerAddress,
-		"weightToValue(uint64)->(uint256)",
-		weight,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return contract.GetSmartContractCallResult[*big.Int]("weightToValue", out)
-}
 
 func GetPChainL1ValidatorRegistrationMessage(
 	ctx context.Context,
@@ -341,7 +330,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 		return nil, err
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
-		network.ID,
+		network.ID(),
 		luxdconstants.PlatformChainID,
 		subnetValidatorRegistrationAddressedCall.Bytes(),
 	)
@@ -357,7 +346,15 @@ func GetPChainL1ValidatorRegistrationMessage(
 	}
 	justification := hex.EncodeToString(justificationBytes)
 	messageHexStr := hex.EncodeToString(subnetConversionUnsignedMessage.Bytes())
-	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, justification, subnetID.String(), aggregatorQuorumPercentage)
+	standaloneSignedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, justification, subnetID.String(), aggregatorQuorumPercentage)
+	if err != nil {
+		return nil, err
+	}
+	signedMessageInterface, err := warpMessage.ConvertStandaloneToNodeWarpMessage(standaloneSignedMessage)
+	if err != nil {
+		return nil, err
+	}
+	return signedMessageInterface.(*warp.Message), nil
 }
 
 // last step of flow for adding a new validator
@@ -410,7 +407,7 @@ func InitValidatorRegistration(
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, ids.ID, *types.Transaction, error) {
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -418,7 +415,7 @@ func InitValidatorRegistration(
 		return nil, ids.Empty, nil, err
 	}
 	blockchainID, err := contract.GetBlockchainID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -559,7 +556,7 @@ func FinishValidatorRegistration(
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -640,10 +637,10 @@ func SearchForRegisterL1ValidatorMessage(
 			fromBlock = big.NewInt(0)
 		}
 		toBlock := big.NewInt(blockNumber)
-		logs, err := client.FilterLogs(interfaces.FilterQuery{
+		logs, err := client.FilterLogs(ethereum.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []crypto.Address{subnetEvmWarp.Module.Address},
+			Addresses: []common.Address{subnetEvmWarp.Module.Address},
 		})
 		if err != nil {
 			return nil, err
@@ -678,12 +675,14 @@ func GetRegistrationJustification(
 			justification := platformvm.L1ValidatorRegistrationJustification{
 				Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertSubnetToL1TxData{
 					ConvertSubnetToL1TxData: &platformvm.SubnetIDIndex{
-						SubnetId: subnetID[:],
+						SubnetID: subnetID[:],
 						Index:    validationIndex,
 					},
 				},
 			}
-			return proto.Marshal(&justification)
+			// Use JSON marshaling as a workaround since we don't have real protobuf
+			justBytes, _ := json.Marshal(&justification)
+			return justBytes, nil
 		}
 	}
 	msg, err := SearchForRegisterL1ValidatorMessage(
@@ -704,7 +703,9 @@ func GetRegistrationJustification(
 			RegisterL1ValidatorMessage: addressedCall.Payload,
 		},
 	}
-	return proto.Marshal(&justification)
+	// Use JSON marshaling as a workaround since we don't have real protobuf
+	justBytes, _ := json.Marshal(&justification)
+	return justBytes, nil
 }
 
 func GetRegisterL1ValidatorMessageFromTx(

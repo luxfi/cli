@@ -19,12 +19,12 @@ import (
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/docker"
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ssh"
@@ -994,19 +994,19 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	}
 
 	chainSpec := contract.ChainSpec{CChain: true}
-	subnetID, err := contract.GetSubnetID(app, network, chainSpec)
+	subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}
-	blockchainID, err := contract.GetBlockchainID(app, network, chainSpec)
+	blockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}
-	registryAddress, messengerAddress, err := contract.GetWarpInfo(app, network, chainSpec, false, false, false)
+	registryAddress, messengerAddress, err := contract.GetWarpInfo(app.GetSDKApp(), network, chainSpec, false, false, false)
 	if err != nil {
 		return err
 	}
-	rpcEndpoint, wsEndpoint, err := contract.GetBlockchainEndpoints(app, network, chainSpec, false, false)
+	rpcEndpoint, wsEndpoint, err := contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, false, false)
 	if err != nil {
 		return err
 	}
@@ -1026,19 +1026,19 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	}
 
 	chainSpec = contract.ChainSpec{BlockchainName: blockchainName}
-	subnetID, err = contract.GetSubnetID(app, network, chainSpec)
+	subnetID, err = contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}
-	blockchainID, err = contract.GetBlockchainID(app, network, chainSpec)
+	blockchainID, err = contract.GetBlockchainID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}
-	registryAddress, messengerAddress, err = contract.GetWarpInfo(app, network, chainSpec, false, false, false)
+	registryAddress, messengerAddress, err = contract.GetWarpInfo(app.GetSDKApp(), network, chainSpec, false, false, false)
 	if err != nil {
 		return err
 	}
-	rpcEndpoint, wsEndpoint, err = contract.GetBlockchainEndpoints(app, network, chainSpec, false, false)
+	rpcEndpoint, wsEndpoint, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, false, false)
 	if err != nil {
 		return err
 	}

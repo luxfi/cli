@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/node/utils/logging"
 )
 
@@ -31,4 +31,9 @@ func UpdateSignatureAggregatorPeers(
 	logger logging.Logger,
 ) error {
 	return errors.New("signature aggregator functionality temporarily disabled")
+}
+
+func GetSignatureAggregatorEndpoint(app *application.Lux, network models.Network) (string, error) {
+	// Return a default endpoint for now
+	return "http://localhost:8090/aggregate-signatures", nil
 }

@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/docker"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ssh"

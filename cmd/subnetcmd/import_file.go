@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/lpmintegration"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )

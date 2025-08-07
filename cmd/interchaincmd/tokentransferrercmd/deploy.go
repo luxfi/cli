@@ -12,11 +12,11 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/precompiles"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/warp"
@@ -103,7 +103,7 @@ func deploy(_ *cobra.Command, args []string) error {
 func getHomeKeyAndAddress(app *application.Lux, network models.Network, homeFlags HomeFlags) (string, string, error) {
 	// First check if there is a genesis key able to be used.
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+		app.GetSDKApp(),
 		network,
 		homeFlags.chainFlags,
 	)
@@ -111,7 +111,7 @@ func getHomeKeyAndAddress(app *application.Lux, network models.Network, homeFlag
 		return "", "", err
 	}
 
-	homeKey, err := homeFlags.privateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	homeKey, err := homeFlags.privateKeyFlags.GetPrivateKey(app.GetSDKApp(), genesisPrivateKey)
 	if err != nil {
 		return "", "", err
 	}
@@ -177,7 +177,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	// Home Chain Prompts
 	if !flags.homeFlags.chainFlags.Defined() {
 		prompt := "Where is the Token origin?"
-		if cancel, err := contract.PromptChain(app, network, prompt, "", &flags.homeFlags.chainFlags); err != nil {
+		if cancel, err := contract.PromptChain(app.GetSDKApp(), network, prompt, "", &flags.homeFlags.chainFlags); err != nil {
 			return err
 		} else if cancel {
 			return nil
@@ -185,7 +185,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 	homeRPCEndpoint := flags.homeFlags.RPCEndpoint
 	if homeRPCEndpoint == "" {
-		homeRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app, network, flags.homeFlags.chainFlags, true, false)
+		homeRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, flags.homeFlags.chainFlags, true, false)
 		if err != nil {
 			return err
 		}
@@ -376,7 +376,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			false,
 		)
 		if cancel, err := contract.PromptChain(
-			app,
+			app.GetSDKApp(),
 			network,
 			prompt,
 			flags.homeFlags.chainFlags.BlockchainName,
@@ -389,7 +389,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 	remoteRPCEndpoint := flags.remoteFlags.RPCEndpoint
 	if remoteRPCEndpoint == "" {
-		remoteRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app, network, flags.remoteFlags.chainFlags, true, false)
+		remoteRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, flags.remoteFlags.chainFlags, true, false)
 		if err != nil {
 			return err
 		}
@@ -397,14 +397,14 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+		app.GetSDKApp(),
 		network,
 		flags.remoteFlags.chainFlags,
 	)
 	if err != nil {
 		return err
 	}
-	remoteKey, err := flags.remoteFlags.privateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	remoteKey, err := flags.remoteFlags.privateKeyFlags.GetPrivateKey(app.GetSDKApp(), genesisPrivateKey)
 	if err != nil {
 		return err
 	}
@@ -448,7 +448,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	if flags.remoteFlags.native {
 		var remoteMinterAdminFound, remoteManagedMinterAdmin bool
 		remoteMinterAdminFound, remoteManagedMinterAdmin, _, remoteMinterManagerAddress, remoteMinterManagerPrivKey, err = contract.GetEVMSubnetGenesisNativeMinterAdmin(
-			app,
+			app.GetSDKApp(),
 			network,
 			flags.remoteFlags.chainFlags,
 		)
@@ -459,7 +459,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			remoteMinterAdminAddress := remoteMinterManagerAddress
 			var remoteMinterManagerFound, remoteManagedMinterManager bool
 			remoteMinterManagerFound, remoteManagedMinterManager, _, remoteMinterManagerAddress, remoteMinterManagerPrivKey, err = contract.GetEVMSubnetGenesisNativeMinterManager(
-				app,
+				app.GetSDKApp(),
 				network,
 				flags.remoteFlags.chainFlags,
 			)
@@ -497,11 +497,11 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 	var homeAddress crypto.Address
 	// TODO: need registry address, manager address, private key for the home chain (academy for testnet)
-	homeBlockchainID, err := contract.GetBlockchainID(app, network, flags.homeFlags.chainFlags)
+	homeBlockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, flags.homeFlags.chainFlags)
 	if err != nil {
 		return err
 	}
-	homeRegistryAddress, _, err := contract.GetWarpInfo(app, network, flags.homeFlags.chainFlags, true, false, true)
+	homeRegistryAddress, _, err := contract.GetWarpInfo(app.GetSDKApp(), network, flags.homeFlags.chainFlags, true, false, true)
 	if err != nil {
 		return err
 	}
@@ -570,11 +570,11 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 
 	// Remote Deploy
-	remoteBlockchainID, err := contract.GetBlockchainID(app, network, flags.remoteFlags.chainFlags)
+	remoteBlockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, flags.remoteFlags.chainFlags)
 	if err != nil {
 		return err
 	}
-	remoteRegistryAddress, _, err := contract.GetWarpInfo(app, network, flags.remoteFlags.chainFlags, true, false, true)
+	remoteRegistryAddress, _, err := contract.GetWarpInfo(app.GetSDKApp(), network, flags.remoteFlags.chainFlags, true, false, true)
 	if err != nil {
 		return err
 	}
@@ -648,7 +648,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			return err
 		}
 		remoteSupply, err = contract.GetEVMSubnetGenesisSupply(
-			app,
+			app.GetSDKApp(),
 			network,
 			flags.remoteFlags.chainFlags,
 		)

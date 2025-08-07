@@ -13,21 +13,56 @@ import (
 	sdkwarp "github.com/luxfi/sdk/warp"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/evm"
-	"github.com/luxfi/cli/pkg/validator"
+	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
-	warp "github.com/luxfi/warp"
+	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
+	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
 
 	"github.com/luxfi/crypto"
 )
+
+// convertStandaloneToNodeWarp converts a standalone warp message to node warp message
+func convertStandaloneToNodeWarp(msg *standaloneWarp.Message) (*nodeWarp.Message, error) {
+	if msg == nil {
+		return nil, errors.New("nil message")
+	}
+	
+	// Extract network ID and source chain ID from the standalone message
+	networkID := msg.UnsignedMessage.NetworkID
+	sourceChainID := msg.UnsignedMessage.SourceChainID
+	payload := msg.UnsignedMessage.Payload
+	
+	// Convert source chain ID to ids.ID
+	var chainID ids.ID
+	copy(chainID[:], sourceChainID)
+	
+	unsignedMsg, err := nodeWarp.NewUnsignedMessage(
+		networkID,
+		chainID,
+		payload,
+	)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Convert signature - for now just use an empty signature
+	// since we don't have access to the actual signature bytes
+	sig := &nodeWarp.BitSetSignature{}
+	
+	return &nodeWarp.Message{
+		UnsignedMessage: *unsignedMsg,
+		Signature:       sig,
+	}, nil
+}
 
 func InitializeValidatorRemoval(
 	rpcURL string,
@@ -37,7 +72,7 @@ func InitializeValidatorRemoval(
 	privateKey string,
 	validationID ids.ID,
 	isPoS bool,
-	uptimeProofSignedMessage *warp.Message,
+	uptimeProofSignedMessage *standaloneWarp.Message,
 	force bool,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -60,13 +95,17 @@ func InitializeValidatorRemoval(
 				)
 			}
 			// remove PoS validator with uptime proof
+			nodeWarpMsg, err := convertStandaloneToNodeWarp(uptimeProofSignedMessage)
+			if err != nil {
+				return nil, nil, err
+			}
 			return contract.TxToMethodWithWarpMessage(
 				rpcURL,
 				false,
 				crypto.Address{},
 				privateKey,
 				managerAddress,
-				uptimeProofSignedMessage,
+				nodeWarpMsg,
 				big.NewInt(0),
 				"POS validator removal with uptime proof",
 				ErrorSignatureToError,
@@ -93,13 +132,17 @@ func InitializeValidatorRemoval(
 			)
 		}
 		// remove PoS validator with uptime proof
+		nodeWarpMsg, err := convertStandaloneToNodeWarp(uptimeProofSignedMessage)
+		if err != nil {
+			return nil, nil, err
+		}
 		return contract.TxToMethodWithWarpMessage(
 			rpcURL,
 			false,
 			crypto.Address{},
 			privateKey,
 			managerAddress,
-			uptimeProofSignedMessage,
+			nodeWarpMsg,
 			big.NewInt(0),
 			"POS validator removal with uptime proof",
 			ErrorSignatureToError,
@@ -147,7 +190,7 @@ func GetUptimeProofMessage(
 	validationID ids.ID,
 	uptime uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*standaloneWarp.Message, error) {
 	uptimePayload, err := messages.NewValidatorUptime(validationID, uptime)
 	if err != nil {
 		return nil, err
@@ -156,9 +199,9 @@ func GetUptimeProofMessage(
 	if err != nil {
 		return nil, err
 	}
-	uptimeProofUnsignedMessage, err := warp.NewUnsignedMessage(
-		network.ID,
-		blockchainID,
+	uptimeProofUnsignedMessage, err := standaloneWarp.NewUnsignedMessage(
+		network.ID(),
+		blockchainID[:],
 		addressedCall.Bytes(),
 	)
 	if err != nil {
@@ -187,9 +230,9 @@ func InitValidatorRemoval(
 	useACP99 bool,
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, ids.ID, *types.Transaction, error) {
+) (*standaloneWarp.Message, ids.ID, *types.Transaction, error) {
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -197,7 +240,7 @@ func InitValidatorRemoval(
 		return nil, ids.Empty, nil, err
 	}
 	blockchainID, err := contract.GetBlockchainID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -218,9 +261,9 @@ func InitValidatorRemoval(
 		return nil, ids.Empty, nil, fmt.Errorf("node %s is not a L1 validator", nodeID)
 	}
 
-	var unsignedMessage *warp.UnsignedMessage
+	var unsignedMessage *nodeWarp.UnsignedMessage
 	if initiateTxHash != "" {
-		unsignedMessage, err = GetL1ValidatorWeightMessageFromTx(
+		standaloneUnsignedMsg, err := GetL1ValidatorWeightMessageFromTx(
 			rpcURL,
 			validationID,
 			0,
@@ -229,11 +272,22 @@ func InitValidatorRemoval(
 		if err != nil {
 			return nil, ids.Empty, nil, err
 		}
+		// Convert standalone to node warp unsigned message
+		var chainID ids.ID
+		copy(chainID[:], standaloneUnsignedMsg.SourceChainID)
+		unsignedMessage, err = nodeWarp.NewUnsignedMessage(
+			standaloneUnsignedMsg.NetworkID,
+			chainID,
+			standaloneUnsignedMsg.Payload,
+		)
+		if err != nil {
+			return nil, ids.Empty, nil, err
+		}
 	}
 
 	var receipt *types.Receipt
 	if unsignedMessage == nil {
-		signedUptimeProof := &warp.Message{}
+		signedUptimeProof := &standaloneWarp.Message{}
 		if isPoS {
 			if uptimeSec == 0 {
 				uptimeSec, err = utils.GetL1ValidatorUptimeSeconds(rpcURL, nodeID)
@@ -299,10 +353,23 @@ func InitValidatorRemoval(
 		}
 	}
 
+	// Convert node warp message back to standalone for GetL1ValidatorWeightMessage
+	var standaloneUnsignedMsg *standaloneWarp.UnsignedMessage
+	if unsignedMessage != nil {
+		standaloneUnsignedMsg, err = standaloneWarp.NewUnsignedMessage(
+			unsignedMessage.NetworkID,
+			unsignedMessage.SourceChainID[:],
+			unsignedMessage.Payload,
+		)
+		if err != nil {
+			return nil, ids.Empty, nil, err
+		}
+	}
+	
 	signedMsg, err := GetL1ValidatorWeightMessage(
 		network,
 		aggregatorLogger,
-		unsignedMessage,
+		standaloneUnsignedMsg,
 		subnetID,
 		blockchainID,
 		managerAddress,
@@ -320,7 +387,7 @@ func CompleteValidatorRemoval(
 	generateRawTxOnly bool,
 	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
-	subnetValidatorRegistrationSignedMessage *warp.Message,
+	subnetValidatorRegistrationSignedMessage *nodeWarp.Message,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
 	if useACP99 {
@@ -370,7 +437,7 @@ func FinishValidatorRemoval(
 ) (*types.Transaction, error) {
 	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)

@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/validator"
+	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/node/utils/units"
 
 	"github.com/spf13/cobra"
@@ -54,7 +54,7 @@ func list(_ *cobra.Command, args []string) error {
 		BlockchainName: blockchainName,
 	}
 
-	subnetID, err := contract.GetSubnetID(app, network, chainSpec)
+	subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}

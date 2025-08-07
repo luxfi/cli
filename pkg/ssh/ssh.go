@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/docker"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/monitoring"
 	"github.com/luxfi/cli/pkg/remoteconfig"
 	"github.com/luxfi/cli/pkg/utils"
