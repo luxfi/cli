@@ -12,29 +12,30 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/dependencies"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/validatormanager"
+	"github.com/luxfi/sdk/validatormanager"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/evm"
-	validatormanagerSDK "github.com/luxfi/cli/pkg/validatormanager"
-	"github.com/luxfi/cli/pkg/validatormanager/validatormanagertypes"
+	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/config"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	sdktxs "github.com/luxfi/sdk/validatormanager/txs"
 
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
@@ -255,7 +256,7 @@ func InitializeValidatorManager(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	network models.Network,
-	luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator,
+	luxdBootstrapValidators []*sdktxs.ConvertSubnetToL1Validator,
 	pos bool,
 	managerAddress string,
 	proxyContractOwner string,
@@ -470,7 +471,7 @@ func convertSubnetToL1(
 	subnetAuthKeysList []string,
 	validatorManagerAddressStr string,
 	doStrongInputsCheck bool,
-) ([]*txs.ConvertSubnetToL1Validator, bool, bool, error) {
+) ([]*sdktxs.ConvertSubnetToL1Validator, bool, bool, error) {
 	if subnetID == ids.Empty {
 		return nil, false, false, constants.ErrNoSubnetID
 	}

@@ -11,15 +11,15 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/validatormanager"
+	"github.com/luxfi/sdk/validatormanager"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
-	validatormanagerSDK "github.com/luxfi/cli/pkg/validatormanager"
+	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 
@@ -115,7 +115,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	privateKey, err := privateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	privateKey, err := privateKeyFlags.GetPrivateKey(app.GetSDKApp(), genesisPrivateKey)
 	if err != nil {
 		return err
 	}

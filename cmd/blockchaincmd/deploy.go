@@ -17,15 +17,15 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/dependencies"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/prompts/comparator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
@@ -33,8 +33,8 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	sdkutils "github.com/luxfi/sdk/utils"
-	validatormanagerSDK "github.com/luxfi/cli/pkg/validatormanager"
-	"github.com/luxfi/cli/pkg/validatormanager/validatormanagertypes"
+	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
 	luxdutils "github.com/luxfi/node/utils"
@@ -45,6 +45,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/fx"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	sdktxs "github.com/luxfi/sdk/validatormanager/txs"
 	warpMessage "github.com/luxfi/warp"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -69,7 +70,7 @@ var (
 	skipCreatePrompt       bool
 	partialSync            bool
 	subnetOnly             bool
-	warpSpec               subnet.WarpSpec
+	// warpSpec               subnet.WarpSpec // TODO: WarpSpec not defined
 	numNodes               uint32
 	relayerAmount          float64
 	relayerKeyName         string
@@ -1042,7 +1043,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
+func setBootstrapValidatorValidationID(luxdBootstrapValidators []*sdktxs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
 	for index, luxdValidator := range luxdBootstrapValidators {
 		for bootstrapValidatorIndex, validator := range bootstrapValidators {
 			luxdValidatorNodeID, _ := ids.ToNodeID(luxdValidator.NodeID)
@@ -1092,8 +1093,8 @@ func getClusterBootstrapValidators(
 }
 
 // TODO: add deactivation owner?
-func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertSubnetToL1Validator, error) {
-	bootstrapValidators := []*txs.ConvertSubnetToL1Validator{}
+func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*sdktxs.ConvertSubnetToL1Validator, error) {
+	bootstrapValidators := []*sdktxs.ConvertSubnetToL1Validator{}
 	for _, validator := range subnetValidators {
 		nodeID, err := ids.NodeIDFromString(validator.NodeID)
 		if err != nil {

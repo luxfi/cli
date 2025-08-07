@@ -9,7 +9,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/lpm"
+	"github.com/luxfi/sdk/lpm"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )

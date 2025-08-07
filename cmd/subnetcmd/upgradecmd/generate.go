@@ -10,7 +10,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
@@ -19,7 +19,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/commontype"
