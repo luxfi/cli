@@ -4,7 +4,7 @@
 package validatormanager
 
 import (
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
 

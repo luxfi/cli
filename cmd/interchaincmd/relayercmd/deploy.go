@@ -9,13 +9,13 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -288,7 +288,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 				return err
 			}
 			cchainBlockchainID, err := contract.GetBlockchainID(
-				app,
+				app.GetSDKApp(),
 				network,
 				contract.ChainSpec{
 					CChain: true,
@@ -330,7 +330,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			}
 			if doPay {
 				_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-					app,
+					app.GetSDKApp(),
 					network,
 					contract.ChainSpec{
 						BlockchainID: destination.blockchainID,

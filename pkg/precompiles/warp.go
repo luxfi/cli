@@ -5,7 +5,7 @@ package precompiles
 import (
 	_ "embed"
 
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 )

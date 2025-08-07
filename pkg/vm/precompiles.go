@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/params"

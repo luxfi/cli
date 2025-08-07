@@ -3,7 +3,7 @@ package stop
 import (
 	"github.com/luxfi/cli/cmd"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"

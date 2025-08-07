@@ -22,6 +22,7 @@ const (
 	GenesisFileName             = "genesis.json"
 	ElasticSubnetConfigFileName = "elastic_subnet_config.json"
 	NodeConfigJSONFile          = "node-config.json"
+	NodeConfigFileName          = "node-config.json"
 	SidecarSuffix               = SuffixSeparator + SidecarFileName
 	GenesisSuffix               = SuffixSeparator + GenesisFileName
 	NodeFileName                = "node.json"
@@ -84,6 +85,7 @@ const (
 	LocalAPIEndpoint = "http://127.0.0.1:9630"
 	DevnetAPIEndpoint = "https://api.lux-dev.network"
 	LocalNetworkID   = 1337
+	DefaultNumberOfLocalMachineNodes = 5
 
 	DefaultTokenName = "TEST"
 	
@@ -162,6 +164,12 @@ const (
 	// Devnet flags
 	DevnetFlagsProposerVMUseCurrentHeight = true // This is a boolean flag
 	
+	// Validator constants
+	BootstrapValidatorBalanceLUX = 1000000000000000 // 1M LUX in nanoLUX
+	DefaultValidationIDExpiryDuration = 48 * time.Hour
+	MaxL1TotalWeightChange = 0.2 // 20% max weight change
+	SignatureAggregatorTimeout = 60 * time.Second // Timeout for signature aggregator
+	
 	// File names
 	AliasesFileName = "aliases.json"
 	
@@ -211,6 +219,7 @@ const (
 	// time to go through the command
 	StakingStartLeadTime   = 1 * time.Minute
 	StakingMinimumLeadTime = 25 * time.Second
+	DevnetStakingStartLeadTime = 30 * time.Second
 
 	DefaultConfigFileName = ".cli"
 	DefaultConfigFileType = "json"

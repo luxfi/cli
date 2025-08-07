@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	cliutils "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"

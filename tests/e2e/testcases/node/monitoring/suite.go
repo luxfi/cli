@@ -13,7 +13,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	ginkgo "github.com/onsi/ginkgo/v2"

@@ -8,22 +8,23 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.10
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.200.0
-	github.com/chelnak/ysmrr v0.5.0
+	github.com/chelnak/ysmrr v0.6.0
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.2.8
+	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v0.8.2
+	github.com/luxfi/evm v0.7.8-lux.1
 	github.com/luxfi/geth v1.16.27
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v1.0.2
 	github.com/luxfi/lpm v1.7.12
-	github.com/luxfi/netrunner v1.8.4-lux
+	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/node v1.16.15
+	github.com/luxfi/sdk v0.2.0
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -34,8 +35,8 @@ require (
 	github.com/otiai10/copy v1.14.1
 	github.com/pborman/ansi v1.0.0
 	github.com/pingcap/errors v0.11.4
-	github.com/posthog/posthog-go v1.4.7
-	github.com/schollz/progressbar/v3 v3.17.1
+	github.com/posthog/posthog-go v1.6.1
+	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/afero v1.14.0
 	github.com/spf13/cobra v1.9.1
@@ -57,12 +58,8 @@ require (
 )
 
 require (
-	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/dgraph-io/badger/v3 v3.2103.5 // indirect
-	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/golang/glog v1.2.5 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/luxfi/netrunner-sdk v0.3.0 // indirect
-	go.opencensus.io v0.24.0 // indirect
 )
 
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
@@ -91,7 +88,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.22.0 // indirect
+	github.com/bits-and-blooms/bitset v1.24.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
@@ -168,7 +165,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/database v1.1.10 // indirect
 	github.com/luxfi/metrics v1.1.1 // indirect
-	github.com/luxfi/sdk v0.0.0
 	github.com/luxfi/trace v0.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -234,10 +230,12 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
-replace github.com/luxfi/sdk => ../sdk
-
-replace github.com/luxfi/node => ../node
-
-replace github.com/luxfi/evm => ../evm
-
-replace github.com/luxfi/geth => ../geth
+// Temporary replace until SDK v0.2.0 is published
+replace (
+	github.com/luxfi/evm v0.7.8-lux => github.com/luxfi/evm v0.7.8-lux.1
+	github.com/luxfi/geth v1.16.26 => github.com/luxfi/geth v1.16.2-lux.2
+	github.com/luxfi/geth v1.16.27 => github.com/luxfi/geth v1.16.2-lux.2
+	github.com/luxfi/node v1.16.15 => ../node
+	github.com/luxfi/sdk v0.2.0 => ../sdk
+	github.com/luxfi/warp v0.1.1 => ../warp
+)

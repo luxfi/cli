@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/genesis"
 	"github.com/stretchr/testify/require"
@@ -890,17 +890,17 @@ func TestValidatePChainTestnetAddress(t *testing.T) {
 	}{
 		{
 			name:    "valid P-Chain address with Testnet HRP",
-			input:   "P-testnet18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
-			wantErr: false, // Parse succeeds and HRP == "testnet"
+			input:   "P-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			wantErr: false, // Parse succeeds and HRP == "test"
 		},
 		{
 			name:    "valid P-Chain address but wrong HRP - custom",
 			input:   "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // Parse succeeds but HRP != "testnet"
+			wantErr: true, // Parse succeeds but HRP != "test"
 		},
 		{
 			name:    "invalid Testnet P-Chain address - bad checksum",
-			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:   "P-test1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true, // This will fail checksum validation
 		},
 		{
@@ -1131,7 +1131,7 @@ func TestValidateXChainAddress(t *testing.T) {
 		},
 		{
 			name:    "invalid Testnet X-Chain address - bad checksum",
-			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:   "X-test1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true, // This will fail checksum validation
 		},
 		{
@@ -1181,17 +1181,17 @@ func TestValidateXChainTestnetAddress(t *testing.T) {
 	}{
 		{
 			name:    "valid X-Chain address with Testnet HRP",
-			input:   "X-testnet18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			input:   "X-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
 			wantErr: false,
 		},
 		{
 			name:    "valid X-Chain address but wrong HRP - custom",
 			input:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // Parse succeeds but HRP != "testnet"
+			wantErr: true, // Parse succeeds but HRP != "test"
 		},
 		{
 			name:    "invalid Testnet X-Chain address - bad checksum",
-			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
+			input:   "X-test1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 			wantErr: true, // This will fail checksum validation
 		},
 		{
