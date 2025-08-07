@@ -238,7 +238,8 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 	if print {
 		blockchainIDstr := "<your-blockchain-id>"
 		if sc.Networks != nil &&
-			sc.Networks[networkKey] != (models.NetworkData{}) &&
+			(sc.Networks[networkKey].SubnetID != ids.Empty || 
+			 sc.Networks[networkKey].BlockchainID != ids.Empty) &&
 			sc.Networks[networkKey].BlockchainID != ids.Empty {
 			blockchainIDstr = sc.Networks[networkKey].BlockchainID.String()
 		}
@@ -303,7 +304,8 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 
 func validateUpgrade(subnetName, networkKey string, sc *models.Sidecar, skipPrompting bool) ([]extras.PrecompileUpgrade, string, error) {
 	// if there's no entry in the Sidecar, we assume there hasn't been a deploy yet
-	if sc.Networks[networkKey] == (models.NetworkData{}) {
+	if sc.Networks[networkKey].SubnetID == ids.Empty && 
+	   sc.Networks[networkKey].BlockchainID == ids.Empty {
 		return nil, "", subnetNotYetDeployed()
 	}
 	chainID := sc.Networks[networkKey].BlockchainID

@@ -39,3 +39,33 @@ func ReadJSON(path string, v interface{}) error {
 
 	return nil
 }
+
+// GetJSONKey retrieves a value from a map by key and returns it as the specified type
+func GetJSONKey[T any](m map[string]interface{}, key string) (T, error) {
+	var zero T
+	value, ok := m[key]
+	if !ok {
+		return zero, fmt.Errorf("key %s not found in map", key)
+	}
+	
+	typedValue, ok := value.(T)
+	if !ok {
+		return zero, fmt.Errorf("value for key %s is not of the expected type", key)
+	}
+	
+	return typedValue, nil
+}
+
+// WriteJSON writes the provided interface to a JSON file
+func WriteJSON(path string, v interface{}) error {
+	contentBytes, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %w", err)
+	}
+	
+	if err := os.WriteFile(path, contentBytes, 0644); err != nil {
+		return fmt.Errorf("failed to write JSON to %s: %w", path, err)
+	}
+	
+	return nil
+}

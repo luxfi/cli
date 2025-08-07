@@ -113,7 +113,8 @@ func ImportGenesis(*cobra.Command, []string) error {
 	}
 
 	ux.Logger.PrintToUser("Launching import node...")
-	_, err = cli.Start(ctx, opts...)
+	// Start needs an exec path as second parameter
+	_, err = cli.Start(ctx, "", opts...)
 	if err != nil {
 		return fmt.Errorf("failed to start import node: %w", err)
 	}
@@ -132,7 +133,7 @@ func ImportGenesis(*cobra.Command, []string) error {
 
 	// Stop the import node
 	if clusterInfo != nil {
-		if err := cli.Stop(ctx); err != nil {
+		if _, err := cli.Stop(ctx); err != nil {
 			ux.Logger.PrintToUser("Warning: failed to stop import node: %v", err)
 		}
 	}

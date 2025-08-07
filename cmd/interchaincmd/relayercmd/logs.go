@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/node/utils/logging"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -65,7 +65,7 @@ func logs(_ *cobra.Command, _ []string) error {
 		return err
 	}
 	var logLines []string
-	logsPath := app.GetLocalRelayerLogPath(network.Kind)
+	logsPath := app.GetLocalRelayerLogPath(network.Kind())
 	bs, err := os.ReadFile(logsPath)
 	if err != nil {
 		return err

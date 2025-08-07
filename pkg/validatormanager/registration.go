@@ -16,11 +16,11 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/cli/sdk/interchain"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
-	"github.com/luxfi/cli/sdk/validator"
-	"github.com/luxfi/cli/sdk/validatormanager"
+	"github.com/luxfi/sdk/evm"
+	sdkwarp "github.com/luxfi/sdk/warp"
+	sdkutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/cli/pkg/validator"
+	localWarpMessage "github.com/luxfi/cli/pkg/validatormanager/warp"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/interfaces"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
@@ -43,8 +43,8 @@ func InitializeValidatorRegistrationPoSNative(
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
-	balanceOwners warpMessage.PChainOwner,
-	disableOwners warpMessage.PChainOwner,
+	balanceOwners localWarpMessage.PChainOwner,
+	disableOwners localWarpMessage.PChainOwner,
 	delegationFeeBips uint16,
 	minStakeDuration time.Duration,
 	stakeAmount *big.Int,
@@ -86,7 +86,7 @@ func InitializeValidatorRegistrationPoSNative(
 			managerAddress,
 			stakeAmount,
 			"initialize validator registration with stake",
-			validatormanager.ErrorSignatureToError,
+			ErrorSignatureToError,
 			"initiateValidatorRegistration(bytes,bytes,(uint32,[address]),(uint32,[address]),uint16,uint64,address)",
 			nodeID[:],
 			blsPublicKey,
@@ -106,7 +106,7 @@ func InitializeValidatorRegistrationPoSNative(
 		managerAddress,
 		stakeAmount,
 		"initialize validator registration with stake",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"initializeValidatorRegistration((bytes,bytes,uint64,(uint32,[address]),(uint32,[address])),uint16,uint64)",
 		ValidatorRegistrationInput{
 			NodeID:                nodeID[:],
@@ -130,8 +130,8 @@ func InitializeValidatorRegistrationPoA(
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
-	balanceOwners warpMessage.PChainOwner,
-	disableOwners warpMessage.PChainOwner,
+	balanceOwners localWarpMessage.PChainOwner,
+	disableOwners localWarpMessage.PChainOwner,
 	weight uint64,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -160,7 +160,7 @@ func InitializeValidatorRegistrationPoA(
 			managerAddress,
 			big.NewInt(0),
 			"initialize validator registration",
-			validatormanager.ErrorSignatureToError,
+			ErrorSignatureToError,
 			"initiateValidatorRegistration(bytes,bytes,(uint32,[address]),(uint32,[address]),uint64)",
 			nodeID[:],
 			blsPublicKey,
@@ -184,7 +184,7 @@ func InitializeValidatorRegistrationPoA(
 		managerAddress,
 		big.NewInt(0),
 		"initialize validator registration",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"initializeValidatorRegistration((bytes,bytes,uint64,(uint32,[address]),(uint32,[address])),uint64)",
 		ValidatorRegistrationInput{
 			NodeID:                nodeID[:],
@@ -209,8 +209,8 @@ func GetRegisterL1ValidatorMessage(
 	nodeID ids.NodeID,
 	blsPublicKey [48]byte,
 	expiry uint64,
-	balanceOwners warpMessage.PChainOwner,
-	disableOwners warpMessage.PChainOwner,
+	balanceOwners localWarpMessage.PChainOwner,
+	disableOwners localWarpMessage.PChainOwner,
 	weight uint64,
 	alreadyInitialized bool,
 	initiateTxHash string,
@@ -294,7 +294,7 @@ func GetRegisterL1ValidatorMessage(
 	}
 
 	messageHexStr := hex.EncodeToString(registerSubnetValidatorUnsignedMessage.Bytes())
-	signedMessage, err := interchain.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	signedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("failed to get signed message: %w", err)
 	}
@@ -357,7 +357,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	}
 	justification := hex.EncodeToString(justificationBytes)
 	messageHexStr := hex.EncodeToString(subnetConversionUnsignedMessage.Bytes())
-	return interchain.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, justification, subnetID.String(), aggregatorQuorumPercentage)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, justification, subnetID.String(), aggregatorQuorumPercentage)
 }
 
 // last step of flow for adding a new validator
@@ -378,7 +378,7 @@ func CompleteValidatorRegistration(
 		l1ValidatorRegistrationSignedMessage,
 		big.NewInt(0),
 		"complete validator registration",
-		validatormanager.ErrorSignatureToError,
+		ErrorSignatureToError,
 		"completeValidatorRegistration(uint32)",
 		uint32(0),
 	)
@@ -396,8 +396,8 @@ func InitValidatorRegistration(
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
-	balanceOwners warpMessage.PChainOwner,
-	disableOwners warpMessage.PChainOwner,
+	balanceOwners localWarpMessage.PChainOwner,
+	disableOwners localWarpMessage.PChainOwner,
 	weight uint64,
 	aggregatorLogger logging.Logger,
 	isPos bool,
@@ -443,7 +443,7 @@ func InitValidatorRegistration(
 	if !alreadyInitialized {
 		var tx *types.Transaction
 		if isPos {
-			stakeAmount, err := validatormanager.PoSWeightToValue(
+			stakeAmount, err := PoSWeightToValue(
 				rpcURL,
 				managerAddress,
 				weight,
@@ -472,7 +472,7 @@ func InitValidatorRegistration(
 				useACP99,
 			)
 			if err != nil {
-				if !errors.Is(err, validatormanager.ErrNodeAlreadyRegistered) {
+				if !errors.Is(err, ErrNodeAlreadyRegistered) {
 					return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator registration")
 				}
 				ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
@@ -498,7 +498,7 @@ func InitValidatorRegistration(
 				useACP99,
 			)
 			if err != nil {
-				if !errors.Is(err, validatormanager.ErrNodeAlreadyRegistered) {
+				if !errors.Is(err, ErrNodeAlreadyRegistered) {
 					return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator registration")
 				}
 				ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
@@ -601,7 +601,7 @@ func FinishValidatorRegistration(
 		signedMessage,
 	)
 	if err != nil {
-		if !errors.Is(err, validatormanager.ErrInvalidValidationID) {
+		if !errors.Is(err, ErrInvalidValidationID) {
 			return nil, evm.TransactionError(tx, err, "failure completing validator registration")
 		} else {
 			return nil, fmt.Errorf("the Validator was already fully registered on the Manager")

@@ -265,6 +265,10 @@ func (m *SoftKey) Encode() string {
 	return m.privKeyEncoded
 }
 
+func (m *SoftKey) PrivKeyHex() string {
+	return hex.EncodeToString(m.privKeyRaw)
+}
+
 // Saves the private key to disk with hex encoding.
 func (m *SoftKey) Save(p string) error {
 	k := hex.EncodeToString(m.privKeyRaw)

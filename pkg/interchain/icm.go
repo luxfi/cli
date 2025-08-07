@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
+	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/crypto"
 )
 
@@ -357,11 +357,12 @@ func getPrivateKey(
 		k   *key.SoftKey
 	)
 	if keyName == "" {
-		if k, err = key.LoadEwoq(network.ID); err != nil {
+		// Use default test key for empty keyName
+		if k, err = key.LoadSoft(network.ID(), app.GetKeyPath("test")); err != nil {
 			return "", err
 		}
 	} else {
-		k, err = key.LoadSoft(network.ID, app.GetKeyPath(keyName))
+		k, err = key.LoadSoft(network.ID(), app.GetKeyPath(keyName))
 		if err != nil {
 			return "", err
 		}
@@ -379,7 +380,8 @@ func SetProposerVM(
 	if err != nil {
 		return err
 	}
-	wsEndpoint := network.BlockchainWSEndpoint(blockchainID)
+	// Get the WebSocket endpoint for the blockchain
+	wsEndpoint := models.GetWSEndpoint(network.Endpoint(), blockchainID)
 	client, err := evm.GetClient(wsEndpoint)
 	if err != nil {
 		return err
@@ -392,9 +394,17 @@ func getWarpKeyInfo(
 	app *application.Lux,
 	keyName string,
 ) (string, string, *big.Int, error) {
-	k, err := key.LoadSoftOrCreate(models.NewLocalNetwork().ID, app.GetKeyPath(keyName))
+	// Try to load the key, create if doesn't exist
+	k, err := key.LoadSoft(models.NewLocalNetwork().ID(), app.GetKeyPath(keyName))
 	if err != nil {
-		return "", "", nil, err
+		// If key doesn't exist, create a new one
+		k, err = key.NewSoft(0) // Use default network ID
+		if err != nil {
+			return "", "", nil, err
+		}
+		if err := k.Save(app.GetKeyPath(keyName)); err != nil {
+			return "", "", nil, err
+		}
 	}
 	return k.C(), k.PrivKeyHex(), InterchainMessagingPrefundedAddressBalance, nil
 }
@@ -420,8 +430,10 @@ func GetWarpInfo(
 	}
 	ti.Version = constants.WarpVersion
 	deployer := WarpDeployer{}
+	// TODO: GetWarpContractsBinDir doesn't exist in application
+	warpBinDir := filepath.Join(app.GetBasePath(), "warp", "bin")
 	_, ti.MessengerDeployerAddress, _, _, err = deployer.GetAssets(
-		app.GetWarpContractsBinDir(),
+		warpBinDir,
 		ti.Version,
 	)
 	if err != nil {

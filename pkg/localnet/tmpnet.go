@@ -17,13 +17,13 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/admin"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/config/node"
 	"github.com/luxfi/node/genesis"
+	nodecontext "github.com/luxfi/node/node"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
@@ -77,7 +77,7 @@ func TmpNetCreate(
 	bootstrap bool,
 ) (*tmpnet.Network, error) {
 	if len(upgradeBytes) > 0 {
-		defaultFlags[config.UpgradeFileContentKey] = base64.StdEncoding.EncodeToString(upgradeBytes)
+		defaultFlags["upgrade-file-content"] = base64.StdEncoding.EncodeToString(upgradeBytes)
 	}
 	network := &tmpnet.Network{
 		Nodes:        nodes,
@@ -126,8 +126,8 @@ func TmpNetMove(
 		}
 		flagsFile := filepath.Join(newDir, entry.Name(), "flags.json")
 		if utils.FileExists(flagsFile) {
-			data, err := utils.ReadJSON(flagsFile)
-			if err != nil {
+			data := make(map[string]interface{})
+			if err := utils.ReadJSON(flagsFile, &data); err != nil {
 				return err
 			}
 			data[config.DataDirKey] = filepath.Join(newDir, entry.Name())
@@ -160,17 +160,17 @@ func GetTmpNetNetwork(networkDir string) (*tmpnet.Network, error) {
 		processPath := filepath.Join(networkDir, network.Nodes[i].NodeID.String(), "process.json")
 		if bytes, err := os.ReadFile(processPath); errors.Is(err, os.ErrNotExist) {
 			network.Nodes[i].URI = ""
-			network.Nodes[i].StakingAddress = netip.AddrPort{}
+			network.Nodes[i].StakingAddress = ""
 		} else if err != nil {
 			return network, fmt.Errorf("failed to read node process context: %w", err)
 		} else {
-			processContext := node.ProcessContext{}
+			processContext := nodecontext.NodeProcessContext{}
 			if err := json.Unmarshal(bytes, &processContext); err != nil {
 				return network, fmt.Errorf("failed to unmarshal node process context: %w", err)
 			}
 			if _, err := utils.GetProcess(processContext.PID); err != nil {
 				network.Nodes[i].URI = ""
-				network.Nodes[i].StakingAddress = netip.AddrPort{}
+				network.Nodes[i].StakingAddress = ""
 				if err := os.Remove(processPath); err != nil {
 					return network, fmt.Errorf("failed to clean up node process context: %w", err)
 				}
@@ -203,7 +203,7 @@ func TmpNetLoad(
 	if luxdBinPath != "" {
 		for i := range network.Nodes {
 			network.Nodes[i].RuntimeConfig = &tmpnet.NodeRuntimeConfig{
-				LuxdPath: luxdBinPath,
+				LuxNodePath: luxdBinPath,
 			}
 		}
 	}
@@ -280,7 +280,7 @@ func GetTmpNetFirstNode(network *tmpnet.Network) (*tmpnet.Node, error) {
 // Get first running node of the network
 func GetTmpNetFirstRunningNode(network *tmpnet.Network) (*tmpnet.Node, error) {
 	for _, node := range network.Nodes {
-		if node.StakingAddress != (netip.AddrPort{}) {
+		if node.StakingAddress != "" {
 			return node, nil
 		}
 	}
@@ -652,10 +652,10 @@ func GetTmpNetBootstrappers(
 		if node.NodeID == skipNodeID {
 			continue
 		}
-		if node.StakingAddress == (netip.AddrPort{}) {
+		if node.StakingAddress == "" {
 			continue
 		}
-		bootstrapIPs = append(bootstrapIPs, node.StakingAddress.String())
+		bootstrapIPs = append(bootstrapIPs, node.StakingAddress)
 		bootstrapIDs = append(bootstrapIDs, node.NodeID.String())
 	}
 	return bootstrapIPs, bootstrapIDs, nil
@@ -676,7 +676,7 @@ func GetTmpNetUpgrade(
 	if err != nil {
 		return nil, err
 	}
-	encodedUpgrade, err := network.DefaultFlags.GetStringVal(config.UpgradeFileContentKey)
+	encodedUpgrade, err := network.DefaultFlags.GetStringVal("upgrade-file-content")
 	if err != nil {
 		return nil, err
 	}
@@ -715,7 +715,7 @@ func TmpNetTrackSubnet(
 		return err
 	}
 	if !sovereign && wallet != nil {
-		if err := TmpNetAddNonSovereignValidators(ctx, network, subnetID, wallet); err != nil {
+		if err := TmpNetAddNonSovereignValidators(ctx, network, subnetID, &wallet); err != nil {
 			return err
 		}
 		if err := TmpNetWaitNonSovereignValidators(ctx, network, subnetID); err != nil {
@@ -829,7 +829,7 @@ func TmpNetAddNonSovereignValidators(
 		if isValidator := subnetValidators.Contains(node.NodeID); isValidator {
 			continue
 		}
-		if _, err := wallet.P().IssueAddSubnetValidatorTx(
+		if _, err := (*wallet).P().IssueAddSubnetValidatorTx(
 			&txs.SubnetValidator{
 				Validator: txs.Validator{
 					NodeID: node.NodeID,
@@ -1031,7 +1031,11 @@ func TmpNetPersistPorts(
 			return fmt.Errorf("couldn't parse node URI %s: %w", network.Nodes[i].URI, err)
 		}
 		network.Nodes[i].Flags[config.HTTPPortKey] = ipPort.Port()
-		network.Nodes[i].Flags[config.StakingPortKey] = network.Nodes[i].StakingAddress.Port()
+		stakingAddrPort, err := netip.ParseAddrPort(network.Nodes[i].StakingAddress)
+		if err != nil {
+			return fmt.Errorf("couldn't parse staking address %s: %w", network.Nodes[i].StakingAddress, err)
+		}
+		network.Nodes[i].Flags[config.StakingPortKey] = stakingAddrPort.Port()
 	}
 	return network.Write()
 }
@@ -1120,7 +1124,7 @@ func GetTmpNetLuxdBinaryPath(networkDir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return network.DefaultRuntimeConfig.LuxdPath, nil
+	return network.DefaultRuntimeConfig.LuxNodePath, nil
 }
 
 // when host is public, we avoid [::] but use public IP

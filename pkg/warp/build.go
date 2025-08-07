@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/pkg/vm"
 )
 
 func RepoDir(
@@ -56,8 +55,9 @@ func DownloadRepo(
 	app *application.Lux,
 	version string,
 ) error {
-	if err := vm.CheckGitIsInstalled(); err != nil {
-		return err
+	// Check if git is installed
+	if _, err := exec.LookPath("git"); err != nil {
+		return fmt.Errorf("git is not installed: %w", err)
 	}
 	repoDir, err := RepoDir(app)
 	if err != nil {
