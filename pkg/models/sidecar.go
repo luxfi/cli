@@ -15,9 +15,14 @@ type TokenInfo struct {
 }
 
 type NetworkData struct {
-	SubnetID     ids.ID
-	BlockchainID ids.ID
-	RPCVersion   int
+	SubnetID                   ids.ID
+	BlockchainID               ids.ID
+	RPCVersion                 int
+	RPCEndpoints               []string // RPC endpoints for the network
+	WSEndpoints                []string // WebSocket endpoints for the network
+	TeleporterRegistryAddress  string   // Teleporter registry address
+	TeleporterMessengerAddress string   // Teleporter messenger address
+	ValidatorManagerAddress    string   // Validator manager contract address
 }
 
 type MultisigTxInfo struct {
@@ -47,6 +52,7 @@ type Sidecar struct {
 	SubnetID        ids.ID
 	BlockchainID    ids.ID
 	TokenName       string
+	TokenSymbol     string
 	ChainID         string
 	Version         string
 	Networks        map[string]NetworkData
@@ -106,4 +112,9 @@ type MigrationTx struct {
 	ValidatorManagement string `json:"validatorManagement"`
 	RentalPlan          string `json:"rentalPlan"`
 	Timestamp           int64  `json:"timestamp"`
+}
+
+// NetworkDataIsEmpty checks if the sidecar has no network data
+func (sc *Sidecar) NetworkDataIsEmpty() bool {
+	return sc.Networks == nil || len(sc.Networks) == 0
 }

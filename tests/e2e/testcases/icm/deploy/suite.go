@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/cli/cmd"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain"
-	"github.com/luxfi/cli/sdk/evm"
+	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	ginkgo "github.com/onsi/ginkgo/v2"

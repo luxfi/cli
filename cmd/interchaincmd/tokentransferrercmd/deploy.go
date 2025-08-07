@@ -20,9 +20,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/warp"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
 
 	"github.com/spf13/cobra"
@@ -103,7 +102,7 @@ func deploy(_ *cobra.Command, args []string) error {
 
 func getHomeKeyAndAddress(app *application.Lux, network models.Network, homeFlags HomeFlags) (string, string, error) {
 	// First check if there is a genesis key able to be used.
-	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
 		app,
 		network,
 		homeFlags.chainFlags,
@@ -125,10 +124,6 @@ func getHomeKeyAndAddress(app *application.Lux, network models.Network, homeFlag
 		homeKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"pay for home deployment fees, and collateralization (if necessary)",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			genesisPrivateKey,
 		)
 		if err != nil {
 			return "", "", err
@@ -401,7 +396,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		ux.Logger.PrintToUser(logging.Yellow.Wrap("Remote RPC Endpoint: %s"), remoteRPCEndpoint)
 	}
 
-	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
 		app,
 		network,
 		flags.remoteFlags.chainFlags,
@@ -417,10 +412,6 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		remoteKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"pay for remote deploy fees",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			genesisPrivateKey,
 		)
 		if err != nil {
 			return err
@@ -504,7 +495,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	if err != nil {
 		return err
 	}
-	var homeAddress common.Address
+	var homeAddress crypto.Address
 	// TODO: need registry address, manager address, private key for the home chain (academy for testnet)
 	homeBlockchainID, err := contract.GetBlockchainID(app, network, flags.homeFlags.chainFlags)
 	if err != nil {
@@ -515,10 +506,10 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		return err
 	}
 	if flags.homeFlags.homeAddress != "" {
-		homeAddress = common.HexToAddress(flags.homeFlags.homeAddress)
+		homeAddress = crypto.HexToAddress(flags.homeFlags.homeAddress)
 	}
 	if flags.homeFlags.erc20Address != "" {
-		tokenHomeAddress := common.HexToAddress(flags.homeFlags.erc20Address)
+		tokenHomeAddress := crypto.HexToAddress(flags.homeFlags.erc20Address)
 		tokenHomeDecimals, err := warp.GetTokenDecimals(
 			homeRPCEndpoint,
 			tokenHomeAddress,
@@ -530,8 +521,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			warpSrcDir,
 			homeRPCEndpoint,
 			homeKey,
-			common.HexToAddress(homeRegistryAddress),
-			common.HexToAddress(homeKeyAddress),
+			crypto.HexToAddress(homeRegistryAddress),
+			crypto.HexToAddress(homeKeyAddress),
 			tokenHomeAddress,
 			tokenHomeDecimals,
 		)
@@ -566,8 +557,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			warpSrcDir,
 			homeRPCEndpoint,
 			homeKey,
-			common.HexToAddress(homeRegistryAddress),
-			common.HexToAddress(homeKeyAddress),
+			crypto.HexToAddress(homeRegistryAddress),
+			crypto.HexToAddress(homeKeyAddress),
 			wrappedNativeTokenAddress,
 		)
 		if err != nil {
@@ -589,7 +580,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	}
 
 	var (
-		remoteAddress common.Address
+		remoteAddress crypto.Address
 		remoteSupply  *big.Int
 	)
 
@@ -598,7 +589,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 	if err != nil {
 		return err
 	}
-	var tokenHomeAddress common.Address
+	var tokenHomeAddress crypto.Address
 	switch endpointKind {
 	case warp.ERC20TokenHome:
 		tokenHomeAddress, err = warp.ERC20TokenHomeGetTokenAddress(homeRPCEndpoint, homeAddress)
@@ -636,8 +627,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			warpSrcDir,
 			remoteRPCEndpoint,
 			remoteKey,
-			common.HexToAddress(remoteRegistryAddress),
-			common.HexToAddress(remoteKeyAddress),
+			crypto.HexToAddress(remoteRegistryAddress),
+			crypto.HexToAddress(remoteKeyAddress),
 			homeBlockchainID,
 			homeAddress,
 			homeDecimals,
@@ -668,8 +659,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			warpSrcDir,
 			remoteRPCEndpoint,
 			remoteKey,
-			common.HexToAddress(remoteRegistryAddress),
-			common.HexToAddress(remoteKeyAddress),
+			crypto.HexToAddress(remoteRegistryAddress),
+			crypto.HexToAddress(remoteKeyAddress),
 			homeBlockchainID,
 			homeAddress,
 			homeDecimals,
@@ -764,7 +755,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 			homeKey,
 			remoteBlockchainID,
 			remoteAddress,
-			common.HexToAddress(homeKeyAddress),
+			crypto.HexToAddress(homeKeyAddress),
 			big.NewInt(1),
 		)
 		if err != nil {
@@ -796,7 +787,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 				remoteRPCEndpoint,
 				precompiles.NativeMinterPrecompile,
 				remoteMinterManagerPrivKey,
-				common.HexToAddress(remoteMinterManagerAddress),
+				crypto.HexToAddress(remoteMinterManagerAddress),
 			); err != nil {
 				return err
 			}

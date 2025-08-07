@@ -225,11 +225,8 @@ func updateToLatestVersion(vmType models.VMType, sc models.Sidecar, networkToUpg
 	currentVersion := sc.VMVersion
 
 	// check latest version
-	latestVersion, err := app.Downloader.GetLatestReleaseVersion(
-		constants.LuxOrg,
-		vmType.RepoName(),
-		"",
-	)
+	releaseURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", constants.LuxOrg, vmType.RepoName())
+	latestVersion, err := app.Downloader.GetLatestReleaseVersion(releaseURL)
 	if err != nil {
 		return err
 	}

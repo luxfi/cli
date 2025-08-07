@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/spf13/cobra"
 )

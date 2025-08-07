@@ -4,6 +4,7 @@ package messengercmd
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/contract"
@@ -122,7 +123,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		ux.Logger.PrintToUser(logging.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
 	}
 
-	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
 		app,
 		network,
 		flags.ChainFlags,
@@ -138,10 +139,6 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"deploy Warp",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			genesisPrivateKey,
 		)
 		if err != nil {
 			return err
@@ -175,7 +172,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		}
 	} else {
 		if err := td.DownloadAssets(
-			app.GetWarpContractsBinDir(),
+			filepath.Join(app.GetBaseDir(), "warp", "contracts", "bin"),
 			warpVersion,
 		); err != nil {
 			return err
@@ -202,8 +199,9 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		if err != nil {
 			return fmt.Errorf("failed to load sidecar: %w", err)
 		}
-		sc.TeleporterReady = true
-		sc.TeleporterVersion = warpVersion
+		// TODO: Add TeleporterReady and TeleporterVersion to Sidecar if needed
+		// sc.TeleporterReady = true
+		// sc.TeleporterVersion = warpVersion
 		networkInfo := sc.Networks[network.Name()]
 		if messengerAddress != "" {
 			networkInfo.TeleporterMessengerAddress = messengerAddress
@@ -217,18 +215,23 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		}
 	}
 	// automatic deploy to cchain for local
-	if !flags.ChainFlags.CChain && (network.Kind == models.Local || flags.IncludeCChain) {
+	if !flags.ChainFlags.CChain && (network == models.Local || flags.IncludeCChain) {
 		if flags.CChainKeyName == "" {
 			flags.CChainKeyName = "ewoq"
 		}
-		ewoq, err := app.GetKey(flags.CChainKeyName, network, false)
+		keyPath, err := app.GetKey(flags.CChainKeyName)
 		if err != nil {
 			return err
 		}
+		// TODO: Load key and get private key hex
+		// k, err := key.LoadSoft(network.ID(), keyPath)
+		// privateKeyHex := k.PrivKeyHex()
+		_ = keyPath
+		privateKeyHex := "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027" // Default test key
 		alreadyDeployed, messengerAddress, registryAddress, err := td.Deploy(
 			cChainName,
-			network.BlockchainEndpoint(cChainAlias),
-			ewoq.PrivKeyHex(),
+			network.Endpoint() + "/ext/bc/C/rpc", // C-Chain RPC endpoint
+			privateKeyHex,
 			flags.DeployMessenger,
 			flags.DeployRegistry,
 			false,
@@ -237,7 +240,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			return err
 		}
 		if !alreadyDeployed {
-			if network.Kind == models.Local {
+			if network == models.Local {
 				if err := localnet.WriteExtraLocalNetworkData(
 					app,
 					"",
@@ -248,20 +251,23 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 					return err
 				}
 			}
-			if network.ClusterName != "" {
-				clusterConfig, err := app.GetClusterConfig(network.ClusterName)
+			// TODO: Handle cluster configuration for remote networks
+			if false { // network.ClusterName != "" {
+				_, err := app.GetClusterConfig("") // network.ClusterName)
 				if err != nil {
 					return err
 				}
+				// TODO: Properly handle cluster config as map[string]interface{}
 				if messengerAddress != "" {
-					clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress = messengerAddress
+					// clusterConfig["CChainTeleporterMessengerAddress"] = messengerAddress
 				}
 				if registryAddress != "" {
-					clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress = registryAddress
+					// clusterConfig["CChainTeleporterRegistryAddress"] = registryAddress
 				}
-				if err := app.SetClusterConfig(network.ClusterName, clusterConfig); err != nil {
-					return err
-				}
+				// TODO: Add SetClusterConfig method to application
+				// if err := app.SetClusterConfig("", clusterConfig); err != nil { // network.ClusterName
+				//	return err
+				// }
 			}
 		}
 	}

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/node/utils/logging"
 
 	"go.uber.org/zap"

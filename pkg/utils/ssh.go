@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/sdk/utils"
 
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/exp/slices"

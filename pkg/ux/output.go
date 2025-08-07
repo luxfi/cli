@@ -97,6 +97,22 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	table.Render()
 }
 
+// DefaultTable creates a default table with the given title and headers
+func DefaultTable(title string, headers []string) *tablewriter.Table {
+	table := tablewriter.NewWriter(os.Stdout)
+	if title != "" {
+		// Table title is set using caption in some versions
+		table.SetCaption(true, title)
+	}
+	if headers != nil && len(headers) > 0 {
+		table.SetHeader(headers)
+	}
+	table.SetBorder(true)
+	table.SetAutoWrapText(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	return table
+}
+
 func ConvertToStringWithThousandSeparator(input uint64) string {
 	p := message.NewPrinter(language.English)
 	s := p.Sprintf("%d", input)

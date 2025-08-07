@@ -7,12 +7,12 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/sdk/evm"
+	warpMessage "github.com/luxfi/cli/pkg/validatormanager/warp"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/geth"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	warpMessage "github.com/luxfi/warp"
-	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/crypto"
 )
@@ -45,10 +45,10 @@ func GetValidatorNonce(
 			fromBlock = big.NewInt(0)
 		}
 		toBlock := big.NewInt(blockNumber)
-		logs, err := client.FilterLogs(interfaces.FilterQuery{
+		logs, err := client.FilterLogs(ethereum.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []crypto.Address{subnetEvmWarp.Module.Address},
+			Addresses: []common.Address{subnetEvmWarp.Module.Address},
 		})
 		if err != nil {
 			return 0, err
@@ -56,7 +56,7 @@ func GetValidatorNonce(
 		msgs := evm.GetWarpMessagesFromLogs(utils.PointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
-			addressedCall, err := warpPayload.ParseAddressedCall(payload)
+			addressedCall, err := warpMessage.ParseAddressedCall(payload)
 			if err == nil {
 				weightMsg, err := warpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 				if err == nil {

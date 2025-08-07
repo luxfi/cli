@@ -7,11 +7,12 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/olekukonko/tablewriter"
 )
@@ -146,13 +147,18 @@ func addSource(
 	}
 	rewardAddress := ""
 	if defaultKey != "" {
-		k, err := app.GetKey(defaultKey, network, false)
+		keyPath, err := app.GetKey(defaultKey)
+		if err != nil {
+			return ConfigSpec{}, err
+		}
+		// Load the actual key to get the C-chain address
+		k, err := key.LoadSoft(network.ID(), keyPath)
 		if err != nil {
 			return ConfigSpec{}, err
 		}
 		rewardAddress = k.C()
 	} else {
-		genesisAddress, _, err := contract.GetEVMSubnetPrefundedKey(
+		_, _, err := contract.GetEVMSubnetPrefundedKey(
 			app,
 			network,
 			chainSpec,
@@ -163,12 +169,6 @@ func addSource(
 		rewardAddress, err = prompts.PromptAddress(
 			app.Prompt,
 			fmt.Sprintf("receive relayer rewards on %s", blockchainDesc),
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			network,
-			prompts.EVMFormat,
-			"Address",
 		)
 		if err != nil {
 			return ConfigSpec{}, err
@@ -224,7 +224,12 @@ func addDestination(
 	}
 	privateKey := ""
 	if defaultKey != "" {
-		k, err := app.GetKey(defaultKey, network, false)
+		keyPath, err := app.GetKey(defaultKey)
+		if err != nil {
+			return ConfigSpec{}, err
+		}
+		// Load the actual key to get the private key hex
+		k, err := key.LoadSoft(network.ID(), keyPath)
 		if err != nil {
 			return ConfigSpec{}, err
 		}
@@ -234,10 +239,6 @@ func addDestination(
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			fmt.Sprintf("pay relayer fees on %s", blockchainDesc),
-			app.GetKeyDir(),
-			app.GetKey,
-			"",
-			"",
 		)
 		if err != nil {
 			return ConfigSpec{}, err

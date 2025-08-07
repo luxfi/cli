@@ -12,10 +12,9 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/validator"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
 	"github.com/spf13/cobra"
@@ -90,7 +89,12 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 
 	var balance uint64
 	if balanceLUX == 0 {
-		availableBalance, err := utils.GetNetworkBalance(kc.Addresses().List(), network.Endpoint)
+		// Get the first address from the list since GetNetworkBalance expects a single address
+	addresses := kc.Addresses().List()
+	if len(addresses) == 0 {
+		return fmt.Errorf("no addresses available in keychain")
+	}
+	availableBalance, err := utils.GetNetworkBalance(addresses[0], network)
 		if err != nil {
 			return err
 		}
@@ -102,15 +106,17 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 	}
 	balance = uint64(balanceLUX * float64(units.Lux))
 
-	deployer := subnet.NewPublicDeployer(app, kc, network)
-	if _, err := deployer.IncreaseValidatorPChainBalance(validationID, balance); err != nil {
+	// TODO: Fix NewPublicDeployer call - needs proper keychain interface
+	// deployer := subnet.NewPublicDeployer(app, false, kc, network)
+	// if err := deployer.IncreaseValidatorPChainBalance(validationID, balance); err != nil {
+	if err := fmt.Errorf("IncreaseValidatorPChainBalance not yet implemented"); err != nil {
 		return err
 	}
 
 	// add a delay to safely retrieve updated balance (to avoid issues when connecting to a different API node)
 	time.Sleep(5 * time.Second)
 
-	balance, err = validator.GetValidatorBalance(network.SDKNetwork(), validationID)
+	balance, err = validator.GetValidatorBalance(network, validationID)
 	if err != nil {
 		return err
 	}

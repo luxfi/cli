@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/blockchain"
@@ -23,8 +23,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/validatormanager"
-	"github.com/luxfi/cli/sdk/evm"
-	"github.com/luxfi/cli/sdk/validator"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting"

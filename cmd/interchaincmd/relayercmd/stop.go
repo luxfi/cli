@@ -62,8 +62,8 @@ func CallStop(_ []string, flags StopFlags, network models.Network) error {
 		}
 	}
 	switch {
-	case network.ClusterName != "":
-		host, err := node.GetWarpRelayerHost(app, network.ClusterName)
+	case network.ClusterName() != "":
+		host, err := node.GetWarpRelayerHost(app, network.ClusterName())
 		if err != nil {
 			return err
 		}
@@ -73,22 +73,22 @@ func CallStop(_ []string, flags StopFlags, network models.Network) error {
 		ux.Logger.GreenCheckmarkToUser("Remote AWM Relayer on %s successfully stopped", host.GetCloudID())
 	default:
 		b, _, _, err := relayer.RelayerIsUp(
-			app.GetLocalRelayerRunPath(network.Kind),
+			app.GetLocalRelayerRunPath(network.Kind()),
 		)
 		if err != nil {
 			return err
 		}
 		if !b {
-			return fmt.Errorf("there is no CLI-managed local AWM relayer running for %s", network.Kind)
+			return fmt.Errorf("there is no CLI-managed local AWM relayer running for %s", network.Kind())
 		}
 		if err := relayer.RelayerCleanup(
-			app.GetLocalRelayerRunPath(network.Kind),
-			app.GetLocalRelayerLogPath(network.Kind),
-			app.GetLocalRelayerStorageDir(network.Kind),
+			app.GetLocalRelayerRunPath(network.Kind()),
+			app.GetLocalRelayerLogPath(network.Kind()),
+			app.GetLocalRelayerStorageDir(network.Kind()),
 		); err != nil {
 			return err
 		}
-		ux.Logger.GreenCheckmarkToUser("Local AWM Relayer successfully stopped for %s", network.Kind)
+		ux.Logger.GreenCheckmarkToUser("Local AWM Relayer successfully stopped for %s", network.Kind())
 	}
 	return nil
 }

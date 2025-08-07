@@ -10,9 +10,9 @@ import (
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 
-	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/olekukonko/tablewriter"
 )
 
 // PrintEndpoints prints the endpoint information for the executing local network,
@@ -72,9 +72,10 @@ func PrintBlockchainEndpoints(
 		return err
 	}
 	t := ux.DefaultTable(fmt.Sprintf("%s RPC URLs", blockchain.Name), nil)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, AutoMerge: true},
-	})
+	// SetColumnConfigs is not available in tablewriter
+	// Use SetAlignment instead for column configuration
+	t.SetAlignment(tablewriter.ALIGN_LEFT)
+	
 	blockchainIDURL := fmt.Sprintf("%s/ext/bc/%s/rpc", node.URI, blockchain.ID)
 	sc, err := app.LoadSidecar(blockchain.Name)
 	if err == nil {
@@ -83,15 +84,16 @@ func PrintBlockchainEndpoints(
 			blockchainIDURL = rpcEndpoints[0]
 		}
 	}
-	t.AppendRow(table.Row{"Localhost", blockchainIDURL})
+	t.Append([]string{"Localhost", blockchainIDURL})
 	if utils.InsideCodespace() {
 		codespaceURL, err := utils.GetCodespaceURL(blockchainIDURL)
 		if err != nil {
 			return err
 		}
-		t.AppendRow(table.Row{"Codespace", codespaceURL})
+		t.Append([]string{"Codespace", codespaceURL})
 	}
-	printFunc(t.Render())
+	t.Render()
+	printFunc("")
 	return nil
 }
 
@@ -107,14 +109,14 @@ func PrintNetworkEndpoints(
 	if err != nil {
 		return err
 	}
-	header := table.Row{"Node ID", "Localhost Endpoint"}
+	headerStr := []string{"Node ID", "Localhost Endpoint"}
 	insideCodespace := utils.InsideCodespace()
 	if insideCodespace {
-		header = append(header, "Codespace Endpoint")
+		headerStr = append(headerStr, "Codespace Endpoint")
 	}
-	t := ux.DefaultTable(title, header)
+	t := ux.DefaultTable(title, headerStr)
 	for _, node := range network.Nodes {
-		row := table.Row{node.NodeID, node.URI}
+		row := []string{node.NodeID.String(), node.URI}
 		if insideCodespace {
 			if codespaceURL, err := utils.GetCodespaceURL(node.URI); err != nil {
 				return err
@@ -122,9 +124,10 @@ func PrintNetworkEndpoints(
 				row = append(row, codespaceURL)
 			}
 		}
-		t.AppendRow(row)
+		t.Append(row)
 	}
-	printFunc(t.Render())
+	t.Render()
+	printFunc("")
 	return nil
 }
 
@@ -142,13 +145,13 @@ func PrintL1Endpoints(
 	if len(clusters) == 0 {
 		return nil
 	}
-	header := table.Row{"Node ID", "Localhost Endpoint"}
+	headerStr := []string{"Node ID", "Localhost Endpoint"}
 	insideCodespace := utils.InsideCodespace()
 	if insideCodespace {
-		header = append(header, "Codespace Endpoint")
+		headerStr = append(headerStr, "Codespace Endpoint")
 	}
-	header = append(header, "L1")
-	t := ux.DefaultTable("L1 NODES", header)
+	headerStr = append(headerStr, "L1")
+	t := ux.DefaultTable("L1 NODES", headerStr)
 	for _, clusterName := range clusters {
 		trackedBlockchainsInfo, err := GetLocalClusterTrackedBlockchains(app, clusterName)
 		if err != nil {
@@ -161,7 +164,7 @@ func PrintL1Endpoints(
 			return err
 		}
 		for _, node := range network.Nodes {
-			row := table.Row{node.NodeID, node.URI}
+			row := []string{node.NodeID.String(), node.URI}
 			if insideCodespace {
 				if codespaceURL, err := utils.GetCodespaceURL(node.URI); err != nil {
 					return err
@@ -170,9 +173,10 @@ func PrintL1Endpoints(
 				}
 			}
 			row = append(row, strings.Join(trackedBlockchains, ","))
-			t.AppendRow(row)
+			t.Append(row)
 		}
 	}
-	printFunc(t.Render())
+	t.Render()
+	printFunc("")
 	return nil
 }

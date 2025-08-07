@@ -21,6 +21,7 @@ const githubVersionTagName = "tag_name"
 // interface to your application object.
 type Downloader interface {
 	Download(url string) ([]byte, error)
+	DownloadWithTee(url string, filePath string) ([]byte, error)
 	GetLatestReleaseVersion(releaseURL string) (string, error)
 	GetLatestPreReleaseVersion(releaseURL string) (string, error)
 	GetAllReleasesForRepo(org, repo string) ([]string, error)
@@ -43,6 +44,31 @@ func (downloader) Download(url string) ([]byte, error) {
 	}
 
 	return io.ReadAll(resp.Body)
+}
+
+// DownloadWithTee downloads a file and saves it to disk while also returning the content
+func (downloader) DownloadWithTee(url string, filePath string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected http status code: %d", resp.StatusCode)
+	}
+
+	// Read the content
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Save to file
+	if err := os.WriteFile(filePath, content, 0644); err != nil {
+		return nil, err
+	}
+
+	return content, nil
 }
 
 func (d downloader) GetAllReleasesForRepo(org, repo string) ([]string, error) {

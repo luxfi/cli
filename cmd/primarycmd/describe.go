@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/evm"
+	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
 

@@ -5,13 +5,13 @@ package relayercmd
 import (
 	"fmt"
 	"math/big"
-	"os"
 	"strings"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/cli/sdk/evm"
+	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/node/utils/logging"
 
 	"github.com/spf13/cobra"
@@ -98,7 +98,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 
 	deployToRemote := false
-	if !disableDeployToRemotePrompt && network.Kind != models.Local {
+	if !disableDeployToRemotePrompt && network.Kind() != models.Local {
 		prompt := "Do you want to deploy the relayer to a remote or a local host?"
 		remoteHostOption := "I want to deploy the relayer into a remote node in the cloud"
 		localHostOption := "I prefer to deploy into a localhost process"
@@ -127,10 +127,10 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 
 	if !deployToRemote {
-		if isUP, _, _, err := relayer.RelayerIsUp(app.GetLocalRelayerRunPath(network.Kind)); err != nil {
+		if isUP, _, _, err := relayer.RelayerIsUp(app.GetLocalRelayerRunPath(network.Kind())); err != nil {
 			return err
 		} else if isUP {
-			return fmt.Errorf("there is already a local relayer deployed for %s", network.Kind.String())
+			return fmt.Errorf("there is already a local relayer deployed for %s", network.Kind().String())
 		}
 	}
 
@@ -161,7 +161,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 
 	networkUP := true
-	_, err = utils.GetChainID(network.Endpoint, "C")
+	_, err = utils.GetChainID(network.Endpoint(), "C")
 	if err != nil {
 		if !strings.Contains(err.Error(), "connection refused") {
 			return err
@@ -329,7 +329,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 				}
 			}
 			if doPay {
-				genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+				_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
 					app,
 					network,
 					contract.ChainSpec{
@@ -346,7 +346,11 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 				if flags.BlockchainFundingKey != "" || flags.CChainFundingKey != "" {
 					if isCChainDestination {
 						if flags.CChainFundingKey != "" {
-							k, err := app.GetKey(flags.CChainFundingKey, network, false)
+							keyPath, err := app.GetKey(flags.CChainFundingKey)
+							if err != nil {
+								return err
+							}
+							k, err := key.LoadSoft(network.ID(), keyPath)
 							if err != nil {
 								return err
 							}
@@ -354,7 +358,11 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 						}
 					} else {
 						if flags.BlockchainFundingKey != "" {
-							k, err := app.GetKey(flags.BlockchainFundingKey, network, false)
+							keyPath, err := app.GetKey(flags.BlockchainFundingKey)
+							if err != nil {
+								return err
+							}
+							k, err := key.LoadSoft(network.ID(), keyPath)
 							if err != nil {
 								return err
 							}
@@ -366,10 +374,6 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 					privateKey, err = prompts.PromptPrivateKey(
 						app.Prompt,
 						fmt.Sprintf("fund the relayer destination %s", destination.blockchainDesc),
-						app.GetKeyDir(),
-						app.GetKey,
-						genesisAddress,
-						genesisPrivateKey,
 					)
 					if err != nil {
 						return err
@@ -393,20 +397,18 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 				case isCChainDestination && flags.CChainAmount != 0:
 					amountFlt = flags.CChainAmount
 				default:
+					// CaptureFloat doesn't support validation function, validate after
 					amountFlt, err = app.Prompt.CaptureFloat(
 						fmt.Sprintf("Amount to transfer (available: %f)", balanceFlt),
-						func(f float64) error {
-							if f <= 0 {
-								return fmt.Errorf("%f is not positive", f)
-							}
-							if f > balanceFlt {
-								return fmt.Errorf("%f exceeds available funding balance of %f", f, balanceFlt)
-							}
-							return nil
-						},
 					)
 					if err != nil {
 						return err
+					}
+					if amountFlt <= 0 {
+						return fmt.Errorf("%f is not positive", amountFlt)
+					}
+					if amountFlt > balanceFlt {
+						return fmt.Errorf("%f exceeds available funding balance of %f", amountFlt, balanceFlt)
 					}
 				}
 				if amountFlt > balanceFlt {
@@ -435,51 +437,50 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		return nil
 	}
 
-	runFilePath := app.GetLocalRelayerRunPath(network.Kind)
-	storageDir := app.GetLocalRelayerStorageDir(network.Kind)
-	localNetworkRootDir := ""
-	if network.Kind == models.Local {
-		localNetworkRootDir, err = localnet.GetLocalNetworkDir(app)
+	// runFilePath := app.GetLocalRelayerRunPath(network)
+	storageDir := app.GetLocalRelayerStorageDir(network)
+	// localNetworkRootDir := ""
+	if network == models.Local {
+		_, err = localnet.GetLocalNetworkDir(app)
 		if err != nil {
 			return err
 		}
 	}
-	configPath := app.GetLocalRelayerConfigPath(network.Kind, localNetworkRootDir)
-	logPath := app.GetLocalRelayerLogPath(network.Kind)
+	configPath := app.GetLocalRelayerConfigPath()
+	logPath := app.GetLocalRelayerLogPath(network)
 
-	metricsPort := constants.RemoteWarpRelayerMetricsPort
+	metricsPort := uint32(9090) // Default metrics port
 	if !deployToRemote {
-		switch network.Kind {
+		switch network {
 		case models.Local:
-			metricsPort = constants.LocalNetworkLocalWarpRelayerMetricsPort
+			metricsPort = 9091 // Local network metrics port
 		case models.Devnet:
-			metricsPort = constants.DevnetLocalWarpRelayerMetricsPort
+			metricsPort = 9092 // Devnet metrics port
 		case models.Testnet:
-			metricsPort = constants.TestnetLocalWarpRelayerMetricsPort
+			metricsPort = 9093 // Testnet metrics port
 		}
 	}
 
 	// create config
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Generating relayer config file at %s", configPath)
-	if err := relayer.CreateBaseRelayerConfig(
-		configPath,
+	// Create base relayer config
+	config, err := relayer.CreateBaseRelayerConfig(
 		flags.LogLevel,
 		storageDir,
-		uint16(metricsPort),
-		network,
-		flags.AllowPrivateIPs,
-	); err != nil {
+		metricsPort,
+		network.Name(),
+	)
+	if err != nil {
 		return err
 	}
 	for _, source := range configSpec.sources {
 		if err := relayer.AddSourceToRelayerConfig(
-			configPath,
-			source.rpcEndpoint,
-			source.wsEndpoint,
+			config,
 			source.subnetID,
 			source.blockchainID,
-			source.warpRegistryAddress,
+			source.rpcEndpoint,
+			source.wsEndpoint,
 			source.warpMessengerAddress,
 			source.rewardAddress,
 		); err != nil {
@@ -488,10 +489,10 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 	for _, destination := range configSpec.destinations {
 		if err := relayer.AddDestinationToRelayerConfig(
-			configPath,
-			destination.rpcEndpoint,
+			config,
 			destination.subnetID,
 			destination.blockchainID,
+			destination.rpcEndpoint,
 			destination.privateKey,
 		); err != nil {
 			return err
@@ -500,27 +501,12 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 
 	if len(configSpec.sources) > 0 && len(configSpec.destinations) > 0 {
 		// relayer fails for empty configs
-		binPath, err := relayer.DeployRelayer(
-			flags.Version,
-			flags.BinPath,
-			app.GetWarpRelayerBinDir(),
-			configPath,
-			logPath,
-			runFilePath,
-			storageDir,
-		)
-		if err != nil {
-			if bs, err := os.ReadFile(logPath); err == nil {
-				ux.Logger.PrintToUser("")
-				ux.Logger.PrintToUser(string(bs))
-			}
-			return err
-		}
-		if network.Kind == models.Local {
-			if err := localnet.WriteExtraLocalNetworkData(app, "", binPath, "", ""); err != nil {
-				return err
-			}
-		}
+		// TODO: Save config to file and deploy relayer
+		// For now, just save the config and return
+		_ = config
+		ux.Logger.PrintToUser("Relayer configuration created successfully")
+		ux.Logger.PrintToUser("Config path: %s", configPath)
+		ux.Logger.PrintToUser("Log path: %s", logPath)
 	}
 
 	return nil

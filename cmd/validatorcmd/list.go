@@ -9,10 +9,9 @@ import (
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/sdk/validator"
+	"github.com/luxfi/cli/pkg/validator"
 	"github.com/luxfi/node/utils/units"
 
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
@@ -60,24 +59,24 @@ func list(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	validators, err := validator.GetCurrentValidators(network.SDKNetwork(), subnetID)
+	validators, err := validator.GetCurrentValidators(network, subnetID)
 	if err != nil {
 		return err
 	}
 
 	t := ux.DefaultTable(
 		fmt.Sprintf("%s Validators", blockchainName),
-		table.Row{"Node ID", "Validation ID", "Weight", "Remaining Balance (LUX)"},
+		[]string{"Node ID", "Validation ID", "Weight", "Remaining Balance (LUX)"},
 	)
 	for _, validator := range validators {
-		t.AppendRow(table.Row{
-			validator.NodeID,
-			validator.ValidationID,
-			validator.Weight,
-			float64(validator.Balance) / float64(units.Lux),
+		t.Append([]string{
+			validator.NodeID.String(),
+			validator.ValidationID.String(),
+			fmt.Sprintf("%d", validator.Weight),
+			fmt.Sprintf("%.5f", float64(validator.Balance) / float64(units.Lux)),
 		})
 	}
-	fmt.Println(t.Render())
+	t.Render()
 
 	return nil
 }

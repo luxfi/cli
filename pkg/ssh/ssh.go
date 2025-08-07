@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/cli/pkg/remoteconfig"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/cli/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 )
 
