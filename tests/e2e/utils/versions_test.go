@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"

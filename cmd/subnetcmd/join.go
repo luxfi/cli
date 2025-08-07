@@ -9,12 +9,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/node/utils/formatting/address"
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/plugins"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"

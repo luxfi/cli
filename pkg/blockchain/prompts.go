@@ -4,8 +4,8 @@ package blockchain
 
 import (
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 )
 

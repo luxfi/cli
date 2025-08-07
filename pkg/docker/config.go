@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/remoteconfig"
 	"github.com/luxfi/cli/pkg/utils"
 )

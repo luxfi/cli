@@ -6,9 +6,9 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
@@ -98,7 +98,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	privateKey, err := deployERC20Flags.PrivateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	privateKey, err := deployERC20Flags.PrivateKeyFlags.GetPrivateKey(app.GetSDKApp(), genesisPrivateKey)
 	if err != nil {
 		return err
 	}

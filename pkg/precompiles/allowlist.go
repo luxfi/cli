@@ -6,7 +6,7 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/crypto"
 )
 
