@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/utils/logging"
 
@@ -103,7 +103,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	if !flags.ChainFlags.Defined() {
 		prompt := "Which Blockchain would you like to deploy Warp to?"
 		if cancel, err := contract.PromptChain(
-			app,
+			app.GetSDKApp(),
 			network,
 			prompt,
 			"",
@@ -116,7 +116,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 	rpcURL := flags.RPCURL
 	if rpcURL == "" {
-		rpcURL, _, err = contract.GetBlockchainEndpoints(app, network, flags.ChainFlags, true, false)
+		rpcURL, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, flags.ChainFlags, true, false)
 		if err != nil {
 			return err
 		}
@@ -124,14 +124,14 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+		app.GetSDKApp(),
 		network,
 		flags.ChainFlags,
 	)
 	if err != nil {
 		return err
 	}
-	privateKey, err := flags.PrivateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	privateKey, err := flags.PrivateKeyFlags.GetPrivateKey(app.GetSDKApp(), genesisPrivateKey)
 	if err != nil {
 		return err
 	}

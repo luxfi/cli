@@ -7,13 +7,13 @@ import (
 	"sort"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/cli/pkg/validator"
+	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
 
@@ -129,7 +129,7 @@ func getNodeValidationID(
 		chainSpec.OnlySOV = true
 		if l1 == "" {
 			if cancel, err := contract.PromptChain(
-				app,
+				app.GetSDKApp(),
 				network,
 				"Choose the L1",
 				"",
@@ -151,7 +151,7 @@ func getNodeValidationID(
 		if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
 			return ids.Empty, false, fmt.Errorf("unable to find Validator Manager address")
 		}
-		subnetID, err := contract.GetSubnetID(app, network, chainSpec)
+		subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
 		if err != nil {
 			return ids.Empty, false, err
 		}

@@ -4,7 +4,7 @@ package localnet
 
 import (
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"

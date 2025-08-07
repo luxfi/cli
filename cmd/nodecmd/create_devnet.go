@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"

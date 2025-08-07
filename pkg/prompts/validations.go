@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/publicarchive"
 	"github.com/luxfi/node/utils/logging"

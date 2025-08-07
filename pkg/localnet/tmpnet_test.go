@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 

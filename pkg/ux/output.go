@@ -46,6 +46,16 @@ func (ul *UserLog) Info(msg string, args ...interface{}) {
 	ul.log.Info(formattedMsg)
 }
 
+// PrintLineSeparator prints a line separator
+func (ul *UserLog) PrintLineSeparator(msg ...string) {
+	separator := "=========================================="
+	if len(msg) > 0 && msg[0] != "" {
+		separator = msg[0]
+	}
+	fmt.Fprintln(ul.writer, separator)
+	ul.log.Info(separator)
+}
+
 // Error logs an error message
 func (ul *UserLog) Error(msg string, args ...interface{}) {
 	formattedMsg := fmt.Sprintf(msg, args...)

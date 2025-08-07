@@ -5,7 +5,7 @@ package l3cmd
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )

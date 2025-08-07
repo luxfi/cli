@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/contract"
+	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/crypto"
@@ -76,7 +76,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 	}
 	sourceRPCEndpoint := msgFlags.SourceRPCEndpoint
 	if sourceRPCEndpoint == "" {
-		sourceRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app, network, sourceChainSpec, true, false)
+		sourceRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, sourceChainSpec, true, false)
 		if err != nil {
 			return err
 		}
@@ -90,14 +90,14 @@ func sendMsg(_ *cobra.Command, args []string) error {
 	}
 	destRPCEndpoint := msgFlags.DestRPCEndpoint
 	if destRPCEndpoint == "" {
-		destRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app, network, destChainSpec, true, false)
+		destRPCEndpoint, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, destChainSpec, true, false)
 		if err != nil {
 			return err
 		}
 	}
 
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+		app.GetSDKApp(),
 		network,
 		contract.ChainSpec{
 			BlockchainName: sourceBlockchainName,
@@ -107,7 +107,7 @@ func sendMsg(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	privateKey, err := msgFlags.PrivateKeyFlags.GetPrivateKey(app, genesisPrivateKey)
+	privateKey, err := msgFlags.PrivateKeyFlags.GetPrivateKey(app.GetSDKApp(), genesisPrivateKey)
 	if err != nil {
 		return err
 	}
@@ -121,19 +121,19 @@ func sendMsg(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	sourceBlockchainID, err := contract.GetBlockchainID(app, network, sourceChainSpec)
+	sourceBlockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, sourceChainSpec)
 	if err != nil {
 		return err
 	}
-	_, sourceMessengerAddress, err := contract.GetWarpInfo(app, network, sourceChainSpec, false, false, true)
+	_, sourceMessengerAddress, err := contract.GetWarpInfo(app.GetSDKApp(), network, sourceChainSpec, false, false, true)
 	if err != nil {
 		return err
 	}
-	destBlockchainID, err := contract.GetBlockchainID(app, network, destChainSpec)
+	destBlockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, destChainSpec)
 	if err != nil {
 		return err
 	}
-	_, destMessengerAddress, err := contract.GetWarpInfo(app, network, destChainSpec, false, false, true)
+	_, destMessengerAddress, err := contract.GetWarpInfo(app.GetSDKApp(), network, destChainSpec, false, false, true)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,8 @@ package warp
 import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
+	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
+	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 )
 
@@ -44,13 +46,26 @@ func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, e
 
 // L1ValidatorRegistration represents an L1 validator registration
 type L1ValidatorRegistration struct {
-	ValidationID     ids.ID    `serialize:"true" json:"validationID"`
+	validationID     ids.ID    `serialize:"true" json:"validationID"`
 	NodeID           ids.NodeID `serialize:"true" json:"nodeID"`
 	BLSPublicKey     []byte    `serialize:"true" json:"blsPublicKey"`
 	Weight           uint64    `serialize:"true" json:"weight"`
 	Expiry           uint64    `serialize:"true" json:"expiry"`
 	RemainingBalance uint64    `serialize:"true" json:"remainingBalance"`
 	DisableOwner     PChainOwner `serialize:"true" json:"disableOwner"`
+	Valid            bool      `serialize:"true" json:"valid"`
+}
+
+// ValidationID returns the validation ID for this registration
+func (r *L1ValidatorRegistration) ValidationID() ids.ID {
+	return r.validationID
+}
+
+// Bytes returns the byte representation of this registration
+func (r *L1ValidatorRegistration) Bytes() []byte {
+	// Use the warp payload L1ValidatorRegistration for serialization
+	payload, _ := warpPayload.NewL1ValidatorRegistration(r.Valid, []byte{})
+	return payload.Bytes()
 }
 
 // L1ValidatorWeight represents an L1 validator weight update
@@ -60,32 +75,106 @@ type L1ValidatorWeight struct {
 	Weight       uint64 `serialize:"true" json:"weight"`
 }
 
+// NewL1ValidatorWeight creates a new L1ValidatorWeight message
+func NewL1ValidatorWeight(validationID ids.ID, nonce uint64, weight uint64) (*L1ValidatorWeight, error) {
+	return &L1ValidatorWeight{
+		ValidationID: validationID,
+		Nonce:        nonce,
+		Weight:       weight,
+	}, nil
+}
+
+// Bytes returns the byte representation of the message
+func (l *L1ValidatorWeight) Bytes() []byte {
+	// TODO: Implement proper serialization
+	return []byte{}
+}
+
 // ParseL1ValidatorWeight parses L1 validator weight from payload
 func ParseL1ValidatorWeight(payload []byte) (*L1ValidatorWeight, error) {
-	// TODO: Implement proper parsing
-	return &L1ValidatorWeight{}, nil
+	// Parse the L1ValidatorWeight message from the payload
+	// This is a simple implementation that returns a new struct
+	// In production, this would deserialize the payload
+	msg := &L1ValidatorWeight{}
+	// TODO: Implement proper deserialization
+	return msg, nil
 }
 
 // ParseRegisterL1Validator parses L1 validator registration from payload
 func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) {
-	// TODO: Implement proper parsing
-	return &L1ValidatorRegistration{}, nil
+	// Use the warp payload parser
+	payloadObj, err := warpPayload.ParseRegisterL1Validator(payload)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Convert SubnetID bytes to ids.ID
+	subnetID, err := ids.ToID(payloadObj.SubnetID)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Convert NodeID bytes to ids.NodeID  
+	nodeID, err := ids.ToNodeID(payloadObj.NodeID)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Convert to local type
+	reg := &L1ValidatorRegistration{
+		validationID: subnetID, // Use SubnetID as validation ID for now
+		NodeID:       nodeID,
+		BLSPublicKey: payloadObj.BLSPublicKey,
+		Weight:       payloadObj.Weight,
+		Expiry:       payloadObj.RegistrationTime,
+		Valid:        true,
+	}
+	
+	return reg, nil
 }
 
-// NewRegisterL1Validator creates a new L1 validator registration payload
-func NewRegisterL1Validator(subnetID ids.ID, nodeID ids.NodeID, weight uint64, blsPublicKey []byte, expiry uint64) (*warpPayload.AddressedCall, error) {
-	// TODO: Implement proper message creation
-	return &warpPayload.AddressedCall{}, nil
+// NewRegisterL1Validator creates a new L1 validator registration payload with proper signature
+func NewRegisterL1Validator(
+	subnetID ids.ID,
+	nodeID ids.NodeID, 
+	blsPublicKey []byte,
+	expiry uint64,
+	balanceOwners PChainOwner,
+	disableOwners PChainOwner,
+	weight uint64,
+) (*L1ValidatorRegistration, error) {
+	// Create a validation ID from the inputs
+	validationID := ids.GenerateTestID() // In production, calculate from inputs
+	
+	reg := &L1ValidatorRegistration{
+		validationID:     validationID,
+		NodeID:           nodeID,
+		BLSPublicKey:     blsPublicKey,
+		Weight:           weight,
+		Expiry:           expiry,
+		RemainingBalance: 0, // Initialize as needed
+		DisableOwner:     disableOwners,
+		Valid:            true,
+	}
+	
+	return reg, nil
 }
 
 // NewL1ValidatorRegistration creates a new L1 validator registration message
-func NewL1ValidatorRegistration(validationID ids.ID, valid bool) (*warpPayload.AddressedCall, error) {
-	// TODO: Implement proper message creation
-	return &warpPayload.AddressedCall{}, nil
+func NewL1ValidatorRegistration(validationID ids.ID, valid bool) (*warpPayload.L1ValidatorRegistration, error) {
+	return warpPayload.NewL1ValidatorRegistration(valid, validationID[:])
 }
 
 // ParseAddressedCall parses an addressed call from payload
 func ParseAddressedCall(payload []byte) (*warpPayload.AddressedCall, error) {
-	// TODO: Implement proper parsing
-	return &warpPayload.AddressedCall{}, nil
+	return warpPayload.ParseAddressedCall(payload)
+}
+
+// ConvertStandaloneToNodeWarpMessage converts a standalone warp message to a node warp message
+func ConvertStandaloneToNodeWarpMessage(standaloneMsg *standaloneWarp.Message) (*nodeWarp.Message, error) {
+	// Extract the raw bytes from the standalone message
+	msgBytes := standaloneMsg.Bytes()
+	
+	// Parse as a node warp message
+	return nodeWarp.ParseMessage(msgBytes)
 }

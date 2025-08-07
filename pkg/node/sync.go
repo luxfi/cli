@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"

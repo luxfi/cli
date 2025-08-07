@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/mod/semver"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"

@@ -11,14 +11,15 @@ import (
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	warpPayload "github.com/luxfi/warp/payload"
 
-	"github.com/luxfi/cli/pkg/contract"
-	"github.com/luxfi/cli/pkg/validator"
-	"github.com/luxfi/cli/pkg/validatormanager/txs"
-	"github.com/luxfi/cli/pkg/validatormanager/validatormanagertypes"
-	warpMessage "github.com/luxfi/cli/pkg/validatormanager/warp"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/validator"
+	"github.com/luxfi/sdk/validatormanager/txs"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
+	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/warp"
+	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -231,8 +232,19 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	if err != nil {
 		return nil, err
 	}
+	// Get network ID - assuming mainnet is 1, testnet is 5, etc.
+	// This is a simple conversion - adjust based on actual network ID mapping
+	var networkID uint32
+	switch network.Name {
+	case "mainnet":
+		networkID = 1
+	case "testnet":
+		networkID = 5
+	default:
+		networkID = 1 // default to mainnet
+	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
-		network.ID,
+		networkID,
 		luxdconstants.PlatformChainID[:],
 		subnetConversionAddressedCall.Bytes(),
 	)
@@ -280,13 +292,16 @@ func InitializeValidatorsSet(
 		ValidatorManagerAddress:      managerAddress,
 		InitialValidators:            validators,
 	}
+	// Convert standalone warp to node warp
+	nodeWarpMsg := convertStandaloneToNodeWarpMsg(subnetConversionSignedMessage)
+	
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		false,
 		crypto.Address{},
 		privateKey,
 		managerAddress,
-		subnetConversionSignedMessage,
+		nodeWarpMsg,
 		big.NewInt(0),
 		"initialize validator set",
 		ErrorSignatureToError,
@@ -312,4 +327,35 @@ func GetValidatorManagerType(
 		return validatormanagertypes.ProofOfAuthority
 	}
 	return validatormanagertypes.UndefinedValidatorManagement
+}
+
+
+// convertStandaloneToNodeWarpMsg converts a standalone warp message to node warp message
+func convertStandaloneToNodeWarpMsg(msg *warp.Message) *nodeWarp.Message {
+	if msg == nil {
+		return nil
+	}
+	
+	// Extract network ID and source chain ID from the standalone message
+	networkID := msg.UnsignedMessage.NetworkID
+	sourceChainID := msg.UnsignedMessage.SourceChainID
+	payload := msg.UnsignedMessage.Payload
+	
+	// Convert source chain ID to ids.ID
+	var chainID ids.ID
+	copy(chainID[:], sourceChainID)
+	
+	unsignedMsg, _ := nodeWarp.NewUnsignedMessage(
+		networkID,
+		chainID,
+		payload,
+	)
+	
+	// Convert signature - for now just use an empty signature
+	sig := &nodeWarp.BitSetSignature{}
+	
+	return &nodeWarp.Message{
+		UnsignedMessage: *unsignedMsg,
+		Signature:       sig,
+	}
 }

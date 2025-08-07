@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/vm"
 	luxlog "github.com/luxfi/log"
 	"golang.org/x/mod/semver"
@@ -59,10 +59,15 @@ type VersionMapper interface {
 
 // NewVersionMapper returns the default VersionMapper for e2e tests
 func NewVersionMapper() VersionMapper {
-	app := &application.Lux{
-		Downloader: application.NewDownloader(),
-		Log:        luxlog.NewNoOpLogger(),
-	}
+	app := application.New()
+	// Setup the app with test defaults
+	app.Setup(
+		"",  // baseDir
+		luxlog.NewNoOpLogger(), // logger
+		nil, // config
+		nil, // prompter
+		application.NewDownloader(), // downloader
+	)
 	return &versionMapper{
 		app: app,
 	}

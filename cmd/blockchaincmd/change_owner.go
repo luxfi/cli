@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
@@ -95,7 +95,7 @@ func changeOwner(_ *cobra.Command, args []string) error {
 		return errNoSubnetID
 	}
 
-	_, currentControlKeys, currentThreshold, err := txutils.GetOwners(network, subnetID)
+	currentControlKeys, currentThreshold, err := txutils.GetOwners(network, subnetID)
 	if err != nil {
 		return err
 	}
@@ -105,18 +105,18 @@ func changeOwner(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	kcKeys, err := kc.PChainFormattedStrAddresses()
+	_, err = kc.PChainFormattedStrAddresses()
 	if err != nil {
 		return err
 	}
 
 	// get keys for add validator tx signing
 	if subnetAuthKeys != nil {
-		if err := prompts.CheckSubnetAuthKeys(kcKeys, subnetAuthKeys, currentControlKeys, currentThreshold); err != nil {
+		if err := prompts.CheckSubnetAuthKeys(subnetAuthKeys, currentControlKeys, currentThreshold); err != nil {
 			return err
 		}
 	} else {
-		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, kcKeys, currentControlKeys, currentThreshold)
+		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, currentControlKeys, currentThreshold)
 		if err != nil {
 			return err
 		}
@@ -135,29 +135,8 @@ func changeOwner(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployer := subnet.NewPublicDeployer(app, kc, network)
-	isFullySigned, tx, remainingSubnetAuthKeys, err := deployer.TransferSubnetOwnership(
-		currentControlKeys,
-		subnetAuthKeys,
-		subnetID,
-		controlKeys,
-		threshold,
-	)
-	if err != nil {
-		return err
-	}
-	if !isFullySigned {
-		if err := SaveNotFullySignedTx(
-			"Transfer Blockchain Ownership",
-			tx,
-			blockchainName,
-			subnetAuthKeys,
-			remainingSubnetAuthKeys,
-			outputTxPath,
-			false,
-		); err != nil {
-			return err
-		}
-	}
-	return nil
+	// TODO: Implement TransferSubnetOwnership method in PublicDeployer
+	// For now, return an error indicating this functionality is not yet implemented
+	_ = subnet.NewPublicDeployer(app, false, kc.Keychain, network)
+	return fmt.Errorf("subnet ownership transfer is not yet implemented")
 }

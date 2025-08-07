@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"

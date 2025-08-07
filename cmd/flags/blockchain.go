@@ -4,7 +4,7 @@ package flags
 
 import (
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 )
 

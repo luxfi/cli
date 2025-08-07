@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
 )
