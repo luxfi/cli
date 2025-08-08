@@ -98,6 +98,50 @@ func (app *Lux) GetReposDir() string {
 	return filepath.Join(app.GetBaseDir(), constants.ReposDir)
 }
 
+// HasSubnetEVMGenesis checks if the blockchain has a Subnet-EVM genesis
+func (app *Lux) HasSubnetEVMGenesis(blockchainName string) (bool, string, error) {
+	genesisPath := app.GetGenesisPath(blockchainName)
+	genesisBytes, err := os.ReadFile(genesisPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, "", nil
+		}
+		return false, "", err
+	}
+	
+	// Check if it's a Subnet-EVM genesis by looking for key fields
+	var genesis map[string]interface{}
+	if err := json.Unmarshal(genesisBytes, &genesis); err != nil {
+		return false, "", nil // Not JSON, so not Subnet-EVM
+	}
+	
+	// Subnet-EVM genesis should have "alloc" and "config" fields
+	_, hasAlloc := genesis["alloc"]
+	_, hasConfig := genesis["config"]
+	
+	if hasAlloc && hasConfig {
+		return true, string(genesisBytes), nil
+	}
+	
+	return false, "", nil
+}
+
+// LoadEvmGenesis loads EVM genesis for a blockchain
+func (app *Lux) LoadEvmGenesis(blockchainName string) (*types.EvmGenesis, error) {
+	genesisPath := app.GetGenesisPath(blockchainName)
+	genesisBytes, err := os.ReadFile(genesisPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var genesis types.EvmGenesis
+	if err := json.Unmarshal(genesisBytes, &genesis); err != nil {
+		return nil, err
+	}
+	
+	return &genesis, nil
+}
+
 func (*Lux) GetLuxCompatibilityURL() string {
 	return constants.LuxCompatibilityURL
 }

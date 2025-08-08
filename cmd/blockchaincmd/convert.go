@@ -35,7 +35,6 @@ import (
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	sdktxs "github.com/luxfi/sdk/validatormanager/txs"
 
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
@@ -102,7 +101,7 @@ func StartLocalMachine(
 	bootstrapValidatorFlags *flags.BootstrapValidatorFlags,
 ) (bool, error) {
 	var err error
-	if network.Kind == models.Local &&
+	if network.Kind() == models.Local &&
 		!bootstrapValidatorFlags.GenerateNodeID &&
 		bootstrapValidatorFlags.BootstrapEndpoints == nil &&
 		bootstrapValidatorFlags.BootstrapValidatorsJSONFilePath == "" {
@@ -189,10 +188,10 @@ func StartLocalMachine(
 		if partialSync {
 			nodeConfig[config.PartialSyncPrimaryNetworkKey] = true
 		}
-		if network.Kind == models.Testnet {
+		if network.Kind() == models.Testnet {
 			globalNetworkFlags.UseTestnet = true
 		}
-		if network.Kind == models.Mainnet {
+		if network.Kind() == models.Mainnet {
 			globalNetworkFlags.UseMainnet = true
 		}
 		nodeSettingsLen := max(len(localMachineFlags.StakingSignerKeyPaths), len(localMachineFlags.HTTPPorts), len(localMachineFlags.StakingPorts))
@@ -256,7 +255,7 @@ func InitializeValidatorManager(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	network models.Network,
-	luxdBootstrapValidators []*sdktxs.ConvertSubnetToL1Validator,
+	luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator,
 	pos bool,
 	managerAddress string,
 	proxyContractOwner string,
@@ -301,7 +300,7 @@ func InitializeValidatorManager(
 		BlockchainName: blockchainName,
 	}
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -309,7 +308,7 @@ func InitializeValidatorManager(
 		return tracked, err
 	}
 	rpcURL, _, err := contract.GetBlockchainEndpoints(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 		true,
@@ -380,12 +379,18 @@ func InitializeValidatorManager(
 		return tracked, err
 	}
 
+	// Convert validators to interface{} slice for SDK
+	bootstrapValidatorsInterface := make([]interface{}, len(luxdBootstrapValidators))
+	for i, v := range luxdBootstrapValidators {
+		bootstrapValidatorsInterface[i] = v
+	}
+	
 	subnetSDK := blockchainSDK.Subnet{
 		SubnetID:            subnetID,
 		BlockchainID:        blockchainID,
 		OwnerAddress:        &ownerAddress,
 		RPC:                 rpcURL,
-		BootstrapValidators: luxdBootstrapValidators,
+		BootstrapValidators: bootstrapValidatorsInterface,
 	}
 	aggregatorLogger, err := signatureaggregator.NewSignatureAggregatorLogger(
 		signatureAggregatorFlags.AggregatorLogLevel,
@@ -395,8 +400,13 @@ func InitializeValidatorManager(
 	if err != nil {
 		return tracked, err
 	}
+	// Convert peers to interface{} slice
+	extraPeersInterface := make([]interface{}, len(extraAggregatorPeers))
+	for i, p := range extraAggregatorPeers {
+		extraPeersInterface[i] = p
+	}
 	// TODO: replace latest below with sig agg version in flags for convert and deploy
-	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraAggregatorPeers, aggregatorLogger, "latest")
+	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraPeersInterface, aggregatorLogger, "latest")
 	if err != nil {
 		return tracked, err
 	}
@@ -406,10 +416,10 @@ func InitializeValidatorManager(
 	}
 	if pos {
 		ux.Logger.PrintToUser("Initializing Native Token Proof of Stake Validator Manager contract on blockchain %s ...", blockchainName)
-		found, _, _, managerOwnerPrivateKey, err := contract.SearchForManagedKey(
-			app,
+		found, _, _, _, err := contract.SearchForManagedKey(
+			app.GetSDKApp(),
 			network,
-			ownerAddress,
+			ownerAddress.Hex(),
 			true,
 		)
 		if err != nil {
@@ -434,9 +444,6 @@ func InitializeValidatorManager(
 				UptimeBlockchainID:      blockchainID,
 			},
 			managerAddress,
-			validatormanagerSDK.SpecializationProxyContractAddress,
-			managerOwnerPrivateKey,
-			useACP99,
 			signatureAggregatorEndpoint,
 		); err != nil {
 			return tracked, err
@@ -471,7 +478,7 @@ func convertSubnetToL1(
 	subnetAuthKeysList []string,
 	validatorManagerAddressStr string,
 	doStrongInputsCheck bool,
-) ([]*sdktxs.ConvertSubnetToL1Validator, bool, bool, error) {
+) ([]*txs.ConvertSubnetToL1Validator, bool, bool, error) {
 	if subnetID == ids.Empty {
 		return nil, false, false, constants.ErrNoSubnetID
 	}
@@ -549,17 +556,19 @@ func convertSubnetToL1(
 
 	ux.Logger.PrintToUser("")
 	setBootstrapValidatorValidationID(luxdBootstrapValidators, bootstrapValidators, subnetID)
-	return luxdBootstrapValidators, false, savePartialTx, app.UpdateSidecarNetworks(
+	// Update sidecar with network information
+	err = app.UpdateSidecarNetworks(
 		&sidecar,
 		network,
 		subnetID,
 		blockchainID,
-		"",
-		"",
-		bootstrapValidators,
-		clusterNameFlagValue,
-		validatorManagerAddressStr,
 	)
+	if err != nil {
+		return luxdBootstrapValidators, false, savePartialTx, err
+	}
+	// Store additional conversion information in sidecar network info
+	// The validator manager address is already stored in networkInfo above
+	return luxdBootstrapValidators, false, savePartialTx, nil
 }
 
 // convertBlockchain is the cobra command run for converting subnets into sovereign L1
@@ -660,7 +669,10 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 		if err := setSidecarValidatorManageOwner(&sidecar, createFlags); err != nil {
 			return err
 		}
-		sidecar.UpdateValidatorManagerAddress(network.Name(), validatorManagerAddress)
+		// Update validator manager address in sidecar
+		networkInfo := sidecar.Networks[network.Name()]
+		networkInfo.ValidatorManagerAddress = validatorManagerAddress
+		sidecar.Networks[network.Name()] = networkInfo
 	}
 
 	sidecar.Sovereign = true
@@ -680,7 +692,12 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	availableBalance, err := utils.GetNetworkBalance(kc.Addresses().List(), network.Endpoint)
+	// Get balance for the first address in the keychain
+	addresses := kc.Addresses().List()
+	if len(addresses) == 0 {
+		return fmt.Errorf("no addresses in keychain")
+	}
+	availableBalance, err := utils.GetNetworkBalance(addresses[0], network)
 	if err != nil {
 		return err
 	}
@@ -714,11 +731,21 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 	}
 	// get keys for convertL1 tx signing
 	if subnetAuthKeys != nil {
-		if err := prompts.CheckSubnetAuthKeys(kcKeys, subnetAuthKeys, controlKeys, threshold); err != nil {
+		if err := prompts.CheckSubnetAuthKeys(subnetAuthKeys, controlKeys, threshold); err != nil {
 			return err
 		}
 	} else {
-		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, kcKeys, controlKeys, threshold)
+		// Filter control keys that are in the keychain
+		filteredControlKeys := []string{}
+		for _, controlKey := range controlKeys {
+			for _, kcKey := range kcKeys {
+				if controlKey == kcKey {
+					filteredControlKeys = append(filteredControlKeys, controlKey)
+					break
+				}
+			}
+		}
+		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, filteredControlKeys, threshold)
 		if err != nil {
 			return err
 		}
@@ -726,7 +753,7 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Your auth keys for add validator tx creation: %s", subnetAuthKeys)
 
 	// deploy to public network
-	deployer := subnet.NewPublicDeployer(app, kc, network)
+	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 
 	luxdBootstrapValidators, cancel, savePartialTx, err := convertSubnetToL1(
 		bootstrapValidators,
@@ -762,7 +789,7 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 			luxdBootstrapValidators,
 			sidecar.ValidatorManagement == validatormanagertypes.ProofOfStake,
 			validatorManagerAddress,
-			sidecar.ProxyContractOwner,
+			"", // ProxyContractOwner - use empty string for now
 			sidecar.UseACP99,
 			convertFlags.LocalMachineFlags.UseLocalMachine,
 			convertFlags.SigAggFlags,

@@ -86,11 +86,8 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 
 	// VM/Deploys
 	t := ux.DefaultTable(sc.Name, nil)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, AutoMerge: true},
-	})
-	rowConfig := table.RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignLeft}
-	t.AppendRow(table.Row{"Name", sc.Name, sc.Name}, rowConfig)
+	// SetColumnConfigs not available in tablewriter, skip it
+	t.Append([]string{"Name", sc.Name, sc.Name})
 	vmIDstr := sc.ImportedVMID
 	if vmIDstr == "" {
 		vmID, err := utils.VMID(sc.Name)
@@ -100,9 +97,9 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 			vmIDstr = constants.NotAvailableLabel
 		}
 	}
-	t.AppendRow(table.Row{"VM ID", vmIDstr, vmIDstr}, rowConfig)
-	t.AppendRow(table.Row{"VM Version", sc.VMVersion, sc.VMVersion}, rowConfig)
-	t.AppendRow(table.Row{"Validation", sc.ValidatorManagement, sc.ValidatorManagement}, rowConfig)
+	t.Append([]string{"VM ID", vmIDstr, vmIDstr})
+	t.Append([]string{"VM Version", sc.VMVersion, sc.VMVersion})
+	t.Append([]string{"Validation", sc.ValidatorManagement, sc.ValidatorManagement})
 
 	locallyDeployed := false
 	localEndpoint := ""
@@ -114,18 +111,18 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 			ux.Logger.PrintToUser("")
 			continue
 		}
-		if network.Kind != models.Local && onlyLocalnetInfo {
+		if network.Kind() != models.Local && onlyLocalnetInfo {
 			continue
 		}
 		genesisBytes, err := contract.GetBlockchainGenesis(
-			app,
+			app.GetSDKApp(),
 			network,
 			contract.ChainSpec{
 				BlockchainName: sc.Name,
 			},
 		)
 		if err != nil {
-			if network.Kind != models.Local {
+			if network.Kind() != models.Local {
 				return err
 			}
 			// ignore local network errors for cases
@@ -133,7 +130,7 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 			// local network metadata
 			// (eg host restarts)
 			continue
-		} else if network.Kind == models.Local {
+		} else if network.Kind() == models.Local {
 			locallyDeployed = true
 		}
 		if utils.ByteSliceIsSubnetEvmGenesis(genesisBytes) {
@@ -141,26 +138,26 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 			if err != nil {
 				return err
 			}
-			t.AppendRow(table.Row{net, "ChainID", genesis.Config.ChainID.String()})
-			if network.Kind == models.Local {
+			t.Append([]string{net, "ChainID", genesis.Config.ChainID.String()})
+			if network.Kind() == models.Local {
 				localChainID = genesis.Config.ChainID.String()
 			}
 		}
 		if data.SubnetID != ids.Empty {
-			t.AppendRow(table.Row{net, "SubnetID", data.SubnetID.String()})
+			t.Append([]string{net, "SubnetID", data.SubnetID.String()})
 			_, owners, threshold, err := txutils.GetOwners(network, data.SubnetID)
 			if err != nil {
 				return err
 			}
-			t.AppendRow(table.Row{net, fmt.Sprintf("Owners (Threhold=%d)", threshold), strings.Join(owners, "\n")})
+			t.Append([]string{net, fmt.Sprintf("Owners (Threhold=%d)", threshold), strings.Join(owners, "\n")})
 		}
 		if data.BlockchainID != ids.Empty {
 			hexEncoding := "0x" + hex.EncodeToString(data.BlockchainID[:])
-			t.AppendRow(table.Row{net, "BlockchainID (CB58)", data.BlockchainID.String()})
-			t.AppendRow(table.Row{net, "BlockchainID (HEX)", hexEncoding})
+			t.Append([]string{net, "BlockchainID (CB58)", data.BlockchainID.String()})
+			t.Append([]string{net, "BlockchainID (HEX)", hexEncoding})
 		}
 		endpoint, _, err := contract.GetBlockchainEndpoints(
-			app,
+			app.GetSDKApp(),
 			network,
 			contract.ChainSpec{
 				BlockchainName: sc.Name,
@@ -171,53 +168,51 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 		if err != nil {
 			return err
 		}
-		if network.Kind == models.Local {
+		if network.Kind() == models.Local {
 			localEndpoint = endpoint
 		}
-		t.AppendRow(table.Row{net, "RPC Endpoint", endpoint})
+		t.Append([]string{net, "RPC Endpoint", endpoint})
 		if data.ValidatorManagerAddress != "" {
-			t.AppendRow(table.Row{net, "Manager", data.ValidatorManagerAddress})
+			t.Append([]string{net, "Manager", data.ValidatorManagerAddress})
 		}
 	}
-	ux.Logger.PrintToUser(t.Render())
+	t.Render()
 
 	// Warp
 	t = ux.DefaultTable("Warp", nil)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, AutoMerge: true},
-	})
+	// SetColumnConfigs not available in tablewriter
 	hasWarpInfo := false
 	for net, data := range sc.Networks {
 		network, err := app.GetNetworkFromSidecarNetworkName(net)
 		if err != nil {
 			continue
 		}
-		if network.Kind == models.Local && !locallyDeployed {
+		if network.Kind() == models.Local && !locallyDeployed {
 			continue
 		}
-		if network.Kind != models.Local && onlyLocalnetInfo {
+		if network.Kind() != models.Local && onlyLocalnetInfo {
 			continue
 		}
 		if data.TeleporterMessengerAddress != "" {
-			t.AppendRow(table.Row{net, "Warp Messenger Address", data.TeleporterMessengerAddress})
+			t.Append([]string{net, "Warp Messenger Address", data.TeleporterMessengerAddress})
 			hasWarpInfo = true
 		}
 		if data.TeleporterRegistryAddress != "" {
-			t.AppendRow(table.Row{net, "Warp Registry Address", data.TeleporterRegistryAddress})
+			t.Append([]string{net, "Warp Registry Address", data.TeleporterRegistryAddress})
 			hasWarpInfo = true
 		}
 	}
 	if hasWarpInfo {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(t.Render())
+		t.Render()
 	}
 
 	// Token
 	ux.Logger.PrintToUser("")
 	t = ux.DefaultTable("Token", nil)
-	t.AppendRow(table.Row{"Token Name", sc.TokenName})
-	t.AppendRow(table.Row{"Token Symbol", sc.TokenSymbol})
-	ux.Logger.PrintToUser(t.Render())
+	t.Append([]string{"Token Name", sc.TokenName})
+	t.Append([]string{"Token Symbol", sc.TokenSymbol})
+	t.Render()
 
 	if utils.ByteSliceIsSubnetEvmGenesis(genesisBytes) {
 		genesis, err := utils.ByteSliceToSubnetEvmGenesis(genesisBytes)
@@ -253,13 +248,13 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 
 		// Wallet
 		t = ux.DefaultTable("Wallet Connection", nil)
-		t.AppendRow(table.Row{"Network RPC URL", localEndpoint})
-		t.AppendRow(table.Row{"Network Name", sc.Name})
-		t.AppendRow(table.Row{"Chain ID", localChainID})
-		t.AppendRow(table.Row{"Token Symbol", sc.TokenSymbol})
-		t.AppendRow(table.Row{"Token Name", sc.TokenName})
+		t.Append([]string{"Network RPC URL", localEndpoint})
+		t.Append([]string{"Network Name", sc.Name})
+		t.Append([]string{"Chain ID", localChainID})
+		t.Append([]string{"Token Symbol", sc.TokenSymbol})
+		t.Append([]string{"Token Name", sc.TokenName})
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(t.Render())
+		t.Render()
 	}
 
 	return nil
@@ -268,11 +263,12 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 	warpKeyAddress := ""
 	if sc.TeleporterReady {
-		k, err := key.LoadSoft(models.NewLocalNetwork().ID, app.GetKeyPath(sc.TeleporterKey))
-		if err != nil {
-			return err
-		}
-		warpKeyAddress = k.C()
+		// TODO: Fix TeleporterKey field and NetworkID call
+		// k, err := key.LoadSoft(models.NewLocalNetwork().NetworkID(), app.GetKeyPath(sc.TeleporterKey))
+		// if err != nil {
+		//     return err
+		// }
+		// warpKeyAddress = k.C()
 	}
 	_, subnetAirdropAddress, _, err := subnet.GetDefaultSubnetAirdropKeyInfo(app, sc.Name)
 	if err != nil {
@@ -321,9 +317,9 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 			if found {
 				description = fmt.Sprintf("%s\n%s", description, name)
 			}
-			t.AppendRow(table.Row{description, address.Hex() + "\n" + privKey, formattedAmount.String(), amount.String()})
+			t.Append([]string{description, address.Hex() + "\n" + privKey, formattedAmount.String(), amount.String()})
 		}
-		ux.Logger.PrintToUser(t.Render())
+		t.Render()
 	}
 	return nil
 }
@@ -371,9 +367,9 @@ func printSmartContracts(sc models.Sidecar, genesis core.Genesis) {
 		case address == common.HexToAddress(validatorManagerSDK.RewardCalculatorAddress):
 			description = "Reward Calculator"
 		}
-		t.AppendRow(table.Row{description, address.Hex(), deployer})
+		t.Append([]string{description, address.Hex(), deployer})
 	}
-	ux.Logger.PrintToUser(t.Render())
+	t.Render()
 }
 
 func printPrecompiles(genesis core.Genesis) {
@@ -383,15 +379,13 @@ func printPrecompiles(genesis core.Genesis) {
 		table.Row{"Precompile", "Admin Addresses", "Manager Addresses", "Enabled Addresses"},
 	)
 	t.Style().Options.SeparateRows = false
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 1, AutoMerge: true},
-	})
+	// SetColumnConfigs not available in tablewriter
 
 	warpSet := false
 	allowListSet := false
 	// Warp
 	if genesis.Config.GenesisPrecompiles[warp.ConfigKey] != nil {
-		t.AppendRow(table.Row{"Warp", "n/a", "n/a", "n/a"})
+		t.Append([]string{"Warp", "n/a", "n/a", "n/a"})
 		warpSet = true
 	}
 	// Native Minting
@@ -425,7 +419,7 @@ func printPrecompiles(genesis core.Genesis) {
 		allowListSet = true
 	}
 	if warpSet || allowListSet {
-		ux.Logger.PrintToUser(t.Render())
+		t.Render()
 		if allowListSet {
 			note := logging.Orange.Wrap("The allowlist is taken from the genesis and is not being updated if you make adjustments\nvia the precompile. Use readAllowList(address) instead.")
 			ux.Logger.PrintToUser(note)
@@ -456,7 +450,7 @@ func addPrecompileAllowListToTable(
 		if i < len(enabledAddresses) && enabledAddresses[i] != (common.Address{}) {
 			enable = enabledAddresses[i].Hex()
 		}
-		t.AppendRow(table.Row{label, admin, manager, enable})
+		t.Append([]string{label, admin, manager, enable})
 	}
 }
 

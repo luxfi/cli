@@ -3,6 +3,7 @@
 package blockchaincmd
 
 import (
+	luxlog "github.com/luxfi/log"
 	"io"
 	"net/url"
 	"os"
@@ -416,7 +417,7 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *promptsmocks.Prompter) {
 	ux.NewUserLog(logging.NoLog{}, io.Discard)
 	app = &application.Lux{}
 	mockPrompt := promptsmocks.NewPrompter(t)
-	app.Setup(testDir, logging.NoLog{}, config.New(), "", mockPrompt, application.NewDownloader(), nil)
+	app.Setup(testDir, luxlog.NoWarn{}, config.New(), mockPrompt, application.NewDownloader())
 
 	return require, mockPrompt
 }

@@ -13,7 +13,6 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/cli/pkg/prompts/comparator"
 	"github.com/manifoldco/promptui"
 	"github.com/stretchr/testify/require"
 )
@@ -557,7 +556,7 @@ func TestCaptureFloatWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			floatVal, err := prompter.CaptureFloat("Enter float:", tt.validator)
+			floatVal, err := prompter.CaptureFloat("Enter float:")
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -581,10 +580,10 @@ func TestCapturePositiveIntWithMonkeyPatch(t *testing.T) {
 	}()
 
 	// Mock comparator for testing
-	mockComparator := func(minVal int) comparator.Comparator {
-		return comparator.Comparator{
+	mockComparator := func(minVal int) Comparator {
+		return Comparator{
 			Label: fmt.Sprintf("min_%d", minVal),
-			Type:  comparator.MoreThanEq,
+			Type:  MoreThanEq,
 			Value: uint64(minVal),
 		}
 	}
@@ -593,7 +592,7 @@ func TestCapturePositiveIntWithMonkeyPatch(t *testing.T) {
 		name          string
 		mockReturn    string
 		mockError     error
-		comparators   []comparator.Comparator
+		comparators   []Comparator
 		expectedInt   int
 		expectError   bool
 		errorContains string
@@ -626,7 +625,7 @@ func TestCapturePositiveIntWithMonkeyPatch(t *testing.T) {
 			name:        "valid integer with passing comparator",
 			mockReturn:  "50",
 			mockError:   nil,
-			comparators: []comparator.Comparator{mockComparator(10)},
+			comparators: []Comparator{mockComparator(10)},
 			expectedInt: 50,
 			expectError: false,
 		},
@@ -643,7 +642,7 @@ func TestCapturePositiveIntWithMonkeyPatch(t *testing.T) {
 			name:          "integer failing comparator validation",
 			mockReturn:    "5",
 			mockError:     nil,
-			comparators:   []comparator.Comparator{mockComparator(10)},
+			comparators:   []Comparator{mockComparator(10)},
 			expectedInt:   0,
 			expectError:   true,
 			errorContains: "the value must be bigger than or equal to",
@@ -751,7 +750,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 		name          string
 		mockReturn    string
 		mockError     error
-		comparators   []comparator.Comparator
+		comparators   []Comparator
 		expectedVal   uint64
 		expectError   bool
 		errorContains string
@@ -760,7 +759,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:        "valid uint64 - no comparators",
 			mockReturn:  "123",
 			mockError:   nil,
-			comparators: []comparator.Comparator{},
+			comparators: []Comparator{},
 			expectedVal: 123,
 			expectError: false,
 		},
@@ -768,7 +767,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:        "valid uint64 - decimal format",
 			mockReturn:  "456",
 			mockError:   nil,
-			comparators: []comparator.Comparator{},
+			comparators: []Comparator{},
 			expectedVal: 456,
 			expectError: false,
 		},
@@ -776,7 +775,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:        "valid uint64 - hex format",
 			mockReturn:  "0xFF",
 			mockError:   nil,
-			comparators: []comparator.Comparator{},
+			comparators: []Comparator{},
 			expectedVal: 255,
 			expectError: false,
 		},
@@ -784,7 +783,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:        "valid uint64 - octal format",
 			mockReturn:  "0755",
 			mockError:   nil,
-			comparators: []comparator.Comparator{},
+			comparators: []Comparator{},
 			expectedVal: 493,
 			expectError: false,
 		},
@@ -792,7 +791,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:        "zero value - valid when no comparators",
 			mockReturn:  "0",
 			mockError:   nil,
-			comparators: []comparator.Comparator{},
+			comparators: []Comparator{},
 			expectedVal: 0,
 			expectError: false,
 		},
@@ -800,7 +799,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:          "invalid format - negative",
 			mockReturn:    "-1",
 			mockError:     nil,
-			comparators:   []comparator.Comparator{},
+			comparators:   []Comparator{},
 			expectedVal:   0,
 			expectError:   true,
 			errorContains: "invalid syntax",
@@ -809,7 +808,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:          "invalid format - letters",
 			mockReturn:    "abc",
 			mockError:     nil,
-			comparators:   []comparator.Comparator{},
+			comparators:   []Comparator{},
 			expectedVal:   0,
 			expectError:   true,
 			errorContains: "invalid syntax",
@@ -818,7 +817,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:          "invalid format - float",
 			mockReturn:    "123.45",
 			mockError:     nil,
-			comparators:   []comparator.Comparator{},
+			comparators:   []Comparator{},
 			expectedVal:   0,
 			expectError:   true,
 			errorContains: "invalid syntax",
@@ -827,7 +826,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:          "prompt error - user cancelled",
 			mockReturn:    "",
 			mockError:     fmt.Errorf("user cancelled"),
-			comparators:   []comparator.Comparator{},
+			comparators:   []Comparator{},
 			expectedVal:   0,
 			expectError:   true,
 			errorContains: "user cancelled",
@@ -836,7 +835,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:          "empty string",
 			mockReturn:    "",
 			mockError:     nil,
-			comparators:   []comparator.Comparator{},
+			comparators:   []Comparator{},
 			expectedVal:   0,
 			expectError:   true,
 			errorContains: "invalid syntax",
@@ -845,7 +844,7 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:          "validation parsing failure - strconv.ParseUint fails in Validate",
 			mockReturn:    "not-a-number",
 			mockError:     nil,
-			comparators:   []comparator.Comparator{},
+			comparators:   []Comparator{},
 			expectedVal:   0,
 			expectError:   true,
 			errorContains: "strconv",
@@ -854,10 +853,10 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:       "comparator validation failure - value too small",
 			mockReturn: "5",
 			mockError:  nil,
-			comparators: []comparator.Comparator{
+			comparators: []Comparator{
 				{
 					Label: "minimum value",
-					Type:  comparator.MoreThanEq,
+					Type:  MoreThanEq,
 					Value: uint64(10),
 				},
 			},
@@ -869,10 +868,10 @@ func TestCaptureUint64CompareWithMonkeyPatch(t *testing.T) {
 			name:       "zero value rejected by comparator",
 			mockReturn: "0",
 			mockError:  nil,
-			comparators: []comparator.Comparator{
+			comparators: []Comparator{
 				{
 					Label: "must be positive",
-					Type:  comparator.MoreThan,
+					Type:  MoreThan,
 					Value: uint64(0),
 				},
 			},
@@ -1172,7 +1171,7 @@ func TestCapturePChainAddressWithMonkeyPatch(t *testing.T) {
 			var network models.Network
 			switch tt.network {
 			case "devnet":
-				network = models.NewDevnetNetwork("", 0)
+				network = models.NewDevnetNetwork()
 			case "testnet":
 				network = models.NewTestnetNetwork()
 			case "mainnet":
@@ -1291,19 +1290,9 @@ func TestCaptureXChainAddressWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			var network models.Network
-			switch tt.network {
-			case "devnet":
-				network = models.NewDevnetNetwork("", 0)
-			case "testnet":
-				network = models.NewTestnetNetwork()
-			case "mainnet":
-				network = models.NewMainnetNetwork()
-			default:
-				network = models.NewLocalNetwork()
-			}
-
-			addr, err := prompter.CaptureXChainAddress("Enter X-Chain address:", network)
+			// Network was used with CaptureXChainAddress but CaptureAddress doesn't need it
+			
+			addr, err := prompter.CaptureAddress("Enter X-Chain address:")
 
 			if tt.expectError {
 				require.Error(t, err)

@@ -3,6 +3,7 @@
 package blockchaincmd
 
 import (
+	luxlog "github.com/luxfi/log"
 	"encoding/json"
 	"io"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
@@ -32,7 +34,7 @@ func TestExportImportSubnet(t *testing.T) {
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
 
-	app.Setup(testDir, logging.NoLog{}, nil, "", prompts.NewPrompter(), &mockAppDownloader, nil)
+	app.Setup(testDir, luxlog.NoWarn{}, config.New(), prompts.NewPrompter(), &mockAppDownloader)
 	ux.NewUserLog(logging.NoLog{}, io.Discard)
 
 	subnetEvmGenesisPath := "tests/e2e/assets/test_subnet_evm_genesis.json"

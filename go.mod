@@ -231,7 +231,14 @@ require (
 )
 
 replace (
+	// Use local evm
 	github.com/luxfi/evm v0.7.8-lux.1 => ../evm
-	github.com/luxfi/node v1.13.4-lux => ../node
+	// Use local netrunner
+	github.com/luxfi/netrunner v0.1.0 => ../netrunner
+	// Use local node
+	github.com/luxfi/node v1.16.15 => ../node
+	// Use local SDK
 	github.com/luxfi/sdk v0.2.0 => ../sdk
+	// Use local warp
+	github.com/luxfi/warp v0.1.1 => ../warp
 )

@@ -85,6 +85,56 @@ func (_m *Downloader) GetLatestReleaseVersion(releaseURL string) (string, error)
 	return r0, r1
 }
 
+// GetLatestPreReleaseVersion provides a mock function with given fields: releaseURL
+func (_m *Downloader) GetLatestPreReleaseVersion(releaseURL string) (string, error) {
+	ret := _m.Called(releaseURL)
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(releaseURL)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(releaseURL)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(releaseURL)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DownloadWithTee provides a mock function with given fields: url, filePath
+func (_m *Downloader) DownloadWithTee(url string, filePath string) ([]byte, error) {
+	ret := _m.Called(url, filePath)
+
+	var r0 []byte
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) ([]byte, error)); ok {
+		return rf(url, filePath)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) []byte); ok {
+		r0 = rf(url, filePath)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(url, filePath)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type mockConstructorTestingTNewDownloader interface {
 	mock.TestingT
 	Cleanup(func())
