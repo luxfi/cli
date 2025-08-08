@@ -5,7 +5,6 @@ package types
 
 import (
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/params"
 )
 
 // EvmGenesis represents an EVM genesis configuration
