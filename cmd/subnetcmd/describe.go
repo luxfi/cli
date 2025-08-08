@@ -222,12 +222,12 @@ func describeSubnetEvmGenesis(sc models.Sidecar) error {
 		return err
 	}
 
-	printDetails(genesis, sc)
+	printDetails(genesis.Genesis, sc)
 	// Write gas table
-	printGasTable(genesis)
+	printGasTable(genesis.Genesis)
 	// fmt.Printf("\n\n")
-	printAirdropTable(genesis)
-	printPrecompileTable(genesis)
+	printAirdropTable(genesis.Genesis)
+	printPrecompileTable(genesis.Genesis)
 	return nil
 }
 

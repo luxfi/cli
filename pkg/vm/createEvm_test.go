@@ -10,12 +10,19 @@ import (
 	"github.com/luxfi/cli/internal/testutils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_ensureAdminsFunded(t *testing.T) {
-	addrs, err := testutils.GenerateEthAddrs(5)
+	cryptoAddrs, err := testutils.GenerateEthAddrs(5)
 	require.NoError(t, err)
+	
+	// Convert crypto.Address to common.Address for GenesisAlloc
+	addrs := make([]common.Address, len(cryptoAddrs))
+	for i, addr := range cryptoAddrs {
+		addrs[i] = common.Address(addr)
+	}
 
 	type test struct {
 		name       string
@@ -33,7 +40,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 				},
 				addrs[2]: {},
 			},
-			admins:     []crypto.Address{addrs[1]},
+			admins:     []crypto.Address{cryptoAddrs[1]},
 			shouldFail: false,
 		},
 		{
@@ -47,7 +54,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 					Balance: big.NewInt(42),
 				},
 			},
-			admins:     []crypto.Address{addrs[3], addrs[4]},
+			admins:     []crypto.Address{cryptoAddrs[3], cryptoAddrs[4]},
 			shouldFail: false,
 		},
 		{
@@ -59,7 +66,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 				addrs[1]: {},
 				addrs[2]: {},
 			},
-			admins:     []crypto.Address{addrs[0], addrs[2]},
+			admins:     []crypto.Address{cryptoAddrs[0], cryptoAddrs[2]},
 			shouldFail: true,
 		},
 		{
