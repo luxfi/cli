@@ -9,6 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	// LuxDataDirVar is the environment variable for the Lux data directory
+	LuxDataDirVar = "LUXD_DATA_DIR"
+)
+
 type Config struct {
 	MetricsEnabled bool `json:"metricsEnabled"`
 }

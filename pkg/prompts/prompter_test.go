@@ -426,7 +426,7 @@ func TestCaptureDurationEdgeCases(t *testing.T) {
 	})
 }
 
-func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
+func TestCaptureFujiDurationWithMonkeyPatch(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -564,7 +564,7 @@ func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			duration, err := prompter.CaptureTestnetDuration("Enter Testnet staking duration:")
+			duration, err := prompter.CaptureFujiDuration("Enter Testnet staking duration:")
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -580,7 +580,7 @@ func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
 	}
 }
 
-func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
+func TestCaptureFujiDurationEdgeCases(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -598,7 +598,7 @@ func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureTestnetDuration("Test Testnet prompt")
+		duration, err := prompter.CaptureFujiDuration("Test Testnet prompt")
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
@@ -613,7 +613,7 @@ func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureTestnetDuration(expectedLabel)
+		duration, err := prompter.CaptureFujiDuration(expectedLabel)
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
@@ -634,7 +634,7 @@ func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureTestnetDuration("Enter Testnet duration:")
+		duration, err := prompter.CaptureFujiDuration("Enter Testnet duration:")
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)

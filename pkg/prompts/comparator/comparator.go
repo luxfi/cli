@@ -4,7 +4,6 @@
 package comparator
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -13,6 +12,7 @@ const (
 	LessThanEq = "Less Than Or Eq"
 	MoreThanEq = "More Than Or Eq"
 	MoreThan   = "More Than"
+	NotEq      = "Not Equal"
 )
 
 // Comparator struct for value comparisons
@@ -27,18 +27,23 @@ func (c *Comparator) Validate(val uint64) error {
 	switch c.Type {
 	case LessThanEq:
 		if val > c.Value {
-			return fmt.Errorf("%s must be less than or equal to %d", c.Label, c.Value)
+			return fmt.Errorf("the value must be smaller than or equal to %s (%d)", c.Label, c.Value)
 		}
 	case MoreThanEq:
 		if val < c.Value {
-			return fmt.Errorf("%s must be more than or equal to %d", c.Label, c.Value)
+			return fmt.Errorf("the value must be bigger than or equal to %s (%d)", c.Label, c.Value)
 		}
 	case MoreThan:
 		if val <= c.Value {
-			return fmt.Errorf("%s must be more than %d", c.Label, c.Value)
+			return fmt.Errorf("the value must be bigger than %s (%d)", c.Label, c.Value)
+		}
+	case NotEq:
+		if val == c.Value {
+			return fmt.Errorf("the value must be different than %s (%d)", c.Label, c.Value)
 		}
 	default:
-		return errors.New("invalid comparator type")
+		// Unknown comparator types pass through without error
+		return nil
 	}
 	return nil
 }

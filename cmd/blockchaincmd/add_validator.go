@@ -709,7 +709,7 @@ func CallAddValidatorNonSOV(
 		return errNoSubnetID
 	}
 
-	controlKeys, threshold, err := txutils.GetOwners(network, subnetID)
+	_, controlKeys, threshold, err := txutils.GetOwners(network, subnetID)
 	if err != nil {
 		return err
 	}

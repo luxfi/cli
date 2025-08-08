@@ -133,9 +133,8 @@ func TestValidateRPC(t *testing.T) {
 					Return(tt.promptURL, tt.promptError)
 			}
 
-			app := &application.Lux{
-				Prompt: &mockPrompter,
-			}
+			app := application.New()
+			app.Prompt = &mockPrompter
 			cmd := &cobra.Command{Use: tt.cmdName}
 
 			rpcValue := tt.rpcURL

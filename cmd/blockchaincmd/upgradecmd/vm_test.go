@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/stretchr/testify/require"
 )
@@ -298,15 +299,12 @@ func TestUpdateToCustomBin(t *testing.T) {
 	}
 	networkToUpgrade := futureDeployment
 
-	factory := logging.NewFactory(logging.Config{})
-	log, err := factory.Make("lux")
-	assert.NoError(err)
-
 	// create the user facing logger as a global var
+	log := luxlog.NoWarn{}
 	ux.NewUserLog(log, os.Stdout)
 
 	app = &application.Lux{}
-	app.Setup(testDir, log, config.New(), "", prompts.NewPrompter(), application.NewDownloader(), nil)
+	app.Setup(testDir, log, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	err = os.MkdirAll(app.GetSubnetDir(), constants.DefaultPerms755)
 	assert.NoError(err)

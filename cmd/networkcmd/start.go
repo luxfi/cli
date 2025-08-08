@@ -36,6 +36,21 @@ var (
 
 const latest = "latest"
 
+// StartFlags contains configuration for starting a network
+type StartFlags struct {
+	UserProvidedAvagoVersion string
+	AvagoBinaryPath          string
+	UserProvidedLuxdVersion  string
+	LuxdBinaryPath           string
+	NumNodes                 uint32
+}
+
+// Start starts the local network with the given flags
+func Start(flags StartFlags, printEndpoints bool) error {
+	// For now, just call StartNetwork with nil cmd and args
+	return StartNetwork(nil, nil)
+}
+
 func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",

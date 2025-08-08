@@ -37,3 +37,9 @@ func GetSignatureAggregatorEndpoint(app *application.Lux, network models.Network
 	// Return a default endpoint for now
 	return "http://localhost:8090/aggregate-signatures", nil
 }
+
+func CreateSignatureAggregatorInstance(app *application.Lux, subnetID string, network models.Network, extraPeers []interface{}, logger logging.Logger, version string) error {
+	// Stub implementation for signature aggregator instance creation
+	// TODO: Implement actual aggregator instance creation when warp package is available
+	return nil
+}

@@ -611,11 +611,8 @@ func RunSSHRenderLuxNodeConfig(
 
 // RunSSHCreatePlugin runs script to create plugin
 func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
-	vmID, err := sc.GetVMID()
-	if err != nil {
-		return err
-	}
-	subnetVMBinaryPath := fmt.Sprintf(constants.CloudNodeSubnetEvmBinaryPath, vmID)
+	// Note: vmID can be retrieved if needed in the future via sc.GetVMID()
+	subnetVMBinaryPath := constants.CloudNodeSubnetEvmBinaryPath
 	hostInstaller := NewHostInstaller(host)
 	tmpDir, err := host.CreateTempDir()
 	if err != nil {

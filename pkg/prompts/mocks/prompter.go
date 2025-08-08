@@ -1,4 +1,4 @@
-// Code generated manually for testing. DO NOT EDIT.
+// Code generated manually for testing. Update as needed.
 
 package mocks
 
@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/stretchr/testify/mock"
 )
 

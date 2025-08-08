@@ -28,6 +28,8 @@ const (
 	NodeFileName                = "node.json"
 
 	SidecarVersion = "1.4.0"
+	LatestPreReleaseVersionTag = "latest-prerelease"
+	LatestReleaseVersionTag = "latest"
 
 	MaxLogFileSize   = 4
 	MaxNumOfLogFiles = 5
@@ -46,6 +48,12 @@ const (
 	// WebSocket endpoints
 	MainnetWSEndpoint = "wss://api.lux.network/ext/bc/C/ws"
 	TestnetWSEndpoint = "wss://api.lux-test.network/ext/bc/C/ws"
+	
+	// Default values for relayer and validators
+	DefaultRelayerAmount = float64(10)
+	
+	// Metrics
+	MetricsNetwork = "network"
 	LocalWSEndpoint   = "ws://127.0.0.1:9630/ext/bc/C/ws"
 	DevnetWSEndpoint  = "wss://api.lux-dev.network/ext/bc/C/ws"
 
@@ -86,6 +94,7 @@ const (
 	DevnetAPIEndpoint = "https://api.lux-dev.network"
 	LocalNetworkID   = 1337
 	DefaultNumberOfLocalMachineNodes = 5
+	LocalNetworkNumNodes = 5
 
 	DefaultTokenName = "TEST"
 	
@@ -94,6 +103,7 @@ const (
 	
 	// Staking constants
 	BootstrapValidatorBalanceNanoLUX = 1_000_000_000_000 // 1000 LUX
+	BootstrapValidatorWeight = 20                        // Default validator weight
 	PoSL1MinimumStakeDurationSeconds = 86400             // 24 hours
 	
 	// Logging
@@ -288,6 +298,9 @@ const (
 	SubnetConfigFileName       = "subnet.json"
 	ChainConfigFileName        = "chain.json"
 	PerNodeChainConfigFileName = "per-node-chain.json"
+	CustomAirdrop              = "customAirdrop"
+	PrecompileType             = "precompileType"
+	NumberOfAirdrops           = "numberOfAirdrops"
 
 	GitRepoCommitName  = "Lux CLI"
 	GitRepoCommitEmail = "info@lux.network"

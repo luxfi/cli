@@ -46,7 +46,7 @@ func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, e
 
 // L1ValidatorRegistration represents an L1 validator registration
 type L1ValidatorRegistration struct {
-	validationID     ids.ID    `serialize:"true" json:"validationID"`
+	ValidationID     ids.ID    `serialize:"true" json:"validationID"`
 	NodeID           ids.NodeID `serialize:"true" json:"nodeID"`
 	BLSPublicKey     []byte    `serialize:"true" json:"blsPublicKey"`
 	Weight           uint64    `serialize:"true" json:"weight"`
@@ -56,9 +56,9 @@ type L1ValidatorRegistration struct {
 	Valid            bool      `serialize:"true" json:"valid"`
 }
 
-// ValidationID returns the validation ID for this registration
-func (r *L1ValidatorRegistration) ValidationID() ids.ID {
-	return r.validationID
+// GetValidationID returns the validation ID for this registration
+func (r *L1ValidatorRegistration) GetValidationID() ids.ID {
+	return r.ValidationID
 }
 
 // Bytes returns the byte representation of this registration
@@ -122,7 +122,7 @@ func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) 
 	
 	// Convert to local type
 	reg := &L1ValidatorRegistration{
-		validationID: subnetID, // Use SubnetID as validation ID for now
+		ValidationID: subnetID, // Use SubnetID as validation ID for now
 		NodeID:       nodeID,
 		BLSPublicKey: payloadObj.BLSPublicKey,
 		Weight:       payloadObj.Weight,
@@ -147,7 +147,7 @@ func NewRegisterL1Validator(
 	validationID := ids.GenerateTestID() // In production, calculate from inputs
 	
 	reg := &L1ValidatorRegistration{
-		validationID:     validationID,
+		ValidationID:     validationID,
 		NodeID:           nodeID,
 		BLSPublicKey:     blsPublicKey,
 		Weight:           weight,

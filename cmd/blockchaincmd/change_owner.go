@@ -95,7 +95,7 @@ func changeOwner(_ *cobra.Command, args []string) error {
 		return errNoSubnetID
 	}
 
-	currentControlKeys, currentThreshold, err := txutils.GetOwners(network, subnetID)
+	_, currentControlKeys, currentThreshold, err := txutils.GetOwners(network, subnetID)
 	if err != nil {
 		return err
 	}

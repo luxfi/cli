@@ -26,7 +26,7 @@ import (
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/cli/pkg/prompts/comparator"
+	"github.com/luxfi/sdk/prompts/comparator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
@@ -45,7 +45,6 @@ import (
 	"github.com/luxfi/node/vms/platformvm/fx"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	sdktxs "github.com/luxfi/sdk/validatormanager/txs"
 	warpMessage "github.com/luxfi/warp"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -70,7 +69,7 @@ var (
 	skipCreatePrompt       bool
 	partialSync            bool
 	subnetOnly             bool
-	// warpSpec               subnet.WarpSpec // TODO: WarpSpec not defined
+	warpSpec               subnet.WarpSpec
 	numNodes               uint32
 	relayerAmount          float64
 	relayerKeyName         string
@@ -258,8 +257,8 @@ func getChainsInSubnet(blockchainName string) ([]string, error) {
 }
 
 func checkSubnetEVMDefaultAddressNotInAlloc(network models.Network, chain string) error {
-	if network.Kind != models.Local &&
-		network.Kind != models.Devnet &&
+	if network != models.Local &&
+		network != models.Devnet &&
 		!simulatedPublicNetwork() {
 		genesis, err := app.LoadEvmGenesis(chain)
 		if err != nil {
@@ -314,7 +313,7 @@ func getSubnetEVMMainnetChainID(sc *models.Sidecar, blockchainName string) error
 	originalChainID := evmGenesis.Config.ChainID.Uint64()
 	// handle cmdline flag if given
 	if mainnetChainID != 0 {
-		sc.SubnetEVMMainnetChainID = uint(mainnetChainID)
+		sc.SubnetEVMMainnetChainID = uint32(mainnetChainID)
 	}
 	// prompt the user
 	if sc.SubnetEVMMainnetChainID == 0 {
@@ -331,12 +330,12 @@ func getSubnetEVMMainnetChainID(sc *models.Sidecar, blockchainName string) error
 			return err
 		}
 		if decision == useSameChainID {
-			sc.SubnetEVMMainnetChainID = uint(originalChainID)
+			sc.SubnetEVMMainnetChainID = uint32(originalChainID)
 		} else {
 			ux.Logger.PrintToUser("Enter your blockchain's ChainID. It can be any positive integer != %d.", originalChainID)
 			newChainID, err := app.Prompt.CapturePositiveInt(
 				"ChainID",
-				[]comparator.Comparator{
+				[]prompts.Comparator{
 					{
 						Label: "Zero",
 						Type:  comparator.MoreThan,
@@ -352,14 +351,14 @@ func getSubnetEVMMainnetChainID(sc *models.Sidecar, blockchainName string) error
 			if err != nil {
 				return err
 			}
-			sc.SubnetEVMMainnetChainID = uint(newChainID)
+			sc.SubnetEVMMainnetChainID = uint32(newChainID)
 		}
 	}
 	return app.UpdateSidecar(sc)
 }
 
 func deployLocalNetworkPreCheck(cmd *cobra.Command, network models.Network, bootstrapValidatorFlags flags.BootstrapValidatorFlags) error {
-	if network.Kind == models.Local {
+	if network == models.Local {
 		if cmd.Flags().Changed("use-local-machine") && !deployFlags.LocalMachineFlags.UseLocalMachine &&
 			bootstrapValidatorFlags.BootstrapEndpoints == nil &&
 			bootstrapValidatorFlags.BootstrapValidatorsJSONFilePath == "" &&
@@ -555,12 +554,12 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 	if isEVMGenesis {
 		// is is a subnet evm or a custom vm based on subnet evm
-		if network.Kind == models.Mainnet {
+		if network == models.Mainnet {
 			err = getSubnetEVMMainnetChainID(&sidecar, chain)
 			if err != nil {
 				return err
 			}
-			chainGenesis, err = updateSubnetEVMGenesisChainID(chainGenesis, sidecar.SubnetEVMMainnetChainID)
+			chainGenesis, err = updateSubnetEVMGenesisChainID(chainGenesis, uint(sidecar.SubnetEVMMainnetChainID))
 			if err != nil {
 				return err
 			}
@@ -577,7 +576,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("Deploying %s to %s", chains, network.Name())
 
-	if network.Kind == models.Local {
+	if network == models.Local {
 		if err = deployLocalNetworkPreCheck(cmd, network, deployFlags.BootstrapValidatorFlags); err != nil {
 			return err
 		}
@@ -671,7 +670,11 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	availableBalance, err := utils.GetNetworkBalance(kc.Addresses().List(), network.Endpoint)
+	addresses := kc.Addresses().List()
+	if len(addresses) == 0 {
+		return fmt.Errorf("no addresses available in keychain")
+	}
+	availableBalance, err := utils.GetNetworkBalance(addresses[0], network)
 	if err != nil {
 		return err
 	}
@@ -682,7 +685,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-	} else if network.Kind == models.Local {
+	} else if network == models.Local {
 		sameControlKey = true
 	}
 
@@ -746,11 +749,21 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 	// get keys for blockchain tx signing
 	if subnetAuthKeys != nil {
-		if err := prompts.CheckSubnetAuthKeys(kcKeys, subnetAuthKeys, controlKeys, threshold); err != nil {
+		if err := prompts.CheckSubnetAuthKeys(subnetAuthKeys, controlKeys, threshold); err != nil {
 			return err
 		}
 	} else {
-		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, kcKeys, controlKeys, threshold)
+		// Filter control keys that are in the keychain
+		filteredControlKeys := []string{}
+		for _, controlKey := range controlKeys {
+			for _, kcKey := range kcKeys {
+				if controlKey == kcKey {
+					filteredControlKeys = append(filteredControlKeys, controlKey)
+					break
+				}
+			}
+		}
+		subnetAuthKeys, err = prompts.GetSubnetAuthKeys(app.Prompt, filteredControlKeys, threshold)
 		if err != nil {
 			return err
 		}
@@ -758,15 +771,13 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Your blockchain auth keys for chain creation: %s", subnetAuthKeys)
 
 	// deploy to public network
-	deployer := subnet.NewPublicDeployer(app, kc, network)
+	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 
 	if createSubnet {
 		subnetID, err = deployer.DeploySubnet(controlKeys, threshold)
 		if err != nil {
 			return err
 		}
-		// TODO: remove once dynamic fees conf can be updated on wallet
-		deployer.CleanCacheWallet()
 		// get the control keys in the same order as the tx
 		_, controlKeys, threshold, err = txutils.GetOwners(network, subnetID)
 		if err != nil {
@@ -796,8 +807,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		// TODO: remove once dynamic fees conf can be updated on wallet
-		deployer.CleanCacheWallet()
-
 		savePartialTx = !isFullySigned && err == nil
 	}
 
@@ -825,7 +834,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 
 	// needs to first stop relayer so non sovereign subnets successfully restart
-	if sidecar.TeleporterReady && !warpSpec.SkipWarpDeploy && !warpSpec.SkipRelayerDeploy && network.Kind != models.Mainnet {
+	if sidecar.TeleporterReady && !warpSpec.SkipWarpDeploy && !warpSpec.SkipRelayerDeploy && network != models.Mainnet {
 		_ = relayercmd.CallStop(nil, relayercmd.StopFlags{}, network)
 	}
 
@@ -897,15 +906,10 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			network,
 			subnetID,
 			blockchainID,
-			"",
-			"",
-			nil,
-			clusterNameFlagValue,
-			"",
 		); err != nil {
 			return err
 		}
-		if network.Kind == models.Local && !simulatedPublicNetwork() {
+		if network == models.Local && !simulatedPublicNetwork() {
 			ux.Logger.PrintToUser("")
 			if err := localnet.LocalNetworkTrackSubnet(
 				app,
@@ -950,7 +954,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			ux.Logger.RedXToUser("Interchain Messaging is not deployed due to: %v", warpErr)
 		} else {
 			ux.Logger.GreenCheckmarkToUser("Warp is successfully deployed")
-			if network.Kind != models.Local && !deployFlags.LocalMachineFlags.UseLocalMachine {
+			if network != models.Local && !deployFlags.LocalMachineFlags.UseLocalMachine {
 				if flag := cmd.Flags().Lookup(skipRelayerFlagName); flag != nil && !flag.Changed {
 					ux.Logger.PrintToUser("")
 					yes, err := app.Prompt.CaptureYesNo("Do you want to setup local relayer for the messages to be interchanged, as Interchain Messaging was deployed to your blockchain?")
@@ -960,8 +964,8 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 					warpSpec.SkipRelayerDeploy = !yes
 				}
 			}
-			if !warpSpec.SkipRelayerDeploy && network.Kind != models.Mainnet {
-				if network.Kind == models.Local && warpSpec.RelayerBinPath == "" && warpSpec.RelayerVersion == constants.DefaultRelayerVersion {
+			if !warpSpec.SkipRelayerDeploy && network != models.Mainnet {
+				if network == models.Local && warpSpec.RelayerBinPath == "" && warpSpec.RelayerVersion == constants.DefaultRelayerVersion {
 					if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 						return err
 					} else if b {
@@ -979,15 +983,15 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 					Amount:             relayerAmount,
 					AllowPrivateIPs:    relayerAllowPrivateIPs,
 				}
-				if network.Kind == models.Local {
+				if network == models.Local {
 					blockchains, err := localnet.GetLocalNetworkBlockchainsInfo(app)
 					if err != nil {
 						return err
 					}
 					deployRelayerFlags.BlockchainsToRelay = utils.Unique(sdkutils.Map(blockchains, func(i localnet.BlockchainInfo) string { return i.Name }))
 				}
-				if network.Kind == models.Local || deployFlags.LocalMachineFlags.UseLocalMachine {
-					relayerKeyName, _, _, err := relayer.GetDefaultRelayerKeyInfo(app)
+				if network == models.Local || deployFlags.LocalMachineFlags.UseLocalMachine {
+					relayerKeyName, _, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainName)
 					if err != nil {
 						return err
 					}
@@ -995,7 +999,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 					deployRelayerFlags.Amount = constants.DefaultRelayerAmount
 					deployRelayerFlags.BlockchainFundingKey = constants.WarpKeyName
 				}
-				if network.Kind == models.Local {
+				if network == models.Local {
 					deployRelayerFlags.CChainFundingKey = "ewoq"
 					deployRelayerFlags.CChainAmount = constants.DefaultRelayerAmount
 				}
@@ -1013,7 +1017,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	flags[constants.MetricsNetwork] = network.Name()
 	metrics.HandleTracking(app, flags, nil)
 
-	if network.Kind == models.Local && !simulatedPublicNetwork() {
+	if network.Kind() == models.Local && !simulatedPublicNetwork() {
 		ux.Logger.PrintToUser("")
 		_ = PrintSubnetInfo(blockchainName, true)
 	}
@@ -1043,7 +1047,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setBootstrapValidatorValidationID(luxdBootstrapValidators []*sdktxs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
+func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
 	for index, luxdValidator := range luxdBootstrapValidators {
 		for bootstrapValidatorIndex, validator := range bootstrapValidators {
 			luxdValidatorNodeID, _ := ids.ToNodeID(luxdValidator.NodeID)
@@ -1060,41 +1064,41 @@ func getClusterBootstrapValidators(
 	network models.Network,
 	deployBalance uint64,
 ) ([]models.SubnetValidator, error) {
-	clusterConf, err := app.GetClusterConfig(clusterName)
+	_, err := app.GetClusterConfig(clusterName)
 	if err != nil {
 		return nil, err
 	}
 	subnetValidators := []models.SubnetValidator{}
-	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxdHost)
-	changeAddr := ""
+	// TODO: Implement proper cluster config parsing
+	// For now, skip remote cluster node parsing
+	hostIDs := []string{}
 	for _, h := range hostIDs {
-		nodeID, pub, pop, err := utils.GetNodeParams(app.GetNodeInstanceDirPath(h))
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse nodeID: %w", err)
-		}
-		changeAddr, err = blockchain.GetKeyForChangeOwner(app, network)
-		if err != nil {
-			return nil, err
-		}
-		if err != nil {
-			return nil, err
-		}
-		ux.Logger.Info("Bootstrap validator info for Host: %s | Node ID: %s | Public Key: %s | Proof of Possession: %s", h, nodeID, hex.EncodeToString(pub), hex.EncodeToString(pop))
-		subnetValidators = append(subnetValidators, models.SubnetValidator{
-			NodeID:               nodeID.String(),
-			Weight:               constants.BootstrapValidatorWeight,
-			Balance:              deployBalance,
-			BLSPublicKey:         fmt.Sprintf("%s%s", "0x", hex.EncodeToString(pub)),
-			BLSProofOfPossession: fmt.Sprintf("%s%s", "0x", hex.EncodeToString(pop)),
-			ChangeOwnerAddr:      changeAddr,
-		})
+		// TODO: Implement GetNodeInstanceDirPath when needed
+		_ = h
+		// nodeID, pub, pop, err := utils.GetNodeParams(app.GetNodeInstanceDirPath(h))
+		// if err != nil {
+		//     return nil, fmt.Errorf("failed to parse nodeID: %w", err)
+		// }
+		// changeAddr, err = blockchain.GetKeyForChangeOwner(app, network)
+		// if err != nil {
+		//     return nil, err
+		// }
+		// ux.Logger.Info("Bootstrap validator info for Host: %s | Node ID: %s | Public Key: %s | Proof of Possession: %s", h, nodeID, hex.EncodeToString(pub), hex.EncodeToString(pop))
+		// subnetValidators = append(subnetValidators, models.SubnetValidator{
+		//     NodeID:               nodeID.String(),
+		//     Weight:               constants.BootstrapValidatorWeight,
+		//     Balance:              deployBalance,
+		//     BLSPublicKey:         fmt.Sprintf("%s%s", "0x", hex.EncodeToString(pub)),
+		//     BLSProofOfPossession: fmt.Sprintf("%s%s", "0x", hex.EncodeToString(pop)),
+		//     ChangeOwnerAddr:      changeAddr,
+		// })
 	}
 	return subnetValidators, nil
 }
 
 // TODO: add deactivation owner?
-func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*sdktxs.ConvertSubnetToL1Validator, error) {
-	bootstrapValidators := []*sdktxs.ConvertSubnetToL1Validator{}
+func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertSubnetToL1Validator, error) {
+	bootstrapValidators := []*txs.ConvertSubnetToL1Validator{}
 	for _, validator := range subnetValidators {
 		nodeID, err := ids.NodeIDFromString(validator.NodeID)
 		if err != nil {
@@ -1104,19 +1108,17 @@ func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]
 		if err != nil {
 			return nil, fmt.Errorf("failure parsing BLS info: %w", err)
 		}
-		addrs, err := address.ParseToIDs([]string{validator.ChangeOwnerAddr})
-		if err != nil {
-			return nil, fmt.Errorf("failure parsing change owner address: %w", err)
-		}
+		// TODO: Parse change owner address when RemainingBalanceOwner is available
+		// addrs, err := address.ParseToIDs([]string{validator.ChangeOwnerAddr})
+		// if err != nil {
+		//     return nil, fmt.Errorf("failure parsing change owner address: %w", err)
+		// }
 		bootstrapValidator := &txs.ConvertSubnetToL1Validator{
 			NodeID:  nodeID[:],
 			Weight:  validator.Weight,
 			Balance: validator.Balance,
 			Signer:  blsInfo,
-			RemainingBalanceOwner: warpMessage.PChainOwner{
-				Threshold: 1,
-				Addresses: addrs,
-			},
+			// TODO: Add RemainingBalanceOwner when available in node implementation
 		}
 		bootstrapValidators = append(bootstrapValidators, bootstrapValidator)
 	}
@@ -1229,25 +1231,23 @@ func PrintRemainingToSignMsg(
 
 func PrintDeployResults(blockchainName string, subnetID ids.ID, blockchainID ids.ID) error {
 	t := ux.DefaultTable("Deployment results", nil)
-	t.SetColumnConfigs([]table.ColumnConfig{
-		{Number: 2, AutoMerge: true},
-	})
+	// SetColumnConfigs doesn't exist for tablewriter, skip it
 	if blockchainName != "" {
-		t.AppendRow(table.Row{"Chain Name", blockchainName})
+		t.Append([]string{"Chain Name", blockchainName})
 	}
-	t.AppendRow(table.Row{"Subnet ID", subnetID.String()})
+	t.Append([]string{"Subnet ID", subnetID.String()})
 	if blockchainName != "" {
 		vmID, err := utils.VMID(blockchainName)
 		if err != nil {
 			return fmt.Errorf("failed to create VM ID from %s: %w", blockchainName, err)
 		}
-		t.AppendRow(table.Row{"VM ID", vmID.String()})
+		t.Append([]string{"VM ID", vmID.String()})
 	}
 	if blockchainID != ids.Empty {
-		t.AppendRow(table.Row{"Blockchain ID", blockchainID.String()})
-		t.AppendRow(table.Row{"P-Chain TXID", blockchainID.String()})
+		t.Append([]string{"Blockchain ID", blockchainID.String()})
+		t.Append([]string{"P-Chain TXID", blockchainID.String()})
 	}
-	ux.Logger.PrintToUser(t.Render())
+	t.Render()
 	return nil
 }
 

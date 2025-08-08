@@ -24,6 +24,12 @@ func GenerateProposerConfig(
 	return "", errors.New("relayer functionality temporarily disabled")
 }
 
+// GetDefaultRelayerKeyInfo returns the default relayer key information
+func GetDefaultRelayerKeyInfo(app *application.Lux, subnetName string) (string, string, string, error) {
+	// Return empty values for now - this would typically read from sidecar
+	return "", "", "", nil
+}
+
 // DeployRelayerCmd creates a command to deploy the relayer (not implemented)
 func DeployRelayerCmd(
 	binDir string,

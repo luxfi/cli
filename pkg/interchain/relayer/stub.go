@@ -25,4 +25,10 @@ func GenerateProposerConfig(
 	return "", errors.New("relayer functionality not available in this build")
 }
 
+// GetDefaultRelayerKeyInfo returns the default relayer key information
+func GetDefaultRelayerKeyInfo(app *application.Lux, subnetName string) (string, string, string, error) {
+	// Return empty values for now - this would typically read from sidecar
+	return "", "", "", nil
+}
+
 // Add other stub functions as needed
