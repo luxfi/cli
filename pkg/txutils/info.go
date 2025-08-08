@@ -57,7 +57,62 @@ func IsCreateChainTx(tx *txs.Tx) bool {
 	return ok
 }
 
-func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error) {
+// SubnetOwners contains the ownership information for a subnet
+type SubnetOwners struct {
+	IsPermissioned bool
+	ControlKeys    []string
+	Threshold      uint32
+}
+
+// GetSubnetOwners retrieves ownership information for a subnet
+func GetSubnetOwners(network models.Network, subnetID ids.ID) (*SubnetOwners, error) {
+	pClient, err := getPlatformClient(network)
+	if err != nil {
+		return nil, err
+	}
+	
+	tx, err := getSubnetTx(pClient, subnetID)
+	if err != nil {
+		return nil, err
+	}
+	
+	createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
+	if !ok {
+		return nil, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, subnetID)
+	}
+	
+	owner, ok := createSubnetTx.Owner.(*secp256k1fx.OutputOwners)
+	if !ok {
+		// If not a standard OutputOwners, it might be a different owner type
+		// For now, treat as non-permissioned
+		return &SubnetOwners{IsPermissioned: false}, nil
+	}
+	
+	// Format control keys as strings
+	controlKeysStrs, err := formatControlKeys(network, owner.Addrs)
+	if err != nil {
+		return nil, err
+	}
+	
+	return &SubnetOwners{
+		IsPermissioned: true,
+		ControlKeys:    controlKeysStrs,
+		Threshold:      owner.Threshold,
+	}, nil
+}
+
+// GetOwners returns ownership information in the legacy format (for backward compatibility)
+func GetOwners(network models.Network, subnetID ids.ID) (bool, []string, uint32, error) {
+	owners, err := GetSubnetOwners(network, subnetID)
+	if err != nil {
+		return false, nil, 0, err
+	}
+	return owners.IsPermissioned, owners.ControlKeys, owners.Threshold, nil
+}
+
+// Helper functions for better composability
+
+func getPlatformClient(network models.Network) (platformvm.Client, error) {
 	var api string
 	switch network {
 	case models.Testnet:
@@ -67,40 +122,40 @@ func GetOwners(network models.Network, subnetID ids.ID) ([]string, uint32, error
 	case models.Local:
 		api = constants.LocalAPIEndpoint
 	default:
-		return nil, 0, fmt.Errorf("network not supported")
+		return nil, fmt.Errorf("network not supported: %v", network)
 	}
-	pClient := platformvm.NewClient(api)
+	return platformvm.NewClient(api), nil
+}
+
+func getSubnetTx(pClient platformvm.Client, subnetID ids.ID) (*txs.Tx, error) {
 	ctx := context.Background()
 	txBytes, err := pClient.GetTx(ctx, subnetID)
 	if err != nil {
-		return nil, 0, fmt.Errorf("subnet tx %s query error: %w", subnetID, err)
+		return nil, fmt.Errorf("subnet tx %s query error: %w", subnetID, err)
 	}
+	
 	var tx txs.Tx
 	if _, err := txs.Codec.Unmarshal(txBytes, &tx); err != nil {
-		return nil, 0, fmt.Errorf("couldn't unmarshal tx %s: %w", subnetID, err)
+		return nil, fmt.Errorf("couldn't unmarshal tx %s: %w", subnetID, err)
 	}
-	createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
-	if !ok {
-		return nil, 0, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, subnetID)
-	}
-	owner, ok := createSubnetTx.Owner.(*secp256k1fx.OutputOwners)
-	if !ok {
-		return nil, 0, fmt.Errorf("got unexpected type %T for subnet owners tx %s", createSubnetTx.Owner, subnetID)
-	}
-	controlKeys := owner.Addrs
-	threshold := owner.Threshold
+	return &tx, nil
+}
+
+func formatControlKeys(network models.Network, addrs []ids.ShortID) ([]string, error) {
 	networkID, err := network.NetworkID()
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
+	
 	hrp := key.GetHRP(networkID)
-	controlKeysStrs := []string{}
-	for _, addr := range controlKeys {
+	controlKeysStrs := make([]string, 0, len(addrs))
+	
+	for _, addr := range addrs {
 		addrStr, err := address.Format("P", hrp, addr[:])
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		controlKeysStrs = append(controlKeysStrs, addrStr)
 	}
-	return controlKeysStrs, threshold, nil
+	return controlKeysStrs, nil
 }

@@ -360,12 +360,8 @@ github.com/luxfi/netrunner v1.13.5-lux.2 h1:QPIhsC0MpqA9IpCfZ/BNINGq8rM/QLdhHb15
 github.com/luxfi/netrunner v1.13.5-lux.2/go.mod h1:ut9bz6y6jrUI1b9npk9UI9NUO8fCOa9zm/y8Ms9rJXQ=
 github.com/luxfi/netrunner-sdk v0.3.0 h1:bX68U8zb2JCwdTq8Wb2YY9Lf8vY0gu0rt2EHkjt0TTY=
 github.com/luxfi/netrunner-sdk v0.3.0/go.mod h1:nMOlNg1ukj/sWjcJHmLarZSBdzzD6EXDOL06y2S2VRA=
-github.com/luxfi/node v1.16.15 h1:ZRsteUu6ObB7Or3E6ZliNY2w/cL4tByGaSm7J37sVU8=
-github.com/luxfi/node v1.16.15/go.mod h1:05FhncqqiDSp5XfSPjoPvTBBUVokCdKpHL72aRCxs4Y=
 github.com/luxfi/trace v0.1.1 h1:T/ReB1MvwAJpgQaPWGsBLUx96rr5OMlJocWRo5JSvkU=
 github.com/luxfi/trace v0.1.1/go.mod h1:6jhCW0hPCFv7qzFsL0w/amHRv7PfNIyW77N4WDS3U5Q=
-github.com/luxfi/warp v0.1.1 h1:PL+cW7BDWpi5rtIP8DWJPHEAVe/CA2T52zo1HzvfYvg=
-github.com/luxfi/warp v0.1.1/go.mod h1:DZ3z+8SeLZq3r2ztCpHIqGAhjUg7cs4OypWxaAwyr3E=
 github.com/manifoldco/promptui v0.9.0 h1:3V4HzJk1TtXW1MTZMP7mdlwbBpIinw3HztaIlYthEiA=
 github.com/manifoldco/promptui v0.9.0/go.mod h1:ka04sppxSGFAtxX0qhlYQjISsg9mR4GWtQEhdbn6Pgg=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=

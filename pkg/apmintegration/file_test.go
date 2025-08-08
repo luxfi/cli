@@ -9,10 +9,11 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/lpm/types"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -63,8 +64,8 @@ const (
 func newTestApp(t *testing.T, testDir string) *application.Lux {
 	tempDir := t.TempDir()
 	app := application.New()
-	app.Setup(tempDir, logging.NoLog{}, nil, "", prompts.NewPrompter(), application.NewDownloader(), nil)
-	app.ApmDir = testDir
+	app.Setup(tempDir, luxlog.NoWarn{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
+	app.ApmDir = func() string { return testDir }
 	return app
 }
 
