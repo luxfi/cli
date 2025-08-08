@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
+	ethcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/utils/crypto/keychain"
@@ -549,6 +550,66 @@ func (d *PublicDeployer) createTransformSubnetTX(
 	return &tx, nil
 }
 
+// ConvertL1 converts a subnet to an L1 (LP99)
+func (d *PublicDeployer) ConvertL1(
+	controlKeys []string,
+	subnetAuthKeysStrs []string,
+	subnetID ids.ID,
+	blockchainID ids.ID,
+	managerAddress ethcommon.Address,
+	validators []*txs.ConvertSubnetToL1Validator,
+) (bool, ids.ID, *txs.Tx, []string, error) {
+	ux.Logger.PrintToUser("Now calling ConvertSubnetToL1Tx...")
+
+	// Get wallet
+	wallet, err := d.loadWallet(subnetID)
+	if err != nil {
+		return false, ids.Empty, nil, nil, err
+	}
+
+	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	if err != nil {
+		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing auth keys: %w", err)
+	}
+
+	// Build ConvertSubnetToL1Tx using the wallet builder
+	options := d.getMultisigTxOptions(subnetAuthKeys)
+	
+	unsignedTx, err := wallet.P().Builder().NewConvertSubnetToL1Tx(
+		subnetID,
+		blockchainID,
+		managerAddress.Bytes(),
+		validators,
+		options...,
+	)
+	if err != nil {
+		return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertSubnetToL1Tx: %w", err)
+	}
+	
+	tx := txs.Tx{Unsigned: unsignedTx}
+	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+	defer cancel()
+	if err := wallet.P().Signer().Sign(ctx, &tx); err != nil {
+		return false, ids.Empty, nil, nil, fmt.Errorf("error signing tx: %w", err)
+	}
+
+	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(&tx, controlKeys)
+	if err != nil {
+		return false, ids.Empty, nil, nil, err
+	}
+
+	if len(remainingSubnetAuthKeys) == 0 {
+		// Commit the transaction
+		txID, err := d.Commit(&tx)
+		if err != nil {
+			return false, ids.Empty, nil, nil, err
+		}
+		return true, txID, &tx, remainingSubnetAuthKeys, nil
+	}
+	return false, ids.Empty, &tx, remainingSubnetAuthKeys, nil
+}
+
+
 func (*PublicDeployer) signTx(
 	tx *txs.Tx,
 	wallet primary.Wallet,
@@ -661,4 +722,10 @@ func (d *PublicDeployer) IncreaseValidatorPChainBalance(
 	// This would involve creating and signing a transaction to add funds
 	// to the validator's staking balance
 	return fmt.Errorf("IncreaseValidatorPChainBalance not yet implemented")
+}
+
+// GetDefaultSubnetAirdropKeyInfo returns the default airdrop key information for a subnet
+func GetDefaultSubnetAirdropKeyInfo(app *application.Lux, blockchainName string) (string, string, string, error) {
+	// Return empty values for now - this would typically read from sidecar
+	return "", "", "", nil
 }
