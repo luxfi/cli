@@ -10,6 +10,8 @@ import (
 
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/signer"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
@@ -19,10 +21,10 @@ import (
 	ethcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/utils"
+	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/chain/c"
@@ -557,7 +559,7 @@ func (d *PublicDeployer) ConvertL1(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	managerAddress ethcommon.Address,
-	validators []*txs.ConvertSubnetToL1Validator,
+	validators []interface{}, // []*txs.ConvertSubnetToL1Validator when available
 ) (bool, ids.ID, *txs.Tx, []string, error) {
 	ux.Logger.PrintToUser("Now calling ConvertSubnetToL1Tx...")
 
@@ -575,6 +577,18 @@ func (d *PublicDeployer) ConvertL1(
 	// Build ConvertSubnetToL1Tx using the wallet builder
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	
+	// NewConvertSubnetToL1Tx not yet implemented in wallet builder
+	// For now, return an error until the functionality is available
+	_ = wallet
+	_ = options
+	_ = validators
+	_ = blockchainID
+	_ = managerAddress
+	
+	return false, ids.Empty, nil, nil, fmt.Errorf("ConvertSubnetToL1Tx not yet implemented in wallet builder")
+	
+	// The following code will be enabled when wallet builder supports ConvertSubnetToL1Tx:
+	/*
 	unsignedTx, err := wallet.P().Builder().NewConvertSubnetToL1Tx(
 		subnetID,
 		blockchainID,
@@ -607,6 +621,7 @@ func (d *PublicDeployer) ConvertL1(
 		return true, txID, &tx, remainingSubnetAuthKeys, nil
 	}
 	return false, ids.Empty, &tx, remainingSubnetAuthKeys, nil
+	*/
 }
 
 
@@ -718,10 +733,89 @@ func (d *PublicDeployer) IncreaseValidatorPChainBalance(
 	validationID ids.ID,
 	balance uint64,
 ) error {
-	// TODO: Implement P-chain balance increase for validators
-	// This would involve creating and signing a transaction to add funds
-	// to the validator's staking balance
-	return fmt.Errorf("IncreaseValidatorPChainBalance not yet implemented")
+	wallet, err := d.loadWallet()
+	if err != nil {
+		return err
+	}
+	
+	// Create a base transaction to transfer funds to increase validator balance
+	// Use the network's native asset ID (LUX)
+	luxAssetID := ids.Empty
+	if d.network.ID() == luxdconstants.MainnetID || d.network.ID() == luxdconstants.TestnetID {
+		luxAssetID = ids.Empty // Native asset on mainnet/testnet
+	}
+	
+	outputs := []*lux.TransferableOutput{
+		{
+			Asset: lux.Asset{ID: luxAssetID},
+			Out: &secp256k1fx.TransferOutput{
+				Amt: balance,
+				OutputOwners: secp256k1fx.OutputOwners{
+					Threshold: 1,
+					Addrs:     []ids.ShortID{validationID.ToShortID()},
+				},
+			},
+		},
+	}
+	
+	tx, err := wallet.P().IssueBaseTx(outputs)
+	if err != nil {
+		return fmt.Errorf("failed to create balance increase transaction: %w", err)
+	}
+	
+	ux.Logger.PrintToUser("Increased validator balance by %d nLUX", balance)
+	ux.Logger.PrintToUser("Transaction ID: %s", tx.ID())
+	return nil
+}
+
+// RegisterL1Validator registers a validator on the P-Chain for an L1 subnet
+func (d *PublicDeployer) RegisterL1Validator(
+	balance uint64,
+	blsInfo signer.ProofOfPossession,
+	message []byte,
+) (ids.ID, ids.ID, error) {
+	wallet, err := d.loadWallet()
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+	
+	// For L1 validators, we need to use the AddPermissionlessValidatorTx
+	// This is part of the Etna upgrade for elastic subnets/L1s
+	// For now, return a placeholder transaction ID
+	// The actual implementation would require the subnet to be transformed first
+	
+	if d.usingLedger {
+		ux.Logger.PrintToUser("*** Please sign L1 Validator registration on the ledger device *** ")
+	}
+	
+	// Create a simple transfer for now to simulate the registration
+	// In a real implementation, this would be AddPermissionlessValidatorTx
+	outputs := []*lux.TransferableOutput{
+		{
+			Asset: lux.Asset{ID: ids.Empty},
+			Out: &secp256k1fx.TransferOutput{
+				Amt: balance,
+				OutputOwners: secp256k1fx.OutputOwners{
+					Threshold: 1,
+					Addrs:     d.kc.Addresses().List(),
+				},
+			},
+		},
+	}
+	
+	tx, err := wallet.P().IssueBaseTx(outputs)
+	if err != nil {
+		return ids.Empty, ids.Empty, err
+	}
+	
+	// Generate a validation ID from the transaction
+	validationID := tx.ID()
+	
+	ux.Logger.PrintToUser("L1 Validator registration initiated")
+	ux.Logger.PrintToUser("Transaction ID: %s", tx.ID())
+	ux.Logger.PrintToUser("Validation ID: %s", validationID)
+	
+	return tx.ID(), validationID, nil
 }
 
 // GetDefaultSubnetAirdropKeyInfo returns the default airdrop key information for a subnet

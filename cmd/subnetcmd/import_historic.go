@@ -176,8 +176,11 @@ func importHistoricSubnets(cmd *cobra.Command, args []string) error {
 
 	if autoRegister {
 		ux.Logger.PrintToUser("\n📡 Registering subnets with node...")
-		// TODO: Add node registration logic here
-		ux.Logger.PrintToUser("✅ Subnet registration complete!")
+		// Node registration for imported subnets
+		// This will be implemented when the node API supports dynamic subnet registration
+		// For now, manual node configuration is required after import
+		ux.Logger.PrintToUser("⚠️  Note: Manual node configuration required for imported subnets")
+		ux.Logger.PrintToUser("✅ Subnet import complete - please configure your node manually")
 	}
 
 	ux.Logger.PrintToUser("\n🎉 Historic subnet import complete!")

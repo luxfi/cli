@@ -13,9 +13,9 @@ func validateConvertOperation(tx *txs.Tx, action string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	// TODO: ConvertSubnetToL1Tx is not yet implemented in the node package
-	// This function is stubbed for now and will need to be implemented when
-	// the transaction type is available
+	// ConvertSubnetToL1Tx transaction type is pending implementation in the node package
+	// This validation function will be fully implemented when the transaction type becomes available
+	// Track progress at: github.com/luxfi/node
 	_ = network // suppress unused variable warning
 	_ = action  // suppress unused variable warning
 	ux.Logger.PrintToUser("ConvertSubnetToL1Tx validation is not yet implemented")

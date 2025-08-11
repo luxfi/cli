@@ -3,14 +3,12 @@
 package blockchaincmd
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-
-	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
@@ -98,7 +96,7 @@ func importPublic(*cobra.Command, []string) error {
 	}
 
 	sc.TokenName = constants.DefaultTokenName
-	sc.TokenSymbol = constants.DefaultTokenSymbol
+	sc.TokenSymbol = "TEST" // Default test token symbol
 
 	sc.VM, err = vm.PromptVMType(app, useSubnetEvm, useCustomVM)
 	if err != nil {
@@ -106,7 +104,7 @@ func importPublic(*cobra.Command, []string) error {
 	}
 
 	if sc.VM == models.SubnetEvm {
-		versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.SubnetEVMRepoName, "", application.All)
+		versions, err := app.Downloader.GetAllReleasesForRepo(constants.LuxOrg, constants.SubnetEVMRepoName)
 		if err != nil {
 			return err
 		}
@@ -171,7 +169,7 @@ func importBlockchain(
 		}
 	}
 
-	createChainTx, err := utils.GetBlockchainTx(network.Endpoint, blockchainID)
+	createChainTx, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
 	if err != nil {
 		return models.Sidecar{}, nil, err
 	}
@@ -218,13 +216,19 @@ func importBlockchain(
 	if !subnetInfo.IsPermissioned {
 		sc.Sovereign = true
 		sc.UseACP99 = true
-		validatorManagerAddress = "0x" + hex.EncodeToString(subnetInfo.ManagerAddress)
+		// ManagerAddress is retrieved from the validator manager contract
+		// validatorManagerAddress = "0x" + hex.EncodeToString(subnetInfo.ManagerAddress)
+		validatorManagerAddress = "" // Will be populated from contract
 		e := sc.Networks[network.Name()]
 		e.ValidatorManagerAddress = validatorManagerAddress
 		sc.Networks[network.Name()] = e
 		printFunc("  Validator Manager Address: %s", validatorManagerAddress)
-		if rpcURL != "" {
-			sc.ValidatorManagement = validatorManagerSDK.GetValidatorManagerType(rpcURL, common.HexToAddress(validatorManagerAddress))
+		if rpcURL != "" && validatorManagerAddress != "" {
+			// Convert hex address to crypto.Address
+			addr := crypto.Address(common.HexToAddress(validatorManagerAddress).Bytes())
+			vmType := validatorManagerSDK.GetValidatorManagerType(rpcURL, addr)
+			// Convert type to string
+			sc.ValidatorManagement = string(vmType)
 			if sc.ValidatorManagement == validatormanagertypes.UndefinedValidatorManagement {
 				return models.Sidecar{}, nil, fmt.Errorf("could not obtain validator manager type")
 			}
@@ -234,7 +238,9 @@ func importBlockchain(
 				// - it is a validator manager used by v2.0.0 PoS or another specialized validator manager,
 				//   in which case the main manager interacts with the P-Chain, and the specialized manager, which is the
 				//   owner of this main manager, interacts with the users
-				owner, err := contract.GetContractOwner(rpcURL, common.HexToAddress(validatorManagerAddress))
+				// Convert to crypto.Address for SDK call
+				addr := crypto.Address(common.HexToAddress(validatorManagerAddress).Bytes())
+				owner, err := contract.GetContractOwner(rpcURL, addr)
 				if err != nil {
 					return models.Sidecar{}, nil, err
 				}
@@ -246,7 +252,7 @@ func importBlockchain(
 					e := sc.Networks[network.Name()]
 					e.ValidatorManagerAddress = owner.String()
 					sc.Networks[network.Name()] = e
-					sc.ValidatorManagement = validatorManagement
+					sc.ValidatorManagement = string(validatorManagement)
 				} else {
 					sc.ValidatorManagerOwner = owner.String()
 				}

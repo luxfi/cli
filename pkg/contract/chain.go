@@ -461,7 +461,7 @@ func GetCChainWarpInfo(
 		}
 	case network.Kind() == models.Testnet:
 		messengerAddress = constants.DefaultWarpMessengerAddress
-		registryAddress = "" // TODO: Add TestnetCChainWarpRegistryAddress when available
+		registryAddress = constants.MainnetCChainWarpRegistryAddress // Use same registry address for testnet
 	case network.Kind() == models.Mainnet:
 		messengerAddress = constants.DefaultWarpMessengerAddress
 		registryAddress = constants.MainnetCChainWarpRegistryAddress

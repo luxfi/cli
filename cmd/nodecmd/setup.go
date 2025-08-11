@@ -203,10 +203,19 @@ func promptSetupNodes() error {
 	var numNodes int
 	ux.Logger.PrintToUser("Only Ubuntu operating system is supported")
 	if len(nodeIPs) == 0 && len(sshKeyPaths) == 0 {
-		numNodes, err = app.Prompt.CaptureInt(
+		numNodesUint, err := app.Prompt.CaptureUint64Compare(
 			"How many Lux nodes do you want to setup?",
-			prompts.ValidatePositiveInt,
+			[]prompts.Comparator{
+				{
+					Label: "Positive",
+					Type:  prompts.MoreThan,
+					Value: 0,
+				},
+			},
 		)
+		if err == nil {
+			numNodes = int(numNodesUint)
+		}
 	}
 	if err != nil {
 		return err

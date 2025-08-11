@@ -3,6 +3,8 @@
 package nodecmd
 
 import (
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -34,21 +36,26 @@ func list(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	if len(clustersConfig.Clusters) == 0 {
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || len(clusters) == 0 {
 		ux.Logger.PrintToUser("There are no clusters defined.")
 	}
-	clusterNames := maps.Keys(clustersConfig.Clusters)
+	clusterNames := maps.Keys(clusters)
 	sort.Strings(clusterNames)
 	for _, clusterName := range clusterNames {
-		clusterConf := clustersConfig.Clusters[clusterName]
+		clusterConf := clusters[clusterName].(map[string]interface{})
 		if err := node.CheckCluster(app, clusterName); err != nil {
 			return err
 		}
-		cloudIDs := clusterConf.GetCloudIDs()
+		// Get cloud IDs from the Nodes list
+		nodes, _ := clusterConf["Nodes"].([]string)
 		nodeIDs := []string{}
-		for _, cloudID := range cloudIDs {
+		for _, cloudID := range nodes {
 			nodeIDStr := "----------------------------------------"
-			if clusterConf.IsLuxdHost(cloudID) {
+			// Check if this is a luxd host (has staking files)
+			stakingPath := filepath.Join(app.GetNodeInstanceDirPath(cloudID), "staker.crt")
+			if _, err := os.Stat(stakingPath); err == nil {
 				if nodeID, err := getNodeID(app.GetNodeInstanceDirPath(cloudID)); err != nil {
 					ux.Logger.RedXToUser("could not obtain node ID for nodes %s: %s", cloudID, err)
 				} else {
@@ -57,25 +64,58 @@ func list(_ *cobra.Command, _ []string) error {
 			}
 			nodeIDs = append(nodeIDs, nodeIDStr)
 		}
-		switch {
-		case clusterConf.External:
-			ux.Logger.PrintToUser("cluster %q (%s) EXTERNAL", clusterName, clusterConf.Network.Kind.String())
-		case clusterConf.Local:
-			ux.Logger.PrintToUser("cluster %q (%s) LOCAL", clusterName, clusterConf.Network.Kind.String())
-		default:
-			ux.Logger.PrintToUser("Cluster %q (%s)", clusterName, clusterConf.Network.Kind.String())
+		
+		// Get network info
+		networkKind := "Unknown"
+		if network, ok := clusterConf["Network"].(map[string]interface{}); ok {
+			if kind, ok := network["Kind"].(string); ok {
+				networkKind = kind
+			}
 		}
-		for i, cloudID := range clusterConf.GetCloudIDs() {
-			nodeConfig, err := app.LoadClusterNodeConfig(cloudID)
+		
+		external, _ := clusterConf["External"].(bool)
+		local, _ := clusterConf["Local"].(bool)
+		
+		switch {
+		case external:
+			ux.Logger.PrintToUser("cluster %q (%s) EXTERNAL", clusterName, networkKind)
+		case local:
+			ux.Logger.PrintToUser("cluster %q (%s) LOCAL", clusterName, networkKind)
+		default:
+			ux.Logger.PrintToUser("Cluster %q (%s)", clusterName, networkKind)
+		}
+		
+		for i, cloudID := range nodes {
+			nodeConfig, err := app.LoadClusterNodeConfig(clusterName, cloudID)
 			if err != nil {
 				return err
 			}
-			roles := clusterConf.GetHostRoles(nodeConfig)
+			
+			// Determine roles
+			roles := []string{}
+			apiNodes, _ := clusterConf["APINodes"].([]string)
+			for _, apiNode := range apiNodes {
+				if apiNode == cloudID {
+					roles = append(roles, "API")
+					break
+				}
+			}
+			
+			// Check if it's a monitor or load test node
+			if isMonitor, _ := nodeConfig["IsMonitor"].(bool); isMonitor {
+				roles = append(roles, "Monitor")
+			}
+			if isLoadTest, _ := nodeConfig["IsLoadTest"].(bool); isLoadTest {
+				roles = append(roles, "LoadTest")
+			}
+			
 			rolesStr := strings.Join(roles, ",")
 			if rolesStr != "" {
 				rolesStr = " [" + rolesStr + "]"
 			}
-			ux.Logger.PrintToUser("  Node %s (%s) %s%s", cloudID, nodeIDs[i], nodeConfig.ElasticIP, rolesStr)
+			
+			elasticIP, _ := nodeConfig["ElasticIP"].(string)
+			ux.Logger.PrintToUser("  Node %s (%s) %s%s", cloudID, nodeIDs[i], elasticIP, rolesStr)
 		}
 	}
 	return nil

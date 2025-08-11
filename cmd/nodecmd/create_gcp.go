@@ -57,9 +57,14 @@ func getGCPCloudCredentials() (*compute.Service, string, string, error) {
 	if err != nil {
 		return nil, "", "", err
 	}
-	if clustersConfig.GCPConfig != (models.GCPConfig{}) {
-		gcpProjectName = clustersConfig.GCPConfig.ProjectName
-		gcpCredentialsPath = clustersConfig.GCPConfig.ServiceAccFilePath
+	// clustersConfig is a map[string]interface{}, not a struct
+	if gcpConfig, ok := clustersConfig["GCPConfig"].(map[string]interface{}); ok && gcpConfig != nil {
+		if projectName, ok := gcpConfig["ProjectName"].(string); ok {
+			gcpProjectName = projectName
+		}
+		if serviceAccPath, ok := gcpConfig["ServiceAccFilePath"].(string); ok {
+			gcpCredentialsPath = serviceAccPath
+		}
 	}
 	if gcpProjectName == "" {
 		if cmdLineGCPProjectName != "" {
@@ -167,10 +172,7 @@ func createGCEInstances(gcpClient *gcpAPI.GcpCloud,
 	} else {
 		ux.Logger.PrintToUser("Creating separate monitoring VM instance(s) on Google Compute Engine...")
 	}
-	certInSSHDir, err := app.CheckCertInSSHDir(fmt.Sprintf("%s-keypair.pub", cliDefaultName))
-	if err != nil {
-		return nil, nil, "", "", err
-	}
+	certInSSHDir := app.CheckCertInSSHDir(fmt.Sprintf("%s-keypair.pub", cliDefaultName))
 	if !useSSHAgent && !certInSSHDir {
 		ux.Logger.PrintToUser("Creating new SSH key pair %s in GCP", sshKeyPath)
 		ux.Logger.PrintToUser("For more information regarding SSH key pair in GCP, please head to https://cloud.google.com/compute/docs/connect/create-ssh-keys")
@@ -381,13 +383,19 @@ func updateClustersConfigGCPKeyFilepath(projectName, serviceAccountKeyFilepath s
 	if err != nil {
 		return err
 	}
+	// Ensure GCPConfig exists in the map
+	if _, ok := clustersConfig["GCPConfig"]; !ok {
+		clustersConfig["GCPConfig"] = make(map[string]interface{})
+	}
+	gcpConfig := clustersConfig["GCPConfig"].(map[string]interface{})
+	
 	if projectName != "" {
-		clustersConfig.GCPConfig.ProjectName = projectName
+		gcpConfig["ProjectName"] = projectName
 	}
 	if serviceAccountKeyFilepath != "" {
-		clustersConfig.GCPConfig.ServiceAccFilePath = serviceAccountKeyFilepath
+		gcpConfig["ServiceAccFilePath"] = serviceAccountKeyFilepath
 	}
-	return app.WriteClustersConfigFile(&clustersConfig)
+	return app.SaveClustersConfig(clustersConfig)
 }
 
 func grantAccessToPublicIPViaFirewall(gcpClient *gcpAPI.GcpCloud, projectName string, publicIP string, label string) error {
@@ -398,7 +406,7 @@ func grantAccessToPublicIPViaFirewall(gcpClient *gcpAPI.GcpCloud, projectName st
 	networkName := fmt.Sprintf("%s-network", prefix)
 	firewallName := fmt.Sprintf("%s-%s-%s", networkName, strings.ReplaceAll(publicIP, ".", ""), label)
 	ports := []string{
-		strconv.Itoa(constants.LuxdMachineMetricsPort), strconv.Itoa(constants.LuxdAPIPort),
+		strconv.Itoa(constants.LuxdMachineMetricsPortInt), strconv.Itoa(constants.LuxdAPIPort),
 		strconv.Itoa(constants.LuxdMonitoringPort), strconv.Itoa(constants.LuxdGrafanaPort),
 		strconv.Itoa(constants.LuxdLokiPort),
 	}

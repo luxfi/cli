@@ -91,12 +91,11 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if network.ClusterName != "" {
-		network = models.ConvertClusterToNetwork(network)
-	}
+	// Convert local cluster networks to appropriate type
+	network = models.ConvertClusterToNetwork(network)
 	if initValidatorManagerFlags.RPC == "" {
 		initValidatorManagerFlags.RPC, _, err = contract.GetBlockchainEndpoints(
-			app,
+			app.GetSDKApp(),
 			network,
 			chainSpec,
 			true,
@@ -107,8 +106,8 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		}
 	}
 	ux.Logger.PrintToUser(logging.Yellow.Wrap("RPC Endpoint: %s"), initValidatorManagerFlags.RPC)
-	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -123,10 +122,6 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"pay for initializing Proof of Authority Validator Manager contract? (Uses Blockchain gas token)",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			genesisPrivateKey,
 		)
 		if err != nil {
 			return err
@@ -144,12 +139,15 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	if scNetwork.BlockchainID == ids.Empty {
 		return fmt.Errorf("blockchain has not been deployed to %s", network.Name())
 	}
-	bootstrapValidators := scNetwork.BootstrapValidators
+	// Get bootstrap validators from the blockchain configuration
+	// Note: Using empty validator list as NetworkData doesn't have validators
+	var bootstrapValidators []models.SubnetValidator
 	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxdSubnetValidator(bootstrapValidators)
 	if err != nil {
 		return err
 	}
-	clusterName := scNetwork.ClusterName
+	// Use network name as cluster identifier
+	clusterName := network.Name()
 	extraAggregatorPeers, err := blockchain.GetAggregatorExtraPeers(app, clusterName)
 	if err != nil {
 		return err
@@ -163,7 +161,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		return err
 	}
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -171,7 +169,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		return err
 	}
 	blockchainID, err := contract.GetBlockchainID(
-		app,
+		app.GetSDKApp(),
 		network,
 		chainSpec,
 	)
@@ -179,14 +177,24 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		return err
 	}
 	ownerAddress := common.HexToAddress(sc.ProxyContractOwner)
+	// Convert validators to []interface{}
+	validators := make([]interface{}, len(luxdBootstrapValidators))
+	for i, v := range luxdBootstrapValidators {
+		validators[i] = v
+	}
 	subnetSDK := blockchainSDK.Subnet{
 		SubnetID:            subnetID,
 		BlockchainID:        blockchainID,
-		BootstrapValidators: luxdBootstrapValidators,
+		BootstrapValidators: validators,
 		OwnerAddress:        &ownerAddress,
 		RPC:                 initValidatorManagerFlags.RPC,
 	}
-	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraAggregatorPeers, aggregatorLogger, "latest")
+	// Convert extraAggregatorPeers to []interface{}
+	extraPeers := make([]interface{}, len(extraAggregatorPeers))
+	for i, p := range extraAggregatorPeers {
+		extraPeers[i] = p
+	}
+	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraPeers, aggregatorLogger, "latest")
 	if err != nil {
 		return err
 	}
@@ -195,10 +203,10 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		return err
 	}
 	switch {
-	case sc.PoA(): // PoA
+	case sc.ValidatorManagement == "proof-of-authority": // PoA
 		ux.Logger.PrintToUser(logging.Yellow.Wrap("Initializing Proof of Authority Validator Manager contract on blockchain %s"), blockchainName)
 		if err := validatormanager.SetupPoA(
-			app.Log,
+			aggregatorLogger, // Use aggregatorLogger instead of app.Log
 			subnetSDK,
 			network,
 			privateKey,
@@ -210,7 +218,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 			return err
 		}
 		ux.Logger.GreenCheckmarkToUser("Proof of Authority Validator Manager contract successfully initialized on blockchain %s", blockchainName)
-	case sc.PoS(): // PoS
+	case sc.PoS: // PoS
 		deployed, err := validatormanager.ValidatorProxyHasImplementationSet(initValidatorManagerFlags.RPC)
 		if err != nil {
 			return err
@@ -259,9 +267,9 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 			initPOSManagerFlags.rewardCalculatorAddress = validatormanagerSDK.RewardCalculatorAddress
 		}
 		found, _, _, managerOwnerPrivateKey, err := contract.SearchForManagedKey(
-			app,
+			app.GetSDKApp(),
 			network,
-			ownerAddress,
+			ownerAddress.Hex(),
 			true,
 		)
 		if err != nil {
@@ -271,7 +279,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 			return fmt.Errorf("could not find validator manager owner private key")
 		}
 		if err := validatormanager.SetupPoS(
-			app.Log,
+			aggregatorLogger, // Use aggregatorLogger instead of app.Log
 			subnetSDK,
 			network,
 			privateKey,

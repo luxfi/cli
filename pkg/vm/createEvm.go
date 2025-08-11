@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
-	// "github.com/luxfi/evm/precompile/contracts/txallowlist" // TODO: uncomment when fixed
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/geth/common"
 )
 
@@ -115,28 +115,36 @@ func createEvmGenesis(
 		subnetEvmState.NextState(direction)
 	}
 
-	// TODO: GenesisPrecompiles needs to be accessed from extras.ChainConfig
-	// if conf != nil && conf.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
-	// 	allowListCfg, ok := conf.GenesisPrecompiles[txallowlist.ConfigKey].(*txallowlist.Config)
-	// 	if !ok {
-	// 		return nil, nil, fmt.Errorf("expected config of type txallowlist.AllowListConfig, but got %T", allowListCfg)
-	// 	}
+	// Check for txallowlist in extras config
+	if params.GetExtra(conf) != nil && params.GetExtra(conf).GenesisPrecompiles != nil {
+		if precompile, exists := params.GetExtra(conf).GenesisPrecompiles[txallowlist.ConfigKey]; exists {
+			allowListCfg, ok := precompile.(*txallowlist.Config)
+			if !ok {
+				return nil, nil, fmt.Errorf("expected config of type txallowlist.Config, but got %T", precompile)
+			}
 
-	// 	if err := ensureAdminsHaveBalance(
-	// 		allowListCfg.AdminAddresses,
-	// 		allocation); err != nil {
-	// 		return nil, nil, err
-	// 	}
-	// }
+			// Convert common.Address to crypto.Address
+			adminAddrs := make([]crypto.Address, len(allowListCfg.AdminAddresses))
+			for i, addr := range allowListCfg.AdminAddresses {
+				adminAddrs[i] = crypto.HexToAddress(addr.Hex())
+			}
+			if err := ensureAdminsHaveBalance(adminAddrs, allocation); err != nil {
+				return nil, nil, err
+			}
+		}
+	}
 
 	conf.ChainID = chainID
 
 	genesis.Alloc = allocation
 	genesis.Config = conf
 	genesis.Difficulty = Difficulty
-	// TODO: FeeConfig needs to be accessed from extras.ChainConfig
-	// genesis.GasLimit = conf.FeeConfig.GasLimit.Uint64()
-	genesis.GasLimit = 8000000 // Default gas limit
+	// Get gas limit from extras FeeConfig if available
+	if params.GetExtra(conf) != nil && params.GetExtra(conf).FeeConfig.GasLimit != nil {
+		genesis.GasLimit = params.GetExtra(conf).FeeConfig.GasLimit.Uint64()
+	} else {
+		genesis.GasLimit = 8000000 // Default gas limit
+	}
 
 	jsonBytes, err := genesis.MarshalJSON()
 	if err != nil {

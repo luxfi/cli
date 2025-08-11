@@ -157,7 +157,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 	// or, pluginDir was set but not luxdConfigPath
 	// if **both** flags were set, this will be skipped...
 	if luxdConfigPath == "" {
-		luxdConfigPath, err = plugins.FindLuxdConfigPath()
+		luxdConfigPath, err = plugins.FindLuxConfigPath()
 		if err != nil {
 			return err
 		}

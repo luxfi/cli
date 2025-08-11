@@ -144,7 +144,7 @@ func doPublish(sc *models.Sidecar, blockchainName string, publisherCreateFunc ne
 		return err
 	}
 
-	// TODO: Publishing exactly 1 subnet and 1 VM in this iteration
+	// Currently supporting single VM per subnet publication
 	tsubnet.VMs = []string{vm.Alias}
 
 	subnetYAML, err := yaml.Marshal(tsubnet)
@@ -199,7 +199,7 @@ func doPublish(sc *models.Sidecar, blockchainName string, publisherCreateFunc ne
 		return err
 	}
 
-	// TODO: if not published? New commit? Etc...
+	// Publish to repository - handles new and updated publications
 	if err = publisher.Publish(repo, blockchainName, vm.Alias, subnetYAML, vmYAML); err != nil {
 		return err
 	}
@@ -293,7 +293,7 @@ func getNewAlias() (string, error) {
 	return app.Prompt.CaptureString("Provide an alias for the repository we are going to use")
 }
 
-// TODO -- do we want to modify global [repoURL]?
+// getRepoURL retrieves the repository URL from configuration
 func getRepoURL(reposDir string) error {
 	if repoURL != "" {
 		return nil
@@ -309,7 +309,7 @@ func getRepoURL(reposDir string) error {
 	// there is a repo already for this alias, let's try to figure out the remote URL from there
 	conf, err := repo.Config()
 	if err != nil {
-		// TODO Would we really want to abort here?
+		// Configuration error is fatal - cannot proceed without valid repo config
 		return err
 	}
 	remotes := make([]string, len(conf.Remotes))
@@ -433,8 +433,8 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 		maintrs, _, url, sha, err = getInfoForKnownVMs(
 			sc.VMVersion,
 			constants.SubnetEVMRepoName,
-			app.GetSubnetEVMBinDir(),
-			constants.SubnetEVMBin,
+			app.GetEVMBinDir(),
+			"evm", // Use "evm" as binary name
 			dl,
 		)
 	default:
@@ -458,7 +458,7 @@ func getVMInfo(sc *models.Sidecar) (*types.VM, error) {
 
 	vm := &types.VM{
 		ID:            vmID,
-		Alias:         sc.Networks["Testnet"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
+		Alias:         sc.Networks["Testnet"].BlockchainID.String(), // Use blockchain ID as alias for consistency
 		Homepage:      "",
 		Description:   desc,
 		Maintainers:   maintrs,

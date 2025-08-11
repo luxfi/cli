@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"math/big"
 	"os"
 	"time"
 
@@ -387,9 +388,17 @@ func promptFeeManagerParams(
 	}
 	var feeConfig *commontype.FeeConfig
 	if yes {
-		// TODO: FeeConfig needs to be handled with precompile extras
-		// For now, use a nil feeConfig which means no change
-		feeConfig = nil
+		// Create default fee configuration
+		feeConfig = createFeeConfig(
+			big.NewInt(8000000),   // gasLimit
+			2,                      // targetBlockRate
+			big.NewInt(25000000000), // minBaseFee
+			big.NewInt(15000000),   // targetGas
+			big.NewInt(36),         // baseFeeChangeDenominator
+			big.NewInt(0),          // minBlockGasCost
+			big.NewInt(1000000),    // maxBlockGasCost
+			big.NewInt(200000),     // blockGasCostStep
+		)
 	}
 	config := feemanager.NewConfig(
 		subnetevmutils.NewUint64(uint64(date.Unix())),
@@ -425,8 +434,7 @@ func GetFeeConfig(config params.ChainConfig, useDefault bool) (
 		setGasStep                  = "Set block gas cost step"
 	)
 
-	// TODO: FeeConfig needs to be handled with precompile extras
-	// For now, return the unmodified config
+	// Return default configuration if requested
 	if useDefault {
 		return config, nil
 	}
@@ -441,9 +449,10 @@ func GetFeeConfig(config params.ChainConfig, useDefault bool) (
 		return config, err
 	}
 
-	// TODO: Dynamic fees configuration moved to SDK
+	// Dynamic fees configuration
+	useDynamicFees := false
 	if feeDefault != customFee {
-		_, err = app.Prompt.CaptureYesNo("Do you want to enable dynamic fees?")
+		useDynamicFees, err = app.Prompt.CaptureYesNo("Do you want to enable dynamic fees?")
 		if err != nil {
 			return config, err
 		}
@@ -451,72 +460,78 @@ func GetFeeConfig(config params.ChainConfig, useDefault bool) (
 
 	switch feeDefault {
 	case lowOption:
-		// TODO: Move to SDK - vm.SetStandardGas(&config.FeeConfig, vm.LowGasLimit, vm.LowTargetGas, useDynamicFees)
+		extraConfig := params.GetExtra(&config)
+		setLowGasConfig(&extraConfig.FeeConfig, useDynamicFees)
+		params.SetExtra(&config, extraConfig)
 		return config, nil
 	case mediumOption:
-		// TODO: Move to SDK - vm.SetStandardGas(&config.FeeConfig, vm.MediumGasLimit, vm.MediumTargetGas, useDynamicFees)
-		return config, err
+		extraConfig := params.GetExtra(&config)
+		setMediumGasConfig(&extraConfig.FeeConfig, useDynamicFees)
+		params.SetExtra(&config, extraConfig)
+		return config, nil
 	case highOption:
-		// TODO: Move to SDK - vm.SetStandardGas(&config.FeeConfig, vm.HighGasLimit, vm.HighTargetGas, useDynamicFees)
-		return config, err
+		extraConfig := params.GetExtra(&config)
+		setHighGasConfig(&extraConfig.FeeConfig, useDynamicFees)
+		params.SetExtra(&config, extraConfig)
+		return config, nil
 	default:
 		ux.Logger.PrintToUser("Customizing fee config")
 	}
 
-	// TODO: Custom fee configuration moved to SDK
-	// Temporarily commented out until SDK support is added
-	_, err = app.Prompt.CapturePositiveBigInt(setGasLimit)
+	// Custom fee configuration
+	gasLimit, err := app.Prompt.CapturePositiveBigInt(setGasLimit)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setBlockRate)
+	blockRate, err := app.Prompt.CaptureUint64(setBlockRate)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setMinBaseFee)
+	minBaseFee, err := app.Prompt.CapturePositiveBigInt(setMinBaseFee)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setTargetGas)
+	targetGas, err := app.Prompt.CapturePositiveBigInt(setTargetGas)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setBaseFeeChangeDenominator)
+	baseFeeChangeDenominator, err := app.Prompt.CapturePositiveBigInt(setBaseFeeChangeDenominator)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setMinBlockGas)
+	minBlockGas, err := app.Prompt.CapturePositiveBigInt(setMinBlockGas)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setMaxBlockGas)
+	maxBlockGas, err := app.Prompt.CapturePositiveBigInt(setMaxBlockGas)
 	if err != nil {
 		return config, err
 	}
 
-	_, err = app.Prompt.CapturePositiveBigInt(setGasStep)
+	gasStep, err := app.Prompt.CapturePositiveBigInt(setGasStep)
 	if err != nil {
 		return config, err
 	}
 
-	// TODO: Move FeeConfig to SDK - this should be one function call
-	// feeConf := commontype.FeeConfig{
-	// 	GasLimit:                 gasLimit,
-	// 	TargetBlockRate:          blockRate.Uint64(),
-	// 	MinBaseFee:               minBaseFee,
-	// 	TargetGas:                targetGas,
-	// 	BaseFeeChangeDenominator: baseDenominator,
-	// 	MinBlockGasCost:          minBlockGas,
-	// 	MaxBlockGasCost:          maxBlockGas,
-	// 	BlockGasCostStep:         gasStep,
-	// }
-	// config.FeeConfig = feeConf
+	// Apply custom fee configuration
+	extraConfig := params.GetExtra(&config)
+	extraConfig.FeeConfig = commontype.FeeConfig{
+		GasLimit:                 gasLimit,
+		TargetBlockRate:          blockRate,
+		MinBaseFee:               minBaseFee,
+		TargetGas:                targetGas,
+		BaseFeeChangeDenominator: baseFeeChangeDenominator,
+		MinBlockGasCost:          minBlockGas,
+		MaxBlockGasCost:          maxBlockGas,
+		BlockGasCostStep:         gasStep,
+	}
+	params.SetExtra(&config, extraConfig)
 
 	return config, nil
 }

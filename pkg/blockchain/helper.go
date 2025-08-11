@@ -53,12 +53,46 @@ func GetAggregatorNetworkUris(app *application.Lux, clusterName string) ([]strin
 			if !ok {
 				return nil, fmt.Errorf("cluster %s not found", clusterName)
 			}
-			// For now, skip the cloud ID filtering as it requires complex type assertions
-			// TODO: Implement proper cluster config parsing
-			_ = clusterData
+			// Parse cluster config to extract node endpoints
+			if err := parseClusterConfig(clusterData, &aggregatorExtraPeerEndpointsUris); err != nil {
+				return nil, fmt.Errorf("failed to parse cluster config: %w", err)
+			}
 		}
 	}
 	return aggregatorExtraPeerEndpointsUris, nil
+}
+
+// parseClusterConfig extracts node endpoints from cluster configuration
+func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string) error {
+	// Extract nodes field
+	if nodes, ok := clusterData["Nodes"].([]interface{}); ok {
+		for _, node := range nodes {
+			if nodeStr, ok := node.(string); ok {
+				// Construct endpoint URI from node ID
+				endpoint := fmt.Sprintf("http://%s:9650", nodeStr)
+				*endpoints = append(*endpoints, endpoint)
+			}
+		}
+	}
+	
+	// Extract API nodes if available
+	if apiNodes, ok := clusterData["APINodes"].([]interface{}); ok {
+		for _, apiNode := range apiNodes {
+			if apiNodeStr, ok := apiNode.(string); ok {
+				// API nodes are already endpoints
+				*endpoints = append(*endpoints, apiNodeStr)
+			}
+		}
+	}
+	
+	// Extract network data if present
+	if networkData, ok := clusterData["Network"].(map[string]interface{}); ok {
+		if endpoint, ok := networkData["Endpoint"].(string); ok && endpoint != "" {
+			*endpoints = append(*endpoints, endpoint)
+		}
+	}
+	
+	return nil
 }
 
 func UrisToPeers(uris []string) ([]info.Peer, error) {

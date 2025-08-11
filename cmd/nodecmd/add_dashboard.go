@@ -32,7 +32,7 @@ func addDashboard(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	if isLocal, ok := clusterConfig["local"].(bool); ok && isLocal {
 		return notImplementedForLocal("addDashboard")
 	}
 	if customGrafanaDashboardPath != "" {

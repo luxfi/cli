@@ -146,11 +146,11 @@ func startLoadTest(_ *cobra.Command, args []string) error {
 	cloudService := ""
 	if existingSeparateInstance != "" {
 		ux.Logger.PrintToUser("Will be using cloud instance %s to run load test...", existingSeparateInstance)
-		separateNodeConfig, err := app.LoadClusterNodeConfig(existingSeparateInstance)
+		separateNodeConfig, err := app.LoadClusterNodeConfig(clusterName, existingSeparateInstance)
 		if err != nil {
 			return err
 		}
-		cloudService = separateNodeConfig.CloudService
+		cloudService, _ = separateNodeConfig["CloudService"].(string)
 	} else {
 		ux.Logger.PrintToUser("Creating a separate instance to run load test...")
 		cloudService, err = setCloudService()
@@ -201,7 +201,7 @@ func startLoadTest(_ *cobra.Command, args []string) error {
 			}
 			loadTestNodeConfig = loadTestCloudConfig[separateHostRegion]
 		} else {
-			loadTestNodeConfig, separateHostRegion, err = getNodeCloudConfig(existingSeparateInstance)
+			loadTestNodeConfig, separateHostRegion, err = getNodeCloudConfig(clusterName, existingSeparateInstance)
 			if err != nil {
 				return err
 			}
@@ -248,7 +248,7 @@ func startLoadTest(_ *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			loadTestNodeConfig, separateHostRegion, err = getNodeCloudConfig(existingSeparateInstance)
+			loadTestNodeConfig, separateHostRegion, err = getNodeCloudConfig(clusterName, existingSeparateInstance)
 			if err != nil {
 				return err
 			}
@@ -416,51 +416,75 @@ func createClusterYAMLFile(clusterName, subnetID, chainID string, separateHost *
 	var apiNodes []nodeInfo
 	var validatorNodes []nodeInfo
 	var monitorNode nodeInfo
-	for _, cloudID := range clusterConf.GetCloudIDs() {
-		nodeConfig, err := app.LoadClusterNodeConfig(cloudID)
+	// Get cloud IDs from the Nodes list
+	nodes, _ := clusterConf["Nodes"].([]string)
+	apiNodesList, _ := clusterConf["APINodes"].([]string)
+	
+	for _, cloudID := range nodes {
+		nodeConfig, err := app.LoadClusterNodeConfig(clusterName, cloudID)
 		if err != nil {
 			return err
 		}
 		nodeIDStr := ""
-		if clusterConf.IsLuxdHost(cloudID) {
+		// Check if this is a luxd host (has staking files)
+		stakingPath := filepath.Join(app.GetNodeInstanceDirPath(cloudID), "staker.crt")
+		if _, err := os.Stat(stakingPath); err == nil {
 			nodeID, err := getNodeID(app.GetNodeInstanceDirPath(cloudID))
 			if err != nil {
 				return err
 			}
 			nodeIDStr = nodeID.String()
 		}
-		roles := clusterConf.GetHostRoles(nodeConfig)
+		
+		// Determine roles
+		roles := []string{}
+		isAPINode := false
+		for _, apiNode := range apiNodesList {
+			if apiNode == cloudID {
+				isAPINode = true
+				roles = append(roles, constants.APIRole)
+				break
+			}
+		}
+		if !isAPINode && nodeIDStr != "" {
+			roles = append(roles, constants.ValidatorRole)
+		}
+		
 		if len(roles) == 0 {
 			return fmt.Errorf("incorrect node config file at %s", app.GetNodeConfigPath(cloudID))
 		}
+		
+		elasticIP, _ := nodeConfig["ElasticIP"].(string)
+		region, _ := nodeConfig["Region"].(string)
+		
 		switch roles[0] {
 		case constants.ValidatorRole:
 			validatorNode := nodeInfo{
 				CloudID: cloudID,
 				NodeID:  nodeIDStr,
-				IP:      nodeConfig.ElasticIP,
-				Region:  nodeConfig.Region,
+				IP:      elasticIP,
+				Region:  region,
 			}
 			validatorNodes = append(validatorNodes, validatorNode)
 		case constants.APIRole:
 			apiNode := nodeInfo{
 				CloudID: cloudID,
-				IP:      nodeConfig.ElasticIP,
-				Region:  nodeConfig.Region,
+				IP:      elasticIP,
+				Region:  region,
 			}
 			apiNodes = append(apiNodes, apiNode)
 		case constants.MonitorRole:
 			monitorNode = nodeInfo{
 				CloudID: cloudID,
-				IP:      nodeConfig.ElasticIP,
-				Region:  nodeConfig.Region,
+				IP:      elasticIP,
+				Region:  region,
 			}
 		default:
 		}
 	}
 	var separateHostInfo nodeInfo
 	if separateHost != nil {
-		_, separateHostRegion, err := getNodeCloudConfig(separateHost.GetCloudID())
+		_, separateHostRegion, err := getNodeCloudConfig(clusterName, separateHost.GetCloudID())
 		if err != nil {
 			return err
 		}
@@ -485,13 +509,13 @@ func GetLoadTestScript(app *application.Lux) error {
 	var err error
 	if loadTestRepoURL != "" {
 		ux.Logger.PrintToUser("Checking source code repository URL %s", loadTestRepoURL)
-		if err := prompts.ValidateURL(loadTestRepoURL); err != nil {
+		if err := prompts.ValidateURLFormat(loadTestRepoURL); err != nil {
 			ux.Logger.PrintToUser("Invalid repository url %s: %s", loadTestRepoURL, err)
 			loadTestRepoURL = ""
 		}
 	}
 	if loadTestRepoURL == "" {
-		loadTestRepoURL, err = app.Prompt.CaptureURL("Source code repository URL", true)
+		loadTestRepoURL, err = app.Prompt.CaptureURL("Source code repository URL")
 		if err != nil {
 			return err
 		}
@@ -527,9 +551,17 @@ func getExistingLoadTestInstance(clusterName, loadTestName string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	if _, ok := clustersConfig.Clusters[clusterName]; ok {
-		if _, loadTestExists := clustersConfig.Clusters[clusterName].LoadTestInstance[loadTestName]; loadTestExists {
-			return clustersConfig.Clusters[clusterName].LoadTestInstance[loadTestName], nil
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || clusters == nil {
+		return "", nil
+	}
+	
+	if cluster, ok := clusters[clusterName].(map[string]interface{}); ok {
+		if loadTestInstance, ok := cluster["LoadTestInstance"].(map[string]string); ok {
+			if instanceID, exists := loadTestInstance[loadTestName]; exists {
+				return instanceID, nil
+			}
 		}
 	}
 	return "", nil

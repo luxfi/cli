@@ -53,10 +53,16 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// clusterConfig is a map[string]interface{}, not a struct
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("deploy")
 	}
-	if clusterConfig.Network.Kind != models.Devnet {
+	// Check network kind
+	if networkData, ok := clusterConfig["Network"].(map[string]interface{}); ok {
+		if kind, ok := networkData["Kind"].(string); ok && kind != "Devnet" {
+			return fmt.Errorf("node deploy command must be applied to devnet clusters")
+		}
+	} else if network, ok := clusterConfig["Network"].(models.Network); ok && network.Kind() != models.Devnet {
 		return fmt.Errorf("node deploy command must be applied to devnet clusters")
 	}
 	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))

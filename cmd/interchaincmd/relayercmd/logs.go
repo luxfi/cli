@@ -32,7 +32,6 @@ var (
 	raw                bool
 	last               uint
 	first              uint
-	globalNetworkFlags networkoptions.NetworkFlags
 )
 
 // lux interchain relayer logs

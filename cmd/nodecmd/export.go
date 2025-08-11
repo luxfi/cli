@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/sdk/models"
+	sdkconstants "github.com/luxfi/sdk/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 
@@ -61,21 +62,47 @@ func exportFile(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	clusterConf.Network.ClusterName = "" // hide cluster name
-	clusterConf.External = true          // mark cluster as external
-	nodes, err := utils.MapWithError(clusterConf.Nodes, func(nodeName string) (models.ExportNode, error) {
+	// clusterConf is a map[string]interface{}, not a struct
+	if network, ok := clusterConf["Network"].(map[string]interface{}); ok {
+		network["ClusterName"] = "" // hide cluster name
+	}
+	clusterConf["External"] = true // mark cluster as external
+	
+	// Get the nodes list
+	nodesList, _ := clusterConf["Nodes"].([]string)
+	exportNodes, err := utils.MapWithError(nodesList, func(nodeName string) (models.ExportNode, error) {
 		var err error
-		nodeConf, err := app.LoadClusterNodeConfig(nodeName)
-		nodeConf.CertPath, nodeConf.SecurityGroup, nodeConf.KeyPair = "", "", "" // hide cert path and sg id
+		nodeConf, err := app.LoadClusterNodeConfig(clusterName, nodeName)
 		if err != nil {
 			return models.ExportNode{}, err
 		}
-		signerKey, stakerKey, stakerCrt, err := readKeys(filepath.Join(app.GetNodesDir(), nodeConf.NodeID))
+		// Hide sensitive information
+		nodeConf["CertPath"] = ""
+		nodeConf["SecurityGroup"] = ""
+		nodeConf["KeyPair"] = ""
+		
+		nodeID, _ := nodeConf["NodeID"].(string)
+		signerKey, stakerKey, stakerCrt, err := readKeys(filepath.Join(app.GetNodesDir(), nodeID))
 		if err != nil {
 			return models.ExportNode{}, err
+		}
+		// Convert map to NodeConfig struct
+		nc := models.NodeConfig{
+			NodeID:        nodeID,
+			Region:        nodeConf["Region"].(string),
+			AMI:           nodeConf["AMI"].(string),
+			KeyPair:       "", // Already cleared
+			CertPath:      "", // Already cleared
+			SecurityGroup: "", // Already cleared
+			ElasticIP:     nodeConf["ElasticIP"].(string),
+			CloudService:  nodeConf["CloudService"].(string),
+			UseStaticIP:   nodeConf["UseStaticIP"].(bool),
+			IsMonitor:     nodeConf["IsMonitor"].(bool),
+			IsWarpRelayer: nodeConf["IsWarpRelayer"].(bool),
+			IsLoadTest:    nodeConf["IsLoadTest"].(bool),
 		}
 		return models.ExportNode{
-			NodeConfig: nodeConf,
+			NodeConfig: nc,
 			SignerKey:  signerKey,
 			StakerKey:  stakerKey,
 			StakerCrt:  stakerCrt,
@@ -87,15 +114,35 @@ func exportFile(_ *cobra.Command, args []string) error {
 	}
 	// monitoring instance
 	monitor := models.ExportNode{}
-	if clusterConf.MonitoringInstance != "" {
-		monitoringHost, err := app.LoadClusterNodeConfig(clusterConf.MonitoringInstance)
+	monitoringInstance, _ := clusterConf["MonitoringInstance"].(string)
+	if monitoringInstance != "" {
+		monitoringHost, err := app.LoadClusterNodeConfig(clusterName, monitoringInstance)
 		if err != nil {
 			ux.Logger.RedXToUser("could not load monitoring host configuration: %v", err)
 			return err
 		}
-		monitoringHost.CertPath, monitoringHost.SecurityGroup, monitoringHost.KeyPair = "", "", "" // hide cert path and sg id
+		// Hide sensitive information
+		monitoringHost["CertPath"] = ""
+		monitoringHost["SecurityGroup"] = ""
+		monitoringHost["KeyPair"] = ""
+		
+		// Convert map to NodeConfig struct
+		monitorNC := models.NodeConfig{
+			NodeID:        monitoringHost["NodeID"].(string),
+			Region:        monitoringHost["Region"].(string),
+			AMI:           monitoringHost["AMI"].(string),
+			KeyPair:       "", // Already cleared
+			CertPath:      "", // Already cleared
+			SecurityGroup: "", // Already cleared
+			ElasticIP:     monitoringHost["ElasticIP"].(string),
+			CloudService:  monitoringHost["CloudService"].(string),
+			UseStaticIP:   monitoringHost["UseStaticIP"].(bool),
+			IsMonitor:     true,
+			IsWarpRelayer: monitoringHost["IsWarpRelayer"].(bool),
+			IsLoadTest:    monitoringHost["IsLoadTest"].(bool),
+		}
 		monitor = models.ExportNode{
-			NodeConfig: monitoringHost,
+			NodeConfig: monitorNC,
 			SignerKey:  "",
 			StakerKey:  "",
 			StakerCrt:  "",
@@ -103,24 +150,97 @@ func exportFile(_ *cobra.Command, args []string) error {
 	}
 	// loadtest nodes
 	loadTestNodes := []models.ExportNode{}
-	for _, loadTestNode := range clusterConf.LoadTestInstance {
-		loadTestNodeConf, err := app.LoadClusterNodeConfig(loadTestNode)
+	loadTestInstances, _ := clusterConf["LoadTestInstance"].([]string)
+	for _, loadTestNode := range loadTestInstances {
+		loadTestNodeConf, err := app.LoadClusterNodeConfig(clusterName, loadTestNode)
 		if err != nil {
 			ux.Logger.RedXToUser("could not load load test node configuration: %v", err)
 			return err
 		}
-		loadTestNodeConf.CertPath, loadTestNodeConf.SecurityGroup, loadTestNodeConf.KeyPair = "", "", "" // hide cert path and sg id
+		// Hide sensitive information
+		loadTestNodeConf["CertPath"] = ""
+		loadTestNodeConf["SecurityGroup"] = ""
+		loadTestNodeConf["KeyPair"] = ""
+		
+		// Convert map to NodeConfig struct
+		ltNC := models.NodeConfig{
+			NodeID:        loadTestNodeConf["NodeID"].(string),
+			Region:        loadTestNodeConf["Region"].(string),
+			AMI:           loadTestNodeConf["AMI"].(string),
+			KeyPair:       "", // Already cleared
+			CertPath:      "", // Already cleared
+			SecurityGroup: "", // Already cleared
+			ElasticIP:     loadTestNodeConf["ElasticIP"].(string),
+			CloudService:  loadTestNodeConf["CloudService"].(string),
+			UseStaticIP:   loadTestNodeConf["UseStaticIP"].(bool),
+			IsMonitor:     loadTestNodeConf["IsMonitor"].(bool),
+			IsWarpRelayer: loadTestNodeConf["IsWarpRelayer"].(bool),
+			IsLoadTest:    true,
+		}
 		loadTestNodes = append(loadTestNodes, models.ExportNode{
-			NodeConfig: loadTestNodeConf,
+			NodeConfig: ltNC,
 			SignerKey:  "",
 			StakerKey:  "",
 			StakerCrt:  "",
 		})
 	}
 
+	// Convert clusterConf map to ClusterConfig struct
+	nodes, _ := clusterConf["Nodes"].([]string)
+	apiNodes, _ := clusterConf["APINodes"].([]string)
+	subnets, _ := clusterConf["Subnets"].([]string)
+	external, _ := clusterConf["External"].(bool)
+	local, _ := clusterConf["Local"].(bool)
+	httpAccess, _ := clusterConf["HTTPAccess"].(string)
+	
+	// Handle Network field
+	var network models.Network
+	if networkData, ok := clusterConf["Network"].(map[string]interface{}); ok {
+		// Try to reconstruct the network
+		if kind, ok := networkData["Kind"].(string); ok {
+			switch kind {
+			case "Mainnet":
+				network = models.NewMainnetNetwork()
+			case "Testnet":
+				network = models.NewTestnetNetwork()
+			case "Devnet":
+				network = models.NewDevnetNetwork()
+			default:
+				network = models.NewLocalNetwork()
+			}
+		}
+	} else if net, ok := clusterConf["Network"].(models.Network); ok {
+		network = net
+	}
+	
+	// Handle LoadTestInstance
+	loadTestMap := make(map[string]string)
+	if ltInst, ok := clusterConf["LoadTestInstance"].(map[string]string); ok {
+		loadTestMap = ltInst
+	}
+	
+	// Handle ExtraNetworkData
+	extraNetworkData := models.ExtraNetworkData{}
+	if extra, ok := clusterConf["ExtraNetworkData"].(models.ExtraNetworkData); ok {
+		extraNetworkData = extra
+	}
+	
+	cc := models.ClusterConfig{
+		Nodes:              nodes,
+		APINodes:           apiNodes,
+		Network:            network,
+		MonitoringInstance: monitoringInstance,
+		LoadTestInstance:   loadTestMap,
+		ExtraNetworkData:   extraNetworkData,
+		Subnets:            subnets,
+		External:           external,
+		Local:              local,
+		HTTPAccess:         sdkconstants.HTTPAccess(httpAccess),
+	}
+	
 	exportCluster := models.ExportCluster{
-		ClusterConfig: clusterConf,
-		Nodes:         nodes,
+		ClusterConfig: cc,
+		Nodes:         exportNodes,
 		MonitorNode:   monitor,
 		LoadTestNodes: loadTestNodes,
 	}

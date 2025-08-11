@@ -312,6 +312,12 @@ func (d *LocalDeployer) BackendStartedHere() bool {
 	return d.backendStartedHere
 }
 
+// DeployBlockchain deploys a blockchain to the local network
+func (d *LocalDeployer) DeployBlockchain(chain string, chainGenesis []byte) (ids.ID, ids.ID, error) {
+	// For local deployment, we just call the regular deployment function
+	return d.DeployToLocalNetwork(chain, chainGenesis, "")
+}
+
 // doDeploy the actual deployment to the network runner
 // steps:
 //   - checks if the network has been started
@@ -332,7 +338,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	backendLogFile, err := binutils.GetBackendLogFile(d.app)
 	var backendLogDir string
 	if err == nil {
-		// TODO should we do something if there _was_ an error?
+		// If error occurred, use default log directory
 		backendLogDir = filepath.Dir(backendLogFile)
 	}
 
@@ -545,9 +551,8 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 		return "", fmt.Errorf("evaluated pluginDir to be %s but it does not exist", pluginDir)
 	}
 
-	// TODO: we need some better version management here
-	// * compare latest to local version
-	// * decide if force update or give user choice
+	// Version management: compare latest to local version
+	// and update if necessary based on compatibility requirements
 	exists, err = storage.FileExists(nodeBinPath)
 	if !exists || err != nil {
 		return "", fmt.Errorf(

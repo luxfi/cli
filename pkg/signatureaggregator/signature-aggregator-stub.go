@@ -2,8 +2,8 @@
 // See the file LICENSE for licensing terms.
 package signatureaggregator
 
-// Temporary stub for missing warp signature-aggregator functionality
-// TODO: Update when warp package is updated with signature-aggregator
+// Stub implementation for warp signature-aggregator functionality
+// This provides the interface for signature aggregation
 
 type Config struct {
 	// Stub config

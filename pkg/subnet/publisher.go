@@ -58,8 +58,8 @@ func (p *publisherImpl) Publish(
 	if err != nil {
 		return err
 	}
-	// TODO: This might not always be the right path!
-	subnetPath := filepath.Join(p.repoPath, constants.SubnetDir, subnetName+constants.YAMLSuffix)
+	// Determine the correct path based on repo structure
+	subnetPath := getSubnetPath(p.repoPath, subnetName)
 	if err := os.MkdirAll(filepath.Dir(subnetPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -115,4 +115,22 @@ func (p *publisherImpl) Publish(
 
 	ux.Logger.PrintToUser("Pushing to remote...")
 	return repo.Push(&git.PushOptions{})
+}
+
+// getSubnetPath determines the correct path for the subnet file based on repository structure
+func getSubnetPath(repoPath, subnetName string) string {
+	// Check if the repository has a custom structure
+	customPath := filepath.Join(repoPath, "subnets", subnetName+constants.YAMLSuffix)
+	if _, err := os.Stat(filepath.Dir(customPath)); err == nil {
+		return customPath
+	}
+	
+	// Check for legacy structure
+	legacyPath := filepath.Join(repoPath, "subnet", subnetName+constants.YAMLSuffix)
+	if _, err := os.Stat(filepath.Dir(legacyPath)); err == nil {
+		return legacyPath
+	}
+	
+	// Default to the standard structure
+	return filepath.Join(repoPath, constants.SubnetDir, subnetName+constants.YAMLSuffix)
 }

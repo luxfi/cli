@@ -209,9 +209,9 @@ func getGenesisNativeMinterAdmin(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	// TODO: Fix GenesisPrecompiles access - it's not in params.ChainConfig
-	// Need to use extras.ChainConfig or another approach
-	if false { // Placeholder - GenesisPrecompiles not accessible from params.ChainConfig
+	// Access GenesisPrecompiles through genesis extras if available
+	// For now, return no admin found since params.ChainConfig doesn't have GenesisPrecompiles
+	if false { // Will be enabled when extras.ChainConfig is available
 		var allowListCfg *nativeminter.Config
 		_ = allowListCfg
 		if len(allowListCfg.AllowListConfig.AdminAddresses) == 0 {
@@ -242,9 +242,9 @@ func getGenesisNativeMinterManager(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	// TODO: Fix GenesisPrecompiles access - it's not in params.ChainConfig
-	// Need to use extras.ChainConfig or another approach
-	if false { // Placeholder - GenesisPrecompiles not accessible from params.ChainConfig
+	// Access GenesisPrecompiles through genesis extras if available
+	// For now, return no admin found since params.ChainConfig doesn't have GenesisPrecompiles
+	if false { // Will be enabled when extras.ChainConfig is available
 		var allowListCfg *nativeminter.Config
 		_ = allowListCfg
 		if len(allowListCfg.AllowListConfig.ManagerAddresses) == 0 {

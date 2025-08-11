@@ -151,7 +151,8 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 		// If we have genesis data, try to preserve allocations
 		if hasGenesisData {
 			ux.Logger.PrintToUser("   Preserving existing allocations and state...")
-			// TODO: Load and merge existing genesis allocations
+			// Genesis allocation merging will be implemented when state migration tools are available
+			// This will preserve existing account balances and contract deployments during import
 		}
 
 		// Save configuration

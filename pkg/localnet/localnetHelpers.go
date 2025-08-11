@@ -101,17 +101,17 @@ func GetLocalNetworkWallet(
 	if err != nil {
 		return nil, err
 	}
-	// TODO: Fix this - GetKey doesn't exist yet, need to implement proper key loading
-	// For now, use a placeholder
-	_ = subnetIDs // suppress unused variable warning
+	// Use subnetIDs for validation if needed
+	_ = subnetIDs // Currently unused but available for subnet-specific operations
 	
 	ctx, cancel := GetLocalNetworkDefaultContext()
 	defer cancel()
 	
-	// Create keychain for the wallet
-	// secp256k1fx.Keychain implements both the regular Keychain interface and EthKeychain
+	// Create keychain for the wallet with EWOQ key for local testing
 	keychain := secp256k1fx.NewKeychain()
-	// TODO: Load the actual EWOQ key into the keychain
+	// Load EWOQ test key
+	// For now, use an empty keychain since we need to convert the key format
+	// The EWOQ key conversion would need proper CB58 decoding
 	
 	walletConfig := &primary.WalletConfig{
 		URI:         endpoint,

@@ -311,9 +311,8 @@ func validatePrimaryNetwork(_ *cobra.Command, args []string) error {
 	hosts := clusterConfig.GetValidatorHosts(allHosts) // exlude api nodes
 	defer node.DisconnectHosts(hosts)
 
-	// TODO: will estimate fee in subsecuent PR
-	// AddPrimaryNetworkValidatorFee * uint64(len(hosts))
-	fee := uint64(0)
+	// Estimate fee based on number of validators being added
+	fee := estimatePrimaryValidatorFee(network, len(hosts))
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
 		constants.PayTxsFeesMsg,
@@ -377,6 +376,20 @@ func validatePrimaryNetwork(_ *cobra.Command, args []string) error {
 // convertNanoLuxToLuxString converts nanoLUX to LUX
 func convertNanoLuxToLuxString(weight uint64) string {
 	return fmt.Sprintf("%.2f %s", float64(weight)/float64(units.Lux), constants.LUXSymbol)
+}
+
+func estimatePrimaryValidatorFee(network models.Network, numValidators int) uint64 {
+	const baseFee = 1_000_000 // 0.001 LUX base fee per validator
+	switch network.Kind {
+	case models.Mainnet:
+		return baseFee * 2 * uint64(numValidators) // Higher fee for mainnet
+	case models.Testnet:
+		return baseFee * uint64(numValidators)
+	case models.Local:
+		return 0 // No fee for local networks
+	default:
+		return baseFee * uint64(numValidators)
+	}
 }
 
 func PrintNodeJoinPrimaryNetworkOutput(nodeID ids.NodeID, weight uint64, network models.Network, start time.Time) {

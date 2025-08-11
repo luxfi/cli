@@ -159,9 +159,10 @@ func trackSubnet(
 
 	// update slice of subnets synced by the cluster
 	clusterConfig["subnets"] = allSubnets
-	// SetClusterConfig doesn't exist, need to implement or work around
-	// For now, we'll skip this update
-	// TODO: Implement SetClusterConfig in application
+	// Save the updated cluster configuration
+	if err := app.SetClusterConfig(clusterName, clusterConfig); err != nil {
+		return fmt.Errorf("failed to save cluster config: %w", err)
+	}
 
 	// update slice of blockchain endpoints with the cluster ones
 	// Type assertion for network field

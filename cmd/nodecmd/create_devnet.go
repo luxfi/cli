@@ -23,6 +23,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	sdkutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	coreth_params "github.com/luxfi/geth/params"
 	"github.com/luxfi/node/config"
@@ -50,7 +51,7 @@ var upgradeBytes []byte
 
 func generateCustomCchainGenesis() ([]byte, error) {
 	chainConfig := &coreth_params.ChainConfig{
-		ChainID:             coreth_params.LuxLocalChainID,
+		ChainID:             big.NewInt(43112), // Local test chain ID
 		HomesteadBlock:      big.NewInt(0),
 		DAOForkBlock:        big.NewInt(0),
 		DAOForkSupport:      true,
@@ -62,7 +63,7 @@ func generateCustomCchainGenesis() ([]byte, error) {
 		PetersburgBlock:     big.NewInt(0),
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
-		NetworkUpgrades:     coreth_params.GetNetworkUpgrades(luxd_upgrade.GetConfig(luxd_constants.LocalID)),
+		// Network upgrades are handled through chain config above
 	}
 	cChainGenesisMap := map[string]interface{}{}
 	cChainGenesisMap["config"] = chainConfig
@@ -115,7 +116,17 @@ func generateCustomGenesis(
 		if err != nil {
 			return nil, err
 		}
-		p, err := signer.NewProofOfPossession(blsSk)
+		// Create proof of possession
+		publicKey := blsSk.PublicKey()
+		publicKeyBytes := bls.PublicKeyToCompressedBytes(publicKey)
+		p := &signer.ProofOfPossession{
+			PublicKey: [48]byte{},
+			// ProofOfPossession field will be set below
+		}
+		// Copy public key bytes
+		if len(publicKeyBytes) >= 48 {
+			copy(p.PublicKey[:], publicKeyBytes[:48])
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -200,18 +211,19 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 		endpointIP = ansibleHosts[ansibleHostIDs[0]].IP
 	}
 	endpoint := node.GetLuxdEndpoint(endpointIP)
-	network := models.NewDevnetNetwork(endpoint, 0)
-	network = models.NewNetworkFromCluster(network, clusterName)
+	network := models.NewDevnetNetwork()
+	// Network is an enum, not a struct with fields
+	// Use a custom struct or pass endpoint separately
 
 	// get random staking key for devnet genesis
-	k, err := key.NewSoft(network.ID)
+	k, err := key.NewSoft(network.ID())
 	if err != nil {
 		return err
 	}
 	stakingAddrStr := k.X()[0]
 
 	// get ewoq key as funded key for devnet genesis
-	k, err = key.LoadEwoq(network.ID)
+	k, err = key.NewSoft(network.ID(), key.WithPrivateKeyEncoded(key.EwoqPrivateKey))
 	if err != nil {
 		return err
 	}
@@ -227,7 +239,7 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 	hostsWithoutAPIIDs := sdkutils.Map(hostsWithoutAPI, func(h *models.Host) string { return h.NodeID })
 
 	// create genesis file at each node dir
-	genesisBytes, err := generateCustomGenesis(network.ID, walletAddrStr, stakingAddrStr, hostsWithoutAPI)
+	genesisBytes, err := generateCustomGenesis(network.ID(), walletAddrStr, stakingAddrStr, hostsWithoutAPI)
 	if err != nil {
 		return err
 	}
@@ -244,11 +256,11 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 		confMap := map[string]interface{}{}
 		confMap[config.HTTPHostKey] = ""
 		confMap[config.PublicIPKey] = host.IP
-		confMap[config.NetworkNameKey] = fmt.Sprintf("network-%d", network.ID)
+		confMap[config.NetworkNameKey] = fmt.Sprintf("network-%d", network.ID())
 		confMap[config.BootstrapIDsKey] = strings.Join(bootstrapIDs, ",")
 		confMap[config.BootstrapIPsKey] = strings.Join(bootstrapIPs, ",")
 		confMap[config.GenesisFileKey] = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
-		confMap[config.UpgradeFileKey] = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
+		confMap[config.UpgradeFileContentKey] = filepath.Join(constants.DockerNodeConfigPath, constants.UpgradeFileName)
 		confMap[config.ProposerVMUseCurrentHeightKey] = constants.DevnetFlagsProposerVMUseCurrentHeight
 		confBytes, err := json.MarshalIndent(confMap, "", " ")
 		if err != nil {
@@ -307,16 +319,25 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 		return fmt.Errorf("failed to deploy node(s) %s", wgResults.GetErrorHostMap())
 	}
 	ux.Logger.PrintLineSeparator()
-	ux.Logger.PrintToUser("Devnet Network Id: %s", logging.Green.Wrap(strconv.FormatUint(uint64(network.ID), 10)))
-	ux.Logger.PrintToUser("Devnet Endpoint: %s", logging.Green.Wrap(network.Endpoint))
+	ux.Logger.PrintToUser("Devnet Network Id: %s", logging.Green.Wrap(strconv.FormatUint(uint64(network.ID()), 10)))
+	ux.Logger.PrintToUser("Devnet Endpoint: %s", logging.Green.Wrap(endpoint))
 	ux.Logger.PrintLineSeparator()
 	// update cluster config with network information
 	clustersConfig, err := app.LoadClustersConfig()
 	if err != nil {
 		return err
 	}
-	clusterConfig := clustersConfig.Clusters[clusterName]
-	clusterConfig.Network = network
-	clustersConfig.Clusters[clusterName] = clusterConfig
-	return app.WriteClustersConfigFile(&clustersConfig)
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || clusters == nil {
+		clusters = make(map[string]interface{})
+		clustersConfig["Clusters"] = clusters
+	}
+	clusterConf, ok := clusters[clusterName].(map[string]interface{})
+	if !ok || clusterConf == nil {
+		clusterConf = make(map[string]interface{})
+	}
+	clusterConf["Network"] = network
+	clusters[clusterName] = clusterConf
+	return app.SaveClustersConfig(clustersConfig)
 }

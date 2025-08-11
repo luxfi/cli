@@ -4,11 +4,14 @@
 package vm
 
 import (
+	"math/big"
+	
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 )
 
 func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
@@ -30,6 +33,11 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		setMinBlockGas              = "Set min block gas cost"
 		setMaxBlockGas              = "Set max block gas cost"
 		setGasStep                  = "Set block gas cost step"
+		
+		// Default gas targets
+		fastTarget   = uint64(5000000)
+		mediumTarget = uint64(2000000) 
+		slowTarget   = uint64(1500000)
 	)
 
 	feeConfigOptions := []string{useSlow, useMedium, useFast, customFee, goBackMsg}
@@ -42,20 +50,29 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		return config, statemachine.Stop, err
 	}
 
-	// TODO: FeeConfig needs to be set on extras.ChainConfig, not standard ChainConfig
-	// This requires refactoring to use params.WithExtra()
-	// config.FeeConfig = StarterFeeConfig
+	// Get the extras config or create a new one
+	extrasConfig := params.GetExtra(&config)
+	if extrasConfig == nil {
+		extrasConfig = &extras.ChainConfig{}
+	}
+	
+	// Initialize FeeConfig if not present (check if GasLimit is nil as indicator)
+	if extrasConfig.FeeConfig.GasLimit == nil {
+		extrasConfig.FeeConfig = commontype.FeeConfig{
+			GasLimit: big.NewInt(8000000),
+		}
+	}
 
 	switch feeDefault {
 	case useFast:
-		// config.FeeConfig.TargetGas = fastTarget
-		return config, statemachine.Forward, nil
+		extrasConfig.FeeConfig.TargetGas = new(big.Int).SetUint64(fastTarget)
+		return *params.WithExtra(&config, extrasConfig), statemachine.Forward, nil
 	case useMedium:
-		// config.FeeConfig.TargetGas = mediumTarget
-		return config, statemachine.Forward, nil
+		extrasConfig.FeeConfig.TargetGas = new(big.Int).SetUint64(mediumTarget)
+		return *params.WithExtra(&config, extrasConfig), statemachine.Forward, nil
 	case useSlow:
-		// config.FeeConfig.TargetGas = slowTarget
-		return config, statemachine.Forward, nil
+		extrasConfig.FeeConfig.TargetGas = new(big.Int).SetUint64(slowTarget)
+		return *params.WithExtra(&config, extrasConfig), statemachine.Forward, nil
 	case goBackMsg:
 		return config, statemachine.Backward, nil
 	default:
@@ -102,7 +119,8 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		return config, statemachine.Stop, err
 	}
 
-	feeConf := commontype.FeeConfig{
+	// Set the custom fee configuration
+	extrasConfig.FeeConfig = commontype.FeeConfig{
 		GasLimit:                 gasLimit,
 		TargetBlockRate:          blockRate.Uint64(),
 		MinBaseFee:               minBaseFee,
@@ -113,9 +131,6 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		BlockGasCostStep:         gasStep,
 	}
 
-	// TODO: FeeConfig needs to be set on extras.ChainConfig, not standard ChainConfig
-	// config.FeeConfig = feeConf
-	_ = feeConf // suppress unused variable warning
-
-	return config, statemachine.Forward, nil
+	// Return the config with the updated extras
+	return *params.WithExtra(&config, extrasConfig), statemachine.Forward, nil
 }

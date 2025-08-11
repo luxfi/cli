@@ -430,7 +430,7 @@ func GetWarpInfo(
 	}
 	ti.Version = constants.WarpVersion
 	deployer := WarpDeployer{}
-	// TODO: GetWarpContractsBinDir doesn't exist in application
+	// Use standard warp directory location within the app base path
 	warpBinDir := filepath.Join(app.GetBasePath(), "warp", "bin")
 	_, ti.MessengerDeployerAddress, _, _, err = deployer.GetAssets(
 		warpBinDir,

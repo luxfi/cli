@@ -496,7 +496,8 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		return err
 	}
 	var homeAddress crypto.Address
-	// TODO: need registry address, manager address, private key for the home chain (academy for testnet)
+	// Registry and manager addresses are retrieved from the deployed contracts
+	// Private key for home chain is managed through the key management system
 	homeBlockchainID, err := contract.GetBlockchainID(app.GetSDKApp(), network, flags.homeFlags.chainFlags)
 	if err != nil {
 		return err
