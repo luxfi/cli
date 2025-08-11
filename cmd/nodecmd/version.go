@@ -41,7 +41,7 @@ func newVersionCmd() *cobra.Command {
 
 	// Add subcommands
 	cmd.AddCommand(newInstallCmd(flags))
-	cmd.AddCommand(newListCmd())
+	cmd.AddCommand(newVersionListCmd())
 	cmd.AddCommand(newUseCmd())
 
 	return cmd
@@ -77,7 +77,7 @@ func newInstallCmd(flags *versionFlags) *cobra.Command {
 	return cmd
 }
 
-func newListCmd() *cobra.Command {
+func newVersionListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
 		Short: "List installed luxd versions",

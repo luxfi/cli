@@ -4,7 +4,10 @@ package keycmd
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"regexp"
+	"strings"
 
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/sdk/models"
@@ -20,6 +23,33 @@ var (
 	forceCreate bool
 	filename    string
 )
+
+// validateKeyFormat checks if the key file has a valid format
+func validateKeyFormat(filename string) error {
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read key file: %w", err)
+	}
+	
+	// Check for common key format patterns
+	contentStr := string(content)
+	
+	// Check for private key patterns
+	hasPrivateKey := strings.Contains(contentStr, "PrivateKey-") || 
+		strings.Contains(contentStr, "-----BEGIN") ||
+		strings.Contains(contentStr, "0x") && len(contentStr) >= 64
+		
+	if !hasPrivateKey {
+		return fmt.Errorf("file does not appear to contain a valid private key")
+	}
+	
+	// Check for invalid characters that might indicate a corrupted file
+	if strings.ContainsAny(contentStr, "\x00") {
+		return fmt.Errorf("file contains null bytes, may be corrupted")
+	}
+	
+	return nil
+}
 
 func createKey(_ *cobra.Command, args []string) error {
 	keyName := args[0]
@@ -46,19 +76,25 @@ func createKey(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("Key created")
 		networks := []models.Network{models.Testnet, models.Mainnet}
 		cchain := true
-		pClients, cClients, err := getClients(networks, cchain)
+		pchain := true
+		xchain := false
+		var subnets []string
+		clients, err := getClients(networks, pchain, cchain, xchain, subnets)
 		if err != nil {
 			return err
 		}
-		addrInfos, err := getStoredKeyInfo(pClients, cClients, networks, keyPath, cchain)
+		addrInfos, err := getStoredKeyInfo(clients, networks, keyPath)
 		if err != nil {
 			return err
 		}
 		printAddrInfos(addrInfos)
 	} else {
-		// Load key from file
-		// TODO add validation that key is legal
+		// Load key from file and validate format
 		ux.Logger.PrintToUser("Loading user key...")
+		// Validate key format before copying
+		if err := validateKeyFormat(filename); err != nil {
+			return fmt.Errorf("invalid key format: %w", err)
+		}
 		if err := app.CopyKeyFile(filename, keyName); err != nil {
 			return err
 		}

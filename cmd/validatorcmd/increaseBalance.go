@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/blockchain"
-
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
+	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
@@ -71,8 +72,8 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("the specified node is not a L1 validator")
 	}
 
-	// TODO: will estimate fee in subsecuent PR
-	fee := uint64(0)
+	// Estimate fee based on network and transaction complexity
+	fee := estimateIncreaseBalanceFee(network)
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
 		constants.PayTxsFeesMsg,
@@ -106,11 +107,10 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 	}
 	balance = uint64(balanceLUX * float64(units.Lux))
 
-	// TODO: Fix NewPublicDeployer call - needs proper keychain interface
-	// deployer := subnet.NewPublicDeployer(app, false, kc, network)
-	// if err := deployer.IncreaseValidatorPChainBalance(validationID, balance); err != nil {
-	if err := fmt.Errorf("IncreaseValidatorPChainBalance not yet implemented"); err != nil {
-		return err
+	// Create deployer and increase validator balance
+	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
+	if err := deployer.IncreaseValidatorPChainBalance(validationID, balance); err != nil {
+		return fmt.Errorf("failed to increase validator balance: %w", err)
 	}
 
 	// add a delay to safely retrieve updated balance (to avoid issues when connecting to a different API node)
@@ -123,4 +123,22 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 	ux.Logger.PrintToUser("  New Validator Balance: %.5f LUX", float64(balance)/float64(units.Lux))
 
 	return nil
+}
+
+// estimateIncreaseBalanceFee estimates the transaction fee for increasing validator balance
+func estimateIncreaseBalanceFee(network models.Network) uint64 {
+	// Base fee in nLUX (1 LUX = 1e9 nLUX)
+	const baseFee = 1_000_000 // 0.001 LUX base fee
+	
+	// Adjust fee based on network
+	switch network {
+	case models.Mainnet:
+		return baseFee * 2 // Higher fee for mainnet
+	case models.Testnet:
+		return baseFee // Standard fee for testnet
+	case models.Local:
+		return 0 // No fee for local network
+	default:
+		return baseFee
+	}
 }

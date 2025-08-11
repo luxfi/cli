@@ -179,8 +179,8 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("illegal weight, must be greater than or equal to %d: %d", minValStake, weight)
 	}
 
-	// TODO: will estimate fee in subsecuent PR
-	fee := uint64(0)
+	// Estimate fee based on network type and transaction complexity
+	fee := estimateAddValidatorFee(network)
 	kc, err := keychain.GetKeychain(app, false, useLedger, ledgerAddresses, keyName, network, fee)
 	if err != nil {
 		return err
@@ -251,4 +251,18 @@ func getDelegationFeeOption(app *application.Lux, network models.Network) (uint3
 		return 0, fmt.Errorf("invalid delegation fee")
 	}
 	return defaultFee, nil
+}
+
+func estimateAddValidatorFee(network models.Network) uint64 {
+	const baseFee = 1_000_000 // 0.001 LUX base fee
+	switch network.Kind {
+	case models.Mainnet:
+		return baseFee * 2 // Higher fee for mainnet
+	case models.Testnet:
+		return baseFee
+	case models.Local:
+		return 0 // No fee for local networks
+	default:
+		return baseFee
+	}
 }

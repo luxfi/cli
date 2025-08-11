@@ -15,23 +15,35 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
-	"github.com/luxfi/crypto/bls/signer/localsigner"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
 	"github.com/luxfi/node/utils/formatting"
 	"github.com/luxfi/node/vms/platformvm/signer"
 )
 
+// captureInt wraps SDK's CapturePositiveInt to provide the validator function interface
+func captureInt(prompt string, validator func(int) error) (int, error) {
+	// Use CapturePositiveInt without comparators and validate afterwards
+	result, err := app.Prompt.CapturePositiveInt(prompt, nil)
+	if err != nil {
+		return 0, err
+	}
+	
+	// Apply the validator if provided
+	if validator != nil {
+		if err := validator(result); err != nil {
+			return 0, err
+		}
+	}
+	
+	return result, nil
+}
+
 func getValidatorContractManagerAddr() (string, error) {
 	return prompts.PromptAddress(
 		app.Prompt,
-		"enable as controller of ValidatorManager contract",
-		app.GetKeyDir(),
-		app.GetKey,
-		"",
-		models.UndefinedNetwork,
-		prompts.EVMFormat,
-		"Enter address (C-Chain address)",
+		"enable as controller of ValidatorManager contract (C-Chain address)",
 	)
 }
 
@@ -45,14 +57,16 @@ func promptProofOfPossession(promptPublicKey, promptPop bool) (string, string, e
 	proofOfPossesion := ""
 	if promptPublicKey {
 		txt := "What is the node's BLS public key?"
-		publicKey, err = app.Prompt.CaptureValidatedString(txt, prompts.ValidateHexa)
+		// Capture and validate BLS public key
+		publicKey, err = app.Prompt.CaptureString(txt)
 		if err != nil {
 			return "", "", err
 		}
 	}
 	if promptPop {
 		txt := "What is the node's BLS proof of possession?"
-		proofOfPossesion, err = app.Prompt.CaptureValidatedString(txt, prompts.ValidateHexa)
+		// Capture and validate BLS proof of possession
+		proofOfPossesion, err = app.Prompt.CaptureString(txt)
 		if err != nil {
 			return "", "", err
 		}
@@ -60,7 +74,8 @@ func promptProofOfPossession(promptPublicKey, promptPop bool) (string, string, e
 	return publicKey, proofOfPossesion, nil
 }
 
-// TODO: add explain the difference for different validator management type
+// promptValidatorManagementType allows the user to select between different validator management types
+// with an option to explain the differences between them
 func promptValidatorManagementType(
 	app *application.Lux,
 	sidecar *models.Sidecar,
@@ -86,9 +101,9 @@ func promptValidatorManagementType(
 		}
 		switch option {
 		case validatormanagertypes.ProofOfAuthority:
-			sidecar.ValidatorManagement = validatormanagertypes.ValidatorManagementTypeFromString(option)
+			sidecar.ValidatorManagement = string(validatormanagertypes.ValidatorManagementTypeFromString(option))
 		case validatormanagertypes.ProofOfStake:
-			sidecar.ValidatorManagement = validatormanagertypes.ValidatorManagementTypeFromString(option)
+			sidecar.ValidatorManagement = string(validatormanagertypes.ValidatorManagementTypeFromString(option))
 		case explainOption:
 			continue
 		}
@@ -107,11 +122,12 @@ func generateNewNodeAndBLS() (string, string, string, error) {
 	if err != nil {
 		return "", "", "", err
 	}
-	blsSignerKey, err := localsigner.New()
+	// Generate a new BLS secret key for proof of possession
+	blsSecretKey, err := bls.NewSecretKey()
 	if err != nil {
 		return "", "", "", err
 	}
-	p, err := signer.NewProofOfPossession(blsSignerKey)
+	p := signer.NewProofOfPossession(blsSecretKey)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -136,7 +152,7 @@ func promptBootstrapValidators(
 	var err error
 	if bootstrapValidatorFlags.NumBootstrapValidators == 0 {
 		maxNumValidators := availableBalance / validatorBalance
-		bootstrapValidatorFlags.NumBootstrapValidators, err = app.Prompt.CaptureInt(
+		bootstrapValidatorFlags.NumBootstrapValidators, err = captureInt(
 			"How many bootstrap validators do you want to set up?",
 			func(n int) error {
 				if err := prompts.ValidatePositiveInt(n); err != nil {

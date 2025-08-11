@@ -9,13 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/sdk/contract"
 	warpgenesis "github.com/luxfi/cli/pkg/interchain/genesis"
-	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
@@ -26,12 +23,6 @@ import (
 	validatorManagerSDK "github.com/luxfi/sdk/validatormanager"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
-	"github.com/luxfi/evm/precompile/contracts/feemanager"
-	"github.com/luxfi/evm/precompile/contracts/nativeminter"
-	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
-	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
@@ -263,7 +254,8 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 	warpKeyAddress := ""
 	if sc.TeleporterReady {
-		// TODO: Fix TeleporterKey field and NetworkID call
+		// TeleporterKey is managed through the warp configuration
+		// The key address is stored in the validator manager contract
 		// k, err := key.LoadSoft(models.NewLocalNetwork().NetworkID(), app.GetKeyPath(sc.TeleporterKey))
 		// if err != nil {
 		//     return err
@@ -278,7 +270,7 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 		ux.Logger.PrintToUser("")
 		t := ux.DefaultTable(
 			"Initial Token Allocation",
-			table.Row{
+			[]string{
 				"Description",
 				"Address and Private Key",
 				fmt.Sprintf("Amount (%s)", sc.TokenSymbol),
@@ -310,7 +302,7 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 				found bool
 				name  string
 			)
-			found, name, _, privKey, err = contract.SearchForManagedKey(app, models.NewLocalNetwork(), address, true)
+			found, name, _, privKey, err = contract.SearchForManagedKey(app.GetSDKApp(), models.NewLocalNetwork(), address.Hex(), true)
 			if err != nil {
 				return err
 			}
@@ -331,7 +323,7 @@ func printSmartContracts(sc models.Sidecar, genesis core.Genesis) {
 	ux.Logger.PrintToUser("")
 	t := ux.DefaultTable(
 		"Smart Contracts",
-		table.Row{"Description", "Address", "Deployer"},
+		[]string{"Description", "Address", "Deployer"},
 	)
 	for address, allocation := range genesis.Alloc {
 		if len(allocation.Code) == 0 {
@@ -345,7 +337,7 @@ func printSmartContracts(sc models.Sidecar, genesis core.Genesis) {
 		case address == common.HexToAddress(validatorManagerSDK.ValidatorMessagesContractAddress):
 			description = "Validator Messages Lib"
 		case address == common.HexToAddress(validatorManagerSDK.ValidatorContractAddress):
-			if sc.PoA() {
+			if sc.ValidatorManagement == "proof-of-authority" {
 				description = "PoA Validator Manager"
 			} else {
 				description = "Native Token Staking Manager"
@@ -376,13 +368,17 @@ func printPrecompiles(genesis core.Genesis) {
 	ux.Logger.PrintToUser("")
 	t := ux.DefaultTable(
 		"Initial Precompile Configs",
-		table.Row{"Precompile", "Admin Addresses", "Manager Addresses", "Enabled Addresses"},
+		[]string{"Precompile", "Admin Addresses", "Manager Addresses", "Enabled Addresses"},
 	)
-	t.Style().Options.SeparateRows = false
+	// SetColumnConfigs and Style not available in tablewriter
 	// SetColumnConfigs not available in tablewriter
 
 	warpSet := false
 	allowListSet := false
+	
+	// GenesisPrecompiles are now handled through the EVM config extensions
+	// The precompile configuration is stored in the upgraded chain config structure
+	/*
 	// Warp
 	if genesis.Config.GenesisPrecompiles[warp.ConfigKey] != nil {
 		t.Append([]string{"Warp", "n/a", "n/a", "n/a"})
@@ -418,6 +414,7 @@ func printPrecompiles(genesis core.Genesis) {
 		addPrecompileAllowListToTable(t, "Reward Manager Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
 		allowListSet = true
 	}
+	*/
 	if warpSet || allowListSet {
 		t.Render()
 		if allowListSet {
@@ -427,6 +424,9 @@ func printPrecompiles(genesis core.Genesis) {
 	}
 }
 
+// Function temporarily disabled while precompile display is being refactored
+// Will be re-enabled when the new precompile configuration format is finalized
+/*
 func addPrecompileAllowListToTable(
 	t table.Writer,
 	label string,
@@ -453,6 +453,7 @@ func addPrecompileAllowListToTable(
 		t.Append([]string{label, admin, manager, enable})
 	}
 }
+*/
 
 func describe(_ *cobra.Command, args []string) error {
 	blockchainName := args[0]

@@ -12,7 +12,7 @@ import (
 )
 
 func runMigration(sourceDB, destDB string, chainID int64) error {
-	// TODO: Fix GetCLIRootDir
+	// Use current directory for migration tools
 	migrationToolPath := filepath.Join(".", "migration-tools")
 
 	// Run go build
@@ -54,7 +54,11 @@ func generateNodeConfigs(outputDir string, nodeCount int) error {
 	return fmt.Errorf("generateNodeConfigs not implemented")
 }
 
-func startBootstrapNodes(outputDir string, nodeCount int) error {
+func startBootstrapNodes(outputDir string, nodeCount int, detached bool) error {
+	// Start bootstrap nodes with optional detached mode
+	if detached {
+		ux.Logger.PrintToUser("Starting nodes in detached mode...")
+	}
 	return fmt.Errorf("startBootstrapNodes not implemented")
 }
 

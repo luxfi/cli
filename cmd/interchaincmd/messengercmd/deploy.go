@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/localnet"
@@ -199,9 +200,11 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		if err != nil {
 			return fmt.Errorf("failed to load sidecar: %w", err)
 		}
-		// TODO: Add TeleporterReady and TeleporterVersion to Sidecar if needed
-		// sc.TeleporterReady = true
-		// sc.TeleporterVersion = warpVersion
+		// Update sidecar with Warp deployment info
+		sc.TeleporterReady = true
+		sc.TeleporterVersion = warpVersion
+		sc.TeleporterMessengerAddress = messengerAddress
+		sc.TeleporterRegistryAddress = registryAddress
 		networkInfo := sc.Networks[network.Name()]
 		if messengerAddress != "" {
 			networkInfo.TeleporterMessengerAddress = messengerAddress
@@ -219,15 +222,13 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		if flags.CChainKeyName == "" {
 			flags.CChainKeyName = "ewoq"
 		}
-		keyPath, err := app.GetKey(flags.CChainKeyName)
+		// Load key and get private key hex
+		keyPath := app.GetKeyPath(flags.CChainKeyName)
+		k, err := key.LoadSoft(network.ID(), keyPath)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to load key %s: %w", flags.CChainKeyName, err)
 		}
-		// TODO: Load key and get private key hex
-		// k, err := key.LoadSoft(network.ID(), keyPath)
-		// privateKeyHex := k.PrivKeyHex()
-		_ = keyPath
-		privateKeyHex := "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027" // Default test key
+		privateKeyHex := k.PrivKeyHex()
 		alreadyDeployed, messengerAddress, registryAddress, err := td.Deploy(
 			cChainName,
 			network.Endpoint() + "/ext/bc/C/rpc", // C-Chain RPC endpoint
@@ -251,23 +252,23 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 					return err
 				}
 			}
-			// TODO: Handle cluster configuration for remote networks
-			if false { // network.ClusterName != "" {
-				_, err := app.GetClusterConfig("") // network.ClusterName)
+			// Handle cluster configuration for remote networks
+			if network.ClusterName() != "" {
+				clusterConfig, err := app.GetClusterConfig(network.ClusterName())
 				if err != nil {
 					return err
 				}
-				// TODO: Properly handle cluster config as map[string]interface{}
+				// Update cluster configuration with Warp addresses
 				if messengerAddress != "" {
-					// clusterConfig["CChainTeleporterMessengerAddress"] = messengerAddress
+					clusterConfig["CChainTeleporterMessengerAddress"] = messengerAddress
 				}
 				if registryAddress != "" {
-					// clusterConfig["CChainTeleporterRegistryAddress"] = registryAddress
+					clusterConfig["CChainTeleporterRegistryAddress"] = registryAddress
 				}
-				// TODO: Add SetClusterConfig method to application
-				// if err := app.SetClusterConfig("", clusterConfig); err != nil { // network.ClusterName
-				//	return err
-				// }
+				// Save updated cluster configuration
+				if err := app.SetClusterConfig(network.ClusterName(), clusterConfig); err != nil {
+					return err
+				}
 			}
 		}
 	}

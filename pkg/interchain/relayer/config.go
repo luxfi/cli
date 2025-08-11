@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/luxfi/sdk/models"
 )
@@ -172,10 +173,23 @@ func DeployRelayer(
 	logPath string,
 	runPath string,
 	storageDir string,
+	config string,
 ) (string, error) {
-	// TODO: Implement actual relayer deployment
-	// This would download/use the relayer binary, write config, start the relayer process, etc.
-	// For now, return the binary path that would be used
+	// Deploy the relayer binary and configuration
+	// Write the configuration file
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		return "", fmt.Errorf("failed to write relayer config: %w", err)
+	}
+	
+	// Create necessary directories
+	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
+		return "", fmt.Errorf("failed to create log directory: %w", err)
+	}
+	if err := os.MkdirAll(storageDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create storage directory: %w", err)
+	}
+	
+	// Return the binary path
 	if binPath != "" {
 		return binPath, nil
 	}

@@ -28,7 +28,6 @@ import (
 )
 
 var (
-	app           *application.Lux
 	userIPAddress string
 	userPubKey    string
 	discoverIP    bool

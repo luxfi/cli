@@ -245,9 +245,25 @@ func (m *SoftKey) C() string {
 	return addr.String()
 }
 
+// X returns the X-Chain addresses (as a slice for compatibility)
+func (m *SoftKey) X() []string {
+	// Parse HRP for X-Chain
+	hrp := GetHRP(1) // Use network ID 1 for mainnet by default
+	xAddr, err := address.Format("X", hrp, m.privKey.PublicKey().Address().Bytes())
+	if err != nil {
+		return []string{}
+	}
+	return []string{xAddr}
+}
+
 // Returns the KeyChain
 func (m *SoftKey) KeyChain() *secp256k1fx.Keychain {
 	return m.keyChain
+}
+
+// PrivateKeyRaw returns the private key in hex format
+func (m *SoftKey) PrivateKeyRaw() string {
+	return hex.EncodeToString(m.privKeyRaw)
 }
 
 // Returns the private key.

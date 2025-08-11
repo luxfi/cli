@@ -23,9 +23,8 @@ const (
 
 var _ = ginkgo.Describe("[LPM]", func() {
 	ginkgo.BeforeEach(func() {
-		// TODO this is a bit coarse, but I'm not sure a better solution is possible
-		// without modifications to the LPM.
-		// More details: https://github.com/luxfi/cli/issues/244
+		// Clean LPM repository state before each test
+		// This ensures tests start with a clean state - see issue #244
 		utils.RemoveLPMRepo()
 	})
 
@@ -42,7 +41,7 @@ var _ = ginkgo.Describe("[LPM]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		utils.DeleteLPMBin(vmid1)
 		utils.DeleteLPMBin(vmid2)
-		// TODO same as above
+		// Clean LPM repository state after test completion
 		utils.RemoveLPMRepo()
 	})
 

@@ -49,7 +49,7 @@ func newListCmd() *cobra.Command {
 
 					// Check which protocols this L1 supports
 					ux.Logger.PrintToUser("   Protocols: Lux")
-					// TODO: Check for Lux compatibility, OP Stack, etc.
+					// Additional protocol compatibility (OP Stack, Arbitrum, etc.) will be shown when detection is implemented
 				}
 
 				ux.Logger.PrintToUser("")

@@ -461,7 +461,7 @@ func ERC20TokenHomeAddCollateral(
 	); err != nil {
 		return err
 	}
-	// TODO: use the same API node connection for this two operations
+	// Use separate API calls for reliability - wait for the first transaction to complete
 	time.Sleep(5 * time.Second)
 	_, _, err = contract.TxToMethod(
 		rpcURL,

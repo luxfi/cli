@@ -286,7 +286,8 @@ func transformElasticSubnet(_ *cobra.Command, args []string) error {
 	deployer := subnet.NewPublicDeployer(app, useLedger, kc, network)
 	txHasOccurred, txID := checkIfTxHasOccurred(&sc, network, "CreateAssetTx")
 	var assetID ids.ID
-	// TODO: replace sleep functions with sticky API sessions
+	// Use sleep intervals to ensure UTXO availability between transactions
+	// Future improvement: implement sticky API sessions for better transaction coordination
 	if txHasOccurred {
 		ux.Logger.PrintToUser("Skipping CreateAssetTx, transforming subnet with asset ID %s...", txID.String())
 		assetID = txID

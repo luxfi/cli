@@ -62,7 +62,8 @@ func preResizeChecks(clusterName string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// Check if this is a local cluster (map type check)
+	if isLocal, ok := clusterConfig["Local"].(bool); ok && isLocal {
 		return notImplementedForLocal("resize")
 	}
 	return nil
@@ -102,11 +103,13 @@ func resize(_ *cobra.Command, args []string) error {
 	}
 
 	for _, node := range nodesToResize {
-		nodeConfig, err := app.LoadClusterNodeConfig(node)
+		nodeConfig, err := app.LoadClusterNodeConfig(clusterName, node)
 		if err != nil {
 			return err
 		}
-		hostAnsibleID, err := models.HostCloudIDToAnsibleID(nodeConfig.CloudService, nodeConfig.NodeID)
+		cloudServiceStr, _ := nodeConfig["CloudService"].(string)
+		nodeIDStr, _ := nodeConfig["NodeID"].(string)
+		hostAnsibleID, err := models.HostCloudIDToAnsibleID(cloudServiceStr, nodeIDStr)
 		if err != nil {
 			return err
 		}
@@ -114,13 +117,13 @@ func resize(_ *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		if !(authorizeAccess || nodePkg.AuthorizedAccessFromSettings(app)) && (requestCloudAuth(nodeConfig.CloudService) != nil) {
+		if !(authorizeAccess || nodePkg.AuthorizedAccessFromSettings(app)) && (requestCloudAuth(cloudServiceStr) != nil) {
 			return fmt.Errorf("cloud access is required")
 		}
 		spinSession := ux.NewUserSpinner()
 		// resize node and disk. If error occurs, log it and continue to next host
 		if nodeType != "" {
-			spinner := spinSession.SpinToUser(utils.ScriptLog(nodeConfig.NodeID, "Resizing Instance Type"))
+			spinner := spinSession.SpinToUser(utils.ScriptLog(nodeIDStr, "Resizing Instance Type"))
 			if err := resizeNode(nodeConfig); err != nil {
 				ux.SpinFailWithError(spinner, "", err)
 			} else {
@@ -128,7 +131,7 @@ func resize(_ *cobra.Command, args []string) error {
 			}
 		}
 		if diskSize != "" {
-			spinner := spinSession.SpinToUser(utils.ScriptLog(nodeConfig.NodeID, "Resizing Disk"))
+			spinner := spinSession.SpinToUser(utils.ScriptLog(nodeIDStr, "Resizing Disk"))
 			diskSizeGb, _ := strconv.Atoi(strings.TrimSuffix(diskSize, "Gb"))
 			if err := resizeDisk(nodeConfig, diskSizeGb); err != nil {
 				ux.SpinFailWithError(spinner, "", err)
@@ -144,17 +147,21 @@ func resize(_ *cobra.Command, args []string) error {
 }
 
 // resizeDisk resizes the disk size of the node
-func resizeDisk(nodeConfig models.NodeConfig, diskSize int) error {
+func resizeDisk(nodeConfig map[string]interface{}, diskSize int) error {
 	if diskSize > math.MaxInt32 {
 		return fmt.Errorf("disk size exceeds maximum supported value")
 	}
-	switch nodeConfig.CloudService {
+	cloudServiceStr, _ := nodeConfig["CloudService"].(string)
+	nodeIDStr, _ := nodeConfig["NodeID"].(string)
+	regionStr, _ := nodeConfig["Region"].(string)
+	
+	switch cloudServiceStr {
 	case "", constants.AWSCloudService:
-		ec2Svc, err := awsAPI.NewAwsCloud(awsProfile, nodeConfig.Region)
+		ec2Svc, err := awsAPI.NewAwsCloud(awsProfile, regionStr)
 		if err != nil {
 			return err
 		}
-		rootVolume, err := ec2Svc.GetRootVolumeID(nodeConfig.NodeID)
+		rootVolume, err := ec2Svc.GetRootVolumeID(nodeIDStr)
 		if err != nil {
 			return err
 		}
@@ -168,24 +175,28 @@ func resizeDisk(nodeConfig models.NodeConfig, diskSize int) error {
 		if err != nil {
 			return err
 		}
-		rootVolume, err := gcpCloud.GetRootVolumeID(nodeConfig.NodeID, nodeConfig.Region)
+		rootVolume, err := gcpCloud.GetRootVolumeID(nodeIDStr, regionStr)
 		if err != nil {
 			return err
 		}
 		if diskSize > math.MaxInt {
 			return fmt.Errorf("disk size exceeds maximum supported value")
 		}
-		return gcpCloud.ResizeVolume(rootVolume, nodeConfig.Region, int64(diskSize))
+		return gcpCloud.ResizeVolume(rootVolume, regionStr, int64(diskSize))
 	default:
-		return fmt.Errorf("cloud service %s is not supported", nodeConfig.CloudService)
+		return fmt.Errorf("cloud service %s is not supported", cloudServiceStr)
 	}
 }
 
 // resizeNode changes the node type of the instance
-func resizeNode(nodeConfig models.NodeConfig) error {
-	switch nodeConfig.CloudService {
+func resizeNode(nodeConfig map[string]interface{}) error {
+	cloudServiceStr, _ := nodeConfig["CloudService"].(string)
+	nodeIDStr, _ := nodeConfig["NodeID"].(string)
+	regionStr, _ := nodeConfig["Region"].(string)
+	
+	switch cloudServiceStr {
 	case "", constants.AWSCloudService:
-		ec2Svc, err := awsAPI.NewAwsCloud(awsProfile, nodeConfig.Region)
+		ec2Svc, err := awsAPI.NewAwsCloud(awsProfile, regionStr)
 		if err != nil {
 			return err
 		}
@@ -196,7 +207,7 @@ func resizeNode(nodeConfig models.NodeConfig) error {
 		if !isSupported {
 			return fmt.Errorf("instance type %s is not supported", nodeType)
 		}
-		return ec2Svc.ChangeInstanceType(nodeConfig.NodeID, nodeType)
+		return ec2Svc.ChangeInstanceType(nodeIDStr, nodeType)
 	case constants.GCPCloudService:
 		gcpClient, projectName, _, err := getGCPCloudCredentials()
 		if err != nil {
@@ -206,15 +217,15 @@ func resizeNode(nodeConfig models.NodeConfig) error {
 		if err != nil {
 			return err
 		}
-		isSupported, err := gcpCloud.IsInstanceTypeSupported(nodeType, nodeConfig.Region)
+		isSupported, err := gcpCloud.IsInstanceTypeSupported(nodeType, regionStr)
 		if err != nil {
 			return err
 		}
 		if !isSupported {
 			return fmt.Errorf("instance type %s is not supported", nodeType)
 		}
-		return gcpCloud.ChangeInstanceType(nodeConfig.NodeID, nodeConfig.Region, nodeType)
+		return gcpCloud.ChangeInstanceType(nodeIDStr, regionStr, nodeType)
 	default:
-		return fmt.Errorf("cloud service %s is not supported", nodeConfig.CloudService)
+		return fmt.Errorf("cloud service %s is not supported", cloudServiceStr)
 	}
 }

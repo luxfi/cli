@@ -327,13 +327,9 @@ func promptFeeManagerParams(precompiles *[]extras.PrecompileUpgrade, date time.T
 	var feeConfig *commontype.FeeConfig
 
 	if yes {
-		// TODO: FeeConfig needs to be accessed from extras.ChainConfig
-		// chainConfig, _, err := vm.GetFeeConfig(params.ChainConfig{}, app)
-		// if err != nil {
-		// 	return err
-		// }
-		// feeConfig = &chainConfig.FeeConfig
-		// For now, create a default FeeConfig
+		// FeeConfig will be retrieved from extras.ChainConfig when available
+		// Currently using default configuration values
+		// Future implementation: chainConfig, _, err := vm.GetFeeConfig(params.ChainConfig{}, app)
 		feeConfig = &commontype.FeeConfig{
 			GasLimit:                 big.NewInt(8000000),
 			TargetBlockRate:          2,

@@ -11,6 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
@@ -35,12 +36,34 @@ func GenerateAllowList(
 	action string,
 	vmVersion string,
 ) (AllowList, bool, error) {
-	// TODO: This should be moved to SDK
-	// For now, return empty allow list
+	// Prompt for admin addresses
+	adminPrompt := "Configure admin addresses for " + action
+	adminInfo := "\nAdmin addresses have full control over the allow list and can grant/revoke permissions.\n"
+	adminAddrs, cancelled, err := getAddressList(adminPrompt, adminInfo, app)
+	if err != nil || cancelled {
+		return config, cancelled, err
+	}
+
+	// Prompt for manager addresses
+	managerPrompt := "Configure manager addresses for " + action
+	managerInfo := "\nManager addresses can manage the enabled list but cannot modify admin/manager lists.\n"
+	managerAddrs, cancelled, err := getAddressList(managerPrompt, managerInfo, app)
+	if err != nil || cancelled {
+		return config, cancelled, err
+	}
+
+	// Prompt for enabled addresses
+	enabledPrompt := "Configure enabled addresses for " + action
+	enabledInfo := "\nEnabled addresses are allowed to perform the action: " + action + "\n"
+	enabledAddrs, cancelled, err := getAddressList(enabledPrompt, enabledInfo, app)
+	if err != nil || cancelled {
+		return config, cancelled, err
+	}
+
 	return AllowList{
-		AdminAddresses:   []common.Address{},
-		ManagerAddresses: []common.Address{},
-		EnabledAddresses: []common.Address{},
+		AdminAddresses:   convertAddresses(adminAddrs),
+		ManagerAddresses: convertAddresses(managerAddrs),
+		EnabledAddresses: convertAddresses(enabledAddrs),
 	}, false, nil
 }
 
@@ -330,65 +353,85 @@ func getPrecompiles(config params.ChainConfig, app *application.Lux) (
 
 		switch precompileDecision {
 		case NativeMint:
-			_, cancelled, err := configureMinterList(app)
+			mintConfig, cancelled, err := configureMinterList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				// TODO: GenesisPrecompiles needs extras.ChainConfig
-				// mintConfig would be used here: config.GenesisPrecompiles[nativeminter.ConfigKey] = &mintConfig
+				// Store the configuration for genesis
+				extraConfig := params.GetExtra(&config)
+				if extraConfig.GenesisPrecompiles == nil {
+					extraConfig.GenesisPrecompiles = make(extras.Precompiles)
+				}
+				extraConfig.GenesisPrecompiles[nativeminter.ConfigKey] = &mintConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, NativeMint)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case ContractAllowList:
-			_, cancelled, err := configureContractAllowList(app)
+			contractConfig, cancelled, err := configureContractAllowList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				// TODO: GenesisPrecompiles needs extras.ChainConfig
-				// contractConfig would be used here: config.GenesisPrecompiles[deployerallowlist.ConfigKey] = &contractConfig
+				// Store the configuration for genesis
+				extraConfig := params.GetExtra(&config)
+				if extraConfig.GenesisPrecompiles == nil {
+					extraConfig.GenesisPrecompiles = make(extras.Precompiles)
+				}
+				extraConfig.GenesisPrecompiles[deployerallowlist.ConfigKey] = &contractConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, ContractAllowList)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case TxAllowList:
-			_, cancelled, err := configureTransactionAllowList(app)
+			txConfig, cancelled, err := configureTransactionAllowList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				// TODO: GenesisPrecompiles needs extras.ChainConfig
-				// txConfig would be used here: config.GenesisPrecompiles[txallowlist.ConfigKey] = &txConfig
+				// Store the configuration for genesis
+				extraConfig := params.GetExtra(&config)
+				if extraConfig.GenesisPrecompiles == nil {
+					extraConfig.GenesisPrecompiles = make(extras.Precompiles)
+				}
+				extraConfig.GenesisPrecompiles[txallowlist.ConfigKey] = &txConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, TxAllowList)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case FeeManager:
-			_, cancelled, err := configureFeeConfigAllowList(app)
+			feeConfig, cancelled, err := configureFeeConfigAllowList(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				// TODO: GenesisPrecompiles needs extras.ChainConfig
-				// feeConfig would be used here: config.GenesisPrecompiles[feemanager.ConfigKey] = &feeConfig
+				// Store the configuration for genesis
+				extraConfig := params.GetExtra(&config)
+				if extraConfig.GenesisPrecompiles == nil {
+					extraConfig.GenesisPrecompiles = make(extras.Precompiles)
+				}
+				extraConfig.GenesisPrecompiles[feemanager.ConfigKey] = &feeConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, FeeManager)
 				if err != nil {
 					return config, statemachine.Stop, err
 				}
 			}
 		case RewardManager:
-			_, cancelled, err := configureRewardManager(app)
+			rewardManagerConfig, cancelled, err := configureRewardManager(app)
 			if err != nil {
 				return config, statemachine.Stop, err
 			}
 			if !cancelled {
-				// TODO: GenesisPrecompiles needs extras.ChainConfig
-				// rewardManagerConfig would be used here: config.GenesisPrecompiles[rewardmanager.ConfigKey] = &rewardManagerConfig
+				// Store the configuration for genesis
+				extraConfig := params.GetExtra(&config)
+				if extraConfig.GenesisPrecompiles == nil {
+					extraConfig.GenesisPrecompiles = make(extras.Precompiles)
+				}
+				extraConfig.GenesisPrecompiles[rewardmanager.ConfigKey] = &rewardManagerConfig
 				remainingPrecompiles, err = removePrecompile(remainingPrecompiles, RewardManager)
 				if err != nil {
 					return config, statemachine.Stop, err

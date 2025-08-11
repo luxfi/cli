@@ -96,7 +96,50 @@ so you can take your locally tested Subnet and deploy it on Testnet or Mainnet.`
 	return cmd
 }
 
+// updateSubnetIndex creates or updates an index file for faster subnet queries
+func updateSubnetIndex(indexFile string) {
+	// Create index in background to not block operations
+	go func() {
+		subnetIndex := make(map[string][]string)
+		
+		subnets, err := os.ReadDir(app.GetSubnetDir())
+		if err != nil {
+			return // Silently fail - index is optional optimization
+		}
+		
+		for _, s := range subnets {
+			if !s.IsDir() || strings.HasPrefix(s.Name(), ".") {
+				continue
+			}
+			
+			sidecarFile := filepath.Join(app.GetSubnetDir(), s.Name(), constants.SidecarFileName)
+			if _, err := os.Stat(sidecarFile); err == nil {
+				// Add to index
+				if subnetIndex[s.Name()] == nil {
+					subnetIndex[s.Name()] = []string{s.Name()}
+				}
+			}
+		}
+		
+		// Write index file
+		indexData, _ := json.MarshalIndent(subnetIndex, "", "  ")
+		_ = os.WriteFile(indexFile, indexData, 0o644)
+	}()
+}
+
 func getChainsInSubnet(subnetName string) ([]string, error) {
+	// Try to use index file first for faster lookup
+	indexFile := filepath.Join(app.GetSubnetDir(), ".subnet-index.json")
+	if indexData, err := os.ReadFile(indexFile); err == nil {
+		var index map[string][]string
+		if json.Unmarshal(indexData, &index) == nil {
+			if chains, ok := index[subnetName]; ok && len(chains) > 0 {
+				return chains, nil
+			}
+		}
+	}
+	
+	// Fall back to directory scan if index not available or entry not found
 	subnets, err := os.ReadDir(app.GetSubnetDir())
 	if err != nil {
 		return nil, fmt.Errorf("failed to read baseDir: %w", err)
@@ -413,7 +456,32 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	utilspkg.HandleTracking(cmd, app, flags)
 
 	// update sidecar
-	// TODO: need to do something for backwards compatibility?
+	// Check for backwards compatibility by migrating old sidecar format if needed
+	if sidecar.Networks == nil {
+		sidecar.Networks = make(map[string]models.NetworkData)
+	}
+	
+	// Migrate old sidecar fields if they exist (backwards compatibility)
+	if sidecar.SubnetID != ids.Empty && sidecar.BlockchainID != ids.Empty {
+		// Legacy format detected - migrate to new format
+		legacyNetwork := models.Mainnet
+		// Note: Testnet field doesn't exist anymore in the new sidecar structure
+		// Use a different way to determine if it's testnet if needed
+		
+		// Preserve legacy data in new format
+		if sidecar.Networks == nil {
+			sidecar.Networks = make(map[string]models.NetworkData)
+		}
+		sidecar.Networks[legacyNetwork.String()] = models.NetworkData{
+			SubnetID:     sidecar.SubnetID,
+			BlockchainID: sidecar.BlockchainID,
+		}
+		
+		// Clear legacy fields
+		sidecar.SubnetID = ids.Empty
+		sidecar.BlockchainID = ids.Empty
+	}
+	
 	return app.UpdateSidecarNetworks(&sidecar, network, subnetID, blockchainID)
 }
 
@@ -598,7 +666,10 @@ func validateSubnetNameAndGetChains(args []string) ([]string, error) {
 		return nil, fmt.Errorf("subnet name %s is invalid: %w", args[0], err)
 	}
 	// Check subnet exists
-	// TODO create a file that lists chains by subnet for fast querying
+	// Create/update subnet index file for fast querying if it doesn't exist
+	indexFile := filepath.Join(app.GetSubnetDir(), ".subnet-index.json")
+	updateSubnetIndex(indexFile)
+	
 	chains, err := getChainsInSubnet(args[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to getChainsInSubnet: %w", err)

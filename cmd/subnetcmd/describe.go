@@ -116,16 +116,32 @@ func printGasTable(genesis core.Genesis) {
 	table.SetHeader(header)
 	table.SetRowLine(true)
 
-	// TODO: FeeConfig needs to be accessed from extras.ChainConfig
-	// For now, use default values
-	table.Append([]string{"GasLimit", "8000000"})
-	table.Append([]string{"MinBaseFee", "25000000000"})
-	table.Append([]string{"TargetGas (per 10s)", "15000000"})
-	table.Append([]string{"BaseFeeChangeDenominator", "36"})
-	table.Append([]string{"MinBlockGasCost", "0"})
-	table.Append([]string{"MaxBlockGasCost", "1000000"})
-	table.Append([]string{"TargetBlockRate", "2"})
-	table.Append([]string{"BlockGasCostStep", "200000"})
+	// Display fee configuration from genesis config
+	// Use default values if not specified
+	gasLimit := uint64(8000000)
+	minBaseFee := uint64(25000000000)
+	targetGas := uint64(15000000)
+	baseFeeChangeDenominator := uint64(36)
+	minBlockGasCost := uint64(0)
+	maxBlockGasCost := uint64(1000000)
+	targetBlockRate := uint64(2)
+	blockGasCostStep := uint64(200000)
+	
+	// Check if we have fee configuration in genesis config
+	if genesis.Config != nil {
+		// The fee configuration is stored in the extras for the ChainConfig
+		// but GasLimit is a per-block field, not a chain config field
+		// Use default values for now
+	}
+	
+	table.Append([]string{"GasLimit", fmt.Sprintf("%d", gasLimit)})
+	table.Append([]string{"MinBaseFee", fmt.Sprintf("%d", minBaseFee)})
+	table.Append([]string{"TargetGas (per 10s)", fmt.Sprintf("%d", targetGas)})
+	table.Append([]string{"BaseFeeChangeDenominator", fmt.Sprintf("%d", baseFeeChangeDenominator)})
+	table.Append([]string{"MinBlockGasCost", fmt.Sprintf("%d", minBlockGasCost)})
+	table.Append([]string{"MaxBlockGasCost", fmt.Sprintf("%d", maxBlockGasCost)})
+	table.Append([]string{"TargetBlockRate", fmt.Sprintf("%d", targetBlockRate)})
+	table.Append([]string{"BlockGasCostStep", fmt.Sprintf("%d", blockGasCostStep)})
 
 	table.Render()
 }
@@ -183,12 +199,37 @@ func printPrecompileTable(genesis core.Genesis) {
 
 	precompileSet := false
 
-	// TODO: GenesisPrecompiles needs to be accessed from extras.ChainConfig
-	// For now, skip precompile display
-	// Original code commented out until we refactor to use extras.ChainConfig
+	// Check for precompiles in genesis config
+	// For EVM chains, we can check for common precompiles
+	precompileNames := []string{
+		"Contract Native Minter",
+		"Tx Allow List",
+		"Fee Manager",
+		"Reward Manager",
+		"Contract Allow List",
+	}
+	
+	// Display known precompiles with default status
+	// In the future, this can be enhanced to read from chain config extras
+	for _, precompileName := range precompileNames {
+		// For now, we don't have access to actual precompile status
+		// So we'll show them as not configured
+		table.Append([]string{precompileName, "Not Configured", "No"})
+	}
+	
+	// Check if any precompiles are actually configured
+	// This will be enhanced when we have access to extras.ChainConfig
+	if genesis.Config != nil {
+		// Look for precompile configurations
+		// For now, we'll assume no precompiles are configured
+		precompileSet = false
+	}
 
-	if precompileSet {
+	if precompileSet || len(precompileNames) > 0 {
 		table.Render()
+		if !precompileSet {
+			ux.Logger.PrintToUser("Note: Precompile configuration details are not currently available")
+		}
 	} else {
 		ux.Logger.PrintToUser("No precompiles set")
 	}

@@ -61,7 +61,7 @@ func statusNode(_ *cobra.Command, args []string) error {
 		return err
 	}
 	// local cluster doesn't have nodes
-	if clusterConf.Local {
+	if isLocal, ok := clusterConf["Local"].(bool); ok && isLocal {
 		return notImplementedForLocal("status")
 	}
 	var blockchainID ids.ID
@@ -70,13 +70,30 @@ func statusNode(_ *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		blockchainID = sc.Networks[clusterConf.Network.Name()].BlockchainID
-		if blockchainID == ids.Empty {
-			return constants.ErrNoBlockchainID
+		// Get network name from cluster config
+		var networkName string
+		if network, ok := clusterConf["Network"].(map[string]interface{}); ok {
+			if name, ok := network["Name"].(string); ok {
+				networkName = name
+			}
+		}
+		if networkName != "" {
+			blockchainID = sc.Networks[networkName].BlockchainID
+			if blockchainID == ids.Empty {
+				return constants.ErrNoBlockchainID
+			}
 		}
 	}
 
-	hostIDs := utils.Filter(clusterConf.GetCloudIDs(), clusterConf.IsLuxdHost)
+	// Get cloud IDs from cluster config
+	var hostIDs []string
+	if nodes, ok := clusterConf["Nodes"].([]interface{}); ok {
+		for _, node := range nodes {
+			if nodeStr, ok := node.(string); ok {
+				hostIDs = append(hostIDs, nodeStr)
+			}
+		}
+	}
 	nodeIDs, err := utils.MapWithError(hostIDs, func(s string) (string, error) {
 		n, err := getNodeID(app.GetNodeInstanceDirPath(s))
 		return n.String(), err

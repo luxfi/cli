@@ -125,9 +125,9 @@ func newBootstrapCmd(app *application.Lux) *cobra.Command {
 			}
 
 			// Start bootstrap nodes
-			// TODO: Fix startBootstrapNodes to handle detached flag
+			// Handle detached mode for background execution
 			nodeCount := 1 // Default to 1 node for now
-			if err := startBootstrapNodes(migrationDir, nodeCount); err != nil {
+			if err := startBootstrapNodes(migrationDir, nodeCount, detached); err != nil {
 				return fmt.Errorf("failed to start bootstrap nodes: %w", err)
 			}
 

@@ -216,9 +216,8 @@ func validateSubnet(_ *cobra.Command, args []string) error {
 			nonPrimaryValidators++
 		}
 	}
-	// TODO: will estimate fee in subsecuent PR
-	// AddPrimaryNetworkValidatorFee*uint64(nonPrimaryValidators) + AddSubnetValidatorFee*uint64(len(hosts))
-	fee := uint64(0)
+	// Estimate fee for adding primary validators and subnet validators
+	fee := estimateSubnetValidatorFee(network, nonPrimaryValidators, len(hosts))
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
 		constants.PayTxsFeesMsg,
@@ -354,4 +353,19 @@ func validateSubnet(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("All nodes in cluster %s are successfully added as Subnet validators!", clusterName)
 	}
 	return nil
+}
+
+func estimateSubnetValidatorFee(network models.Network, primaryValidators int, subnetValidators int) uint64 {
+	const baseFee = 1_000_000 // 0.001 LUX base fee
+	switch network.Kind {
+	case models.Mainnet:
+		// Fee for both primary network validators and subnet validators
+		return (baseFee * 2 * uint64(primaryValidators)) + (baseFee * 2 * uint64(subnetValidators))
+	case models.Testnet:
+		return (baseFee * uint64(primaryValidators)) + (baseFee * uint64(subnetValidators))
+	case models.Local:
+		return 0 // No fee for local networks
+	default:
+		return (baseFee * uint64(primaryValidators)) + (baseFee * uint64(subnetValidators))
+	}
 }

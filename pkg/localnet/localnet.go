@@ -128,6 +128,28 @@ func GetLocalNetworkLuxdVersion(app *application.Lux) (bool, string, int, error)
 	return true, parsedVersion, int(versionResponse.RPCProtocolVersion), nil
 }
 
+// LocalNetworkIsRunning is an alias for IsLocalNetworkRunning for backwards compatibility
+func LocalNetworkIsRunning(app *application.Lux) (bool, error) {
+	return IsLocalNetworkRunning(app)
+}
+
+// StartLocalNetwork starts the local network (placeholder - needs implementation)
+func StartLocalNetwork(app *application.Lux, name string, nodeVersion string) error {
+	// Placeholder implementation for starting local network
+	// This would typically involve starting tmpnet nodes
+	return fmt.Errorf("StartLocalNetwork not yet implemented")
+}
+
+// IsRunning checks if the local network is running
+func IsRunning(app *application.Lux) (bool, error) {
+	return IsLocalNetworkRunning(app)
+}
+
+// Stop stops the local network
+func Stop(app *application.Lux) error {
+	return LocalNetworkStop(app)
+}
+
 // Stops the local network
 func LocalNetworkStop(app *application.Lux) error {
 	networkDir, err := GetLocalNetworkDir(app)

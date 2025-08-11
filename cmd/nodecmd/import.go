@@ -109,17 +109,38 @@ func importFile(_ *cobra.Command, args []string) error {
 	}
 
 	// add cluster
-	clustersConfig := models.ClustersConfig{}
-	clustersConfig.Clusters = make(map[string]models.ClusterConfig)
-	clustersConfig, err = app.GetClustersConfig()
+	clustersConfigMap, err := app.GetClustersConfig()
 	if err != nil {
 		ux.Logger.RedXToUser("error loading clusters config: %v", err)
 		return err
 	}
 
-	importCluster.ClusterConfig.Network.ClusterName = clusterName
-	clustersConfig.Clusters[clusterName] = importCluster.ClusterConfig
-	if err := app.WriteClustersConfigFile(&clustersConfig); err != nil {
+	// Ensure Clusters map exists
+	if _, ok := clustersConfigMap["Clusters"]; !ok {
+		clustersConfigMap["Clusters"] = make(map[string]interface{})
+	}
+	clusters := clustersConfigMap["Clusters"].(map[string]interface{})
+	
+	// Convert ClusterConfig to map for storage
+	// Note: We can't directly modify Network.ClusterName as it's immutable
+	// So we'll need to store it in the config separately
+	clusterConfigMap := make(map[string]interface{})
+	
+	// Convert ClusterConfig fields to map format
+	clusterConfigMap["Nodes"] = importCluster.ClusterConfig.Nodes
+	clusterConfigMap["APINodes"] = importCluster.ClusterConfig.APINodes
+	clusterConfigMap["Network"] = importCluster.ClusterConfig.Network
+	clusterConfigMap["MonitoringInstance"] = importCluster.ClusterConfig.MonitoringInstance
+	clusterConfigMap["LoadTestInstance"] = importCluster.ClusterConfig.LoadTestInstance
+	clusterConfigMap["ExtraNetworkData"] = importCluster.ClusterConfig.ExtraNetworkData
+	clusterConfigMap["Subnets"] = importCluster.ClusterConfig.Subnets
+	clusterConfigMap["External"] = importCluster.ClusterConfig.External
+	clusterConfigMap["Local"] = importCluster.ClusterConfig.Local
+	clusterConfigMap["HTTPAccess"] = importCluster.ClusterConfig.HTTPAccess
+	
+	clusters[clusterName] = clusterConfigMap
+	
+	if err := app.SaveClustersConfig(clustersConfigMap); err != nil {
 		ux.Logger.RedXToUser("error saving clusters config: %v", err)
 	}
 	ux.Logger.GreenCheckmarkToUser("cluster [%s] imported successfully", clusterName)

@@ -55,17 +55,30 @@ func sshNode(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if len(clustersConfig.Clusters) == 0 {
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || len(clusters) == 0 {
 		ux.Logger.PrintToUser("There are no clusters defined.")
 		return nil
 	}
 	if len(args) == 0 {
 		// provide ssh connection string for all clusters
-		for clusterName, clusterConfig := range clustersConfig.Clusters {
-			if clusterConfig.Local {
+		for clusterName, clusterConfigInterface := range clusters {
+			clusterConfig, ok := clusterConfigInterface.(map[string]interface{})
+			if !ok {
 				continue
 			}
-			err := printClusterConnectionString(clusterName, clusterConfig.Network.Kind.String())
+			if isLocal, ok := clusterConfig["Local"].(bool); ok && isLocal {
+				continue
+			}
+			// Get network kind if available
+			networkKind := ""
+			if network, ok := clusterConfig["Network"].(map[string]interface{}); ok {
+				if kind, ok := network["Kind"].(string); ok {
+					networkKind = kind
+				}
+			}
+			err := printClusterConnectionString(clusterName, networkKind)
 			if err != nil {
 				return err
 			}

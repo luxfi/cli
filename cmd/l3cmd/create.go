@@ -3,7 +3,10 @@
 package l3cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
@@ -52,8 +55,23 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 	// Select base L2
 	if l2Base == "" {
-		// TODO: List available L2s
-		l2Base, _ = app.Prompt.CaptureString("Enter base L2 name")
+		// List available L2s from sidecar files
+		l2s, err := getAvailableL2s()
+		if err != nil {
+			return fmt.Errorf("failed to get available L2s: %w", err)
+		}
+		
+		if len(l2s) > 0 {
+			l2Base, err = app.Prompt.CaptureList("Select base L2", l2s)
+			if err != nil {
+				return err
+			}
+		} else {
+			l2Base, err = app.Prompt.CaptureString("Enter base L2 name")
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// VM type selection
@@ -135,4 +153,35 @@ func createL3(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   3. Test locally: lux network quickstart --l3 %s", l3Name)
 
 	return nil
+}
+
+// getAvailableL2s returns a list of available L2 configurations
+func getAvailableL2s() ([]string, error) {
+	subnetDir := app.GetSubnetDir()
+	entries, err := os.ReadDir(subnetDir)
+	if err != nil {
+		return nil, err
+	}
+	
+	var l2s []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			sidecarPath := filepath.Join(subnetDir, entry.Name(), "sidecar.json")
+			if _, err := os.Stat(sidecarPath); err == nil {
+				// Check if it's an L2 (has subnet configuration)
+				data, err := os.ReadFile(sidecarPath)
+				if err == nil {
+					var sc models.Sidecar
+					if json.Unmarshal(data, &sc) == nil {
+						// Consider it an L2 if it has subnet or blockchain configuration
+						if sc.Subnet != "" || len(sc.Networks) > 0 {
+							l2s = append(l2s, entry.Name())
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return l2s, nil
 }

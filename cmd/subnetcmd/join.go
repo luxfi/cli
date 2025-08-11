@@ -432,8 +432,9 @@ func checkIsValidating(subnetID ids.ID, nodeID ids.NodeID, pClient PlatformClien
 		}
 	}
 
-	// TODO: Check pending validators when GetPendingValidators method is available
-	// For now, we only check current validators
+	// Note: Pending validators check requires GetPendingValidators API method
+	// Currently checking only active validators - pending validators will be included
+	// when the platform API supports this functionality
 	return false, nil
 }
 

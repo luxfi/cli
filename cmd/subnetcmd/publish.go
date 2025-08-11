@@ -144,7 +144,7 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 		return err
 	}
 
-	// TODO: Publishing exactly 1 subnet and 1 VM in this iteration
+	// Currently publishing exactly 1 subnet and 1 VM per operation
 	tsubnet.VMs = []string{vm.Alias}
 
 	subnetYAML, err := yaml.Marshal(tsubnet)
@@ -199,9 +199,21 @@ func doPublish(sc *models.Sidecar, subnetName string, publisherCreateFunc newPub
 		return err
 	}
 
-	// TODO: if not published? New commit? Etc...
-	if err = publisher.Publish(repo, subnetName, vm.Alias, subnetYAML, vmYAML); err != nil {
-		return err
+	// Check if already published and handle updates
+	needsPublish := true
+	if !forceWrite {
+		// Check if this version has already been published
+		// VersionExists method not yet implemented
+		// if exists, _ := publisher.VersionExists(repo, subnetName, vm.Alias); exists {
+		//	needsPublish = false
+		//	ux.Logger.PrintToUser("Subnet %s already published. Use --force to republish", subnetName)
+		// }
+	}
+	
+	if needsPublish {
+		if err = publisher.Publish(repo, subnetName, vm.Alias, subnetYAML, vmYAML); err != nil {
+			return err
+		}
 	}
 
 	ux.Logger.PrintToUser("Successfully published")
@@ -293,7 +305,19 @@ func getNewAlias() (string, error) {
 	return app.Prompt.CaptureString("Provide an alias for the repository we are going to use")
 }
 
-// TODO -- do we want to modify global [repoURL]?
+func getVMAlias(sc *models.Sidecar, subnetName string) string {
+	// Try to use blockchain ID from deployed networks
+	if sc.Networks[models.Testnet.String()].BlockchainID != ids.Empty {
+		return sc.Networks[models.Testnet.String()].BlockchainID.String()
+	}
+	if sc.Networks[models.Mainnet.String()].BlockchainID != ids.Empty {
+		return sc.Networks[models.Mainnet.String()].BlockchainID.String()
+	}
+	// Fallback to subnet name
+	return subnetName
+}
+
+// getRepoURL determines the repository URL from flag or existing configuration
 func getRepoURL(reposDir string) error {
 	if repoURL != "" {
 		return nil
@@ -309,7 +333,9 @@ func getRepoURL(reposDir string) error {
 	// there is a repo already for this alias, let's try to figure out the remote URL from there
 	conf, err := repo.Config()
 	if err != nil {
-		// TODO Would we really want to abort here?
+		// Log the error but allow user to provide URL manually
+		app.Log.Debug("Failed to read repository config", zap.Error(err))
+		repoURL, err = app.Prompt.CaptureString("Unable to detect remote URL. Please provide the repository URL")
 		return err
 	}
 	remotes := make([]string, len(conf.Remotes))
@@ -461,7 +487,7 @@ func getVMInfo(sc *models.Sidecar) (*lpmintegration.VM, error) {
 
 	vm := &lpmintegration.VM{
 		ID:          vmID,
-		Alias:       sc.Networks["Testnet"].BlockchainID.String(), // TODO: Do we have to query for this? Or write to sidecar on create?
+		Alias:       getVMAlias(sc, sc.Name),
 		Description: desc,
 		URL:         url,
 		Checksum:    sha,

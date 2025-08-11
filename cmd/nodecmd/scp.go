@@ -61,7 +61,9 @@ func scpNode(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if len(clustersConfig.Clusters) == 0 {
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || len(clusters) == 0 {
 		ux.Logger.PrintToUser("There are no clusters defined.")
 		return nil
 	}
@@ -82,14 +84,16 @@ func scpNode(_ *cobra.Command, args []string) error {
 	if sourceClusterExists && destClusterExists {
 		return fmt.Errorf("both source and destination cannot be clusters")
 	}
-	sourceClusterConfig := clustersConfig.Clusters[sourceClusterNameOrNodeID]
-	if sourceClusterExists && sourceClusterConfig.Local {
-		return notImplementedForLocal("scp")
+	if sourceClusterConfig, ok := clusters[sourceClusterNameOrNodeID].(map[string]interface{}); ok {
+		if isLocal, ok := sourceClusterConfig["Local"].(bool); ok && sourceClusterExists && isLocal {
+			return notImplementedForLocal("scp")
+		}
 	}
 
-	destClusterConfig := clustersConfig.Clusters[destClusterNameOrNodeID]
-	if destClusterExists && destClusterConfig.Local {
-		return notImplementedForLocal("scp")
+	if destClusterConfig, ok := clusters[destClusterNameOrNodeID].(map[string]interface{}); ok {
+		if isLocal, ok := destClusterConfig["Local"].(bool); ok && destClusterExists && isLocal {
+			return notImplementedForLocal("scp")
+		}
 	}
 
 	switch {
@@ -256,7 +260,12 @@ func getHostClusterPair(nodeOrCloudIDOrIP string) (*models.Host, string) {
 	if err != nil {
 		return nil, ""
 	}
-	for clusterName := range clustersConfig.Clusters {
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok {
+		return nil, ""
+	}
+	for clusterName := range clusters {
 		clusterHosts, err := GetAllClusterHosts(clusterName)
 		if err != nil {
 			return nil, ""

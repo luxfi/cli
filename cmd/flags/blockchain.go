@@ -35,9 +35,17 @@ func AddRPCFlagToCmd(cmd *cobra.Command, app *application.Lux, rpc *string) {
 
 func ValidateRPC(app *application.Lux, rpc *string, cmd *cobra.Command, args []string) error {
 	var err error
-	// TODO: modify check below to extend prompting for rpc to commands other than addValidator
+	// Prompt for RPC endpoint when needed for certain commands
 	if *rpc == "" {
-		if cmd.Name() == "addValidator" && len(args) == 0 {
+		// Commands that require RPC endpoint
+		requiresRPC := map[string]bool{
+			"addValidator":     true,
+			"deploy":          true,
+			"removeValidator": true,
+			"status":          true,
+		}
+		
+		if requiresRPC[cmd.Name()] && len(args) == 0 {
 			*rpc, err = app.Prompt.CaptureURL("What is the RPC endpoint?")
 			if err != nil {
 				return err

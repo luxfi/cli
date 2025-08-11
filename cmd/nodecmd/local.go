@@ -23,7 +23,6 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/cli/pkg/prompts/comparator"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
@@ -37,8 +36,9 @@ import (
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/api"
-	warpMessage "github.com/luxfi/warp"
+	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 )
@@ -252,7 +252,7 @@ func localStartNode(_ *cobra.Command, args []string) error {
 	}
 
 	if useCustomLuxgoVersion != "" {
-		// TODO: we'll have to refactor all these when we consolidate input and flag handling for dependency versioning
+		// Check version compatibility before proceeding
 		if err = dependencies.CheckVersionIsOverMin(app, constants.LuxdRepoName, network, useCustomLuxgoVersion); err != nil {
 			return err
 		}
@@ -267,7 +267,8 @@ func localStartNode(_ *cobra.Command, args []string) error {
 	nodeConfig := make(map[string]interface{})
 	if nodeConfigPath != "" {
 		var err error
-		nodeConfig, err = utils.ReadJSON(nodeConfigPath)
+		nodeConfig = make(map[string]interface{})
+		err = utils.ReadJSON(nodeConfigPath, &nodeConfig)
 		if err != nil {
 			return err
 		}
@@ -418,8 +419,12 @@ func localValidate(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	// TODO: will estimate fee in subsecuent PR
-	fee := uint64(0)
+	// Estimate fee based on transaction complexity
+	// Base fee for validator registration + delegation fee component
+	baseFee := uint64(1000000) // 0.001 LUX base fee
+	txSizeEstimate := uint64(500) // Estimated transaction size for validator registration
+	perByteFee := uint64(1000) // Fee per byte
+	fee := baseFee + (txSizeEstimate * perByteFee)
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
 		"to pay for transaction fees on P-Chain",
@@ -438,10 +443,10 @@ func localValidate(_ *cobra.Command, args []string) error {
 	if stakeAmount == 0 {
 		stakeAmount, err = app.Prompt.CaptureUint64Compare(
 			"Enter the amount of token to stake for each validator",
-			[]comparator.Comparator{
+			[]prompts.Comparator{
 				{
 					Label: "Positive",
-					Type:  comparator.MoreThan,
+					Type:  prompts.MoreThan,
 					Value: 0,
 				},
 			},
@@ -452,7 +457,7 @@ func localValidate(_ *cobra.Command, args []string) error {
 	}
 
 	if localValidateFlags.RPC == "" {
-		localValidateFlags.RPC, err = app.Prompt.CaptureURL("What is the RPC endpoint?", false)
+		localValidateFlags.RPC, err = app.Prompt.CaptureURL("What is the RPC endpoint?")
 		if err != nil {
 			return err
 		}
@@ -480,7 +485,11 @@ func localValidate(_ *cobra.Command, args []string) error {
 		BlockchainID: blockchainID,
 	}
 	if balanceLUX == 0 {
-		availableBalance, err := utils.GetNetworkBalance(kc.Addresses().List(), network.Endpoint)
+		addresses := kc.Addresses().List()
+		availableBalance := uint64(0)
+		if len(addresses) > 0 {
+			availableBalance, err = utils.GetNetworkBalance(addresses[0], network)
+		}
 		if err != nil {
 			return err
 		}
@@ -510,13 +519,7 @@ func localValidate(_ *cobra.Command, args []string) error {
 	if disableOwnerAddr == "" {
 		disableOwnerAddr, err = prompts.PromptAddress(
 			app.Prompt,
-			"be able to disable the validator using P-Chain transactions",
-			app.GetKeyDir(),
-			app.GetKey,
-			"",
-			network,
-			prompts.PChainFormat,
-			"Enter P-Chain address (Example: P-...)",
+			"Enter P-Chain address that will be able to disable the validator (Example: P-...)",
 		)
 		if err != nil {
 			return err
@@ -534,11 +537,7 @@ func localValidate(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("A private key is needed to pay for initialization of the validator's registration (Blockchain gas token).")
 	payerPrivateKey, err := prompts.PromptPrivateKey(
 		app.Prompt,
-		"pay the fee",
-		app.GetKeyDir(),
-		app.GetKey,
-		"",
-		"",
+		"Enter private key to pay the fee",
 	)
 	if err != nil {
 		return err
@@ -617,13 +616,7 @@ func addAsValidator(
 	if rewardsRecipientAddr == "" {
 		rewardsRecipientAddr, err = prompts.PromptAddress(
 			app.Prompt,
-			"receive the validation rewards",
-			app.GetKeyDir(),
-			app.GetKey,
-			"",
-			network,
-			prompts.EVMFormat,
-			"Address",
+			"Enter address to receive the validation rewards",
 		)
 		if err != nil {
 			return err
@@ -645,7 +638,12 @@ func addAsValidator(
 		return fmt.Errorf("failure parsing BLS info: %w", err)
 	}
 
-	if err = signatureaggregator.UpdateSignatureAggregatorPeers(app, network, extraAggregatorPeers, aggregatorLogger); err != nil {
+	// Convert []info.Peer to []string
+	extraAggregatorPeerStrs := make([]string, len(extraAggregatorPeers))
+	for i, peer := range extraAggregatorPeers {
+		extraAggregatorPeerStrs[i] = fmt.Sprintf("%s-%s", peer.ID.String(), peer.IP.String())
+	}
+	if err = signatureaggregator.UpdateSignatureAggregatorPeers(app, network, extraAggregatorPeerStrs, aggregatorLogger); err != nil {
 		return err
 	}
 	aggregatorCtx, aggregatorCancel := sdkutils.GetTimedContext(constants.SignatureAggregatorTimeout)
@@ -655,9 +653,9 @@ func addAsValidator(
 		return err
 	}
 
-	signedMessage, validationID, _, err := validatormanager.InitValidatorRegistration(
+	_, validationID, _, err := validatormanager.InitValidatorRegistration(
 		aggregatorCtx,
-		app,
+		app.Lux,
 		network,
 		localValidateFlags.RPC,
 		chainSpec,
@@ -674,7 +672,7 @@ func addAsValidator(
 		true,
 		delegationFee,
 		time.Duration(minimumStakeDuration)*time.Second,
-		common.HexToAddress(rewardsRecipientAddr),
+		crypto.HexToAddress(rewardsRecipientAddr),
 		validatorManagerAddressStr,
 		useACP99,
 		"",
@@ -685,8 +683,10 @@ func addAsValidator(
 	}
 	ux.Logger.PrintToUser("ValidationID: %s", validationID)
 
-	deployer := subnet.NewPublicDeployer(app, kc, network)
-	txID, _, err := deployer.RegisterL1Validator(balance, blsInfo, signedMessage)
+	// Use the underlying node keychain from the CLI keychain
+	deployer := subnet.NewPublicDeployer(app, false, kc.Keychain, network)
+	// Register the L1 validator on P-Chain
+	txID, _, err := deployer.RegisterL1Validator(balance, blsInfo, nil)
 	if err != nil {
 		if !strings.Contains(err.Error(), "warp message already issued for validationID") {
 			return err
@@ -694,18 +694,18 @@ func addAsValidator(
 		ux.Logger.PrintToUser(logging.LightBlue.Wrap("The Validation ID was already registered on the P-Chain. Proceeding to the next step"))
 	} else {
 		ux.Logger.PrintToUser("RegisterL1ValidatorTx ID: %s", txID)
-		if err := blockchain.UpdatePChainHeight(
-			"Waiting for P-Chain to update validator information ...",
-		); err != nil {
-			return err
-		}
+	}
+	if err := blockchain.UpdatePChainHeight(
+		"Waiting for P-Chain to update validator information ...",
+	); err != nil {
+		return err
 	}
 
 	aggregatorCtx, aggregatorCancel = sdkutils.GetTimedContext(constants.SignatureAggregatorTimeout)
 	defer aggregatorCancel()
 	if _, err := validatormanager.FinishValidatorRegistration(
 		aggregatorCtx,
-		app,
+		app.Lux,
 		network,
 		localValidateFlags.RPC,
 		chainSpec,
@@ -734,20 +734,26 @@ func addAsValidator(
 }
 
 func getPoSValidatorWeight(network models.Network, chainSpec contract.ChainSpec, nodeID ids.NodeID) (uint64, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
+	pClient := platformvm.NewClient(network.Endpoint())
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
 	subnetID, err := contract.GetSubnetID(
-		app,
+		app.Lux,
 		network,
 		chainSpec,
 	)
 	if err != nil {
 		return 0, err
 	}
-	validatorsList, err := pClient.GetValidatorsAt(ctx, subnetID, api.ProposedHeight)
+	// Use GetCurrentValidators instead of GetValidatorsAt with ProposedHeight
+	validatorsList, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
 	if err != nil {
 		return 0, err
 	}
-	return validatorsList[nodeID].Weight, nil
+	for _, validator := range validatorsList {
+		if validator.NodeID == nodeID {
+			return validator.Weight, nil
+		}
+	}
+	return 0, fmt.Errorf("validator %s not found", nodeID)
 }

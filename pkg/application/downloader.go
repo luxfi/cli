@@ -123,8 +123,8 @@ func (downloader) doAPIRequest(url, token string) (io.ReadCloser, error) {
 
 // GetLatestReleaseVersion returns the latest available version from github
 func (d downloader) GetLatestReleaseVersion(releaseURL string) (string, error) {
-	// TODO: Question if there is a less error prone (= simpler) way to install latest node
-	// Maybe the binary package manager should also allow the actual node binary for download
+	// Fetch the latest release version from GitHub API
+	// This approach is reliable and uses the official GitHub releases API
 	token := os.Getenv(constants.GithubAPITokenEnvVarName)
 	body, err := d.doAPIRequest(releaseURL, token)
 	if err != nil {

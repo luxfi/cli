@@ -213,7 +213,7 @@ func preCreateChecks(clusterName string, network models.Network) error {
 		return err
 	}
 	// check for local
-	clusterConfig := models.ClusterConfig{}
+	var clusterConfig map[string]interface{}
 	if ok, err := app.ClusterExists(clusterName); err != nil {
 		return err
 	} else if ok {
@@ -222,8 +222,10 @@ func preCreateChecks(clusterName string, network models.Network) error {
 			return err
 		}
 	}
-	if clusterConfig.Local {
-		return notImplementedForLocal("create")
+	if clusterConfig != nil {
+		if isLocal, ok := clusterConfig["local"].(bool); ok && isLocal {
+			return notImplementedForLocal("create")
+		}
 	}
 	// bootstrap checks
 	if len(bootstrapIDs) != len(bootstrapIPs) {
@@ -259,7 +261,7 @@ func checkClusterExternal(clusterName string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		if clusterConf.External {
+		if isExternal, ok := clusterConf["external"].(bool); ok && isExternal {
 			return true, nil
 		}
 	}
@@ -286,7 +288,7 @@ func stringToAWSVolumeType(input string) types.VolumeType {
 }
 
 func setGlobalNetworkFlags(network models.Network) {
-	switch network.Kind {
+	switch network {
 	case models.Testnet:
 		globalNetworkFlags.UseTestnet = true
 	case models.Devnet:
@@ -314,7 +316,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	network = models.NewNetworkFromCluster(network, clusterName)
-	globalNetworkFlags.UseDevnet = network.Kind == models.Devnet // set globalNetworkFlags.UseDevnet to true if network is devnet for further use
+	globalNetworkFlags.UseDevnet = network == models.Devnet // set globalNetworkFlags.UseDevnet to true if network is devnet for further use
 	luxdVersionSetting := dependencies.LuxdVersionSettings{
 		UseLuxgoVersionFromSubnet:       useLuxgoVersionFromSubnet,
 		UseLatestLuxgoReleaseVersion:    useLatestLuxgoReleaseVersion,
@@ -373,7 +375,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 		// override cloudConfig for E2E testing
 		defaultLuxCLIPrefix := usr.Username + constants.LuxCLISuffix
 		keyPairName := fmt.Sprintf("%s-keypair", defaultLuxCLIPrefix)
-		certPath, err := app.GetSSHCertFilePath(keyPairName)
+		certPath, _ := app.GetSSHCertFilePath(keyPairName)
 		if globalNetworkFlags.UseDevnet {
 			for i, num := range numAPINodes {
 				numValidatorsNodes[i] += num
@@ -383,13 +385,13 @@ func createNodes(cmd *cobra.Command, args []string) error {
 		var dockerNodesPublicIPs []string
 		var monitoringHostIP string
 		if addMonitoring {
-			generatedPublicIPs := utils.GenerateDockerHostIPs(dockerNumNodes + 1)
+			generatedPublicIPs, _ := utils.GenerateDockerHostIPs(dockerNumNodes + 1)
 			monitoringHostIP = generatedPublicIPs[len(generatedPublicIPs)-1]
 			dockerNodesPublicIPs = generatedPublicIPs[:len(generatedPublicIPs)-1]
 		} else {
-			dockerNodesPublicIPs = utils.GenerateDockerHostIPs(dockerNumNodes)
+			dockerNodesPublicIPs, _ = utils.GenerateDockerHostIPs(dockerNumNodes)
 		}
-		dockerHostIDs := utils.GenerateDockerHostIDs(dockerNumNodes)
+		dockerHostIDs, _ := utils.GenerateDockerHostIDs(dockerNumNodes)
 		if err != nil {
 			return err
 		}
@@ -422,7 +424,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 		}
 		cloudConfigMap["docker"] = currentRegionConfig
 		if addMonitoring {
-			monitoringDockerHostID := utils.GenerateDockerHostIDs(1)
+			monitoringDockerHostID, _ := utils.GenerateDockerHostIDs(1)
 			dockerHostIDs = append(dockerHostIDs, monitoringDockerHostID[0])
 			monitoringCloudConfig := models.CloudConfig{
 				"monitoringDocker": {
@@ -441,12 +443,20 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			}
 			monitoringNodeConfig = monitoringCloudConfig["monitoringDocker"]
 		}
-		pubKeyString, err := os.ReadFile(fmt.Sprintf("%s.pub", certPath))
+		_, err = os.ReadFile(fmt.Sprintf("%s.pub", certPath))
 		if err != nil {
 			return err
 		}
-		dockerComposeFile, err := utils.SaveDockerComposeFile(constants.E2EDockerComposeFile, len(dockerHostIDs), "focal", strings.TrimSuffix(string(pubKeyString), "\n"))
+		// Generate docker-compose configuration
+		nodeCount := numNodes
+		nodeIPs, err := utils.GenerateDockerHostIPs(int(nodeCount))
 		if err != nil {
+			return err
+		}
+		
+		dockerComposeContent := generateDockerComposeContent(clusterName, nodeIPs, network)
+		dockerComposeFile := constants.E2EDockerComposeFile
+		if err := utils.SaveDockerComposeFile(dockerComposeContent, dockerComposeFile); err != nil {
 			return err
 		}
 		if err := utils.StartDockerCompose(dockerComposeFile); err != nil {
@@ -482,7 +492,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			}
 			if existingMonitoringInstance != "" {
 				addMonitoring = true
-				monitoringNodeConfig, monitoringHostRegion, err = getNodeCloudConfig(existingMonitoringInstance)
+				monitoringNodeConfig, monitoringHostRegion, err = getNodeCloudConfig(clusterName, existingMonitoringInstance)
 				if err != nil {
 					return err
 				}
@@ -552,7 +562,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			}
 			if existingMonitoringInstance != "" {
 				addMonitoring = true
-				monitoringNodeConfig, monitoringHostRegion, err = getNodeCloudConfig(existingMonitoringInstance)
+				monitoringNodeConfig, monitoringHostRegion, err = getNodeCloudConfig(clusterName, existingMonitoringInstance)
 				if err != nil {
 					return err
 				}
@@ -594,7 +604,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 					networkName := fmt.Sprintf("%s-network", prefix)
 					firewallName := fmt.Sprintf("%s-%s-monitoring", networkName, strings.ReplaceAll(monitoringNodeConfig.PublicIPs[0], ".", ""))
 					ports := []string{
-						strconv.Itoa(constants.LuxdMachineMetricsPort), strconv.Itoa(constants.LuxdAPIPort),
+						constants.LuxdMachineMetricsPort, strconv.Itoa(constants.LuxdAPIPort),
 						strconv.Itoa(constants.LuxdMonitoringPort), strconv.Itoa(constants.LuxdGrafanaPort),
 						strconv.Itoa(constants.LuxdLokiPort),
 					}
@@ -691,7 +701,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 					return
 				}
 				spinner := spinSession.SpinToUser(utils.ScriptLog(monitoringHost.IP, "Setup Monitoring"))
-				if err = app.SetupMonitoringEnv(); err != nil {
+				if err = app.SetupMonitoringEnv(clusterName); err != nil {
 					nodeResults.AddResult(monitoringHost.IP, nil, err)
 					ux.SpinFailWithError(spinner, "", err)
 					return
@@ -774,7 +784,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 	}
 	ux.Logger.Info("Create and setup nodes time took: %s", time.Since(startTime))
 	spinSession.Stop()
-	if network.Kind == models.Devnet {
+	if network == models.Devnet {
 		if err := setupDevnet(clusterName, hosts, apiNodeIPMap); err != nil {
 			return err
 		}
@@ -882,17 +892,16 @@ func saveExternalHostConfig(externalHostConfig models.RegionConfig, hostRegion, 
 
 func getExistingMonitoringInstance(clusterName string) (string, error) {
 	// check for local
-	clusterConfig := models.ClusterConfig{}
 	if ok, err := app.ClusterExists(clusterName); err != nil {
 		return "", err
 	} else if ok {
-		clusterConfig, err = app.GetClusterConfig(clusterName)
+		clusterConfigMap, err := app.GetClusterConfig(clusterName)
 		if err != nil {
 			return "", err
 		}
-	}
-	if clusterConfig.MonitoringInstance != "" {
-		return clusterConfig.MonitoringInstance, nil
+		if monitoringInstance, ok := clusterConfigMap["monitoringInstance"].(string); ok && monitoringInstance != "" {
+			return monitoringInstance, nil
+		}
 	}
 	return "", nil
 }
@@ -902,34 +911,44 @@ func updateKeyPairClustersConfig(cloudConfig models.NodeConfig) error {
 	if err != nil {
 		return err
 	}
-	if clustersConfig.KeyPair == nil {
-		clustersConfig.KeyPair = make(map[string]string)
+	keyPair, ok := clustersConfig["KeyPair"].(map[string]interface{})
+	if !ok || keyPair == nil {
+		keyPair = make(map[string]interface{})
+		clustersConfig["KeyPair"] = keyPair
 	}
-	if _, ok := clustersConfig.KeyPair[cloudConfig.KeyPair]; !ok {
-		clustersConfig.KeyPair[cloudConfig.KeyPair] = cloudConfig.CertPath
+	if _, ok := keyPair[cloudConfig.KeyPair]; !ok {
+		keyPair[cloudConfig.KeyPair] = cloudConfig.CertPath
 	}
-	return app.WriteClustersConfigFile(&clustersConfig)
+	return app.SaveClustersConfig(clustersConfig)
 }
 
-func getNodeCloudConfig(node string) (models.RegionConfig, string, error) {
-	config, err := app.LoadClusterNodeConfig(node)
+func getNodeCloudConfig(clusterName string, node string) (models.RegionConfig, string, error) {
+	config, err := app.LoadClusterNodeConfig(clusterName, node)
 	if err != nil {
 		return models.RegionConfig{}, "", err
 	}
 	elasticIP := []string{}
-	if config.ElasticIP != "" {
-		elasticIP = append(elasticIP, config.ElasticIP)
+	if elasticIPStr, ok := config["ElasticIP"].(string); ok && elasticIPStr != "" {
+		elasticIP = append(elasticIP, elasticIPStr)
 	}
 	instanceIDs := []string{}
-	instanceIDs = append(instanceIDs, config.NodeID)
+	if nodeID, ok := config["NodeID"].(string); ok {
+		instanceIDs = append(instanceIDs, nodeID)
+	}
+	keyPair, _ := config["KeyPair"].(string)
+	securityGroup, _ := config["SecurityGroup"].(string)
+	certPath, _ := config["CertPath"].(string)
+	ami, _ := config["AMI"].(string)
+	region, _ := config["Region"].(string)
+	
 	return models.RegionConfig{
 		InstanceIDs:       instanceIDs,
 		PublicIPs:         elasticIP,
-		KeyPair:           config.KeyPair,
-		SecurityGroupName: config.SecurityGroup,
-		CertFilePath:      config.CertPath,
-		ImageID:           config.AMI,
-	}, config.Region, nil
+		KeyPair:           keyPair,
+		SecurityGroupName: securityGroup,
+		CertFilePath:      certPath,
+		ImageID:           ami,
+	}, region, nil
 }
 
 func addNodeToClustersConfig(network models.Network, nodeID, clusterName string, isAPIInstance bool, isExternalHost bool, nodeRole, loadTestName string) error {
@@ -937,33 +956,56 @@ func addNodeToClustersConfig(network models.Network, nodeID, clusterName string,
 	if err != nil {
 		return err
 	}
-	if clustersConfig.Clusters == nil {
-		clustersConfig.Clusters = make(map[string]models.ClusterConfig)
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || clusters == nil {
+		clusters = make(map[string]interface{})
+		clustersConfig["Clusters"] = clusters
 	}
-	clusterConfig := clustersConfig.Clusters[clusterName]
+	clusterConfig, ok := clusters[clusterName].(map[string]interface{})
+	if !ok || clusterConfig == nil {
+		clusterConfig = make(map[string]interface{})
+	}
 	// if supplied network in argument is empty, don't change current cluster network in cluster_config.json
-	if !network.IsUndefined() {
-		clusterConfig.Network = network
+	if network != models.Undefined {
+		clusterConfig["Network"] = network
 	}
-	clusterConfig.HTTPAccess = constants.HTTPAccess(publicHTTPPortAccess)
-	if clusterConfig.LoadTestInstance == nil {
-		clusterConfig.LoadTestInstance = make(map[string]string)
+	var httpAccess string
+	if publicHTTPPortAccess {
+		httpAccess = "public"
+	} else {
+		httpAccess = "private"
+	}
+	clusterConfig["HTTPAccess"] = httpAccess
+	loadTestInstance, ok := clusterConfig["LoadTestInstance"].(map[string]interface{})
+	if !ok || loadTestInstance == nil {
+		loadTestInstance = make(map[string]interface{})
+		clusterConfig["LoadTestInstance"] = loadTestInstance
 	}
 	if isExternalHost {
 		switch nodeRole {
 		case constants.MonitorRole:
-			clusterConfig.MonitoringInstance = nodeID
+			clusterConfig["MonitoringInstance"] = nodeID
 		case constants.LoadTestRole:
-			clusterConfig.LoadTestInstance[loadTestName] = nodeID
+			loadTestInstance[loadTestName] = nodeID
 		}
 	} else {
-		clusterConfig.Nodes = append(clusterConfig.Nodes, nodeID)
+		nodes, ok := clusterConfig["Nodes"].([]interface{})
+		if !ok {
+			nodes = []interface{}{}
+		}
+		nodes = append(nodes, nodeID)
+		clusterConfig["Nodes"] = nodes
 	}
 	if isAPIInstance {
-		clusterConfig.APINodes = append(clusterConfig.APINodes, nodeID)
+		apiNodes, ok := clusterConfig["APINodes"].([]interface{})
+		if !ok {
+			apiNodes = []interface{}{}
+		}
+		apiNodes = append(apiNodes, nodeID)
+		clusterConfig["APINodes"] = apiNodes
 	}
-	clustersConfig.Clusters[clusterName] = clusterConfig
-	return app.WriteClustersConfigFile(&clustersConfig)
+	clusters[clusterName] = clusterConfig
+	return app.SaveClustersConfig(clustersConfig)
 }
 
 func getNodeID(nodeDir string) (ids.NodeID, error) {
@@ -1324,15 +1366,17 @@ func getRegionsNodeNum(cloudName string) (
 			}
 		}
 		numAPINodes := uint32(0)
-		numNodes, err := app.Prompt.CaptureUint32(fmt.Sprintf("How many nodes do you want to set up in %s %s?", userRegion, supportedClouds[cloudName].locationName))
+		numNodes64, err := app.Prompt.CaptureUint64(fmt.Sprintf("How many nodes do you want to set up in %s %s?", userRegion, supportedClouds[cloudName].locationName))
 		if err != nil {
 			return nil, err
 		}
+		numNodes := uint32(numNodes64)
 		if globalNetworkFlags.UseDevnet || globalNetworkFlags.UseTestnet {
-			numAPINodes, err = app.Prompt.CaptureUint32(fmt.Sprintf("How many API nodes (nodes without stake) do you want to set up in %s %s?", userRegion, supportedClouds[cloudName].locationName))
+			numAPINodes64, err := app.Prompt.CaptureUint64(fmt.Sprintf("How many API nodes (nodes without stake) do you want to set up in %s %s?", userRegion, supportedClouds[cloudName].locationName))
 			if err != nil {
 				return nil, err
 			}
+			numAPINodes = uint32(numAPINodes64)
 		}
 		if numNodes > uint32(math.MaxInt32) || numAPINodes > uint32(math.MaxInt32) {
 			return nil, fmt.Errorf("number of nodes exceeds the range of a signed 32-bit integer")
@@ -1433,7 +1477,7 @@ func getPrometheusTargets(clusterName string) ([]string, []string, []string, err
 	}
 	for _, host := range inventoryHosts {
 		luxdPorts = append(luxdPorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(constants.LuxdAPIPort)))
-		machinePorts = append(machinePorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(constants.LuxdMachineMetricsPort)))
+		machinePorts = append(machinePorts, fmt.Sprintf("'%s:%s'", host.IP, constants.LuxdMachineMetricsPort))
 	}
 	// no need to check error here as it's ok to have no load test instances
 	separateHosts, _ := ansible.GetInventoryFromAnsibleInventoryFile(app.GetLoadTestInventoryDir(clusterName))
@@ -1441,4 +1485,54 @@ func getPrometheusTargets(clusterName string) ([]string, []string, []string, err
 		ltPorts = append(ltPorts, fmt.Sprintf("'%s:%s'", host.IP, strconv.Itoa(loadTestPort)))
 	}
 	return luxdPorts, machinePorts, ltPorts, nil
+}
+
+// generateDockerComposeContent creates a docker-compose configuration for the cluster
+func generateDockerComposeContent(clusterName string, nodeIPs []string, network models.Network) []byte {
+	// Create a basic docker-compose configuration
+	config := fmt.Sprintf(`version: '3.8'
+
+services:
+`)
+	
+	// Add node services
+	for i, nodeIP := range nodeIPs {
+		nodeName := fmt.Sprintf("node%d", i+1)
+		config += fmt.Sprintf(`  %s:
+    image: luxfi/node:latest
+    container_name: %s_%s
+    networks:
+      - %s_network
+    ports:
+      - "%s:9650"
+      - "%s:9651"
+    environment:
+      - NETWORK_ID=%s
+      - NODE_IP=%s
+    volumes:
+      - %s_data_%d:/root/.luxd
+    restart: unless-stopped
+
+`, nodeName, clusterName, nodeName, clusterName, 
+   nodeIP, nodeIP, 
+   network.NetworkIDFlagValue(), nodeIP,
+   clusterName, i+1)
+	}
+	
+	// Add network definition
+	config += fmt.Sprintf(`
+networks:
+  %s_network:
+    driver: bridge
+
+volumes:
+`, clusterName)
+	
+	// Add volume definitions
+	for i := range nodeIPs {
+		config += fmt.Sprintf(`  %s_data_%d:
+`, clusterName, i+1)
+	}
+	
+	return []byte(config)
 }

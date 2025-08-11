@@ -10,6 +10,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
 
@@ -68,7 +69,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 	if !deployERC20Flags.chainFlags.Defined() {
 		prompt := "Where do you want to Deploy the ERC-20 Token?"
 		if cancel, err := contract.PromptChain(
-			app,
+			app.GetSDKApp(),
 			network,
 			prompt,
 			"",
@@ -79,7 +80,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 	}
 	if deployERC20Flags.rpcEndpoint == "" {
 		deployERC20Flags.rpcEndpoint, _, err = contract.GetBlockchainEndpoints(
-			app,
+			app.GetSDKApp(),
 			network,
 			deployERC20Flags.chainFlags,
 			true,
@@ -90,8 +91,8 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 		}
 		ux.Logger.PrintToUser(logging.Yellow.Wrap("RPC Endpoint: %s"), deployERC20Flags.rpcEndpoint)
 	}
-	genesisAddress, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
-		app,
+	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+		app.GetSDKApp(),
 		network,
 		deployERC20Flags.chainFlags,
 	)
@@ -109,10 +110,6 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"deploy the contract",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			genesisPrivateKey,
 		)
 		if err != nil {
 			return err
@@ -138,12 +135,6 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 		deployERC20Flags.funded, err = prompts.PromptAddress(
 			app.Prompt,
 			"receive the total token supply",
-			app.GetKeyDir(),
-			app.GetKey,
-			genesisAddress,
-			network,
-			prompts.EVMFormat,
-			"Address",
 		)
 		if err != nil {
 			return err
@@ -153,7 +144,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 		deployERC20Flags.rpcEndpoint,
 		privateKey,
 		deployERC20Flags.symbol,
-		common.HexToAddress(deployERC20Flags.funded),
+		crypto.Address(common.HexToAddress(deployERC20Flags.funded).Bytes()),
 		supply,
 	)
 	if err != nil {

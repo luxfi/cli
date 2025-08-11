@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sort"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -416,7 +414,7 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 	if deployWarp || useExternalGasToken {
 		// TeleporterReady and related fields are not yet supported in sidecar
 		// sc.TeleporterReady = true
-		// sc.RunRelayer = true // TODO: remove this once deploy asks if deploying relayer
+		// Relayer deployment is now handled by the deploy command
 		// sc.ExternalToken = useExternalGasToken
 		// sc.TeleporterKey = constants.WarpKeyName
 		// sc.TeleporterVersion = warpInfo.Version

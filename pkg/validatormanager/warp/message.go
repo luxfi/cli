@@ -4,6 +4,9 @@
 package warp
 
 import (
+	"crypto/sha256"
+	"encoding/json"
+	
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
@@ -34,14 +37,23 @@ type SubnetToL1ConversionData struct {
 
 // SubnetToL1ConversionID calculates the ID for a subnet-to-L1 conversion
 func SubnetToL1ConversionID(data SubnetToL1ConversionData) (ids.ID, error) {
-	// TODO: Implement proper hashing of the conversion data
-	return ids.GenerateTestID(), nil
+	// Hash the conversion data to generate a unique ID
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return ids.Empty, err
+	}
+	hash := sha256.Sum256(bytes)
+	return ids.ID(hash), nil
 }
 
 // NewSubnetToL1Conversion creates a new subnet-to-L1 conversion message
 func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
-	// TODO: Implement proper message creation
-	return &warpPayload.AddressedCall{}, nil
+	// Create a subnet-to-L1 conversion message
+	payload := &warpPayload.AddressedCall{
+		SourceAddress: []byte{}, // Will be filled by the sender
+		Payload:       conversionID[:],
+	}
+	return payload, nil
 }
 
 // L1ValidatorRegistration represents an L1 validator registration
@@ -86,17 +98,18 @@ func NewL1ValidatorWeight(validationID ids.ID, nonce uint64, weight uint64) (*L1
 
 // Bytes returns the byte representation of the message
 func (l *L1ValidatorWeight) Bytes() []byte {
-	// TODO: Implement proper serialization
-	return []byte{}
+	// Serialize the validator weight message
+	bytes, _ := json.Marshal(l)
+	return bytes
 }
 
 // ParseL1ValidatorWeight parses L1 validator weight from payload
 func ParseL1ValidatorWeight(payload []byte) (*L1ValidatorWeight, error) {
-	// Parse the L1ValidatorWeight message from the payload
-	// This is a simple implementation that returns a new struct
-	// In production, this would deserialize the payload
+	// Deserialize the L1ValidatorWeight message from the payload
 	msg := &L1ValidatorWeight{}
-	// TODO: Implement proper deserialization
+	if err := json.Unmarshal(payload, msg); err != nil {
+		return nil, err
+	}
 	return msg, nil
 }
 

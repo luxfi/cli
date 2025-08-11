@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -495,9 +496,33 @@ func (*realPrompter) CaptureURL(promptStr string, validateConnection bool) (stri
 		return "", err
 	}
 	
-	// If validateConnection is true, we could attempt to connect
-	// For now, we just return the URL
-	// TODO: Add connection validation if needed
+	// Validate connection if requested
+	if validateConnection {
+		parsedURL, err := url.Parse(urlStr)
+		if err != nil {
+			return "", fmt.Errorf("invalid URL: %w", err)
+		}
+		
+		// Try to connect to the URL
+		client := &http.Client{
+			Timeout: 5 * time.Second,
+		}
+		
+		resp, err := client.Head(urlStr)
+		if err != nil {
+			// Try GET if HEAD fails
+			resp, err = client.Get(urlStr)
+			if err != nil {
+				return "", fmt.Errorf("failed to connect to %s: %w", parsedURL.Host, err)
+			}
+		}
+		defer resp.Body.Close()
+		
+		// Accept any successful response (2xx, 3xx)
+		if resp.StatusCode >= 400 {
+			return "", fmt.Errorf("URL returned error status %d", resp.StatusCode)
+		}
+	}
 
 	return urlStr, nil
 }

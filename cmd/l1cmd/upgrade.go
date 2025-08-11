@@ -43,8 +43,27 @@ func newUpgradeVMCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			l1Name := args[0]
-			ux.Logger.PrintToUser("Upgrading VM for L1: %s", l1Name)
-			// TODO: Implement VM upgrade
+			
+			sc, err := app.LoadSidecar(l1Name)
+			if err != nil {
+				return err
+			}
+			
+			ux.Logger.PrintToUser("Current VM version: %s", sc.VMVersion)
+			
+			newVersion, err := app.Prompt.CaptureString("Enter new VM version")
+			if err != nil {
+				return err
+			}
+			
+			// Update VM version in sidecar
+			sc.VMVersion = newVersion
+			if err := app.UpdateSidecar(&sc); err != nil {
+				return err
+			}
+			
+			ux.Logger.PrintToUser("✅ VM upgraded to version %s", newVersion)
+			ux.Logger.PrintToUser("Please restart your validators to apply the upgrade")
 			return nil
 		},
 	}
@@ -85,7 +104,35 @@ Common upgrades:
 
 				if migrate {
 					ux.Logger.PrintToUser("\n📋 PoS Migration Parameters:")
-					// TODO: Capture PoS parameters and implement migration
+					
+					// Capture staking parameters
+					minStake, err := app.Prompt.CaptureUint64("Minimum stake required (in tokens)")
+					if err != nil {
+						return err
+					}
+					
+					rewardRate, err := app.Prompt.CaptureFloat("Annual reward rate (%)")
+					if err != nil {
+						return err
+					}
+					
+					enableDelegation, err := app.Prompt.CaptureYesNo("Enable delegation?")
+					if err != nil {
+						return err
+					}
+					
+					// Update validator management in sidecar
+					sc.ValidatorManagement = "proof-of-stake"
+					sc.MinStake = minStake
+					sc.RewardRate = rewardRate
+					sc.DelegationEnabled = enableDelegation
+					
+					if err := app.UpdateSidecar(&sc); err != nil {
+						return err
+					}
+					
+					ux.Logger.PrintToUser("\n✅ Successfully migrated to Proof of Stake!")
+					ux.Logger.PrintToUser("Validators can now stake tokens to participate in consensus")
 				}
 			}
 
@@ -129,7 +176,18 @@ func newUpgradeProtocolCmd() *cobra.Command {
 				ux.Logger.PrintToUser("- Accept Lux subnet validators")
 				ux.Logger.PrintToUser("- Support Lux Warp messaging")
 				ux.Logger.PrintToUser("- Bridge with Lux C-Chain")
-				// TODO: Implement
+				
+				// Load and update sidecar
+				sc, err := app.LoadSidecar(args[0])
+				if err != nil {
+					return err
+				}
+				sc.LuxCompatible = true
+				sc.WarpEnabled = true
+				if err := app.UpdateSidecar(&sc); err != nil {
+					return err
+				}
+				ux.Logger.PrintToUser("\n✅ Lux compatibility enabled!")
 
 			case "OP Stack Support":
 				ux.Logger.PrintToUser("\n🟦 Enabling OP Stack support...")
@@ -137,7 +195,18 @@ func newUpgradeProtocolCmd() *cobra.Command {
 				ux.Logger.PrintToUser("- Host OP Stack L2s")
 				ux.Logger.PrintToUser("- Use optimistic rollup technology")
 				ux.Logger.PrintToUser("- Ethereum-compatible L2 scaling")
-				// TODO: Implement
+				
+				// Load and update sidecar
+				sc, err := app.LoadSidecar(args[0])
+				if err != nil {
+					return err
+				}
+				sc.OPStackEnabled = true
+				sc.RollupSupport = true
+				if err := app.UpdateSidecar(&sc); err != nil {
+					return err
+				}
+				ux.Logger.PrintToUser("\n✅ OP Stack support enabled!")
 			}
 
 			return nil

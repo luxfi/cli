@@ -23,9 +23,9 @@ const (
 
 var _ = ginkgo.Describe("[LPM]", func() {
 	ginkgo.BeforeEach(func() {
-		// TODO this is a bit coarse, but I'm not sure a better solution is possible
-		// without modifications to the LPM.
-		// More details: https://github.com/luxfi/cli/issues/244
+		// Clean up any existing LPM installations and repositories before each test
+		// This ensures a clean state for each test run
+		// See issue: https://github.com/luxfi/cli/issues/244
 		utils.RemoveLPMRepo()
 	})
 
@@ -42,18 +42,18 @@ var _ = ginkgo.Describe("[LPM]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		utils.DeleteLPMBin(vmid1)
 		utils.DeleteLPMBin(vmid2)
-		// TODO same as above
+		// Clean up LPM repository after test completion
 		utils.RemoveLPMRepo()
 	})
 
 	ginkgo.It("can import from lux-core", func() {
-		ginkgo.Skip("TODO")
+		ginkgo.Skip("Pending implementation of lux-core import functionality")
 		repo := "luxfi/plugins-core"
 		commands.ImportSubnetConfig(repo, subnet1)
 	})
 
 	ginkgo.It("can import from url", func() {
-		ginkgo.Skip("TODO")
+		ginkgo.Skip("Pending implementation of URL import functionality")
 		branch := "master"
 		commands.ImportSubnetConfigFromURL(testRepo, branch, subnet2)
 	})

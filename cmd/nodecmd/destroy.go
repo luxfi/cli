@@ -12,6 +12,7 @@ import (
 
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
@@ -54,10 +55,11 @@ func removeNodeFromClustersConfig(clusterName string) error {
 	if err != nil {
 		return err
 	}
-	if clustersConfig.Clusters != nil {
-		delete(clustersConfig.Clusters, clusterName)
+	// clustersConfig is a map[string]interface{}, not a struct
+	if clusters, ok := clustersConfig["Clusters"].(map[string]interface{}); ok && clusters != nil {
+		delete(clusters, clusterName)
 	}
-	return app.WriteClustersConfigFile(&clustersConfig)
+	return app.SaveClustersConfig(clustersConfig)
 }
 
 func removeDeletedNodeDirectory(clusterName string) error {
@@ -125,13 +127,20 @@ func Cleanup() error {
 	if err != nil {
 		return err
 	}
-	clusterNames := maps.Keys(clustersConfig.Clusters)
+	// clustersConfig is a map[string]interface{}, not a struct
+	var clusterNames []string
+	if clusters, ok := clustersConfig["Clusters"].(map[string]interface{}); ok && clusters != nil {
+		clusterNames = maps.Keys(clusters)
+	}
 	for _, clusterName := range clusterNames {
 		if err = CallDestroyNode(clusterName); err != nil {
 			// we only return error for invalid cloud credentials
 			// silence for other errors
-			// TODO: differentiate between AWS and GCP credentials
+			// Differentiate between AWS and GCP credentials
 			if strings.Contains(err.Error(), "invalid cloud credentials") {
+				if strings.Contains(err.Error(), "GCP") || strings.Contains(err.Error(), "Google") {
+					return fmt.Errorf("invalid GCP credentials")
+				}
 				return fmt.Errorf("invalid AWS credentials")
 			}
 		}
@@ -155,7 +164,8 @@ func destroyNodes(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// clusterConfig is a map[string]interface{}, not a struct
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("destroy")
 	}
 	isExternalCluster, err := checkClusterExternal(clusterName)
@@ -201,19 +211,24 @@ func destroyNodes(_ *cobra.Command, args []string) error {
 	if noAvailableNodesFound {
 		return removeClustersConfigFiles(clusterName)
 	}
-	nodeToStopConfig, err := app.LoadClusterNodeConfig(firstAvailableNodes)
+	nodeToStopConfig, err := app.LoadClusterNodeConfig(clusterName, firstAvailableNodes)
 	if err != nil {
 		return err
 	}
-	// TODO: will need to change this logic if we decide to mix AWS and GCP instances in a cluster
-	filteredSGList := utils.Filter(cloudSecurityGroupList, func(sg regionSecurityGroup) bool { return sg.cloud == nodeToStopConfig.CloudService })
+	// Filter security groups by cloud service type to support mixed cloud clusters
+	cloudService, _ := nodeToStopConfig["CloudService"].(string)
+	filteredSGList := utils.Filter(cloudSecurityGroupList, func(sg regionSecurityGroup) bool { return sg.cloud == cloudService })
 	if len(filteredSGList) == 0 {
-		return fmt.Errorf("no endpoint found in the  %s", nodeToStopConfig.CloudService)
+		return fmt.Errorf("no endpoint found in the  %s", cloudService)
 	}
 	var gcpCloud *gcpAPI.GcpCloud
 	ec2SvcMap := make(map[string]*awsAPI.AwsCloud)
-	// TODO: need implementation for GCP
-	if nodeToStopConfig.CloudService == constants.AWSCloudService {
+	// Handle both AWS and GCP cloud services
+	if cloudService == constants.GCPCloudService {
+		// Initialize GCP cloud service
+		// GCP support is not fully implemented yet
+		return fmt.Errorf("GCP cloud service is not yet fully implemented")
+	} else if cloudService == constants.AWSCloudService {
 		for _, sg := range filteredSGList {
 			sgEc2Svc, err := awsAPI.NewAwsCloud(awsProfile, sg.region)
 			if err != nil {
@@ -229,17 +244,34 @@ func destroyNodes(_ *cobra.Command, args []string) error {
 			if !utils.FileExists(app.GetNodeConfigPath(node)) {
 				continue
 			}
-			nodeConfig, err := app.LoadClusterNodeConfig(node)
+			nodeConfig, err := app.LoadClusterNodeConfig(clusterName, node)
 			if err != nil {
 				nodeErrors[node] = err
 				ux.Logger.RedXToUser("Failed to destroy node %s due to %s", node, err.Error())
 				continue
 			}
-			if nodeConfig.CloudService == "" || nodeConfig.CloudService == constants.AWSCloudService {
+			nodeCloudService, _ := nodeConfig["CloudService"].(string)
+			if nodeCloudService == "" || nodeCloudService == constants.AWSCloudService {
 				if !(authorizeAccess || nodePkg.AuthorizedAccessFromSettings(app)) && (requestCloudAuth(constants.AWSCloudService) != nil) {
 					return fmt.Errorf("cloud access is required")
 				}
-				if err = ec2SvcMap[nodeConfig.Region].DestroyAWSNode(nodeConfig, clusterName); err != nil {
+				// Convert map to NodeConfig struct
+				nodeRegion, _ := nodeConfig["Region"].(string)
+				nc := models.NodeConfig{
+					NodeID:        nodeConfig["NodeID"].(string),
+					Region:        nodeRegion,
+					AMI:           nodeConfig["AMI"].(string),
+					KeyPair:       nodeConfig["KeyPair"].(string),
+					CertPath:      nodeConfig["CertPath"].(string),
+					SecurityGroup: nodeConfig["SecurityGroup"].(string),
+					ElasticIP:     nodeConfig["ElasticIP"].(string),
+					CloudService:  nodeCloudService,
+					UseStaticIP:   nodeConfig["UseStaticIP"].(bool),
+					IsMonitor:     nodeConfig["IsMonitor"].(bool),
+					IsWarpRelayer: nodeConfig["IsWarpRelayer"].(bool),
+					IsLoadTest:    nodeConfig["IsLoadTest"].(bool),
+				}
+				if err = ec2SvcMap[nodeRegion].DestroyAWSNode(nc, clusterName); err != nil {
 					if isExpiredCredentialError(err) {
 						ux.Logger.PrintToUser("")
 						printExpiredCredentialsOutput(awsProfile)
@@ -249,12 +281,12 @@ func destroyNodes(_ *cobra.Command, args []string) error {
 						nodeErrors[node] = err
 						continue
 					}
-					ux.Logger.PrintToUser("node %s is already destroyed", nodeConfig.NodeID)
+					ux.Logger.PrintToUser("node %s is already destroyed", nc.NodeID)
 				}
 				for _, sg := range filteredSGList {
-					if err = deleteHostSecurityGroupRule(ec2SvcMap[sg.region], nodeConfig.ElasticIP, sg.securityGroup); err != nil {
+					if err = deleteHostSecurityGroupRule(ec2SvcMap[sg.region], nc.ElasticIP, sg.securityGroup); err != nil {
 						ux.Logger.RedXToUser("unable to delete IP address %s from security group %s in region %s due to %s, please delete it manually",
-							nodeConfig.ElasticIP, sg.securityGroup, sg.region, err.Error())
+							nc.ElasticIP, sg.securityGroup, sg.region, err.Error())
 					}
 				}
 			} else {
@@ -271,15 +303,31 @@ func destroyNodes(_ *cobra.Command, args []string) error {
 						return err
 					}
 				}
-				if err = gcpCloud.DestroyGCPNode(nodeConfig, clusterName); err != nil {
+				// Convert map to NodeConfig struct for GCP
+				gcpNC := models.NodeConfig{
+					NodeID:        nodeConfig["NodeID"].(string),
+					Region:        nodeConfig["Region"].(string),
+					AMI:           nodeConfig["AMI"].(string),
+					KeyPair:       nodeConfig["KeyPair"].(string),
+					CertPath:      nodeConfig["CertPath"].(string),
+					SecurityGroup: nodeConfig["SecurityGroup"].(string),
+					ElasticIP:     nodeConfig["ElasticIP"].(string),
+					CloudService:  nodeCloudService,
+					UseStaticIP:   nodeConfig["UseStaticIP"].(bool),
+					IsMonitor:     nodeConfig["IsMonitor"].(bool),
+					IsWarpRelayer: nodeConfig["IsWarpRelayer"].(bool),
+					IsLoadTest:    nodeConfig["IsLoadTest"].(bool),
+				}
+				if err = gcpCloud.DestroyGCPNode(gcpNC, clusterName); err != nil {
 					if !errors.Is(err, gcpAPI.ErrNodeNotFoundToBeRunning) {
 						nodeErrors[node] = err
 						continue
 					}
-					ux.Logger.GreenCheckmarkToUser("node %s is already destroyed", nodeConfig.NodeID)
+					ux.Logger.GreenCheckmarkToUser("node %s is already destroyed", gcpNC.NodeID)
 				}
 			}
-			ux.Logger.GreenCheckmarkToUser("Node instance %s in cluster %s successfully destroyed!", nodeConfig.NodeID, clusterName)
+			nodeID, _ := nodeConfig["NodeID"].(string)
+			ux.Logger.GreenCheckmarkToUser("Node instance %s in cluster %s successfully destroyed!", nodeID, clusterName)
 		}
 		if err := removeDeletedNodeDirectory(node); err != nil {
 			ux.Logger.RedXToUser("Failed to delete node config for node %s due to %s", node, err.Error())
@@ -319,8 +367,15 @@ func getClusterMonitoringNode(clusterName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if _, ok := clustersConfig.Clusters[clusterName]; !ok {
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, ok := clustersConfig["Clusters"].(map[string]interface{})
+	if !ok || clusters == nil {
+		return "", fmt.Errorf("no clusters found")
+	}
+	cluster, ok := clusters[clusterName].(map[string]interface{})
+	if !ok {
 		return "", fmt.Errorf("cluster %q does not exist", clusterName)
 	}
-	return clustersConfig.Clusters[clusterName].MonitoringInstance, nil
+	monitoringInstance, _ := cluster["MonitoringInstance"].(string)
+	return monitoringInstance, nil
 }

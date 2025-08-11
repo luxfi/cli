@@ -4,6 +4,7 @@ package validatormanager
 
 import (
 	_ "embed"
+	"fmt"
 	"math/big"
 	"strings"
 
@@ -332,8 +333,9 @@ func SetupPoS(
 	v2_0_0 bool,
 	signatureAggregatorEndpoint string,
 ) error {
-	// TODO: Implement InitializeProofOfStake when the function is available in subnet package
-	// For now, return nil to allow compilation
+	// InitializeProofOfStake configures the Proof of Stake validator manager
+	// This feature is pending the subnet package implementation
+	// All parameters are currently preserved for future implementation
 	_ = log
 	_ = network
 	_ = privateKey
@@ -344,5 +346,5 @@ func SetupPoS(
 	_ = managerOwnerPrivateKey
 	_ = v2_0_0
 	_ = signatureAggregatorEndpoint
-	return nil
+	return fmt.Errorf("proof of stake initialization not yet available")
 }

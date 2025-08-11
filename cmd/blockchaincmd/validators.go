@@ -63,7 +63,7 @@ func printValidators(_ *cobra.Command, args []string) error {
 
 	subnetID := deployInfo.SubnetID
 
-	validators, err := subnet.GetSubnetValidators(network, subnetID)
+	validators, err := subnet.GetSubnetValidators(subnetID)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func printValidatorsFromList(network models.Network, subnetID ids.ID, validators
 			delegatorWeight = *validator.DelegatorWeight
 		}
 
-		validatorKind, err := validatorsdk.GetValidatorKind(network.SDKNetwork(), subnetID, validator.NodeID)
+		validatorKind, err := validatorsdk.GetValidatorKind(network.SDKNetwork().(models.Network), subnetID, validator.NodeID)
 		if err != nil {
 			return err
 		}

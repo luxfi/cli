@@ -350,7 +350,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 
 			_, err = commands.KeyTransferSend(transferArgs)
 			gomega.Expect(err).Should(gomega.BeNil())
-			time.Sleep(5 * time.Second) // TODO remove this after key transfer waits for warp tx completion
+			time.Sleep(5 * time.Second) // Wait for warp transaction confirmation
 
 			// Verify ERC20 balances
 			output, err = commands.ListKeys("local", true, "c,"+subnetName, fmt.Sprintf("%s,%s", erc20Address, remoteAddress))
@@ -416,7 +416,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 
 			_, err = commands.KeyTransferSend(transferArgs)
 			gomega.Expect(err).Should(gomega.BeNil())
-			time.Sleep(5 * time.Second) // TODO remove this after key transfer waits for warp tx completion
+			time.Sleep(5 * time.Second) // Wait for warp transaction confirmation
 
 			// Verify ERC20 balances
 			output, err = commands.ListKeys("local", true, "c,"+subnetName, fmt.Sprintf("%s,%s", erc20Address, remoteAddress))
