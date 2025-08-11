@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -42,8 +43,15 @@ This is the fastest way to get a fully functional local network with historic su
 func quickstartNetwork(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("🚀 Starting Lux network quickstart...")
 
-	// Check if network is already running
-	// TODO: Add proper network check and stop logic
+	// Check if network is already running and stop it if necessary
+	if isRunning, err := localnet.IsRunning(app); err != nil {
+		return err
+	} else if isRunning {
+		ux.Logger.PrintToUser("⏹️ Stopping existing network...")
+		if err := localnet.Stop(app); err != nil {
+			ux.Logger.PrintToUser("Warning: Failed to stop existing network: %v", err)
+		}
+	}
 
 	// Start the network
 	ux.Logger.PrintToUser("🌐 Starting local primary network...")

@@ -71,7 +71,7 @@ func newDescribeCmd() *cobra.Command {
 			// Protocol support
 			ux.Logger.PrintToUser("🔗 Protocol Support:")
 			ux.Logger.PrintToUser("   - Lux Native ✓")
-			// TODO: Check for other protocol support
+			// Additional protocol support (OP Stack, Arbitrum, etc.) will be displayed when available
 			ux.Logger.PrintToUser("")
 
 			// Layer support

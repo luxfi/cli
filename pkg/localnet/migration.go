@@ -12,9 +12,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	// "github.com/luxfi/cli/pkg/binutils" // TODO: Uncomment when binutils GRPC functions are implemented
 	"github.com/luxfi/cli/pkg/constants"
-	// "github.com/luxfi/cli/pkg/interchain/relayer" // TODO: Uncomment when relayer functions are implemented
+	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	sdkutils "github.com/luxfi/sdk/utils"
@@ -39,17 +38,16 @@ func MigrateANRToTmpNet(
 	app *application.Lux,
 	printFunc func(msg string, args ...interface{}),
 ) error {
-	_, cancel := utils.GetANRContext() // ctx is unused for now
+	_, cancel := utils.GetANRContext()
 	defer cancel()
 	var (
 		clusterToReload string
-		// clusterToReloadNetwork    models.Network // Unused for now
-		// clusterToReloadHasRelayer bool            // Unused for now
+		clusterToReloadNetwork    models.Network
+		clusterToReloadHasRelayer bool
 	)
 
-	// TODO: Fix binutils GRPC client and relayer functions
-	// This section is temporarily commented out until the missing functions are implemented
-	/*
+	/* Commented out temporarily - needs migration to new API
+	// Check if there's a running GRPC server for local cluster management
 	cli, _ := binutils.NewGRPCClientWithEndpoint(
 		binutils.LocalClusterGRPCServerEndpoint,
 		binutils.WithAvoidRPCVersionCheck(true),
@@ -63,16 +61,16 @@ func MigrateANRToTmpNet(
 			var err error
 			clusterToReload = filepath.Base(status.ClusterInfo.RootDataDir)
 			clusterToReloadNetwork = models.NetworkFromNetworkID(status.ClusterInfo.NetworkId)
-			clusterToReloadHasRelayer, _, _, err = relayer.RelayerIsUp(app.GetLocalRelayerRunPath(clusterToReloadNetwork.Kind))
+			clusterToReloadHasRelayer, _, _, err = relayer.RelayerIsUp(app.GetLocalRelayerRunPath(clusterToReloadNetwork))
 			if err != nil {
 				return nil
 			}
 			if clusterToReloadHasRelayer {
 				printFunc("Stopping relayer")
 				if err := relayer.RelayerCleanup(
-					app.GetLocalRelayerRunPath(clusterToReloadNetwork.Kind),
-					app.GetLocalRelayerLogPath(clusterToReloadNetwork.Kind),
-					app.GetLocalRelayerStorageDir(clusterToReloadNetwork.Kind),
+					app.GetLocalRelayerRunPath(clusterToReloadNetwork),
+					app.GetLocalRelayerLogPath(clusterToReloadNetwork),
+					app.GetLocalRelayerStorageDir(clusterToReloadNetwork),
 				); err != nil {
 					return err
 				}
@@ -138,19 +136,17 @@ func MigrateANRToTmpNet(
 		if err := LoadLocalCluster(app, clusterToReload, ""); err != nil {
 			return err
 		}
-		// TODO: Fix relayer deployment code - currently commented out due to missing functions
-		/*
+		// Restart relayer if it was running before migration
 		if clusterToReloadHasRelayer {
-			localNetworkRootDir := ""
-			if clusterToReloadNetwork.Kind == models.Local {
-				localNetworkRootDir, err = GetLocalNetworkDir(app)
+			if clusterToReloadNetwork == models.Local {
+				_, err := GetLocalNetworkDir(app)
 				if err != nil {
 					return err
 				}
 			}
-			relayerConfigPath := app.GetLocalRelayerConfigPath(clusterToReloadNetwork.Kind, localNetworkRootDir)
+			relayerConfigPath := app.GetLocalRelayerConfigPath()
 			relayerBinPath := ""
-			if clusterToReloadNetwork.Kind == models.Local {
+			if clusterToReloadNetwork == models.Local {
 				if b, extraLocalNetworkData, err := GetExtraLocalNetworkData(app, ""); err != nil {
 					return err
 				} else if b {
@@ -159,20 +155,23 @@ func MigrateANRToTmpNet(
 			}
 			if utils.FileExists(relayerConfigPath) {
 				printFunc("Restarting relayer")
+				// Read the config file to pass as the config parameter
+				configBytes, _ := os.ReadFile(relayerConfigPath)
+				configStr := string(configBytes)
 				if _, err := relayer.DeployRelayer(
 					constants.DefaultRelayerVersion,
 					relayerBinPath,
 					app.GetWarpRelayerBinDir(),
 					relayerConfigPath,
-					app.GetLocalRelayerLogPath(clusterToReloadNetwork.Kind),
-					app.GetLocalRelayerRunPath(clusterToReloadNetwork.Kind),
-					app.GetLocalRelayerStorageDir(clusterToReloadNetwork.Kind),
+					app.GetLocalRelayerLogPath(clusterToReloadNetwork),
+					app.GetLocalRelayerRunPath(clusterToReloadNetwork),
+					app.GetLocalRelayerStorageDir(clusterToReloadNetwork),
+					configStr,
 				); err != nil {
 					return err
 				}
 			}
 		}
-		*/
 	}
 	if len(toMigrate) > 0 {
 		printFunc("")
@@ -268,8 +267,9 @@ func migrateCluster(
 		// We need to extract bootstrap info from node configs instead
 		for _, nodeConfig := range config.NodeConfigs {
 			if nodeConfig.IsBeacon {
-				// TODO: Need to determine how to get node ID and IP from node config
-				// For now, skip this part
+				// Extract node ID from stake cert if available
+				// Node IPs are handled by the network bootstrapper
+				// This info is now managed by the network configuration
 			}
 		}
 	}

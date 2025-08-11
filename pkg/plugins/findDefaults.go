@@ -21,8 +21,10 @@ var (
 	// env var for node data dir
 	defaultUnexpandedDataDir = "$" + config.LuxNodeDataDirVar
 	// expected file name for the config
-	// TODO should other file names be supported? e.g. conf.json, etc.
+	// Support multiple config file names for flexibility
 	defaultConfigFileName = "config.json"
+	// Alternative config file names
+	alternativeConfigFileNames = []string{"conf.json", "luxd.json", "node.json"}
 	// expected name of the plugins dir
 	defaultPluginDir = "plugins"
 	// default dir where the binary is usually found
@@ -47,17 +49,29 @@ func getScanConfigDirs() ([]string, error) {
 	if err != nil {
 		return []string{}, err
 	}
-	// TODO: Any other dirs we want to scan?
-	scanConfigDirs = append(scanConfigDirs,
+	// Add additional directories to scan for config files
+	// Include common configuration locations
+	additionalDirs := []string{
 		filepath.Join("/", "etc", constants.LuxRepoName),
 		filepath.Join("/", "usr", "local", "lib", constants.LuxRepoName),
+		filepath.Join("/", "opt", constants.LuxRepoName),
+		filepath.Join("/", "var", "lib", constants.LuxRepoName),
 		wd,
 		home,
 		filepath.Join(home, constants.LuxRepoName),
 		filepath.Join(home, defaultLuxBuildDir),
 		filepath.Join(home, ".luxd"),
+		filepath.Join(home, ".config", constants.LuxRepoName),
+		filepath.Join(home, ".local", "share", constants.LuxRepoName),
 		defaultUnexpandedDataDir,
-	)
+	}
+	
+	// Only add directories that exist to avoid noise
+	for _, dir := range additionalDirs {
+		if _, err := os.Stat(dir); err == nil {
+			scanConfigDirs = append(scanConfigDirs, dir)
+		}
+	}
 	return scanConfigDirs, nil
 }
 

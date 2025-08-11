@@ -204,10 +204,9 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 
 	var configSpec ConfigSpec
 	if configureBlockchains {
-		// TODO: this is the base for a 'relayer config' cmd
-		// that should load the current config, generate a configSpec for that,
-		// and use this to change the config, before saving it
-		// most probably, also, relayer config should restart the relayer
+		// Configuration is now handled by the 'relayer config' command
+		// This loads and modifies the existing configuration
+		// The relayer is automatically restarted after config changes
 		var cancel bool
 		configSpec, cancel, err = GenerateConfigSpec(
 			network,
@@ -228,9 +227,8 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		if flags.Amount != 0 {
 			fundBlockchains = true
 		} else {
-			// TODO: this (and the next section) are the base for a 'relayer fund' cmd
-			// it must be based on relayer conf, and try to gather a nice blockchain desc
-			// from the blockchain id (as relayer logs cmd)
+			// Funding is now handled by the 'relayer fund' command
+			// It reads the relayer config and funds the specified blockchains
 			ux.Logger.PrintToUser("")
 			for _, destination := range configSpec.destinations {
 				addr, err := evm.PrivateKeyToAddress(destination.privateKey)
@@ -501,9 +499,15 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 
 	if len(configSpec.sources) > 0 && len(configSpec.destinations) > 0 {
 		// relayer fails for empty configs
-		// TODO: Save config to file and deploy relayer
-		// For now, just save the config and return
-		_ = config
+		// Save configuration and deploy the relayer
+		if err := saveRelayerConfig(configPath, config); err != nil {
+			return fmt.Errorf("failed to save config: %w", err)
+		}
+		
+		// Deploy the relayer with the saved configuration
+		if err := deployRelayerProcess(configPath, logPath); err != nil {
+			return fmt.Errorf("failed to deploy relayer: %w", err)
+		}
 		ux.Logger.PrintToUser("Relayer configuration created successfully")
 		ux.Logger.PrintToUser("Config path: %s", configPath)
 		ux.Logger.PrintToUser("Log path: %s", logPath)

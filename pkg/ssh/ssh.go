@@ -288,27 +288,54 @@ func RunSSHSetupMonitoringFolders(host *models.Host) error {
 }
 
 func RunSSHCopyMonitoringDashboards(host *models.Host, monitoringDashboardPath string) error {
-	// TODO: download dashboards from github instead
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
-	if !sdkutils.DirExists(monitoringDashboardPath) {
-		return fmt.Errorf("%s does not exist", monitoringDashboardPath)
-	}
-	if err := host.MkdirAll(remoteDashboardsPath, constants.SSHFileOpsTimeout); err != nil {
-		return err
-	}
-	dashboards, err := os.ReadDir(monitoringDashboardPath)
-	if err != nil {
-		return err
-	}
-	for _, dashboard := range dashboards {
-		if err := host.Upload(
-			filepath.Join(monitoringDashboardPath, dashboard.Name()),
-			filepath.Join(remoteDashboardsPath, dashboard.Name()),
-			constants.SSHFileOpsTimeout,
-		); err != nil {
+	
+	// If path is provided, use local dashboards
+	if monitoringDashboardPath != "" && sdkutils.DirExists(monitoringDashboardPath) {
+		if err := host.MkdirAll(remoteDashboardsPath, constants.SSHFileOpsTimeout); err != nil {
 			return err
 		}
+		dashboards, err := os.ReadDir(monitoringDashboardPath)
+		if err != nil {
+			return err
+		}
+		for _, dashboard := range dashboards {
+			if err := host.Upload(
+				filepath.Join(monitoringDashboardPath, dashboard.Name()),
+				filepath.Join(remoteDashboardsPath, dashboard.Name()),
+				constants.SSHFileOpsTimeout,
+			); err != nil {
+				return err
+			}
+		}
+	} else {
+		// Download dashboards from GitHub releases
+		dashboardsURL := "https://github.com/luxfi/node/releases/latest/download/monitoring-dashboards.tar.gz"
+		tempFile := "/tmp/monitoring-dashboards.tar.gz"
+		
+		// Download dashboards archive
+		downloadCmd := fmt.Sprintf("wget -q -O %s %s", tempFile, dashboardsURL)
+		if _, err := host.Command(downloadCmd, nil, constants.SSHLongRunningScriptTimeout); err != nil {
+			return fmt.Errorf("failed to download monitoring dashboards: %w", err)
+		}
+		
+		// Extract to remote path
+		if err := host.MkdirAll(remoteDashboardsPath, constants.SSHFileOpsTimeout); err != nil {
+			return err
+		}
+		extractCmd := fmt.Sprintf("tar -xzf %s -C %s", tempFile, remoteDashboardsPath)
+		if _, err := host.Command(extractCmd, nil, constants.SSHFileOpsTimeout); err != nil {
+			return fmt.Errorf("failed to extract monitoring dashboards: %w", err)
+		}
+		
+		// Clean up temp file
+		cleanupCmd := fmt.Sprintf("rm -f %s", tempFile)
+		if _, err := host.Command(cleanupCmd, nil, constants.SSHFileOpsTimeout); err != nil {
+			// Non-fatal error
+			ux.Logger.PrintToUser("Warning: failed to clean up temporary file %s", tempFile)
+		}
 	}
+	
 	if composeFileExists(host) {
 		return docker.RestartDockerComposeService(host, utils.GetRemoteComposeFile(), "grafana", constants.SSHLongRunningScriptTimeout)
 	} else {

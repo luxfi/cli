@@ -4,6 +4,7 @@ package application
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -98,6 +99,97 @@ func (app *Lux) GetReposDir() string {
 	return filepath.Join(app.GetBaseDir(), constants.ReposDir)
 }
 
+func (app *Lux) GetWarpRelayerBinDir() string {
+	return filepath.Join(app.GetBaseDir(), "bin", "warp-relayer")
+}
+
+func (app *Lux) GetMonitoringDashboardDir() string {
+	return filepath.Join(app.GetBaseDir(), "monitoring", "dashboards")
+}
+
+func (app *Lux) GetSSHCertFilePath(certName string) (string, error) {
+	certPath := filepath.Join(app.GetBaseDir(), "ssh", certName+constants.CertSuffix)
+	// Check if file exists
+	if _, err := os.Stat(certPath); err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("certificate %s not found", certName)
+		}
+		return "", err
+	}
+	return certPath, nil
+}
+
+// SetupMonitoringEnv sets up monitoring environment
+func (app *Lux) SetupMonitoringEnv(clusterName string) error {
+	// Create monitoring directory structure
+	monitoringDir := filepath.Join(app.GetBaseDir(), "monitoring", clusterName)
+	if err := os.MkdirAll(monitoringDir, constants.DefaultPerms755); err != nil {
+		return fmt.Errorf("failed to create monitoring directory: %w", err)
+	}
+	
+	// Create config files for monitoring
+	configPath := filepath.Join(monitoringDir, "config.json")
+	config := map[string]interface{}{
+		"clusterName": clusterName,
+		"enabled":     true,
+		"metrics":     []string{"cpu", "memory", "network", "disk"},
+		"interval":    60, // seconds
+	}
+	
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal monitoring config: %w", err)
+	}
+	
+	if err := os.WriteFile(configPath, data, WriteReadReadPerms); err != nil {
+		return fmt.Errorf("failed to write monitoring config: %w", err)
+	}
+	
+	return nil
+}
+
+func (app *Lux) GetNodeInstanceDirPath(nodeName string) string {
+	return filepath.Join(app.GetBaseDir(), "nodes", nodeName)
+}
+
+func (app *Lux) CreateNodeCloudConfigFile(clusterName string, nodeConfig interface{}) error {
+	// Create cloud configuration file for the node
+	nodeDir := app.GetNodeInstanceDirPath(clusterName)
+	if err := os.MkdirAll(nodeDir, constants.DefaultPerms755); err != nil {
+		return fmt.Errorf("failed to create node directory: %w", err)
+	}
+	
+	// Write the node configuration
+	configPath := filepath.Join(nodeDir, "cloud-config.json")
+	data, err := json.MarshalIndent(nodeConfig, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal node config: %w", err)
+	}
+	
+	if err := os.WriteFile(configPath, data, WriteReadReadPerms); err != nil {
+		return fmt.Errorf("failed to write node config: %w", err)
+	}
+	
+	return nil
+}
+
+func (app *Lux) GetClustersConfig() (map[string]interface{}, error) {
+	return app.LoadClustersConfig()
+}
+
+// ClusterExists checks if a cluster exists
+func (app *Lux) ClusterExists(clusterName string) (bool, error) {
+	clusterDir := app.GetLocalClusterDir(clusterName)
+	info, err := os.Stat(clusterDir)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return info.IsDir(), nil
+}
+
 // HasSubnetEVMGenesis checks if the blockchain has a Subnet-EVM genesis
 func (app *Lux) HasSubnetEVMGenesis(blockchainName string) (bool, string, error) {
 	genesisPath := app.GetGenesisPath(blockchainName)
@@ -185,6 +277,93 @@ func (app *Lux) ConfigFileExists() bool {
 // GetBasePath returns the base directory path for the CLI
 func (app *Lux) GetBasePath() string {
 	return app.GetBaseDir()
+}
+
+// GetClusterConfig loads cluster configuration from disk
+func (app *Lux) GetClusterConfig(clusterName string) (map[string]interface{}, error) {
+	clusterConfigPath := filepath.Join(app.GetBaseDir(), "clusters", clusterName, "config.json")
+	data, err := os.ReadFile(clusterConfigPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	
+	return config, nil
+}
+
+// SetClusterConfig saves cluster configuration to disk
+func (app *Lux) SetClusterConfig(clusterName string, config map[string]interface{}) error {
+	clusterDir := filepath.Join(app.GetBaseDir(), "clusters", clusterName)
+	clusterConfigPath := filepath.Join(clusterDir, "config.json")
+	
+	// Ensure directory exists
+	if err := os.MkdirAll(clusterDir, constants.DefaultPerms755); err != nil {
+		return err
+	}
+	
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+	
+	return os.WriteFile(clusterConfigPath, data, WriteReadReadPerms)
+}
+
+// SaveClustersConfig saves the clusters configuration
+func (app *Lux) SaveClustersConfig(config map[string]interface{}) error {
+	clustersPath := filepath.Join(app.GetBaseDir(), constants.ClustersConfigFileName)
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(clustersPath, data, WriteReadReadPerms)
+}
+
+// LoadClusterNodeConfig loads node configuration for a cluster
+func (app *Lux) LoadClusterNodeConfig(clusterName string, nodeName string) (map[string]interface{}, error) {
+	nodeConfigPath := filepath.Join(app.GetBaseDir(), "clusters", clusterName, "nodes", nodeName, "config.json")
+	data, err := os.ReadFile(nodeConfigPath)
+	if err != nil {
+		return nil, err
+	}
+	
+	var config map[string]interface{}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	
+	return config, nil
+}
+
+// GetNodeStakingDir returns the staking directory for a node
+func (app *Lux) GetNodeStakingDir(nodeName string) string {
+	return filepath.Join(app.GetBaseDir(), "nodes", nodeName, "staking")
+}
+
+// GetLoadTestInventoryDir returns the load test inventory directory
+func (app *Lux) GetLoadTestInventoryDir(clusterName string) string {
+	return filepath.Join(app.GetBaseDir(), "inventory", "load-test", clusterName)
+}
+
+// CheckCertInSSHDir checks if a certificate exists in the SSH directory
+func (app *Lux) CheckCertInSSHDir(certName string) bool {
+	certPath := filepath.Join(app.GetBaseDir(), "ssh", certName+constants.CertSuffix)
+	_, err := os.Stat(certPath)
+	return err == nil
+}
+
+// GetNodeConfigPath returns the path to a node's config file
+func (app *Lux) GetNodeConfigPath(nodeName string) string {
+	return filepath.Join(app.GetNodeInstanceDirPath(nodeName), "node.json")
+}
+
+// GetClusterYAMLFilePath returns the path to a cluster's YAML config file
+func (app *Lux) GetClusterYAMLFilePath(clusterName string) string {
+	return filepath.Join(app.GetBaseDir(), "clusters", clusterName, constants.ClusterYAMLFileName)
 }
 
 // All the SDK methods are now provided by embedded type

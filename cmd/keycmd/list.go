@@ -16,7 +16,6 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/evm"
 	sdkUtils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/ids"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
@@ -26,7 +25,7 @@ import (
 
 	"github.com/luxfi/erc20-go/erc20"
 	"github.com/luxfi/geth/common"
-	goethereumethclient "github.com/luxfi/geth/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -143,10 +142,10 @@ keys or for the ledger addresses associated to certain indices.`,
 type Clients struct {
 	x             map[models.Network]xvm.Client
 	p             map[models.Network]platformvm.Client
-	c             map[models.Network]ethclient.Client
-	cGeth         map[models.Network]*goethereumethclient.Client
-	evm           map[models.Network]map[string]ethclient.Client
-	evmGeth       map[models.Network]map[string]*goethereumethclient.Client
+	c             map[models.Network]*ethclient.Client
+	cGeth         map[models.Network]*ethclient.Client
+	evm           map[models.Network]map[string]*ethclient.Client
+	evmGeth       map[models.Network]map[string]*ethclient.Client
 	blockchainRPC map[models.Network]map[string]string
 }
 
@@ -157,25 +156,26 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 	var err error
 	xClients := map[models.Network]xvm.Client{}
 	pClients := map[models.Network]platformvm.Client{}
-	cClients := map[models.Network]ethclient.Client{}
-	cGethClients := map[models.Network]*goethereumethclient.Client{}
-	evmClients := map[models.Network]map[string]ethclient.Client{}
-	evmGethClients := map[models.Network]map[string]*goethereumethclient.Client{}
+	cClients := map[models.Network]*ethclient.Client{}
+	cGethClients := map[models.Network]*ethclient.Client{}
+	evmClients := map[models.Network]map[string]*ethclient.Client{}
+	evmGethClients := map[models.Network]map[string]*ethclient.Client{}
 	blockchainRPCs := map[models.Network]map[string]string{}
 	for _, network := range networks {
 		if pchain {
-			pClients[network] = platformvm.NewClient(network.Endpoint)
+			pClients[network] = platformvm.NewClient(network.Endpoint())
 		}
 		if xchain {
-			xClients[network] = xvm.NewClient(network.Endpoint, "X")
+			xClients[network] = xvm.NewClient(network.Endpoint(), "X")
 		}
 		if cchain {
-			cClients[network], err = ethclient.Dial(network.CChainEndpoint())
+			client, err := ethclient.Dial(network.CChainEndpoint())
 			if err != nil {
 				return nil, err
 			}
+			cClients[network] = client
 			if len(tokenAddresses) != 0 {
-				cGethClients[network], err = goethereumethclient.Dial(network.CChainEndpoint())
+				cGethClients[network], err = ethclient.Dial(network.CChainEndpoint())
 				if err != nil {
 					return nil, err
 				}
@@ -198,7 +198,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 					}
 					subnetToken = sc.TokenSymbol
 					endpoint, _, err := contract.GetBlockchainEndpoints(
-						app,
+						app.GetSDKApp(),
 						network,
 						contract.ChainSpec{
 							BlockchainName: subnetName,
@@ -214,18 +214,19 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 						blockchainRPCs[network][subnetName] = endpoint
 						_, b = evmClients[network]
 						if !b {
-							evmClients[network] = map[string]ethclient.Client{}
+							evmClients[network] = map[string]*ethclient.Client{}
 						}
-						evmClients[network][subnetName], err = ethclient.Dial(endpoint)
+						client, err := ethclient.Dial(endpoint)
 						if err != nil {
 							return nil, err
 						}
+						evmClients[network][subnetName] = client
 						if len(tokenAddresses) != 0 {
 							_, b := evmGethClients[network]
 							if !b {
-								evmGethClients[network] = map[string]*goethereumethclient.Client{}
+								evmGethClients[network] = map[string]*ethclient.Client{}
 							}
-							evmGethClients[network][subnetName], err = goethereumethclient.Dial(endpoint)
+							evmGethClients[network][subnetName], err = ethclient.Dial(endpoint)
 							if err != nil {
 								return nil, err
 							}
@@ -290,7 +291,7 @@ func listKeys(*cobra.Command, []string) error {
 		}
 		networks = append(networks, network)
 	}
-	mainnetIsIncluded := len(utils.Filter(networks, func(n models.Network) bool { return n.Kind == models.Mainnet })) > 0
+	mainnetIsIncluded := len(utils.Filter(networks, func(n models.Network) bool { return n == models.Mainnet })) > 0
 	if mainnetIsIncluded && len(keys) != 1 {
 		ux.Logger.PrintToUser("For mainnet you need to specify the key name to be listed by using the --keys flag")
 		return nil
@@ -370,7 +371,12 @@ func getStoredKeyInfo(
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		sk, err := app.GetKey(keyName, network, false)
+		keyPath := app.GetKeyPath(keyName)
+		networkID, err := network.NetworkID()
+		if err != nil {
+			return nil, err
+		}
+		sk, err := key.LoadSoft(networkID, keyPath)
 		if err != nil {
 			return nil, err
 		}
@@ -466,7 +472,7 @@ func getLedgerIndexInfo(
 ) ([]addressInfo, error) {
 	addrInfos := []addressInfo{}
 	for _, network := range networks {
-		pChainAddr, err := address.Format("P", key.GetHRP(network.ID), addr[:])
+		pChainAddr, err := address.Format("P", key.GetHRP(network.ID()), addr[:])
 		if err != nil {
 			return nil, err
 		}
@@ -495,7 +501,7 @@ func getPChainAddrInfo(
 	balance, err := getPChainBalanceStr(pClients[network], pChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network.Kind != models.Local {
+		if network != models.Local {
 			return addressInfo{}, err
 		}
 	}
@@ -520,7 +526,7 @@ func getXChainAddrInfo(
 	balance, err := getXChainBalanceStr(xClients[network], xChainAddr)
 	if err != nil {
 		// just ignore local network errors
-		if network.Kind != models.Local {
+		if network != models.Local {
 			return addressInfo{}, err
 		}
 	}
@@ -538,8 +544,8 @@ func getXChainAddrInfo(
 func getEvmBasedChainAddrInfo(
 	chainName string,
 	chainToken string,
-	cClient ethclient.Client,
-	cGethClient *goethereumethclient.Client,
+	cClient *ethclient.Client,
+	cGethClient *ethclient.Client,
 	network models.Network,
 	cChainAddr string,
 	kind string,
@@ -550,7 +556,7 @@ func getEvmBasedChainAddrInfo(
 		cChainBalance, err := getCChainBalanceStr(cClient, cChainAddr)
 		if err != nil {
 			// just ignore local network errors
-			if network.Kind != models.Local {
+			if network.Kind() != models.Local {
 				return nil, err
 			}
 		}
@@ -638,7 +644,7 @@ func printAddrInfos(addrInfos []addressInfo) {
 	table.Render()
 }
 
-func getCChainBalanceStr(cClient ethclient.Client, addrStr string) (string, error) {
+func getCChainBalanceStr(cClient *ethclient.Client, addrStr string) (string, error) {
 	addr := common.HexToAddress(addrStr)
 	ctx, cancel := utils.GetAPIContext()
 	balance, err := cClient.BalanceAt(ctx, addr, nil)
