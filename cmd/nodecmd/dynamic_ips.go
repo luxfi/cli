@@ -16,15 +16,31 @@ import (
 	sdkutils "github.com/luxfi/sdk/utils"
 )
 
-func getNodesWithDynamicIP(clusterNodes []string) ([]models.NodeConfig, error) {
+func getNodesWithDynamicIP(clusterName string, clusterNodes []string) ([]models.NodeConfig, error) {
 	nodesWithDynamicIP := []models.NodeConfig{}
 	for _, node := range clusterNodes {
-		nodeConfig, err := app.LoadClusterNodeConfig(node)
+		nodeConfig, err := app.LoadClusterNodeConfig(clusterName, node)
 		if err != nil {
 			return nil, err
 		}
-		if !nodeConfig.UseStaticIP {
-			nodesWithDynamicIP = append(nodesWithDynamicIP, nodeConfig)
+		// Convert map to NodeConfig struct
+		useStaticIP, _ := nodeConfig["UseStaticIP"].(bool)
+		if !useStaticIP {
+			nc := models.NodeConfig{
+				NodeID:        nodeConfig["NodeID"].(string),
+				Region:        nodeConfig["Region"].(string),
+				AMI:           nodeConfig["AMI"].(string),
+				KeyPair:       nodeConfig["KeyPair"].(string),
+				CertPath:      nodeConfig["CertPath"].(string),
+				SecurityGroup: nodeConfig["SecurityGroup"].(string),
+				ElasticIP:     nodeConfig["ElasticIP"].(string),
+				CloudService:  nodeConfig["CloudService"].(string),
+				UseStaticIP:   useStaticIP,
+				IsMonitor:     nodeConfig["IsMonitor"].(bool),
+				IsWarpRelayer: nodeConfig["IsWarpRelayer"].(bool),
+				IsLoadTest:    nodeConfig["IsLoadTest"].(bool),
+			}
+			nodesWithDynamicIP = append(nodesWithDynamicIP, nc)
 		}
 	}
 	return nodesWithDynamicIP, nil
@@ -91,7 +107,7 @@ func updatePublicIPs(clusterName string) error {
 	if err != nil {
 		return err
 	}
-	nodesWithDynamicIP, err := getNodesWithDynamicIP(clusterNodes)
+	nodesWithDynamicIP, err := getNodesWithDynamicIP(clusterName, clusterNodes)
 	if err != nil {
 		return err
 	}

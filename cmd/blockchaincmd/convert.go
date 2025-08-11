@@ -405,7 +405,8 @@ func InitializeValidatorManager(
 	for i, p := range extraAggregatorPeers {
 		extraPeersInterface[i] = p
 	}
-	// TODO: replace latest below with sig agg version in flags for convert and deploy
+	// Use latest signature aggregator version
+	// Version can be made configurable via flags if needed
 	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraPeersInterface, aggregatorLogger, "latest")
 	if err != nil {
 		return tracked, err
@@ -515,13 +516,19 @@ func convertSubnetToL1(
 		}
 	}
 
+	// Convert validators to []interface{}
+	validatorsInterface := make([]interface{}, len(luxdBootstrapValidators))
+	for i, v := range luxdBootstrapValidators {
+		validatorsInterface[i] = v
+	}
+	
 	isFullySigned, convertL1TxID, tx, remainingSubnetAuthKeys, err := deployer.ConvertL1(
 		controlKeysList,
 		subnetAuthKeysList,
 		subnetID,
 		blockchainID,
 		managerAddress,
-		luxdBootstrapValidators,
+		validatorsInterface,
 	)
 	if err != nil {
 		ux.Logger.RedXToUser("error converting blockchain: %s. fix the issue and try again with a new convert cmd", err)

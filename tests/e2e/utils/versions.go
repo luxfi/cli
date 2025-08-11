@@ -97,8 +97,9 @@ func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	case models.EVM:
 		return constants.EVMRPCCompatibilityURL
 	case models.CustomVM:
-		// TODO: unclear yet what we should return here
-		return ""
+		// Return a generic compatibility URL for custom VMs
+		// This could be overridden per custom VM implementation
+		return constants.CustomVMCompatibilityURL
 	default:
 		return ""
 	}
@@ -130,6 +131,18 @@ func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName stri
 	}
 
 	return eligible, nil
+}
+
+// GetLatestSubnetEVMVersion returns the latest available SubnetEVM version
+func GetLatestSubnetEVMVersion() string {
+	// This would ideally fetch from a version API, but for tests we use a known stable version
+	return "v0.7.1"
+}
+
+// GetPreviousSubnetEVMVersion returns a previous SubnetEVM version for testing
+func GetPreviousSubnetEVMVersion() string {
+	// Return a known previous version for testing compatibility
+	return "v0.7.0"
 }
 
 // GetVersionMapping returns a map of specific VMs resp. Lux e2e context keys

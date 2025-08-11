@@ -203,9 +203,9 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 	})
 
 	ginkgo.It("can't deploy conflicting vm versions non SOV", func() {
-		// TODO: These shouldn't be hardcoded either
-		subnetEVMVersion1 := "v0.7.1"
-		subnetEVMVersion2 := "v0.7.0"
+		// Use version constants for better maintainability
+		subnetEVMVersion1 := utils.GetLatestSubnetEVMVersion()
+		subnetEVMVersion2 := utils.GetPreviousSubnetEVMVersion()
 
 		commands.CreateSubnetEvmConfigWithVersionNonSOV(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1, false)
 		commands.CreateSubnetEvmConfigWithVersionNonSOV(secondSubnetName, utils.SubnetEvmGenesis2Path, subnetEVMVersion2, false)

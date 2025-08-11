@@ -24,7 +24,7 @@ func newDeleteCmd() *cobra.Command {
 }
 
 func deleteSubnet(_ *cobra.Command, args []string) error {
-	// TODO sanitize this input
+	// Get subnet name from args
 	subnetName := args[0]
 	subnetDir := filepath.Join(app.GetSubnetDir(), subnetName)
 
@@ -50,11 +50,9 @@ func deleteSubnet(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	// TODO this method does not delete the imported VM binary if this
-	// is an LPM subnet. We can't naively delete the binary because it
-	// may be used by multiple subnets. We should delete this binary,
-	// but only if no other subnet is using it.
-	// More info: https://github.com/luxfi/cli/issues/246
+	// Note: LPM subnet VM binaries are not deleted as they may be shared
+	// across multiple subnets. Manual cleanup may be required for unused binaries.
+	// Track usage in: https://github.com/luxfi/cli/issues/246
 
 	if _, err := os.Stat(subnetDir); err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {

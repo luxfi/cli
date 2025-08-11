@@ -208,7 +208,8 @@ func StartServerProcess(app *application.Lux) error {
 	if err != nil {
 		return err
 	}
-	// TODO: should this be redirected to this app's log file instead?
+	// Direct output to dedicated backend log file for easier debugging
+	// This keeps backend logs separate from main application logs
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 

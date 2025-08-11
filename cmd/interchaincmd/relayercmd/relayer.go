@@ -24,7 +24,7 @@ and configuring an Warp relayers.`,
 	cmd.AddCommand(newLogsCmd())
 	cmd.AddCommand(newStartCmd())
 	cmd.AddCommand(newStopCmd())
-	// TODO: config
-	// TODO: fund
+	cmd.AddCommand(newConfigCmd())
+	cmd.AddCommand(newFundCmd())
 	return cmd
 }

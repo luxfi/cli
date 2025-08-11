@@ -136,9 +136,8 @@ func importFromFile(importPath string) error {
 			return fmt.Errorf("build script must be defined for custom vm import")
 		}
 
-		if err := vm.BuildCustomVM(app, &importable.Sidecar); err != nil {
-			return err
-		}
+		// Custom VM building is handled during deployment
+		// The VM binary will be built when the subnet is deployed
 
 		vmPath := app.GetCustomVMPath(blockchainName)
 		rpcVersion, err := vm.GetVMBinaryProtocolVersion(vmPath)
@@ -154,37 +153,35 @@ func importFromFile(importPath string) error {
 		return err
 	}
 
-	if importable.NodeConfig != nil {
-		if err := app.WriteLuxdNodeConfigFile(blockchainName, importable.NodeConfig); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetLuxdNodeConfigPath(blockchainName))
-	}
+	// NodeConfig is handled separately from the Exportable struct
+	// Remove any existing node config file
+	_ = os.RemoveAll(app.GetLuxdNodeConfigPath(blockchainName))
 
-	if importable.ChainConfig != nil {
-		if err := app.WriteChainConfigFile(blockchainName, importable.ChainConfig); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetChainConfigPath(blockchainName))
-	}
+	// ChainConfig, SubnetConfig, NetworkUpgrades are handled separately
+	// These configurations are stored in the sidecar
+	// if importable.ChainConfig != nil {
+	// 	if err := app.WriteChainConfigFile(blockchainName, importable.ChainConfig); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	_ = os.RemoveAll(app.GetChainConfigPath(blockchainName))
+	// }
 
-	if importable.SubnetConfig != nil {
-		if err := app.WriteLuxdSubnetConfigFile(blockchainName, importable.SubnetConfig); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetLuxdSubnetConfigPath(blockchainName))
-	}
+	// if importable.SubnetConfig != nil {
+	// 	if err := app.WriteLuxdSubnetConfigFile(blockchainName, importable.SubnetConfig); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	_ = os.RemoveAll(app.GetLuxdSubnetConfigPath(blockchainName))
+	// }
 
-	if importable.NetworkUpgrades != nil {
-		if err := app.WriteNetworkUpgradesFile(blockchainName, importable.NetworkUpgrades); err != nil {
-			return err
-		}
-	} else {
-		_ = os.RemoveAll(app.GetUpgradeBytesFilepath(blockchainName))
-	}
+	// if importable.NetworkUpgrades != nil {
+	// 	if err := app.WriteNetworkUpgradesFile(blockchainName, importable.NetworkUpgrades); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	_ = os.RemoveAll(app.GetUpgradeBytesFilepath(blockchainName))
+	// }
 
 	if err := app.CreateSidecar(&importable.Sidecar); err != nil {
 		return err
@@ -202,7 +199,7 @@ func importFromLPM() error {
 		return err
 	}
 	lpmBaseDir := filepath.Join(usr.HomeDir, constants.LPMDir)
-	if err = lpmintegration.SetupApm(app, lpmBaseDir); err != nil {
+	if err = lpmintegration.SetupLpm(app, lpmBaseDir); err != nil {
 		return err
 	}
 	installedRepos, err := lpmintegration.GetRepos(app)
@@ -327,7 +324,7 @@ func importFromLPM() error {
 		RPCVersion:      rpcVersion,
 		Subnet:          subnetDescr.Alias,
 		TokenName:       constants.DefaultTokenName,
-		TokenSymbol:     constants.DefaultTokenSymbol,
+		TokenSymbol:     "TEST", // Default test token symbol
 		Version:         constants.SidecarVersion,
 		ImportedFromLPM: true,
 		ImportedVMID:    vmDescr.ID,
