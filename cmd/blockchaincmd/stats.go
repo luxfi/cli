@@ -176,7 +176,7 @@ func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
 	}
 
 	// create client to public API
-	c = platformvm.NewClient(network.Endpoint)
+	c = platformvm.NewClient(network.Endpoint())
 	// try calling it to make sure it actually worked
 	_, err = c.GetHeight(ctx)
 	if err == nil {

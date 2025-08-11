@@ -124,11 +124,10 @@ func buildPendingValidatorStats(pClient platformvm.Client, infoClient InfoClient
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// TODO: GetPendingValidators is not available in the current platformvm client
+	// GetPendingValidators API is not yet available in the platformvm client
+	// When available, it will be called as:
 	// pendingValidatorsIface, pendingDelegatorsIface, err := pClient.GetPendingValidators(ctx, subnetID, []ids.NodeID{})
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to query the API endpoint for the pending validators: %w", err)
-	// }
+	// For now, initialize empty slices for pending validators
 	var pendingValidatorsIface []interface{}
 	var pendingDelegatorsIface []interface{}
 

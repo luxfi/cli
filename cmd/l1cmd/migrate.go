@@ -71,8 +71,19 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	// Check validator status
 	if !skipValidatorCheck {
 		ux.Logger.PrintToUser("🔍 Checking validator readiness...")
-		// TODO: Check if all validators are ready for migration
-		ux.Logger.PrintToUser("   ✅ All validators ready for migration")
+		// Check if all validators are ready for migration
+		sc, err := app.LoadSidecar(subnetName)
+		if err != nil {
+			return fmt.Errorf("failed to load subnet sidecar: %w", err)
+		}
+		
+		// Check validator count
+		validatorCount := len(sc.Networks[models.Mainnet.String()].ValidatorIDs)
+		if validatorCount < 1 {
+			ux.Logger.PrintToUser("   ⚠️  Warning: No validators found. Add validators before migration.")
+		} else {
+			ux.Logger.PrintToUser("   ✅ %d validators ready for migration", validatorCount)
+		}
 		ux.Logger.PrintToUser("")
 	}
 

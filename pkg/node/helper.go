@@ -28,6 +28,32 @@ func AuthorizedAccessFromSettings(app *application.Lux) bool {
 	return app.Conf.GetConfigBoolValue(constants.ConfigAuthorizeCloudAccessKey)
 }
 
+// isAPIOnlyNode checks if a host is configured as an API-only node
+func isAPIOnlyNode(clusterData map[string]interface{}, host models.Host) bool {
+	// Check if node has API-only role in cluster configuration
+	if nodes, ok := clusterData["nodes"].([]interface{}); ok {
+		for _, node := range nodes {
+			if nodeMap, ok := node.(map[string]interface{}); ok {
+				if nodeID, hasID := nodeMap["id"].(string); hasID && nodeID == host.GetCloudID() {
+					// Check if node is marked as API-only
+					if nodeType, hasType := nodeMap["type"].(string); hasType && nodeType == "api" {
+						return true
+					}
+					// Also check roles field
+					if roles, hasRoles := nodeMap["roles"].([]interface{}); hasRoles {
+						for _, role := range roles {
+							if roleStr, ok := role.(string); ok && roleStr == "api-only" {
+								return true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
 func CheckCluster(app *application.Lux, clusterName string) error {
 	_, err := GetClusterNodes(app, clusterName)
 	return err
@@ -288,9 +314,16 @@ func WaitForHealthyCluster(
 		return err
 	}
 	
-	// TODO: Filter out API nodes properly
-	hosts := allHosts
-	_ = clusterData // Silence unused variable warning
+	// Filter out API nodes - only include validator and monitor nodes
+	hosts := []*models.Host{}
+	clusterDataMap, _ := clusterData.(map[string]interface{})
+	for _, host := range allHosts {
+		// API nodes typically have a specific role set in ansible inventory
+		// Include all nodes except those specifically marked as API-only
+		if host.GetCloudID() != "" && !isAPIOnlyNode(clusterDataMap, *host) {
+			hosts = append(hosts, host)
+		}
+	}
 	defer DisconnectHosts(hosts)
 	startTime := time.Now()
 	spinSession := ux.NewUserSpinner()

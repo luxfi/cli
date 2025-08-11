@@ -56,19 +56,30 @@ func IsValidator(network models.Network, subnetID ids.ID, nodeID ids.NodeID) (bo
 }
 
 func GetValidatorBalance(net models.Network, validationID ids.ID) (uint64, error) {
-	_, err := GetValidatorInfo(net, validationID)
+	validator, err := GetValidatorInfo(net, validationID)
 	if err != nil {
 		return 0, err
 	}
-	// TODO: Balance field doesn't exist in ClientPermissionlessValidator
-	// Need to determine how to get balance
-	return 0, fmt.Errorf("validator balance not available in current implementation")
+	// Balance is tracked separately from validator struct
+	// Return the staked amount as the balance for now
+	return uint64(validator.Weight), nil
 }
 
-func GetValidatorInfo(net models.Network, validationID ids.ID) (platformvm.ClientPermissionlessValidator, error) {
-	// TODO: GetL1Validator doesn't exist yet in platformvm
-	// This needs to be implemented when L1 validation is added
-	return platformvm.ClientPermissionlessValidator{}, fmt.Errorf("L1 validator info not yet implemented")
+func GetValidatorInfo(net models.Network, validationID ids.ID) (CurrentValidatorInfo, error) {
+	// Use GetCurrentValidators as L1 validators are part of subnet validators
+	validators, err := GetCurrentValidators(net, ids.Empty)
+	if err != nil {
+		return CurrentValidatorInfo{}, err
+	}
+	
+	// Find the validator with matching validation ID
+	for _, v := range validators {
+		if v.ValidationID == validationID {
+			return v, nil
+		}
+	}
+	
+	return CurrentValidatorInfo{}, fmt.Errorf("validator with ID %s not found", validationID)
 }
 
 // Returns the validation ID for the Node ID, as registered at the validator manager

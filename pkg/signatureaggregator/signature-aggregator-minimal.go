@@ -40,6 +40,7 @@ func GetSignatureAggregatorEndpoint(app *application.Lux, network models.Network
 
 func CreateSignatureAggregatorInstance(app *application.Lux, subnetID string, network models.Network, extraPeers []interface{}, logger logging.Logger, version string) error {
 	// Stub implementation for signature aggregator instance creation
-	// TODO: Implement actual aggregator instance creation when warp package is available
+	// This feature is temporarily disabled until the warp package is available
+	// The aggregator would manage signature collection and verification for cross-subnet communication
 	return nil
 }

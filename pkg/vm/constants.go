@@ -4,7 +4,12 @@
 package vm
 
 import (
+	"fmt"
 	"math/big"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 // Units
@@ -25,8 +30,52 @@ const (
 
 // GetVMBinaryProtocolVersion returns the protocol version for the VM binary
 func GetVMBinaryProtocolVersion(vmBinaryPath string) (int, error) {
-	// TODO: Implement VM binary protocol version detection
-	// This would involve running the VM binary with a version flag
-	// For now, return a default RPC version
-	return 37, nil // Latest RPC version
+	// Try to detect protocol version by running the VM binary with version flag
+	if vmBinaryPath == "" {
+		return 37, nil // Return default if no path provided
+	}
+	
+	// Check if binary exists
+	if _, err := os.Stat(vmBinaryPath); err != nil {
+		return 37, fmt.Errorf("VM binary not found: %w", err)
+	}
+	
+	// Try to run the binary with --version flag to get protocol info
+	cmd := exec.Command(vmBinaryPath, "--version")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// If version flag doesn't work, try other common flags
+		cmd = exec.Command(vmBinaryPath, "-v")
+		output, err = cmd.CombinedOutput()
+		if err != nil {
+			// Fall back to default if version detection fails
+			return 37, nil
+		}
+	}
+	
+	// Parse output looking for protocol version
+	// Expected format: "protocol-version: X" or "rpc-version: X"
+	outputStr := string(output)
+	lines := strings.Split(outputStr, "\n")
+	for _, line := range lines {
+		line = strings.ToLower(strings.TrimSpace(line))
+		if strings.Contains(line, "protocol") || strings.Contains(line, "rpc") {
+			// Extract version number
+			parts := strings.Fields(line)
+			for i, part := range parts {
+				if strings.Contains(part, "version") && i+1 < len(parts) {
+					// Try to parse the next part as version number
+					versionStr := strings.TrimPrefix(parts[i+1], "v")
+					versionStr = strings.TrimSuffix(versionStr, ",")
+					versionStr = strings.TrimSuffix(versionStr, ":")
+					if version, err := strconv.Atoi(versionStr); err == nil {
+						return version, nil
+					}
+				}
+			}
+		}
+	}
+	
+	// Default to latest known RPC version if detection fails
+	return 37, nil
 }

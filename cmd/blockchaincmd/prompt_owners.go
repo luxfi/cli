@@ -98,7 +98,7 @@ func getControlKeysForDeploy(kc *keychain.Keychain) ([]string, bool, error) {
 	} else {
 		feePaying = "Use fee-paying key"
 	}
-	if kc.Network.Kind == models.Mainnet {
+	if kc.Network.Kind() == models.Mainnet {
 		listOptions = []string{feePaying, custom}
 	} else {
 		listOptions = []string{feePaying, useAll, custom}
@@ -202,7 +202,7 @@ func useAllKeys(network models.Network) ([]string, error) {
 	}
 
 	for _, kp := range keyPaths {
-		k, err := key.LoadSoft(network.ID, kp)
+		k, err := key.LoadSoft(network.ID(), kp)
 		if err != nil {
 			return nil, err
 		}
@@ -236,7 +236,7 @@ func controlKeysLoop(controlKeysPrompt string, network models.Network) ([]string
 	label := "Control key"
 	info := "Control keys are P-Chain addresses which have admin rights on the subnet.\n" +
 		"Only private keys which control such addresses are allowed to make changes on the subnet"
-	customPrompt := "Enter P-Chain address (Example: P-...)"
+	// customPrompt := "Enter P-Chain address (Example: P-...)" // Not needed with simplified PromptAddress
 	return prompts.CaptureListDecision(
 		// we need this to be able to mock test
 		app.Prompt,
@@ -247,12 +247,6 @@ func controlKeysLoop(controlKeysPrompt string, network models.Network) ([]string
 			return prompts.PromptAddress(
 				app.Prompt,
 				"be set as a control key",
-				app.GetKeyDir(),
-				app.GetKey,
-				"",
-				network,
-				prompts.PChainFormat,
-				customPrompt,
 			)
 		},
 		// the prompt for each address

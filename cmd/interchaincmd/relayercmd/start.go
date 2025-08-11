@@ -114,6 +114,7 @@ func CallStart(_ []string, flags StartFlags, network models.Network) error {
 			flags.BinPath,
 			filepath.Join(app.GetBaseDir(), "bin", "warp-relayer"),
 			relayerConfigPath,
+			"", // config string parameter
 			app.GetLocalRelayerLogPath(network.Kind()),
 			app.GetLocalRelayerRunPath(network.Kind()),
 			app.GetLocalRelayerStorageDir(network.Kind()),

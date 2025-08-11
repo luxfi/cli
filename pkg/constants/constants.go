@@ -216,10 +216,31 @@ const (
 	YAMLSuffix = ".yml"
 
 	Enable = "enable"
+	
+	// AWS constants
+	AWSGP3DefaultThroughput = 125
+	AWSGP3DefaultIOPS = 3000
+	AWSDefaultCredential = "default"
+	AWSVolumeTypeGP3 = "gp3"
+	AWSVolumeTypeIO1 = "io1"
+	AWSVolumeTypeIO2 = "io2"
 
 	Disable = "disable"
 
 	TimeParseLayout    = "2006-01-02 15:04:05"
+	
+	LuxCLISuffix = "-lux-cli"
+	E2EDockerComposeFile = "docker-compose-e2e.yml"
+	LuxdMachineMetricsPort = "9091"
+	LuxdMachineMetricsPortInt = 9091
+	LoadTestRole = "load-test"
+	
+	// GCP constants  
+	GCPDefaultAuthKeyPath = ".gcp/auth_key.json"
+	GCPEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
+	
+	// Cluster constants
+	ClusterYAMLFileName = "cluster.yaml"
 	MinStakeDuration   = 24 * 14 * time.Hour
 	MaxStakeDuration   = 24 * 365 * time.Hour
 	MaxStakeWeight     = 100
@@ -274,6 +295,36 @@ const (
 	
 	// Units
 	OneLux = 1_000_000_000 // 1 LUX = 1e9 nLUX
+	
+	// Node types
+	DefaultNodeType = "default"
+	AWSDefaultInstanceType = "t3.xlarge"
+	GCPDefaultInstanceType = "e2-standard-4"
+	
+	// SSH timeouts
+	SSHServerStartTimeout = 5 * time.Minute
+	
+	// Metrics constants
+	MetricsNumRegions = "num_regions"
+	MetricsCloudService = "cloud_service"  
+	MetricsNodeType = "node_type"
+	MetricsUseStaticIP = "use_static_ip"
+	MetricsValidatorCount = "validator_count"
+	MetricsAPICount = "api_count"
+	MetricsAWSVolumeType = "aws_volume_type"
+	MetricsAWSVolumeSize = "aws_volume_size"
+	MetricsEnableMonitoring = "enable_monitoring"
+	MetricsCalledFromWiz = "called_from_wizard"
+	
+	// Ubuntu version
+	UbuntuVersionLTS = "22.04"
+	
+	// Certificate suffix
+	CertSuffix = ".pem"
+	
+	// AWS constants
+	AWSSecurityGroupSuffix = "-sg"
+	EIPLimitErr = "EIP limit reached"
 )
 
 // HTTPAccess represents HTTP access configuration

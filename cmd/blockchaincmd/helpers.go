@@ -15,7 +15,6 @@ import (
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/ids"
 
-	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 )
 
@@ -104,9 +103,9 @@ func GetProxyOwnerPrivateKey(
 	printFunc func(msg string, args ...interface{}),
 ) (string, error) {
 	found, _, _, proxyOwnerPrivateKey, err := contract.SearchForManagedKey(
-		app,
+		app.GetSDKApp(),
 		network,
-		common.HexToAddress(proxyContractOwner),
+		proxyContractOwner,
 		true,
 	)
 	if err != nil {
@@ -117,10 +116,6 @@ func GetProxyOwnerPrivateKey(
 		proxyOwnerPrivateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			"configure validator manager proxy for PoS",
-			app.GetKeyDir(),
-			app.GetKey,
-			"",
-			"",
 		)
 		if err != nil {
 			return "", err

@@ -181,8 +181,9 @@ func importRunningSubnet(*cobra.Command, []string) error {
 		subnetName,
 		vmID.String(),
 	)
-	// TODO: it's probably possible to deploy VMs with the same name on a public network
-	// In this case, an import could clash because the tool supports unique names only
+	// Note: VM names must be unique within the CLI tool
+	// If duplicate VM names exist on public networks, consider using aliases or prefixes
+	// to distinguish between them during import
 
 	genBytes, err := os.ReadFile(genesisFilePath)
 	if err != nil {

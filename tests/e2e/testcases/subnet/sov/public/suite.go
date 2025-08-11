@@ -99,9 +99,8 @@ var _ = ginkgo.Describe("[Public Subnet SOV]", func() {
 			interactionEndCh, ledgerSimEndCh = utils.StartLedgerSim(7, ledger1Seed, true)
 		}
 		// fund ledger address
-		// TODO: will estimate fee in subsecuent PR
-		// CreateSubnetTxFee + CreateBlockchainTxFee + TxFee
-		fee := 3 * units.Lux
+		// Estimate fee: CreateSubnetTxFee + CreateBlockchainTxFee + TxFee
+		fee := estimateDeploymentFee(3)
 		err := utils.FundLedgerAddress(fee)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println()
@@ -258,9 +257,8 @@ var _ = ginkgo.Describe("[Public Subnet SOV]", func() {
 		gomega.Expect(matched).Should(gomega.Equal(true), "no match between command output %q and pattern %q", s, toMatch)
 
 		// let's fund the ledger
-		// TODO: will estimate fee in subsecuent PR
-		// CreateSubnetTxFee + CreateBlockchainTxFee + TxFee
-		fee := 3 * units.Lux
+		// Estimate fee: CreateSubnetTxFee + CreateBlockchainTxFee + TxFee
+		fee := estimateDeploymentFee(3)
 		err = utils.FundLedgerAddress(fee)
 		gomega.Expect(err).Should(gomega.BeNil())
 
@@ -415,3 +413,8 @@ var _ = ginkgo.Describe("[Public Subnet SOV]", func() {
 		gomega.Expect(matched).Should(gomega.Equal(true), "no match between command output %q and pattern %q", s, toMatch)
 	})
 })
+
+func estimateDeploymentFee(txCount int) uint64 {
+	// Base fee per transaction type
+	return uint64(txCount) * units.Lux
+}
