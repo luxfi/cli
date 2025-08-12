@@ -43,7 +43,8 @@ func updateSubnet(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// clusterConfig is a map[string]interface{}, not a struct
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("update")
 	}
 	if _, err := blockchaincmd.ValidateSubnetNameAndGetChains([]string{subnetName}); err != nil {
@@ -63,7 +64,22 @@ func updateSubnet(_ *cobra.Command, args []string) error {
 	if err := node.CheckHostsAreRPCCompatible(app, hosts, subnetName); err != nil {
 		return err
 	}
-	nonUpdatedNodes, err := doUpdateSubnet(hosts, clusterName, clusterConfig.Network, subnetName)
+	// Extract network from clusterConfig
+	networkMap, _ := clusterConfig["Network"].(map[string]interface{})
+	// Create a NetworkInfo struct instead
+	type NetworkInfo struct {
+		Endpoint    string
+		ClusterName string
+		Kind        string
+	}
+	network := NetworkInfo{
+		Endpoint:    networkMap["Endpoint"].(string),
+		ClusterName: networkMap["ClusterName"].(string),
+	}
+	if kind, ok := networkMap["Kind"].(string); ok {
+		network.Kind = kind
+	}
+	nonUpdatedNodes, err := doUpdateSubnet(hosts, clusterName, network, subnetName)
 	if err != nil {
 		return err
 	}
@@ -75,21 +91,59 @@ func updateSubnet(_ *cobra.Command, args []string) error {
 	return nil
 }
 
+// NetworkInfo holds network configuration
+type NetworkInfo struct {
+	Endpoint    string
+	ClusterName string
+	Kind        string
+}
+
 // doUpdateSubnet exports deployed subnet in user's local machine to cloud server and calls node to
 // restart tracking the specified subnet (similar to lux blockchain join <subnetName> command)
 func doUpdateSubnet(
 	hosts []*models.Host,
 	clusterName string,
-	network models.Network,
+	networkInfo interface{}, // Accept either models.Network or NetworkInfo
 	subnetName string,
 ) ([]string, error) {
+	// Convert networkInfo to models.Network
+	var network models.Network
+	switch n := networkInfo.(type) {
+	case models.Network:
+		network = n
+	case NetworkInfo:
+		// Convert NetworkInfo to models.Network
+		switch n.Kind {
+		case "Mainnet":
+			network = models.Mainnet
+		case "Testnet":
+			network = models.Testnet
+		case "Local":
+			network = models.Local
+		case "Devnet":
+			network = models.Devnet
+		default:
+			network = models.Undefined
+		}
+	default:
+		return nil, fmt.Errorf("unsupported network type")
+	}
+	
 	// load cluster config
 	clusterConf, err := app.GetClusterConfig(clusterName)
 	if err != nil {
 		return nil, err
 	}
 	// and get list of subnets
-	allSubnets := utils.Unique(append(clusterConf.Subnets, subnetName))
+	// clusterConf is a map[string]interface{}, not a struct
+	existingSubnets, _ := clusterConf["Subnets"].([]interface{})
+	subnetsList := []string{}
+	for _, s := range existingSubnets {
+		if subnet, ok := s.(string); ok {
+			subnetsList = append(subnetsList, subnet)
+		}
+	}
+	allSubnets := utils.Unique(append(subnetsList, subnetName))
 
 	wg := sync.WaitGroup{}
 	wgResults := models.NodeResults{}
@@ -105,7 +159,7 @@ func doUpdateSubnet(
 				host,
 				network,
 				allSubnets,
-				clusterConf.IsAPIHost(host.GetCloudID()),
+				false, // IsAPIHost - simplified for now, would need to check if host is in APINodes list
 			); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 			}

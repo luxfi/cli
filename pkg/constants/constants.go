@@ -234,6 +234,25 @@ const (
 	LuxdMachineMetricsPort = "9091"
 	LuxdMachineMetricsPortInt = 9091
 	LoadTestRole = "load-test"
+	LoadTestDir  = "loadtest"
+	
+	// SubnetEVM constants
+	SubnetEVMArchive    = "subnet-evm_%s_linux_amd64.tar.gz"
+	SubnetEVMReleaseURL = "https://github.com/luxfi/subnet-evm/releases/download/%s/%s"
+	
+	// Key names for signing
+	PlatformKeyName = "platformvm"
+	EVMKeyName      = "evm"
+	XVMKeyName      = "xvm"
+	
+	// Primary network validation constants
+	PrimaryNetworkValidatingStartLeadTimeNodeCmd = 5 * time.Minute
+	PrimaryNetworkValidatingStartLeadTime        = 2 * time.Minute
+	DefaultTestnetStakeDuration                  = 7 * 24 * time.Hour  // 1 week
+	DefaultMainnetStakeDuration                  = 14 * 24 * time.Hour // 2 weeks
+	
+	// Currency symbols
+	LUXSymbol = "LUX"
 	
 	// GCP constants  
 	GCPDefaultAuthKeyPath = ".gcp/auth_key.json"
@@ -286,6 +305,7 @@ const (
 	WarpURL     = "https://github.com/luxfi/warp.git"
 	WarpKeyName = "warp"
 	WarpVersion = "v1.0.0"
+	WarpRelayerDockerDir = "warp-relayer-docker"
 	
 	// Relayer constants
 	DefaultRelayerVersion = "v1.0.0"
@@ -315,6 +335,10 @@ const (
 	MetricsAWSVolumeSize = "aws_volume_size"
 	MetricsEnableMonitoring = "enable_monitoring"
 	MetricsCalledFromWiz = "called_from_wizard"
+	MetricsSubnetVM = "subnet_vm"
+	MetricsCustomVMRepoURL = "custom_vm_repo_url"
+	MetricsCustomVMBranch = "custom_vm_branch"
+	MetricsCustomVMBuildScript = "custom_vm_build_script"
 	
 	// Ubuntu version
 	UbuntuVersionLTS = "22.04"

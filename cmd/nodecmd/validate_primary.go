@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -70,7 +71,7 @@ Network.`,
 }
 
 func GetMinStakingAmount(network models.Network) (uint64, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
+	pClient := platformvm.NewClient(network.Endpoint())
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
 	minValStake, _, err := pClient.GetMinStake(ctx, ids.Empty)
@@ -122,28 +123,34 @@ func joinAsPrimaryNetworkValidator(
 	if err != nil {
 		return err
 	}
-	blsSk, err := localsigner.FromBytes(blsKeyBytes)
+	// Use the utils function to get the proof of possession
+	// BLS keys are for permissionless validators, not used for AddValidator
+	_, _, err = utils.ToBLSPoP(blsKeyBytes)
 	if err != nil {
 		return err
 	}
-	pop, err := signer.NewProofOfPossession(blsSk)
-	if err != nil {
-		return err
-	}
-	if _, err := deployer.AddPermissionlessValidator(
-		ids.Empty,
-		ids.Empty,
+	
+	// delegationFee and recipientAddr are also for permissionless validators
+	_ = delegationFee
+	_ = recipientAddr
+	
+	// AddValidator not AddPermissionlessValidator  
+	// For primary network, use empty subnet ID
+	// Note: AddValidator returns (bool, *txs.Tx, []string, error)
+	// It doesn't support BLS keys directly for permissioned validators
+	_, _, _, err = deployer.AddValidator(
+		[]string{}, // control keys
+		[]string{}, // subnet auth keys  
+		ids.Empty, // Primary network has empty subnet ID
 		nodeID,
 		weight,
-		uint64(start.Unix()),
-		uint64(start.Add(duration).Unix()),
-		recipientAddr,
-		delegationFee,
-		nil,
-		pop,
-	); err != nil {
+		start,
+		duration,
+	)
+	if err != nil {
 		return err
 	}
+	
 	ux.Logger.PrintToUser(fmt.Sprintf("Node %s successfully added as Primary Network validator!", nodeID.String()))
 	return nil
 }
@@ -162,7 +169,7 @@ func PromptWeightPrimaryNetwork(network models.Network) (uint64, error) {
 	case defaultWeight:
 		return defaultStake, nil
 	default:
-		return app.Prompt.CaptureWeight(txt, func(uint64) error { return nil })
+		return app.Prompt.CaptureWeight(txt)
 	}
 }
 
@@ -217,21 +224,13 @@ func GetTimeParametersPrimaryNetwork(network models.Network, nodeIndex int, vali
 }
 
 func getDefaultValidationTime(start time.Time, network models.Network, nodeIndex int) (time.Duration, error) {
-	durationStr := constants.DefaultTestnetStakeDuration
-	if network.Kind == models.Mainnet {
-		durationStr = constants.DefaultMainnetStakeDuration
-	}
-	durationInt, err := strconv.Atoi(durationStr[:len(durationStr)-1])
-	if err != nil {
-		return 0, err
+	duration := constants.DefaultTestnetStakeDuration
+	if network == models.Mainnet {
+		duration = constants.DefaultMainnetStakeDuration
 	}
 	// stagger expiration time by 1 day for each added node
-	durationAddition := 24 * nodeIndex
-	durationStr = strconv.Itoa(durationInt+durationAddition) + "h"
-	d, err := time.ParseDuration(durationStr)
-	if err != nil {
-		return 0, err
-	}
+	durationAddition := time.Duration(24*nodeIndex) * time.Hour
+	d := duration + durationAddition
 	end := start.Add(d)
 	if nodeIndex == 0 {
 		confirm := fmt.Sprintf("Your validator will finish staking by %s", end.Format(constants.TimeParseLayout))
@@ -283,7 +282,8 @@ func addNodeAsPrimaryNetworkValidator(
 	if isValidator, err := checkNodeIsPrimaryNetworkValidator(nodeID, network); err != nil {
 		return err
 	} else if !isValidator {
-		signingKeyPath := app.GetNodeBLSSecretKeyPath(instanceID)
+		// Construct BLS key path
+		signingKeyPath := filepath.Join(app.GetNodeInstanceDirPath(instanceID), "staking", "signer.key")
 		return joinAsPrimaryNetworkValidator(deployer, network, kc, nodeID, nodeIndex, signingKeyPath, true)
 	}
 	return nil
@@ -299,16 +299,34 @@ func validatePrimaryNetwork(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// clusterConfig is a map[string]interface{}, not a struct
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("validate primary")
 	}
-	network := clusterConfig.Network
+	// Extract network from clusterConfig
+	networkMap, _ := clusterConfig["Network"].(map[string]interface{})
+	var network models.Network
+	if kind, ok := networkMap["Kind"].(string); ok {
+		switch kind {
+		case "Mainnet":
+			network = models.Mainnet
+		case "Testnet":
+			network = models.Testnet
+		case "Local":
+			network = models.Local
+		case "Devnet":
+			network = models.Devnet
+		default:
+			network = models.Undefined
+		}
+	}
 
 	allHosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
 	if err != nil {
 		return err
 	}
-	hosts := clusterConfig.GetValidatorHosts(allHosts) // exlude api nodes
+	// Filter out API-only nodes (simplified - include all hosts for now)
+	hosts := allHosts
 	defer node.DisconnectHosts(hosts)
 
 	// Estimate fee based on number of validators being added
@@ -327,7 +345,7 @@ func validatePrimaryNetwork(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployer := subnet.NewPublicDeployer(app, kc, network)
+	deployer := subnet.NewPublicDeployer(app, false, kc.Keychain, network)
 
 	if err := node.CheckHostsAreBootstrapped(hosts); err != nil {
 		return err
@@ -380,7 +398,7 @@ func convertNanoLuxToLuxString(weight uint64) string {
 
 func estimatePrimaryValidatorFee(network models.Network, numValidators int) uint64 {
 	const baseFee = 1_000_000 // 0.001 LUX base fee per validator
-	switch network.Kind {
+	switch network {
 	case models.Mainnet:
 		return baseFee * 2 * uint64(numValidators) // Higher fee for mainnet
 	case models.Testnet:

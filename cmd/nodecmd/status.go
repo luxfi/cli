@@ -214,15 +214,31 @@ func statusNode(_ *cobra.Command, args []string) error {
 			}
 		}
 	}
-	if clusterConf.MonitoringInstance != "" {
-		hostIDs = append(hostIDs, clusterConf.MonitoringInstance)
+	// clusterConf is a map[string]interface{}, not a struct
+	if monitoringInstance, ok := clusterConf["MonitoringInstance"].(string); ok && monitoringInstance != "" {
+		hostIDs = append(hostIDs, monitoringInstance)
 		nodeIDs = append(nodeIDs, "")
 	}
 	nodeConfigs := []models.NodeConfig{}
 	for _, hostID := range hostIDs {
-		nodeConfig, err := app.LoadClusterNodeConfig(hostID)
+		nodeConfigMap, err := app.LoadClusterNodeConfig(clusterName, hostID)
 		if err != nil {
 			return err
+		}
+		// Convert map to NodeConfig struct
+		nodeConfig := models.NodeConfig{
+			NodeID:        nodeConfigMap["NodeID"].(string),
+			Region:        nodeConfigMap["Region"].(string),
+			AMI:           nodeConfigMap["AMI"].(string),
+			KeyPair:       nodeConfigMap["KeyPair"].(string),
+			CertPath:      nodeConfigMap["CertPath"].(string),
+			SecurityGroup: nodeConfigMap["SecurityGroup"].(string),
+			ElasticIP:     nodeConfigMap["ElasticIP"].(string),
+			CloudService:  nodeConfigMap["CloudService"].(string),
+			UseStaticIP:   nodeConfigMap["UseStaticIP"].(bool),
+			IsMonitor:     nodeConfigMap["IsMonitor"].(bool),
+			IsWarpRelayer: nodeConfigMap["IsWarpRelayer"].(bool),
+			IsLoadTest:    nodeConfigMap["IsLoadTest"].(bool),
 		}
 		nodeConfigs = append(nodeConfigs, nodeConfig)
 	}
@@ -244,7 +260,7 @@ func statusNode(_ *cobra.Command, args []string) error {
 }
 
 func printOutput(
-	clusterConf models.ClusterConfig,
+	clusterConf map[string]interface{},
 	cloudIDs []string,
 	nodeIDs []string,
 	luxdVersions map[string]string,
@@ -257,8 +273,11 @@ func printOutput(
 	blockchainName string,
 	nodeConfigs []models.NodeConfig,
 ) {
-	if clusterConf.External {
-		ux.Logger.PrintToUser("Cluster %s (%s) is EXTERNAL", logging.LightBlue.Wrap(clusterName), clusterConf.Network.Kind.String())
+	// clusterConf is a map[string]interface{}, not a struct
+	if external, ok := clusterConf["External"].(bool); ok && external {
+		network, _ := clusterConf["Network"].(map[string]interface{})
+		kind, _ := network["Kind"].(string)
+		ux.Logger.PrintToUser("Cluster %s (%s) is EXTERNAL", logging.LightBlue.Wrap(clusterName), kind)
 	}
 	if blockchainName == "" && len(notBootstrappedHosts) == 0 {
 		ux.Logger.PrintToUser("All nodes in cluster %s are bootstrapped to Primary Network!", clusterName)
@@ -288,8 +307,26 @@ func printOutput(
 		healthyStatus := ""
 		nodeIDStr := ""
 		luxdVersion := ""
-		roles := clusterConf.GetHostRoles(nodeConfigs[i])
-		if clusterConf.IsLuxdHost(cloudID) {
+		// Extract roles from nodeConfig
+		nodeConfig := nodeConfigs[i]
+		roles := []string{}
+		if nodeConfig.IsMonitor {
+			roles = append(roles, "Monitor")
+		}
+		if nodeConfig.IsWarpRelayer {
+			roles = append(roles, "WarpRelayer")
+		}
+		if nodeConfig.IsLoadTest {
+			roles = append(roles, "LoadTest")
+		}
+		
+		// Check if it's a luxd host (typically all hosts are luxd hosts unless they're monitoring or loadtest only)
+		isLuxdHost := true
+		if nodeConfig.IsMonitor && !nodeConfig.IsWarpRelayer && !nodeConfig.IsLoadTest {
+			// Only monitor, not a luxd host
+			isLuxdHost = false
+		}
+		if isLuxdHost {
 			boostrappedStatus = logging.Green.Wrap("BOOTSTRAPPED")
 			if slices.Contains(notBootstrappedHosts, cloudID) {
 				boostrappedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
@@ -305,7 +342,11 @@ func printOutput(
 			cloudID,
 			logging.Green.Wrap(nodeIDStr),
 			nodeConfigs[i].ElasticIP,
-			clusterConf.Network.Kind.String(),
+			func() string {
+				network, _ := clusterConf["Network"].(map[string]interface{})
+				kind, _ := network["Kind"].(string)
+				return kind
+			}(),
 			strings.Join(roles, ","),
 			luxdVersion,
 			boostrappedStatus,
@@ -313,7 +354,8 @@ func printOutput(
 		}
 		if blockchainName != "" {
 			syncedStatus := ""
-			if clusterConf.MonitoringInstance != cloudID {
+			monitoringInstance, _ := clusterConf["MonitoringInstance"].(string)
+			if monitoringInstance != cloudID {
 				syncedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
 				if slices.Contains(subnetSyncedHosts, cloudID) {
 					syncedStatus = logging.Green.Wrap("SYNCED")

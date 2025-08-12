@@ -30,7 +30,6 @@ import (
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	luxdfee "github.com/luxfi/node/vms/platformvm/txs/fee"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	xvmtxs "github.com/luxfi/node/vms/xvm/txs"
 	"github.com/luxfi/node/wallet/chain/c"
