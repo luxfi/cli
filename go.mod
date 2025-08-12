@@ -182,7 +182,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/database v1.1.11 // indirect
-	github.com/luxfi/metrics v1.1.6 // indirect
+	github.com/luxfi/metrics v1.1.10 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
