@@ -90,51 +90,101 @@ func sshNode(_ *cobra.Command, args []string) error {
 		if err := node.CheckCluster(app, clusterNameOrNodeID); err == nil {
 			// clusterName detected
 			if len(args[1:]) == 0 {
-				return printClusterConnectionString(clusterNameOrNodeID, clustersConfig.Clusters[clusterNameOrNodeID].Network.Kind.String())
+				// clustersConfig is a map[string]interface{}, not a struct
+				clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+				cluster, _ := clusters[clusterNameOrNodeID].(map[string]interface{})
+				network, _ := cluster["Network"].(map[string]interface{})
+				kind, _ := network["Kind"].(string)
+				return printClusterConnectionString(clusterNameOrNodeID, kind)
 			} else {
-				if clustersConfig.Clusters[clusterNameOrNodeID].Local {
+				clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+				cluster, _ := clusters[clusterNameOrNodeID].(map[string]interface{})
+				if local, ok := cluster["Local"].(bool); ok && local {
 					return notImplementedForLocal("ssh")
 				}
 				clusterHosts, err := GetAllClusterHosts(clusterNameOrNodeID)
 				if err != nil {
 					return err
 				}
-				return sshHosts(clusterHosts, cmd, clustersConfig.Clusters[clusterNameOrNodeID])
+				return sshHosts(clusterHosts, cmd, cluster)
 			}
 		} else {
 			// try to detect nodeID
 			selectedHost, clusterName := getHostClusterPair(clusterNameOrNodeID)
 			if selectedHost != nil && clusterName != "" {
-				return sshHosts([]*models.Host{selectedHost}, cmd, clustersConfig.Clusters[clusterName])
+				clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+				cluster, _ := clusters[clusterName].(map[string]interface{})
+				return sshHosts([]*models.Host{selectedHost}, cmd, cluster)
 			}
 		}
 		return fmt.Errorf("cluster or node %s not found", clusterNameOrNodeID)
 	}
 }
 
-func printNodeInfo(host *models.Host, clusterConf models.ClusterConfig, result string) error {
-	nodeConfig, err := app.LoadClusterNodeConfig(host.GetCloudID())
+func printNodeInfo(host *models.Host, clusterConf map[string]interface{}, result string) error {
+	// Extract clusterName from clusterConf (need to find it)
+	clusterName := ""
+	clustersConfig, _ := app.GetClustersConfig()
+	clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+	for name, cluster := range clusters {
+		if c, ok := cluster.(map[string]interface{}); ok {
+			// Check if this cluster contains our host
+			if hosts, ok := c["Nodes"].([]interface{}); ok {
+				for _, h := range hosts {
+					if h == host.GetCloudID() {
+						clusterName = name
+						break
+					}
+				}
+			}
+		}
+		if clusterName != "" {
+			break
+		}
+	}
+	nodeConfig, err := app.LoadClusterNodeConfig(clusterName, host.GetCloudID())
 	if err != nil {
 		return err
 	}
 	nodeIDStr := "----------------------------------------"
-	if clusterConf.IsLuxdHost(host.GetCloudID()) {
+	// Check if host is a luxd host (typically all hosts are luxd hosts unless they're monitoring or loadtest only)
+	isLuxdHost := true
+	if monitor, ok := nodeConfig["IsMonitor"].(bool); ok && monitor {
+		if relayer, ok := nodeConfig["IsWarpRelayer"].(bool); !ok || !relayer {
+			if loadtest, ok := nodeConfig["IsLoadTest"].(bool); !ok || !loadtest {
+				// Only monitor, not a luxd host
+				isLuxdHost = false
+			}
+		}
+	}
+	if isLuxdHost {
 		nodeID, err := getNodeID(app.GetNodeInstanceDirPath(host.GetCloudID()))
 		if err != nil {
 			return err
 		}
 		nodeIDStr = nodeID.String()
 	}
-	roles := clusterConf.GetHostRoles(nodeConfig)
+	// Map access for clusterConf
+	elasticIP, _ := nodeConfig["ElasticIP"].(string)
+	roles := []string{}
+	if monitor, ok := nodeConfig["IsMonitor"].(bool); ok && monitor {
+		roles = append(roles, "Monitor")
+	}
+	if relayer, ok := nodeConfig["IsWarpRelayer"].(bool); ok && relayer {
+		roles = append(roles, "WarpRelayer")
+	}
+	if loadtest, ok := nodeConfig["IsLoadTest"].(bool); ok && loadtest {
+		roles = append(roles, "LoadTest")
+	}
 	rolesStr := strings.Join(roles, ",")
 	if rolesStr != "" {
 		rolesStr = " [" + rolesStr + "]"
 	}
-	ux.Logger.PrintToUser("  [Node %s (%s) %s%s] %s", host.GetCloudID(), nodeIDStr, nodeConfig.ElasticIP, rolesStr, result)
+	ux.Logger.PrintToUser("  [Node %s (%s) %s%s] %s", host.GetCloudID(), nodeIDStr, elasticIP, rolesStr, result)
 	return nil
 }
 
-func sshHosts(hosts []*models.Host, cmd string, clusterConf models.ClusterConfig) error {
+func sshHosts(hosts []*models.Host, cmd string, clusterConf map[string]interface{}) error {
 	if cmd != "" {
 		// execute cmd
 		wg := sync.WaitGroup{}
@@ -211,7 +261,8 @@ func printClusterConnectionString(clusterName string, networkName string) error 
 	if err != nil {
 		return err
 	}
-	if clusterConf.External {
+	// clusterConf is a map[string]interface{}, not a struct
+	if external, ok := clusterConf["External"].(bool); ok && external {
 		ux.Logger.PrintToUser("Cluster: %s (%s) EXTERNAL", logging.LightBlue.Wrap(clusterName), logging.Green.Wrap(networkName))
 	} else {
 		ux.Logger.PrintToUser("Cluster: %s (%s)", logging.LightBlue.Wrap(clusterName), logging.Green.Wrap(networkName))
