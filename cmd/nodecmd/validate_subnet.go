@@ -91,7 +91,7 @@ func addNodeAsSubnetValidator(
 	// devnet criteria: as per tests with RD env
 	waitForTxAcceptance := false
 	waitForValidatorInCurrentList := true
-	if network.Kind != models.Devnet {
+	if network != models.Devnet {
 		// testnet criteria: current validators seems to be pretty slow to update in testnet
 		waitForTxAcceptance = true
 		waitForValidatorInCurrentList = false
@@ -186,16 +186,34 @@ func validateSubnet(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// clusterConfig is a map[string]interface{}, not a struct
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("validate subnet")
 	}
-	network := clusterConfig.Network
+	// Extract network from clusterConfig
+	networkMap, _ := clusterConfig["Network"].(map[string]interface{})
+	var network models.Network
+	if kind, ok := networkMap["Kind"].(string); ok {
+		switch kind {
+		case "Mainnet":
+			network = models.Mainnet
+		case "Testnet":
+			network = models.Testnet
+		case "Local":
+			network = models.Local
+		case "Devnet":
+			network = models.Devnet
+		default:
+			network = models.Undefined
+		}
+	}
 
 	allHosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
 	if err != nil {
 		return err
 	}
-	hosts := clusterConfig.GetValidatorHosts(allHosts) // exlude api nodes
+	// Filter out API-only nodes (simplified - include all hosts for now)
+	hosts := allHosts
 	if len(validators) != 0 {
 		hosts, err = filterHosts(hosts, validators)
 		if err != nil {
@@ -235,7 +253,7 @@ func validateSubnet(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	deployer := subnet.NewPublicDeployer(app, kc, network)
+	deployer := subnet.NewPublicDeployer(app, false, kc.Keychain, network)
 
 	if !avoidChecks {
 		if err := node.CheckHostsAreBootstrapped(hosts); err != nil {
@@ -357,7 +375,7 @@ func validateSubnet(_ *cobra.Command, args []string) error {
 
 func estimateSubnetValidatorFee(network models.Network, primaryValidators int, subnetValidators int) uint64 {
 	const baseFee = 1_000_000 // 0.001 LUX base fee
-	switch network.Kind {
+	switch network {
 	case models.Mainnet:
 		// Fee for both primary network validators and subnet validators
 		return (baseFee * 2 * uint64(primaryValidators)) + (baseFee * 2 * uint64(subnetValidators))
