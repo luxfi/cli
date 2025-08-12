@@ -20,7 +20,7 @@ require (
 	github.com/luxfi/geth v1.16.27
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
-	github.com/luxfi/log v1.0.6
+	github.com/luxfi/log v1.0.7
 	// github.com/luxfi/lpm v1.0.0 // temporarily commented - module path mismatch
 	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/node v1.16.15
@@ -67,9 +67,11 @@ require (
 
 // Use local modules for development
 replace (
+	github.com/luxfi/database => ../database
 	github.com/luxfi/evm => ../evm
 	github.com/luxfi/geth => ../geth
 	github.com/luxfi/ids => ../ids
+	github.com/luxfi/metrics => ../metrics
 	github.com/luxfi/node => ../node
 	github.com/luxfi/sdk => ../sdk
 	github.com/luxfi/warp => ../warp
@@ -105,7 +107,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
-	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.6 // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -179,8 +181,8 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/database v1.1.10 // indirect
-	github.com/luxfi/metrics v1.1.1 // indirect
+	github.com/luxfi/database v1.1.11 // indirect
+	github.com/luxfi/metrics v1.1.6 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

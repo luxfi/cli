@@ -57,7 +57,8 @@ func upgrade(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if clusterConfig.Local {
+	// clusterConfig is a map[string]interface{}, not a struct
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("upgrade")
 	}
 	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
@@ -116,17 +117,13 @@ func upgrade(_ *cobra.Command, args []string) error {
 // if the node is not tracking any subnet, it will just install latestLuxdVersion
 func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo, error) {
 	latestLuxdVersion, err := app.Downloader.GetLatestReleaseVersion(
-		constants.LuxOrg,
-		constants.LuxdRepoName,
-		"",
+		fmt.Sprintf("%s/%s", constants.LuxOrg, constants.LuxdRepoName),
 	)
 	if err != nil {
 		return nil, err
 	}
 	latestSubnetEVMVersion, err := app.Downloader.GetLatestReleaseVersion(
-		constants.LuxOrg,
-		constants.SubnetEVMRepoName,
-		"",
+		fmt.Sprintf("%s/%s", constants.LuxOrg, constants.SubnetEVMRepoName),
 	)
 	if err != nil {
 		return nil, err
@@ -215,7 +212,7 @@ func getNodesUpgradeInfo(hosts []*models.Host) (map[*models.Host]nodeUpgradeInfo
 
 // checks if vmName is "xvm", "evm" or "platform"
 func checkIfKeyIsStandardVMName(vmName string) bool {
-	standardVMNames := []string{constants.PlatformKeyName, constants.EVMKeyName, constants.AVMKeyName}
+	standardVMNames := []string{constants.PlatformKeyName, constants.EVMKeyName, constants.XVMKeyName}
 	return slices.Contains(standardVMNames, vmName)
 }
 

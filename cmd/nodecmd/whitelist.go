@@ -69,12 +69,14 @@ func whitelist(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	clustersConfig, err := app.LoadClustersConfig()
+	clustersConfig, err := app.GetClustersConfig()
 	if err != nil {
 		return err
 	}
-	clusterConfig := clustersConfig.Clusters[clusterName]
-	if clusterConfig.Local {
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+	clusterConfig, _ := clusters[clusterName].(map[string]interface{})
+	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("whitelist")
 	}
 	if discoverIP {
@@ -130,22 +132,26 @@ func whitelist(_ *cobra.Command, args []string) error {
 			return err
 		}
 		for _, node := range clusterNodes {
-			nodeConfig, err := app.LoadClusterNodeConfig(node)
+			nodeConfig, err := app.LoadClusterNodeConfig(clusterName, node)
 			if err != nil {
 				ux.Logger.PrintToUser("Failed to parse node %s due to %s", node, err.Error())
 				return err
 			}
+			// nodeConfig is a map[string]interface{}, not a struct
+			cloudService, _ := nodeConfig["CloudService"].(string)
+			region, _ := nodeConfig["Region"].(string)
+			securityGroup, _ := nodeConfig["SecurityGroup"].(string)
 			if slices.Contains(cloudSecurityGroupList, regionSecurityGroup{
-				cloud:         nodeConfig.CloudService,
-				region:        nodeConfig.Region,
-				securityGroup: nodeConfig.SecurityGroup,
+				cloud:         cloudService,
+				region:        region,
+				securityGroup: securityGroup,
 			}) {
 				continue
 			}
 			cloudSecurityGroupList = append(cloudSecurityGroupList, regionSecurityGroup{
-				cloud:         nodeConfig.CloudService,
-				region:        nodeConfig.Region,
-				securityGroup: nodeConfig.SecurityGroup,
+				cloud:         cloudService,
+				region:        region,
+				securityGroup: securityGroup,
 			})
 		}
 		if len(cloudSecurityGroupList) == 0 {
@@ -246,23 +252,25 @@ func whitelistSSHPubKey(clusterName string, pubkey string) error {
 	if err := node.CheckCluster(app, clusterName); err != nil {
 		return err
 	}
-	clustersConfig, err := app.LoadClustersConfig()
+	clustersConfig, err := app.GetClustersConfig()
 	if err != nil {
 		return err
 	}
-	clusterConfig := clustersConfig.Clusters[clusterName]
+	// clustersConfig is a map[string]interface{}, not a struct
+	clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+	clusterConfig, _ := clusters[clusterName].(map[string]interface{})
 	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
 	if err != nil {
 		return err
 	}
-	if clusterConfig.MonitoringInstance != "" {
+	if monitoringInstance, ok := clusterConfig["MonitoringInstance"].(string); ok && monitoringInstance != "" {
 		monitoringHost, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetMonitoringInventoryDir(clusterName))
 		if err != nil {
 			return err
 		}
 		hosts = append(hosts, monitoringHost...)
 	}
-	if len(clusterConfig.LoadTestInstance) != 0 {
+	if loadTestInstance, ok := clusterConfig["LoadTestInstance"].([]interface{}); ok && len(loadTestInstance) != 0 {
 		loadTestHost, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetLoadTestInventoryDir(clusterName))
 		if err != nil {
 			return err
@@ -294,26 +302,54 @@ func whitelistSSHPubKey(clusterName string, pubkey string) error {
 // getCloudSecurityGroupList returns a list of cloud security groups for a given cluster nodes
 func getCloudSecurityGroupList(clusterNodes []string) ([]regionSecurityGroup, error) {
 	cloudSecurityGroupList := []regionSecurityGroup{}
+	// Try to extract cluster name from first node
+	clusterName := ""
+	if len(clusterNodes) > 0 {
+		// The node name typically includes the cluster name
+		// Try to get the cluster from clusters config
+		clustersConfig, _ := app.GetClustersConfig()
+		clusters, _ := clustersConfig["Clusters"].(map[string]interface{})
+		for cName, cluster := range clusters {
+			if c, ok := cluster.(map[string]interface{}); ok {
+				if nodes, ok := c["Nodes"].([]interface{}); ok {
+					for _, n := range nodes {
+						if n == clusterNodes[0] {
+							clusterName = cName
+							break
+						}
+					}
+				}
+			}
+			if clusterName != "" {
+				break
+			}
+		}
+	}
+	
 	for _, node := range clusterNodes {
 		if !utils.FileExists(app.GetNodeConfigPath(node)) {
 			continue
 		}
-		nodeConfig, err := app.LoadClusterNodeConfig(node)
+		nodeConfig, err := app.LoadClusterNodeConfig(clusterName, node)
 		if err != nil {
 			ux.Logger.PrintToUser("Failed to parse node %s due to %s", node, err.Error())
 			return nil, err
 		}
+		// nodeConfig is a map[string]interface{}, not a struct
+		cloudService, _ := nodeConfig["CloudService"].(string)
+		region, _ := nodeConfig["Region"].(string)
+		securityGroup, _ := nodeConfig["SecurityGroup"].(string)
 		if slices.Contains(cloudSecurityGroupList, regionSecurityGroup{
-			cloud:         nodeConfig.CloudService,
-			region:        nodeConfig.Region,
-			securityGroup: nodeConfig.SecurityGroup,
+			cloud:         cloudService,
+			region:        region,
+			securityGroup: securityGroup,
 		}) {
 			continue
 		}
 		cloudSecurityGroupList = append(cloudSecurityGroupList, regionSecurityGroup{
-			cloud:         nodeConfig.CloudService,
-			region:        nodeConfig.Region,
-			securityGroup: nodeConfig.SecurityGroup,
+			cloud:         cloudService,
+			region:        region,
+			securityGroup: securityGroup,
 		})
 	}
 	return cloudSecurityGroupList, nil
