@@ -65,18 +65,20 @@ require (
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
-// Use local modules for development
-replace (
-	github.com/luxfi/database => ../database
-	github.com/luxfi/evm => ../evm
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/ids => ../ids
-	github.com/luxfi/metric => ../metrics
-	github.com/luxfi/netrunner => ../netrunner
-	github.com/luxfi/node => ../node
-	github.com/luxfi/sdk => ../sdk
-	github.com/luxfi/warp => ../warp
-)
+// Replace directives removed for CI compatibility
+// For local development, uncomment the replace block below:
+// replace (
+//     github.com/luxfi/database => ../database
+//     github.com/luxfi/evm => ../evm
+//     github.com/luxfi/geth => ../geth
+//     github.com/luxfi/ids => ../ids
+//     github.com/luxfi/metric => ../metrics
+//     github.com/luxfi/netrunner => ../netrunner
+//     github.com/luxfi/node => ../node
+//     github.com/luxfi/sdk => ../sdk
+//     github.com/luxfi/warp => ../warp
+//     github.com/luxfi/coreth => ../coreth
+// )
 
 require (
 	github.com/luxfi/lpm v1.7.12
