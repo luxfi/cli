@@ -343,9 +343,13 @@ func GetPChainL1ValidatorWeightMessage(
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, error) {
 	if l1SignedMessage != nil {
-		addressedCall, err := warpPayload.ParseAddressedCall(l1SignedMessage.UnsignedMessage.Payload)
+		payload, err := warpPayload.ParsePayload(l1SignedMessage.UnsignedMessage.Payload)
 		if err != nil {
 			return nil, err
+		}
+		addressedCall, ok := payload.(*warpPayload.AddressedCall)
+		if !ok {
+			return nil, fmt.Errorf("expected AddressedCall payload, got %T", payload)
 		}
 		weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 		if err != nil {
@@ -399,7 +403,14 @@ func GetL1ValidatorWeightMessageFromTx(
 	msgs := evm.GetWarpMessagesFromLogs(receipt.Logs)
 	for _, msg := range msgs {
 		payload := msg.Payload
-		addressedCall, err := warpPayload.ParseAddressedCall(payload)
+		parsedPayload, err := warpPayload.ParsePayload(payload)
+		if err != nil {
+			return nil, err
+		}
+		addressedCall, ok := parsedPayload.(*warpPayload.AddressedCall)
+		if !ok {
+			return nil, fmt.Errorf("expected AddressedCall payload, got %T", parsedPayload)
+		}
 		if err == nil {
 			weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 			if err == nil {
@@ -461,7 +472,14 @@ func SearchForL1ValidatorWeightMessage(
 		msgs := evm.GetWarpMessagesFromLogs(utils.PointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
-			addressedCall, err := warpPayload.ParseAddressedCall(payload)
+			parsedPayload, err := warpPayload.ParsePayload(payload)
+		if err != nil {
+			return nil, err
+		}
+		addressedCall, ok := parsedPayload.(*warpPayload.AddressedCall)
+		if !ok {
+			return nil, fmt.Errorf("expected AddressedCall payload, got %T", parsedPayload)
+		}
 			if err == nil {
 				weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 				if err == nil {

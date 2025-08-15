@@ -11,7 +11,6 @@ import (
 	"github.com/luxfi/cli/pkg/node"
 
 	"github.com/luxfi/cli/pkg/ansible"
-	"github.com/luxfi/cli/pkg/application"
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
 	"github.com/luxfi/cli/pkg/cobrautils"

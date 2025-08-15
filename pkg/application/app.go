@@ -152,6 +152,10 @@ func (app *Lux) GetNodeInstanceDirPath(nodeName string) string {
 	return filepath.Join(app.GetBaseDir(), "nodes", nodeName)
 }
 
+func (app *Lux) GetWarpRelayerServiceStorageDir() string {
+	return filepath.Join(app.GetBaseDir(), "services", "warp-relayer")
+}
+
 func (app *Lux) CreateNodeCloudConfigFile(clusterName string, nodeConfig interface{}) error {
 	// Create cloud configuration file for the node
 	nodeDir := app.GetNodeInstanceDirPath(clusterName)

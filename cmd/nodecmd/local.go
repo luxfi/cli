@@ -35,11 +35,9 @@ import (
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/api"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
 )
 

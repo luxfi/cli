@@ -109,3 +109,48 @@ func RelayerFileExists(path string) bool {
 	}
 	return false
 }
+
+// CreateBaseRelayerConfigIfMissing creates base relayer config if missing (stub)
+func CreateBaseRelayerConfigIfMissing(
+	configPath string,
+	logLevel string,
+	storageDir string,
+	metricsPort uint16,
+	network models.Network,
+	awmRelayerEnabled bool,
+) error {
+	// Stub implementation - functionality temporarily disabled
+	return nil
+}
+
+// AddSourceAndDestinationToRelayerConfig adds source and destination to relayer config (stub)
+func AddSourceAndDestinationToRelayerConfig(
+	app *application.Lux,
+	storageDir string,
+	network models.Network,
+	subnetID string,
+	blockchainID string,
+	teleporterContractAddress string,
+	teleporterRegistryAddress string,
+	isSource bool,
+) error {
+	// Stub implementation - functionality temporarily disabled
+	return nil
+}
+
+// GetLatestRelayerReleaseVersion gets the latest relayer release version (stub)
+func GetLatestRelayerReleaseVersion(app *application.Lux) (string, error) {
+	return "v1.0.0", nil
+}
+
+// FundRelayer funds the relayer (stub)
+func FundRelayer(
+	app *application.Lux,
+	network models.Network,
+	chainSpec map[string]interface{},
+	relayerAddress string,
+	fundingAmount string,
+) error {
+	// Stub implementation - functionality temporarily disabled
+	return nil
+}
