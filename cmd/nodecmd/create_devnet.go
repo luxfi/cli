@@ -27,8 +27,6 @@ import (
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	coreth_params "github.com/luxfi/geth/params"
 	"github.com/luxfi/node/config"
-	luxd_upgrade "github.com/luxfi/node/upgrade"
-	luxd_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/signer"

@@ -17,14 +17,14 @@ require (
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/erc20-go v0.2.0
 	github.com/luxfi/evm v0.8.7
-	github.com/luxfi/geth v1.16.2-lux.4
+	github.com/luxfi/geth v1.16.32
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v1.0.7
 	// github.com/luxfi/lpm v1.0.0 // temporarily commented - module path mismatch
-	github.com/luxfi/netrunner v1.13.5-lux.2
-	github.com/luxfi/node v1.13.4-lux.15
-	github.com/luxfi/sdk v0.2.0
+	github.com/luxfi/netrunner v1.13.5-lux.3.0.20250813050123-da46dce7dc48
+	github.com/luxfi/node v1.13.5-lux.3.0.20250815021439-7d72a878f005
+	github.com/luxfi/sdk v1.7.0-lux.4.0.20250815220229-604158685221
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -166,7 +166,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/rpc v1.2.1 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db // indirect
@@ -186,6 +186,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/database v1.1.11 // indirect
 	github.com/luxfi/metric v1.3.0 // indirect
+	github.com/luxfi/metrics v1.1.1 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -248,4 +249,12 @@ require (
 	google.golang.org/grpc v1.74.2 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
+)
+
+replace (
+	github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.16.2
+	github.com/luxfi/database => github.com/luxfi/database v1.1.10
+	github.com/luxfi/geth => github.com/luxfi/geth v1.16.2-lux.4
+	github.com/luxfi/node => github.com/luxfi/node v1.13.4-lux.15
+	github.com/luxfi/sdk => ../sdk
 )

@@ -6,6 +6,7 @@ package warp
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
@@ -13,6 +14,8 @@ import (
 	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 )
+
+var ErrInvalidMessageType = errors.New("invalid message type")
 
 // PChainOwner represents an owner on the P-Chain
 type PChainOwner struct {
@@ -116,19 +119,25 @@ func ParseL1ValidatorWeight(payload []byte) (*L1ValidatorWeight, error) {
 // ParseRegisterL1Validator parses L1 validator registration from payload
 func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) {
 	// Use the warp payload parser
-	payloadObj, err := warpPayload.ParseRegisterL1Validator(payload)
+	payloadObj, err := warpPayload.ParsePayload(payload)
 	if err != nil {
 		return nil, err
 	}
 	
+	// Type assert to RegisterL1Validator
+	registerPayload, ok := payloadObj.(*warpPayload.RegisterL1Validator)
+	if !ok {
+		return nil, ErrInvalidMessageType
+	}
+	
 	// Convert SubnetID bytes to ids.ID
-	subnetID, err := ids.ToID(payloadObj.SubnetID)
+	subnetID, err := ids.ToID(registerPayload.SubnetID)
 	if err != nil {
 		return nil, err
 	}
 	
 	// Convert NodeID bytes to ids.NodeID  
-	nodeID, err := ids.ToNodeID(payloadObj.NodeID)
+	nodeID, err := ids.ToNodeID(registerPayload.NodeID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,9 +146,9 @@ func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) 
 	reg := &L1ValidatorRegistration{
 		ValidationID: subnetID, // Use SubnetID as validation ID for now
 		NodeID:       nodeID,
-		BLSPublicKey: payloadObj.BLSPublicKey,
-		Weight:       payloadObj.Weight,
-		Expiry:       payloadObj.RegistrationTime,
+		BLSPublicKey: registerPayload.BLSPublicKey,
+		Weight:       registerPayload.Weight,
+		Expiry:       registerPayload.RegistrationTime,
 		Valid:        true,
 	}
 	
@@ -180,7 +189,18 @@ func NewL1ValidatorRegistration(validationID ids.ID, valid bool) (*warpPayload.L
 
 // ParseAddressedCall parses an addressed call from payload
 func ParseAddressedCall(payload []byte) (*warpPayload.AddressedCall, error) {
-	return warpPayload.ParseAddressedCall(payload)
+	payloadObj, err := warpPayload.ParsePayload(payload)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Type assert to AddressedCall
+	addressedCall, ok := payloadObj.(*warpPayload.AddressedCall)
+	if !ok {
+		return nil, ErrInvalidMessageType
+	}
+	
+	return addressedCall, nil
 }
 
 // ConvertStandaloneToNodeWarpMessage converts a standalone warp message to a node warp message
