@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/docker"
 	"github.com/luxfi/cli/pkg/interchain"
-	"github.com/luxfi/cli/pkg/relayer"
+	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/metrics"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
@@ -339,7 +339,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 				return err
 			}
 			// get awm-relayer latest version
-			relayerVersion, err := relayer.GetLatestRelayerReleaseVersion()
+			relayerVersion, err := relayer.GetLatestRelayerReleaseVersion(app)
 			if err != nil {
 				return err
 			}
@@ -596,18 +596,22 @@ func chooseWarpRelayerHost(clusterName string) (*models.Host, error) {
 }
 
 func updateWarpRelayerFunds(network models.Network, sc models.Sidecar, blockchainID ids.ID) error {
-	_, relayerAddress, _, err := relayer.GetDefaultRelayerKeyInfo(app)
+	_, relayerAddress, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainID.String())
 	if err != nil {
 		return err
 	}
 	// Use a placeholder key for now - proper key management would be needed
 	keyAddress := "0x0000000000000000000000000000000000000000"
-	if err := relayer.FundRelayer(app, network, keyAddress, relayerAddress, blockchainID, 0.1); err != nil {
+	chainSpec := map[string]interface{}{
+		"blockchainID": blockchainID.String(),
+		"amount":       0.1,
+	}
+	if err := relayer.FundRelayer(app, network, chainSpec, keyAddress, relayerAddress); err != nil {
 		return err
 	}
 	// Fund from ewoq as well
 	ewoqAddress := "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
-	return relayer.FundRelayer(app, network, ewoqAddress, relayerAddress, blockchainID, 0.1)
+	return relayer.FundRelayer(app, network, chainSpec, ewoqAddress, relayerAddress)
 }
 
 func deployClusterYAMLFile(clusterName, subnetName string) error {
@@ -1002,12 +1006,11 @@ func setUpSubnetLogging(clusterName, subnetName string) error {
 }
 
 func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, blockchainName string) error {
-	_, relayerAddress, relayerPrivateKey, err := relayer.GetDefaultRelayerKeyInfo(app)
+	_, _, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainName)
 	if err != nil {
 		return err
 	}
 
-	storageBasePath := constants.WarpRelayerDockerDir
 	configBasePath := app.GetNodeInstanceDirPath(cloudNodeID)
 
 	configPath := app.GetWarpRelayerServiceConfigPath(configBasePath)
@@ -1019,8 +1022,8 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	if err := relayer.CreateBaseRelayerConfigIfMissing(
 		configPath,
 		logging.Info.LowerString(),
-		app.GetWarpRelayerServiceStorageDir(storageBasePath),
-		constants.RemoteWarpRelayerMetricsPort,
+		app.GetWarpRelayerServiceStorageDir(),
+		9090, // Default warp relayer metrics port
 		network,
 		true,
 	); err != nil {
@@ -1040,21 +1043,22 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	if err != nil {
 		return err
 	}
-	rpcEndpoint, wsEndpoint, err := contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, false, false)
+	_, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, false, false)
 	if err != nil {
 		return err
 	}
 
+	// Use storage directory for relayer config
+	storageDir := app.GetKeyDir()
 	if err = relayer.AddSourceAndDestinationToRelayerConfig(
-		configPath,
-		rpcEndpoint,
-		wsEndpoint,
+		app,
+		storageDir,
+		network,
 		subnetID.String(),
 		blockchainID.String(),
 		registryAddress,
 		messengerAddress,
-		relayerAddress,
-		relayerPrivateKey,
+		true, // isSource
 	); err != nil {
 		return err
 	}
@@ -1072,21 +1076,21 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 	if err != nil {
 		return err
 	}
-	rpcEndpoint, wsEndpoint, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, false, false)
+	_, _, err = contract.GetBlockchainEndpoints(app.GetSDKApp(), network, chainSpec, false, false)
 	if err != nil {
 		return err
 	}
 
+	// Reuse storage directory for relayer config
 	if err = relayer.AddSourceAndDestinationToRelayerConfig(
-		configPath,
-		rpcEndpoint,
-		wsEndpoint,
+		app,
+		storageDir,
+		network,
 		subnetID.String(),
 		blockchainID.String(),
 		registryAddress,
 		messengerAddress,
-		relayerAddress,
-		relayerPrivateKey,
+		true, // isSource
 	); err != nil {
 		return err
 	}
