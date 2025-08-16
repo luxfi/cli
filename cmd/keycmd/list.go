@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/sdk/evm"
 	sdkUtils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
-	ledger "github.com/luxfi/node/utils/crypto/ledger"
+	ledger "github.com/luxfi/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"

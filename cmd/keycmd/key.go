@@ -33,6 +33,16 @@ To get started, use the key create command.`,
 
 	// lux key create
 	cmd.AddCommand(newCreateCmd())
+	
+	// Post-quantum signature algorithms
+	cmd.AddCommand(newCreateMLDSACmd(app))    // lux key create-mldsa
+	cmd.AddCommand(newCreateSLHDSACmd(app))   // lux key create-slhdsa
+	
+	// Consensus and validator keys
+	cmd.AddCommand(newCreateBLSCmd(app))      // lux key create-bls
+	
+	// Future: Ringtail hybrid post-quantum
+	// cmd.AddCommand(newCreateRingtailCmd(app)) // lux key create-ringtail
 
 	// lux key list
 	cmd.AddCommand(newListCmd())
