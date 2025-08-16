@@ -19,11 +19,11 @@ require (
 	github.com/luxfi/evm v0.8.7
 	github.com/luxfi/geth v1.16.34
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/ledger-lux-go v0.0.3
+	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.1
 	// github.com/luxfi/lpm v1.0.0 // temporarily commented - module path mismatch
 	github.com/luxfi/netrunner v1.13.5-lux.3.0.20250813050123-da46dce7dc48
-	github.com/luxfi/node v1.13.5-lux.3.0.20250815021439-7d72a878f005
+	github.com/luxfi/node v1.16.15
 	github.com/luxfi/sdk v1.7.0-lux.4.0.20250815220229-604158685221
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
