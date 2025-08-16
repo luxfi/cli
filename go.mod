@@ -14,7 +14,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.2.9
+	github.com/luxfi/crypto v1.3.2
 	github.com/luxfi/erc20-go v0.2.0
 	github.com/luxfi/evm v0.8.7
 	github.com/luxfi/geth v1.16.34
@@ -192,7 +192,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.1.2 // indirect
+	github.com/luxfi/consensus v1.1.3 // indirect
 	github.com/luxfi/database v1.1.11 // indirect
 	github.com/luxfi/metric v1.3.0 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
