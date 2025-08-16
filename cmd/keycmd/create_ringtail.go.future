@@ -1,0 +1,43 @@
+// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Ringtail hybrid post-quantum key creation command
+// NOTE: This is a future implementation template
+
+package keycmd
+
+import (
+	"github.com/spf13/cobra"
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/crypto/ringtail"
+)
+
+func newCreateRingtailCmd(app *application.Lux) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "create-ringtail [keyName]",
+		Short: "Create a new Ringtail hybrid post-quantum key",
+		Long: `Create a new Ringtail key combining classical and post-quantum security.
+Ringtail provides hybrid security by combining:
+  - Classical ECDSA or BLS signatures
+  - Post-quantum ML-DSA signatures
+  
+This provides security even if one algorithm is broken.
+
+Example:
+  lux key create-ringtail validator1 --classical bls --quantum mldsa65`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Future implementation
+			// Ringtail combines:
+			// 1. Classical signature (ECDSA or BLS)
+			// 2. Post-quantum signature (ML-DSA)
+			// 3. Both must verify for the signature to be valid
+			
+			// This provides:
+			// - Current security via classical crypto
+			// - Future security via post-quantum crypto
+			// - Defense in depth - both must be broken
+			
+			return nil
+		},
+	}
+	
+	return cmd
+}

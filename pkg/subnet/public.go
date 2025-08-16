@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/utils"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm/txs"

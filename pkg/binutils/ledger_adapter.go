@@ -7,7 +7,7 @@ import (
 
 	"github.com/luxfi/ids"
 	ledger "github.com/luxfi/ledger-lux-go"
-	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/crypto/keychain"
 	"github.com/luxfi/node/version"
 )
 

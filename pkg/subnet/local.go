@@ -34,7 +34,7 @@ import (
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/crypto/keychain"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
