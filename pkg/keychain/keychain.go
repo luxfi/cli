@@ -22,6 +22,7 @@ import (
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 const (
@@ -96,7 +97,7 @@ func (kc *Keychain) AddAddresses(addresses []string) error {
 				return err
 			}
 		}
-		luxdKc, err := keychain.NewLedgerKeychainFromIndices(kc.Ledger, kc.LedgerIndices)
+		luxdKc, err := keychain.NewLedgerKeychain(kc.Ledger, kc.LedgerIndices)
 		if err != nil {
 			return err
 		}
@@ -187,7 +188,7 @@ func GetKeychain(
 	}
 	// get keychain accessor
 	if useLedger {
-		ledgerDevice, err := ledger.New()
+		ledgerDevice, err := ledger.NewLedger()
 		if err != nil {
 			return nil, err
 		}
@@ -214,7 +215,7 @@ func GetKeychain(
 		if err := showLedgerAddresses(network, ledgerDevice, ledgerIndices); err != nil {
 			return nil, err
 		}
-		kc, err := keychain.NewLedgerKeychainFromIndices(ledgerDevice, ledgerIndices)
+		kc, err := keychain.NewLedgerKeychain(ledgerDevice, ledgerIndices)
 		if err != nil {
 			return nil, err
 		}
@@ -227,7 +228,8 @@ func GetKeychain(
 			return nil, err
 		}
 		kc := sf.KeyChain()
-		return NewKeychain(network, kc, nil, nil), nil
+		wrappedKc := secp256k1fx.WrapKeychainForNode(kc)
+		return NewKeychain(network, wrappedKc, nil, nil), nil
 	}
 	keyPath := app.GetKeyPath(keyName)
 	sf, err := key.LoadSoft(network.ID(), keyPath)
@@ -235,7 +237,8 @@ func GetKeychain(
 		return nil, err
 	}
 	kc := sf.KeyChain()
-	return NewKeychain(network, kc, nil, nil), nil
+	wrappedKc := secp256k1fx.WrapKeychainForNode(kc)
+	return NewKeychain(network, wrappedKc, nil, nil), nil
 }
 
 func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]uint32, error) {
@@ -249,7 +252,7 @@ func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]ui
 	// addresses and, if so, add the index pair to indexMap, breaking the loop if
 	// all addresses were found
 	for ledgerIndex := uint32(0); ledgerIndex < numLedgerIndicesToSearch; ledgerIndex++ {
-		ledgerAddress, err := ledgerDevice.Addresses([]uint32{ledgerIndex})
+		ledgerAddress, err := ledgerDevice.GetAddresses([]uint32{ledgerIndex})
 		if err != nil {
 			return []uint32{}, err
 		}
@@ -297,7 +300,7 @@ func searchForFundedLedgerIndices(network models.Network, ledgerDevice keychain.
 	totalBalance := uint64(0)
 	ledgerIndices := []uint32{}
 	for ledgerIndex := uint32(0); ledgerIndex < numLedgerIndicesToSearchForBalance; ledgerIndex++ {
-		ledgerAddress, err := ledgerDevice.Addresses([]uint32{ledgerIndex})
+		ledgerAddress, err := ledgerDevice.GetAddresses([]uint32{ledgerIndex})
 		if err != nil {
 			return []uint32{}, err
 		}
@@ -325,7 +328,7 @@ func searchForFundedLedgerIndices(network models.Network, ledgerDevice keychain.
 
 func showLedgerAddresses(network models.Network, ledgerDevice keychain.Ledger, ledgerIndices []uint32) error {
 	// get formatted addresses for ux
-	addresses, err := ledgerDevice.Addresses(ledgerIndices)
+	addresses, err := ledgerDevice.GetAddresses(ledgerIndices)
 	if err != nil {
 		return err
 	}

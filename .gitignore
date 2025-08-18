@@ -43,3 +43,7 @@ tests/e2e/hardhat/dynamic_conf.json
 tests/e2e/hardhat/greeter.json
 .cache
 tests/e2e/assets/*
+LLM.md
+CLAUDE.md
+AGENTS.md
+GEMINI.md
