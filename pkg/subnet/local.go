@@ -38,6 +38,8 @@ import (
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
+	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
+	ledgerkeychain "github.com/luxfi/ledger-lux-go/keychain"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/reward"
@@ -56,7 +58,7 @@ const (
 // emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
 type emptyEthKeychain struct{}
 
-func (e *emptyEthKeychain) GetEth(addr common.Address) (keychain.Signer, bool) {
+func (e *emptyEthKeychain) GetEth(addr common.Address) (ledgerkeychain.Signer, bool) {
 	return nil, false
 }
 
@@ -186,7 +188,7 @@ func IssueTransformSubnetTx(
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: kc,
+		LUXKeychain: keychainwrapper.WrapNodeKeychain(kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
@@ -246,7 +248,7 @@ func IssueAddPermissionlessValidatorTx(
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: kc,
+		LUXKeychain: keychainwrapper.WrapNodeKeychain(kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
@@ -773,7 +775,7 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: kc,
+		LUXKeychain: keychainwrapper.WrapNodeKeychain(kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {

@@ -25,6 +25,7 @@ import (
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/set"
+	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/chain/c"
@@ -433,7 +434,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: d.kc,
+		LUXKeychain: keychainwrapper.WrapNodeKeychain(d.kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
