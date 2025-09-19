@@ -28,7 +28,7 @@ import (
 	subnetevmutils "github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	goethereummath "github.com/luxfi/geth/common/math"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 )
 

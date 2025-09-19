@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 
 	"github.com/stretchr/testify/require"
 )

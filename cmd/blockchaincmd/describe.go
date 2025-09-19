@@ -25,7 +25,7 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

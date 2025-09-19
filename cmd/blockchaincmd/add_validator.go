@@ -33,7 +33,7 @@ import (
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/units"
 	sdkwarp "github.com/luxfi/sdk/validatormanager/warp"
 
