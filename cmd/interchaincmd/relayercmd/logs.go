@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mitchellh/go-wordwrap"

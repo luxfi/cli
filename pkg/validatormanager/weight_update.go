@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
@@ -66,7 +66,7 @@ func InitValidatorWeightChange(
 	ownerAddressStr string,
 	ownerPrivateKey string,
 	nodeID ids.NodeID,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	validatorManagerAddressStr string,
 	weight uint64,
 	initiateTxHash string,
@@ -223,7 +223,7 @@ func FinishValidatorWeightChange(
 	ownerAddressStr string,
 	privateKey string,
 	validationID ids.ID,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	validatorManagerAddressStr string,
 	l1ValidatorRegistrationSignedMessage *warp.Message,
 	weight uint64,
@@ -289,7 +289,7 @@ func FinishValidatorWeightChange(
 
 func GetL1ValidatorWeightMessage(
 	network models.Network,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	// message is given
 	unsignedMessage *warp.UnsignedMessage,
 	subnetID ids.ID,
@@ -331,7 +331,7 @@ func GetL1ValidatorWeightMessage(
 
 func GetPChainL1ValidatorWeightMessage(
 	network models.Network,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
 	subnetID ids.ID,
 	// message is given

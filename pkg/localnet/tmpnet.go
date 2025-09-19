@@ -26,12 +26,12 @@ import (
 	nodecontext "github.com/luxfi/node/node"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
+	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/node/wallet/net/primary/common"
 
 	dircopy "github.com/otiai10/copy"
 	"golang.org/x/exp/maps"
@@ -63,7 +63,7 @@ type NodeSetting struct {
 // - can be bootstrapped or not depending on [bootstrap] setting
 func TmpNetCreate(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	networkDir string,
 	luxdBinPath string,
 	pluginDir string,
@@ -192,7 +192,7 @@ func GetTmpNetNetwork(networkDir string) (*tmpnet.Network, error) {
 // If [luxdBinPath] is given, uses it instead of the persisted one
 func TmpNetLoad(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	networkDir string,
 	luxdBinPath string,
 ) (*tmpnet.Network, error) {
@@ -467,7 +467,7 @@ func TmpNetSetDefaultAliases(ctx context.Context, networkDir string) error {
 // Install the given VM binary into the appropriate location with the
 // appropriate name
 func TmpNetInstallVM(
-	log logging.Logger,
+	log luxlog.Logger,
 	network *tmpnet.Network,
 	binaryPath string,
 	vmID ids.ID,
@@ -606,7 +606,7 @@ func TmpNetSetSubnetConfig(
 // If [subnetIDs] are given, configure the nodes to track the subnets
 func TmpNetRestartNodes(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	printFunc func(msg string, args ...interface{}),
 	network *tmpnet.Network,
 	nodes []*tmpnet.Node,
@@ -688,7 +688,7 @@ func GetTmpNetUpgrade(
 // Waits until both P-Chain and the blockchain [blockchainID] are bootstrapped
 func TmpNetTrackSubnet(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	printFunc func(msg string, args ...interface{}),
 	networkDir string,
 	sovereign bool,
@@ -731,7 +731,7 @@ func TmpNetTrackSubnet(
 
 // Set up blockchain config file from [vmBinaryPath], [blockchainConfig], [perNodeBlockchainConfig], [blockchainUpgrades], [subnetConfig]
 func TmpNetUpdateBlockchainConfig(
-	log logging.Logger,
+	log luxlog.Logger,
 	networkDir string,
 	subnetID ids.ID,
 	blockchainID ids.ID,
@@ -954,7 +954,7 @@ func TmpNetCopyNode(
 // ports -if set to 0- into persisted ones)
 func TmpNetBootstrap(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	networkDir string,
 ) error {
 	network, err := GetTmpNetNetwork(networkDir)
@@ -976,7 +976,7 @@ func TmpNetBootstrap(
 // Waits for P-Chain to be bootstrapped, and persists ports for the node
 func TmpNetAddNode(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	network *tmpnet.Network,
 	node *tmpnet.Node,
 	httpPort uint32,
@@ -1043,7 +1043,7 @@ func TmpNetPersistPorts(
 // Restart given [node] of [network]
 func TmpNetRestartNode(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	network *tmpnet.Network,
 	node *tmpnet.Node,
 ) error {
@@ -1059,7 +1059,7 @@ func TmpNetRestartNode(
 // Starts given [node] of [network]
 func TmpNetStartNode(
 	ctx context.Context,
-	log logging.Logger,
+	log luxlog.Logger,
 	network *tmpnet.Network,
 	node *tmpnet.Node,
 ) error {
