@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/cli/pkg/warp"
 	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 
 	"github.com/spf13/cobra"
 )

@@ -32,7 +32,7 @@ import (
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/config"
 	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
@@ -594,7 +594,7 @@ func addAsValidator(
 	chainSpec contract.ChainSpec,
 	remainingBalanceOwners, disableOwners warpMessage.PChainOwner,
 	extraAggregatorPeers []info.Peer,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	kc *keychain.Keychain,
 	balance uint64,
 	payerPrivateKey string,

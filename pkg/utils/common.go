@@ -27,7 +27,8 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -405,7 +406,7 @@ func GetChainIDs(endpoint string, chainName string) (string, string, error) {
 		return "", "", err
 	}
 	if chain := Find(blockChains, func(e platformvm.APIBlockchain) bool { return e.Name == chainName }); chain != nil {
-		return chain.SubnetID.String(), chain.ID.String(), nil
+		return chain.NetID.String(), chain.ID.String(), nil
 	}
 	return "", "", fmt.Errorf("%s not found on primary network blockchains", chainName)
 }
@@ -514,20 +515,20 @@ func StringValue(data map[string]interface{}, key string) (string, error) {
 
 func LogLevelToEmoji(logLevel string) (string, error) {
 	levelEmoji := ""
-	level, err := logging.ToLevel(logLevel)
+	lvl, err := level.ToLevel(logLevel)
 	if err != nil {
 		return "", err
 	}
-	switch level {
-	case logging.Info:
+	switch lvl {
+	case level.Info:
 		levelEmoji = "ℹ️"
-	case logging.Debug:
+	case level.Debug:
 		levelEmoji = "🪲"
-	case logging.Warn:
+	case level.Warn:
 		levelEmoji = "⚠️"
-	case logging.Error:
+	case level.Error:
 		levelEmoji = "⛔"
-	case logging.Fatal:
+	case level.Fatal:
 		levelEmoji = "💀"
 	}
 	return levelEmoji, nil
@@ -573,19 +574,19 @@ func NewLogger(
 	logDir string,
 	logToStdout bool,
 	print func(string, ...interface{}),
-) (logging.Logger, error) {
-	logLevel, err := logging.ToLevel(logLevelStr)
+) (luxlog.Logger, error) {
+	logLevel, err := level.ToLevel(logLevelStr)
 	if err != nil {
 		if logLevelStr != "" {
 			print("undefined logLevel %s. Setting %s log to %s", logLevelStr, logName, defaultLogLevelStr)
 		}
-		logLevel, err = logging.ToLevel(defaultLogLevelStr)
+		logLevel, err = level.ToLevel(defaultLogLevelStr)
 		if err != nil {
-			return logging.NoLog{}, err
+			return luxlog.NoLog{}, err
 		}
 	}
-	logConfig := logging.Config{
-		RotatingWriterConfig: logging.RotatingWriterConfig{
+	logConfig := luxlog.Config{
+		RotatingWriterConfig: luxlog.RotatingWriterConfig{
 			Directory: logDir,
 		},
 		LogLevel: logLevel,
@@ -593,7 +594,7 @@ func NewLogger(
 	if logToStdout {
 		logConfig.DisplayLevel = logLevel
 	}
-	logFactory := logging.NewFactory(logConfig)
+	logFactory := luxlog.NewFactoryWithConfig(logConfig)
 	return logFactory.Make(logName)
 }
 

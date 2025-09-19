@@ -7,7 +7,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 )
 
 // Minimal stub implementation until warp packages are available
@@ -16,7 +16,7 @@ func NewSignatureAggregatorLogger(
 	aggregatorLogLevel string,
 	aggregatorLogToStdout bool,
 	logDir string,
-) (logging.Logger, error) {
+) (luxlog.Logger, error) {
 	return nil, errors.New("signature aggregator functionality temporarily disabled")
 }
 
@@ -28,7 +28,7 @@ func UpdateSignatureAggregatorPeers(
 	app *application.Lux,
 	network models.Network,
 	extraAggregatorPeers []string,
-	logger logging.Logger,
+	logger luxlog.Logger,
 ) error {
 	return errors.New("signature aggregator functionality temporarily disabled")
 }
@@ -38,7 +38,7 @@ func GetSignatureAggregatorEndpoint(app *application.Lux, network models.Network
 	return "http://localhost:8090/aggregate-signatures", nil
 }
 
-func CreateSignatureAggregatorInstance(app *application.Lux, subnetID string, network models.Network, extraPeers []interface{}, logger logging.Logger, version string) error {
+func CreateSignatureAggregatorInstance(app *application.Lux, subnetID string, network models.Network, extraPeers []interface{}, logger luxlog.Logger, version string) error {
 	// Stub implementation for signature aggregator instance creation
 	// This feature is temporarily disabled until the warp package is available
 	// The aggregator would manage signature collection and verification for cross-subnet communication

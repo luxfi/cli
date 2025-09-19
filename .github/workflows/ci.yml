@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 env:
-  GO_VERSION: 1.24.5
+  GO_VERSION: '1.24.6'
 
 jobs:
   lint:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Install dependencies
         run: go mod download
@@ -49,7 +49,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Install dependencies
         run: |
@@ -76,7 +76,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Install dependencies
         run: go mod download
@@ -99,7 +99,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Install dependencies
         run: |
@@ -134,7 +134,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Build CLI
         env:
@@ -159,7 +159,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Download Linux binary
         uses: actions/download-artifact@v4
@@ -184,7 +184,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24.5
+          go-version: ${{ env.GO_VERSION }}
       
       - name: Run gosec
         uses: securego/gosec@master

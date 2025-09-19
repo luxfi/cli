@@ -19,21 +19,21 @@ import (
 //
 // expect tx.Unsigned type to be in:
 // - txs.CreateChainTx
-// - txs.AddSubnetValidatorTx
-// - txs.RemoveSubnetValidatorTx
+// - txs.AddNetValidatorTx
+// - txs.RemoveNetValidatorTx
 //
 // controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners)
 func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	unsignedTx := tx.Unsigned
 	var subnetAuth verify.Verifiable
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveSubnetValidatorTx:
+	case *txs.RemoveNetValidatorTx:
 		subnetAuth = unsignedTx.SubnetAuth
-	case *txs.AddSubnetValidatorTx:
+	case *txs.AddNetValidatorTx:
 		subnetAuth = unsignedTx.SubnetAuth
 	case *txs.CreateChainTx:
 		subnetAuth = unsignedTx.SubnetAuth
-	case *txs.TransformSubnetTx:
+	case *txs.ConvertNetToL1Tx:
 		subnetAuth = unsignedTx.SubnetAuth
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)

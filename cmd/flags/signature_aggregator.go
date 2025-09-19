@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/log/level"
 	"github.com/spf13/cobra"
 )
 
@@ -23,18 +23,18 @@ type SignatureAggregatorFlags struct {
 }
 
 func validateSignatureAggregatorFlags(sigAggFlags SignatureAggregatorFlags) error {
-	if _, err := logging.ToLevel(sigAggFlags.AggregatorLogLevel); err != nil {
+	if _, err := level.ToLevel(sigAggFlags.AggregatorLogLevel); err != nil {
 		return fmt.Errorf(
 			"invalid log level: %q. Available values: %s, %s, %s, %s, %s, %s, %s, %s",
 			sigAggFlags.AggregatorLogLevel,
-			logging.Info.LowerString(),
-			logging.Warn.LowerString(),
-			logging.Error.LowerString(),
-			logging.Off.LowerString(),
-			logging.Fatal.LowerString(),
-			logging.Debug.LowerString(),
-			logging.Trace.LowerString(),
-			logging.Verbo.LowerString(),
+			level.Info.LowerString(),
+			level.Warn.LowerString(),
+			level.Error.LowerString(),
+			level.Off.LowerString(),
+			level.Fatal.LowerString(),
+			level.Debug.LowerString(),
+			level.Trace.LowerString(),
+			level.Verbo.LowerString(),
 		)
 	}
 	return nil
