@@ -32,7 +32,7 @@ import (
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/txs"
 

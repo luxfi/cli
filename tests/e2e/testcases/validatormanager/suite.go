@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/platformvm/txs"
 
 	"github.com/luxfi/geth/common"

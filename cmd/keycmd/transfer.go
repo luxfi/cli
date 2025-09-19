@@ -34,8 +34,8 @@ import (
 	xvmtxs "github.com/luxfi/node/vms/xvm/txs"
 	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/chain/p/builder"
-	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxfi/node/wallet/subnet/primary/common"
+	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/node/wallet/net/primary/common"
 	"github.com/spf13/cobra"
 )
 

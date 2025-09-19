@@ -28,7 +28,7 @@ import (
 	coreth_params "github.com/luxfi/geth/params"
 	"github.com/luxfi/node/config"
 	"github.com/luxfi/node/utils/formatting"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/platformvm/signer"
 
 	"golang.org/x/exp/maps"

@@ -13,7 +13,7 @@ import (
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 
 	"github.com/luxfi/crypto"
 )
@@ -295,11 +295,11 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 // [convertSubnetValidators], together with an evm [ownerAddress]
 // to set as the owner of the PoA manager
 func SetupPoA(
-	log logging.Logger,
+	log luxlog.Logger,
 	subnet blockchainSDK.Subnet,
 	network models.Network,
 	privateKey string,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	validatorManagerAddressStr string,
 	v2_0_0 bool,
 	signatureAggregatorEndpoint string,
@@ -321,11 +321,11 @@ func SetupPoA(
 // [convertSubnetValidators], together with an evm [ownerAddress]
 // to set as the owner of the PoA manager
 func SetupPoS(
-	log logging.Logger,
+	log luxlog.Logger,
 	subnet blockchainSDK.Subnet,
 	network models.Network,
 	privateKey string,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	posParams PoSParams,
 	managerAddress string,
 	specializedManagerAddress string,

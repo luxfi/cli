@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/publicarchive"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 
 	"go.uber.org/zap"
 )
@@ -22,7 +22,7 @@ func DownloadLuxdDB(
 	clusterNetwork models.Network,
 	rootDir string,
 	nodeNames []string,
-	log logging.Logger,
+	log luxlog.Logger,
 	printFunc func(msg string, args ...interface{}),
 ) error {
 	// only for testnet

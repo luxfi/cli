@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 
 	"go.uber.org/zap"
 	"golang.org/x/mod/modfile"
@@ -97,7 +97,7 @@ func FileCopy(src string, dst string) error {
 // SetupExecFile copies a file into destination and set it to have exec perms,
 // if destination either does not exists, or is not executable
 func SetupExecFile(
-	log logging.Logger,
+	log luxlog.Logger,
 	src string,
 	dst string,
 ) error {

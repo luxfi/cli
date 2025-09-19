@@ -17,18 +17,18 @@ import (
 )
 
 // get network model associated to tx
-// expect tx.Unsigned type to be in [txs.AddSubnetValidatorTx, txs.CreateChainTx]
+// expect tx.Unsigned type to be in [txs.AddNetValidatorTx, txs.CreateChainTx]
 func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	unsignedTx := tx.Unsigned
 	var networkID uint32
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveSubnetValidatorTx:
+	case *txs.RemoveNetValidatorTx:
 		networkID = unsignedTx.NetworkID
-	case *txs.AddSubnetValidatorTx:
+	case *txs.AddNetValidatorTx:
 		networkID = unsignedTx.NetworkID
 	case *txs.CreateChainTx:
 		networkID = unsignedTx.NetworkID
-	case *txs.TransformSubnetTx:
+	case *txs.ConvertNetToL1Tx:
 		networkID = unsignedTx.NetworkID
 	default:
 		return models.Undefined, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
@@ -43,7 +43,7 @@ func GetNetwork(tx *txs.Tx) (models.Network, error) {
 func GetLedgerDisplayName(tx *txs.Tx) string {
 	unsignedTx := tx.Unsigned
 	switch unsignedTx.(type) {
-	case *txs.AddSubnetValidatorTx:
+	case *txs.AddNetValidatorTx:
 		return "SubnetValidator"
 	case *txs.CreateChainTx:
 		return "CreateChain"
@@ -76,7 +76,7 @@ func GetSubnetOwners(network models.Network, subnetID ids.ID) (*SubnetOwners, er
 		return nil, err
 	}
 	
-	createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
+	createSubnetTx, ok := tx.Unsigned.(*txs.CreateNetTx)
 	if !ok {
 		return nil, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, subnetID)
 	}

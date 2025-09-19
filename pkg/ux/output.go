@@ -91,8 +91,7 @@ func PrintWait(cancel chan struct{}) {
 // PrintTableEndpoints prints the endpoints coming from the healthy call
 func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	table := tablewriter.NewWriter(os.Stdout)
-	header := []string{"node", "VM", "URL", "ALIAS_URL"}
-	table.Append(header)
+	table.SetHeader([]string{"node", "VM", "URL", "ALIAS_URL"})
 
 	nodeInfos := map[string]*rpcpb.NodeInfo{}
 	for _, nodeInfo := range clusterInfo.NodeInfos {
@@ -110,8 +109,9 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 // DefaultTable creates a default table with the given title and headers
 func DefaultTable(title string, headers []string) *tablewriter.Table {
 	table := tablewriter.NewWriter(os.Stdout)
+
 	if title != "" {
-		// Table title is set using caption in some versions
+		// Table title is set using caption in v0.0.5
 		table.SetCaption(true, title)
 	}
 	if headers != nil && len(headers) > 0 {
