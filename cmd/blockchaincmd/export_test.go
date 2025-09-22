@@ -35,7 +35,7 @@ func TestExportImportSubnet(t *testing.T) {
 	mockAppDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
 
 	app.Setup(testDir, luxlog.NoWarn{}, config.New(), prompts.NewPrompter(), &mockAppDownloader)
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NoLog{}, io.Discard)
 
 	subnetEvmGenesisPath := "tests/e2e/assets/test_subnet_evm_genesis.json"
 	genBytes, err := os.ReadFile("../../" + subnetEvmGenesisPath)

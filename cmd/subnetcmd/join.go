@@ -14,6 +14,7 @@ import (
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/constants"
+	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/plugins"
 	"github.com/luxfi/cli/pkg/subnet"
@@ -352,7 +353,9 @@ func handleValidatorJoinElasticSubnet(sc models.Sidecar, network models.Network,
 
 	assetID := sc.ElasticSubnet[models.Local.String()].AssetID
 	testKey := genesis.EWOQKey
-	keyChain := secp256k1fx.NewKeychain(testKey)
+	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Wrap the secp256k1fx keychain to implement node keychain interface
+	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
 	subnetID := sc.Networks[models.Local.String()].SubnetID
 	txID, err := subnet.IssueAddPermissionlessValidatorTx(keyChain, subnetID, nodeID, stakedTokenAmount, assetID, uint64(start.Unix()), uint64(endTime.Unix()))
 	if err != nil {

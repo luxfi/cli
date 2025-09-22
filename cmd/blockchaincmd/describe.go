@@ -232,7 +232,7 @@ func PrintSubnetInfo(blockchainName string, onlyLocalnetInfo bool) error {
 			if err != nil {
 				return err
 			}
-			localEndpoint = codespaceEndpoint + "\n" + logging.Orange.Wrap(
+			localEndpoint = codespaceEndpoint + "\n" + luxlog.Orange.Wrap(
 				fmt.Sprintf("Please make sure to set visibility of port %d to public", port),
 			)
 		}
@@ -288,15 +288,15 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 			privKey := ""
 			switch address.Hex() {
 			case warpKeyAddress:
-				description = logging.Orange.Wrap("Used by Warp")
+				description = luxlog.Orange.Wrap("Used by Warp")
 			case subnetAirdropAddress:
-				description = logging.Orange.Wrap("Main funded account")
+				description = luxlog.Orange.Wrap("Main funded account")
 			case vm.PrefundedEwoqAddress.Hex():
-				description = logging.Orange.Wrap("Main funded account")
+				description = luxlog.Orange.Wrap("Main funded account")
 			case sc.ValidatorManagerOwner:
-				description = logging.Orange.Wrap("Validator Manager Owner")
+				description = luxlog.Orange.Wrap("Validator Manager Owner")
 			case sc.ProxyContractOwner:
-				description = logging.Orange.Wrap("Proxy Admin Owner")
+				description = luxlog.Orange.Wrap("Proxy Admin Owner")
 			}
 			var (
 				found bool
@@ -418,7 +418,7 @@ func printPrecompiles(genesis core.Genesis) {
 	if warpSet || allowListSet {
 		t.Render()
 		if allowListSet {
-			note := logging.Orange.Wrap("The allowlist is taken from the genesis and is not being updated if you make adjustments\nvia the precompile. Use readAllowList(address) instead.")
+			note := luxlog.Orange.Wrap("The allowlist is taken from the genesis and is not being updated if you make adjustments\nvia the precompile. Use readAllowList(address) instead.")
 			ux.Logger.PrintToUser(note)
 		}
 	}

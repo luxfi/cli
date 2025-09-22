@@ -122,7 +122,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		err := utils.FundLedgerAddress(fee)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println()
-		fmt.Println(logging.LightRed.Wrap("DEPLOYING SUBNET. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING"))
+		fmt.Println(luxlog.LightRed.Wrap("DEPLOYING SUBNET. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING"))
 		s := commands.SimulateMainnetDeployNonSOV(subnetName, 0, false)
 		// deploy
 		subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
@@ -132,7 +132,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		nodeIdx := 1
 		for _, nodeInfo := range nodeInfos {
-			fmt.Println(logging.LightRed.Wrap(
+			fmt.Println(luxlog.LightRed.Wrap(
 				fmt.Sprintf("ADDING VALIDATOR %d of %d. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING", nodeIdx, len(nodeInfos))))
 			start := time.Now().Add(time.Second * 30).UTC().Format("2006-01-02 15:04:05")
 			_ = commands.SimulateMainnetAddValidator(subnetName, nodeInfo.ID, start, "24h", "20")
@@ -142,7 +142,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 			close(interactionEndCh)
 			<-ledgerSimEndCh
 		}
-		fmt.Println(logging.LightBlue.Wrap("EXECUTING NON INTERACTIVE PART OF THE TEST: JOIN/WHITELIST/WAIT/HARDHAT"))
+		fmt.Println(luxlog.LightBlue.Wrap("EXECUTING NON INTERACTIVE PART OF THE TEST: JOIN/WHITELIST/WAIT/HARDHAT"))
 		// join to copy vm binary and update config file
 		for _, nodeInfo := range nodeInfos {
 			_ = commands.SimulateMainnetJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)

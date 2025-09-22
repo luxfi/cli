@@ -317,8 +317,8 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 		return fmt.Errorf("failed to deploy node(s) %s", wgResults.GetErrorHostMap())
 	}
 	ux.Logger.PrintLineSeparator()
-	ux.Logger.PrintToUser("Devnet Network Id: %s", logging.Green.Wrap(strconv.FormatUint(uint64(network.ID()), 10)))
-	ux.Logger.PrintToUser("Devnet Endpoint: %s", logging.Green.Wrap(endpoint))
+	ux.Logger.PrintToUser("Devnet Network Id: %s", luxlog.Green.Wrap(strconv.FormatUint(uint64(network.ID()), 10)))
+	ux.Logger.PrintToUser("Devnet Endpoint: %s", luxlog.Green.Wrap(endpoint))
 	ux.Logger.PrintLineSeparator()
 	// update cluster config with network information
 	clustersConfig, err := app.LoadClustersConfig()

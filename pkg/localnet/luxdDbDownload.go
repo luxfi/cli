@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/publicarchive"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 
 	"go.uber.org/zap"
 )
@@ -34,7 +35,7 @@ func DownloadLuxdDB(
 		Type: network.NetworkTypeTestnet,
 	}
 	printFunc("Downloading public archive for network %s", clusterNetwork.Name())
-	publicArcDownloader, err := publicarchive.NewDownloader(testnet, logging.NewLogger("public-archive-downloader", logging.NewWrappedCore(logging.Off, os.Stdout, logging.JSON.ConsoleEncoder()))) // off as we run inside of the spinner
+	publicArcDownloader, err := publicarchive.NewDownloader(testnet, luxlog.NewLogger("public-archive-downloader", *luxlog.NewWrappedCore(level.Off, os.Stdout, luxlog.JSON.ConsoleEncoder()))) // off as we run inside of the spinner
 	if err != nil {
 		return fmt.Errorf("failed to create public archive downloader for network %s: %w", clusterNetwork.Name(), err)
 	}

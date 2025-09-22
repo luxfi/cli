@@ -35,7 +35,7 @@ func GetBlockchainsInfo(endpoint string) ([]BlockchainInfo, error) {
 		blockchainInfo := BlockchainInfo{
 			Name:     blockchain.Name,
 			ID:       blockchain.ID,
-			SubnetID: blockchain.SubnetID,
+			SubnetID: blockchain.NetID,
 			VMID:     blockchain.VMID,
 		}
 		blockchainsInfo = append(blockchainsInfo, blockchainInfo)

@@ -803,7 +803,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			monitoringPublicIP = monitoringNodeConfig.PublicIPs[0]
 		}
 		printResults(cloudConfigMap, publicIPMap, monitoringPublicIP)
-		ux.Logger.PrintToUser(logging.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
+		ux.Logger.PrintToUser(luxlog.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 	}
 	sendNodeCreateMetrics(cloudService, network.Name(), numNodesMetricsMap)
 	return nil
@@ -1168,18 +1168,18 @@ func printResults(cloudConfigMap models.CloudConfig, publicIPMap map[string]stri
 	ux.Logger.PrintToUser("LUX NODE(S) SUCCESSFULLY SET UP!")
 	ux.Logger.PrintLineSeparator()
 	ux.Logger.PrintToUser("Please wait until the node(s) are successfully bootstrapped to run further commands on the node(s)")
-	ux.Logger.PrintToUser("You can check status of the node(s) using %s command", logging.LightBlue.Wrap("lux node status"))
-	ux.Logger.PrintToUser("Please use %s to ssh into the node(s). More details: %s", logging.LightBlue.Wrap("lux node ssh"), "https://docs.lux.network/tooling/cli-create-nodes/node-ssh")
+	ux.Logger.PrintToUser("You can check status of the node(s) using %s command", luxlog.LightBlue.Wrap("lux node status"))
+	ux.Logger.PrintToUser("Please use %s to ssh into the node(s). More details: %s", luxlog.LightBlue.Wrap("lux node ssh"), "https://docs.lux.network/tooling/cli-create-nodes/node-ssh")
 
 	for region, cloudConfig := range cloudConfigMap {
 		ux.Logger.PrintToUser(" ")
-		ux.Logger.PrintToUser("Region: [%s] ", logging.LightBlue.Wrap(region))
+		ux.Logger.PrintToUser("Region: [%s] ", luxlog.LightBlue.Wrap(region))
 		ux.Logger.PrintToUser(" ")
 		if len(cloudConfig.APIInstanceIDs) > 0 {
 			ux.Logger.PrintLineSeparator()
-			ux.Logger.PrintToUser("API Endpoint(s) for region [%s]: ", logging.LightBlue.Wrap(region))
+			ux.Logger.PrintToUser("API Endpoint(s) for region [%s]: ", luxlog.LightBlue.Wrap(region))
 			for _, apiNode := range cloudConfig.APIInstanceIDs {
-				ux.Logger.PrintToUser(logging.Green.Wrap(fmt.Sprintf("    http://%s:9650", publicIPMap[apiNode])))
+				ux.Logger.PrintToUser(luxlog.Green.Wrap(fmt.Sprintf("    http://%s:9650", publicIPMap[apiNode])))
 			}
 			ux.Logger.PrintLineSeparator()
 			ux.Logger.PrintToUser("")
@@ -1191,9 +1191,9 @@ func printResults(cloudConfigMap models.CloudConfig, publicIPMap map[string]stri
 			publicIP := ""
 			publicIP = publicIPMap[instanceID]
 			if slices.Contains(cloudConfig.APIInstanceIDs, instanceID) {
-				ux.Logger.PrintToUser("%s [API] Cloud Instance ID: %s | Public IP: %s | %s", logging.Green.Wrap(">"), instanceID, publicIP, logging.Green.Wrap(nodeID.String()))
+				ux.Logger.PrintToUser("%s [API] Cloud Instance ID: %s | Public IP: %s | %s", luxlog.Green.Wrap(">"), instanceID, publicIP, luxlog.Green.Wrap(nodeID.String()))
 			} else {
-				ux.Logger.PrintToUser("%s Cloud Instance ID: %s | Public IP: %s | %s ", logging.Green.Wrap(">"), instanceID, publicIP, logging.Green.Wrap(nodeID.String()))
+				ux.Logger.PrintToUser("%s Cloud Instance ID: %s | Public IP: %s | %s ", luxlog.Green.Wrap(">"), instanceID, publicIP, luxlog.Green.Wrap(nodeID.String()))
 			}
 			ux.Logger.PrintToUser("staker.crt, staker.key and signer.key are stored at %s. Please keep them safe, as these files can be used to fully recreate your node.", app.GetNodeInstanceDirPath(instanceID))
 			ux.Logger.PrintLineSeparator()
@@ -1215,8 +1215,8 @@ func printResults(cloudConfigMap models.CloudConfig, publicIPMap map[string]stri
 func getMonitoringHint(monitoringHostIP string) {
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintLineSeparator()
-	ux.Logger.PrintToUser("To view unified node %s, visit the following link in your browser: ", logging.LightBlue.Wrap("monitoring dashboard"))
-	ux.Logger.PrintToUser(logging.Green.Wrap(fmt.Sprintf("http://%s:%d/dashboards", monitoringHostIP, constants.LuxdGrafanaPort)))
+	ux.Logger.PrintToUser("To view unified node %s, visit the following link in your browser: ", luxlog.LightBlue.Wrap("monitoring dashboard"))
+	ux.Logger.PrintToUser(luxlog.Green.Wrap(fmt.Sprintf("http://%s:%d/dashboards", monitoringHostIP, constants.LuxdGrafanaPort)))
 	ux.Logger.PrintToUser("Log in with username: admin, password: admin")
 	ux.Logger.PrintLineSeparator()
 	ux.Logger.PrintToUser("")

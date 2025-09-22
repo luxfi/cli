@@ -119,7 +119,7 @@ func InitValidatorWeightChange(
 	if unsignedMessage == nil {
 		unsignedMessage, err = SearchForL1ValidatorWeightMessage(ctx, rpcURL, validationID, weight)
 		if err != nil {
-			printFunc(logging.Red.Wrap("Failure checking for warp messages of previous operations: %s. Proceeding."), err)
+			printFunc(luxlog.Red.Wrap("Failure checking for warp messages of previous operations: %s. Proceeding."), err)
 		}
 	}
 
@@ -144,7 +144,7 @@ func InitValidatorWeightChange(
 			ux.Logger.PrintToUser("Validator weight change initialized. InitiateTxHash: %s", tx.Hash())
 		}
 	} else {
-		printFunc(logging.LightBlue.Wrap("The validator weight change process was already initialized. Proceeding to the next step"))
+		printFunc(luxlog.LightBlue.Wrap("The validator weight change process was already initialized. Proceeding to the next step"))
 	}
 
 	if receipt != nil {

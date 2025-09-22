@@ -90,7 +90,7 @@ func describe(_ *cobra.Command, _ []string) error {
 			warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
 		}
 	}
-	fmt.Print(logging.LightBlue.Wrap(art))
+	fmt.Print(luxlog.LightBlue.Wrap(art))
 	blockchainIDHexEncoding := "0x" + hex.EncodeToString(blockchainID[:])
 	rpcURL := network.CChainEndpoint()
 	client, err := evm.GetClient(rpcURL)

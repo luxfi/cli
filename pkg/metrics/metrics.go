@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 
 	"github.com/posthog/posthog-go"
@@ -29,7 +29,7 @@ func getMetricsUserID(app *application.Lux) string {
 	if !app.Conf.ConfigFileExists() || !app.Conf.ConfigValueIsSet(constants.ConfigMetricsUserIDKey) {
 		userID := utils.RandomString(20)
 		if err := app.Conf.SetConfigValue(constants.ConfigMetricsUserIDKey, userID); err != nil {
-			ux.Logger.PrintToUser(logging.Red.Wrap("failure initializing metrics id: %s"), err)
+			ux.Logger.PrintToUser(luxlog.Red.Wrap("failure initializing metrics id: %s"), err)
 		}
 		return userID
 	}
@@ -60,7 +60,7 @@ func HandleTracking(
 	}
 	if notInitialized(app) {
 		if err := app.Conf.SetConfigValue(constants.ConfigMetricsEnabledKey, true); err != nil {
-			ux.Logger.PrintToUser(logging.Red.Wrap("failure initializing metrics default: %s"), err)
+			ux.Logger.PrintToUser(luxlog.Red.Wrap("failure initializing metrics default: %s"), err)
 		}
 		_ = getMetricsUserID(app)
 	}
