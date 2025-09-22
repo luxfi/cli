@@ -5,7 +5,7 @@ package keychain
 import (
 	"github.com/luxfi/ids"
 	nodekeychain "github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	ledgerkeychain "github.com/luxfi/ledger-lux-go/keychain"
 )
