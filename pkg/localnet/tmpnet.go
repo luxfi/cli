@@ -829,14 +829,14 @@ func TmpNetAddNonSovereignValidators(
 		if isValidator := subnetValidators.Contains(node.NodeID); isValidator {
 			continue
 		}
-		if _, err := (*wallet).P().IssueAddSubnetValidatorTx(
-			&txs.SubnetValidator{
+		if _, err := (*wallet).P().IssueAddNetValidatorTx(
+			&txs.NetValidator{
 				Validator: txs.Validator{
 					NodeID: node.NodeID,
 					End:    uint64(primaryValidatorsEndtime[node.NodeID].Unix()),
 					Wght:   1000,
 				},
-				Subnet: subnetID,
+				Net: subnetID,
 			},
 			common.WithContext(ctx),
 			common.WithPollFrequency(100*time.Millisecond),

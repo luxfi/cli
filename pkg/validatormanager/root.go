@@ -200,7 +200,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
-	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
+	convertSubnetValidators []*txs.ConvertNetToL1Validator,
 ) (*warp.UnsignedMessage, error) {
 	validators := []warpMessage.SubnetToL1ConversionValidatorData{}
 	for _, convertSubnetValidator := range convertSubnetValidators {
@@ -263,7 +263,7 @@ func InitializeValidatorsSet(
 	privateKey string,
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
-	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
+	convertSubnetValidators []*txs.ConvertNetToL1Validator,
 	subnetConversionSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
 	type InitialValidator struct {

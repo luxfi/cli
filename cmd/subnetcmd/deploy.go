@@ -15,6 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
+	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnetworkinterface"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
@@ -785,7 +786,7 @@ func GetKeychain(
 			}
 		}
 		// get formatted addresses for ux
-		addresses, err := ledgerDevice.Addresses(ledgerIndices)
+		addresses, err := ledgerDevice.GetAddresses(ledgerIndices)
 		if err != nil {
 			return kc, err
 		}
@@ -801,13 +802,14 @@ func GetKeychain(
 		for _, addrStr := range addrStrs {
 			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
 		}
-		return keychain.NewLedgerKeychainFromIndices(ledgerDevice, ledgerIndices)
+		return keychain.NewLedgerKeychain(ledgerDevice, ledgerIndices)
 	}
 	sf, err := key.LoadSoft(networkID, app.GetKeyPath(keyName))
 	if err != nil {
 		return kc, err
 	}
-	return sf.KeyChain(), nil
+	// Wrap the secp256k1fx keychain to implement node keychain interface
+	return keychainpkg.WrapSecp256k1fxKeychain(sf.KeyChain()), nil
 }
 
 func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]uint32, error) {
@@ -821,7 +823,7 @@ func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]ui
 	// addresses and, if so, add the index pair to indexMap, breaking the loop if
 	// all addresses were found
 	for ledgerIndex := uint32(0); ledgerIndex < numLedgerAddressesToSearch; ledgerIndex++ {
-		ledgerAddress, err := ledgerDevice.Addresses([]uint32{ledgerIndex})
+		ledgerAddress, err := ledgerDevice.GetAddresses([]uint32{ledgerIndex})
 		if err != nil {
 			return []uint32{}, err
 		}

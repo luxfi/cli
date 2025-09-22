@@ -174,7 +174,7 @@ func importBlockchain(
 		return models.Sidecar{}, nil, err
 	}
 
-	subnetID := createChainTx.SubnetID
+	subnetID := createChainTx.NetID
 	vmID := createChainTx.VMID
 	blockchainName := createChainTx.ChainName
 	genBytes := createChainTx.GenesisData

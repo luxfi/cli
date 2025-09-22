@@ -235,7 +235,7 @@ func addDestination(
 		}
 		privateKey = k.PrivKeyHex()
 	} else {
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Please provide a key that is not going to be used for any other purpose on destination"))
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Please provide a key that is not going to be used for any other purpose on destination"))
 		privateKey, err = prompts.PromptPrivateKey(
 			app.Prompt,
 			fmt.Sprintf("pay relayer fees on %s", blockchainDesc),

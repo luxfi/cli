@@ -23,6 +23,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
+	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
@@ -672,13 +673,13 @@ func GetFileHash(filename string) (string, error) {
 
 func FundLedgerAddress() error {
 	// get ledger
-	ledgerDev, err := ledger.New()
+	ledgerDev, err := ledger.NewLedger()
 	if err != nil {
 		return err
 	}
 
 	// get ledger addr
-	ledgerAddrs, err := ledgerDev.Addresses([]uint32{0})
+	ledgerAddrs, err := ledgerDev.GetAddresses([]uint32{0})
 	if err != nil {
 		return err
 	}
@@ -692,12 +693,14 @@ func FundLedgerAddress() error {
 	if err != nil {
 		return err
 	}
-	var kc keychain.Keychain
-	kc = sk.KeyChain()
+	// Wrap the secp256k1fx keychain to implement node keychain interface
+	kc := keychainpkg.WrapSecp256k1fxKeychain(sk.KeyChain())
 	// Create wallet with new API
+	// Wrap the node keychain to implement wallet keychain interface
+	walletKC := keychainpkg.WrapNodeToWalletKeychain(kc)
 	wallet, err := primary.MakeWallet(context.Background(), &primary.WalletConfig{
 		URI:         constants.LocalAPIEndpoint,
-		LUXKeychain: kc,
+		LUXKeychain: walletKC,
 		EthKeychain: nil,
 	})
 	if err != nil {
@@ -722,13 +725,15 @@ func FundLedgerAddress() error {
 	}
 
 	// get ledger funded wallet
-	kc, err = keychain.NewLedgerKeychain(ledgerDev, 1)
+	kc, err = keychain.NewLedgerKeychain(ledgerDev, []uint32{1})
 	if err != nil {
 		return err
 	}
+	// Wrap the node keychain to implement wallet keychain interface
+	walletKC = keychainpkg.WrapNodeToWalletKeychain(kc)
 	wallet, err = primary.MakeWallet(context.Background(), &primary.WalletConfig{
 		URI:         constants.LocalAPIEndpoint,
-		LUXKeychain: kc,
+		LUXKeychain: walletKC,
 		EthKeychain: nil,
 	})
 	if err != nil {

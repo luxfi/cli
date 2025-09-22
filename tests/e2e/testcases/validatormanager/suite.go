@@ -127,7 +127,7 @@ func destroyLocalNode() {
 	}
 }
 
-func getBootstrapValidator(uri string) ([]*txs.ConvertSubnetToL1Validator, error) {
+func getBootstrapValidator(uri string) ([]*txs.ConvertNetToL1Validator, error) {
 	infoClient := info.NewClient(uri)
 	ctx, cancel := utils.GetAPILargeContext()
 	defer cancel()
@@ -215,10 +215,10 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		_, cancel := utils.GetSignatureAggregatorContext()
 		defer cancel()
 		err = subnetSDK.InitializeProofOfAuthority(
-			logging.NoLog{},
+			luxlog.NoLog{},
 			network.SDKNetwork(),
 			k.PrivKeyHex(),
-			logging.NoLog{},
+			luxlog.NoLog{},
 			ProxyContractAddress,
 			true,
 			"",

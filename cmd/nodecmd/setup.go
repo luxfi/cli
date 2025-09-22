@@ -123,7 +123,7 @@ func setup(hosts []*models.Host, luxdVersion string, network models.Network) err
 	if wgResults.HasErrors() {
 		return fmt.Errorf("failed to deploy node(s) %s", wgResults.GetErrorHostMap())
 	} else {
-		ux.Logger.PrintToUser(logging.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
+		ux.Logger.PrintToUser(luxlog.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 	}
 	return nil
 }
@@ -192,7 +192,7 @@ func printSetupResults(hosts []*models.Host) {
 		if err != nil {
 			continue
 		}
-		ux.Logger.PrintToUser("%s Public IP: %s | %s ", logging.Green.Wrap(">"), host.IP, logging.Green.Wrap(nodeID.String()))
+		ux.Logger.PrintToUser("%s Public IP: %s | %s ", luxlog.Green.Wrap(">"), host.IP, luxlog.Green.Wrap(nodeID.String()))
 		ux.Logger.PrintToUser("staker.crt, staker.key and signer.key are stored at %s. Please keep them safe, as these files can be used to fully recreate your node.", nodePath)
 		ux.Logger.PrintLineSeparator()
 	}

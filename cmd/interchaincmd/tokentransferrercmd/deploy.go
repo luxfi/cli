@@ -189,7 +189,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		if err != nil {
 			return err
 		}
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Home RPC Endpoint: %s"), homeRPCEndpoint)
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Home RPC Endpoint: %s"), homeRPCEndpoint)
 	}
 
 	// Home Chain Validations
@@ -393,7 +393,7 @@ func CallDeploy(_ []string, flags DeployFlags) error {
 		if err != nil {
 			return err
 		}
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Remote RPC Endpoint: %s"), remoteRPCEndpoint)
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Remote RPC Endpoint: %s"), remoteRPCEndpoint)
 	}
 
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(

@@ -127,7 +127,7 @@ func logs(_ *cobra.Command, _ []string) error {
 			}
 			logMsg := wordwrap.WrapString(msg, 80)
 			logMsgLines := strings.Split(logMsg, "\n")
-			logMsgLines = sdkutils.Map(logMsgLines, func(s string) string { return logging.Green.Wrap(s) })
+			logMsgLines = sdkutils.Map(logMsgLines, func(s string) string { return luxlog.Green.Wrap(s) })
 			logMsg = strings.Join(logMsgLines, "\n")
 			keys := maps.Keys(logMap)
 			sort.Strings(keys)
