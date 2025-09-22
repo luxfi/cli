@@ -441,11 +441,11 @@ func getLedgerIndicesInfo(
 	ledgerIndices []uint32,
 	networks []models.Network,
 ) ([]addressInfo, error) {
-	ledgerDevice, err := ledger.New()
+	ledgerDevice, err := ledger.NewLedger()
 	if err != nil {
 		return nil, err
 	}
-	addresses, err := ledgerDevice.Addresses(ledgerIndices)
+	addresses, err := ledgerDevice.GetAddresses(ledgerIndices)
 	if err != nil {
 		return nil, err
 	}

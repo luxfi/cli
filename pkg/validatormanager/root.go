@@ -9,11 +9,11 @@ import (
 
 	"github.com/luxfi/sdk/network"
 	luxdconstants "github.com/luxfi/node/utils/constants"
+	platformvmtxs "github.com/luxfi/node/vms/platformvm/txs"
 	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
-	"github.com/luxfi/sdk/validatormanager/txs"
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	"github.com/luxfi/geth/core/types"
@@ -200,7 +200,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
-	convertSubnetValidators []*txs.ConvertNetToL1Validator,
+	convertSubnetValidators []*platformvmtxs.ConvertNetToL1Validator,
 ) (*warp.UnsignedMessage, error) {
 	validators := []warpMessage.SubnetToL1ConversionValidatorData{}
 	for _, convertSubnetValidator := range convertSubnetValidators {
@@ -263,7 +263,7 @@ func InitializeValidatorsSet(
 	privateKey string,
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
-	convertSubnetValidators []*txs.ConvertNetToL1Validator,
+	convertSubnetValidators []*platformvmtxs.ConvertNetToL1Validator,
 	subnetConversionSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
 	type InitialValidator struct {
