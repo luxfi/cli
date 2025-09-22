@@ -23,6 +23,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/utils/logging"
 	luxlog "github.com/luxfi/log"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
@@ -195,16 +196,13 @@ func CompleteValidatorWeightChange(
 	privateKey string, // not need to be owner atm
 	pchainL1ValidatorRegistrationSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
-	// Convert standalone warp to node warp for contract
-	nodeWarpMsg := convertStandaloneToNodeWarpMsg(pchainL1ValidatorRegistrationSignedMessage)
-	
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		generateRawTxOnly,
 		ownerAddress,
 		privateKey,
 		managerAddress,
-		nodeWarpMsg,
+		pchainL1ValidatorRegistrationSignedMessage,
 		big.NewInt(0),
 		"complete poa validator weight change",
 		ErrorSignatureToError,

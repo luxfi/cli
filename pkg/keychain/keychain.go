@@ -15,14 +15,13 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
-	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 const (
@@ -228,7 +227,7 @@ func GetKeychain(
 			return nil, err
 		}
 		kc := sf.KeyChain()
-		wrappedKc := secp256k1fx.WrapKeychainForNode(kc)
+		wrappedKc := WrapSecp256k1fxKeychain(kc)
 		return NewKeychain(network, wrappedKc, nil, nil), nil
 	}
 	keyPath := app.GetKeyPath(keyName)
@@ -237,7 +236,7 @@ func GetKeychain(
 		return nil, err
 	}
 	kc := sf.KeyChain()
-	wrappedKc := secp256k1fx.WrapKeychainForNode(kc)
+	wrappedKc := WrapSecp256k1fxKeychain(kc)
 	return NewKeychain(network, wrappedKc, nil, nil), nil
 }
 

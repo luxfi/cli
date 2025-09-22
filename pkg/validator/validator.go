@@ -147,8 +147,8 @@ func GetCurrentValidators(network models.Network, subnetID ids.ID) ([]CurrentVal
 		ctx,
 		"platform.getCurrentValidators",
 		&platformvm.GetCurrentValidatorsArgs{
-			SubnetID: subnetID,
-			NodeIDs:  nil,
+			NetID:   subnetID,
+			NodeIDs: nil,
 		},
 		res,
 	); err != nil {
