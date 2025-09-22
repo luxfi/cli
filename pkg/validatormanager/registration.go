@@ -30,7 +30,6 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/proto/pb/platformvm"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
 	luxlog "github.com/luxfi/log"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
