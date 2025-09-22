@@ -24,8 +24,9 @@ import (
 	goethereumcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/crypto/keychain"
+	cryptokeychain "github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
+	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/components/lux"
@@ -248,7 +249,7 @@ func transferF(*cobra.Command, []string) error {
 		}
 	}
 
-	var kc keychain.Keychain
+	var kc walletkeychain.Keychain
 	var sk *key.SoftKey
 	if keyName != "" {
 		keyPath := app.GetKeyPath(keyName)
@@ -258,12 +259,12 @@ func transferF(*cobra.Command, []string) error {
 		}
 		kc = sk.KeyChain()
 	} else {
-		ledgerDevice, err := ledger.New()
+		ledgerDevice, err := ledger.NewLedger()
 		if err != nil {
 			return err
 		}
 		ledgerIndices := []uint32{ledgerIndex}
-		kc, err = keychain.NewLedgerKeychainFromIndices(ledgerDevice, ledgerIndices)
+		kc, err = NewLedgerKeychain(ledgerDevice, ledgerIndices)
 		if err != nil {
 			return err
 		}
@@ -611,7 +612,7 @@ func interEvmSend(
 
 func pToPSend(
 	network models.Network,
-	kc keychain.Keychain,
+	kc walletkeychain.Keychain,
 	usingLedger bool,
 	destinationAddrStr string,
 	amount uint64,
@@ -683,7 +684,7 @@ func pToPSend(
 
 func pToXSend(
 	network models.Network,
-	kc keychain.Keychain,
+	kc walletkeychain.Keychain,
 	usingLedger bool,
 	amount uint64,
 ) error {
@@ -702,7 +703,7 @@ func pToXSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses().List(),
+		Addrs:     kc.Addresses(),
 	}
 	if err := exportFromP(
 		amount,
@@ -819,7 +820,7 @@ func importIntoX(
 
 func pToCSend(
 	network models.Network,
-	kc keychain.Keychain,
+	kc walletkeychain.Keychain,
 	usingLedger bool,
 	destinationAddrStr string,
 	amount uint64,
@@ -839,7 +840,7 @@ func pToCSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses().List(),
+		Addrs:     kc.Addresses(),
 	}
 	if err := exportFromP(
 		amount,
@@ -927,7 +928,7 @@ func importIntoC(
 
 func cToPSend(
 	network models.Network,
-	kc keychain.Keychain,
+	kc walletkeychain.Keychain,
 	sk *key.SoftKey,
 	usingLedger bool,
 	amount uint64,
@@ -947,7 +948,7 @@ func cToPSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses().List(),
+		Addrs:     kc.Addresses(),
 	}
 	if err := exportFromC(
 		network,
@@ -1090,4 +1091,65 @@ func getBuilderContext(wallet primary.Wallet) *builder.Context {
 		return nil
 	}
 	return wallet.P().Builder().Context()
+}
+
+// ledgerKeychain wraps a ledger device to implement wallet keychain interface
+type ledgerKeychain struct {
+	ledger    cryptokeychain.Ledger
+	indices   []uint32
+	addresses []ids.ShortID
+}
+
+// NewLedgerKeychain creates a new ledger keychain
+func NewLedgerKeychain(ledgerDevice cryptokeychain.Ledger, indices []uint32) (walletkeychain.Keychain, error) {
+	addresses, err := ledgerDevice.GetAddresses(indices)
+	if err != nil {
+		return nil, err
+	}
+	return &ledgerKeychain{
+		ledger:    ledgerDevice,
+		indices:   indices,
+		addresses: addresses,
+	}, nil
+}
+
+// Addresses returns the list of addresses
+func (lk *ledgerKeychain) Addresses() []ids.ShortID {
+	return lk.addresses
+}
+
+// Get returns a signer for the given address
+func (lk *ledgerKeychain) Get(addr ids.ShortID) (walletkeychain.Signer, bool) {
+	for i, a := range lk.addresses {
+		if a == addr {
+			return &ledgerSigner{
+				ledger: lk.ledger,
+				index:  lk.indices[i],
+				addr:   addr,
+			}, true
+		}
+	}
+	return nil, false
+}
+
+// ledgerSigner implements the Signer interface for ledger
+type ledgerSigner struct {
+	ledger cryptokeychain.Ledger
+	index  uint32
+	addr   ids.ShortID
+}
+
+// SignHash signs a hash
+func (ls *ledgerSigner) SignHash(hash []byte) ([]byte, error) {
+	return ls.ledger.SignHash(hash, ls.index)
+}
+
+// Sign signs data
+func (ls *ledgerSigner) Sign(data []byte) ([]byte, error) {
+	return ls.ledger.Sign(data, ls.index)
+}
+
+// Address returns the address
+func (ls *ledgerSigner) Address() ids.ShortID {
+	return ls.addr
 }

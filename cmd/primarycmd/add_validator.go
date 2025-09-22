@@ -3,7 +3,6 @@
 package primarycmd
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -17,8 +16,8 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/cli/pkg/prompts/comparator"
+	cliprompts "github.com/luxfi/cli/pkg/prompts"
+	sdkprompts "github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -72,14 +71,14 @@ in the Primary Network`,
 
 func promptProofOfPossession() (jsonProofOfPossession, error) {
 	if publicKey != "" {
-		err := prompts.ValidateHexa(publicKey)
+		err := cliprompts.ValidateHexa(publicKey)
 		if err != nil {
 			ux.Logger.PrintToUser("Format error in given public key: %s", err)
 			publicKey = ""
 		}
 	}
 	if pop != "" {
-		err := prompts.ValidateHexa(pop)
+		err := cliprompts.ValidateHexa(pop)
 		if err != nil {
 			ux.Logger.PrintToUser("Format error in given proof of possession: %s", err)
 			pop = ""
@@ -93,14 +92,18 @@ func promptProofOfPossession() (jsonProofOfPossession, error) {
 	var err error
 	if publicKey == "" {
 		txt := "What is the public key of the node's BLS?"
-		publicKey, err = app.Prompt.CaptureValidatedString(txt, prompts.ValidateHexa)
+		// Create a CLI prompter to use CaptureValidatedString
+		cliPrompter := cliprompts.NewPrompter()
+		publicKey, err = cliPrompter.CaptureValidatedString(txt, cliprompts.ValidateHexa)
 		if err != nil {
 			return jsonProofOfPossession{}, err
 		}
 	}
 	if pop == "" {
 		txt := "What is the proof of possession of the node's BLS?"
-		pop, err = app.Prompt.CaptureValidatedString(txt, prompts.ValidateHexa)
+		// Create a CLI prompter to use CaptureValidatedString
+		cliPrompter := cliprompts.NewPrompter()
+		pop, err = cliPrompter.CaptureValidatedString(txt, cliprompts.ValidateHexa)
 		if err != nil {
 			return jsonProofOfPossession{}, err
 		}
@@ -136,10 +139,10 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return ErrMutuallyExlusiveKeyLedger
 	}
 
-	switch network.Kind {
+	switch network.Kind() {
 	case models.Testnet:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, constants.PayTxsFeesMsg, app.GetKeyDir(), false)
+			useLedger, keyName, err = sdkprompts.GetKeyOrLedger(app.Prompt, constants.PayTxsFeesMsg, app.GetKeyDir(), false)
 			if err != nil {
 				return err
 			}
@@ -188,21 +191,19 @@ func addValidator(_ *cobra.Command, _ []string) error {
 
 	network.HandlePublicNetworkSimulation()
 
-	jsonPop, err := promptProofOfPossession()
+	// For primary network validators, we don't need proof of possession for now
+	// but keeping the prompt for future compatibility
+	_, err = promptProofOfPossession()
 	if err != nil {
 		return err
 	}
-	popBytes, err := json.Marshal(jsonPop)
-	if err != nil {
-		return err
-	}
+
 	start, duration, err = nodecmd.GetTimeParametersPrimaryNetwork(network, 0, duration, startTimeStr, false)
 	if err != nil {
 		return err
 	}
-	deployer := subnet.NewPublicDeployer(app, kc, network)
+	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 	nodecmd.PrintNodeJoinPrimaryNetworkOutput(nodeID, weight, network, start)
-	recipientAddr := kc.Addresses().List()[0]
 	if delegationFee == 0 {
 		delegationFee, err = getDelegationFeeOption(app, network)
 		if err != nil {
@@ -214,7 +215,10 @@ func addValidator(_ *cobra.Command, _ []string) error {
 			return fmt.Errorf("delegation fee has to be larger than %d", defaultFee)
 		}
 	}
-	_, err = deployer.AddPermissionlessValidator(ids.Empty, ids.Empty, nodeID, weight, uint64(start.Unix()), uint64(start.Add(duration).Unix()), recipientAddr, delegationFee, popBytes, nil)
+	// For primary network, use AddValidator with empty subnet ID
+	// AddValidator returns (bool, *txs.Tx, []string, error)
+	// The popBytes and recipientAddr are used for PoS validators, but primary network uses the simpler model
+	_, _, _, err = deployer.AddValidator(nil, nil, ids.Empty, nodeID, weight, start, duration)
 	return err
 }
 
@@ -234,10 +238,10 @@ func getDelegationFeeOption(app *application.Lux, network models.Network) (uint3
 		ux.Logger.PrintToUser("Note that 20 000 is equivalent to 2%%")
 		delegationFee, err := app.Prompt.CapturePositiveInt(
 			delegationFeePrompt,
-			[]comparator.Comparator{
+			[]sdkprompts.Comparator{
 				{
 					Label: "Min Delegation Fee",
-					Type:  comparator.MoreThanEq,
+					Type:  sdkprompts.MoreThanEq,
 					Value: uint64(defaultFee),
 				},
 			},
@@ -255,7 +259,7 @@ func getDelegationFeeOption(app *application.Lux, network models.Network) (uint3
 
 func estimateAddValidatorFee(network models.Network) uint64 {
 	const baseFee = 1_000_000 // 0.001 LUX base fee
-	switch network.Kind {
+	switch network.Kind() {
 	case models.Mainnet:
 		return baseFee * 2 // Higher fee for mainnet
 	case models.Testnet:

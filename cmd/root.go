@@ -308,7 +308,7 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 	var err error
 
 	config := luxlog.Config{}
-	config.LogLevel = luxlog.InfoLevel
+	config.LogLevel = luxlog.Level(-6) // Info level
 	config.DisplayLevel, err = luxlog.ToLevel(logLevel)
 	if err != nil {
 		return nil, fmt.Errorf("invalid log level configured: %s", logLevel)

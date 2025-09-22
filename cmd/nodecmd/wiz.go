@@ -1021,7 +1021,7 @@ func addBlockchainToRelayerConf(network models.Network, cloudNodeID string, bloc
 
 	if err := relayer.CreateBaseRelayerConfigIfMissing(
 		configPath,
-		luxlog.Info.LowerString(),
+		"info",
 		app.GetWarpRelayerServiceStorageDir(),
 		9090, // Default warp relayer metrics port
 		network,

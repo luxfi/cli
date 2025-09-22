@@ -23,7 +23,6 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
 	luxlog "github.com/luxfi/log"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
