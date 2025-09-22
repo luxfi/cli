@@ -127,7 +127,7 @@ func generateNewNodeAndBLS() (string, string, string, error) {
 	if err != nil {
 		return "", "", "", err
 	}
-	p := signer.NewProofOfPossession(blsSecretKey)
+	p, err := signer.NewProofOfPossession(blsSecretKey)
 	if err != nil {
 		return "", "", "", err
 	}

@@ -93,10 +93,10 @@ func StartLocalNode(
 
 		switch {
 		case network.Kind() == models.Testnet:
-			ux.Logger.PrintToUser(logging.Yellow.Wrap("Warning: Testnet Bootstrapping can take several minutes"))
+			ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Warning: Testnet Bootstrapping can take several minutes"))
 			connectionSettings.NetworkID = network.ID()
 		case network.Kind() == models.Mainnet:
-			ux.Logger.PrintToUser(logging.Yellow.Wrap("Warning: Mainnet Bootstrapping can take 6-24 hours"))
+			ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Warning: Mainnet Bootstrapping can take 6-24 hours"))
 			connectionSettings.NetworkID = network.ID()
 		case network.Kind() == models.Local:
 			connectionSettings, err = localnet.GetLocalNetworkConnectionInfo(app)
@@ -179,9 +179,9 @@ func LocalStatus(
 		}
 	}
 	if clusterName != "" {
-		ux.Logger.PrintToUser("%s %s", logging.Blue.Wrap("Local cluster:"), logging.Green.Wrap(clusterName))
+		ux.Logger.PrintToUser("%s %s", luxlog.Blue.Wrap("Local cluster:"), luxlog.Green.Wrap(clusterName))
 	} else if len(localClusters) > 0 {
-		ux.Logger.PrintToUser(logging.Blue.Wrap("Local clusters:"))
+		ux.Logger.PrintToUser(luxlog.Blue.Wrap("Local clusters:"))
 	}
 	for _, clusterName := range localClusters {
 		currenlyRunning := ""
@@ -192,7 +192,7 @@ func LocalStatus(
 		if err != nil {
 			return fmt.Errorf("failed to get cluster network: %w", err)
 		}
-		networkKind := fmt.Sprintf(" [%s]", logging.Orange.Wrap(network.Name()))
+		networkKind := fmt.Sprintf(" [%s]", luxlog.Orange.Wrap(network.Name()))
 
 		// load sidecar and cluster config for the cluster  if blockchainName is not empty
 		blockchainID := ids.Empty
@@ -212,11 +212,11 @@ func LocalStatus(
 			if err != nil {
 				return err
 			}
-			currenlyRunning = fmt.Sprintf(" [%s]", logging.Blue.Wrap("Running"))
+			currenlyRunning = fmt.Sprintf(" [%s]", luxlog.Blue.Wrap("Running"))
 			if pChainHealth && l1Health {
-				healthStatus = fmt.Sprintf(" [%s]", logging.Green.Wrap("Healthy"))
+				healthStatus = fmt.Sprintf(" [%s]", luxlog.Green.Wrap("Healthy"))
 			} else {
-				healthStatus = fmt.Sprintf(" [%s]", logging.Red.Wrap("Unhealthy"))
+				healthStatus = fmt.Sprintf(" [%s]", luxlog.Red.Wrap("Unhealthy"))
 			}
 			runningLuxdURIs, err := localnet.GetLocalClusterURIs(app, clusterName)
 			if err != nil {
@@ -231,9 +231,9 @@ func LocalStatus(
 				nodePOPPubKey := "0x" + hex.EncodeToString(nodePOP.PublicKey[:])
 				nodePOPProof := "0x" + hex.EncodeToString(nodePOP.ProofOfPossession[:])
 
-				isBootStr := "Primary:" + logging.Red.Wrap("Not Bootstrapped")
+				isBootStr := "Primary:" + luxlog.Red.Wrap("Not Bootstrapped")
 				if isBoot {
-					isBootStr = "Primary:" + logging.Green.Wrap("Bootstrapped")
+					isBootStr = "Primary:" + luxlog.Green.Wrap("Bootstrapped")
 				}
 
 				blockchainStatus := ""
@@ -242,15 +242,15 @@ func LocalStatus(
 				}
 
 				luxdURIOuput += fmt.Sprintf("   - %s [%s] [%s]\n     publicKey: %s \n     proofOfPossession: %s \n",
-					logging.LightBlue.Wrap(luxdURI),
+					luxlog.LightBlue.Wrap(luxdURI),
 					nodeID,
-					strings.TrimRight(strings.Join([]string{isBootStr, "L1:" + logging.Orange.Wrap(blockchainStatus)}, " "), " "),
+					strings.TrimRight(strings.Join([]string{isBootStr, "L1:" + luxlog.Orange.Wrap(blockchainStatus)}, " "), " "),
 					nodePOPPubKey,
 					nodePOPProof,
 				)
 			}
 		} else {
-			currenlyRunning = fmt.Sprintf(" [%s]", logging.LightGray.Wrap("Stopped"))
+			currenlyRunning = fmt.Sprintf(" [%s]", luxlog.LightGray.Wrap("Stopped"))
 		}
 		networkDir := localnet.GetLocalClusterDir(app, clusterName)
 		ux.Logger.PrintToUser("- %s: %s %s %s %s", clusterName, networkDir, networkKind, currenlyRunning, healthStatus)

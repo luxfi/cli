@@ -5,6 +5,7 @@ package keychain
 import (
 	"github.com/luxfi/ids"
 	nodekeychain "github.com/luxfi/node/utils/crypto/keychain"
+	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	ledgerkeychain "github.com/luxfi/ledger-lux-go/keychain"
@@ -57,4 +58,31 @@ func (w *Secp256k1fxToNodeWrapper) Addresses() set.Set[ids.ShortID] {
 	// Convert slice to set
 	addrs := w.secpKC.Addresses()
 	return set.Of(addrs...)
+}
+
+// NodeToWalletWrapper wraps a node keychain to implement wallet keychain interface
+type NodeToWalletWrapper struct {
+	nodeKC nodekeychain.Keychain
+}
+
+// WrapNodeToWalletKeychain wraps a node keychain to implement wallet keychain interface
+func WrapNodeToWalletKeychain(nodeKC nodekeychain.Keychain) walletkeychain.Keychain {
+	return &NodeToWalletWrapper{nodeKC: nodeKC}
+}
+
+// Get returns the signer for the given address
+func (w *NodeToWalletWrapper) Get(addr ids.ShortID) (walletkeychain.Signer, bool) {
+	signer, ok := w.nodeKC.Get(addr)
+	if !ok {
+		return nil, false
+	}
+	// The node signer already implements the wallet signer interface
+	return signer, true
+}
+
+// Addresses returns the addresses managed by this keychain as a slice
+func (w *NodeToWalletWrapper) Addresses() []ids.ShortID {
+	// Convert set to slice
+	addrSet := w.nodeKC.Addresses()
+	return addrSet.List()
 }

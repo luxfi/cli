@@ -4,6 +4,7 @@ package transactioncmd
 
 import (
 	"github.com/luxfi/cli/cmd/subnetcmd"
+	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -72,11 +73,13 @@ func commitTx(_ *cobra.Command, args []string) error {
 	}
 
 	// get kc with some random address, to pass wallet creation checks
-	kc := secp256k1fx.NewKeychain()
-	_, err = kc.New()
+	secpKC := secp256k1fx.NewKeychain()
+	_, err = secpKC.New()
 	if err != nil {
 		return err
 	}
+	// Wrap the secp256k1fx keychain to implement node keychain interface
+	kc := keychainpkg.WrapSecp256k1fxKeychain(secpKC)
 
 	deployer := subnet.NewPublicDeployer(app, false, kc, network)
 	txID, err := deployer.Commit(tx)

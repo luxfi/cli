@@ -277,7 +277,7 @@ func printOutput(
 	if external, ok := clusterConf["External"].(bool); ok && external {
 		network, _ := clusterConf["Network"].(map[string]interface{})
 		kind, _ := network["Kind"].(string)
-		ux.Logger.PrintToUser("Cluster %s (%s) is EXTERNAL", logging.LightBlue.Wrap(clusterName), kind)
+		ux.Logger.PrintToUser("Cluster %s (%s) is EXTERNAL", luxlog.LightBlue.Wrap(clusterName), kind)
 	}
 	if blockchainName == "" && len(notBootstrappedHosts) == 0 {
 		ux.Logger.PrintToUser("All nodes in cluster %s are bootstrapped to Primary Network!", clusterName)
@@ -288,10 +288,10 @@ func printOutput(
 		if len(subnetSyncedHosts) == 0 {
 			status = "validators of"
 		}
-		ux.Logger.PrintToUser("All nodes in cluster %s are %s Subnet %s", logging.LightBlue.Wrap(clusterName), status, blockchainName)
+		ux.Logger.PrintToUser("All nodes in cluster %s are %s Subnet %s", luxlog.LightBlue.Wrap(clusterName), status, blockchainName)
 	}
 	ux.Logger.PrintToUser("")
-	tit := fmt.Sprintf("STATUS FOR CLUSTER: %s", logging.LightBlue.Wrap(clusterName))
+	tit := fmt.Sprintf("STATUS FOR CLUSTER: %s", luxlog.LightBlue.Wrap(clusterName))
 	ux.Logger.PrintToUser(tit)
 	ux.Logger.PrintToUser(strings.Repeat("=", len(removeColors(tit))))
 	ux.Logger.PrintToUser("")
@@ -327,20 +327,20 @@ func printOutput(
 			isLuxdHost = false
 		}
 		if isLuxdHost {
-			boostrappedStatus = logging.Green.Wrap("BOOTSTRAPPED")
+			boostrappedStatus = luxlog.Green.Wrap("BOOTSTRAPPED")
 			if slices.Contains(notBootstrappedHosts, cloudID) {
-				boostrappedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
+				boostrappedStatus = luxlog.Red.Wrap("NOT_BOOTSTRAPPED")
 			}
-			healthyStatus = logging.Green.Wrap("OK")
+			healthyStatus = luxlog.Green.Wrap("OK")
 			if slices.Contains(unhealthyHosts, cloudID) {
-				healthyStatus = logging.Red.Wrap("UNHEALTHY")
+				healthyStatus = luxlog.Red.Wrap("UNHEALTHY")
 			}
 			nodeIDStr = nodeIDs[i]
 			luxdVersion = luxdVersions[cloudID]
 		}
 		row := []string{
 			cloudID,
-			logging.Green.Wrap(nodeIDStr),
+			luxlog.Green.Wrap(nodeIDStr),
 			nodeConfigs[i].ElasticIP,
 			func() string {
 				network, _ := clusterConf["Network"].(map[string]interface{})
@@ -356,12 +356,12 @@ func printOutput(
 			syncedStatus := ""
 			monitoringInstance, _ := clusterConf["MonitoringInstance"].(string)
 			if monitoringInstance != cloudID {
-				syncedStatus = logging.Red.Wrap("NOT_BOOTSTRAPPED")
+				syncedStatus = luxlog.Red.Wrap("NOT_BOOTSTRAPPED")
 				if slices.Contains(subnetSyncedHosts, cloudID) {
-					syncedStatus = logging.Green.Wrap("SYNCED")
+					syncedStatus = luxlog.Green.Wrap("SYNCED")
 				}
 				if slices.Contains(subnetValidatingHosts, cloudID) {
-					syncedStatus = logging.Green.Wrap("VALIDATING")
+					syncedStatus = luxlog.Green.Wrap("VALIDATING")
 				}
 			}
 			row = append(row, syncedStatus)
