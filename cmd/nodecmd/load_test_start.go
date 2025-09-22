@@ -357,12 +357,12 @@ func startLoadTest(_ *cobra.Command, args []string) error {
 	}
 
 	ux.Logger.GreenCheckmarkToUser("Load test environment is ready!")
-	ux.Logger.PrintToUser("%s Building load test code", logging.Green.Wrap(">"))
+	ux.Logger.PrintToUser("%s Building load test code", luxlog.Green.Wrap(">"))
 	if err := ssh.RunSSHBuildLoadTestCode(currentLoadTestHost[0], loadTestRepoURL, loadTestBuildCmd, loadTestRepoCommit, repoDirName, loadTestBranch, checkoutCommit); err != nil {
 		return err
 	}
 
-	ux.Logger.PrintToUser("%s Running load test", logging.Green.Wrap(">"))
+	ux.Logger.PrintToUser("%s Running load test", luxlog.Green.Wrap(">"))
 	if err := ssh.RunSSHRunLoadTest(currentLoadTestHost[0], loadTestCmd, loadTestName); err != nil {
 		return err
 	}

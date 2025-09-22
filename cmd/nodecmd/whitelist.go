@@ -83,7 +83,7 @@ func whitelist(_ *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to get user IP address")
 		}
-		ux.Logger.PrintToUser("Detected your IP address as: %s", logging.LightBlue.Wrap(userIPAddress))
+		ux.Logger.PrintToUser("Detected your IP address as: %s", luxlog.LightBlue.Wrap(userIPAddress))
 	}
 	if userIPAddress == "" && userPubKey == "" {
 		// prompt for ssh key
@@ -96,8 +96,8 @@ func whitelist(_ *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to get user IP address")
 		}
-		ux.Logger.PrintToUser("Detected your IP address as: %s", logging.LightBlue.Wrap(detectedIPAddress))
-		userIPAddress, err = app.Prompt.CaptureStringAllowEmpty(fmt.Sprintf("Enter IP address to whitelist (Also you can press Enter to use %s or S to skip)", logging.LightBlue.Wrap(detectedIPAddress)))
+		ux.Logger.PrintToUser("Detected your IP address as: %s", luxlog.LightBlue.Wrap(detectedIPAddress))
+		userIPAddress, err = app.Prompt.CaptureStringAllowEmpty(fmt.Sprintf("Enter IP address to whitelist (Also you can press Enter to use %s or S to skip)", luxlog.LightBlue.Wrap(detectedIPAddress)))
 		if err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func whitelist(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid IP address: %s", userIPAddress)
 	}
 	if userIPAddress != "" {
-		ux.Logger.GreenCheckmarkToUser("Whitelisting IP: %s", logging.LightBlue.Wrap(userIPAddress))
+		ux.Logger.GreenCheckmarkToUser("Whitelisting IP: %s", luxlog.LightBlue.Wrap(userIPAddress))
 		cloudSecurityGroupList := []regionSecurityGroup{}
 		clusterNodes, err := node.GetClusterNodes(app, clusterName)
 		if err != nil {
@@ -276,7 +276,7 @@ func whitelistSSHPubKey(clusterName string, pubkey string) error {
 		}
 		hosts = append(hosts, loadTestHost...)
 	}
-	ux.Logger.PrintToUser("Whitelisting SSH public key on all nodes in cluster: %s", logging.LightBlue.Wrap(clusterName))
+	ux.Logger.PrintToUser("Whitelisting SSH public key on all nodes in cluster: %s", luxlog.LightBlue.Wrap(clusterName))
 	wg := sync.WaitGroup{}
 	wgResults := models.NodeResults{}
 	for _, host := range hosts {

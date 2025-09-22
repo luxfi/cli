@@ -560,7 +560,7 @@ func (d *PublicDeployer) ConvertL1(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	managerAddress ethcommon.Address,
-	validators []interface{}, // []*txs.ConvertSubnetToL1Validator when available
+	validators []interface{}, // []*txs.ConvertNetToL1Validator when available
 ) (bool, ids.ID, *txs.Tx, []string, error) {
 	ux.Logger.PrintToUser("Now calling ConvertSubnetToL1Tx...")
 
