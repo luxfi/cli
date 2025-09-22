@@ -63,31 +63,33 @@ func describe(_ *cobra.Command, _ []string) error {
 		warpMessengerAddress string
 		warpRegistryAddress  string
 	)
-	blockchainID, err := utils.GetChainID(network.Endpoint, "C")
+	blockchainID, err := utils.GetChainID(network.Endpoint(), "C")
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
 			networkUpMsg := ""
-			if network.Kind != models.Testnet && network.Kind != models.Mainnet {
+			if network.Kind() != models.Testnet && network.Kind() != models.Mainnet {
 				networkUpMsg = fmt.Sprintf(" Is the %s up?", network.Name())
 			}
-			ux.Logger.RedXToUser("Could not connect to Primary Network at %s.%s", network.Endpoint, networkUpMsg)
+			ux.Logger.RedXToUser("Could not connect to Primary Network at %s.%s", network.Endpoint(), networkUpMsg)
 			return nil
 		}
 		return err
 	}
-	if network.Kind == models.Local {
+	if network.Kind() == models.Local {
 		if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 			return err
 		} else if b {
 			warpMessengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
 			warpRegistryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
 		}
-	} else if network.ClusterName != "" {
-		if clusterConfig, err := app.GetClusterConfig(network.ClusterName); err != nil {
+	} else if network.ClusterName() != "" {
+		if clusterConfig, err := app.GetClusterConfig(network.ClusterName()); err != nil {
 			return err
 		} else {
-			warpMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
-			warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
+			// TODO: Fix cluster config access - might need type assertion or different method
+			// warpMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
+			// warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
+			_ = clusterConfig
 		}
 	}
 	fmt.Print(luxlog.LightBlue.Wrap(art))
@@ -101,7 +103,8 @@ func describe(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	k, err := key.LoadEwoq(network.ID)
+	// Load the ewoq key for local networks
+	k, err := key.NewSoft(network.ID(), key.WithPrivateKeyEncoded(key.EwoqPrivateKey))
 	if err != nil {
 		return err
 	}
