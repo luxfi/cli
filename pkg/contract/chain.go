@@ -294,7 +294,7 @@ func GetSubnetID(
 		if err != nil {
 			return ids.Empty, err
 		}
-		subnetID = tx.SubnetID
+		subnetID = tx.NetID
 	default:
 		return ids.Empty, fmt.Errorf("blockchain is not defined")
 	}

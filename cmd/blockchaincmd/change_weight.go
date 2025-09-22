@@ -229,7 +229,7 @@ func setWeight(_ *cobra.Command, args []string) error {
 	deployer := subnet.NewPublicDeployer(app, false, kc.Keychain, network)
 
 	if sc.UseACP99 {
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Validator Manager Protocol: V2"))
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator Manager Protocol: V2"))
 		return changeWeightACP99(
 			deployer,
 			network,
@@ -239,7 +239,7 @@ func setWeight(_ *cobra.Command, args []string) error {
 			initiateTxHash,
 		)
 	} else {
-		ux.Logger.PrintToUser(logging.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
 	}
 
 	// PublicKey is retrieved from the validator registration transaction
@@ -355,14 +355,14 @@ func changeWeightACP99(
 			return fmt.Errorf("not private key found for Validator manager owner %s", validatorManagerOwner)
 		}
 	}
-	ux.Logger.PrintToUser(logging.Yellow.Wrap("Validator manager owner %s pays for the initialization of the validator's weight change (Blockchain gas token)"), validatorManagerOwner)
+	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator manager owner %s pays for the initialization of the validator's weight change (Blockchain gas token)"), validatorManagerOwner)
 
 	if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
 		return fmt.Errorf("unable to find Validator Manager address")
 	}
 	validatorManagerAddress = sc.Networks[network.Name()].ValidatorManagerAddress
 
-	ux.Logger.PrintToUser(logging.Yellow.Wrap("RPC Endpoint: %s"), changeWeightFlags.RPC)
+	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), changeWeightFlags.RPC)
 
 	// Cluster name is managed separately from network data
 	clusterName := ""
@@ -428,7 +428,7 @@ func changeWeightACP99(
 			return err
 		}
 		if validatorInfo.Weight == newWeight {
-			ux.Logger.PrintToUser(logging.LightBlue.Wrap("The new Weight was already set on the P-Chain. Proceeding to the next step"))
+			ux.Logger.PrintToUser(luxlog.LightBlue.Wrap("The new Weight was already set on the P-Chain. Proceeding to the next step"))
 			skipPChain = true
 		}
 	}
@@ -440,7 +440,7 @@ func changeWeightACP99(
 		//	if newWeight != 0 || !strings.Contains(err.Error(), "could not load L1 validator: not found") {
 		//		return err
 		//	}
-		//	ux.Logger.PrintToUser(logging.LightBlue.Wrap("The Weight was already set to 0 on the P-Chain. Proceeding to the next step"))
+		//	ux.Logger.PrintToUser(luxlog.LightBlue.Wrap("The Weight was already set to 0 on the P-Chain. Proceeding to the next step"))
 		// } else {
 		//	ux.Logger.PrintToUser("SetL1ValidatorWeightTx ID: %s", txID)
 		//	if err := blockchain.UpdatePChainHeight(

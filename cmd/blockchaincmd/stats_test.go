@@ -21,7 +21,7 @@ import (
 func TestStats(t *testing.T) {
 	require := require.New(t)
 
-	ux.NewUserLog(logging.NoLog{}, io.Discard)
+	ux.NewUserLog(luxlog.NoLog{}, io.Discard)
 
 	pClient := &mocks.PClient{}
 	iClient := &mocks.InfoClient{}

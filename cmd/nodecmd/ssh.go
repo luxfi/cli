@@ -263,9 +263,9 @@ func printClusterConnectionString(clusterName string, networkName string) error 
 	}
 	// clusterConf is a map[string]interface{}, not a struct
 	if external, ok := clusterConf["External"].(bool); ok && external {
-		ux.Logger.PrintToUser("Cluster: %s (%s) EXTERNAL", logging.LightBlue.Wrap(clusterName), logging.Green.Wrap(networkName))
+		ux.Logger.PrintToUser("Cluster: %s (%s) EXTERNAL", luxlog.LightBlue.Wrap(clusterName), luxlog.Green.Wrap(networkName))
 	} else {
-		ux.Logger.PrintToUser("Cluster: %s (%s)", logging.LightBlue.Wrap(clusterName), logging.Green.Wrap(networkName))
+		ux.Logger.PrintToUser("Cluster: %s (%s)", luxlog.LightBlue.Wrap(clusterName), luxlog.Green.Wrap(networkName))
 	}
 	clusterHosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
 	if err != nil {

@@ -21,6 +21,7 @@ import (
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/sdk/evm"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 
 	"github.com/spf13/cobra"
 )
@@ -135,14 +136,14 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	}
 
 	logLevelOptions := []string{
-		logging.Info.LowerString(),
-		logging.Warn.LowerString(),
-		logging.Error.LowerString(),
-		logging.Off.LowerString(),
-		logging.Fatal.LowerString(),
-		logging.Debug.LowerString(),
-		logging.Trace.LowerString(),
-		logging.Verbo.LowerString(),
+		strings.ToLower(level.Info.String()),
+		strings.ToLower(level.Warn.String()),
+		strings.ToLower(level.Error.String()),
+		strings.ToLower(level.Off.String()),
+		strings.ToLower(level.Fatal.String()),
+		strings.ToLower(level.Debug.String()),
+		strings.ToLower(level.Trace.String()),
+		strings.ToLower(level.Verbo.String()),
 	}
 	if flags.LogLevel == "" {
 		prompt := "Which log level do you prefer for your relayer?"
@@ -155,7 +156,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 			return err
 		}
 	} else {
-		if _, err := logging.ToLevel(flags.LogLevel); err != nil {
+		if _, err := luxlog.ToLevel(flags.LogLevel); err != nil {
 			return fmt.Errorf("invalid log level %s: %w", flags.LogLevel, err)
 		}
 	}

@@ -3,8 +3,9 @@
 package localnet
 
 import (
+	"context"
 	"log/slog"
-	
+
 	"github.com/luxfi/log"
 	luxlog "github.com/luxfi/log"
 	"go.uber.org/zap"
@@ -37,33 +38,27 @@ func (l *loggerAdapter) Fatal(msg string, fields ...zap.Field) {
 }
 
 // Error implements luxlog.Logger
-func (l *loggerAdapter) Error(msg string, fields ...zap.Field) {
-	// Convert fields to interface{} for the Error method that expects ...interface{}
-	args := fieldsToInterface(fields)
+func (l *loggerAdapter) Error(msg string, args ...interface{}) {
 	l.logger.Error(msg, args...)
 }
 
 // Warn implements luxlog.Logger
-func (l *loggerAdapter) Warn(msg string, fields ...zap.Field) {
-	args := fieldsToInterface(fields)
+func (l *loggerAdapter) Warn(msg string, args ...interface{}) {
 	l.logger.Warn(msg, args...)
 }
 
 // Info implements luxlog.Logger
-func (l *loggerAdapter) Info(msg string, fields ...zap.Field) {
-	args := fieldsToInterface(fields)
+func (l *loggerAdapter) Info(msg string, args ...interface{}) {
 	l.logger.Info(msg, args...)
 }
 
 // Trace implements luxlog.Logger
-func (l *loggerAdapter) Trace(msg string, fields ...zap.Field) {
-	args := fieldsToInterface(fields)
+func (l *loggerAdapter) Trace(msg string, args ...interface{}) {
 	l.logger.Trace(msg, args...)
 }
 
 // Debug implements luxlog.Logger
-func (l *loggerAdapter) Debug(msg string, fields ...zap.Field) {
-	args := fieldsToInterface(fields)
+func (l *loggerAdapter) Debug(msg string, args ...interface{}) {
 	l.logger.Debug(msg, args...)
 }
 
@@ -77,18 +72,64 @@ func (l *loggerAdapter) Verbo(msg string, fields ...zap.Field) {
 	l.logger.Verbo(msg, logFields...)
 }
 
+// Crit implements luxlog.Logger
+func (l *loggerAdapter) Crit(msg string, args ...interface{}) {
+	l.logger.Crit(msg, args...)
+}
+
 // SetLevel implements luxlog.Logger
-func (l *loggerAdapter) SetLevel(level logging.Level) {
-	// Convert logging.Level (int8) to slog.Level
-	slogLevel := slog.Level(level)
-	l.logger.SetLevel(slogLevel)
+func (l *loggerAdapter) SetLevel(level slog.Level) {
+	l.logger.SetLevel(level)
 }
 
 // Enabled implements luxlog.Logger
-func (l *loggerAdapter) Enabled(lvl logging.Level) bool {
-	// Convert logging.Level (int8) to slog.Level
-	slogLevel := slog.Level(lvl)
-	return l.logger.EnabledLevel(slogLevel)
+func (l *loggerAdapter) Enabled(ctx context.Context, lvl slog.Level) bool {
+	return l.logger.Enabled(ctx, lvl)
+}
+
+// EnabledLevel implements luxlog.Logger (node compatibility)
+func (l *loggerAdapter) EnabledLevel(lvl slog.Level) bool {
+	return l.logger.EnabledLevel(lvl)
+}
+
+// GetLevel implements luxlog.Logger
+func (l *loggerAdapter) GetLevel() slog.Level {
+	return l.logger.GetLevel()
+}
+
+// With implements luxlog.Logger
+func (l *loggerAdapter) With(ctx ...interface{}) luxlog.Logger {
+	return &loggerAdapter{logger: l.logger.With(ctx...)}
+}
+
+// New implements luxlog.Logger
+func (l *loggerAdapter) New(ctx ...interface{}) luxlog.Logger {
+	return &loggerAdapter{logger: l.logger.New(ctx...)}
+}
+
+// Log implements luxlog.Logger
+func (l *loggerAdapter) Log(level slog.Level, msg string, ctx ...interface{}) {
+	l.logger.Log(level, msg, ctx...)
+}
+
+// WriteLog implements luxlog.Logger
+func (l *loggerAdapter) WriteLog(level slog.Level, msg string, attrs ...any) {
+	l.logger.WriteLog(level, msg, attrs...)
+}
+
+// Handler implements luxlog.Logger
+func (l *loggerAdapter) Handler() slog.Handler {
+	return l.logger.Handler()
+}
+
+// WithFields implements luxlog.Logger
+func (l *loggerAdapter) WithFields(fields ...log.Field) luxlog.Logger {
+	return &loggerAdapter{logger: l.logger.WithFields(fields...)}
+}
+
+// WithOptions implements luxlog.Logger
+func (l *loggerAdapter) WithOptions(opts ...log.Option) luxlog.Logger {
+	return &loggerAdapter{logger: l.logger.WithOptions(opts...)}
 }
 
 // StopOnPanic implements luxlog.Logger

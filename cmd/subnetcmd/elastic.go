@@ -25,6 +25,7 @@ import (
 	"github.com/luxfi/node/genesis"
 
 	es "github.com/luxfi/cli/pkg/elasticsubnet"
+	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/sdk/models"
 	subnet "github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/ids"
@@ -403,7 +404,9 @@ func transformElasticSubnetLocal(sc models.Sidecar, subnetName string, tokenName
 	cancel := make(chan struct{})
 	go ux.PrintWait(cancel)
 	testKey := genesis.EWOQKey
-	keyChain := secp256k1fx.NewKeychain(testKey)
+	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Wrap the secp256k1fx keychain to implement node keychain interface
+	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
 	txID, assetID, err := subnet.IssueTransformSubnetTx(elasticSubnetConfig, keyChain, subnetID, tokenName, tokenSymbol, elasticSubnetConfig.MaxSupply)
 	close(cancel)
 	if err != nil {
@@ -603,7 +606,9 @@ func handleRemoveAndAddValidators(sc models.Sidecar, subnetID ids.ID, validator 
 	startTime := time.Now().Add(constants.StakingMinimumLeadTime).UTC()
 	endTime := startTime.Add(constants.MinStakeDuration)
 	testKey := genesis.EWOQKey
-	keyChain := secp256k1fx.NewKeychain(testKey)
+	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Wrap the secp256k1fx keychain to implement node keychain interface
+	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
 	_, err := subnet.IssueRemoveSubnetValidatorTx(keyChain, subnetID, validator)
 	if err != nil {
 		return err

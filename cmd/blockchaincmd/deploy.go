@@ -45,6 +45,8 @@ import (
 	"github.com/luxfi/node/vms/platformvm/fx"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/platformvm/warp/message"
+	"github.com/luxfi/node/vms/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -729,7 +731,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
-		ux.Logger.PrintToUser(logging.Blue.Wrap(
+		ux.Logger.PrintToUser(luxlog.Blue.Wrap(
 			fmt.Sprintf("Deploying into pre-existent subnet ID %s", subnetID.String()),
 		))
 		var isPermissioned bool
@@ -806,7 +808,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			chainGenesis,
 		)
 		if err != nil {
-			ux.Logger.PrintToUser(logging.Red.Wrap(
+			ux.Logger.PrintToUser(luxlog.Red.Wrap(
 				fmt.Sprintf("error deploying blockchain: %s. fix the issue and try again with a new deploy cmd", err),
 			))
 			return err
@@ -929,7 +931,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 	if sidecar.Sovereign && tracked {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(logging.Green.Wrap("Your L1 is ready for on-chain interactions."))
+		ux.Logger.PrintToUser(luxlog.Green.Wrap("Your L1 is ready for on-chain interactions."))
 	}
 
 	var warpErr, relayerErr error
@@ -1052,7 +1054,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertSubnetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
+func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertNetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
 	for index, luxdValidator := range luxdBootstrapValidators {
 		for bootstrapValidatorIndex, validator := range bootstrapValidators {
 			luxdValidatorNodeID, _ := ids.ToNodeID(luxdValidator.NodeID[:])
@@ -1103,8 +1105,8 @@ func getClusterBootstrapValidators(
 
 // ConvertToLuxdSubnetValidator converts subnet validators to L1 validator format
 // Deactivation owner is handled through the validator management contract
-func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertSubnetToL1Validator, error) {
-	bootstrapValidators := []*txs.ConvertSubnetToL1Validator{}
+func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertNetToL1Validator, error) {
+	bootstrapValidators := []*txs.ConvertNetToL1Validator{}
 	for _, validator := range subnetValidators {
 		nodeID, err := ids.NodeIDFromString(validator.NodeID)
 		if err != nil {
@@ -1128,11 +1130,31 @@ func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]
 			}
 			// The owner handling might need to be done differently with LP99
 		}
-		bootstrapValidator := &txs.ConvertSubnetToL1Validator{
-			NodeID:                nodeID,
-			Weight:                validator.Weight,
-			Balance:               validator.Balance,
-			BLSPublicKey:          blsPubKey,
+		// Convert nodeID to byte slice for types.JSONByteSlice
+		nodeIDBytes := nodeID.Bytes()
+
+		// Create ProofOfPossession from BLS public key
+		// For now, using empty proof since we don't have the private key
+		var blsPubKeyBytes [bls.PublicKeyLen]byte
+		copy(blsPubKeyBytes[:], bls.PublicKeyToCompressedBytes(blsPubKey))
+
+		bootstrapValidator := &txs.ConvertNetToL1Validator{
+			NodeID:  types.JSONByteSlice(nodeIDBytes[:]),
+			Weight:  validator.Weight,
+			Balance: validator.Balance,
+			Signer: signer.ProofOfPossession{
+				PublicKey: blsPubKeyBytes,
+				// ProofOfPossession would need to be generated with private key
+			},
+			// These fields are required but we'll use empty owners for now
+			RemainingBalanceOwner: message.PChainOwner{
+				Threshold: 1,
+				Addresses: []ids.ShortID{},
+			},
+			DeactivationOwner: message.PChainOwner{
+				Threshold: 1,
+				Addresses: []ids.ShortID{},
+			},
 		}
 		bootstrapValidators = append(bootstrapValidators, bootstrapValidator)
 	}
