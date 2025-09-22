@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.24.6
+go 1.25.1
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -14,16 +14,16 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.16.16
+	github.com/luxfi/crypto v1.17.0
 	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v0.8.7
+	github.com/luxfi/evm v1.16.17
 	github.com/luxfi/geth v1.16.34
-	github.com/luxfi/ids v1.0.2
+	github.com/luxfi/ids v1.1.0
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.16.17
 	github.com/luxfi/sdk v1.0.0
 	github.com/luxfi/warp v1.13.4-lux.20
 	github.com/manifoldco/promptui v0.9.0
@@ -51,7 +51,7 @@ require (
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/sync v0.16.0
 	golang.org/x/text v0.28.0
-	google.golang.org/api v0.216.0
+	google.golang.org/api v0.247.0
 	google.golang.org/protobuf v1.36.8
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -67,26 +67,20 @@ require (
 
 // Replace directives for local development
 replace (
-	github.com/luxfi/database => ../database
-	github.com/luxfi/evm => ../evm
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/ids => ../ids
-	github.com/luxfi/metric => ../metric
-	github.com/luxfi/netrunner => ../netrunner
-	github.com/luxfi/node => ../node
-	github.com/luxfi/sdk => ../sdk
-	github.com/luxfi/warp => ../warp
 	github.com/luxfi/coreth => ../coreth
 	github.com/luxfi/lpm => ../lpm
 	github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 )
 
-require golang.org/x/term v0.34.0
+require (
+	github.com/luxfi/math v0.1.1
+	golang.org/x/term v0.34.0
+)
 
 require (
-	cloud.google.com/go/auth v0.13.0 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.6 // indirect
-	cloud.google.com/go/compute/metadata v0.7.0 // indirect
+	cloud.google.com/go/auth v0.16.4 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
+	cloud.google.com/go/compute/metadata v0.8.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
@@ -164,10 +158,10 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20250820193118-f64d9cf942d6 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
-	github.com/google/s2a-go v0.1.8 // indirect
+	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
-	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
+	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/rpc v1.2.1 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
@@ -192,9 +186,8 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/consensus v1.18.0 // indirect
-	github.com/luxfi/database v1.1.13 // indirect
-	github.com/luxfi/math v0.1.0 // indirect
-	github.com/luxfi/metric v1.3.0 // indirect
+	github.com/luxfi/database v1.2.0 // indirect
+	github.com/luxfi/metric v1.4.0 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
@@ -240,10 +233,11 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	github.com/zondax/golem v0.27.0 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
-	github.com/zondax/ledger-go v1.0.0 // indirect
+	github.com/zondax/ledger-go v1.0.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.37.0 // indirect
