@@ -30,8 +30,9 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/proto/pb/platformvm"
 	luxdconstants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/utils/logging"
 	luxlog "github.com/luxfi/log"
-	warp "github.com/luxfi/node/vms/platformvm/warp"
+	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 )
@@ -273,7 +274,7 @@ func GetRegisterL1ValidatorMessage(
 			}
 			registerSubnetValidatorUnsignedMessage, err = warp.NewUnsignedMessage(
 				network.ID(),
-				blockchainID,
+				blockchainID[:],
 				registerSubnetValidatorAddressedCall.Bytes(),
 			)
 			if err != nil {
@@ -331,7 +332,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID(),
-		luxdconstants.PlatformChainID,
+		luxdconstants.PlatformChainID[:],
 		subnetValidatorRegistrationAddressedCall.Bytes(),
 	)
 	if err != nil {
@@ -675,7 +676,7 @@ func GetRegistrationJustification(
 			justification := platformvm.L1ValidatorRegistrationJustification{
 				Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertSubnetToL1TxData{
 					ConvertSubnetToL1TxData: &platformvm.SubnetIDIndex{
-						SubnetID: subnetID[:],
+						SubnetId: subnetID[:],
 						Index:    validationIndex,
 					},
 				},

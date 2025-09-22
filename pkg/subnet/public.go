@@ -24,7 +24,7 @@ import (
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
@@ -76,14 +76,14 @@ func (d *PublicDeployer) AddValidator(
 	if err != nil {
 		return false, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
 	}
-	validator := &txs.SubnetValidator{
+	validator := &txs.NetValidator{
 		Validator: txs.Validator{
 			NodeID: nodeID,
 			Start:  uint64(startTime.Unix()),
 			End:    uint64(startTime.Add(duration).Unix()),
 			Wght:   weight,
 		},
-		Subnet: subnetID,
+		Net: subnetID,
 	}
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign SubnetValidator transaction on the ledger device *** ")
@@ -434,7 +434,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: keychainwrapper.WrapNodeKeychain(d.kc),
+		LUXKeychain: keychainwrapper.WrapCryptoKeychain(d.kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
@@ -492,12 +492,12 @@ func (d *PublicDeployer) createBlockchainTx(
 
 func (d *PublicDeployer) createAddSubnetValidatorTx(
 	subnetAuthKeys []ids.ShortID,
-	validator *txs.SubnetValidator,
+	validator *txs.NetValidator,
 	wallet primary.Wallet,
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewAddSubnetValidatorTx(validator, options...)
+	unsignedTx, err := wallet.P().Builder().NewAddNetValidatorTx(validator, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -517,7 +517,7 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewRemoveSubnetValidatorTx(nodeID, subnetID, options...)
+	unsignedTx, err := wallet.P().Builder().NewRemoveNetValidatorTx(nodeID, subnetID, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -537,7 +537,7 @@ func (d *PublicDeployer) createTransformSubnetTX(
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewTransformSubnetTx(elasticSubnetConfig.SubnetID, assetID,
+	unsignedTx, err := wallet.P().Builder().NewTransformNetTx(elasticSubnetConfig.SubnetID, assetID,
 		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
@@ -650,7 +650,7 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
 	}
-	tx, err := wallet.P().IssueCreateSubnetTx(owners, opts...)
+	tx, err := wallet.P().IssueCreateNetTx(owners, opts...)
 	if err != nil {
 		return ids.Empty, err
 	}

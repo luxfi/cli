@@ -72,10 +72,7 @@ replace (
 	github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 )
 
-require (
-	github.com/luxfi/math v0.1.1
-	golang.org/x/term v0.34.0
-)
+require golang.org/x/term v0.34.0
 
 require (
 	cloud.google.com/go/auth v0.16.4 // indirect
@@ -187,6 +184,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/consensus v1.18.0 // indirect
 	github.com/luxfi/database v1.2.0 // indirect
+	github.com/luxfi/math v0.1.1 // indirect
 	github.com/luxfi/metric v1.4.0 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect

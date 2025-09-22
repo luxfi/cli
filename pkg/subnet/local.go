@@ -35,11 +35,11 @@ import (
 	anrutils "github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/genesis"
 	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
 	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
-	ledgerkeychain "github.com/luxfi/ledger-lux-go/keychain"
+	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/reward"
@@ -58,7 +58,7 @@ const (
 // emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
 type emptyEthKeychain struct{}
 
-func (e *emptyEthKeychain) GetEth(addr common.Address) (ledgerkeychain.Signer, bool) {
+func (e *emptyEthKeychain) GetEth(addr common.Address) (walletkeychain.Signer, bool) {
 	return nil, false
 }
 
@@ -188,7 +188,7 @@ func IssueTransformSubnetTx(
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: keychainwrapper.WrapNodeKeychain(kc),
+		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
@@ -214,7 +214,7 @@ func IssueTransformSubnetTx(
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
-	transformSubnetTxID, err := wallet.P().IssueTransformSubnetTx(elasticSubnetConfig.SubnetID, subnetAssetID,
+	transformSubnetTxID, err := wallet.P().IssueTransformNetTx(elasticSubnetConfig.SubnetID, subnetAssetID,
 		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
@@ -248,7 +248,7 @@ func IssueAddPermissionlessValidatorTx(
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: keychainwrapper.WrapNodeKeychain(kc),
+		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
@@ -262,14 +262,14 @@ func IssueAddPermissionlessValidatorTx(
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
 	txID, err := wallet.P().IssueAddPermissionlessValidatorTx(
-		&txs.SubnetValidator{
+		&txs.NetValidator{
 			Validator: txs.Validator{
 				NodeID: nodeID,
 				Start:  startTime,
 				End:    endTime,
 				Wght:   stakeAmount,
 			},
-			Subnet: subnetID,
+			Net: subnetID,
 		},
 		&signer.Empty{},
 		assetID,
@@ -775,14 +775,14 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
-		LUXKeychain: keychainwrapper.WrapNodeKeychain(kc),
+		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
 		EthKeychain: ethKc,
 	})
 	if err != nil {
 		return ids.Empty, err
 	}
 
-	tx, err := wallet.P().IssueRemoveSubnetValidatorTx(nodeID, subnetID)
+	tx, err := wallet.P().IssueRemoveNetValidatorTx(nodeID, subnetID)
 	if err != nil {
 		return ids.Empty, err
 	}
