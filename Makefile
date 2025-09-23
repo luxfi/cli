@@ -18,7 +18,7 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p bin
-	go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) main.go
+	GOSUMDB=off GOPROXY=direct go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) main.go
 	@echo "Build complete: ./bin/$(BINARY_NAME)"
 
 # Install the binary to GOBIN
@@ -32,7 +32,7 @@ install:
 .PHONY: test
 test:
 	@echo "Running tests..."
-	go test ./...
+	GOSUMDB=off GOPROXY=direct go test ./...
 
 # Run tests with coverage
 .PHONY: test-coverage
