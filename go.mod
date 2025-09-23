@@ -15,9 +15,9 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.17.0
-	github.com/luxfi/erc20-go v0.2.0
-	github.com/luxfi/evm v1.16.17
-	github.com/luxfi/geth v1.17.0
+	github.com/luxfi/erc20-go v0.2.1
+	github.com/luxfi/evm v1.16.18
+	github.com/luxfi/geth v1.16.35
 	github.com/luxfi/ids v1.1.0
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.22
@@ -64,13 +64,6 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 
 // Keep only the tablewriter replace
 replace (
-	github.com/luxfi/erc20-go => ../erc20-go
-	github.com/luxfi/evm => ../evm
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/netrunner => ../netrunner
-	// Temporary local replace directives for testing - DO NOT COMMIT
-	github.com/luxfi/node => ../node
-	github.com/luxfi/sdk => ../sdk
 	github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 )
 
@@ -275,5 +268,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-replace github.com/ethereum/go-ethereum => github.com/luxfi/geth v1.16.34
