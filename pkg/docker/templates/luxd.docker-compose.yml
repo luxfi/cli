@@ -17,7 +17,7 @@ services:
     volumes:
       - luxd_data_{{.E2ESuffix}}:/.luxd:rw
     ports:
-      - "{{ .E2EIP }}:9650:9650"
+      - "{{ .E2EIP }}:9630:9630"
       - "{{ .E2EIP }}:9651:9651"
     networks:
       - luxd_net_{{.E2ESuffix}}
@@ -25,7 +25,7 @@ services:
     volumes:
       - /home/ubuntu/.luxd:/.luxd:rw
     ports:
-      - "9650:9650"
+      - "9630:9630"
       - "9651:9651"
     network_mode: "host"
 {{ end }}
