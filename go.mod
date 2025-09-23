@@ -17,13 +17,13 @@ require (
 	github.com/luxfi/crypto v1.17.0
 	github.com/luxfi/erc20-go v0.2.0
 	github.com/luxfi/evm v1.16.17
-	github.com/luxfi/geth v1.16.34
+	github.com/luxfi/geth v1.17.0
 	github.com/luxfi/ids v1.1.0
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
-	github.com/luxfi/node v1.16.17
+	github.com/luxfi/node v1.17.1
 	github.com/luxfi/sdk v1.0.0
 	github.com/luxfi/warp v1.13.4-lux.20
 	github.com/manifoldco/promptui v0.9.0
@@ -57,22 +57,27 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require (
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/luxfi/netrunner-sdk v0.3.0 // indirect
-)
+require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
-// Replace directives for local development
+// Keep only the tablewriter replace
 replace (
-	github.com/luxfi/coreth => ../coreth
-	github.com/luxfi/lpm => ../lpm
+	github.com/luxfi/erc20-go => ../erc20-go
+	github.com/luxfi/evm => ../evm
+	github.com/luxfi/geth => ../geth
+	github.com/luxfi/netrunner => ../netrunner
+	// Temporary local replace directives for testing - DO NOT COMMIT
+	github.com/luxfi/node => ../node
+	github.com/luxfi/sdk => ../sdk
 	github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 )
 
-require golang.org/x/term v0.34.0
+require (
+	github.com/luxfi/math v0.1.1
+	golang.org/x/term v0.34.0
+)
 
 require (
 	cloud.google.com/go/auth v0.16.4 // indirect
@@ -182,9 +187,8 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.18.0 // indirect
+	github.com/luxfi/consensus v1.18.1 // indirect
 	github.com/luxfi/database v1.2.0 // indirect
-	github.com/luxfi/math v0.1.1 // indirect
 	github.com/luxfi/metric v1.4.0 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
@@ -272,24 +276,4 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace (
-	github.com/ethereum/go-ethereum => github.com/luxfi/geth v1.16.34
-	github.com/luxfi/consensus => ../consensus
-	github.com/luxfi/crypto => ../crypto
-	github.com/luxfi/database => ../database
-	github.com/luxfi/erc20-go => ../erc20-go
-	github.com/luxfi/evm => ../evm
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/ids => ../ids
-	github.com/luxfi/ledger-lux-go => ../ledger-lux-go
-	github.com/luxfi/log => ../log
-	github.com/luxfi/math => ../math
-	github.com/luxfi/metric => ../metric
-	github.com/luxfi/metrics => ../metrics
-	github.com/luxfi/netrunner => ../netrunner
-	github.com/luxfi/netrunner-sdk => ../netrunner-sdk
-	github.com/luxfi/node => ../node
-	github.com/luxfi/sdk => ../sdk
-	github.com/luxfi/trace => ../trace
-	github.com/luxfi/warp => ../warp
-)
+replace github.com/ethereum/go-ethereum => github.com/luxfi/geth v1.16.34

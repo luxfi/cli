@@ -18,7 +18,7 @@ import (
 const (
 	ewoqKeyName      = "ewoq"
 	subnetName       = "testSubnet"
-	cChainRPCUrl     = "http://127.0.0.1:9650/ext/bc/C/rpc"
+	cChainRPCUrl     = "http://127.0.0.1:9630/ext/bc/C/rpc"
 	cChainSubnetName = "c-chain"
 )
 
