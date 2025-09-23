@@ -2586,7 +2586,7 @@
               "options": {
                 "mode": "exclude",
                 "names": [
-                  "Queries per Accepted Container {instance=\"localhost:9650\", job=\"luxd\"}"
+                  "Queries per Accepted Container {instance=\"localhost:9630\", job=\"luxd\"}"
                 ],
                 "prefix": "All except:",
                 "readOnly": true
@@ -5659,8 +5659,8 @@
       {
         "current": {
           "selected": true,
-          "text": "184.73.245.13:9650",
-          "value": "184.73.245.13:9650"
+          "text": "184.73.245.13:9630",
+          "value": "184.73.245.13:9630"
         },
         "definition": "label_values(instance)",
         "hide": 0,
@@ -5674,7 +5674,7 @@
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/9650/",
+        "regex": "/9630/",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"

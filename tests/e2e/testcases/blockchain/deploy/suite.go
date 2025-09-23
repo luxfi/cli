@@ -358,7 +358,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	})
 	ginkgo.It("ERROR PATH: bootstrap endpoints is not applicable if convert only is false", func() {
 		testFlags := utils.TestFlags{
-			"bootstrap-endpoints": "127.0.0.1:9650",
+			"bootstrap-endpoints": "127.0.0.1:9630",
 			"convert-only":        false,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "deploy", blockchainCmdArgs, globalFlags, testFlags)
@@ -367,7 +367,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	})
 	ginkgo.It("ERROR PATH: bootstrap endpoints is not applicable if use local machine is true", func() {
 		testFlags := utils.TestFlags{
-			"bootstrap-endpoints": "127.0.0.1:9650",
+			"bootstrap-endpoints": "127.0.0.1:9630",
 			"use-local-machine":   true,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "deploy", blockchainCmdArgs, globalFlags, testFlags)
@@ -404,7 +404,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	ginkgo.It("ERROR PATH: bootstrap filepath cannot be set if bootstrap endpoints is set", func() {
 		testFlags := utils.TestFlags{
 			"bootstrap-filepath":  utils.BootstrapValidatorPath2,
-			"bootstrap-endpoints": "127.0.0.1:9650",
+			"bootstrap-endpoints": "127.0.0.1:9630",
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "deploy", blockchainCmdArgs, globalFlags, testFlags)
 		gomega.Expect(err).Should(gomega.HaveOccurred())

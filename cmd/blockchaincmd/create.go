@@ -130,7 +130,6 @@ configuration, pass the -f flag.`,
 
 	warpGroup := flags.RegisterFlagGroup(cmd, "Warp Flags", "show-warp-flags", true, func(set *pflag.FlagSet) {
 		set.BoolVar(&createFlags.useWarp, "warp", true, "generate a vm with warp support (needed for Warp)")
-		set.BoolVar(&createFlags.useWarp, "warp", false, "interoperate with other blockchains using Warp")
 		set.BoolVar(&createFlags.useExternalGasToken, "external-gas-token", false, "use a gas token from another blockchain")
 		set.BoolVar(&createFlags.addWarpRegistryToGenesis, "warp-registry-at-genesis", false, "setup Warp registry smart contract on genesis [experimental]")
 		set.BoolVar(&createFlags.useProductionDefaults, "production-defaults", false, "use default production settings for your blockchain")

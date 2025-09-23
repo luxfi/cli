@@ -82,7 +82,7 @@ var _ = ginkgo.Describe("[Node monitoring]", func() {
 		hostluxdPorts := []string{}
 		hostMachinePorts := []string{}
 		for _, host := range createdHosts {
-			hostluxdPorts = append(hostluxdPorts, fmt.Sprintf("%s:9650", host.IP))
+			hostluxdPorts = append(hostluxdPorts, fmt.Sprintf("%s:9630", host.IP))
 			hostMachinePorts = append(hostMachinePorts, fmt.Sprintf("%s:9100", host.IP))
 		}
 		prometheusConfig := commands.ParsePrometheusYamlConfig(filepath.Join(homeDir, constants.E2EBaseDirName, relativePath, monitoringHostID, constants.NodePrometheusConfigFileName))

@@ -31,11 +31,16 @@ func (w *NodeToLedgerWrapper) Get(addr ids.ShortID) (ledgerkeychain.Signer, bool
 	return signer, true
 }
 
-// Addresses returns the addresses managed by this keychain as a slice
-func (w *NodeToLedgerWrapper) Addresses() []ids.ShortID {
-	// Convert set to slice
+// Addresses returns the addresses managed by this keychain as a set
+func (w *NodeToLedgerWrapper) Addresses() ledgerkeychain.Set[ids.ShortID] {
+	// Get the set from node keychain
 	addrSet := w.nodeKC.Addresses()
-	return addrSet.List()
+	// Create a new ledger keychain compatible set
+	ledgerSet := make(ledgerkeychain.Set[ids.ShortID])
+	for addr := range addrSet {
+		ledgerSet[addr] = struct{}{}
+	}
+	return ledgerSet
 }
 
 // Secp256k1fxToNodeWrapper wraps a secp256k1fx keychain to implement node keychain interface

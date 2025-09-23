@@ -1739,8 +1739,8 @@
       {
         "current": {
           "selected": true,
-          "text": "18.214.155.207:9650",
-          "value": "18.214.155.207:9650"
+          "text": "18.214.155.207:9630",
+          "value": "18.214.155.207:9630"
         },
         "datasource": {
           "type": "prometheus",
@@ -1758,7 +1758,7 @@
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/9650/",
+        "regex": "/9630/",
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"

@@ -69,7 +69,7 @@ func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string)
 		for _, node := range nodes {
 			if nodeStr, ok := node.(string); ok {
 				// Construct endpoint URI from node ID
-				endpoint := fmt.Sprintf("http://%s:9650", nodeStr)
+				endpoint := fmt.Sprintf("http://%s:9630", nodeStr)
 				*endpoints = append(*endpoints, endpoint)
 			}
 		}

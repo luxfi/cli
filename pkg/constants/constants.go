@@ -287,7 +287,7 @@ const (
 
 	// Network ports
 	SSHTCPPort      = 22
-	LuxdAPIPort     = 9650
+	LuxdAPIPort     = 9630
 	LuxdGrafanaPort = 3000
 
 	// Node roles
