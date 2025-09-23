@@ -485,7 +485,7 @@ func StartTestnet() error {
 		"--chain-data-dir=/home/z/.luxd/testnet-data",
 		"--db-dir=/home/z/.luxd/testnet-db",
 		"--log-dir=/home/z/.luxd/testnet-logs",
-		"--http-port=9650",
+		"--http-port=9630",
 		"--staking-port=9651",
 	}
 
@@ -501,7 +501,7 @@ func StartTestnet() error {
 	}
 
 	ux.Logger.PrintToUser("Testnet started successfully!")
-	ux.Logger.PrintToUser("RPC endpoint: http://localhost:9650")
+	ux.Logger.PrintToUser("RPC endpoint: http://localhost:9630")
 	ux.Logger.PrintToUser("Node logs: ~/.luxd/testnet-logs/")
 	return nil
 }
