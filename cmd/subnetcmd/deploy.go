@@ -81,8 +81,7 @@ so you can take your locally tested Subnet and deploy it on Testnet or Mainnet.`
 		Args:              cobra.ExactArgs(1),
 	}
 	cmd.Flags().BoolVarP(&deployLocal, "local", "l", false, "deploy to a local network")
-	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet (alias to `testnet`)")
-	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "f", false, "deploy to testnet (alias to `testnet`")
+	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "deploy to testnet")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "deploy to mainnet")
 	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet deploy only]")

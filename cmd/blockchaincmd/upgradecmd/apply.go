@@ -78,8 +78,7 @@ Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain
 
 	cmd.Flags().BoolVar(&useConfig, "config", false, "create upgrade config for future subnet deployments (same as generate)")
 	cmd.Flags().BoolVar(&useLocal, "local", false, "apply upgrade existing `local` deployment")
-	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "apply upgrade existing `testnet` deployment (alias for `testnet`)")
-	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "apply upgrade existing `testnet` deployment (alias for `testnet`)")
+	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "apply upgrade existing `testnet` deployment")
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "apply upgrade existing `mainnet` deployment")
 	cmd.Flags().BoolVar(&print, "print", false, "if true, print the manual config without prompting (for public networks only)")
 	cmd.Flags().BoolVar(&force, "force", false, "If true, don't prompt for confirmation of timestamps in the past")
