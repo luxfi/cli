@@ -155,8 +155,7 @@ func GetNetworkFlagsGroup(cmd *cobra.Command, networkFlags *NetworkFlags, addEnd
 				addEndpoint = true
 				addCluster = true
 			case Testnet:
-				set.BoolVarP(&networkFlags.UseTestnet, "testnet", "t", false, "operate on testnet (alias to `testnet`)")
-				set.BoolVarP(&networkFlags.UseTestnet, "testnet", "f", false, "operate on testnet (alias to `testnet`)")
+				set.BoolVarP(&networkFlags.UseTestnet, "testnet", "t", false, "operate on testnet")
 			case Mainnet:
 				set.BoolVarP(&networkFlags.UseMainnet, "mainnet", "m", false, "operate on mainnet")
 			case Cluster:
