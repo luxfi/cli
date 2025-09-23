@@ -1179,7 +1179,7 @@ func printResults(cloudConfigMap models.CloudConfig, publicIPMap map[string]stri
 			ux.Logger.PrintLineSeparator()
 			ux.Logger.PrintToUser("API Endpoint(s) for region [%s]: ", luxlog.LightBlue.Wrap(region))
 			for _, apiNode := range cloudConfig.APIInstanceIDs {
-				ux.Logger.PrintToUser(luxlog.Green.Wrap(fmt.Sprintf("    http://%s:9650", publicIPMap[apiNode])))
+				ux.Logger.PrintToUser(luxlog.Green.Wrap(fmt.Sprintf("    http://%s:9630", publicIPMap[apiNode])))
 			}
 			ux.Logger.PrintLineSeparator()
 			ux.Logger.PrintToUser("")
@@ -1504,7 +1504,7 @@ services:
     networks:
       - %s_network
     ports:
-      - "%s:9650"
+      - "%s:9630"
       - "%s:9651"
     environment:
       - NETWORK_ID=%s
