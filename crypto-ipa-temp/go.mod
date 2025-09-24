@@ -1,6 +1,6 @@
 module github.com/luxfi/crypto/ipa
 
-go 1.18
+go 1.25
 
 require (
 	github.com/consensys/gnark-crypto v0.12.1
