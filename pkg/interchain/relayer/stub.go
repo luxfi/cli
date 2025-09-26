@@ -1,7 +1,7 @@
 //go:build nowarp
 // +build nowarp
 
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package relayer
 
