@@ -62,11 +62,6 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
-// Keep only the tablewriter replace
-replace (
-	github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
-)
-
 require (
 	github.com/luxfi/math v0.1.1
 	golang.org/x/term v0.34.0
