@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // LPM (Lux Plugin Manager) client wrapper for CLI integration
 package lpm
 
