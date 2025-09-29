@@ -60,7 +60,7 @@ these prompts by providing the values with flags.`,
 		RunE:    removeValidator,
 		PreRunE: cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags are registered at the parent blockchain command level
 	flags.AddRPCFlagToCmd(cmd, app, &removeValidatorFlags.RPC)
 	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &removeValidatorFlags.SigAggFlags)
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet deploy only]")

@@ -11,7 +11,8 @@ import (
 	sdkapp "github.com/luxfi/sdk/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/cli/pkg/prompts"
+	sdkprompts "github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/types"
 	luxlog "github.com/luxfi/log"
 )
@@ -67,8 +68,45 @@ type promptAdapter struct {
 	prompts.Prompter
 }
 
-// The CLI's prompts.Prompter already implements the SDK's prompts.Prompter interface
-// So we just embed it directly
+// CaptureURL adapts the CLI's CaptureURL (2 params) to SDK's CaptureURL (1 param)
+func (p promptAdapter) CaptureURL(promptStr string) (string, error) {
+	// Call the CLI's CaptureURL with validateConnection=false by default
+	return p.Prompter.CaptureURL(promptStr, false)
+}
+
+// CaptureWeight adapts the CLI's CaptureWeight to SDK's signature
+func (p promptAdapter) CaptureWeight(promptStr string) (uint64, error) {
+	// Call CLI's CaptureWeight with nil validator since SDK doesn't pass one
+	return p.Prompter.CaptureWeight(promptStr, nil)
+}
+
+// CapturePositiveInt adapts between the different Comparator types
+func (p promptAdapter) CapturePositiveInt(promptStr string, comparators []sdkprompts.Comparator) (int, error) {
+	// Convert SDK comparators to CLI comparators
+	cliComparators := make([]prompts.Comparator, len(comparators))
+	for i, comp := range comparators {
+		cliComparators[i] = prompts.Comparator{
+			Label: comp.Label,
+			Type:  comp.Type,
+			Value: comp.Value,
+		}
+	}
+	return p.Prompter.CapturePositiveInt(promptStr, cliComparators)
+}
+
+// CaptureUint64Compare adapts between the different Comparator types
+func (p promptAdapter) CaptureUint64Compare(promptStr string, comparators []sdkprompts.Comparator) (uint64, error) {
+	// Convert SDK comparators to CLI comparators
+	cliComparators := make([]prompts.Comparator, len(comparators))
+	for i, comp := range comparators {
+		cliComparators[i] = prompts.Comparator{
+			Label: comp.Label,
+			Type:  comp.Type,
+			Value: comp.Value,
+		}
+	}
+	return p.Prompter.CaptureUint64Compare(promptStr, cliComparators)
+}
 
 type downloaderAdapter struct {
 	Downloader
