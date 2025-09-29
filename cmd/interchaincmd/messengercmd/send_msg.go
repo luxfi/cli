@@ -41,7 +41,7 @@ func NewSendMsgCmd() *cobra.Command {
 		RunE:  sendMsg,
 		Args:  cobrautils.ExactArgs(3),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &msgFlags.Network, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	msgFlags.PrivateKeyFlags.AddToCmd(cmd, "as message originator and to pay source blockchain fees")
 	cmd.Flags().BoolVar(&msgFlags.HexEncodedMessage, "hex-encoded", false, "given message is hex encoded")
 	cmd.Flags().StringVar(&msgFlags.DestinationAddress, "destination-address", "", "deliver the message to the given contract destination address")

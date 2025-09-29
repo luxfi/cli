@@ -31,7 +31,7 @@ func newStatsCmd() *cobra.Command {
 		Args:  cobrautils.ExactArgs(1),
 		RunE:  stats,
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags are registered at the parent blockchain command level
 	return cmd
 }
 
@@ -95,11 +95,11 @@ func buildCurrentValidatorStats(pClient platformvm.Client, infoClient info.Clien
 	ux.Logger.PrintToUser("Current validators (already validating the subnet)")
 	ux.Logger.PrintToUser("==================================================")
 
-	header := []string{"nodeID", "connected", "weight", "remaining", "vmversion"}
-	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
+	_ = []string{"nodeID", "connected", "weight", "remaining", "vmversion"}
+	// table.SetHeader(header)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0})
+	// table.SetAutoMergeCells(true)
+	// table.SetRowLine(true)
 	rows := [][]string{}
 
 	var (

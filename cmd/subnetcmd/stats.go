@@ -158,11 +158,11 @@ func buildPendingValidatorStats(pClient platformvm.Client, infoClient InfoClient
 	ux.Logger.PrintToUser("Pending validators (not yet validating the subnet)")
 	ux.Logger.PrintToUser("==================================================")
 
-	header := []string{"nodeID", "weight", "start-time", "end-time", "vmversion"}
-	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
+	_ = []string{"nodeID", "weight", "start-time", "end-time", "vmversion"}
+	// table.SetHeader(header)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0})
+	// table.SetAutoMergeCells(true)
+	// table.SetRowLine(true)
 
 	var (
 		startTime, endTime          time.Time
@@ -221,11 +221,11 @@ func buildCurrentValidatorStats(pClient platformvm.Client, infoClient InfoClient
 	ux.Logger.PrintToUser("Current validators (already validating the subnet)")
 	ux.Logger.PrintToUser("==================================================")
 
-	header := []string{"nodeID", "connected", "weight", "remaining", "vmversion"}
-	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
+	_ = []string{"nodeID", "connected", "weight", "remaining", "vmversion"}
+	// table.SetHeader(header)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0})
+	// table.SetAutoMergeCells(true)
+	// table.SetRowLine(true)
 	rows := [][]string{}
 
 	var (

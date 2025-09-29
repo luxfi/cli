@@ -48,8 +48,8 @@ const (
 
 func preview(configSpec ConfigSpec) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetRowLine(true)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
+	// table.SetRowLine(true)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0})
 	if len(configSpec.sources) > 0 {
 		for _, source := range configSpec.sources {
 			table.Append([]string{"Source", source.blockchainDesc})

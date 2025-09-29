@@ -38,7 +38,7 @@ func newDeployERC20Cmd() *cobra.Command {
 		RunE:  deployERC20,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &deployERC20Flags.Network, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	deployERC20Flags.PrivateKeyFlags.AddToCmd(cmd, "as contract deployer")
 	// enabling blockchain names, C-Chain and blockchain IDs
 	deployERC20Flags.chainFlags.SetEnabled(true, true, false, false, true)
