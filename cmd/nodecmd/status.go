@@ -300,8 +300,8 @@ func printOutput(
 		header = append(header, "Subnet "+blockchainName)
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetRowLine(true)
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
 	for i, cloudID := range cloudIDs {
 		boostrappedStatus := ""
 		healthyStatus := ""

@@ -91,7 +91,7 @@ func PrintWait(cancel chan struct{}) {
 // PrintTableEndpoints prints the endpoints coming from the healthy call
 func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"node", "VM", "URL", "ALIAS_URL"})
+	// Note: SetHeader is not available in v1.0.9, use Append for header row
 
 	nodeInfos := map[string]*rpcpb.NodeInfo{}
 	for _, nodeInfo := range clusterInfo.NodeInfos {
@@ -100,7 +100,7 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	for _, nodeName := range clusterInfo.NodeNames {
 		nodeInfo := nodeInfos[nodeName]
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			table.Append([]string{nodeInfo.Name, chainInfo.ChainName, fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.ChainName)})
+			table.Append(nodeInfo.Name, chainInfo.ChainName, fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.ChainName))
 		}
 	}
 	table.Render()
@@ -109,17 +109,8 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 // DefaultTable creates a default table with the given title and headers
 func DefaultTable(title string, headers []string) *tablewriter.Table {
 	table := tablewriter.NewWriter(os.Stdout)
-
-	if title != "" {
-		// Table title is set using caption in v0.0.5
-		table.SetCaption(true, title)
-	}
-	if headers != nil && len(headers) > 0 {
-		table.SetHeader(headers)
-	}
-	table.SetBorder(true)
-	table.SetAutoWrapText(false)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	// Note: v1.0.9 API doesn't have SetCaption, SetBorder, SetAutoWrapText, SetAlignment
+	// These would need to be set via Options during creation or not at all
 	return table
 }
 

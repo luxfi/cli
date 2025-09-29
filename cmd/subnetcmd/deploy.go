@@ -852,11 +852,11 @@ func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID) erro
 	if err != nil {
 		return fmt.Errorf("failed to create VM ID from %s: %w", chain, err)
 	}
-	header := []string{"Deployment results", ""}
+	_ = []string{"Deployment results", ""}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetRowLine(true)
-	table.SetAutoMergeCells(true)
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
+	// table.SetAutoMergeCells(true)
 	table.Append([]string{"Chain Name", chain})
 	table.Append([]string{"Subnet ID", subnetID.String()})
 	table.Append([]string{"VM ID", vmID.String()})

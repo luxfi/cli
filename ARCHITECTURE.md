@@ -110,7 +110,7 @@ func (s *E2ESuite) AfterAll() {
 }
 ```
 
-## Missing Functionality to Port from Avalanche
+## Missing Functionality to Port from Lux
 
 ### 1. Sovereign Chain Management
 ```go
@@ -298,7 +298,7 @@ type QuantumSafeChain struct {
 ## Next Steps
 
 1. [ ] Implement SDK-based architecture
-2. [ ] Port missing tests from Avalanche
+2. [ ] Port missing tests from Lux
 3. [ ] Add native cross-chain messaging
 4. [ ] Deploy monitoring stack
 5. [ ] Create ecosystem deployer

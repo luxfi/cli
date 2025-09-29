@@ -26,7 +26,7 @@ func newFundCmd() *cobra.Command {
 		Args:  cobrautils.ExactArgs(0),
 	}
 	
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().StringVar(&fundingKeyName, "key", "", "Key to use for funding")
 	cmd.Flags().Float64Var(&fundAmount, "amount", 0.1, "Amount to fund in LUX")
 	cmd.Flags().StringSliceVar(&blockchainNames, "blockchains", nil, "Blockchains to fund")

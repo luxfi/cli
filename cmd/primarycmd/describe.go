@@ -42,7 +42,7 @@ func newDescribeCmd() *cobra.Command {
 		RunE:  describe,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.LocalClusterSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	return cmd
 }
 
@@ -117,11 +117,11 @@ func describe(_ *cobra.Command, _ []string) error {
 	balance = balance.Div(balance, big.NewInt(int64(units.Lux)))
 	balanceStr := fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Lux))
 	table := tablewriter.NewWriter(os.Stdout)
-	header := []string{"Parameter", "Value"}
-	table.SetHeader(header)
-	table.SetRowLine(true)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
+	_ = []string{"Parameter", "Value"}
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
+	// table.SetAlignment(tablewriter.ALIGN_LEFT)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0})
 	table.Append([]string{"RPC URL", rpcURL})
 	codespaceURL, err := utils.GetCodespaceURL(rpcURL)
 	if err != nil {

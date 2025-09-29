@@ -26,6 +26,7 @@ manage your Blockchain configurations and live deployments.`,
 		RunE: cobrautils.CommandSuiteUsage,
 	}
 	app = injectedApp
+	// Note: Network flags are registered at root level, subcommands should not re-register them
 	// blockchain create
 	cmd.AddCommand(newCreateCmd())
 	// blockchain delete

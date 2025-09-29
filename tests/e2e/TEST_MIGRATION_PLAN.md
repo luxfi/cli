@@ -1,4 +1,4 @@
-# Test Migration Plan from Avalanche CLI
+# Test Migration Plan from Lux CLI
 
 ## Priority 1: Critical Missing Tests
 

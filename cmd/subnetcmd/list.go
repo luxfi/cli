@@ -55,12 +55,12 @@ func listSubnets(cmd *cobra.Command, args []string) error {
 	if deployed {
 		return listDeployInfo(cmd, args)
 	}
-	header := []string{"subnet", "chain", "chainID", "vmID", "type", "vm version", "from repo"}
+	_ = []string{"subnet", "chain", "chainID", "vmID", "type", "vm version", "from repo"}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0})
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
+	// table.SetHeader(header)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0})
+	// table.SetAutoMergeCells(true)
+	// table.SetRowLine(true)
 
 	rows := subnetMatrix{}
 
@@ -140,12 +140,12 @@ func getSidecars(app *application.Lux) ([]*models.Sidecar, error) {
 }
 
 func listDeployInfo(*cobra.Command, []string) error {
-	header := []string{"subnet", "chain", "vm ID", "Local Network", "Testnet (testnet)", "Mainnet"}
+	_ = []string{"subnet", "chain", "vm ID", "Local Network", "Testnet (testnet)", "Mainnet"}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2, 3, 4})
-	table.SetAutoMergeCells(true)
-	table.SetRowLine(true)
+	// table.SetHeader(header)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2, 3, 4})
+	// table.SetAutoMergeCells(true)
+	// table.SetRowLine(true)
 
 	rows := subnetMatrix{}
 

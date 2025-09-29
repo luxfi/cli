@@ -57,7 +57,7 @@ func newDeployCmd() *cobra.Command {
 		RunE:  deploy,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &deployFlags.Network, true, networkoptions.NonMainnetSupportedNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	cmd.Flags().StringVar(&deployFlags.BinPath, "bin-path", "", "use the given relayer binary")
 	cmd.Flags().StringVar(
 		&deployFlags.Version,

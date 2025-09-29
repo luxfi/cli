@@ -109,7 +109,7 @@ You can check the bootstrapping status by running lux node status local.
 		RunE:              localStartNode,
 		PersistentPostRun: handlePostRun,
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().BoolVar(&latestLuxdReleaseVersion, "latest-luxd-version", true, "install latest luxd release version on node/s")
 	cmd.Flags().BoolVar(&latestLuxdPreReleaseVersion, "latest-luxd-pre-release-version", false, "install latest luxd pre-release version on node/s")
 	cmd.Flags().StringVar(&useCustomLuxgoVersion, "custom-luxd-version", "", "install given luxd version on node/s")

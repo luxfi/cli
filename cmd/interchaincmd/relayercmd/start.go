@@ -43,7 +43,7 @@ func newStartCmd() *cobra.Command {
 		RunE:  start,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &startFlags.Network, true, startNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	cmd.Flags().StringVar(&startFlags.BinPath, "bin-path", "", "use the given relayer binary")
 	cmd.Flags().StringVar(
 		&startFlags.Version,
