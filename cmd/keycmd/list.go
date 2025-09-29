@@ -65,7 +65,7 @@ func newListCmd() *cobra.Command {
 keys or for the ledger addresses associated to certain indices.`,
 		RunE: listKeys,
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().BoolVarP(
 		&all,
 		allFlag,
@@ -625,11 +625,11 @@ func getEvmBasedChainAddrInfo(
 }
 
 func printAddrInfos(addrInfos []addressInfo) {
-	header := []string{"Kind", "Name", "Subnet", "Address", "Token", "Balance", "Network"}
+	_ = []string{"Kind", "Name", "Subnet", "Address", "Token", "Balance", "Network"}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetRowLine(true)
-	table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2})
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2})
 	for _, addrInfo := range addrInfos {
 		table.Append([]string{
 			addrInfo.kind,

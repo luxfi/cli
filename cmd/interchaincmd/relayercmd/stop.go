@@ -37,7 +37,7 @@ func newStopCmd() *cobra.Command {
 		RunE:  stop,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &stopFlags.Network, true, stopNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	return cmd
 }
 

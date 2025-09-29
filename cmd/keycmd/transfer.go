@@ -72,7 +72,7 @@ func newTransferCmd() *cobra.Command {
 		RunE:  transferF,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().StringVarP(
 		&keyName,
 		keyNameFlag,
@@ -639,7 +639,7 @@ func pToPSend(
 		Addrs:     []ids.ShortID{destinationAddr},
 	}
 	output := &lux.TransferableOutput{
-		Asset: lux.Asset{ID: getBuilderContext(wallet).LUXAssetID},
+		Asset: lux.Asset{ID: getBuilderContext(wallet).XAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          amount,
 			OutputOwners: to,
@@ -734,7 +734,7 @@ func exportFromP(
 	usingLedger bool,
 ) error {
 	output := &lux.TransferableOutput{
-		Asset: lux.Asset{ID: getBuilderContext(wallet).LUXAssetID},
+		Asset: lux.Asset{ID: getBuilderContext(wallet).XAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          amount,
 			OutputOwners: to,

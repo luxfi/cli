@@ -511,8 +511,8 @@ func PrintTransformResults(chain string, txID ids.ID, subnetID ids.ID, tokenName
 	fmt.Print(art)
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetRowLine(true)
-	table.SetAutoMergeCells(true)
+	// table.SetRowLine(true)
+	// table.SetAutoMergeCells(true)
 	table.Append([]string{"Token Name", tokenName})
 	table.Append([]string{"Token Symbol", tokenSymbol})
 	table.Append([]string{"Asset ID", assetID.String()})

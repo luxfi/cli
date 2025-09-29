@@ -23,7 +23,7 @@ func NewListCmd() *cobra.Command {
 		RunE:  list,
 		Args:  cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	return cmd
 }
 

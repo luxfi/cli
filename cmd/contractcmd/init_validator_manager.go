@@ -58,7 +58,7 @@ func newInitValidatorManagerCmd() *cobra.Command {
 		RunE:    initValidatorManager,
 		PreRunE: cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &network, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	privateKeyFlags.AddToCmd(cmd, "as contract deployer")
 	flags.AddRPCFlagToCmd(cmd, app, &initValidatorManagerFlags.RPC)
 	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &initValidatorManagerFlags.SigAggFlags)

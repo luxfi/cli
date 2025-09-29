@@ -38,7 +38,7 @@ P-Chain continuous fee`,
 		Args: cobrautils.ExactArgs(0),
 	}
 
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().StringVar(&l1, "l1", "", "name of L1")
 	cmd.Flags().StringVar(&validationIDStr, "validation-id", "", "validation ID of the validator")
 	cmd.Flags().StringVar(&nodeIDStr, "node-id", "", "node ID of the validator")

@@ -1,9 +1,9 @@
-# Merge Notes: avalanche-cli v1.9.2 into lux/cli
+# Merge Notes: lux-cli v1.9.2 into lux/cli
 
 ## Date: September 22, 2025
 
 ## Summary
-Successfully merged critical upstream changes from avalanche-cli v1.9.2 into lux/cli while maintaining Lux branding and package structure.
+Successfully merged critical upstream changes from lux-cli v1.9.2 into lux/cli while maintaining Lux branding and package structure.
 
 ## Key Changes Merged
 
@@ -76,15 +76,15 @@ Several packages still have build errors that need attention:
 
 ## Important Notes
 
-1. **No avalanche-tooling-sdk-go**: The upstream introduced a new SDK repository, but we're using our own luxfi/sdk instead.
+1. **No lux-tooling-sdk-go**: The upstream introduced a new SDK repository, but we're using our own luxfi/sdk instead.
 
-2. **Package Structure Maintained**: All ava-labs imports remain replaced with luxfi equivalents:
-   - `github.com/ava-labs/avalanche-cli` → `github.com/luxfi/cli`
-   - `github.com/ava-labs/avalanchego` → `github.com/luxfi/node`
-   - `github.com/ava-labs/subnet-evm` → `github.com/luxfi/evm`
-   - `github.com/ava-labs/coreth` → `github.com/luxfi/geth`
+2. **Package Structure Maintained**: All luxfi imports remain replaced with luxfi equivalents:
+   - `github.com/luxfi/lux-cli` → `github.com/luxfi/cli`
+   - `github.com/luxfi/luxd` → `github.com/luxfi/node`
+   - `github.com/luxfi/subnet-evm` → `github.com/luxfi/evm`
+   - `github.com/luxfi/coreth` → `github.com/luxfi/geth`
 
-3. **Branding**: Lux branding maintained throughout (no Avalanche/AVAX references added)
+3. **Branding**: Lux branding maintained throughout (no Lux/LUX references added)
 
 ## Testing Required
 

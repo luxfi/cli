@@ -77,9 +77,10 @@ This command currently only supports Subnets deployed on the Testnet and Mainnet
 	}
 	cmd.Flags().StringVar(&luxConfigPath, "node-config", "", "file path of the node config file")
 	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of node's plugin directory")
-	cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on testnet")
-	cmd.Flags().BoolVar(&deployLocal, "local", false, "join on `local` (for elastic subnet only)")
-	cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "join on `mainnet`")
+	// Note: testnet, local, mainnet flags are handled by networkoptions.AddNetworkFlagsToCmd in blockchaincmd
+	// cmd.Flags().BoolVar(&deployTestnet, "testnet", false, "join on testnet")
+	// cmd.Flags().BoolVar(&deployLocal, "local", false, "join on `local` (for elastic subnet only)")
+	// cmd.Flags().BoolVar(&deployMainnet, "mainnet", false, "join on `mainnet`")
 	cmd.Flags().BoolVar(&printManual, "print", false, "if true, print the manual config without prompting")
 	cmd.Flags().BoolVar(&skipWhitelistCheck, "skip-whitelist-check", false, "if true, skip the whitelist check")
 	cmd.Flags().BoolVar(&forceWhitelistCheck, "force-whitelist-check", false, "if true, force the whitelist check")

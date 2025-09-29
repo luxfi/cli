@@ -63,7 +63,7 @@ func NewDeployCmd() *cobra.Command {
 		RunE:  deploy,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &deployFlags.Network, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	deployFlags.homeFlags.chainFlags.SetFlagNames(
 		"home-blockchain",
 		"c-chain-home",

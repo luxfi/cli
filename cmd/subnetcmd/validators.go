@@ -107,10 +107,10 @@ func printPublicValidators(subnetID ids.ID, network models.Network) error {
 }
 
 func printValidatorsFromList(validators []platformvm.ClientPermissionlessValidator) error {
-	header := []string{"NodeID", "Stake Amount", "Delegator Weight", "Start Time", "End Time", "Type"}
+	_ = []string{"NodeID", "Stake Amount", "Delegator Weight", "Start Time", "End Time", "Type"}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetRowLine(true)
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
 
 	for _, validator := range validators {
 		var delegatorWeight uint64

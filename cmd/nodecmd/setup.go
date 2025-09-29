@@ -43,7 +43,7 @@ Currently, only Ubuntu operating system is supported.`,
 		RunE:              setupNode,
 		PersistentPostRun: handlePostRun,
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.NonLocalSupportedNetworkOptions)
+	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().BoolVar(&useLatestLuxgoReleaseVersion, "latest-luxd-version", false, "install latest luxd release version on node/s")
 	cmd.Flags().BoolVar(&useLatestLuxgoPreReleaseVersion, "latest-luxd-pre-release-version", false, "install latest luxd pre-release version on node/s")
 	cmd.Flags().StringVar(&useCustomLuxgoVersion, "custom-luxd-version", "", "install given luxd version on node/s")

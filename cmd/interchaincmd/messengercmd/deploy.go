@@ -57,7 +57,7 @@ For Local Networks, it also deploys into C-Chain.`,
 		RunE: deploy,
 		Args: cobrautils.ExactArgs(0),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &deployFlags.Network, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags handled globally to avoid conflicts
 	deployFlags.PrivateKeyFlags.AddToCmd(cmd, "to fund Warp deploy")
 	deployFlags.ChainFlags.SetEnabled(true, true, false, false, true)
 	deployFlags.ChainFlags.AddToCmd(cmd, "deploy Warp into %s")

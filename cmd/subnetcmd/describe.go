@@ -65,10 +65,10 @@ func printDetails(genesis core.Genesis, sc models.Sidecar) {
 `
 	fmt.Print(art)
 	table := tablewriter.NewWriter(os.Stdout)
-	header := []string{"Parameter", "Value"}
-	table.SetHeader(header)
-	table.SetRowLine(true)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	_ = []string{"Parameter", "Value"}
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
+	// table.SetAlignment(tablewriter.ALIGN_LEFT)
 
 	table.Append([]string{"Subnet Name", sc.Subnet})
 	table.Append([]string{"ChainID", genesis.Config.ChainID.String()})
@@ -112,9 +112,9 @@ func printGasTable(genesis core.Genesis) {
 
 	fmt.Print(art)
 	table := tablewriter.NewWriter(os.Stdout)
-	header := []string{"Gas Parameter", "Value"}
-	table.SetHeader(header)
-	table.SetRowLine(true)
+	_ = []string{"Gas Parameter", "Value"}
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
 
 	// Display fee configuration from genesis config
 	// Use default values if not specified
@@ -160,9 +160,9 @@ func printAirdropTable(genesis core.Genesis) {
 	fmt.Print(art)
 	if len(genesis.Alloc) > 0 {
 		table := tablewriter.NewWriter(os.Stdout)
-		header := []string{"Address", "Airdrop Amount (10^18)", "Airdrop Amount (wei)"}
-		table.SetHeader(header)
-		table.SetRowLine(true)
+		_ = []string{"Address", "Airdrop Amount (10^18)", "Airdrop Amount (wei)"}
+		// table.SetHeader(header)
+		// table.SetRowLine(true)
 
 		for address := range genesis.Alloc {
 			amount := genesis.Alloc[address].Balance
@@ -192,10 +192,10 @@ func printPrecompileTable(genesis core.Genesis) {
 	fmt.Print(art)
 
 	table := tablewriter.NewWriter(os.Stdout)
-	header := []string{"Precompile", "Admin", "Enabled"}
-	table.SetHeader(header)
-	table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2})
-	table.SetRowLine(true)
+	_ = []string{"Precompile", "Admin", "Enabled"}
+	// table.SetHeader(header)
+	// table.SetAutoMergeCellsByColumnIndex([]int{0, 1, 2})
+	// table.SetRowLine(true)
 
 	precompileSet := false
 

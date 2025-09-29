@@ -30,7 +30,7 @@ several statistics about them.`,
 		RunE: printValidators,
 		Args: cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags are registered at the parent blockchain command level
 	return cmd
 }
 
@@ -72,10 +72,10 @@ func printValidators(_ *cobra.Command, args []string) error {
 }
 
 func printValidatorsFromList(network models.Network, subnetID ids.ID, validators []platformvm.ClientPermissionlessValidator) error {
-	header := []string{"NodeID", "Weight", "Delegator Weight", "Start Time", "End Time", "Type"}
+	_ = []string{"NodeID", "Weight", "Delegator Weight", "Start Time", "End Time", "Type"}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetRowLine(true)
+	// table.SetHeader(header)
+	// table.SetRowLine(true)
 
 	for _, validator := range validators {
 		var delegatorWeight uint64
