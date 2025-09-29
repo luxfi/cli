@@ -52,7 +52,7 @@ The L1 has to be a Proof of Authority L1.`,
 		RunE:    setWeight,
 		PreRunE: cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags are registered at the parent blockchain command level
 	flags.AddRPCFlagToCmd(cmd, app, &changeWeightFlags.RPC)
 	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &changeWeightFlags.SigAggFlags)
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet only]")

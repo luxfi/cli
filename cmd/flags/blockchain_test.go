@@ -127,14 +127,16 @@ func TestValidateRPC(t *testing.T) {
 			require := require.New(t)
 
 			// Create and configure mock prompter if needed
-			mockPrompter := mocks.Prompter{}
+			var mockPrompter *mocks.Prompter
 			if tt.cmdName == "addValidator" && len(tt.args) == 0 && tt.rpcURL == "" {
+				mockPrompter = &mocks.Prompter{}
 				mockPrompter.On("CaptureURL", "What is the RPC endpoint?", false).
 					Return(tt.promptURL, tt.promptError)
 			}
 
 			app := application.New()
-			app.Prompt = &mockPrompter
+			// Use Setup method to properly initialize the app with the mock prompter
+			app.Setup("", nil, nil, mockPrompter, nil)
 			cmd := &cobra.Command{Use: tt.cmdName}
 
 			rpcValue := tt.rpcURL
@@ -148,13 +150,15 @@ func TestValidateRPC(t *testing.T) {
 			}
 
 			// Verify prompt expectations
-			mockPrompter.AssertExpectations(t)
+			if mockPrompter != nil {
+				mockPrompter.AssertExpectations(t)
 
-			// Verify prompt calls
-			if tt.shouldPrompt {
-				mockPrompter.AssertCalled(t, "CaptureURL", "What is the RPC endpoint?", false)
-			} else {
-				mockPrompter.AssertNotCalled(t, "CaptureURL", "What is the RPC endpoint?", false)
+				// Verify prompt calls
+				if tt.shouldPrompt {
+					mockPrompter.AssertCalled(t, "CaptureURL", "What is the RPC endpoint?", false)
+				} else {
+					mockPrompter.AssertNotCalled(t, "CaptureURL", "What is the RPC endpoint?", false)
+				}
 			}
 
 			// Verify final RPC URL value

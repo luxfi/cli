@@ -59,7 +59,7 @@ This command currently only supports Blockchains deployed on the Testnet and Mai
 		RunE: joinCmd,
 		Args: cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Note: Network flags are registered at the parent command level to avoid conflicts
 	cmd.Flags().StringVar(&luxdConfigPath, "luxd-config", "", "file path of the luxd config file")
 	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "file path of luxd's plugin directory")
 	cmd.Flags().StringVar(&dataDir, "data-dir", "", "path of luxd's data dir directory")

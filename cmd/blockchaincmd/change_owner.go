@@ -27,7 +27,7 @@ func newChangeOwnerCmd() *cobra.Command {
 		RunE:  changeOwner,
 		Args:  cobrautils.ExactArgs(1),
 	}
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags are registered at the parent blockchain command level
 	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet]")

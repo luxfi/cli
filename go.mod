@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.25
+go 1.25.1
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -14,18 +14,18 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.17.0
+	github.com/luxfi/crypto v1.17.4
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v1.16.18
-	github.com/luxfi/geth v1.16.35
-	github.com/luxfi/ids v1.1.0
+	github.com/luxfi/geth v1.16.37
+	github.com/luxfi/ids v1.1.1
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.7.12
-	github.com/luxfi/netrunner v1.13.5-lux.2
-	github.com/luxfi/node v1.17.1
-	github.com/luxfi/sdk v1.0.0
-	github.com/luxfi/warp v1.13.4-lux.20
+	github.com/luxfi/netrunner v1.13.7-lux.2
+	github.com/luxfi/node v1.18.18
+	github.com/luxfi/sdk v1.8.1
+	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/mitchellh/go-wordwrap v1.0.1
@@ -44,13 +44,13 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.41.0
+	golang.org/x/crypto v0.42.0
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
 	golang.org/x/mod v0.27.0
 	golang.org/x/net v0.43.0
 	golang.org/x/oauth2 v0.30.0
-	golang.org/x/sync v0.16.0
-	golang.org/x/text v0.28.0
+	golang.org/x/sync v0.17.0
+	golang.org/x/text v0.29.0
 	google.golang.org/api v0.247.0
 	google.golang.org/protobuf v1.36.8
 	gopkg.in/yaml.v2 v2.4.0
@@ -64,7 +64,7 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 
 require (
 	github.com/luxfi/math v0.1.1
-	golang.org/x/term v0.34.0
+	golang.org/x/term v0.35.0
 )
 
 require (
@@ -175,8 +175,8 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.18.1 // indirect
-	github.com/luxfi/database v1.2.0 // indirect
+	github.com/luxfi/consensus v1.19.7 // indirect
+	github.com/luxfi/database v1.2.1 // indirect
 	github.com/luxfi/metric v1.4.0 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
@@ -195,6 +195,8 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
+	github.com/olekukonko/errors v1.1.0 // indirect
+	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pires/go-proxyproto v0.8.1 // indirect
@@ -263,3 +265,4 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
