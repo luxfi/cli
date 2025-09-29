@@ -48,7 +48,7 @@ doesn't overwrite an existing Blockchain with the same name. To allow overwrites
 flag.`,
 	}
 
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.DefaultSupportedNetworkOptions)
+	// Network flags are registered at the parent blockchain command level
 
 	cmd.Flags().BoolVar(&useSubnetEvm, "evm", false, "import a subnet-evm")
 	cmd.Flags().BoolVar(&useCustomVM, "custom", false, "use a custom VM template")
