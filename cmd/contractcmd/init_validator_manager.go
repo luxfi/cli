@@ -105,7 +105,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("RPC Endpoint: %s"), initValidatorManagerFlags.RPC)
+	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), initValidatorManagerFlags.RPC)
 	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
 		app.GetSDKApp(),
 		network,
@@ -204,7 +204,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	}
 	switch {
 	case sc.ValidatorManagement == "proof-of-authority": // PoA
-		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Initializing Proof of Authority Validator Manager contract on blockchain %s"), blockchainName)
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Initializing Proof of Authority Validator Manager contract on blockchain %s"), blockchainName)
 		if err := validatormanager.SetupPoA(
 			aggregatorLogger, // Use aggregatorLogger instead of app.Log
 			subnetSDK,
@@ -262,7 +262,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 				}
 			}
 		}
-		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Initializing Proof of Stake Validator Manager contract on blockchain %s"), blockchainName)
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Initializing Proof of Stake Validator Manager contract on blockchain %s"), blockchainName)
 		if initPOSManagerFlags.rewardCalculatorAddress == "" {
 			initPOSManagerFlags.rewardCalculatorAddress = validatormanagerSDK.RewardCalculatorAddress
 		}
