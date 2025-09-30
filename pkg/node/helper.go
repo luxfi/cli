@@ -346,7 +346,7 @@ func WaitForHealthyCluster(
 			ux.Logger.PrintToUser("")
 			ux.Logger.RedXToUser("Unhealthy Nodes")
 			for _, failedNode := range unhealthyNodes {
-				ux.Logger.PrintToUser("  " + failedNode)
+				ux.Logger.PrintToUser("  %s", failedNode)
 			}
 			ux.Logger.PrintToUser("")
 			return fmt.Errorf("cluster not healthy after %d seconds", uint32(timeout.Seconds()))
