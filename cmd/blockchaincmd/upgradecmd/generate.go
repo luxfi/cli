@@ -69,15 +69,15 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Yellow.Wrap(
 		"Performing a network upgrade requires coordinating the upgrade network-wide.")))
 	ux.Logger.PrintToUser("%s", luxlog.White.Wrap(luxlog.Reset.Wrap(
-		"A network upgrade changes the rule set used to process and verify blocks, " +
-			"such that any node that upgrades incorrectly or fails to upgrade by the time " +
+		"A network upgrade changes the rule set used to process and verify blocks, "+
+			"such that any node that upgrades incorrectly or fails to upgrade by the time "+
 			"that upgrade goes into effect may become out of sync with the rest of the network.\n")))
 	ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Red.Wrap(
-		"Any mistakes in configuring network upgrades or coordinating them on validators " +
+		"Any mistakes in configuring network upgrades or coordinating them on validators "+
 			"may cause the network to halt and recovering may be difficult.")))
 	ux.Logger.PrintToUser("%s", luxlog.Reset.Wrap(
-		"Please consult " + luxlog.Cyan.Wrap(
-			"https://docs.lux.network/lux-l1s/upgrade/customize-lux-l1#network-upgrades-enabledisable-precompiles ") +
+		"Please consult "+luxlog.Cyan.Wrap(
+			"https://docs.lux.network/lux-l1s/upgrade/customize-lux-l1#network-upgrades-enabledisable-precompiles ")+
 			luxlog.Reset.Wrap("for more information")))
 
 	txt := "Press [Enter] to continue, or abort by choosing 'no'"
@@ -100,7 +100,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	fmt.Println()
 	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(
-		"Luxgo and this tool support configuring multiple precompiles. " +
+		"Luxgo and this tool support configuring multiple precompiles. "+
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 
