@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 )
 
 func CreateCustomSubnetConfig(app *application.Lux, subnetName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {

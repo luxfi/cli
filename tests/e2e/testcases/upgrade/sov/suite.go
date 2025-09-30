@@ -15,12 +15,12 @@ import (
 	"github.com/luxfi/cli/cmd/blockchaincmd/upgradecmd"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	cliutils "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

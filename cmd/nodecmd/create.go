@@ -23,16 +23,16 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/docker"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/staking"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/node/staking"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/spf13/cobra"
@@ -453,7 +453,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		
+
 		dockerComposeContent := generateDockerComposeContent(clusterName, nodeIPs, network)
 		dockerComposeFile := constants.E2EDockerComposeFile
 		if err := utils.SaveDockerComposeFile(dockerComposeContent, dockerComposeFile); err != nil {
@@ -940,7 +940,7 @@ func getNodeCloudConfig(clusterName string, node string) (models.RegionConfig, s
 	certPath, _ := config["CertPath"].(string)
 	ami, _ := config["AMI"].(string)
 	region, _ := config["Region"].(string)
-	
+
 	return models.RegionConfig{
 		InstanceIDs:       instanceIDs,
 		PublicIPs:         elasticIP,
@@ -1494,7 +1494,7 @@ func generateDockerComposeContent(clusterName string, nodeIPs []string, network 
 
 services:
 `)
-	
+
 	// Add node services
 	for i, nodeIP := range nodeIPs {
 		nodeName := fmt.Sprintf("node%d", i+1)
@@ -1513,12 +1513,12 @@ services:
       - %s_data_%d:/root/.luxd
     restart: unless-stopped
 
-`, nodeName, clusterName, nodeName, clusterName, 
-   nodeIP, nodeIP, 
-   network.NetworkIDFlagValue(), nodeIP,
-   clusterName, i+1)
+`, nodeName, clusterName, nodeName, clusterName,
+			nodeIP, nodeIP,
+			network.NetworkIDFlagValue(), nodeIP,
+			clusterName, i+1)
 	}
-	
+
 	// Add network definition
 	config += fmt.Sprintf(`
 networks:
@@ -1527,12 +1527,12 @@ networks:
 
 volumes:
 `, clusterName)
-	
+
 	// Add volume definitions
 	for i := range nodeIPs {
 		config += fmt.Sprintf(`  %s_data_%d:
 `, clusterName, i+1)
 	}
-	
+
 	return []byte(config)
 }

@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
@@ -25,19 +25,19 @@ func newFundCmd() *cobra.Command {
 		RunE:  fundRelayer,
 		Args:  cobrautils.ExactArgs(0),
 	}
-	
+
 	// Network flags handled at higher level to avoid conflicts
 	cmd.Flags().StringVar(&fundingKeyName, "key", "", "Key to use for funding")
 	cmd.Flags().Float64Var(&fundAmount, "amount", 0.1, "Amount to fund in LUX")
 	cmd.Flags().StringSliceVar(&blockchainNames, "blockchains", nil, "Blockchains to fund")
-	
+
 	return cmd
 }
 
 var (
-	fundingKeyName  string
-	fundAmount      float64
-	blockchainNames []string
+	fundingKeyName     string
+	fundAmount         float64
+	blockchainNames    []string
 	globalNetworkFlags networkoptions.NetworkFlags
 )
 
@@ -54,48 +54,48 @@ func fundRelayer(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Load funding key
 	if fundingKeyName == "" {
 		return fmt.Errorf("funding key is required")
 	}
-	
+
 	keyPath := app.GetKeyPath(fundingKeyName)
 	sk, err := key.LoadSoft(network.ID(), keyPath)
 	if err != nil {
 		return fmt.Errorf("failed to load key: %w", err)
 	}
-	
+
 	// Get relayer address
 	relayerAddress, err := getRelayerAddress()
 	if err != nil {
 		return fmt.Errorf("failed to get relayer address: %w", err)
 	}
-	
+
 	// Convert amount to wei
 	amountWei := new(big.Int).Mul(
 		big.NewInt(int64(fundAmount*float64(units.Lux))),
 		big.NewInt(1),
 	)
-	
+
 	// Fund each blockchain
 	for _, blockchainName := range blockchainNames {
 		ux.Logger.PrintToUser("Funding relayer on blockchain: %s", blockchainName)
-		
+
 		// Get RPC endpoint for the blockchain
 		rpcEndpoint, err := getBlockchainRPC(app, network, blockchainName)
 		if err != nil {
 			return fmt.Errorf("failed to get RPC for %s: %w", blockchainName, err)
 		}
-		
+
 		// Send funds
 		if err := sendFunds(sk, relayerAddress, amountWei, rpcEndpoint); err != nil {
 			return fmt.Errorf("failed to fund relayer on %s: %w", blockchainName, err)
 		}
-		
+
 		ux.Logger.PrintToUser("✅ Funded relayer with %.4f LUX on %s", fundAmount, blockchainName)
 	}
-	
+
 	return nil
 }
 
@@ -111,17 +111,17 @@ func getBlockchainRPC(app *application.Lux, network models.Network, blockchainNa
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Get RPC endpoint
 	networkData, ok := sc.Networks[network.Name()]
 	if !ok {
 		return "", fmt.Errorf("blockchain %s not deployed on network %s", blockchainName, network.Name())
 	}
-	
+
 	if len(networkData.RPCEndpoints) == 0 {
 		return "", fmt.Errorf("no RPC endpoints for blockchain %s", blockchainName)
 	}
-	
+
 	return networkData.RPCEndpoints[0], nil
 }
 

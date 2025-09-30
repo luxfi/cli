@@ -6,9 +6,9 @@ import (
 	_ "embed"
 	"math/big"
 
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
-	"github.com/luxfi/geth/core/types"
 
 	"github.com/luxfi/crypto"
 )

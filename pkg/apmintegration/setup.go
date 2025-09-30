@@ -9,9 +9,9 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	sdklpm "github.com/luxfi/sdk/lpm"
 	"github.com/luxfi/lpm/config"
 	"github.com/luxfi/lpm/lpm"
+	sdklpm "github.com/luxfi/sdk/lpm"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v2"
 )
@@ -52,7 +52,7 @@ func SetupApm(app *application.Lux, lpmBaseDir string) error {
 		return err
 	}
 	os.Stdout = stdOutHolder
-	
+
 	// Create an SDK LPM client using the same configuration
 	app.Apm, err = sdklpm.NewClient(
 		lpmBaseDir,

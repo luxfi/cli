@@ -47,12 +47,12 @@ func GetJSONKey[T any](m map[string]interface{}, key string) (T, error) {
 	if !ok {
 		return zero, fmt.Errorf("key %s not found in map", key)
 	}
-	
+
 	typedValue, ok := value.(T)
 	if !ok {
 		return zero, fmt.Errorf("value for key %s is not of the expected type", key)
 	}
-	
+
 	return typedValue, nil
 }
 
@@ -62,10 +62,10 @@ func WriteJSON(path string, v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
-	
+
 	if err := os.WriteFile(path, contentBytes, 0644); err != nil {
 		return fmt.Errorf("failed to write JSON to %s: %w", path, err)
 	}
-	
+
 	return nil
 }

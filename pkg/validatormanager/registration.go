@@ -13,27 +13,27 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/evm"
-	sdkwarp "github.com/luxfi/sdk/warp"
-	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/validator"
-	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	"github.com/luxfi/crypto"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/proto/pb/platformvm"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	luxlog "github.com/luxfi/log"
-	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/sdk/validator"
+	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
+	sdkwarp "github.com/luxfi/sdk/warp"
+	warp "github.com/luxfi/warp"
 )
 
 func InitializeValidatorRegistrationPoSNative(
@@ -305,7 +305,6 @@ func GetRegisterL1ValidatorMessage(
 	signedMessage := signedMessageInterface.(*warp.Message)
 	return signedMessage, validationID, nil
 }
-
 
 func GetPChainL1ValidatorRegistrationMessage(
 	ctx context.Context,

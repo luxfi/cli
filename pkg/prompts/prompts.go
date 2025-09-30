@@ -16,10 +16,10 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/models"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/mod/semver"
 )
@@ -495,19 +495,19 @@ func (*realPrompter) CaptureURL(promptStr string, validateConnection bool) (stri
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Validate connection if requested
 	if validateConnection {
 		parsedURL, err := url.Parse(urlStr)
 		if err != nil {
 			return "", fmt.Errorf("invalid URL: %w", err)
 		}
-		
+
 		// Try to connect to the URL
 		client := &http.Client{
 			Timeout: 5 * time.Second,
 		}
-		
+
 		resp, err := client.Head(urlStr)
 		if err != nil {
 			// Try GET if HEAD fails
@@ -517,7 +517,7 @@ func (*realPrompter) CaptureURL(promptStr string, validateConnection bool) (stri
 			}
 		}
 		defer resp.Body.Close()
-		
+
 		// Accept any successful response (2xx, 3xx)
 		if resp.StatusCode >= 400 {
 			return "", fmt.Errorf("URL returned error status %d", resp.StatusCode)
@@ -824,7 +824,7 @@ func PromptChain(
 ) (bool, bool, bool, bool, string, string, error) {
 	// Build options
 	options := []string{}
-	
+
 	if pChainEnabled {
 		options = append(options, "P-Chain")
 	}
@@ -834,37 +834,37 @@ func PromptChain(
 	if cChainEnabled {
 		options = append(options, "C-Chain")
 	}
-	
+
 	// Add blockchain names
 	for _, name := range blockchainNames {
 		if name != blockchainNameToAvoid {
 			options = append(options, name)
 		}
 	}
-	
+
 	if blockchainIDEnabled {
 		options = append(options, "Enter blockchain ID")
 	}
-	
+
 	options = append(options, Cancel)
-	
+
 	choice, err := prompt.CaptureList(message, options)
 	if err != nil {
 		return false, false, false, false, "", "", err
 	}
-	
+
 	if choice == Cancel {
 		return true, false, false, false, "", "", nil
 	}
-	
+
 	// Return flags based on choice
 	pChain := choice == "P-Chain"
 	xChain := choice == "X-Chain"
 	cChain := choice == "C-Chain"
-	
+
 	blockchainName := ""
 	blockchainID := ""
-	
+
 	if choice == "Enter blockchain ID" {
 		blockchainID, err = prompt.CaptureString("Enter blockchain ID")
 		if err != nil {
@@ -874,7 +874,7 @@ func PromptChain(
 		// It's a blockchain name
 		blockchainName = choice
 	}
-	
+
 	return false, pChain, xChain, cChain, blockchainName, blockchainID, nil
 }
 
@@ -892,7 +892,7 @@ func CaptureKeyAddress(
 	if err != nil {
 		return "", err
 	}
-	
+
 	keys := []string{}
 	for _, entry := range entries {
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".pk") {
@@ -900,21 +900,21 @@ func CaptureKeyAddress(
 			keys = append(keys, keyName)
 		}
 	}
-	
+
 	if len(keys) == 0 {
 		return "", errNoKeys
 	}
-	
+
 	keyName, err := prompt.CaptureList(fmt.Sprintf("Which key should %s?", goal), keys)
 	if err != nil {
 		return "", err
 	}
-	
+
 	keyPath, err := getKey(keyName)
 	if err != nil {
 		return "", err
 	}
-	
+
 	// For now, return the key path
 	// In a real implementation, this would convert the key to the appropriate address format
 	return keyPath, nil
@@ -925,25 +925,25 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 	if len(options) == 0 {
 		return nil, errors.New("no options provided")
 	}
-	
+
 	selected := []string{}
 	remaining := make([]string, len(options))
 	copy(remaining, options)
-	
+
 	for i := 0; i < size && len(remaining) > 0; i++ {
 		if i > 0 {
 			prompt = fmt.Sprintf("Select item %d of %d", i+1, size)
 		}
-		
+
 		choice, err := p.CaptureList(prompt, append(remaining, Done))
 		if err != nil {
 			return nil, err
 		}
-		
+
 		if choice == Done {
 			break
 		}
-		
+
 		selected = append(selected, choice)
 		// Remove selected item from remaining options
 		newRemaining := []string{}
@@ -954,7 +954,7 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 		}
 		remaining = newRemaining
 	}
-	
+
 	return selected, nil
 }
 
@@ -970,12 +970,12 @@ func (*realPrompter) CaptureFloat(promptStr string) (float64, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return strconv.ParseFloat(result, 64)
 }
 
@@ -1001,12 +1001,12 @@ func (*realPrompter) CaptureUint16(promptStr string) (uint16, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	// Parse with proper base detection
 	base := 10
 	numStr := result
@@ -1036,12 +1036,12 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	val, _ := strconv.ParseUint(result, 10, 32)
 	return uint32(val), nil
 }
@@ -1062,19 +1062,19 @@ func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error
 			return nil
 		},
 	}
-	
+
 	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	parts := strings.Split(result, ",")
 	addresses := make([]crypto.Address, 0, len(parts))
 	for _, part := range parts {
 		addr := strings.TrimSpace(part)
 		addresses = append(addresses, crypto.HexToAddress(addr))
 	}
-	
+
 	return addresses, nil
 }
 
@@ -1089,7 +1089,7 @@ func (*realPrompter) CaptureXChainAddress(promptStr string, network models.Netwo
 			return nil
 		},
 	}
-	
+
 	return promptUIRunner(prompt)
 }
 
@@ -1099,7 +1099,7 @@ func (*realPrompter) CaptureValidatedString(promptStr string, validator func(str
 		Label:    promptStr,
 		Validate: validator,
 	}
-	
+
 	return promptUIRunner(prompt)
 }
 
@@ -1118,7 +1118,7 @@ func (*realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, e
 			return nil
 		},
 	}
-	
+
 	return promptUIRunner(prompt)
 }
 
@@ -1137,7 +1137,7 @@ func (*realPrompter) CaptureRepoFile(promptStr string, repo string, branch strin
 			return nil
 		},
 	}
-	
+
 	return promptUIRunner(prompt)
 }
 
@@ -1156,12 +1156,12 @@ func (*realPrompter) CaptureInt(promptStr string, validator func(int) error) (in
 			return nil
 		},
 	}
-	
+
 	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return strconv.Atoi(result)
 }
 
@@ -1180,12 +1180,12 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	val, _ := strconv.ParseUint(result, 10, 8)
 	return uint8(val), nil
 }
@@ -1210,12 +1210,12 @@ func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error
 			return nil
 		},
 	}
-	
+
 	durationStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return time.ParseDuration(durationStr)
 }
 
@@ -1239,12 +1239,12 @@ func (*realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, er
 			return nil
 		},
 	}
-	
+
 	durationStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return time.ParseDuration(durationStr)
 }
 
@@ -1268,11 +1268,11 @@ func (*realPrompter) CaptureMainnetL1StakingDuration(promptStr string) (time.Dur
 			return nil
 		},
 	}
-	
+
 	durationStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return time.ParseDuration(durationStr)
 }

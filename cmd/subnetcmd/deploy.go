@@ -17,8 +17,6 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnetworkinterface"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	utilspkg "github.com/luxfi/cli/pkg/utils"
@@ -31,6 +29,8 @@ import (
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -101,17 +101,17 @@ func updateSubnetIndex(indexFile string) {
 	// Create index in background to not block operations
 	go func() {
 		subnetIndex := make(map[string][]string)
-		
+
 		subnets, err := os.ReadDir(app.GetSubnetDir())
 		if err != nil {
 			return // Silently fail - index is optional optimization
 		}
-		
+
 		for _, s := range subnets {
 			if !s.IsDir() || strings.HasPrefix(s.Name(), ".") {
 				continue
 			}
-			
+
 			sidecarFile := filepath.Join(app.GetSubnetDir(), s.Name(), constants.SidecarFileName)
 			if _, err := os.Stat(sidecarFile); err == nil {
 				// Add to index
@@ -120,7 +120,7 @@ func updateSubnetIndex(indexFile string) {
 				}
 			}
 		}
-		
+
 		// Write index file
 		indexData, _ := json.MarshalIndent(subnetIndex, "", "  ")
 		_ = os.WriteFile(indexFile, indexData, 0o644)
@@ -138,7 +138,7 @@ func getChainsInSubnet(subnetName string) ([]string, error) {
 			}
 		}
 	}
-	
+
 	// Fall back to directory scan if index not available or entry not found
 	subnets, err := os.ReadDir(app.GetSubnetDir())
 	if err != nil {
@@ -460,14 +460,14 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	if sidecar.Networks == nil {
 		sidecar.Networks = make(map[string]models.NetworkData)
 	}
-	
+
 	// Migrate old sidecar fields if they exist (backwards compatibility)
 	if sidecar.SubnetID != ids.Empty && sidecar.BlockchainID != ids.Empty {
 		// Legacy format detected - migrate to new format
 		legacyNetwork := models.Mainnet
 		// Note: Testnet field doesn't exist anymore in the new sidecar structure
 		// Use a different way to determine if it's testnet if needed
-		
+
 		// Preserve legacy data in new format
 		if sidecar.Networks == nil {
 			sidecar.Networks = make(map[string]models.NetworkData)
@@ -476,12 +476,12 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 			SubnetID:     sidecar.SubnetID,
 			BlockchainID: sidecar.BlockchainID,
 		}
-		
+
 		// Clear legacy fields
 		sidecar.SubnetID = ids.Empty
 		sidecar.BlockchainID = ids.Empty
 	}
-	
+
 	return app.UpdateSidecarNetworks(&sidecar, network, subnetID, blockchainID)
 }
 
@@ -669,7 +669,7 @@ func validateSubnetNameAndGetChains(args []string) ([]string, error) {
 	// Create/update subnet index file for fast querying if it doesn't exist
 	indexFile := filepath.Join(app.GetSubnetDir(), ".subnet-index.json")
 	updateSubnetIndex(indexFile)
-	
+
 	chains, err := getChainsInSubnet(args[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to getChainsInSubnet: %w", err)

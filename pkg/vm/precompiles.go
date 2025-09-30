@@ -7,7 +7,6 @@ import (
 	"errors"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/params"
@@ -20,13 +19,14 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/sdk/prompts"
 )
 
 // AllowList represents an allow list configuration
 type AllowList struct {
-	AdminAddresses    []common.Address
-	ManagerAddresses  []common.Address
-	EnabledAddresses  []common.Address
+	AdminAddresses   []common.Address
+	ManagerAddresses []common.Address
+	EnabledAddresses []common.Address
 }
 
 // GenerateAllowList prompts the user to configure an allow list

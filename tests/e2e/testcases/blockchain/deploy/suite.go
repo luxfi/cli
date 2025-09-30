@@ -11,12 +11,12 @@ import (
 
 	"github.com/luxfi/cli/cmd"
 	"github.com/luxfi/cli/pkg/blockchain"
-	"github.com/luxfi/sdk/models"
-	validatorManagerSDK "github.com/luxfi/sdk/validatormanager"
-	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/sdk/models"
+	validatorManagerSDK "github.com/luxfi/sdk/validatormanager"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

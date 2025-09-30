@@ -388,7 +388,7 @@ func updateClustersConfigGCPKeyFilepath(projectName, serviceAccountKeyFilepath s
 		clustersConfig["GCPConfig"] = make(map[string]interface{})
 	}
 	gcpConfig := clustersConfig["GCPConfig"].(map[string]interface{})
-	
+
 	if projectName != "" {
 		gcpConfig["ProjectName"] = projectName
 	}

@@ -25,9 +25,9 @@ func CreateEVMGenesisWithParams(
 	chainIDBig := new(big.Int).SetUint64(1234) // Default chain ID
 	allocations := make(core.GenesisAlloc)
 	timestamps := make(map[string]uint64)
-	
+
 	genesisMap := CreateEVMGenesis(chainIDBig, allocations, timestamps)
-	
+
 	// Convert to bytes (simplified - actual implementation would serialize properly)
 	// For now, return empty genesis bytes
 	_ = genesisMap

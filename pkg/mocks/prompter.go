@@ -6,7 +6,7 @@ package mocks
 import (
 	"math/big"
 	"time"
-	
+
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 )

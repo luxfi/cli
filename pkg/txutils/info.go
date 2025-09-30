@@ -8,12 +8,12 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/models"
 )
 
 // get network model associated to tx
@@ -70,30 +70,30 @@ func GetSubnetOwners(network models.Network, subnetID ids.ID) (*SubnetOwners, er
 	if err != nil {
 		return nil, err
 	}
-	
+
 	tx, err := getSubnetTx(pClient, subnetID)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	createSubnetTx, ok := tx.Unsigned.(*txs.CreateNetTx)
 	if !ok {
 		return nil, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, subnetID)
 	}
-	
+
 	owner, ok := createSubnetTx.Owner.(*secp256k1fx.OutputOwners)
 	if !ok {
 		// If not a standard OutputOwners, it might be a different owner type
 		// For now, treat as non-permissioned
 		return &SubnetOwners{IsPermissioned: false}, nil
 	}
-	
+
 	// Format control keys as strings
 	controlKeysStrs, err := formatControlKeys(network, owner.Addrs)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &SubnetOwners{
 		IsPermissioned: true,
 		ControlKeys:    controlKeysStrs,
@@ -133,7 +133,7 @@ func getSubnetTx(pClient platformvm.Client, subnetID ids.ID) (*txs.Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("subnet tx %s query error: %w", subnetID, err)
 	}
-	
+
 	var tx txs.Tx
 	if _, err := txs.Codec.Unmarshal(txBytes, &tx); err != nil {
 		return nil, fmt.Errorf("couldn't unmarshal tx %s: %w", subnetID, err)
@@ -146,10 +146,10 @@ func formatControlKeys(network models.Network, addrs []ids.ShortID) ([]string, e
 	if err != nil {
 		return nil, err
 	}
-	
+
 	hrp := key.GetHRP(networkID)
 	controlKeysStrs := make([]string, 0, len(addrs))
-	
+
 	for _, addr := range addrs {
 		addrStr, err := address.Format("P", hrp, addr[:])
 		if err != nil {

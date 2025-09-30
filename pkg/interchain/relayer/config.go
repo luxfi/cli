@@ -49,7 +49,7 @@ func AddSourceToRelayerConfig(
 	if !ok {
 		return fmt.Errorf("invalid config structure: sources not found")
 	}
-	
+
 	source := map[string]interface{}{
 		"subnetID":               subnetID,
 		"blockchainID":           blockchainID,
@@ -58,7 +58,7 @@ func AddSourceToRelayerConfig(
 		"messageContractAddress": messageContractAddress,
 		"rewardAddress":          rewardAddress,
 	}
-	
+
 	config["sources"] = append(sources, source)
 	return nil
 }
@@ -75,14 +75,14 @@ func AddDestinationToRelayerConfig(
 	if !ok {
 		return fmt.Errorf("invalid config structure: destinations not found")
 	}
-	
+
 	destination := map[string]interface{}{
 		"subnetID":          subnetID,
 		"blockchainID":      blockchainID,
 		"rpcEndpoint":       rpcEndpoint,
 		"accountPrivateKey": accountPrivateKey,
 	}
-	
+
 	config["destinations"] = append(destinations, destination)
 	return nil
 }
@@ -180,7 +180,7 @@ func DeployRelayer(
 	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
 		return "", fmt.Errorf("failed to write relayer config: %w", err)
 	}
-	
+
 	// Create necessary directories
 	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
 		return "", fmt.Errorf("failed to create log directory: %w", err)
@@ -188,7 +188,7 @@ func DeployRelayer(
 	if err := os.MkdirAll(storageDir, 0755); err != nil {
 		return "", fmt.Errorf("failed to create storage directory: %w", err)
 	}
-	
+
 	// Return the binary path
 	if binPath != "" {
 		return binPath, nil

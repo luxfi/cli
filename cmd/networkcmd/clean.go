@@ -11,10 +11,10 @@ import (
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/interchain/signatureaggregator"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/spf13/cobra"
 )

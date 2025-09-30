@@ -14,7 +14,6 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
@@ -22,6 +21,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
@@ -126,19 +126,19 @@ func joinAsPrimaryNetworkValidator(
 	if err != nil {
 		return err
 	}
-	
+
 	// delegationFee and recipientAddr are also for permissionless validators
 	_ = delegationFee
 	_ = recipientAddr
-	
-	// AddValidator not AddPermissionlessValidator  
+
+	// AddValidator not AddPermissionlessValidator
 	// For primary network, use empty subnet ID
 	// Note: AddValidator returns (bool, *txs.Tx, []string, error)
 	// It doesn't support BLS keys directly for permissioned validators
 	_, _, _, err = deployer.AddValidator(
 		[]string{}, // control keys
-		[]string{}, // subnet auth keys  
-		ids.Empty, // Primary network has empty subnet ID
+		[]string{}, // subnet auth keys
+		ids.Empty,  // Primary network has empty subnet ID
 		nodeID,
 		weight,
 		start,
@@ -147,7 +147,7 @@ func joinAsPrimaryNetworkValidator(
 	if err != nil {
 		return err
 	}
-	
+
 	ux.Logger.PrintToUser(fmt.Sprintf("Node %s successfully added as Primary Network validator!", nodeID.String()))
 	return nil
 }

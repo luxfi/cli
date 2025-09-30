@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/internal/mocks"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

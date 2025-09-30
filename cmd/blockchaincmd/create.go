@@ -18,12 +18,12 @@ import (
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
@@ -246,7 +246,7 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 	}
 
 	var (
-		genesisBytes        []byte
+		genesisBytes []byte
 		// useWarpFlag         *bool
 		deployWarp          bool
 		useExternalGasToken bool

@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/core"
@@ -18,6 +17,7 @@ import (
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 

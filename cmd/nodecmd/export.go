@@ -12,10 +12,10 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
-	sdkconstants "github.com/luxfi/sdk/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	sdkconstants "github.com/luxfi/sdk/constants"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/spf13/cobra"
 )
@@ -67,7 +67,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 		network["ClusterName"] = "" // hide cluster name
 	}
 	clusterConf["External"] = true // mark cluster as external
-	
+
 	// Get the nodes list
 	nodesList, _ := clusterConf["Nodes"].([]string)
 	exportNodes, err := utils.MapWithError(nodesList, func(nodeName string) (models.ExportNode, error) {
@@ -80,7 +80,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 		nodeConf["CertPath"] = ""
 		nodeConf["SecurityGroup"] = ""
 		nodeConf["KeyPair"] = ""
-		
+
 		nodeID, _ := nodeConf["NodeID"].(string)
 		signerKey, stakerKey, stakerCrt, err := readKeys(filepath.Join(app.GetNodesDir(), nodeID))
 		if err != nil {
@@ -125,7 +125,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 		monitoringHost["CertPath"] = ""
 		monitoringHost["SecurityGroup"] = ""
 		monitoringHost["KeyPair"] = ""
-		
+
 		// Convert map to NodeConfig struct
 		monitorNC := models.NodeConfig{
 			NodeID:        monitoringHost["NodeID"].(string),
@@ -161,7 +161,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 		loadTestNodeConf["CertPath"] = ""
 		loadTestNodeConf["SecurityGroup"] = ""
 		loadTestNodeConf["KeyPair"] = ""
-		
+
 		// Convert map to NodeConfig struct
 		ltNC := models.NodeConfig{
 			NodeID:        loadTestNodeConf["NodeID"].(string),
@@ -192,7 +192,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 	external, _ := clusterConf["External"].(bool)
 	local, _ := clusterConf["Local"].(bool)
 	httpAccess, _ := clusterConf["HTTPAccess"].(string)
-	
+
 	// Handle Network field
 	var network models.Network
 	if networkData, ok := clusterConf["Network"].(map[string]interface{}); ok {
@@ -212,19 +212,19 @@ func exportFile(_ *cobra.Command, args []string) error {
 	} else if net, ok := clusterConf["Network"].(models.Network); ok {
 		network = net
 	}
-	
+
 	// Handle LoadTestInstance
 	loadTestMap := make(map[string]string)
 	if ltInst, ok := clusterConf["LoadTestInstance"].(map[string]string); ok {
 		loadTestMap = ltInst
 	}
-	
+
 	// Handle ExtraNetworkData
 	extraNetworkData := models.ExtraNetworkData{}
 	if extra, ok := clusterConf["ExtraNetworkData"].(models.ExtraNetworkData); ok {
 		extraNetworkData = extra
 	}
-	
+
 	cc := models.ClusterConfig{
 		Nodes:              nodes,
 		APINodes:           apiNodes,
@@ -237,7 +237,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 		Local:              local,
 		HTTPAccess:         sdkconstants.HTTPAccess(httpAccess),
 	}
-	
+
 	exportCluster := models.ExportCluster{
 		ClusterConfig: cc,
 		Nodes:         exportNodes,

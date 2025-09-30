@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
@@ -76,7 +76,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to load subnet sidecar: %w", err)
 		}
-		
+
 		// Check validator count
 		validatorCount := len(sc.Networks[models.Mainnet.String()].ValidatorIDs)
 		if validatorCount < 1 {

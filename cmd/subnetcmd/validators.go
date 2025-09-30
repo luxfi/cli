@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/cmd/flags"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/models"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

@@ -11,10 +11,10 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/models"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

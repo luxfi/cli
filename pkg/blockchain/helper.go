@@ -11,7 +11,6 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/api/info"
@@ -19,6 +18,7 @@ import (
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/sdk/models"
 )
 
 func GetAggregatorExtraPeers(
@@ -74,7 +74,7 @@ func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string)
 			}
 		}
 	}
-	
+
 	// Extract API nodes if available
 	if apiNodes, ok := clusterData["APINodes"].([]interface{}); ok {
 		for _, apiNode := range apiNodes {
@@ -84,14 +84,14 @@ func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string)
 			}
 		}
 	}
-	
+
 	// Extract network data if present
 	if networkData, ok := clusterData["Network"].(map[string]interface{}); ok {
 		if endpoint, ok := networkData["Endpoint"].(string); ok && endpoint != "" {
 			*endpoints = append(*endpoints, endpoint)
 		}
 	}
-	
+
 	return nil
 }
 

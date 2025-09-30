@@ -7,13 +7,13 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/spf13/cobra"
 )

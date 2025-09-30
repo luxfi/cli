@@ -14,10 +14,10 @@ import (
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -91,11 +91,11 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 	var balance uint64
 	if balanceLUX == 0 {
 		// Get the first address from the list since GetNetworkBalance expects a single address
-	addresses := kc.Addresses().List()
-	if len(addresses) == 0 {
-		return fmt.Errorf("no addresses available in keychain")
-	}
-	availableBalance, err := utils.GetNetworkBalance(addresses[0], network)
+		addresses := kc.Addresses().List()
+		if len(addresses) == 0 {
+			return fmt.Errorf("no addresses available in keychain")
+		}
+		availableBalance, err := utils.GetNetworkBalance(addresses[0], network)
 		if err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 func estimateIncreaseBalanceFee(network models.Network) uint64 {
 	// Base fee in nLUX (1 LUX = 1e9 nLUX)
 	const baseFee = 1_000_000 // 0.001 LUX base fee
-	
+
 	// Adjust fee based on network
 	switch network {
 	case models.Mainnet:

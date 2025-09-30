@@ -14,11 +14,11 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"

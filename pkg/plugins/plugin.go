@@ -11,8 +11,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/sdk/models"
 )
 
 func SanitizePath(path string) (string, error) {

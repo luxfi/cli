@@ -5,28 +5,28 @@ package blockchaincmd
 import (
 	"fmt"
 
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/validatormanager"
-	"github.com/luxfi/sdk/evm"
-	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/validator"
+	"github.com/luxfi/sdk/validatormanager"
 	"github.com/spf13/cobra"
 )
 
@@ -93,9 +93,9 @@ func setWeight(_ *cobra.Command, args []string) error {
 
 	// Estimate fee based on transaction complexity
 	// Base fee for weight change transaction
-	baseFee := uint64(1000000) // 0.001 LUX base fee
+	baseFee := uint64(1000000)    // 0.001 LUX base fee
 	txSizeEstimate := uint64(400) // Estimated transaction size for weight change
-	perByteFee := uint64(1000) // Fee per byte
+	perByteFee := uint64(1000)    // Fee per byte
 	fee := baseFee + (txSizeEstimate * perByteFee)
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,

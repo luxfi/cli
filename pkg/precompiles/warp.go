@@ -5,9 +5,9 @@ package precompiles
 import (
 	_ "embed"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/contract"
 )
 
 func WarpPrecompileGetBlockchainID(

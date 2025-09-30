@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"sync"
 
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/publicarchive"
-	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/log/level"
 
 	"go.uber.org/zap"
 )

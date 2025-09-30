@@ -7,12 +7,11 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"
-
-// 	"github.com/olekukonko/tablewriter"
+	// 	"github.com/olekukonko/tablewriter"
 )
 
 // PrintEndpoints prints the endpoint information for the executing local network,
@@ -75,7 +74,7 @@ func PrintBlockchainEndpoints(
 	// SetColumnConfigs is not available in tablewriter
 	// Use SetAlignment instead for column configuration
 	// t.SetAlignment(tablewriter.ALIGN_LEFT)
-	
+
 	blockchainIDURL := fmt.Sprintf("%s/ext/bc/%s/rpc", node.URI, blockchain.ID)
 	sc, err := app.LoadSidecar(blockchain.Name)
 	if err == nil {

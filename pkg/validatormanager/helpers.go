@@ -7,12 +7,12 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/sdk/evm"
-	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/evm"
+	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 )
 
 func GetValidatorNonce(

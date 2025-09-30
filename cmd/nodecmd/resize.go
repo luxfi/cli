@@ -15,10 +15,10 @@ import (
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/context"
 )
@@ -154,7 +154,7 @@ func resizeDisk(nodeConfig map[string]interface{}, diskSize int) error {
 	cloudServiceStr, _ := nodeConfig["CloudService"].(string)
 	nodeIDStr, _ := nodeConfig["NodeID"].(string)
 	regionStr, _ := nodeConfig["Region"].(string)
-	
+
 	switch cloudServiceStr {
 	case "", constants.AWSCloudService:
 		ec2Svc, err := awsAPI.NewAwsCloud(awsProfile, regionStr)
@@ -193,7 +193,7 @@ func resizeNode(nodeConfig map[string]interface{}) error {
 	cloudServiceStr, _ := nodeConfig["CloudService"].(string)
 	nodeIDStr, _ := nodeConfig["NodeID"].(string)
 	regionStr, _ := nodeConfig["Region"].(string)
-	
+
 	switch cloudServiceStr {
 	case "", constants.AWSCloudService:
 		ec2Svc, err := awsAPI.NewAwsCloud(awsProfile, regionStr)

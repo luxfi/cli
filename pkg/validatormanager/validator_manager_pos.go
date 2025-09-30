@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/sdk/contract"
 
 	"github.com/luxfi/crypto"
 )

@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/sdk/contract"
 )
 
 type WarpFeeInfo struct {

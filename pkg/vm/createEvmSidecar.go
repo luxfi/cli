@@ -25,6 +25,6 @@ func CreateEvmSidecar(
 	sc.TokenSymbol = tokenSymbol
 	sc.Sovereign = sovereign
 	sc.UseACP99 = useACP99
-	
+
 	return sc, nil
 }

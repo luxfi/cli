@@ -7,15 +7,15 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/spf13/cobra"
 )
@@ -231,7 +231,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		privateKeyHex := k.PrivKeyHex()
 		alreadyDeployed, messengerAddress, registryAddress, err := td.Deploy(
 			cChainName,
-			network.Endpoint() + "/ext/bc/C/rpc", // C-Chain RPC endpoint
+			network.Endpoint()+"/ext/bc/C/rpc", // C-Chain RPC endpoint
 			privateKeyHex,
 			flags.DeployMessenger,
 			flags.DeployRegistry,

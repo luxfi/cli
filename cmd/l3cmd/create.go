@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +60,7 @@ func createL3(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to get available L2s: %w", err)
 		}
-		
+
 		if len(l2s) > 0 {
 			l2Base, err = app.Prompt.CaptureList("Select base L2", l2s)
 			if err != nil {
@@ -162,7 +162,7 @@ func getAvailableL2s() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var l2s []string
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -182,6 +182,6 @@ func getAvailableL2s() ([]string, error) {
 			}
 		}
 	}
-	
+
 	return l2s, nil
 }

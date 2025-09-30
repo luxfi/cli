@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -26,6 +25,7 @@ import (
 	"github.com/luxfi/ids"
 	ANRclient "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

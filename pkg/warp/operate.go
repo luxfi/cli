@@ -8,11 +8,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/contract"
 )
 
 type EndpointKind int64

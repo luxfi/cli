@@ -17,8 +17,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/api/admin"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/config"
@@ -26,12 +26,12 @@ import (
 	nodecontext "github.com/luxfi/node/node"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/wallet/net/primary"
 	"github.com/luxfi/node/wallet/net/primary/common"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	dircopy "github.com/otiai10/copy"
 	"golang.org/x/exp/maps"

@@ -124,13 +124,13 @@ func getSubnetPath(repoPath, subnetName string) string {
 	if _, err := os.Stat(filepath.Dir(customPath)); err == nil {
 		return customPath
 	}
-	
+
 	// Check for legacy structure
 	legacyPath := filepath.Join(repoPath, "subnet", subnetName+constants.YAMLSuffix)
 	if _, err := os.Stat(filepath.Dir(legacyPath)); err == nil {
 		return legacyPath
 	}
-	
+
 	// Default to the standard structure
 	return filepath.Join(repoPath, constants.SubnetDir, subnetName+constants.YAMLSuffix)
 }

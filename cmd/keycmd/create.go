@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
@@ -30,24 +30,24 @@ func validateKeyFormat(filename string) error {
 	if err != nil {
 		return fmt.Errorf("failed to read key file: %w", err)
 	}
-	
+
 	// Check for common key format patterns
 	contentStr := string(content)
-	
+
 	// Check for private key patterns
-	hasPrivateKey := strings.Contains(contentStr, "PrivateKey-") || 
+	hasPrivateKey := strings.Contains(contentStr, "PrivateKey-") ||
 		strings.Contains(contentStr, "-----BEGIN") ||
 		strings.Contains(contentStr, "0x") && len(contentStr) >= 64
-		
+
 	if !hasPrivateKey {
 		return fmt.Errorf("file does not appear to contain a valid private key")
 	}
-	
+
 	// Check for invalid characters that might indicate a corrupted file
 	if strings.ContainsAny(contentStr, "\x00") {
 		return fmt.Errorf("file contains null bytes, may be corrupted")
 	}
-	
+
 	return nil
 }
 

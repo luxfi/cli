@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	luxdjson "github.com/luxfi/node/utils/json"
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/crypto"
 )
@@ -71,14 +71,14 @@ func GetValidatorInfo(net models.Network, validationID ids.ID) (CurrentValidator
 	if err != nil {
 		return CurrentValidatorInfo{}, err
 	}
-	
+
 	// Find the validator with matching validation ID
 	for _, v := range validators {
 		if v.ValidationID == validationID {
 			return v, nil
 		}
 	}
-	
+
 	return CurrentValidatorInfo{}, fmt.Errorf("validator with ID %s not found", validationID)
 }
 
