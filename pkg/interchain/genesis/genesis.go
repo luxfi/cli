@@ -9,11 +9,11 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/sdk/contract"
 )
 
 const (

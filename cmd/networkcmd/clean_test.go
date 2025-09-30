@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/internal/testutils"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
 	"github.com/stretchr/testify/require"
 )
 

@@ -14,14 +14,14 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/docker"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/node"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -419,7 +419,7 @@ func createClusterYAMLFile(clusterName, subnetID, chainID string, separateHost *
 	// Get cloud IDs from the Nodes list
 	nodes, _ := clusterConf["Nodes"].([]string)
 	apiNodesList, _ := clusterConf["APINodes"].([]string)
-	
+
 	for _, cloudID := range nodes {
 		nodeConfig, err := app.LoadClusterNodeConfig(clusterName, cloudID)
 		if err != nil {
@@ -435,7 +435,7 @@ func createClusterYAMLFile(clusterName, subnetID, chainID string, separateHost *
 			}
 			nodeIDStr = nodeID.String()
 		}
-		
+
 		// Determine roles
 		roles := []string{}
 		isAPINode := false
@@ -449,14 +449,14 @@ func createClusterYAMLFile(clusterName, subnetID, chainID string, separateHost *
 		if !isAPINode && nodeIDStr != "" {
 			roles = append(roles, constants.ValidatorRole)
 		}
-		
+
 		if len(roles) == 0 {
 			return fmt.Errorf("incorrect node config file at %s", app.GetNodeConfigPath(cloudID))
 		}
-		
+
 		elasticIP, _ := nodeConfig["ElasticIP"].(string)
 		region, _ := nodeConfig["Region"].(string)
-		
+
 		switch roles[0] {
 		case constants.ValidatorRole:
 			validatorNode := nodeInfo{
@@ -556,7 +556,7 @@ func getExistingLoadTestInstance(clusterName, loadTestName string) (string, erro
 	if !ok || clusters == nil {
 		return "", nil
 	}
-	
+
 	if cluster, ok := clusters[clusterName].(map[string]interface{}); ok {
 		if loadTestInstance, ok := cluster["LoadTestInstance"].(map[string]string); ok {
 			if instanceID, exists := loadTestInstance[loadTestName]; exists {

@@ -12,29 +12,29 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/dependencies"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/validatormanager"
-	blockchainSDK "github.com/luxfi/sdk/blockchain"
-	"github.com/luxfi/sdk/evm"
-	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
-	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/config"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/node/config"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	blockchainSDK "github.com/luxfi/sdk/blockchain"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/sdk/validatormanager"
+	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 
 	"github.com/luxfi/geth/common"
 	"github.com/spf13/cobra"
@@ -384,7 +384,7 @@ func InitializeValidatorManager(
 	for i, v := range luxdBootstrapValidators {
 		bootstrapValidatorsInterface[i] = v
 	}
-	
+
 	subnetSDK := blockchainSDK.Subnet{
 		SubnetID:            subnetID,
 		BlockchainID:        blockchainID,
@@ -521,7 +521,7 @@ func convertSubnetToL1(
 	for i, v := range luxdBootstrapValidators {
 		validatorsInterface[i] = v
 	}
-	
+
 	isFullySigned, convertL1TxID, tx, remainingSubnetAuthKeys, err := deployer.ConvertL1(
 		controlKeysList,
 		subnetAuthKeysList,

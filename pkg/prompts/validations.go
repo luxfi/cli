@@ -14,12 +14,12 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/sdk/models"
 )
 
 func validateEmail(input string) error {

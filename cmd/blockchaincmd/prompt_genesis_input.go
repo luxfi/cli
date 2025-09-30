@@ -10,16 +10,16 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
 	"github.com/luxfi/node/utils/formatting"
 	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 )
 
 // captureInt wraps SDK's CapturePositiveInt to provide the validator function interface
@@ -29,14 +29,14 @@ func captureInt(prompt string, validator func(int) error) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	
+
 	// Apply the validator if provided
 	if validator != nil {
 		if err := validator(result); err != nil {
 			return 0, err
 		}
 	}
-	
+
 	return result, nil
 }
 

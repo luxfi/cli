@@ -7,15 +7,15 @@ import (
 	"sort"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/sdk/validator"
 
 	"github.com/spf13/cobra"
 )

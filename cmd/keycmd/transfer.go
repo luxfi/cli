@@ -12,21 +12,17 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/cli/pkg/warp"
-	"github.com/luxfi/sdk/evm"
 	eth_crypto "github.com/luxfi/crypto"
 	goethereumcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	cryptokeychain "github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
-	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/components/lux"
@@ -35,8 +31,12 @@ import (
 	xvmtxs "github.com/luxfi/node/vms/xvm/txs"
 	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/chain/p/builder"
+	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/node/wallet/net/primary"
 	"github.com/luxfi/node/wallet/net/primary/common"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 )
 
@@ -570,12 +570,12 @@ func interEvmSend(
 	// Import crypto for Address type
 	originAddr := goethereumcommon.HexToAddress(originTransferrerAddress)
 	destTransferrerAddr := goethereumcommon.HexToAddress(destinationTransferrerAddress)
-	
+
 	// Convert to crypto.Address by converting to hex and back
 	cryptoOriginAddr := eth_crypto.HexToAddress(originAddr.Hex())
 	cryptoDestTransferrerAddr := eth_crypto.HexToAddress(destTransferrerAddr.Hex())
 	cryptoDestAddr := eth_crypto.HexToAddress(destinationAddr.Hex())
-	
+
 	receipt, receipt2, err := warp.Send(
 		senderURL,
 		cryptoOriginAddr,
@@ -619,9 +619,9 @@ func pToPSend(
 ) error {
 	ethKeychain := secp256k1fx.NewKeychain()
 	walletConfig := &primary.WalletConfig{
-		URI:          network.Endpoint(),
-		LUXKeychain:  kc,
-		EthKeychain:  ethKeychain,
+		URI:         network.Endpoint(),
+		LUXKeychain: kc,
+		EthKeychain: ethKeychain,
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -690,9 +690,9 @@ func pToXSend(
 ) error {
 	ethKeychain := secp256k1fx.NewKeychain()
 	walletConfig := &primary.WalletConfig{
-		URI:          network.Endpoint(),
-		LUXKeychain:  kc,
-		EthKeychain:  ethKeychain,
+		URI:         network.Endpoint(),
+		LUXKeychain: kc,
+		EthKeychain: ethKeychain,
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -827,9 +827,9 @@ func pToCSend(
 ) error {
 	ethKeychain := secp256k1fx.NewKeychain()
 	walletConfig := &primary.WalletConfig{
-		URI:          network.Endpoint(),
-		LUXKeychain:  kc,
-		EthKeychain:  ethKeychain,
+		URI:         network.Endpoint(),
+		LUXKeychain: kc,
+		EthKeychain: ethKeychain,
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -935,9 +935,9 @@ func cToPSend(
 ) error {
 	ethKeychain := sk.KeyChain()
 	walletConfig := &primary.WalletConfig{
-		URI:          network.Endpoint(),
-		LUXKeychain:  kc,
-		EthKeychain:  ethKeychain,
+		URI:         network.Endpoint(),
+		LUXKeychain: kc,
+		EthKeychain: ethKeychain,
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),

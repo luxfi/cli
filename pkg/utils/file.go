@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	sdkutils "github.com/luxfi/sdk/utils"
 	luxlog "github.com/luxfi/log"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"go.uber.org/zap"
 	"golang.org/x/mod/modfile"

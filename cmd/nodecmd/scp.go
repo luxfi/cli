@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/cli/pkg/node"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 

@@ -27,9 +27,9 @@ const (
 	GenesisSuffix               = SuffixSeparator + GenesisFileName
 	NodeFileName                = "node.json"
 
-	SidecarVersion = "1.4.0"
+	SidecarVersion             = "1.4.0"
 	LatestPreReleaseVersionTag = "latest-prerelease"
-	LatestReleaseVersionTag = "latest"
+	LatestReleaseVersionTag    = "latest"
 
 	MaxLogFileSize   = 4
 	MaxNumOfLogFiles = 5
@@ -48,14 +48,14 @@ const (
 	// WebSocket endpoints
 	MainnetWSEndpoint = "wss://api.lux.network/ext/bc/C/ws"
 	TestnetWSEndpoint = "wss://api.lux-test.network/ext/bc/C/ws"
-	
+
 	// Default values for relayer and validators
 	DefaultRelayerAmount = float64(10)
-	
+
 	// Metrics
-	MetricsNetwork = "network"
-	LocalWSEndpoint   = "ws://127.0.0.1:9630/ext/bc/C/ws"
-	DevnetWSEndpoint  = "wss://api.lux-dev.network/ext/bc/C/ws"
+	MetricsNetwork   = "network"
+	LocalWSEndpoint  = "ws://127.0.0.1:9630/ext/bc/C/ws"
+	DevnetWSEndpoint = "wss://api.lux-dev.network/ext/bc/C/ws"
 
 	// Cloud service constants
 	GCPCloudService            = "gcp"
@@ -81,121 +81,121 @@ const (
 	SSHScriptTimeout      = 120 * time.Second
 	SSHPOSTTimeout        = 30 * time.Second
 	SSHDirOpsTimeout      = 30 * time.Second
-	
+
 	// Docker constants
 	DockerNodeConfigPath   = "/data/.luxgo/configs"
 	WriteReadUserOnlyPerms = 0o600
-	
-	// AWS constants  
+
+	// AWS constants
 	AWSCloudServerRunningState = "running"
 
 	// this depends on bootstrap snapshot
-	LocalAPIEndpoint = "http://127.0.0.1:9630"
-	DevnetAPIEndpoint = "https://api.lux-dev.network"
-	LocalNetworkID   = 1337
+	LocalAPIEndpoint                 = "http://127.0.0.1:9630"
+	DevnetAPIEndpoint                = "https://api.lux-dev.network"
+	LocalNetworkID                   = 1337
 	DefaultNumberOfLocalMachineNodes = 5
-	LocalNetworkNumNodes = 5
+	LocalNetworkNumNodes             = 5
 
 	DefaultTokenName = "TEST"
-	
+
 	// Default versions
 	DefaultLuxdVersion = "v1.13.4"
-	
+
 	// Staking constants
 	BootstrapValidatorBalanceNanoLUX = 1_000_000_000_000 // 1000 LUX
-	BootstrapValidatorWeight = 20                        // Default validator weight
+	BootstrapValidatorWeight         = 20                // Default validator weight
 	PoSL1MinimumStakeDurationSeconds = 86400             // 24 hours
-	
+
 	// Logging
 	DefaultAggregatorLogLevel = "INFO"
-	
+
 	// Git
 	GitExtension = ".git"
-	
+
 	// Ansible
 	AnsibleHostInventoryFileName = "hosts"
 	AnsibleSSHUseAgentParams     = "-o ForwardAgent=yes"
-	
+
 	// Cloud node
-	CloudNodeConfigPath = "/home/ubuntu/.luxgo/configs"
+	CloudNodeConfigPath           = "/home/ubuntu/.luxgo/configs"
 	CloudNodePrometheusConfigPath = "/home/ubuntu/.luxgo/configs/prometheus"
-	CloudNodeStakingPath = "/home/ubuntu/.luxgo/staking"
-	UpgradeFileName     = "upgrade.json"
-	NodePrometheusConfigFileName = "prometheus.yml"
-	ServicesDir = "services"
-	WarpRelayerInstallDir = "warp-relayer"
-	WarpRelayerConfigFilename = "warp-relayer.yml"
-	
+	CloudNodeStakingPath          = "/home/ubuntu/.luxgo/staking"
+	UpgradeFileName               = "upgrade.json"
+	NodePrometheusConfigFileName  = "prometheus.yml"
+	ServicesDir                   = "services"
+	WarpRelayerInstallDir         = "warp-relayer"
+	WarpRelayerConfigFilename     = "warp-relayer.yml"
+
 	// Config keys
-	ConfigSnapshotsAutoSaveKey   = "SnapshotsAutoSaveEnabled"
-	ConfigUpdatesDisabledKey     = "UpdatesDisabled"
-	
+	ConfigSnapshotsAutoSaveKey = "SnapshotsAutoSaveEnabled"
+	ConfigUpdatesDisabledKey   = "UpdatesDisabled"
+
 	// Build environment
 	BuildEnvGolangVersion = "1.24.5"
-	
+
 	// Docker images and repos
 	LuxdDockerImage = "luxfi/luxd"
 	LuxdGitRepo     = "https://github.com/luxfi/node"
 	LuxdRepoName    = "luxfi/node"
-	
+
 	// Organizations
 	LuxOrg = "luxfi"
-	
+
 	// Repo names
 	LuxRepoName = "node"
 	EVMRepoName = "evm"
-	
+
 	// Install directories
 	LuxInstallDir   = "lux"
 	LuxGoInstallDir = "luxgo"
 	EVMInstallDir   = "evm"
-	
+
 	// Directories
-	SubnetDir    = "subnets"
-	ReposDir     = "repos"
+	SubnetDir        = "subnets"
+	ReposDir         = "repos"
 	SnapshotsDirName = "snapshots"
-	CustomVMDir  = "customvms"
-	PluginDir    = "plugins"
-	ConfigDir    = "config"
-	KeyDir       = "keys"
-	LPMPluginDir = "lpm-plugins"
-	
+	CustomVMDir      = "customvms"
+	PluginDir        = "plugins"
+	ConfigDir        = "config"
+	KeyDir           = "keys"
+	LPMPluginDir     = "lpm-plugins"
+
 	// Cloud node paths
 	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.cli/bin/subnet-evm"
-	
+
 	// File names
-	UpgradeBytesFileName = "upgrade.json"
-	LPMLogName          = "lpm.log"
-	OldConfigFileName   = ".cli-config.json"
-	OldMetricsConfigFileName = ".cli-metrics.json"
+	UpgradeBytesFileName         = "upgrade.json"
+	LPMLogName                   = "lpm.log"
+	OldConfigFileName            = ".cli-config.json"
+	OldMetricsConfigFileName     = ".cli-metrics.json"
 	ConfigLPMAdminAPIEndpointKey = "lpm-admin-api-endpoint"
 	ConfigLPMCredentialsFileKey  = "lpm-credentials-file"
-	
+
 	// Devnet flags
 	DevnetFlagsProposerVMUseCurrentHeight = true // This is a boolean flag
-	
+
 	// Validator constants
-	BootstrapValidatorBalanceLUX = 1000000000000000 // 1M LUX in nanoLUX
+	BootstrapValidatorBalanceLUX      = 1000000000000000 // 1M LUX in nanoLUX
 	DefaultValidationIDExpiryDuration = 48 * time.Hour
-	MaxL1TotalWeightChange = 0.2 // 20% max weight change
-	SignatureAggregatorTimeout = 60 * time.Second // Timeout for signature aggregator
-	
+	MaxL1TotalWeightChange            = 0.2              // 20% max weight change
+	SignatureAggregatorTimeout        = 60 * time.Second // Timeout for signature aggregator
+
 	// File names
 	AliasesFileName = "aliases.json"
-	
+
 	// Directories
 	DashboardsDir = "dashboards"
-	
+
 	// Grafana
 	CustomGrafanaDashboardJSON = "custom_dashboard.json"
-	
+
 	// Config metrics keys
-	ConfigMetricsUserIDKey         = "metrics-user-id"
-	ConfigMetricsEnabledKey        = "metrics-enabled"
-	ConfigAuthorizeCloudAccessKey  = "authorize-cloud-access"
-	
+	ConfigMetricsUserIDKey        = "metrics-user-id"
+	ConfigMetricsEnabledKey       = "metrics-enabled"
+	ConfigAuthorizeCloudAccessKey = "authorize-cloud-access"
+
 	// Duplicate constants removed - these are already defined above
-	
+
 	// Environment variables
 	MetricsAPITokenEnvVarName = "METRICS_API_TOKEN"
 
@@ -216,59 +216,59 @@ const (
 	YAMLSuffix = ".yml"
 
 	Enable = "enable"
-	
+
 	// AWS constants
 	AWSGP3DefaultThroughput = 125
-	AWSGP3DefaultIOPS = 3000
-	AWSDefaultCredential = "default"
-	AWSVolumeTypeGP3 = "gp3"
-	AWSVolumeTypeIO1 = "io1"
-	AWSVolumeTypeIO2 = "io2"
+	AWSGP3DefaultIOPS       = 3000
+	AWSDefaultCredential    = "default"
+	AWSVolumeTypeGP3        = "gp3"
+	AWSVolumeTypeIO1        = "io1"
+	AWSVolumeTypeIO2        = "io2"
 
 	Disable = "disable"
 
-	TimeParseLayout    = "2006-01-02 15:04:05"
-	
-	LuxCLISuffix = "-lux-cli"
-	E2EDockerComposeFile = "docker-compose-e2e.yml"
-	LuxdMachineMetricsPort = "9091"
+	TimeParseLayout = "2006-01-02 15:04:05"
+
+	LuxCLISuffix              = "-lux-cli"
+	E2EDockerComposeFile      = "docker-compose-e2e.yml"
+	LuxdMachineMetricsPort    = "9091"
 	LuxdMachineMetricsPortInt = 9091
-	LoadTestRole = "load-test"
-	LoadTestDir  = "loadtest"
-	
+	LoadTestRole              = "load-test"
+	LoadTestDir               = "loadtest"
+
 	// SubnetEVM constants
 	SubnetEVMArchive    = "subnet-evm_%s_linux_amd64.tar.gz"
 	SubnetEVMReleaseURL = "https://github.com/luxfi/subnet-evm/releases/download/%s/%s"
-	
+
 	// Key names for signing
 	PlatformKeyName = "platformvm"
 	EVMKeyName      = "evm"
 	XVMKeyName      = "xvm"
-	
+
 	// Primary network validation constants
 	PrimaryNetworkValidatingStartLeadTimeNodeCmd = 5 * time.Minute
 	PrimaryNetworkValidatingStartLeadTime        = 2 * time.Minute
 	DefaultTestnetStakeDuration                  = 7 * 24 * time.Hour  // 1 week
 	DefaultMainnetStakeDuration                  = 14 * 24 * time.Hour // 2 weeks
-	
+
 	// Currency symbols
 	LUXSymbol = "LUX"
-	
-	// GCP constants  
+
+	// GCP constants
 	GCPDefaultAuthKeyPath = ".gcp/auth_key.json"
-	GCPEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
-	
+	GCPEnvVar             = "GOOGLE_APPLICATION_CREDENTIALS"
+
 	// Cluster constants
 	ClusterYAMLFileName = "cluster.yaml"
-	MinStakeDuration   = 24 * 14 * time.Hour
-	MaxStakeDuration   = 24 * 365 * time.Hour
-	MaxStakeWeight     = 100
-	MinStakeWeight     = 1
-	DefaultStakeWeight = 20
+	MinStakeDuration    = 24 * 14 * time.Hour
+	MaxStakeDuration    = 24 * 365 * time.Hour
+	MaxStakeWeight      = 100
+	MinStakeWeight      = 1
+	DefaultStakeWeight  = 20
 	// The absolute minimum is 25 seconds, but set to 1 minute to allow for
 	// time to go through the command
-	StakingStartLeadTime   = 1 * time.Minute
-	StakingMinimumLeadTime = 25 * time.Second
+	StakingStartLeadTime       = 1 * time.Minute
+	StakingMinimumLeadTime     = 25 * time.Second
 	DevnetStakingStartLeadTime = 30 * time.Second
 
 	DefaultConfigFileName = ".cli"
@@ -291,64 +291,64 @@ const (
 	LuxdGrafanaPort = 3000
 
 	// Node roles
-	APIRole         = "api"
-	ValidatorRole   = "validator"
-	
+	APIRole       = "api"
+	ValidatorRole = "validator"
+
 	// Cluster config
 	ClustersConfigFileName = "clusters.json"
-	MonitorRole     = "monitor"
-	WarpRelayerRole = "warp-relayer"
-	
+	MonitorRole            = "monitor"
+	WarpRelayerRole        = "warp-relayer"
+
 	// Warp constants
-	WarpDir     = "warp"
-	WarpBranch  = "main"
-	WarpURL     = "https://github.com/luxfi/warp.git"
-	WarpKeyName = "warp"
-	WarpVersion = "v1.0.0"
+	WarpDir              = "warp"
+	WarpBranch           = "main"
+	WarpURL              = "https://github.com/luxfi/warp.git"
+	WarpKeyName          = "warp"
+	WarpVersion          = "v1.0.0"
 	WarpRelayerDockerDir = "warp-relayer-docker"
-	
+
 	// Relayer constants
 	DefaultRelayerVersion = "v1.0.0"
-	
+
 	// Payment messages
 	PayTxsFeesMsg = "pay transaction fees"
-	
+
 	// Units
 	OneLux = 1_000_000_000 // 1 LUX = 1e9 nLUX
-	
+
 	// Node types
-	DefaultNodeType = "default"
+	DefaultNodeType        = "default"
 	AWSDefaultInstanceType = "t3.xlarge"
 	GCPDefaultInstanceType = "e2-standard-4"
-	
+
 	// SSH timeouts
 	SSHServerStartTimeout = 5 * time.Minute
-	
+
 	// Metrics constants
-	MetricsNumRegions = "num_regions"
-	MetricsCloudService = "cloud_service"  
-	MetricsNodeType = "node_type"
-	MetricsUseStaticIP = "use_static_ip"
-	MetricsValidatorCount = "validator_count"
-	MetricsAPICount = "api_count"
-	MetricsAWSVolumeType = "aws_volume_type"
-	MetricsAWSVolumeSize = "aws_volume_size"
-	MetricsEnableMonitoring = "enable_monitoring"
-	MetricsCalledFromWiz = "called_from_wizard"
-	MetricsSubnetVM = "subnet_vm"
-	MetricsCustomVMRepoURL = "custom_vm_repo_url"
-	MetricsCustomVMBranch = "custom_vm_branch"
+	MetricsNumRegions          = "num_regions"
+	MetricsCloudService        = "cloud_service"
+	MetricsNodeType            = "node_type"
+	MetricsUseStaticIP         = "use_static_ip"
+	MetricsValidatorCount      = "validator_count"
+	MetricsAPICount            = "api_count"
+	MetricsAWSVolumeType       = "aws_volume_type"
+	MetricsAWSVolumeSize       = "aws_volume_size"
+	MetricsEnableMonitoring    = "enable_monitoring"
+	MetricsCalledFromWiz       = "called_from_wizard"
+	MetricsSubnetVM            = "subnet_vm"
+	MetricsCustomVMRepoURL     = "custom_vm_repo_url"
+	MetricsCustomVMBranch      = "custom_vm_branch"
 	MetricsCustomVMBuildScript = "custom_vm_build_script"
-	
+
 	// Ubuntu version
 	UbuntuVersionLTS = "22.04"
-	
+
 	// Certificate suffix
 	CertSuffix = ".pem"
-	
+
 	// AWS constants
 	AWSSecurityGroupSuffix = "-sg"
-	EIPLimitErr = "EIP limit reached"
+	EIPLimitErr            = "EIP limit reached"
 )
 
 // HTTPAccess represents HTTP access configuration
@@ -392,14 +392,14 @@ const (
 	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
 	CLILatestDependencyURL       = CLIMinVersionURL // Alias for backward compatibility
-	SubnetEVMRepoName            = EVMRepoName       // Alias for backward compatibility
+	SubnetEVMRepoName            = EVMRepoName      // Alias for backward compatibility
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
 
 	// Default Warp Messenger Address
 	DefaultWarpMessengerAddress = "0x0000000000000000000000000000000000000005"
-	
+
 	// C-Chain Warp Registry Addresses
 	MainnetCChainWarpRegistryAddress = "0x0000000000000000000000000000000000000006"
 
@@ -427,6 +427,6 @@ const (
 
 	// Local network constants
 	ExtraLocalNetworkDataFilename = "extra_local_network_data.json"
-	LocalNetworkMetaFile           = "local_network_meta.json"
-	FastGRPCDialTimeout            = 3 * time.Second
+	LocalNetworkMetaFile          = "local_network_meta.json"
+	FastGRPCDialTimeout           = 3 * time.Second
 )

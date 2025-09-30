@@ -8,12 +8,12 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/spf13/cobra"
 )
@@ -58,9 +58,9 @@ func changeOwner(_ *cobra.Command, args []string) error {
 
 	// Estimate fee based on transaction complexity
 	// Base fee for ownership transfer
-	baseFee := uint64(1000000) // 0.001 LUX base fee
+	baseFee := uint64(1000000)    // 0.001 LUX base fee
 	txSizeEstimate := uint64(300) // Estimated transaction size for ownership change
-	perByteFee := uint64(1000) // Fee per byte
+	perByteFee := uint64(1000)    // Fee per byte
 	fee := baseFee + (txSizeEstimate * perByteFee)
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
@@ -141,17 +141,17 @@ func changeOwner(_ *cobra.Command, args []string) error {
 
 	// Create a deployer instance to transfer subnet ownership
 	_ = subnet.NewPublicDeployer(app, false, kc.Keychain, network)
-	
+
 	// Transfer subnet ownership functionality not yet implemented
 	// This will be added when the method is available in SDK
 	ux.Logger.PrintToUser("Subnet ownership transfer request prepared")
 	ux.Logger.PrintToUser("New owner addresses: %v", controlKeys)
 	ux.Logger.PrintToUser("New threshold: %d", threshold)
-	
+
 	// Prepare the transfer transaction
 	// The actual transfer will be processed when the method becomes available
 	// The new ownership structure has been validated and is ready for submission
-	
+
 	// Update local configuration
 	sc2, err := app.LoadSidecar(blockchainName)
 	if err == nil {
@@ -163,6 +163,6 @@ func changeOwner(_ *cobra.Command, args []string) error {
 			ux.Logger.PrintToUser("Warning: Failed to update local configuration: %v", err)
 		}
 	}
-	
+
 	return nil
 }

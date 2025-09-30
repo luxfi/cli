@@ -15,12 +15,12 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm/status"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 )

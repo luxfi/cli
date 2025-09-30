@@ -11,21 +11,21 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	warpgenesis "github.com/luxfi/cli/pkg/interchain/genesis"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	validatorManagerSDK "github.com/luxfi/sdk/validatormanager"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	validatorManagerSDK "github.com/luxfi/sdk/validatormanager"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -375,45 +375,45 @@ func printPrecompiles(genesis core.Genesis) {
 
 	warpSet := false
 	allowListSet := false
-	
+
 	// GenesisPrecompiles are now handled through the EVM config extensions
 	// The precompile configuration is stored in the upgraded chain config structure
 	/*
-	// Warp
-	if genesis.Config.GenesisPrecompiles[warp.ConfigKey] != nil {
-		t.Append([]string{"Warp", "n/a", "n/a", "n/a"})
-		warpSet = true
-	}
-	// Native Minting
-	if genesis.Config.GenesisPrecompiles[nativeminter.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[nativeminter.ConfigKey].(*nativeminter.Config)
-		addPrecompileAllowListToTable(t, "Native Minter", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
-		allowListSet = true
-	}
-	// Contract allow list
-	if genesis.Config.GenesisPrecompiles[deployerallowlist.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[deployerallowlist.ConfigKey].(*deployerallowlist.Config)
-		addPrecompileAllowListToTable(t, "Contract Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
-		allowListSet = true
-	}
-	// TX allow list
-	if genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[txallowlist.Module.ConfigKey].(*txallowlist.Config)
-		addPrecompileAllowListToTable(t, "Tx Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
-		allowListSet = true
-	}
-	// Fee config allow list
-	if genesis.Config.GenesisPrecompiles[feemanager.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[feemanager.ConfigKey].(*feemanager.Config)
-		addPrecompileAllowListToTable(t, "Fee Config Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
-		allowListSet = true
-	}
-	// Reward config allow list
-	if genesis.Config.GenesisPrecompiles[rewardmanager.ConfigKey] != nil {
-		cfg := genesis.Config.GenesisPrecompiles[rewardmanager.ConfigKey].(*rewardmanager.Config)
-		addPrecompileAllowListToTable(t, "Reward Manager Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
-		allowListSet = true
-	}
+		// Warp
+		if genesis.Config.GenesisPrecompiles[warp.ConfigKey] != nil {
+			t.Append([]string{"Warp", "n/a", "n/a", "n/a"})
+			warpSet = true
+		}
+		// Native Minting
+		if genesis.Config.GenesisPrecompiles[nativeminter.ConfigKey] != nil {
+			cfg := genesis.Config.GenesisPrecompiles[nativeminter.ConfigKey].(*nativeminter.Config)
+			addPrecompileAllowListToTable(t, "Native Minter", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
+			allowListSet = true
+		}
+		// Contract allow list
+		if genesis.Config.GenesisPrecompiles[deployerallowlist.ConfigKey] != nil {
+			cfg := genesis.Config.GenesisPrecompiles[deployerallowlist.ConfigKey].(*deployerallowlist.Config)
+			addPrecompileAllowListToTable(t, "Contract Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
+			allowListSet = true
+		}
+		// TX allow list
+		if genesis.Config.GenesisPrecompiles[txallowlist.ConfigKey] != nil {
+			cfg := genesis.Config.GenesisPrecompiles[txallowlist.Module.ConfigKey].(*txallowlist.Config)
+			addPrecompileAllowListToTable(t, "Tx Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
+			allowListSet = true
+		}
+		// Fee config allow list
+		if genesis.Config.GenesisPrecompiles[feemanager.ConfigKey] != nil {
+			cfg := genesis.Config.GenesisPrecompiles[feemanager.ConfigKey].(*feemanager.Config)
+			addPrecompileAllowListToTable(t, "Fee Config Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
+			allowListSet = true
+		}
+		// Reward config allow list
+		if genesis.Config.GenesisPrecompiles[rewardmanager.ConfigKey] != nil {
+			cfg := genesis.Config.GenesisPrecompiles[rewardmanager.ConfigKey].(*rewardmanager.Config)
+			addPrecompileAllowListToTable(t, "Reward Manager Allow List", cfg.AdminAddresses, cfg.ManagerAddresses, cfg.EnabledAddresses)
+			allowListSet = true
+		}
 	*/
 	if warpSet || allowListSet {
 		t.Render()

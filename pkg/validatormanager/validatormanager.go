@@ -8,12 +8,12 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
-	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	luxlog "github.com/luxfi/log"
+	blockchainSDK "github.com/luxfi/sdk/blockchain"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/crypto"
 )

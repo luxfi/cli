@@ -17,28 +17,21 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/dependencies"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/sdk/prompts/comparator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	sdkutils "github.com/luxfi/sdk/utils"
-	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
-	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/api/info"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/utils/units"
@@ -47,6 +40,13 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/platformvm/warp/message"
 	"github.com/luxfi/node/vms/types"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/sdk/prompts/comparator"
+	sdkutils "github.com/luxfi/sdk/utils"
+	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
+	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -1170,7 +1170,7 @@ func scanChainsInSubnet(subnetName string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var chains []string
 	for _, entry := range entries {
 		if entry.IsDir() && entry.Name() == subnetName {

@@ -15,10 +15,10 @@ import (
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
 )
@@ -51,12 +51,12 @@ func getLoadTestInstancesInCluster(clusterName string) ([]string, error) {
 	if !ok || clusters == nil {
 		return nil, fmt.Errorf("no clusters found")
 	}
-	
+
 	cluster, ok := clusters[clusterName].(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("cluster %s doesn't exist", clusterName)
 	}
-	
+
 	if loadTestInstance, ok := cluster["LoadTestInstance"].(map[string]string); ok && loadTestInstance != nil {
 		return maps.Keys(loadTestInstance), nil
 	}
@@ -73,12 +73,12 @@ func checkLoadTestExists(clusterName, loadTestName string) (bool, error) {
 	if !ok || clusters == nil {
 		return false, fmt.Errorf("no clusters found")
 	}
-	
+
 	cluster, ok := clusters[clusterName].(map[string]interface{})
 	if !ok {
 		return false, fmt.Errorf("cluster %s doesn't exist", clusterName)
 	}
-	
+
 	if loadTestInstance, ok := cluster["LoadTestInstance"].(map[string]string); ok && loadTestInstance != nil {
 		_, exists := loadTestInstance[loadTestName]
 		return exists, nil
@@ -311,18 +311,18 @@ func removeLoadTestNodeFromClustersConfig(clusterName, loadTestName string) erro
 	if !ok || clusters == nil {
 		return fmt.Errorf("no clusters found")
 	}
-	
+
 	cluster, ok := clusters[clusterName].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("cluster %s is not found in cluster config", clusterName)
 	}
-	
+
 	if loadTestInstance, ok := cluster["LoadTestInstance"].(map[string]string); ok {
 		if _, exists := loadTestInstance[loadTestName]; exists {
 			delete(loadTestInstance, loadTestName)
 		}
 	}
-	
+
 	return app.SaveClustersConfig(clustersConfig)
 }
 

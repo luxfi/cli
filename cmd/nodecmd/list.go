@@ -64,7 +64,7 @@ func list(_ *cobra.Command, _ []string) error {
 			}
 			nodeIDs = append(nodeIDs, nodeIDStr)
 		}
-		
+
 		// Get network info
 		networkKind := "Unknown"
 		if network, ok := clusterConf["Network"].(map[string]interface{}); ok {
@@ -72,10 +72,10 @@ func list(_ *cobra.Command, _ []string) error {
 				networkKind = kind
 			}
 		}
-		
+
 		external, _ := clusterConf["External"].(bool)
 		local, _ := clusterConf["Local"].(bool)
-		
+
 		switch {
 		case external:
 			ux.Logger.PrintToUser("cluster %q (%s) EXTERNAL", clusterName, networkKind)
@@ -84,13 +84,13 @@ func list(_ *cobra.Command, _ []string) error {
 		default:
 			ux.Logger.PrintToUser("Cluster %q (%s)", clusterName, networkKind)
 		}
-		
+
 		for i, cloudID := range nodes {
 			nodeConfig, err := app.LoadClusterNodeConfig(clusterName, cloudID)
 			if err != nil {
 				return err
 			}
-			
+
 			// Determine roles
 			roles := []string{}
 			apiNodes, _ := clusterConf["APINodes"].([]string)
@@ -100,7 +100,7 @@ func list(_ *cobra.Command, _ []string) error {
 					break
 				}
 			}
-			
+
 			// Check if it's a monitor or load test node
 			if isMonitor, _ := nodeConfig["IsMonitor"].(bool); isMonitor {
 				roles = append(roles, "Monitor")
@@ -108,12 +108,12 @@ func list(_ *cobra.Command, _ []string) error {
 			if isLoadTest, _ := nodeConfig["IsLoadTest"].(bool); isLoadTest {
 				roles = append(roles, "LoadTest")
 			}
-			
+
 			rolesStr := strings.Join(roles, ",")
 			if rolesStr != "" {
 				rolesStr = " [" + rolesStr + "]"
 			}
-			
+
 			elasticIP, _ := nodeConfig["ElasticIP"].(string)
 			ux.Logger.PrintToUser("  Node %s (%s) %s%s", cloudID, nodeIDs[i], elasticIP, rolesStr)
 		}

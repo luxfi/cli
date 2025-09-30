@@ -5,8 +5,8 @@ package node
 import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/sdk/models"
 )
 
 func GetHostWithCloudID(app *application.Lux, clusterName string, cloudID string) (*models.Host, error) {
@@ -36,7 +36,7 @@ func GetWarpRelayerHost(app *application.Lux, clusterName string) (*models.Host,
 		return nil, err
 	}
 	relayerCloudID := ""
-	
+
 	// Type assertion for nodes field
 	nodes, _ := clusterConfig["nodes"].([]interface{})
 	for _, nodeData := range nodes {
@@ -51,7 +51,7 @@ func GetWarpRelayerHost(app *application.Lux, clusterName string) (*models.Host,
 				cloudID = id
 			}
 		}
-		
+
 		if cloudID != "" {
 			if nodeConfig, err := app.LoadClusterNodeConfig(clusterName, cloudID); err == nil {
 				// Check if this node is a warp relayer

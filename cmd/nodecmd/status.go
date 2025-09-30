@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
@@ -20,6 +19,7 @@ import (
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/vms/platformvm/status"
+	"github.com/luxfi/sdk/models"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/pborman/ansi"
@@ -319,7 +319,7 @@ func printOutput(
 		if nodeConfig.IsLoadTest {
 			roles = append(roles, "LoadTest")
 		}
-		
+
 		// Check if it's a luxd host (typically all hosts are luxd hosts unless they're monitoring or loadtest only)
 		isLuxdHost := true
 		if nodeConfig.IsMonitor && !nodeConfig.IsWarpRelayer && !nodeConfig.IsLoadTest {

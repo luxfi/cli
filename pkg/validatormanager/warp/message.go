@@ -7,7 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
-	
+
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
@@ -32,9 +32,9 @@ type SubnetToL1ConversionValidatorData struct {
 
 // SubnetToL1ConversionData contains the full subnet-to-L1 conversion payload
 type SubnetToL1ConversionData struct {
-	SubnetID       ids.ID                               `serialize:"true" json:"subnetID"`
-	ManagerChainID ids.ID                               `serialize:"true" json:"managerChainID"`
-	ManagerAddress []byte                               `serialize:"true" json:"managerAddress"`
+	SubnetID       ids.ID                              `serialize:"true" json:"subnetID"`
+	ManagerChainID ids.ID                              `serialize:"true" json:"managerChainID"`
+	ManagerAddress []byte                              `serialize:"true" json:"managerAddress"`
 	Validators     []SubnetToL1ConversionValidatorData `serialize:"true" json:"validators"`
 }
 
@@ -61,14 +61,14 @@ func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, e
 
 // L1ValidatorRegistration represents an L1 validator registration
 type L1ValidatorRegistration struct {
-	ValidationID     ids.ID    `serialize:"true" json:"validationID"`
-	NodeID           ids.NodeID `serialize:"true" json:"nodeID"`
-	BLSPublicKey     []byte    `serialize:"true" json:"blsPublicKey"`
-	Weight           uint64    `serialize:"true" json:"weight"`
-	Expiry           uint64    `serialize:"true" json:"expiry"`
-	RemainingBalance uint64    `serialize:"true" json:"remainingBalance"`
+	ValidationID     ids.ID      `serialize:"true" json:"validationID"`
+	NodeID           ids.NodeID  `serialize:"true" json:"nodeID"`
+	BLSPublicKey     []byte      `serialize:"true" json:"blsPublicKey"`
+	Weight           uint64      `serialize:"true" json:"weight"`
+	Expiry           uint64      `serialize:"true" json:"expiry"`
+	RemainingBalance uint64      `serialize:"true" json:"remainingBalance"`
 	DisableOwner     PChainOwner `serialize:"true" json:"disableOwner"`
-	Valid            bool      `serialize:"true" json:"valid"`
+	Valid            bool        `serialize:"true" json:"valid"`
 }
 
 // GetValidationID returns the validation ID for this registration
@@ -123,25 +123,25 @@ func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Type assert to RegisterL1Validator
 	registerPayload, ok := payloadObj.(*warpPayload.RegisterL1Validator)
 	if !ok {
 		return nil, ErrInvalidMessageType
 	}
-	
+
 	// Convert SubnetID bytes to ids.ID
 	subnetID, err := ids.ToID(registerPayload.SubnetID)
 	if err != nil {
 		return nil, err
 	}
-	
-	// Convert NodeID bytes to ids.NodeID  
+
+	// Convert NodeID bytes to ids.NodeID
 	nodeID, err := ids.ToNodeID(registerPayload.NodeID)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Convert to local type
 	reg := &L1ValidatorRegistration{
 		ValidationID: subnetID, // Use SubnetID as validation ID for now
@@ -151,14 +151,14 @@ func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) 
 		Expiry:       registerPayload.RegistrationTime,
 		Valid:        true,
 	}
-	
+
 	return reg, nil
 }
 
 // NewRegisterL1Validator creates a new L1 validator registration payload with proper signature
 func NewRegisterL1Validator(
 	subnetID ids.ID,
-	nodeID ids.NodeID, 
+	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
 	balanceOwners PChainOwner,
@@ -167,7 +167,7 @@ func NewRegisterL1Validator(
 ) (*L1ValidatorRegistration, error) {
 	// Create a validation ID from the inputs
 	validationID := ids.GenerateTestID() // In production, calculate from inputs
-	
+
 	reg := &L1ValidatorRegistration{
 		ValidationID:     validationID,
 		NodeID:           nodeID,
@@ -178,7 +178,7 @@ func NewRegisterL1Validator(
 		DisableOwner:     disableOwners,
 		Valid:            true,
 	}
-	
+
 	return reg, nil
 }
 
@@ -193,13 +193,13 @@ func ParseAddressedCall(payload []byte) (*warpPayload.AddressedCall, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Type assert to AddressedCall
 	addressedCall, ok := payloadObj.(*warpPayload.AddressedCall)
 	if !ok {
 		return nil, ErrInvalidMessageType
 	}
-	
+
 	return addressedCall, nil
 }
 
@@ -207,7 +207,7 @@ func ParseAddressedCall(payload []byte) (*warpPayload.AddressedCall, error) {
 func ConvertStandaloneToNodeWarpMessage(standaloneMsg *standaloneWarp.Message) (*nodeWarp.Message, error) {
 	// Extract the raw bytes from the standalone message
 	msgBytes := standaloneMsg.Bytes()
-	
+
 	// Parse as a node warp message
 	return nodeWarp.ParseMessage(msgBytes)
 }

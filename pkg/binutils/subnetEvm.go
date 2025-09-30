@@ -40,6 +40,6 @@ func SetupSubnetEVM(app *application.Lux, evmVersion string) (string, string, er
 	if err != nil {
 		return "", "", err
 	}
-	// Return empty string for first param, binary path for second param  
+	// Return empty string for first param, binary path for second param
 	return "", binaryPath, nil
 }

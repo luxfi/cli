@@ -11,11 +11,11 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/genesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	dircopy "github.com/otiai10/copy"
 	"go.uber.org/zap"

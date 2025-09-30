@@ -5,7 +5,7 @@ package vm
 
 import (
 	"math/big"
-	
+
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/ux"
@@ -33,10 +33,10 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 		setMinBlockGas              = "Set min block gas cost"
 		setMaxBlockGas              = "Set max block gas cost"
 		setGasStep                  = "Set block gas cost step"
-		
+
 		// Default gas targets
 		fastTarget   = uint64(5000000)
-		mediumTarget = uint64(2000000) 
+		mediumTarget = uint64(2000000)
 		slowTarget   = uint64(1500000)
 	)
 
@@ -55,7 +55,7 @@ func GetFeeConfig(config params.ChainConfig, app *application.Lux) (
 	if extrasConfig == nil {
 		extrasConfig = &extras.ChainConfig{}
 	}
-	
+
 	// Initialize FeeConfig if not present (check if GasLimit is nil as indicator)
 	if extrasConfig.FeeConfig.GasLimit == nil {
 		extrasConfig.FeeConfig = commontype.FeeConfig{

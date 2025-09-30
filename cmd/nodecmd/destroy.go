@@ -12,11 +12,11 @@ import (
 
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"golang.org/x/exp/maps"
 	"golang.org/x/net/context"
 

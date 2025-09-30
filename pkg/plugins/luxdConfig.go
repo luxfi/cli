@@ -12,8 +12,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 )
 
 // Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.

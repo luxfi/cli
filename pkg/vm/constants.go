@@ -20,11 +20,11 @@ const (
 	LowGasLimit    = uint64(12_000_000)
 	MediumGasLimit = uint64(15_000_000)
 	HighGasLimit   = uint64(20_000_000)
-	
+
 	LowTargetGas    = uint64(1_500_000)
 	MediumTargetGas = uint64(2_000_000)
 	HighTargetGas   = uint64(5_000_000)
-	
+
 	NoDynamicFeesGasLimitToTargetGasFactor = uint64(10)
 )
 
@@ -34,12 +34,12 @@ func GetVMBinaryProtocolVersion(vmBinaryPath string) (int, error) {
 	if vmBinaryPath == "" {
 		return 37, nil // Return default if no path provided
 	}
-	
+
 	// Check if binary exists
 	if _, err := os.Stat(vmBinaryPath); err != nil {
 		return 37, fmt.Errorf("VM binary not found: %w", err)
 	}
-	
+
 	// Try to run the binary with --version flag to get protocol info
 	cmd := exec.Command(vmBinaryPath, "--version")
 	output, err := cmd.CombinedOutput()
@@ -52,7 +52,7 @@ func GetVMBinaryProtocolVersion(vmBinaryPath string) (int, error) {
 			return 37, nil
 		}
 	}
-	
+
 	// Parse output looking for protocol version
 	// Expected format: "protocol-version: X" or "rpc-version: X"
 	outputStr := string(output)
@@ -75,7 +75,7 @@ func GetVMBinaryProtocolVersion(vmBinaryPath string) (int, error) {
 			}
 		}
 	}
-	
+
 	// Default to latest known RPC version if detection fails
 	return 37, nil
 }

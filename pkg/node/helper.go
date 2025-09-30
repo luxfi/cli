@@ -11,12 +11,12 @@ import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
 )
 
 const (
@@ -67,14 +67,14 @@ func GetClusterNodes(app *application.Lux, clusterName string) ([]string, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Type assertions for map[string]interface{}
 	nodesData, ok := clusterConfig["nodes"].([]interface{})
 	if !ok {
 		// Try as empty slice
 		nodesData = []interface{}{}
 	}
-	
+
 	// Convert to []string (node IDs or names)
 	clusterNodes := make([]string, 0, len(nodesData))
 	for _, nodeData := range nodesData {
@@ -90,7 +90,7 @@ func GetClusterNodes(app *application.Lux, clusterName string) ([]string, error)
 			}
 		}
 	}
-	
+
 	isLocal, _ := clusterConfig["local"].(bool)
 	if len(clusterNodes) == 0 && !isLocal {
 		return nil, fmt.Errorf("no nodes found in cluster %s", clusterName)
@@ -102,18 +102,18 @@ func CheckClusterExists(app *application.Lux, clusterName string) (bool, error) 
 	if !app.ClustersConfigExists() {
 		return false, nil
 	}
-	
+
 	clustersConfig, err := app.LoadClustersConfig()
 	if err != nil {
 		return false, err
 	}
-	
+
 	// Type assertion for clusters field
 	clusters, ok := clustersConfig["clusters"].(map[string]interface{})
 	if !ok {
 		return false, nil
 	}
-	
+
 	_, exists := clusters[clusterName]
 	return exists, nil
 }
@@ -216,12 +216,12 @@ func getPublicEndpoints(
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Type assertions for map[string]interface{}
 	apiNodes, _ := clusterConfig["apiNodes"].([]string)
 	nodes, _ := clusterConfig["nodes"].([]string)
 	networkStr, _ := clusterConfig["network"].(string)
-	
+
 	network := models.NetworkFromString(networkStr)
 	publicNodes := apiNodes
 	if network.Kind() == models.Devnet {
@@ -295,25 +295,25 @@ func WaitForHealthyCluster(
 	if err != nil {
 		return err
 	}
-	
+
 	// Type assertion for clusters field
 	clusters, ok := clustersConfig["clusters"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("invalid clusters configuration")
 	}
-	
+
 	clusterData, ok := clusters[clusterName]
 	if !ok {
 		return fmt.Errorf("cluster %s does not exist", clusterName)
 	}
-	
+
 	// For now, we can't use cluster.GetValidatorHosts as clusterData is a map
 	// We'll need to get all hosts from ansible inventory
 	allHosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
 	if err != nil {
 		return err
 	}
-	
+
 	// Filter out API nodes - only include validator and monitor nodes
 	hosts := []*models.Host{}
 	clusterDataMap, _ := clusterData.(map[string]interface{})

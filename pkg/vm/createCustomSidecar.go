@@ -18,6 +18,6 @@ func CreateCustomSidecar(
 	// Update sidecar with custom VM information
 	sc.VM = models.CustomVM
 	sc.VMVersion = vmVersion
-	
+
 	return sc, nil
 }

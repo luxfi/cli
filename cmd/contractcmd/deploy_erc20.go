@@ -6,13 +6,13 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/spf13/cobra"
 )

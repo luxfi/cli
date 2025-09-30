@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	sdkutils "github.com/luxfi/sdk/utils"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
+	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/olekukonko/tablewriter"
 )
 

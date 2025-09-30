@@ -15,11 +15,11 @@ import (
 	gcpAPI "github.com/luxfi/cli/pkg/cloud/gcp"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
 	"github.com/pingcap/errors"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/slices"
@@ -324,7 +324,7 @@ func getCloudSecurityGroupList(clusterNodes []string) ([]regionSecurityGroup, er
 			}
 		}
 	}
-	
+
 	for _, node := range clusterNodes {
 		if !utils.FileExists(app.GetNodeConfigPath(node)) {
 			continue

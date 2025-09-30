@@ -1291,7 +1291,7 @@ func TestCaptureXChainAddressWithMonkeyPatch(t *testing.T) {
 
 			prompter := &realPrompter{}
 			// Network was used with CaptureXChainAddress but CaptureAddress doesn't need it
-			
+
 			addr, err := prompter.CaptureAddress("Enter X-Chain address:")
 
 			if tt.expectError {

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/spf13/pflag"
 
@@ -16,25 +16,25 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/validatormanager"
-	"github.com/luxfi/sdk/evm"
-	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/sdk/validator"
+	"github.com/luxfi/sdk/validatormanager"
 	sdkwarp "github.com/luxfi/sdk/validatormanager/warp"
 
 	"github.com/luxfi/geth/common"
@@ -225,9 +225,9 @@ func addValidator(cmd *cobra.Command, args []string) error {
 
 	// Estimate fee based on transaction complexity
 	// Base fee + per-byte fee for transaction size
-	baseFee := uint64(1000000) // 0.001 LUX base fee
+	baseFee := uint64(1000000)    // 0.001 LUX base fee
 	txSizeEstimate := uint64(500) // Estimated transaction size in bytes
-	perByteFee := uint64(1000) // Fee per byte
+	perByteFee := uint64(1000)    // Fee per byte
 	fee := baseFee + (txSizeEstimate * perByteFee)
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
@@ -601,12 +601,12 @@ func CallAddValidator(
 
 	// Register the L1 validator on the P-Chain
 	ux.Logger.PrintToUser("Registering L1 validator on P-Chain...")
-	
+
 	// Use the deployer's RegisterL1Validator method with the calculated balance
 	txID, _, err := deployer.RegisterL1Validator(
-		balance,          // Balance for validation
-		blsInfo,          // BLS proof of possession
-		nil,              // Message (optional)
+		balance, // Balance for validation
+		blsInfo, // BLS proof of possession
+		nil,     // Message (optional)
 	)
 	if err != nil {
 		ux.Logger.PrintToUser("Warning: P-Chain registration not fully implemented: %v", err)
@@ -614,8 +614,8 @@ func CallAddValidator(
 	} else {
 		ux.Logger.PrintToUser("L1 Validator registered with TX ID: %s", txID)
 	}
-	
-	// Still update P-Chain height for consistency  
+
+	// Still update P-Chain height for consistency
 	if err := blockchain.UpdatePChainHeight(
 		"Waiting for P-Chain to update validator information ...",
 	); err != nil {

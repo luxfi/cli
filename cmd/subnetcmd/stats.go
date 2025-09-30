@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
@@ -20,6 +19,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/api"
 	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/sdk/models"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

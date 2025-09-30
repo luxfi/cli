@@ -23,15 +23,15 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/api/info"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
+	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/utils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/exp/slices"

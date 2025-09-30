@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
@@ -176,10 +176,10 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 
 func deployL1Testnet(l1Name string, sc *models.Sidecar) error {
 	ux.Logger.PrintToUser("\n🚀 Deploying to testnet...")
-	
+
 	// Use the blockchain deployment logic from blockchaincmd
 	deployer := subnet.NewLocalDeployer(app, "", "")
-	
+
 	// Deploy to testnet
 	genesis, err := app.LoadRawGenesis(l1Name)
 	if err != nil {
@@ -189,26 +189,26 @@ func deployL1Testnet(l1Name string, sc *models.Sidecar) error {
 	if err != nil {
 		return fmt.Errorf("failed to deploy L1 to testnet: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("L1 deployed to testnet!")
 	ux.Logger.PrintToUser("Subnet ID: %s", subnetID)
 	ux.Logger.PrintToUser("Blockchain ID: %s", blockchainID)
-	
+
 	return nil
 }
 
 func deployL1Mainnet(l1Name string, sc *models.Sidecar) error {
 	ux.Logger.PrintToUser("\n🚀 Deploying to mainnet...")
-	
+
 	// Mainnet deployment requires additional security checks
 	ux.Logger.PrintToUser("⚠️  Mainnet deployment requires:")
 	ux.Logger.PrintToUser("   - Sufficient LUX balance for deployment")
 	ux.Logger.PrintToUser("   - Validator nodes ready")
 	ux.Logger.PrintToUser("   - Security audit completed")
-	
+
 	// Use the blockchain deployment logic from blockchaincmd
 	deployer := subnet.NewLocalDeployer(app, "", "")
-	
+
 	// Deploy to mainnet with additional confirmations
 	genesis, err := app.LoadRawGenesis(l1Name)
 	if err != nil {
@@ -218,18 +218,18 @@ func deployL1Mainnet(l1Name string, sc *models.Sidecar) error {
 	if err != nil {
 		return fmt.Errorf("failed to deploy L1 to mainnet: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("L1 deployed to mainnet!")
 	ux.Logger.PrintToUser("Subnet ID: %s", subnetID)
 	ux.Logger.PrintToUser("Blockchain ID: %s", blockchainID)
-	
+
 	return nil
 }
 
 func startLocalNetwork() error {
 	// Start local network with optimal L1 settings
 	ux.Logger.PrintToUser("Starting local network...")
-	
+
 	// Check if local network is already running
 	if isRunning, err := localnet.LocalNetworkIsRunning(app); err != nil {
 		return fmt.Errorf("failed to check network status: %w", err)
@@ -237,12 +237,12 @@ func startLocalNetwork() error {
 		ux.Logger.PrintToUser("Local network is already running")
 		return nil
 	}
-	
+
 	// Start the local network
 	if err := localnet.StartLocalNetwork(app, "local-network", "latest"); err != nil {
 		return fmt.Errorf("failed to start local network: %w", err)
 	}
-	
+
 	ux.Logger.PrintToUser("Local network started successfully")
 	return nil
 }

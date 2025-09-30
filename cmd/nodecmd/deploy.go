@@ -10,9 +10,9 @@ import (
 	"github.com/luxfi/cli/cmd/blockchaincmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 

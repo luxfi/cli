@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 )
 
 // PullDockerImage pulls a docker image on a remote host.

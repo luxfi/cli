@@ -10,11 +10,11 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/sdk/models"
 )
 
 // information that is persisted alongside the local network
@@ -103,22 +103,22 @@ func GetLocalNetworkWallet(
 	}
 	// Use subnetIDs for validation if needed
 	_ = subnetIDs // Currently unused but available for subnet-specific operations
-	
+
 	ctx, cancel := GetLocalNetworkDefaultContext()
 	defer cancel()
-	
+
 	// Create keychain for the wallet with EWOQ key for local testing
 	keychain := secp256k1fx.NewKeychain()
 	// Load EWOQ test key
 	// For now, use an empty keychain since we need to convert the key format
 	// The EWOQ key conversion would need proper CB58 decoding
-	
+
 	walletConfig := &primary.WalletConfig{
 		URI:         endpoint,
 		LUXKeychain: keychain,
 		EthKeychain: keychain,
 	}
-	
+
 	return primary.MakeWallet(ctx, walletConfig)
 }
 

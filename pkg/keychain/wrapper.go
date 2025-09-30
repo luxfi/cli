@@ -4,11 +4,11 @@ package keychain
 
 import (
 	"github.com/luxfi/ids"
-	nodekeychain "github.com/luxfi/node/utils/crypto/keychain"
-	walletkeychain "github.com/luxfi/node/wallet/keychain"
-	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/vms/secp256k1fx"
 	ledgerkeychain "github.com/luxfi/ledger-lux-go/keychain"
+	"github.com/luxfi/math/set"
+	nodekeychain "github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/node/vms/secp256k1fx"
+	walletkeychain "github.com/luxfi/node/wallet/keychain"
 )
 
 // NodeToLedgerWrapper wraps a node keychain to implement ledger keychain interface

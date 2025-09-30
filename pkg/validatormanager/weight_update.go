@@ -10,23 +10,23 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/evm"
-	sdkwarp "github.com/luxfi/sdk/warp"
-	"github.com/luxfi/sdk/validator"
-	ethereum "github.com/luxfi/geth"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxdconstants "github.com/luxfi/node/utils/constants"
 	luxlog "github.com/luxfi/log"
+	luxdconstants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/validator"
+	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
+	sdkwarp "github.com/luxfi/sdk/warp"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -470,13 +470,13 @@ func SearchForL1ValidatorWeightMessage(
 		for _, msg := range msgs {
 			payload := msg.Payload
 			parsedPayload, err := warpPayload.ParsePayload(payload)
-		if err != nil {
-			return nil, err
-		}
-		addressedCall, ok := parsedPayload.(*warpPayload.AddressedCall)
-		if !ok {
-			return nil, fmt.Errorf("expected AddressedCall payload, got %T", parsedPayload)
-		}
+			if err != nil {
+				return nil, err
+			}
+			addressedCall, ok := parsedPayload.(*warpPayload.AddressedCall)
+			if !ok {
+				return nil, fmt.Errorf("expected AddressedCall payload, got %T", parsedPayload)
+			}
 			if err == nil {
 				weightMsg, err := localWarpMessage.ParseL1ValidatorWeight(addressedCall.Payload)
 				if err == nil {
@@ -500,4 +500,3 @@ func SearchForL1ValidatorWeightMessage(
 	}
 	return nil, nil
 }
-

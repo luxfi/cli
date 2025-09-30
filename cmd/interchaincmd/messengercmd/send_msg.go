@@ -9,14 +9,14 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/spf13/cobra"
 )
