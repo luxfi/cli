@@ -415,7 +415,7 @@ func changeWeightACP99(
 	if rawTx != nil {
 		dump, err := evm.TxDump("Initializing Validator Weight Change", rawTx)
 		if err == nil {
-			ux.Logger.PrintToUser(dump)
+			ux.Logger.PrintToUser("%s", dump)
 		}
 		return err
 	}
@@ -476,7 +476,7 @@ func changeWeightACP99(
 	if rawTx != nil {
 		dump, err := evm.TxDump("Finish Validator Weight Change", rawTx)
 		if err == nil {
-			ux.Logger.PrintToUser(dump)
+			ux.Logger.PrintToUser("%s", dump)
 		}
 		return err
 	}
