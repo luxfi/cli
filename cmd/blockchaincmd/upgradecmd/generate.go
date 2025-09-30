@@ -12,8 +12,6 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -29,6 +27,8 @@ import (
 	"github.com/luxfi/geth/common"
 	goethereummath "github.com/luxfi/geth/common/math"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 )
 
@@ -390,14 +390,14 @@ func promptFeeManagerParams(
 	if yes {
 		// Create default fee configuration
 		feeConfig = createFeeConfig(
-			big.NewInt(8000000),   // gasLimit
-			2,                      // targetBlockRate
+			big.NewInt(8000000),     // gasLimit
+			2,                       // targetBlockRate
 			big.NewInt(25000000000), // minBaseFee
-			big.NewInt(15000000),   // targetGas
-			big.NewInt(36),         // baseFeeChangeDenominator
-			big.NewInt(0),          // minBlockGasCost
-			big.NewInt(1000000),    // maxBlockGasCost
-			big.NewInt(200000),     // blockGasCostStep
+			big.NewInt(15000000),    // targetGas
+			big.NewInt(36),          // baseFeeChangeDenominator
+			big.NewInt(0),           // minBlockGasCost
+			big.NewInt(1000000),     // maxBlockGasCost
+			big.NewInt(200000),      // blockGasCostStep
 		)
 	}
 	config := feemanager.NewConfig(

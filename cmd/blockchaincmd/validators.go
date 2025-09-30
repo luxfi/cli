@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/subnet"
-	validatorsdk "github.com/luxfi/sdk/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/models"
+	validatorsdk "github.com/luxfi/sdk/validator"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

@@ -11,10 +11,10 @@ import (
 
 // SubnetEVMGenesisParams contains parameters for Subnet EVM genesis
 type SubnetEVMGenesisParams struct {
-	UseDefaults          bool
-	Interop              bool
-	UseWarp              bool
-	UseExternalGasToken  bool
+	UseDefaults         bool
+	Interop             bool
+	UseWarp             bool
+	UseExternalGasToken bool
 }
 
 // PromptVMType prompts the user to select a VM type

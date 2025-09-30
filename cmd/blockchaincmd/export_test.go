@@ -3,8 +3,8 @@
 package blockchaincmd
 
 import (
-	luxlog "github.com/luxfi/log"
 	"encoding/json"
+	luxlog "github.com/luxfi/log"
 	"io"
 	"os"
 	"path/filepath"
@@ -14,10 +14,10 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )

@@ -47,10 +47,10 @@ func deployL3(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("📋 Configuration:")
 	ux.Logger.PrintToUser("  • Base Chain: %s", baseChain)
 	ux.Logger.PrintToUser("  • Sequencer Type: %s", sc.SequencerType)
-	
+
 	// Deploy contracts on base L2
 	ux.Logger.PrintToUser("📦 Deploying contracts on base L2...")
-	
+
 	// Deploy inbox contract for based rollup
 	if sc.BasedRollup {
 		ux.Logger.PrintToUser("  • Deploying inbox contract...")
@@ -66,7 +66,7 @@ func deployL3(cmd *cobra.Command, args []string) error {
 
 	// Initialize L3 genesis
 	ux.Logger.PrintToUser("🔧 Initializing L3 genesis...")
-	
+
 	// Save updated configuration
 	if err := app.UpdateSidecar(&sc); err != nil {
 		return fmt.Errorf("failed to save L3 configuration: %w", err)
@@ -77,6 +77,6 @@ func deployL3(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Next steps:")
 	ux.Logger.PrintToUser("  • Start L3 sequencer: lux l3 start %s", l3Name)
 	ux.Logger.PrintToUser("  • Bridge assets: lux l3 bridge %s", l3Name)
-	
+
 	return nil
 }

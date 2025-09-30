@@ -14,13 +14,13 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	cliprompts "github.com/luxfi/cli/pkg/prompts"
-	sdkprompts "github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/models"
+	sdkprompts "github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 )
 

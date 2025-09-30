@@ -59,7 +59,7 @@ func RelayerCleanup(runPath string, logPath string, storagePath string) error {
 	if runPath != "" {
 		_ = os.Remove(runPath)
 	}
-	// Clean up log file  
+	// Clean up log file
 	if logPath != "" {
 		_ = os.Remove(logPath)
 	}

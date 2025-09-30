@@ -9,13 +9,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/constants"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/plugins"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
@@ -25,6 +24,7 @@ import (
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 

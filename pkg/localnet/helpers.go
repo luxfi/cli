@@ -10,11 +10,11 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/sdk/models"
 )
 
 // Update network given by [networkDir], with all blockchain config of [blockchainName]
@@ -82,7 +82,7 @@ func UpdateBlockchainConfig(
 		}
 		perNodeBlockchainConfig[nodeID] = configBytes
 	}
-	
+
 	// general node config
 	nodeConfigStr, err := app.Conf.LoadNodeConfig()
 	if err != nil {

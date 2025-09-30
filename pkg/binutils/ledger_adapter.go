@@ -74,13 +74,13 @@ func (l *LedgerAdapter) SignHash(hash []byte, addressIndex uint32) ([]byte, erro
 	// Build signing path from address index
 	signingPath := fmt.Sprintf("0/%d", addressIndex)
 	signingPaths := []string{signingPath}
-	
+
 	// Sign with the path
 	resp, err := l.device.SignHash("44'/9000'/0'", signingPaths, hash)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Extract signature for the path
 	if sigBytes, ok := resp.Signature[signingPath]; ok {
 		return sigBytes, nil
@@ -93,14 +93,14 @@ func (l *LedgerAdapter) Sign(unsignedTxBytes []byte, addressIndex uint32) ([]byt
 	// Build signing path from address index
 	signingPath := fmt.Sprintf("0/%d", addressIndex)
 	signingPaths := []string{signingPath}
-	
+
 	// Sign with the path (no change paths for now)
 	changePaths := []string{}
 	resp, err := l.device.Sign("44'/9000'/0'", signingPaths, unsignedTxBytes, changePaths)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Extract signature for the path
 	if sigBytes, ok := resp.Signature[signingPath]; ok {
 		return sigBytes, nil
@@ -115,14 +115,14 @@ func (l *LedgerAdapter) SignTransaction(unsignedTxBytes []byte, addressIndices [
 	for i, index := range addressIndices {
 		signingPaths[i] = fmt.Sprintf("0/%d", index)
 	}
-	
+
 	// Sign with all paths at once (no change paths for now)
 	changePaths := []string{}
 	resp, err := l.device.Sign("44'/9000'/0'", signingPaths, unsignedTxBytes, changePaths)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Extract signatures for each path
 	signatures := make([][]byte, len(addressIndices))
 	for i, path := range signingPaths {

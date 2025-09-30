@@ -9,19 +9,19 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/sdk/evm"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/spf13/cobra"
 )
@@ -504,7 +504,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 		if err := saveRelayerConfig(configPath, config); err != nil {
 			return fmt.Errorf("failed to save config: %w", err)
 		}
-		
+
 		// Deploy the relayer with the saved configuration
 		if err := deployRelayerProcess(configPath, logPath); err != nil {
 			return fmt.Errorf("failed to deploy relayer: %w", err)

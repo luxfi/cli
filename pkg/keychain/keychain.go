@@ -10,18 +10,18 @@ import (
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/utils/formatting/address"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 )
 
 const (
@@ -281,7 +281,7 @@ func getLedgerIndices(ledgerDevice keychain.Ledger, addressesStr []string) ([]ui
 func getNetworkEndpoint(network models.Network) string {
 	switch network {
 	case models.Mainnet:
-		return "https://api.lux-test.network" 
+		return "https://api.lux-test.network"
 	case models.Testnet:
 		return "https://api.lux-test.network"
 	case models.Local:

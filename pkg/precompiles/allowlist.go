@@ -6,8 +6,8 @@ import (
 	_ "embed"
 	"math/big"
 
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/sdk/contract"
 )
 
 func SetAdmin(

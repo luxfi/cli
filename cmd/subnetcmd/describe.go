@@ -9,13 +9,13 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/sdk/models"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -126,14 +126,14 @@ func printGasTable(genesis core.Genesis) {
 	maxBlockGasCost := uint64(1000000)
 	targetBlockRate := uint64(2)
 	blockGasCostStep := uint64(200000)
-	
+
 	// Check if we have fee configuration in genesis config
 	if genesis.Config != nil {
 		// The fee configuration is stored in the extras for the ChainConfig
 		// but GasLimit is a per-block field, not a chain config field
 		// Use default values for now
 	}
-	
+
 	table.Append([]string{"GasLimit", fmt.Sprintf("%d", gasLimit)})
 	table.Append([]string{"MinBaseFee", fmt.Sprintf("%d", minBaseFee)})
 	table.Append([]string{"TargetGas (per 10s)", fmt.Sprintf("%d", targetGas)})
@@ -208,7 +208,7 @@ func printPrecompileTable(genesis core.Genesis) {
 		"Reward Manager",
 		"Contract Allow List",
 	}
-	
+
 	// Display known precompiles with default status
 	// In the future, this can be enhanced to read from chain config extras
 	for _, precompileName := range precompileNames {
@@ -216,7 +216,7 @@ func printPrecompileTable(genesis core.Genesis) {
 		// So we'll show them as not configured
 		table.Append([]string{precompileName, "Not Configured", "No"})
 	}
-	
+
 	// Check if any precompiles are actually configured
 	// This will be enhanced when we have access to extras.ChainConfig
 	if genesis.Config != nil {

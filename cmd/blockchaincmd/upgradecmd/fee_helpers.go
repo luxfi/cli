@@ -4,7 +4,7 @@ package upgradecmd
 
 import (
 	"math/big"
-	
+
 	"github.com/luxfi/evm/commontype"
 )
 
@@ -13,7 +13,7 @@ const (
 	LowGasLimit    = int64(8000000)
 	MediumGasLimit = int64(15000000)
 	HighGasLimit   = int64(20000000)
-	
+
 	// Target gas for different configurations
 	LowTargetGas    = int64(15000000)
 	MediumTargetGas = int64(15000000)
