@@ -1261,7 +1261,7 @@ func PrintReadyToSignMsg(
 	if blockchainName == "" {
 		cmdLine = fmt.Sprintf("  lux transaction commit --input-tx-filepath %s", outputTxPath)
 	}
-	ux.Logger.PrintToUser(cmdLine)
+	ux.Logger.PrintToUser("%s", cmdLine)
 }
 
 func PrintRemainingToSignMsg(
@@ -1283,7 +1283,7 @@ func PrintRemainingToSignMsg(
 	if blockchainName == "" {
 		cmdline = fmt.Sprintf("  lux transaction sign --input-tx-filepath %s", outputTxPath)
 	}
-	ux.Logger.PrintToUser(cmdline)
+	ux.Logger.PrintToUser("%s", cmdline)
 	ux.Logger.PrintToUser("")
 }
 
