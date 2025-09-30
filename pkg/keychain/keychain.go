@@ -341,7 +341,7 @@ func showLedgerAddresses(network models.Network, ledgerDevice keychain.Ledger, l
 	}
 	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Ledger addresses: "))
 	for _, addrStr := range addrStrs {
-		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(fmt.Sprintf("  %s", addrStr)))
+		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("  %s"), addrStr)
 	}
 	return nil
 }
