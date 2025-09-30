@@ -12,13 +12,13 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/evm"
-	sdkUtils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/sdk/evm"
+	sdkUtils "github.com/luxfi/sdk/utils"
 	luxWarp "github.com/luxfi/warp"
 )
 

@@ -14,12 +14,12 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/netrunner/network"
 	luxdconfig "github.com/luxfi/node/config"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	dircopy "github.com/otiai10/copy"
 )
@@ -41,7 +41,7 @@ func MigrateANRToTmpNet(
 	_, cancel := utils.GetANRContext()
 	defer cancel()
 	var (
-		clusterToReload string
+		clusterToReload           string
 		clusterToReloadNetwork    models.Network
 		clusterToReloadHasRelayer bool
 	)

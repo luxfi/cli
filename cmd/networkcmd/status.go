@@ -5,7 +5,7 @@ package networkcmd
 import (
 	"os"
 	"strings"
-	
+
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/server"
@@ -26,9 +26,9 @@ network is running and some basic stats about the network.`,
 		Args:         cobra.ExactArgs(0),
 		SilenceUsage: true,
 	}
-	
+
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
-	
+
 	return cmd
 }
 
@@ -54,7 +54,7 @@ func networkStatus(*cobra.Command, []string) error {
 	const maxWidth = 100
 	separator := strings.Repeat("=", min(maxWidth, getTerminalWidth()))
 	nodeSeparator := strings.Repeat("-", min(maxWidth/2, getTerminalWidth()/2))
-	
+
 	if status != nil && status.ClusterInfo != nil {
 		ux.Logger.PrintToUser("Network is Up. Network information:")
 		ux.Logger.PrintToUser(separator)

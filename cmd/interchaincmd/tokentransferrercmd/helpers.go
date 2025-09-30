@@ -6,8 +6,8 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/models"
 )
 
 func validateSubnet(network models.Network, subnetName string) error {

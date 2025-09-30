@@ -7,17 +7,17 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/sdk/network"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	platformvmtxs "github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/network"
 	warpPayload "github.com/luxfi/warp/payload"
 
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/warp"
 
 	"github.com/luxfi/crypto"
@@ -324,5 +324,3 @@ func GetValidatorManagerType(
 	}
 	return validatormanagertypes.UndefinedValidatorManagement
 }
-
-

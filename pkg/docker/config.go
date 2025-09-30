@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/remoteconfig"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/sdk/models"
 )
 
 type LuxdConfigOptions struct {

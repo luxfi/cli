@@ -39,12 +39,12 @@ func ValidateRPC(app *application.Lux, rpc *string, cmd *cobra.Command, args []s
 	if *rpc == "" {
 		// Commands that require RPC endpoint
 		requiresRPC := map[string]bool{
-			"addValidator":     true,
+			"addValidator":    true,
 			"deploy":          true,
 			"removeValidator": true,
 			"status":          true,
 		}
-		
+
 		if requiresRPC[cmd.Name()] && len(args) == 0 {
 			*rpc, err = app.Prompt.CaptureURL("What is the RPC endpoint?")
 			if err != nil {
