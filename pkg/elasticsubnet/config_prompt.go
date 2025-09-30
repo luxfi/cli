@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/vms/platformvm/reward"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
 )
 
 // default elastic config parameter values are from

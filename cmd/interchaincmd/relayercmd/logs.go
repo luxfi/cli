@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
-	sdkutils "github.com/luxfi/sdk/utils"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mitchellh/go-wordwrap"
@@ -29,9 +29,9 @@ var (
 		networkoptions.Local,
 		networkoptions.Testnet,
 	}
-	raw                bool
-	last               uint
-	first              uint
+	raw   bool
+	last  uint
+	first uint
 )
 
 // lux interchain relayer logs

@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 

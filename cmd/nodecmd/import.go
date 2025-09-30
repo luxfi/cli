@@ -12,10 +12,10 @@ import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"
 
 	"github.com/spf13/cobra"
@@ -120,12 +120,12 @@ func importFile(_ *cobra.Command, args []string) error {
 		clustersConfigMap["Clusters"] = make(map[string]interface{})
 	}
 	clusters := clustersConfigMap["Clusters"].(map[string]interface{})
-	
+
 	// Convert ClusterConfig to map for storage
 	// Note: We can't directly modify Network.ClusterName as it's immutable
 	// So we'll need to store it in the config separately
 	clusterConfigMap := make(map[string]interface{})
-	
+
 	// Convert ClusterConfig fields to map format
 	clusterConfigMap["Nodes"] = importCluster.ClusterConfig.Nodes
 	clusterConfigMap["APINodes"] = importCluster.ClusterConfig.APINodes
@@ -137,9 +137,9 @@ func importFile(_ *cobra.Command, args []string) error {
 	clusterConfigMap["External"] = importCluster.ClusterConfig.External
 	clusterConfigMap["Local"] = importCluster.ClusterConfig.Local
 	clusterConfigMap["HTTPAccess"] = importCluster.ClusterConfig.HTTPAccess
-	
+
 	clusters[clusterName] = clusterConfigMap
-	
+
 	if err := app.SaveClustersConfig(clustersConfigMap); err != nil {
 		ux.Logger.RedXToUser("error saving clusters config: %v", err)
 	}

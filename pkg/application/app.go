@@ -8,13 +8,13 @@ import (
 	"os"
 	"path/filepath"
 
-	sdkapp "github.com/luxfi/sdk/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
-	sdkprompts "github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/cli/pkg/types"
 	luxlog "github.com/luxfi/log"
+	sdkapp "github.com/luxfi/sdk/application"
+	sdkprompts "github.com/luxfi/sdk/prompts"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 
 // Lux extends the SDK's application.Lux type with CLI-specific functionality
 type Lux struct {
-	*sdkapp.Lux // Embed SDK's Lux type
+	*sdkapp.Lux                // Embed SDK's Lux type
 	Conf        *config.Config // CLI-specific config
 }
 
@@ -164,7 +164,7 @@ func (app *Lux) SetupMonitoringEnv(clusterName string) error {
 	if err := os.MkdirAll(monitoringDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create monitoring directory: %w", err)
 	}
-	
+
 	// Create config files for monitoring
 	configPath := filepath.Join(monitoringDir, "config.json")
 	config := map[string]interface{}{
@@ -173,16 +173,16 @@ func (app *Lux) SetupMonitoringEnv(clusterName string) error {
 		"metrics":     []string{"cpu", "memory", "network", "disk"},
 		"interval":    60, // seconds
 	}
-	
+
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal monitoring config: %w", err)
 	}
-	
+
 	if err := os.WriteFile(configPath, data, WriteReadReadPerms); err != nil {
 		return fmt.Errorf("failed to write monitoring config: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -200,18 +200,18 @@ func (app *Lux) CreateNodeCloudConfigFile(clusterName string, nodeConfig interfa
 	if err := os.MkdirAll(nodeDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create node directory: %w", err)
 	}
-	
+
 	// Write the node configuration
 	configPath := filepath.Join(nodeDir, "cloud-config.json")
 	data, err := json.MarshalIndent(nodeConfig, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal node config: %w", err)
 	}
-	
+
 	if err := os.WriteFile(configPath, data, WriteReadReadPerms); err != nil {
 		return fmt.Errorf("failed to write node config: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -242,21 +242,21 @@ func (app *Lux) HasSubnetEVMGenesis(blockchainName string) (bool, string, error)
 		}
 		return false, "", err
 	}
-	
+
 	// Check if it's a Subnet-EVM genesis by looking for key fields
 	var genesis map[string]interface{}
 	if err := json.Unmarshal(genesisBytes, &genesis); err != nil {
 		return false, "", nil // Not JSON, so not Subnet-EVM
 	}
-	
+
 	// Subnet-EVM genesis should have "alloc" and "config" fields
 	_, hasAlloc := genesis["alloc"]
 	_, hasConfig := genesis["config"]
-	
+
 	if hasAlloc && hasConfig {
 		return true, string(genesisBytes), nil
 	}
-	
+
 	return false, "", nil
 }
 
@@ -267,12 +267,12 @@ func (app *Lux) LoadEvmGenesis(blockchainName string) (*types.EvmGenesis, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var genesis types.EvmGenesis
 	if err := json.Unmarshal(genesisBytes, &genesis); err != nil {
 		return nil, err
 	}
-	
+
 	return &genesis, nil
 }
 
@@ -328,12 +328,12 @@ func (app *Lux) GetClusterConfig(clusterName string) (map[string]interface{}, er
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var config map[string]interface{}
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, err
 	}
-	
+
 	return config, nil
 }
 
@@ -341,17 +341,17 @@ func (app *Lux) GetClusterConfig(clusterName string) (map[string]interface{}, er
 func (app *Lux) SetClusterConfig(clusterName string, config map[string]interface{}) error {
 	clusterDir := filepath.Join(app.GetBaseDir(), "clusters", clusterName)
 	clusterConfigPath := filepath.Join(clusterDir, "config.json")
-	
+
 	// Ensure directory exists
 	if err := os.MkdirAll(clusterDir, constants.DefaultPerms755); err != nil {
 		return err
 	}
-	
+
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err
 	}
-	
+
 	return os.WriteFile(clusterConfigPath, data, WriteReadReadPerms)
 }
 
@@ -372,12 +372,12 @@ func (app *Lux) LoadClusterNodeConfig(clusterName string, nodeName string) (map[
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var config map[string]interface{}
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, err
 	}
-	
+
 	return config, nil
 }
 

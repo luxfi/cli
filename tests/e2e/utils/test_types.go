@@ -20,8 +20,8 @@ type TestFlags struct {
 
 // GlobalFlags represents global command flags
 type GlobalFlags struct {
-	Network string
-	Config  string
+	Network  string
+	Config   string
 	LogLevel string
 }
 

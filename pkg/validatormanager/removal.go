@@ -13,22 +13,21 @@ import (
 	sdkwarp "github.com/luxfi/sdk/warp"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/evm"
-	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/validator"
 	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/crypto"
 )
-
 
 func InitializeValidatorRemoval(
 	rpcURL string,
@@ -314,7 +313,7 @@ func InitValidatorRemoval(
 			return nil, ids.Empty, nil, err
 		}
 	}
-	
+
 	signedMsg, err := GetL1ValidatorWeightMessage(
 		network,
 		aggregatorLogger,

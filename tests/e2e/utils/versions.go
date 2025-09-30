@@ -13,9 +13,9 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/vm"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
 	"golang.org/x/mod/semver"
 )
 
@@ -62,10 +62,10 @@ func NewVersionMapper() VersionMapper {
 	app := application.New()
 	// Setup the app with test defaults
 	app.Setup(
-		"",  // baseDir
-		luxlog.NewNoOpLogger(), // logger
-		nil, // config
-		nil, // prompter
+		"",                          // baseDir
+		luxlog.NewNoOpLogger(),      // logger
+		nil,                         // config
+		nil,                         // prompter
 		application.NewDownloader(), // downloader
 	)
 	return &versionMapper{
