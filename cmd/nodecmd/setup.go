@@ -123,7 +123,7 @@ func setup(hosts []*models.Host, luxdVersion string, network models.Network) err
 	if wgResults.HasErrors() {
 		return fmt.Errorf("failed to deploy node(s) %s", wgResults.GetErrorHostMap())
 	} else {
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 	}
 	return nil
 }
