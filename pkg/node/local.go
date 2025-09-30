@@ -181,7 +181,7 @@ func LocalStatus(
 	if clusterName != "" {
 		ux.Logger.PrintToUser("%s %s", luxlog.Blue.Wrap("Local cluster:"), luxlog.Green.Wrap(clusterName))
 	} else if len(localClusters) > 0 {
-		ux.Logger.PrintToUser(luxlog.Blue.Wrap("Local clusters:"))
+		ux.Logger.PrintToUser("%s", luxlog.Blue.Wrap("Local clusters:"))
 	}
 	for _, clusterName := range localClusters {
 		currenlyRunning := ""
@@ -254,7 +254,7 @@ func LocalStatus(
 		}
 		networkDir := localnet.GetLocalClusterDir(app, clusterName)
 		ux.Logger.PrintToUser("- %s: %s %s %s %s", clusterName, networkDir, networkKind, currenlyRunning, healthStatus)
-		ux.Logger.PrintToUser(luxdURIOuput)
+		ux.Logger.PrintToUser("%s", luxdURIOuput)
 	}
 
 	return nil
