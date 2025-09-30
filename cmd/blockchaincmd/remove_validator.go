@@ -398,7 +398,7 @@ func removeValidatorSOV(
 	if rawTx != nil {
 		dump, err := evm.TxDump("Initializing Validator Removal", rawTx)
 		if err == nil {
-			ux.Logger.PrintToUser(dump)
+			ux.Logger.PrintToUser("%s", dump)
 		}
 		return err
 	}
@@ -431,7 +431,7 @@ func removeValidatorSOV(
 	if rawTx != nil {
 		dump, err := evm.TxDump("Finish Validator Removal", rawTx)
 		if err == nil {
-			ux.Logger.PrintToUser(dump)
+			ux.Logger.PrintToUser("%s", dump)
 		}
 		return err
 	}
