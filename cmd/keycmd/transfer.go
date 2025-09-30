@@ -668,9 +668,9 @@ func pToPSend(
 	)
 	if err != nil {
 		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
 		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
 		}
 		return err
 	}
@@ -764,9 +764,9 @@ func exportFromP(
 	)
 	if err != nil {
 		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
 		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
 		}
 		return err
 	}
@@ -808,9 +808,9 @@ func importIntoX(
 	)
 	if err != nil {
 		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
 		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
 		}
 		return err
 	}
@@ -912,9 +912,9 @@ func importIntoC(
 	)
 	if err != nil {
 		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
 		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
 		}
 		return err
 	}
@@ -1027,9 +1027,9 @@ func exportFromC(
 	)
 	if err != nil {
 		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
 		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
 		}
 		return err
 	}
@@ -1071,9 +1071,9 @@ func importIntoP(
 	)
 	if err != nil {
 		if ctx.Err() != nil {
-			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("timeout issuing/verifying tx with ID %s: %w", tx.ID(), err)
 		} else {
-			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID, err)
+			err = fmt.Errorf("error issuing tx with ID %s: %w", tx.ID(), err)
 		}
 		return err
 	}
