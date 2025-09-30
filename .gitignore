@@ -47,3 +47,5 @@ LLM.md
 CLAUDE.md
 AGENTS.md
 GEMINI.md
+!pkg/contract/contracts/bin/
+!pkg/contract/contracts/bin/Token.bin
