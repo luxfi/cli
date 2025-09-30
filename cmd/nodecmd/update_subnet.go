@@ -11,10 +11,10 @@ import (
 	"github.com/luxfi/cli/cmd/blockchaincmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
@@ -128,7 +128,7 @@ func doUpdateSubnet(
 	default:
 		return nil, fmt.Errorf("unsupported network type")
 	}
-	
+
 	// load cluster config
 	clusterConf, err := app.GetClusterConfig(clusterName)
 	if err != nil {

@@ -16,12 +16,12 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 

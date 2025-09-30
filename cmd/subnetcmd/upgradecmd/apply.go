@@ -16,15 +16,15 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/subnet"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/ids"
 	ANRclient "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -238,8 +238,8 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 	if print {
 		blockchainIDstr := "<your-blockchain-id>"
 		if sc.Networks != nil &&
-			(sc.Networks[networkKey].SubnetID != ids.Empty || 
-			 sc.Networks[networkKey].BlockchainID != ids.Empty) &&
+			(sc.Networks[networkKey].SubnetID != ids.Empty ||
+				sc.Networks[networkKey].BlockchainID != ids.Empty) &&
 			sc.Networks[networkKey].BlockchainID != ids.Empty {
 			blockchainIDstr = sc.Networks[networkKey].BlockchainID.String()
 		}
@@ -304,8 +304,8 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 
 func validateUpgrade(subnetName, networkKey string, sc *models.Sidecar, skipPrompting bool) ([]extras.PrecompileUpgrade, string, error) {
 	// if there's no entry in the Sidecar, we assume there hasn't been a deploy yet
-	if sc.Networks[networkKey].SubnetID == ids.Empty && 
-	   sc.Networks[networkKey].BlockchainID == ids.Empty {
+	if sc.Networks[networkKey].SubnetID == ids.Empty &&
+		sc.Networks[networkKey].BlockchainID == ids.Empty {
 		return nil, "", subnetNotYetDeployed()
 	}
 	chainID := sc.Networks[networkKey].BlockchainID

@@ -5,9 +5,9 @@ package plugins
 
 import (
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/models"
 )
 
 func ManualUpgrade(app *application.Lux, sc models.Sidecar, targetVersion string) error {

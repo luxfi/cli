@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 )
 
 func GetLocalElasticSubnetsFromFile(app *application.Lux) ([]string, error) {

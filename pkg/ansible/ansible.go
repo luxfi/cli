@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/sdk/models"
 )
 
 // CreateAnsibleHostInventory creates inventory file for ansible

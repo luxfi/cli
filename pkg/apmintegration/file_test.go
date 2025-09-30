@@ -11,9 +11,9 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/lpm/types"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/lpm/types"
+	"github.com/luxfi/sdk/prompts"
 	"github.com/stretchr/testify/require"
 )
 

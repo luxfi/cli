@@ -9,7 +9,7 @@ type VMCompatibility struct {
 
 type LuxCompatiblity map[string][]string
 
-// LuxdCompatiblity is an alias for backward compatibility  
+// LuxdCompatiblity is an alias for backward compatibility
 type LuxdCompatiblity = LuxCompatiblity
 
 // CLIDependencyMap represents CLI dependency versions

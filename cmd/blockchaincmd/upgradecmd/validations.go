@@ -7,11 +7,11 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/sdk/models"
 	"go.uber.org/zap"
 )
 

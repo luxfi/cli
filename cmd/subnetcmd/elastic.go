@@ -13,8 +13,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/txutils"
 
-	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/node/vms/components/verify"
+	"github.com/luxfi/sdk/prompts"
 
 	"github.com/luxfi/node/vms/platformvm"
 
@@ -26,10 +26,10 @@ import (
 
 	es "github.com/luxfi/cli/pkg/elasticsubnet"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/sdk/models"
 	subnet "github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/models"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

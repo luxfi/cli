@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/sdk/models"
 	"github.com/onsi/gomega"
 )
 

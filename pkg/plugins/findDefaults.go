@@ -65,7 +65,7 @@ func getScanConfigDirs() ([]string, error) {
 		filepath.Join(home, ".local", "share", constants.LuxRepoName),
 		defaultUnexpandedDataDir,
 	}
-	
+
 	// Only add directories that exist to avoid noise
 	for _, dir := range additionalDirs {
 		if _, err := os.Stat(dir); err == nil {
