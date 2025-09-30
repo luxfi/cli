@@ -93,10 +93,10 @@ func StartLocalNode(
 
 		switch {
 		case network.Kind() == models.Testnet:
-			ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Warning: Testnet Bootstrapping can take several minutes"))
+			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Warning: Testnet Bootstrapping can take several minutes"))
 			connectionSettings.NetworkID = network.ID()
 		case network.Kind() == models.Mainnet:
-			ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Warning: Mainnet Bootstrapping can take 6-24 hours"))
+			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Warning: Mainnet Bootstrapping can take 6-24 hours"))
 			connectionSettings.NetworkID = network.ID()
 		case network.Kind() == models.Local:
 			connectionSettings, err = localnet.GetLocalNetworkConnectionInfo(app)

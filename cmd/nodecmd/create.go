@@ -803,7 +803,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			monitoringPublicIP = monitoringNodeConfig.PublicIPs[0]
 		}
 		printResults(cloudConfigMap, publicIPMap, monitoringPublicIP)
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Luxd and Lux-CLI installed and node(s) are bootstrapping!"))
 	}
 	sendNodeCreateMetrics(cloudService, network.Name(), numNodesMetricsMap)
 	return nil
@@ -1179,7 +1179,7 @@ func printResults(cloudConfigMap models.CloudConfig, publicIPMap map[string]stri
 			ux.Logger.PrintLineSeparator()
 			ux.Logger.PrintToUser("API Endpoint(s) for region [%s]: ", luxlog.LightBlue.Wrap(region))
 			for _, apiNode := range cloudConfig.APIInstanceIDs {
-				ux.Logger.PrintToUser(luxlog.Green.Wrap(fmt.Sprintf("    http://%s:9630", publicIPMap[apiNode])))
+				ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("    http://%s:9630", publicIPMap[apiNode])))
 			}
 			ux.Logger.PrintLineSeparator()
 			ux.Logger.PrintToUser("")
@@ -1216,7 +1216,7 @@ func getMonitoringHint(monitoringHostIP string) {
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintLineSeparator()
 	ux.Logger.PrintToUser("To view unified node %s, visit the following link in your browser: ", luxlog.LightBlue.Wrap("monitoring dashboard"))
-	ux.Logger.PrintToUser(luxlog.Green.Wrap(fmt.Sprintf("http://%s:%d/dashboards", monitoringHostIP, constants.LuxdGrafanaPort)))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("http://%s:%d/dashboards", monitoringHostIP, constants.LuxdGrafanaPort)))
 	ux.Logger.PrintToUser("Log in with username: admin, password: admin")
 	ux.Logger.PrintLineSeparator()
 	ux.Logger.PrintToUser("")

@@ -293,19 +293,19 @@ func removeValidatorSOV(
 	}
 
 	if sc.UseACP99 {
-		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator Manager Protocol: V2"))
+		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: V2"))
 	} else {
-		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
+		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
 	}
 
-	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator manager owner %s pays for the initialization of the validator's removal (Blockchain gas token)"), validatorManagerOwner)
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator manager owner %s pays for the initialization of the validator's removal (Blockchain gas token)"), validatorManagerOwner)
 
 	if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
 		return fmt.Errorf("unable to find Validator Manager address")
 	}
 	validatorManagerAddress = sc.Networks[network.Name()].ValidatorManagerAddress
 
-	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
 
 	// Note: ClusterName field has been removed from SDK models.NetworkData
 	clusterName := ""
@@ -322,7 +322,7 @@ func removeValidatorSOV(
 		return err
 	}
 	if force && sc.PoS {
-		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Forcing removal of %s as it is a PoS bootstrap validator"), nodeID)
+		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Forcing removal of %s as it is a PoS bootstrap validator"), nodeID)
 	}
 
 	// Convert []info.Peer to []string for the signature aggregator
@@ -407,7 +407,7 @@ func removeValidatorSOV(
 	// Note: SetL1ValidatorWeight method is not available in current PublicDeployer
 	// This functionality needs to be implemented or handled differently
 	// For now, we skip the P-Chain validation update and proceed
-	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Skipping P-Chain validator weight update (method not implemented)"))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Skipping P-Chain validator weight update (method not implemented)"))
 	aggregatorCtx, aggregatorCancel = sdkutils.GetTimedContext(constants.SignatureAggregatorTimeout)
 	defer aggregatorCancel()
 	rawTx, err = validatormanager.FinishValidatorRemoval(

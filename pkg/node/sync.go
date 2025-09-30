@@ -55,7 +55,7 @@ func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidC
 		return err
 	}
 	ux.Logger.PrintToUser("Node(s) successfully started syncing with blockchain!")
-	ux.Logger.PrintToUser(fmt.Sprintf("Check node blockchain syncing status with lux node status %s --blockchain %s", clusterName, blockchainName))
+	ux.Logger.PrintToUser("%s", fmt.Sprintf("Check node blockchain syncing status with lux node status %s --blockchain %s", clusterName, blockchainName))
 	return nil
 }
 
