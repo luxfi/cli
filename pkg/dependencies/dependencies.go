@@ -203,7 +203,7 @@ func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, 
 			if err == nil {
 				break
 			}
-			ux.Logger.PrintToUser(fmt.Sprintf("no blockchain named as %s found", useLuxgoVersionFromSubnet))
+			ux.Logger.PrintToUser("%s", fmt.Sprintf("no blockchain named as %s found", useLuxgoVersionFromSubnet))
 		}
 		return LuxdVersionSettings{UseLuxgoVersionFromSubnet: useLuxgoVersionFromSubnet}, nil
 	}

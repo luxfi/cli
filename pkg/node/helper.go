@@ -178,7 +178,7 @@ func getRPCIncompatibleNodes(app *application.Lux, hosts []*models.Host, subnetN
 		}
 	}
 	if len(incompatibleNodes) > 0 {
-		ux.Logger.PrintToUser(fmt.Sprintf("Compatible Lux Go RPC version is %d", sc.RPCVersion))
+		ux.Logger.PrintToUser("%s", fmt.Sprintf("Compatible Lux Go RPC version is %d", sc.RPCVersion))
 	}
 	return incompatibleNodes, nil
 }

@@ -191,7 +191,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 	}
 	if subnetName != "" && (!app.SidecarExists(subnetName) || forceSubnetCreate) {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Creating the subnet"))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Creating the subnet"))
 		ux.Logger.PrintToUser("")
 		if err := blockchaincmd.CallCreate(
 			cmd,
@@ -232,7 +232,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 			useLuxgoVersionFromSubnet = subnetName
 		}
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Creating the devnet..."))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Creating the devnet..."))
 		ux.Logger.PrintToUser("")
 		// wizSubnet is used to get more metrics sent from node create command on whether if vm is custom or subnetEVM
 		wizSubnet = subnetName
@@ -241,7 +241,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Adding subnet into existing devnet %s..."), clusterName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Adding subnet into existing devnet %s..."), clusterName)
 	}
 
 	// check all validators are found
@@ -273,19 +273,19 @@ func wiz(cmd *cobra.Command, args []string) error {
 
 	if subnetName == "" {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Devnet %s has been created!"), clusterName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Devnet %s has been created!"), clusterName)
 		return nil
 	}
 
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser(luxlog.Green.Wrap("Checking subnet compatibility"))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Checking subnet compatibility"))
 	ux.Logger.PrintToUser("")
 	if err := checkRPCCompatibility(clusterName, subnetName); err != nil {
 		return err
 	}
 
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser(luxlog.Green.Wrap("Creating the blockchain"))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Creating the blockchain"))
 	ux.Logger.PrintToUser("")
 	avoidChecks = true
 	if err := deploySubnet(cmd, []string{clusterName, subnetName}); err != nil {
@@ -293,7 +293,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 	}
 
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser(luxlog.Green.Wrap("Adding nodes as subnet validators"))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Adding nodes as subnet validators"))
 	ux.Logger.PrintToUser("")
 	avoidSubnetValidationChecks = true
 	useEwoq = true
@@ -315,7 +315,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 	}
 
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser(luxlog.Green.Wrap("Waiting for nodes to be validating the subnet"))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Waiting for nodes to be validating the subnet"))
 	ux.Logger.PrintToUser("")
 	if err := waitForSubnetValidators(network, clusterName, subnetID, validateCheckTimeout, validateCheckPoolTime); err != nil {
 		return err
@@ -351,7 +351,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 			}
 		} else {
 			ux.Logger.PrintToUser("")
-			ux.Logger.PrintToUser(luxlog.Green.Wrap("Stopping AWM Relayer Service"))
+			ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Stopping AWM Relayer Service"))
 			if err := ssh.RunSSHStopWarpRelayerService(awmRelayerHost); err != nil {
 				return err
 			}
@@ -359,7 +359,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 	}
 
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser(luxlog.Green.Wrap("Setting the nodes as subnet trackers"))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Setting the nodes as subnet trackers"))
 	ux.Logger.PrintToUser("")
 	if err := syncSubnet(cmd, []string{clusterName, subnetName}); err != nil {
 		return err
@@ -386,17 +386,17 @@ func wiz(cmd *cobra.Command, args []string) error {
 		return err
 	} else if b {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Updating Proposer VMs"))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Updating Proposer VMs"))
 		ux.Logger.PrintToUser("")
 		if err := updateProposerVMs(network); err != nil {
 			// not going to consider fatal, as warp messaging will be working fine after a failed first msg
-			ux.Logger.PrintToUser(luxlog.Yellow.Wrap("failure setting proposer: %s"), err)
+			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("failure setting proposer: %s"), err)
 		}
 	}
 
 	if sc.TeleporterReady && sc.RunRelayer && isEVMGenesis {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Setting up Warp on subnet"))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Setting up Warp on subnet"))
 		ux.Logger.PrintToUser("")
 		flags := messengercmd.DeployFlags{
 			ChainFlags: contract.ChainSpec{
@@ -422,7 +422,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Starting AWM Relayer Service"))
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Starting AWM Relayer Service"))
 		ux.Logger.PrintToUser("")
 		if err := updateWarpRelayerFunds(network, sc, blockchainID); err != nil {
 			return err
@@ -434,13 +434,13 @@ func wiz(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("")
 	if clusterAlreadyExists {
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Devnet %s is now validating subnet %s"), clusterName, subnetName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Devnet %s is now validating subnet %s"), clusterName, subnetName)
 	} else {
-		ux.Logger.PrintToUser(luxlog.Green.Wrap("Devnet %s is successfully created and is now validating subnet %s!"), clusterName, subnetName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Devnet %s is successfully created and is now validating subnet %s!"), clusterName, subnetName)
 	}
 	ux.Logger.PrintToUser("")
 
-	ux.Logger.PrintToUser(luxlog.Green.Wrap("Subnet %s RPC URL: %s"), subnetName, network.BlockchainEndpoint(blockchainID.String()))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Subnet %s RPC URL: %s"), subnetName, network.BlockchainEndpoint(blockchainID.String()))
 	ux.Logger.PrintToUser("")
 
 	if addMonitoring {

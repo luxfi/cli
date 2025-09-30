@@ -57,7 +57,7 @@ func networkStatus(*cobra.Command, []string) error {
 
 	if status != nil && status.ClusterInfo != nil {
 		ux.Logger.PrintToUser("Network is Up. Network information:")
-		ux.Logger.PrintToUser(separator)
+		ux.Logger.PrintToUser("%s", separator)
 		ux.Logger.PrintToUser("Healthy: %t", status.ClusterInfo.Healthy)
 		ux.Logger.PrintToUser("Custom VMs healthy: %t", status.ClusterInfo.CustomChainsHealthy)
 		ux.Logger.PrintToUser("Number of nodes: %d", len(status.ClusterInfo.NodeNames))
@@ -82,7 +82,7 @@ func networkStatus(*cobra.Command, []string) error {
 	if verbose {
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser("Verbose output:")
-		ux.Logger.PrintToUser(status.String())
+		ux.Logger.PrintToUser("%s", status.String())
 	}
 
 	return nil

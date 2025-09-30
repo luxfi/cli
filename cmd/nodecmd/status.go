@@ -292,8 +292,8 @@ func printOutput(
 	}
 	ux.Logger.PrintToUser("")
 	tit := fmt.Sprintf("STATUS FOR CLUSTER: %s", luxlog.LightBlue.Wrap(clusterName))
-	ux.Logger.PrintToUser(tit)
-	ux.Logger.PrintToUser(strings.Repeat("=", len(removeColors(tit))))
+	ux.Logger.PrintToUser("%s", tit)
+	ux.Logger.PrintToUser("%s", strings.Repeat("=", len(removeColors(tit))))
 	ux.Logger.PrintToUser("")
 	header := []string{"Cloud ID", "Node ID", "IP", "Network", "Role", "Luxd Version", "Primary Network", "Healthy"}
 	if blockchainName != "" {

@@ -452,12 +452,12 @@ func CallAddValidator(
 	}
 
 	if sc.UseACP99 {
-		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator Manager Protocol: V2"))
+		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: V2"))
 	} else {
-		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
+		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
 	}
 
-	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Validation manager owner %s pays for the initialization of the validator's registration (Blockchain gas token)"), validatorManagerOwner)
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validation manager owner %s pays for the initialization of the validator's registration (Blockchain gas token)"), validatorManagerOwner)
 
 	if rpcURL == "" {
 		rpcURL, _, err = contract.GetBlockchainEndpoints(
@@ -472,7 +472,7 @@ func CallAddValidator(
 		}
 	}
 
-	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
 
 	totalWeight, err := validator.GetTotalWeight(network, subnetID)
 	if err != nil {

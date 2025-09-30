@@ -276,14 +276,14 @@ func InitValidatorRemoval(
 			if !errors.Is(err, ErrInvalidValidatorStatus) {
 				return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator removal")
 			}
-			ux.Logger.PrintToUser(luxlog.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
+			ux.Logger.PrintToUser("%s", luxlog.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
 		case generateRawTxOnly:
 			return nil, ids.Empty, tx, nil
 		default:
 			ux.Logger.PrintToUser("Validator removal initialized. InitiateTxHash: %s", tx.Hash())
 		}
 	} else {
-		ux.Logger.PrintToUser(luxlog.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
+		ux.Logger.PrintToUser("%s", luxlog.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
 	}
 
 	if receipt != nil {
