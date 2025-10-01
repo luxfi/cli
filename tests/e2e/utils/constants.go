@@ -9,6 +9,10 @@ const (
 	confFilePath = hardhatDir + "/dynamic_conf.json"
 	greeterFile  = hardhatDir + "/greeter.json"
 
+	// Test blockchain and node names
+	BlockchainName     = "test-blockchain"
+	TestLocalNodeName  = "test-local-node"
+
 	// LPM related constants
 	LPMDir       = ".lpm"
 	LPMPluginDir = "plugins"
@@ -19,6 +23,9 @@ const (
 	SoloEVMKey1      = "soloEVMVersion1"
 	SoloEVMKey2      = "soloEVMVersion2"
 	SoloLuxKey       = "soloLuxVersion"
+	SoloSubnetEVMKey1 = "soloSubnetEVMVersion1"
+	SoloSubnetEVMKey2 = "soloSubnetEVMVersion2"
+	SoloLuxdKey      = "soloLuxdVersion"
 	OnlyLuxKey       = "onlyLuxVersion"
 	MultiLuxEVMKey   = "multiLuxEVMVersion"
 	MultiLux1Key     = "multiLuxVersion1"
