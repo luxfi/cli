@@ -298,7 +298,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	}
 	networkToUpgrade := futureDeployment
 
-	factory := luxlog.NewFactory(luxlog.Config{})
+	factory := luxlog.NewFactoryWithConfig(luxlog.Config{})
 	log, err := factory.Make("lux")
 	assert.NoError(err)
 

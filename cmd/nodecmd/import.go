@@ -176,7 +176,7 @@ func writeSecretToFile(secret, filePath string) error {
 		return nil // nothing to write(no error)
 	}
 	if err := utils.WriteStringToFile(filePath, secret); err != nil {
-		ux.Logger.RedXToUser("error writing %s file: %w", filePath, err)
+		ux.Logger.RedXToUser("error writing %s file: %v", filePath, err)
 		return err
 	}
 	return nil

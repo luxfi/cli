@@ -247,7 +247,7 @@ func exportFile(_ *cobra.Command, args []string) error {
 	if clusterFileName != "" {
 		outFile, err := os.Create(utils.ExpandHome(clusterFileName))
 		if err != nil {
-			ux.Logger.RedXToUser("could not create file: %w", err)
+			ux.Logger.RedXToUser("could not create file: %v", err)
 			return err
 		}
 		defer outFile.Close()

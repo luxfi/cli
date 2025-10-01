@@ -16,7 +16,6 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -34,8 +33,8 @@ func TestExportImportSubnet(t *testing.T) {
 	mockAppDownloader := mocks.Downloader{}
 	mockAppDownloader.On("Download", mock.Anything).Return(testSubnetEVMCompat, nil)
 
-	app.Setup(testDir, luxlog.NoWarn{}, config.New(), prompts.NewPrompter(), &mockAppDownloader)
-	ux.NewUserLog(luxlog.NoLog{}, io.Discard)
+	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), &mockAppDownloader)
+	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 
 	subnetEvmGenesisPath := "tests/e2e/assets/test_subnet_evm_genesis.json"
 	genBytes, err := os.ReadFile("../../" + subnetEvmGenesisPath)
