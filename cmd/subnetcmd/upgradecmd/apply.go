@@ -48,7 +48,7 @@ var (
 
 	errUserAborted = errors.New("user aborted")
 
-	nodeChainConfigDirDefault = filepath.Join("$HOME", ".node", "chains")
+	nodeChainConfigDirDefault = filepath.Join("$HOME", ".luxd", "chains")
 	nodeChainConfigFlag       = "node-chain-config-dir"
 	nodeChainConfigDir        string
 
@@ -246,9 +246,9 @@ func applyPublicNetworkUpgrade(subnetName, networkKey string, sc *models.Sidecar
 		ux.Logger.PrintToUser("To install the upgrade file on your validator:")
 		fmt.Println()
 		ux.Logger.PrintToUser("1. Identify where your validator has the node chain config dir configured.")
-		ux.Logger.PrintToUser("   The default is at $HOME/.node/chains (%s on this machine).", os.ExpandEnv(nodeChainConfigDirDefault))
+		ux.Logger.PrintToUser("   The default is at $HOME/.luxd/chains (%s on this machine).", os.ExpandEnv(nodeChainConfigDirDefault))
 		ux.Logger.PrintToUser("   If you are using a different chain config dir for your node, use that one.")
-		ux.Logger.PrintToUser("2. Create a directory with the blockchainID in the configured chain-config-dir (e.g. $HOME/.node/chains/%s) if doesn't already exist.", blockchainIDstr)
+		ux.Logger.PrintToUser("2. Create a directory with the blockchainID in the configured chain-config-dir (e.g. $HOME/.luxd/chains/%s) if doesn't already exist.", blockchainIDstr)
 		ux.Logger.PrintToUser("3. Create an `upgrade.json` file in the blockchain directory with the content of your upgrade file.")
 		upgr, err := app.ReadUpgradeFile(subnetName)
 		if err == nil {

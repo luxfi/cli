@@ -3,7 +3,6 @@
 package commands
 
 import (
-	"github.com/luxfi/cli/cmd"
 	"github.com/luxfi/cli/tests/e2e/utils"
 )
 
@@ -14,15 +13,13 @@ const (
 /* #nosec G204 */
 func SendWarpMessage(args []string, testFlags utils.TestFlags) (string, error) {
 	return utils.TestCommand(WarpCmd, "sendMsg", args, utils.GlobalFlags{
-		"local":             true,
-		"skip-update-check": true,
+		Network: "local",
 	}, testFlags)
 }
 
 /* #nosec G204 */
 func DeployWarpContracts(args []string, testFlags utils.TestFlags) (string, error) {
-	return utils.TestCommand(cmd.WarpCmd, "deploy", args, utils.GlobalFlags{
-		"local":             true,
-		"skip-update-check": true,
+	return utils.TestCommand(WarpCmd, "deploy", args, utils.GlobalFlags{
+		Network: "local",
 	}, testFlags)
 }

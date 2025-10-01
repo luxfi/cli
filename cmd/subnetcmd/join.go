@@ -539,7 +539,7 @@ To setup your node, you must do two things:
 To add the VM to your plugin directory, copy or scp from %s
 
 If you installed node with the install script, your plugin directory is likely
-~/.node/build/plugins.
+~/.luxd/plugins.
 
 If you start your node from the command line WITHOUT a config file (e.g. via command
 line or systemd script), add the following flag to your node's startup command:
