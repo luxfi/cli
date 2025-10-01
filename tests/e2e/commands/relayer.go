@@ -10,15 +10,13 @@ import (
 /* #nosec G204 */
 func StopRelayer() (string, error) {
 	return utils.TestCommand(InterchainCMD, "relayer", []string{"stop"}, utils.GlobalFlags{
-		"local":             true,
-		"skip-update-check": true,
+		Network: "local",
 	}, utils.TestFlags{})
 }
 
 /* #nosec G204 */
 func DeployRelayer(args []string, testFlags utils.TestFlags) (string, error) {
 	return utils.TestCommand(InterchainCMD, "relayer", args, utils.GlobalFlags{
-		"local":             true,
-		"skip-update-check": true,
+		Network: "local",
 	}, testFlags)
 }
