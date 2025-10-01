@@ -81,7 +81,7 @@ func setup(hosts []*models.Host, luxdVersion string, network models.Network) err
 				nodeResults.AddResult(host.IP, nil, err)
 				return
 			}
-			spinner := spinSession.SpinToUser(utils.ScriptLog(host.IP, "Setup Node"))
+			spinner := spinSession.SpinToUser("%s", utils.ScriptLog(host.IP, "Setup Node"))
 			if err := ssh.RunSSHSetupNode(host, app.Conf.GetConfigPath()); err != nil {
 				nodeResults.AddResult(host.IP, nil, err)
 				ux.SpinFailWithError(spinner, "", err)
@@ -93,7 +93,7 @@ func setup(hosts []*models.Host, luxdVersion string, network models.Network) err
 				return
 			}
 			ux.SpinComplete(spinner)
-			spinner = spinSession.SpinToUser(utils.ScriptLog(host.IP, "Setup Luxd"))
+			spinner = spinSession.SpinToUser("%s", utils.ScriptLog(host.IP, "Setup Luxd"))
 			// check if host is a API host
 			if err := docker.ComposeSSHSetupNode(host,
 				network,

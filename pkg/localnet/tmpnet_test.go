@@ -29,7 +29,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	app := &application.Lux{}
 	appDir, err := os.MkdirTemp(os.TempDir(), "cli-app-test")
 	require.NoError(t, err)
-	app.Setup(appDir, luxlog.NoWarn{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
+	app.Setup(appDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 	networkID, unparsedGenesis, upgradeBytes, defaultFlags, nodes, err := GetDefaultNetworkConf(2)
 	require.NoError(t, err)
 	networkDir, err := os.MkdirTemp(os.TempDir(), "cli-tmpnet-test")

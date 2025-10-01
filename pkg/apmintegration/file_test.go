@@ -64,7 +64,7 @@ const (
 func newTestApp(t *testing.T, testDir string) *application.Lux {
 	tempDir := t.TempDir()
 	app := application.New()
-	app.Setup(tempDir, luxlog.NoWarn{}, config.New(), prompts.NewPrompter(), application.NewDownloader())
+	app.Setup(tempDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 	app.ApmDir = func() string { return testDir }
 	return app
 }

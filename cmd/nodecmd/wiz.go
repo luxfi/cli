@@ -974,7 +974,7 @@ func setUpSubnetLogging(clusterName, subnetName string) error {
 		wg.Add(1)
 		go func(host *models.Host) {
 			defer wg.Done()
-			spinner := spinSession.SpinToUser(utils.ScriptLog(host.NodeID, "Setup Subnet Logs"))
+			spinner := spinSession.SpinToUser("%s", utils.ScriptLog(host.NodeID, "Setup Subnet Logs"))
 			cloudID := host.GetCloudID()
 			nodeID, err := getNodeID(app.GetNodeInstanceDirPath(cloudID))
 			if err != nil {

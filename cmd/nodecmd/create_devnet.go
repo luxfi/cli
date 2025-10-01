@@ -293,10 +293,10 @@ func setupDevnet(clusterName string, hosts []*models.Host, apiNodeIPMap map[stri
 			keyPath := filepath.Join(app.GetNodesDir(), host.GetCloudID())
 			if err := ssh.RunSSHSetupDevNet(host, keyPath); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
-				ux.Logger.RedXToUser(utils.ScriptLog(host.NodeID, "Setup devnet err: %v", err))
+				ux.Logger.RedXToUser("%s", utils.ScriptLog(host.NodeID, "Setup devnet err: %v", err))
 				return
 			}
-			ux.Logger.GreenCheckmarkToUser(utils.ScriptLog(host.NodeID, "Setup devnet"))
+			ux.Logger.GreenCheckmarkToUser("%s", utils.ScriptLog(host.NodeID, "Setup devnet"))
 		}(&wgResults, host)
 	}
 	wg.Wait()

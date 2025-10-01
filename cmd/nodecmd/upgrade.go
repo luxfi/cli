@@ -73,7 +73,7 @@ func upgrade(_ *cobra.Command, args []string) error {
 	spinSession := ux.NewUserSpinner()
 	for host, upgradeInfo := range toUpgradeNodesMap {
 		if upgradeInfo.LuxdVersion != "" {
-			spinner := spinSession.SpinToUser(utils.ScriptLog(host.NodeID, fmt.Sprintf("Upgrading luxd to version %s...", upgradeInfo.LuxdVersion)))
+			spinner := spinSession.SpinToUser("%s", utils.ScriptLog(host.NodeID, fmt.Sprintf("Upgrading luxd to version %s...", upgradeInfo.LuxdVersion)))
 			if err := upgradeLuxd(host, upgradeInfo.LuxdVersion); err != nil {
 				ux.SpinFailWithError(spinner, "", err)
 				return err
@@ -84,7 +84,7 @@ func upgrade(_ *cobra.Command, args []string) error {
 			subnetEVMVersionToUpgradeToWoPrefix := strings.TrimPrefix(upgradeInfo.SubnetEVMVersion, "v")
 			subnetEVMArchive := fmt.Sprintf(constants.SubnetEVMArchive, subnetEVMVersionToUpgradeToWoPrefix)
 			subnetEVMReleaseURL := fmt.Sprintf(constants.SubnetEVMReleaseURL, upgradeInfo.SubnetEVMVersion, subnetEVMArchive)
-			spinner := spinSession.SpinToUser(utils.ScriptLog(host.NodeID, fmt.Sprintf("Upgrading SubnetEVM to version %s...", upgradeInfo.SubnetEVMVersion)))
+			spinner := spinSession.SpinToUser("%s", utils.ScriptLog(host.NodeID, fmt.Sprintf("Upgrading SubnetEVM to version %s...", upgradeInfo.SubnetEVMVersion)))
 			if err := getNewSubnetEVMRelease(host, subnetEVMReleaseURL, subnetEVMArchive); err != nil {
 				ux.SpinFailWithError(spinner, "", err)
 				return err
