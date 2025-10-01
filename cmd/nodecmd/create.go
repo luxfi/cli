@@ -700,7 +700,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 					nodeResults.AddResult(monitoringHost.IP, nil, err)
 					return
 				}
-				spinner := spinSession.SpinToUser(utils.ScriptLog(monitoringHost.IP, "Setup Monitoring"))
+				spinner := spinSession.SpinToUser("%s", utils.ScriptLog(monitoringHost.IP, "Setup Monitoring"))
 				if err = app.SetupMonitoringEnv(clusterName); err != nil {
 					nodeResults.AddResult(monitoringHost.IP, nil, err)
 					ux.SpinFailWithError(spinner, "", err)
@@ -761,7 +761,7 @@ func createNodes(cmd *cobra.Command, args []string) error {
 			wg.Add(1)
 			go func(nodeResults *models.NodeResults, host *models.Host) {
 				defer wg.Done()
-				spinner := spinSession.SpinToUser(utils.ScriptLog(host.IP, "Add Monitoring"))
+				spinner := spinSession.SpinToUser("%s", utils.ScriptLog(host.IP, "Add Monitoring"))
 				if addMonitoring {
 					cloudID := host.GetCloudID()
 					nodeID, err := getNodeID(app.GetNodeInstanceDirPath(cloudID))
@@ -1204,7 +1204,7 @@ func printResults(cloudConfigMap models.CloudConfig, publicIPMap map[string]stri
 			IP: monitoringHostIP,
 		}
 		if err := waitForMonitoringEndpoint(&monitoringHost); err != nil {
-			ux.Logger.RedXToUser("Failed to wait for monitoring endpoint to be available with error: %w", err)
+			ux.Logger.RedXToUser("Failed to wait for monitoring endpoint to be available with error: %v", err)
 		} else {
 			getMonitoringHint(monitoringHostIP)
 		}
@@ -1243,7 +1243,7 @@ func waitForHosts(hosts []*models.Host) *models.NodeResults {
 		createdWaitGroup.Add(1)
 		go func(nodeResults *models.NodeResults, host *models.Host) {
 			defer createdWaitGroup.Done()
-			spinner := spinSession.SpinToUser(utils.ScriptLog(host.IP, "Waiting for instance response"))
+			spinner := spinSession.SpinToUser("%s", utils.ScriptLog(host.IP, "Waiting for instance response"))
 			if err := host.WaitForSSHShell(constants.SSHServerStartTimeout); err != nil {
 				nodeResults.AddResult(host.IP, nil, err)
 				ux.SpinFailWithError(spinner, "", err)
@@ -1392,7 +1392,7 @@ func getRegionsNodeNum(cloudName string) (
 				return fmt.Sprintf("[%s]: %d validator(s)", region, nodes[region].numValidators)
 			})
 		}
-		ux.Logger.PrintToUser("Current selection: " + strings.Join(currentInput, " "))
+		ux.Logger.PrintToUser("Current selection: %s", strings.Join(currentInput, " "))
 		yes, err := app.Prompt.CaptureNoYes(additionalRegionPrompt)
 		if err != nil {
 			return nil, err
