@@ -89,7 +89,7 @@ func TestFindDefaultFiles(t *testing.T) {
 		filepath.Join(testDir, "etc", "node"),
 		filepath.Join(testDir, "home", ".node"),
 		testDir,
-		"$" + config.LuxDataDirVar,
+		"$" + config.LuxNodeDataDirVar,
 		// following indexes should fail (don't exist)
 		fakeNotSetEnvVar,
 		fakeSetEnvVar,

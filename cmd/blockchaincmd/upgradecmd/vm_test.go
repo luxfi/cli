@@ -299,7 +299,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	networkToUpgrade := futureDeployment
 
 	// create the user facing logger as a global var
-	log := luxlog.NoWarn{}
+	log := luxlog.NewNoOpLogger()
 	ux.NewUserLog(log, os.Stdout)
 
 	app = &application.Lux{}
