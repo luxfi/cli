@@ -61,6 +61,8 @@ const (
 	GCPCloudService            = "gcp"
 	AWSCloudService            = "aws"
 	E2EDocker                  = "e2e-docker"
+	E2EClusterName             = "e2e-test-cluster"
+	E2ENetworkPrefix           = "10.0.0"
 	GCPNodeAnsiblePrefix       = "gcp_node"
 	AWSNodeAnsiblePrefix       = "aws_node"
 	E2EDockerLoopbackHost      = "127.0.0.1"
