@@ -543,7 +543,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if sidecar.VM == models.SubnetEvm && !isEVMGenesis {
-		return fmt.Errorf("failed to validate SubnetEVM genesis format: %w", validationErr)
+		return fmt.Errorf("failed to validate SubnetEVM genesis format: %s", validationErr)
 	}
 
 	chainGenesis, err := app.LoadRawGenesis(chain)
