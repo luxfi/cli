@@ -298,14 +298,14 @@ func removeValidatorSOV(
 		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
 	}
 
-	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator manager owner %s pays for the initialization of the validator's removal (Blockchain gas token)"), validatorManagerOwner)
+	ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("Validator manager owner %s pays for the initialization of the validator's removal (Blockchain gas token)", validatorManagerOwner))))
 
 	if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
 		return fmt.Errorf("unable to find Validator Manager address")
 	}
 	validatorManagerAddress = sc.Networks[network.Name()].ValidatorManagerAddress
 
-	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
+	ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("RPC Endpoint: %s", rpcURL))))
 
 	// Note: ClusterName field has been removed from SDK models.NetworkData
 	clusterName := ""
@@ -322,7 +322,7 @@ func removeValidatorSOV(
 		return err
 	}
 	if force && sc.PoS {
-		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Forcing removal of %s as it is a PoS bootstrap validator"), nodeID)
+		ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("Forcing removal of %s as it is a PoS bootstrap validator", nodeID))))
 	}
 
 	// Convert []info.Peer to []string for the signature aggregator
