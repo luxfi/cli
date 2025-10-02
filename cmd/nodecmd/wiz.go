@@ -241,7 +241,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Adding subnet into existing devnet %s..."), clusterName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("Adding subnet into existing devnet %s...", clusterName)))
 	}
 
 	// check all validators are found
@@ -273,7 +273,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 
 	if subnetName == "" {
 		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Devnet %s has been created!"), clusterName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("Devnet %s has been created!", clusterName)))
 		return nil
 	}
 
@@ -390,7 +390,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("")
 		if err := updateProposerVMs(network); err != nil {
 			// not going to consider fatal, as warp messaging will be working fine after a failed first msg
-			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("failure setting proposer: %s"), err)
+			ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(fmt.Sprintf("failure setting proposer: %s", err)))
 		}
 	}
 
@@ -434,13 +434,13 @@ func wiz(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("")
 	if clusterAlreadyExists {
-		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Devnet %s is now validating subnet %s"), clusterName, subnetName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("Devnet %s is now validating subnet %s", clusterName, subnetName)))
 	} else {
-		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Devnet %s is successfully created and is now validating subnet %s!"), clusterName, subnetName)
+		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("Devnet %s is successfully created and is now validating subnet %s!", clusterName, subnetName)))
 	}
 	ux.Logger.PrintToUser("")
 
-	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Subnet %s RPC URL: %s"), subnetName, network.BlockchainEndpoint(blockchainID.String()))
+	ux.Logger.PrintToUser("%s", luxlog.Green.Wrap(fmt.Sprintf("Subnet %s RPC URL: %s", subnetName, network.BlockchainEndpoint(blockchainID.String()))))
 	ux.Logger.PrintToUser("")
 
 	if addMonitoring {
@@ -723,9 +723,9 @@ func waitForSubnetValidators(
 			return nil
 		}
 		if time.Since(startTime) > timeout {
-			ux.Logger.PrintToUser("Nodes not validating subnet ID %sf", subnetID)
+			ux.Logger.PrintToUser("Nodes not validating subnet ID %s", subnetID)
 			for _, failedNode := range failedNodes {
-				ux.Logger.PrintToUser("  " + failedNode)
+				ux.Logger.PrintToUser("  %s", failedNode)
 			}
 			ux.Logger.PrintToUser("")
 			return fmt.Errorf("cluster %s not validating subnet ID %s after %d seconds", clusterName, subnetID, uint32(timeout.Seconds()))
@@ -805,7 +805,7 @@ func waitForClusterSubnetStatus(
 		if time.Since(startTime) > timeout {
 			ux.Logger.PrintToUser("Nodes not %s %s", targetStatus.String(), subnetName)
 			for _, failedNode := range failedNodes {
-				ux.Logger.PrintToUser("  " + failedNode)
+				ux.Logger.PrintToUser("  %s", failedNode)
 			}
 			ux.Logger.PrintToUser("")
 			return fmt.Errorf("cluster not %s subnet %s after %d seconds", strings.ToLower(targetStatus.String()), subnetName, uint32(timeout.Seconds()))
