@@ -457,7 +457,7 @@ func CallAddValidator(
 		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: v1.0.0"))
 	}
 
-	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validation manager owner %s pays for the initialization of the validator's registration (Blockchain gas token)"), validatorManagerOwner)
+	ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("Validation manager owner %s pays for the initialization of the validator's registration (Blockchain gas token)", validatorManagerOwner))))
 
 	if rpcURL == "" {
 		rpcURL, _, err = contract.GetBlockchainEndpoints(
@@ -472,7 +472,7 @@ func CallAddValidator(
 		}
 	}
 
-	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("RPC Endpoint: %s"), rpcURL)
+	ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("RPC Endpoint: %s", rpcURL))))
 
 	totalWeight, err := validator.GetTotalWeight(network, subnetID)
 	if err != nil {

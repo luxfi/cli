@@ -330,7 +330,7 @@ func importFromLPM() error {
 		ImportedVMID:    vmDescr.ID,
 	}
 
-	ux.Logger.PrintToUser("Selected blockchain, installing " + subnetKey)
+	ux.Logger.PrintToUser("Selected blockchain, installing %s", subnetKey)
 
 	if err = lpmintegration.InstallVM(app, subnetKey); err != nil {
 		return err

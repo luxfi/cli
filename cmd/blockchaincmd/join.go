@@ -5,6 +5,7 @@ package blockchaincmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -162,7 +163,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 			return err
 		}
 		if luxdConfigPath != "" {
-			ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Green.Wrap("Found a config file at %s")), luxdConfigPath)
+			ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Bold.Wrap(luxlog.Green.Wrap(fmt.Sprintf("Found a config file at %s", luxdConfigPath)))))
 			yes, err := app.Prompt.CaptureYesNo("Is this the file we should update?")
 			if err != nil {
 				return err
@@ -195,7 +196,7 @@ func joinCmd(_ *cobra.Command, args []string) error {
 			return err
 		}
 		if pluginDir != "" {
-			ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
+			ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Bold.Wrap(luxlog.Green.Wrap(fmt.Sprintf("Found the VM plugin directory at %s", pluginDir)))))
 			yes, err := app.Prompt.CaptureYesNo("Is this where we should install the VM?")
 			if err != nil {
 				return err

@@ -60,7 +60,7 @@ func printGenesis(blockchainName string) error {
 		return err
 	}
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser(string(gen))
+	ux.Logger.PrintToUser("%s", string(gen))
 	return nil
 }
 
@@ -419,7 +419,7 @@ func printPrecompiles(genesis core.Genesis) {
 		t.Render()
 		if allowListSet {
 			note := luxlog.Orange.Wrap("The allowlist is taken from the genesis and is not being updated if you make adjustments\nvia the precompile. Use readAllowList(address) instead.")
-			ux.Logger.PrintToUser(note)
+			ux.Logger.PrintToUser("%s", note)
 		}
 	}
 }
