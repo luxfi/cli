@@ -3,7 +3,6 @@
 package blockchaincmd
 
 import (
-	luxlog "github.com/luxfi/log"
 	"io"
 	"net/url"
 	"os"
@@ -132,12 +131,12 @@ func TestNoRepoPath(t *testing.T) {
 	_, err = os.Create(expectedSubnetFile)
 	require.NoError(err)
 
-	// For Sha256 calc we are accessing the subnet-evm binary
+	// For Sha256 calc we are accessing the evm binary
 	// So we're just `touch`ing that file so the code finds it
-	appSubnetDir := filepath.Join(app.GetSubnetEVMBinDir(), constants.SubnetEVMRepoName+"-"+sc.VMVersion)
+	appSubnetDir := filepath.Join(app.GetEVMBinDir(), constants.EVMRepoName+"-"+sc.VMVersion)
 	err = os.MkdirAll(appSubnetDir, constants.DefaultPerms755)
 	require.NoError(err)
-	_, err = os.Create(filepath.Join(appSubnetDir, constants.SubnetEVMBin))
+	_, err = os.Create(filepath.Join(appSubnetDir, constants.EVMBin))
 	require.NoError(err)
 
 	// reset expectations as this test (and TestPublishing) also uses the same mocks
@@ -378,12 +377,12 @@ func TestPublishing(t *testing.T) {
 		VM:        models.SubnetEvm,
 		VMVersion: "v0.9.99",
 	}
-	// For Sha256 calc we are accessing the subnet-evm binary
+	// For Sha256 calc we are accessing the evm binary
 	// So we're just `touch`ing that file so the code finds it
-	subnetDir := filepath.Join(app.GetSubnetEVMBinDir(), constants.SubnetEVMRepoName+"-"+sc.VMVersion)
+	subnetDir := filepath.Join(app.GetEVMBinDir(), constants.EVMRepoName+"-"+sc.VMVersion)
 	err := os.MkdirAll(subnetDir, constants.DefaultPerms755)
 	require.NoError(err)
-	_, err = os.Create(filepath.Join(subnetDir, constants.SubnetEVMBin))
+	_, err = os.Create(filepath.Join(subnetDir, constants.EVMBin))
 	require.NoError(err)
 
 	err = doPublish(sc, testSubnet, newTestPublisher)
@@ -416,7 +415,7 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *promptsmocks.Prompter) {
 	require.NoError(err)
 	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	app = &application.Lux{}
-	mockPrompt := promptsmocks.NewPrompter(t)
+	mockPrompt := &promptsmocks.Prompter{}
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), mockPrompt, application.NewDownloader())
 
 	return require, mockPrompt
