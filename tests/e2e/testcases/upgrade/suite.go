@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	anr_utils "github.com/luxfi/netrunner/utils"
@@ -198,7 +198,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		upgradeBytes, err := os.ReadFile(upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		var precmpUpgrades params.UpgradeConfig
+		var precmpUpgrades extras.UpgradeConfig
 		err = json.Unmarshal(upgradeBytes, &precmpUpgrades)
 		gomega.Expect(err).Should(gomega.BeNil())
 
@@ -387,7 +387,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 
 		// Simulate testnet deployment
 		s := commands.SimulateTestnetDeploy(subnetName, keyName, controlKeys)
-		subnetID, err := utils.ParsePublicDeployOutput(s)
+		subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
 		gomega.Expect(err).Should(gomega.BeNil())
 		// add validators to subnet
 		nodeInfos, err := utils.GetNodesInfo()

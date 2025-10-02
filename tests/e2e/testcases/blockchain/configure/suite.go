@@ -4,6 +4,7 @@
 package configure
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -51,10 +52,10 @@ func AssertBlockchainConfigIsSet(
 			expectedRPCTxFeeCap, ok = nodesRPCTxFeeCap[nodeID]
 			gomega.Expect(ok).Should(gomega.BeTrue())
 		}
-		gomega.Expect(fileBytes).Should(gomega.ContainSubstring("RPCTxFeeCap:%d", expectedRPCTxFeeCap))
+		gomega.Expect(fileBytes).Should(gomega.ContainSubstring(fmt.Sprintf("RPCTxFeeCap:%d", expectedRPCTxFeeCap)))
 		for _, rpcTxFeeCap := range []int{defaultRPCTxFeeCap, newRPCTxFeeCap1, newRPCTxFeeCap2} {
 			if rpcTxFeeCap != expectedRPCTxFeeCap {
-				gomega.Expect(fileBytes).ShouldNot(gomega.ContainSubstring("RPCTxFeeCap:%d", rpcTxFeeCap))
+				gomega.Expect(fileBytes).ShouldNot(gomega.ContainSubstring(fmt.Sprintf("RPCTxFeeCap:%d", rpcTxFeeCap)))
 			}
 		}
 	}
@@ -92,11 +93,11 @@ func AssertNodeConfigIsSet(
 		fileBytes, err := os.ReadFile(logFile)
 		gomega.Expect(err).Should(gomega.BeNil())
 		if expectedACPSupport != -1 {
-			gomega.Expect(fileBytes).Should(gomega.ContainSubstring("\"acp-support\":%d", expectedACPSupport))
+			gomega.Expect(fileBytes).Should(gomega.ContainSubstring(fmt.Sprintf("\"acp-support\":%d", expectedACPSupport)))
 		}
 		for _, acpSupport := range []int{acpSupport1, acpSupport2} {
 			if acpSupport != expectedACPSupport {
-				gomega.Expect(fileBytes).ShouldNot(gomega.ContainSubstring("\"acp-support\":%d", acpSupport))
+				gomega.Expect(fileBytes).ShouldNot(gomega.ContainSubstring(fmt.Sprintf("\"acp-support\":%d", acpSupport)))
 			}
 		}
 	}

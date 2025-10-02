@@ -56,15 +56,41 @@ func CreateKeyForce(keyName string) (string, error) {
 }
 
 /* #nosec G204 */
-func ListKeys() (string, error) {
+func ListKeys(network string, allBalances bool, chains string, tokens string) (string, error) {
 	// Create config
-	cmd := exec.Command(
+	args := []string{
 		CLIBinary,
 		KeyCmd,
 		"list",
-		"--mainnet",
-		"--"+constants.SkipUpdateFlag,
-	)
+	}
+
+	// Add network flag (local, mainnet, testnet)
+	if network == "local" {
+		args = append(args, "--local")
+	} else if network == "testnet" {
+		args = append(args, "--testnet")
+	} else {
+		args = append(args, "--mainnet")
+	}
+
+	// Add all-balances flag
+	if allBalances {
+		args = append(args, "--all-balances")
+	}
+
+	// Add chains flag if provided
+	if chains != "" {
+		args = append(args, "--chains", chains)
+	}
+
+	// Add tokens flag if provided
+	if tokens != "" {
+		args = append(args, "--tokens", tokens)
+	}
+
+	args = append(args, "--"+constants.SkipUpdateFlag)
+
+	cmd := exec.Command(args[0], args[1:]...)
 
 	out, err := cmd.Output()
 	return string(out), err
@@ -113,6 +139,23 @@ func ExportKeyToFile(keyName string, outputPath string) (string, error) {
 		outputPath,
 		"--"+constants.SkipUpdateFlag,
 	)
+
+	out, err := cmd.Output()
+	return string(out), err
+}
+
+/* #nosec G204 */
+func KeyTransferSend(args []string) (string, error) {
+	// Build command args
+	cmdArgs := []string{
+		CLIBinary,
+		KeyCmd,
+		"transfer",
+	}
+	cmdArgs = append(cmdArgs, args...)
+	cmdArgs = append(cmdArgs, "--"+constants.SkipUpdateFlag)
+
+	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
 
 	out, err := cmd.Output()
 	return string(out), err

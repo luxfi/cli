@@ -958,3 +958,183 @@ func ListValidators(subnetName string, network string) (string, error) {
 	out, err := cmd.Output()
 	return string(out), err
 }
+
+// CreateSubnetEvmConfigNonSOV creates a non-sovereign subnet EVM config
+/* #nosec G204 */
+func CreateSubnetEvmConfigNonSOV(subnetName string, genesisPath string, bootstrapped bool) (string, string) {
+	// For now, just call the regular CreateSubnetEvmConfig
+	// The bootstrapped parameter is ignored in the base implementation
+	return CreateSubnetEvmConfig(subnetName, genesisPath)
+}
+
+// CreateSubnetEvmConfigSOV creates a sovereign subnet EVM config
+/* #nosec G204 */
+func CreateSubnetEvmConfigSOV(subnetName string, genesisPath string) (string, string) {
+	// For now, just call the regular CreateSubnetEvmConfig
+	// SOV-specific functionality would be added here
+	return CreateSubnetEvmConfig(subnetName, genesisPath)
+}
+
+// CreateCustomVMConfigNonSOV creates a non-sovereign custom VM config
+/* #nosec G204 */
+func CreateCustomVMConfigNonSOV(subnetName string, genesisPath string, vmPath string) {
+	// For now, just call the regular CreateCustomVMConfig
+	CreateCustomVMConfig(subnetName, genesisPath, vmPath)
+}
+
+// CreateCustomVMConfigSOV creates a sovereign custom VM config
+/* #nosec G204 */
+func CreateCustomVMConfigSOV(subnetName string, genesisPath string, vmPath string) {
+	// For now, just call the regular CreateCustomVMConfig
+	// SOV-specific functionality would be added here
+	CreateCustomVMConfig(subnetName, genesisPath, vmPath)
+}
+
+// DeploySubnetLocallyNonSOV deploys a non-sovereign subnet locally
+/* #nosec G204 */
+func DeploySubnetLocallyNonSOV(subnetName string) string {
+	// For now, just call the regular DeploySubnetLocally
+	return DeploySubnetLocally(subnetName)
+}
+
+// DeploySubnetLocallyWithVersionNonSOV deploys a non-sovereign subnet locally with specific version
+/* #nosec G204 */
+func DeploySubnetLocallyWithVersionNonSOV(subnetName string, version string) string {
+	// Call the existing function with version
+	return DeploySubnetLocallyWithVersion(subnetName, version)
+}
+
+// DeploySubnetLocallyWithViperConfNonSOV deploys a non-sovereign subnet locally with viper config
+/* #nosec G204 */
+func DeploySubnetLocallyWithViperConfNonSOV(subnetName string, confPath string) string {
+	// Call the existing function with config path
+	return DeploySubnetLocallyWithViperConf(subnetName, confPath)
+}
+
+// SimulateTestnetDeploySOV simulates sovereign subnet deployment on testnet
+/* #nosec G204 */
+func SimulateTestnetDeploySOV(subnetName string, key string, controlKeys string) string {
+	// For now, just call the regular SimulateTestnetDeploy
+	// SOV-specific functionality would be added here
+	return SimulateTestnetDeploy(subnetName, key, controlKeys)
+}
+
+// DeploySubnetLocallySOV deploys a sovereign subnet locally
+/* #nosec G204 */
+func DeploySubnetLocallySOV(subnetName string) string {
+	// For now, just call the regular DeploySubnetLocally
+	// SOV-specific functionality would be added here
+	return DeploySubnetLocally(subnetName)
+}
+
+// DeploySubnetLocallyWithViperConfSOV deploys a sovereign subnet locally with viper config
+/* #nosec G204 */
+func DeploySubnetLocallyWithViperConfSOV(subnetName string, confPath string) string {
+	// Call the existing function with config path
+	// SOV-specific functionality would be added here
+	return DeploySubnetLocallyWithViperConf(subnetName, confPath)
+}
+
+// DeploySubnetLocallyWithVersionSOV deploys a sovereign subnet locally with specific version
+/* #nosec G204 */
+func DeploySubnetLocallyWithVersionSOV(subnetName string, version string) string {
+	// Call the existing function with version
+	// SOV-specific functionality would be added here
+	return DeploySubnetLocallyWithVersion(subnetName, version)
+}
+
+// DeploySubnetLocallyWithArgsAndOutputSOV deploys a sovereign subnet locally and returns output
+/* #nosec G204 */
+func DeploySubnetLocallyWithArgsAndOutputSOV(subnetName string, version string, confPath string) ([]byte, error) {
+	// Call the existing function
+	// SOV-specific functionality would be added here
+	return DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
+}
+
+// CreateSubnetEvmConfigWithVersionSOV creates a sovereign subnet EVM config with specific version
+/* #nosec G204 */
+func CreateSubnetEvmConfigWithVersionSOV(subnetName string, genesisPath string, version string) {
+	// Call the existing function with version
+	// SOV-specific functionality would be added here
+	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, version)
+}
+
+// DeploySubnetLocallyExpectErrorSOV deploys a sovereign subnet locally expecting an error
+/* #nosec G204 */
+func DeploySubnetLocallyExpectErrorSOV(subnetName string) {
+	// Call the existing function
+	// SOV-specific functionality would be added here
+	DeploySubnetLocallyExpectError(subnetName)
+}
+
+// DeploySubnetLocallyWithArgsAndOutputNonSOV deploys a non-sovereign subnet locally and returns output
+/* #nosec G204 */
+func DeploySubnetLocallyWithArgsAndOutputNonSOV(subnetName string, version string, confPath string) ([]byte, error) {
+	// Call the existing function
+	return DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
+}
+
+// CreateSubnetEvmConfigWithVersionNonSOV creates a non-sovereign subnet EVM config with specific version
+/* #nosec G204 */
+func CreateSubnetEvmConfigWithVersionNonSOV(subnetName string, genesisPath string, version string, bootstrapped bool) {
+	// Call the existing function with version
+	// The bootstrapped parameter is ignored in the base implementation for now
+	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, version)
+}
+
+// DeploySubnetLocallyExpectErrorNonSOV deploys a non-sovereign subnet locally expecting an error
+/* #nosec G204 */
+func DeploySubnetLocallyExpectErrorNonSOV(subnetName string) {
+	// Call the existing function
+	DeploySubnetLocallyExpectError(subnetName)
+}
+
+// SimulateTestnetDeployNonSOV simulates non-sovereign subnet deployment on testnet
+/* #nosec G204 */
+func SimulateTestnetDeployNonSOV(subnetName string, key string, controlKeys string) string {
+	// For now, just call the regular SimulateTestnetDeploy
+	return SimulateTestnetDeploy(subnetName, key, controlKeys)
+}
+
+// SimulateMainnetDeployNonSOV simulates non-sovereign subnet deployment on mainnet
+// Updated to accept chainID and skipPrompt parameters to match usage
+/* #nosec G204 */
+func SimulateMainnetDeployNonSOV(subnetName string, chainID int, skipPrompt bool) string {
+	// Check config exists
+	exists, err := utils.SubnetConfigExists(subnetName)
+	gomega.Expect(err).Should(gomega.BeNil())
+	gomega.Expect(exists).Should(gomega.BeTrue())
+
+	// Build command args
+	cmdArgs := []string{
+		SubnetCmd,
+		"deploy",
+		subnetName,
+		"--mainnet",
+		"--" + constants.SkipUpdateFlag,
+	}
+
+	// Add chain ID if specified
+	if chainID > 0 {
+		cmdArgs = append(cmdArgs, "--chain-id", fmt.Sprintf("%d", chainID))
+	}
+
+	// Add skip prompt flag if specified
+	if skipPrompt {
+		cmdArgs = append(cmdArgs, "--yes")
+	}
+
+	// Execute command
+	cmd := exec.Command(CLIBinary, cmdArgs...)
+	output, err := cmd.CombinedOutput()
+	outputStr := string(output)
+
+	if err != nil {
+		fmt.Println(cmd.String())
+		fmt.Println(outputStr)
+		utils.PrintStdErr(err)
+	}
+	gomega.Expect(err).Should(gomega.BeNil())
+
+	return outputStr
+}

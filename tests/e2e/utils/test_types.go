@@ -10,20 +10,11 @@ import (
 	"strings"
 )
 
-// TestFlags represents test-specific flags
-type TestFlags struct {
-	Verbose   bool
-	Timeout   string
-	SkipSetup bool
-	Env       map[string]string
-}
+// TestFlags represents test-specific flags as a map for flexible flag passing
+type TestFlags map[string]interface{}
 
-// GlobalFlags represents global command flags
-type GlobalFlags struct {
-	Network  string
-	Config   string
-	LogLevel string
-}
+// GlobalFlags represents global command flags as a map for flexible flag passing
+type GlobalFlags map[string]interface{}
 
 // TestCommand executes a command with the given flags for testing
 func TestCommand(cmd, subCmd string, args []string, globalFlags GlobalFlags, testFlags TestFlags) (string, error) {
@@ -32,30 +23,63 @@ func TestCommand(cmd, subCmd string, args []string, globalFlags GlobalFlags, tes
 	cmdArgs = append(cmdArgs, args...)
 
 	// Add global flags
-	if globalFlags.Network != "" {
-		cmdArgs = append(cmdArgs, "--network", globalFlags.Network)
-	}
-	if globalFlags.Config != "" {
-		cmdArgs = append(cmdArgs, "--config", globalFlags.Config)
-	}
-	if globalFlags.LogLevel != "" {
-		cmdArgs = append(cmdArgs, "--log-level", globalFlags.LogLevel)
+	for key, value := range globalFlags {
+		flagName := "--" + key
+		switch v := value.(type) {
+		case bool:
+			if v {
+				cmdArgs = append(cmdArgs, flagName)
+			}
+		case string:
+			if v != "" {
+				cmdArgs = append(cmdArgs, flagName, v)
+			}
+		case int, int64, float64:
+			cmdArgs = append(cmdArgs, flagName, fmt.Sprintf("%v", v))
+		default:
+			if v != nil {
+				cmdArgs = append(cmdArgs, flagName, fmt.Sprintf("%v", v))
+			}
+		}
 	}
 
 	// Add test flags
-	if testFlags.Verbose {
-		cmdArgs = append(cmdArgs, "-v")
-	}
-	if testFlags.Timeout != "" {
-		cmdArgs = append(cmdArgs, "--timeout", testFlags.Timeout)
+	for key, value := range testFlags {
+		// Skip env as it's handled separately
+		if key == "env" {
+			continue
+		}
+
+		flagName := "--" + key
+		// Handle short flags
+		if key == "verbose" || key == "v" {
+			flagName = "-v"
+		}
+
+		switch v := value.(type) {
+		case bool:
+			if v {
+				cmdArgs = append(cmdArgs, flagName)
+			}
+		case string:
+			if v != "" {
+				cmdArgs = append(cmdArgs, flagName, v)
+			}
+		case int, int64, float64:
+			cmdArgs = append(cmdArgs, flagName, fmt.Sprintf("%v", v))
+		default:
+			if v != nil {
+				cmdArgs = append(cmdArgs, flagName, fmt.Sprintf("%v", v))
+			}
+		}
 	}
 
 	// Build exec command
 	execCmd := exec.Command(cmd, cmdArgs...)
 
 	// Set environment variables
-	if testFlags.Env != nil {
-		for k, v := range testFlags.Env {
+	if envMap, ok := testFlags["env"].(map[string]string); ok {
+		for k, v := range envMap {
 			execCmd.Env = append(execCmd.Env, fmt.Sprintf("%s=%s", k, v))
 		}
 	}

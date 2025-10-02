@@ -185,7 +185,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		_, err = commands.TrackLocalEtnaSubnet(utils.TestLocalNodeName, utils.BlockchainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		keyPath := path.Join(utils.GetBaseDir(), constants.KeyDir, fmt.Sprintf("subnet_%s_airdrop", utils.BlockchainName)+constants.KeySuffix)
-		k, err := key.LoadSoft(models.NewLocalNetwork().ID, keyPath)
+		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 		rpcURL := fmt.Sprintf("%s/ext/bc/%s/rpc", uris[0], blockchainIDStr)
 		client, err := evm.GetClient(rpcURL)
@@ -203,13 +203,18 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 
 		luxdBootstrapValidators, err := getBootstrapValidator(uris[0])
 		gomega.Expect(err).Should(gomega.BeNil())
+		// Convert validators to interface slice for SDK
+		var validators []interface{}
+		for _, v := range luxdBootstrapValidators {
+			validators = append(validators, v)
+		}
 		ownerAddress := common.HexToAddress(ewoqEVMAddress)
 		subnetSDK := blockchainSDK.Subnet{
 			SubnetID:            subnetID,
 			BlockchainID:        blockchainID,
 			OwnerAddress:        &ownerAddress,
 			RPC:                 rpcURL,
-			BootstrapValidators: luxdBootstrapValidators,
+			BootstrapValidators: validators,
 		}
 
 		_, cancel := utils.GetSignatureAggregatorContext()
