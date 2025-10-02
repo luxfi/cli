@@ -6,7 +6,9 @@ package mocks
 import (
 	"context"
 
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/api"
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/stretchr/testify/mock"
@@ -37,6 +39,128 @@ func (m *PClient) GetCurrentValidators(ctx context.Context, subnetID ids.ID, nod
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, ids.ID, []ids.NodeID) error); ok {
 		r1 = rf(ctx, subnetID, nodeIDs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ExportKey provides a mock function with given fields: ctx, user, address, options
+func (m *PClient) ExportKey(ctx context.Context, user api.UserPass, address ids.ShortID, options ...rpc.Option) (*secp256k1.PrivateKey, error) {
+	args := []interface{}{ctx, user, address}
+	for _, opt := range options {
+		args = append(args, opt)
+	}
+	ret := m.Called(args...)
+
+	var r0 *secp256k1.PrivateKey
+	if rf, ok := ret.Get(0).(func(context.Context, api.UserPass, ids.ShortID) *secp256k1.PrivateKey); ok {
+		r0 = rf(ctx, user, address)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*secp256k1.PrivateKey)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, api.UserPass, ids.ShortID) error); ok {
+		r1 = rf(ctx, user, address)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetAtomicUTXOs provides a mock function with given fields: ctx, addrs, sourceChain, limit, startAddress, startUTXOID, options
+func (m *PClient) GetAtomicUTXOs(ctx context.Context, addrs []ids.ShortID, sourceChain string, limit uint32, startAddress ids.ShortID, startUTXOID ids.ID, options ...rpc.Option) ([][]byte, ids.ShortID, ids.ID, error) {
+	args := []interface{}{ctx, addrs, sourceChain, limit, startAddress, startUTXOID}
+	for _, opt := range options {
+		args = append(args, opt)
+	}
+	ret := m.Called(args...)
+
+	var r0 [][]byte
+	if rf, ok := ret.Get(0).(func(context.Context, []ids.ShortID, string, uint32, ids.ShortID, ids.ID) [][]byte); ok {
+		r0 = rf(ctx, addrs, sourceChain, limit, startAddress, startUTXOID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([][]byte)
+		}
+	}
+
+	var r1 ids.ShortID
+	if rf, ok := ret.Get(1).(func(context.Context, []ids.ShortID, string, uint32, ids.ShortID, ids.ID) ids.ShortID); ok {
+		r1 = rf(ctx, addrs, sourceChain, limit, startAddress, startUTXOID)
+	} else {
+		r1 = ret.Get(1).(ids.ShortID)
+	}
+
+	var r2 ids.ID
+	if rf, ok := ret.Get(2).(func(context.Context, []ids.ShortID, string, uint32, ids.ShortID, ids.ID) ids.ID); ok {
+		r2 = rf(ctx, addrs, sourceChain, limit, startAddress, startUTXOID)
+	} else {
+		r2 = ret.Get(2).(ids.ID)
+	}
+
+	var r3 error
+	if rf, ok := ret.Get(3).(func(context.Context, []ids.ShortID, string, uint32, ids.ShortID, ids.ID) error); ok {
+		r3 = rf(ctx, addrs, sourceChain, limit, startAddress, startUTXOID)
+	} else {
+		r3 = ret.Error(3)
+	}
+
+	return r0, r1, r2, r3
+}
+
+// GetBalance provides a mock function with given fields: ctx, addrs, options
+func (m *PClient) GetBalance(ctx context.Context, addrs []ids.ShortID, options ...rpc.Option) (*platformvm.GetBalanceResponse, error) {
+	args := []interface{}{ctx, addrs}
+	for _, opt := range options {
+		args = append(args, opt)
+	}
+	ret := m.Called(args...)
+
+	var r0 *platformvm.GetBalanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, []ids.ShortID) *platformvm.GetBalanceResponse); ok {
+		r0 = rf(ctx, addrs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*platformvm.GetBalanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, []ids.ShortID) error); ok {
+		r1 = rf(ctx, addrs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetBlock provides a mock function with given fields: ctx, blockID, options
+func (m *PClient) GetBlock(ctx context.Context, blockID ids.ID, options ...rpc.Option) ([]byte, error) {
+	args := []interface{}{ctx, blockID}
+	for _, opt := range options {
+		args = append(args, opt)
+	}
+	ret := m.Called(args...)
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func(context.Context, ids.ID) []byte); ok {
+		r0 = rf(ctx, blockID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ids.ID) error); ok {
+		r1 = rf(ctx, blockID)
 	} else {
 		r1 = ret.Error(1)
 	}

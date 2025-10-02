@@ -10,11 +10,11 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/stretchr/testify/require"
 )
 
@@ -305,7 +305,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	app = &application.Lux{}
 	app.Setup(testDir, log, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	err = os.MkdirAll(app.GetSubnetDir(), constants.DefaultPerms755)
+	err := os.MkdirAll(app.GetSubnetDir(), constants.DefaultPerms755)
 	assert.NoError(err)
 
 	err = app.CreateSidecar(&sc)
