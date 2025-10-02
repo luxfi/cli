@@ -18,12 +18,12 @@ type NetworkData struct {
 	SubnetID                   ids.ID
 	BlockchainID               ids.ID
 	RPCVersion                 int
-	RPCEndpoints               []string           // RPC endpoints for the network
-	WSEndpoints                []string           // WebSocket endpoints for the network
-	TeleporterRegistryAddress  string             // Teleporter registry address
-	TeleporterMessengerAddress string             // Teleporter messenger address
-	ValidatorManagerAddress    string             // Validator manager contract address
-	BootstrapValidators        []SubnetValidator  // Bootstrap validators for the network
+	RPCEndpoints               []string          // RPC endpoints for the network
+	WSEndpoints                []string          // WebSocket endpoints for the network
+	TeleporterRegistryAddress  string            // Teleporter registry address
+	TeleporterMessengerAddress string            // Teleporter messenger address
+	ValidatorManagerAddress    string            // Validator manager contract address
+	BootstrapValidators        []SubnetValidator // Bootstrap validators for the network
 }
 
 type MultisigTxInfo struct {
