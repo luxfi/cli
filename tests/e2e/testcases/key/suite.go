@@ -143,7 +143,7 @@ var _ = ginkgo.Describe("[Key]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// Call list cmd
-		output, err = commands.ListKeys()
+		output, err = commands.ListKeys("mainnet", false, "", "")
 		if err != nil {
 			fmt.Println(output)
 			utils.PrintStdErr(err)
