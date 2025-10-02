@@ -287,7 +287,7 @@ func whitelistSSHPubKey(clusterName string, pubkey string) error {
 				nodeResults.AddResult(host.NodeID, nil, err)
 				return
 			}
-			ux.Logger.GreenCheckmarkToUser(utils.ScriptLog(host.NodeID, "Whitelisted SSH public key"))
+			ux.Logger.GreenCheckmarkToUser("%s", utils.ScriptLog(host.NodeID, "Whitelisted SSH public key"))
 		}(&wgResults, host)
 	}
 	wg.Wait()

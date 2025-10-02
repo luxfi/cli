@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
+	promptsmocks "github.com/luxfi/cli/pkg/prompts/mocks"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -393,7 +394,7 @@ func TestPublishing(t *testing.T) {
 	mockPrompt.ExpectedCalls = nil
 }
 
-func configureMockPrompt(mockPrompt *mocks.Prompter) {
+func configureMockPrompt(mockPrompt *promptsmocks.Prompter) {
 	mockPrompt.On("CaptureList", mock.Anything, mock.Anything).Return("Add", nil).Once()
 	mockPrompt.On("CaptureEmail", mock.Anything).Return("someone@somewhere.com", nil)
 	mockPrompt.On("CaptureList", mock.Anything, mock.Anything).Return("Done", nil).Once()
@@ -407,14 +408,14 @@ func configureMockPrompt(mockPrompt *mocks.Prompter) {
 	mockPrompt.On("CaptureVersion", mock.Anything).Return("v0.9.99", nil)
 }
 
-func setupTestEnv(t *testing.T) (*require.Assertions, *mocks.Prompter) {
+func setupTestEnv(t *testing.T) (*require.Assertions, *promptsmocks.Prompter) {
 	require := require.New(t)
 	testDir := t.TempDir()
 	err := os.Mkdir(filepath.Join(testDir, "repos"), 0o755)
 	require.NoError(err)
 	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
 	app = &application.Lux{}
-	mockPrompt := mocks.NewPrompter(t)
+	mockPrompt := &promptsmocks.Prompter{}
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), mockPrompt, application.NewDownloader())
 
 	return require, mockPrompt
