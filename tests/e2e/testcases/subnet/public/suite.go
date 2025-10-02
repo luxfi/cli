@@ -26,7 +26,7 @@ const (
 func deploySubnetToTestnet() (string, map[string]utils.NodeInfo) {
 	// deploy
 	s := commands.SimulateTestnetDeploy(subnetName, keyName, controlKeys)
-	subnetID, err := utils.ParsePublicDeployOutput(s)
+	subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// add validators to subnet
 	nodeInfos, err := utils.GetNodesInfo()
@@ -87,13 +87,13 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 
 	ginkgo.It("deploy subnet to mainnet", ginkgo.Label("local_machine"), func() {
 		// fund ledger address
-		err := utils.FundLedgerAddress()
+		err := utils.FundLedgerAddress(1000000000) // 1 LUX in nanoLUX
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println()
 		fmt.Println(luxlog.LightRed.Wrap("DEPLOYING SUBNET. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING"))
 		s := commands.SimulateMainnetDeploy(subnetName)
 		// deploy
-		subnetID, err := utils.ParsePublicDeployOutput(s)
+		subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
 		gomega.Expect(err).Should(gomega.BeNil())
 		// add validators to subnet
 		nodeInfos, err := utils.GetNodesInfo()

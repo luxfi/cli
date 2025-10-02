@@ -15,6 +15,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/onsi/gomega"
 )
 
@@ -243,4 +244,40 @@ func runCmd(cmd *exec.Cmd, expectSuccess bool) string { //nolint:all
 		gomega.Expect(err).Should(gomega.Not(gomega.BeNil()))
 	}
 	return string(output)
+}
+
+// DeleteNode deletes a node
+/* #nosec G204 */
+func DeleteNode(hostName string) {
+	cmd := exec.Command(
+		CLIBinary,
+		"node",
+		"destroy",
+		hostName,
+		"--"+constants.SkipUpdateFlag,
+	)
+	_ = runCmd(cmd, ExpectSuccess)
+}
+
+// DeleteE2EInventory deletes the E2E test inventory
+/* #nosec G204 */
+func DeleteE2EInventory() {
+	// This would delete the inventory file or clean up inventory state
+	// For now, this is a stub implementation
+	// The actual implementation would depend on how inventory is managed
+	inventoryPath := filepath.Join(utils.GetBaseDir(), "e2e-inventory")
+	_ = os.RemoveAll(inventoryPath)
+}
+
+// DeleteE2ECluster deletes the E2E test cluster
+/* #nosec G204 */
+func DeleteE2ECluster() {
+	cmd := exec.Command(
+		CLIBinary,
+		"node",
+		"destroy",
+		constants.E2EClusterName,
+		"--"+constants.SkipUpdateFlag,
+	)
+	_ = runCmd(cmd, ExpectSuccess)
 }

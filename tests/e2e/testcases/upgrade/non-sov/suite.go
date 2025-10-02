@@ -18,7 +18,7 @@ import (
 	cliutils "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
@@ -194,7 +194,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		upgradeBytes, err := os.ReadFile(upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		var precmpUpgrades params.UpgradeConfig
+		var precmpUpgrades extras.UpgradeConfig
 		err = json.Unmarshal(upgradeBytes, &precmpUpgrades)
 		gomega.Expect(err).Should(gomega.BeNil())
 

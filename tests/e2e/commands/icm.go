@@ -13,13 +13,13 @@ const (
 /* #nosec G204 */
 func SendWarpMessage(args []string, testFlags utils.TestFlags) (string, error) {
 	return utils.TestCommand(WarpCmd, "sendMsg", args, utils.GlobalFlags{
-		Network: "local",
+		"network": "local",
 	}, testFlags)
 }
 
 /* #nosec G204 */
 func DeployWarpContracts(args []string, testFlags utils.TestFlags) (string, error) {
 	return utils.TestCommand(WarpCmd, "deploy", args, utils.GlobalFlags{
-		Network: "local",
+		"network": "local",
 	}, testFlags)
 }

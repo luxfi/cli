@@ -305,7 +305,7 @@ var _ = ginkgo.Describe("[Warp] deploy", func() {
 
 		ginkgo.It("should deploy Warp contracts from paths", func() {
 			td := interchain.WarpDeployer{}
-			contractsDirPath := path.Join(utils.GetBaseDir(), constants.LuxCliBinDir, constants.WarpContractsInstallDir)
+			contractsDirPath := path.Join(utils.GetBaseDir(), constants.LuxCliBinDir, constants.WarpDir)
 			version := "v1.0.0"
 			// Download contracts
 			err := td.DownloadAssets(
