@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/cli/internal/testutils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,7 @@ const (
 	subnetName2 = "TEST_copied_subnet"
 
 	subnetID  = "testSubNet"
-	networkID = "67443"
+	networkID = uint32(67443)
 )
 
 // testing backward compatibility
@@ -52,7 +53,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, networkID, configPath, true, "")
+	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath)
@@ -94,7 +95,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, networkID, configPath, true, "")
+	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath)
@@ -135,7 +136,7 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, networkID, configPath, true, "")
+	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath)

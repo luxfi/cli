@@ -76,7 +76,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 				addrs[1]: {},
 				addrs[2]: {},
 			},
-			admins:     []crypto.Address{addrs[3], addrs[4]},
+			admins:     []crypto.Address{cryptoAddrs[3], cryptoAddrs[4]},
 			shouldFail: true,
 		},
 	}
