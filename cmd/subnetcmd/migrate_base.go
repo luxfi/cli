@@ -171,8 +171,8 @@ func isCurrentBase(option, current string) bool {
 		return option == "Lux (100ms blocks, lowest cost)"
 	case "ethereum":
 		return option == "Ethereum (12s blocks, highest security)"
-	case "avalanche":
-		return option == "Avalanche (2s blocks, fast finality)"
+	case "lux-classic":
+		return option == "Lux Classic (2s blocks, fast finality)"
 	}
 	return false
 }
@@ -183,8 +183,8 @@ func parseBaseChoice(choice string) string {
 		return "lux"
 	case "Ethereum (12s blocks, highest security)":
 		return "ethereum"
-	case "Avalanche (2s blocks, fast finality)":
-		return "avalanche"
+	case "Lux Classic (2s blocks, fast finality)":
+		return "lux-classic"
 	}
 	return choice
 }
@@ -210,7 +210,7 @@ func showMigrationImpact(from, to string) {
 	case "ethereum":
 		ux.Logger.PrintToUser("   💰 Higher data costs (ETH gas)")
 		ux.Logger.PrintToUser("   🛡️  Maximum security inheritance")
-	case "avalanche":
+	case "lux-classic":
 		ux.Logger.PrintToUser("   💵 Moderate data costs")
 		ux.Logger.PrintToUser("   ⚡ Fast finality (~1s)")
 	}
