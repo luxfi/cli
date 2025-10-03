@@ -355,14 +355,14 @@ func changeWeightACP99(
 			return fmt.Errorf("not private key found for Validator manager owner %s", validatorManagerOwner)
 		}
 	}
-	ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("Validator manager owner %s pays for the initialization of the validator's weight change (Blockchain gas token)", validatorManagerOwner))))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(fmt.Sprintf("Validator manager owner %s pays for the initialization of the validator's weight change (Blockchain gas token)", validatorManagerOwner)))
 
 	if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
 		return fmt.Errorf("unable to find Validator Manager address")
 	}
 	validatorManagerAddress = sc.Networks[network.Name()].ValidatorManagerAddress
 
-	ux.Logger.PrintToUser(fmt.Sprintf("%s", luxlog.Yellow.Wrap(fmt.Sprintf("RPC Endpoint: %s", changeWeightFlags.RPC))))
+	ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap(fmt.Sprintf("RPC Endpoint: %s", changeWeightFlags.RPC)))
 
 	// Cluster name is managed separately from network data
 	clusterName := ""

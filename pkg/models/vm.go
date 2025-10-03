@@ -11,6 +11,7 @@ const (
 	SubnetEvm   = EVM // Alias for backward compatibility
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
+	QuantumVM   = "Quantum VM"
 	CustomVM    = "Custom"
 )
 
@@ -22,6 +23,8 @@ func VMTypeFromString(s string) VMType {
 		return BlobVM
 	case TimestampVM:
 		return TimestampVM
+	case QuantumVM:
+		return QuantumVM
 	default:
 		return CustomVM
 	}
