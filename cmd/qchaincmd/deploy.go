@@ -68,10 +68,10 @@ func deployQChain(cmd *cobra.Command, args []string) error {
 
 	// Create deployment configuration
 	config := models.Sidecar{
-		Name:      "Q-Chain",
-		VM:        models.QuantumVM,
-		ChainID:   fmt.Sprintf("%d", networkID),
-		TokenName: "QTM",
+		Name:        "Q-Chain",
+		VM:          models.QuantumVM,
+		ChainID:     fmt.Sprintf("%d", networkID),
+		TokenName:   "QTM",
 		TokenSymbol: "QTM",
 	}
 

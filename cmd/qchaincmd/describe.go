@@ -7,8 +7,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
