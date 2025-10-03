@@ -25,6 +25,7 @@ import (
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
+	"github.com/luxfi/cli/cmd/qchaincmd"
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
@@ -95,6 +96,7 @@ Quick start:
 	// add sub commands
 	rootCmd.AddCommand(blockchaincmd.NewCmd(app))
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
+	rootCmd.AddCommand(qchaincmd.NewCmd(app))
 	rootCmd.AddCommand(l1cmd.NewCmd(app))
 	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
