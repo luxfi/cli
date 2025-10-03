@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.25.1
+go 1.21.12
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -265,5 +265,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-replace github.com/luxfi/netrunner => ../netrunner
