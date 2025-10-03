@@ -4,6 +4,8 @@
 package plugins
 
 import (
+	"fmt"
+
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
@@ -33,7 +35,7 @@ func AutomatedUpgrade(app *application.Lux, sc models.Sidecar, targetVersion str
 			return err
 		}
 		if pluginDir != "" {
-			ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
+			ux.Logger.PrintToUser(luxlog.Bold.Wrap(luxlog.Green.Wrap(fmt.Sprintf("Found the VM plugin directory at %s", pluginDir))))
 			yes, err := app.Prompt.CaptureYesNo("Is this where we should upgrade the VM?")
 			if err != nil {
 				return err
