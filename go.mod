@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.7-lux.2
-	github.com/luxfi/node v1.18.24
+	github.com/luxfi/node v1.18.26
 	github.com/luxfi/sdk v1.8.2
 	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
