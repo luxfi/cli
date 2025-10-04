@@ -77,7 +77,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.3 // indirect
-	github.com/StephenButtolph/canoto v0.17.2 // indirect
 	github.com/VictoriaMetrics/fastcache v1.13.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.63 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
@@ -122,7 +121,6 @@ require (
 	github.com/ethereum/go-bigmodexpfix v0.0.0-20250911101455-f9e208c548ab // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/ferranbt/fastssz v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
