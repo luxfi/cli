@@ -74,7 +74,7 @@ func sendTransaction(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Transaction Data:")
-	ux.Logger.PrintToUser(txData)
+	ux.Logger.PrintToUser("%s", txData)
 
 	if privateKeyPath != "" {
 		ux.Logger.PrintToUser("")

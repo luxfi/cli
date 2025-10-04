@@ -4,9 +4,9 @@ package qchaincmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +40,7 @@ func generateKeys(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Generating %d quantum-resistant key pair(s) using %s algorithm...", count, algorithm)
 
 	// Create output directory
-	if err := app.CreateDir(outputDir); err != nil {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -54,11 +54,11 @@ func generateKeys(cmd *cobra.Command, args []string) error {
 		// TODO: Integrate actual Ringtail key generation when library is available
 		// For now, create placeholder files to demonstrate the structure
 
-		if err := app.WriteFile(publicKeyPath, []byte(fmt.Sprintf("RINGTAIL_PUBLIC_KEY_%d", i+1))); err != nil {
+		if err := os.WriteFile(publicKeyPath, []byte(fmt.Sprintf("RINGTAIL_PUBLIC_KEY_%d", i+1)), 0644); err != nil {
 			return fmt.Errorf("failed to write public key: %w", err)
 		}
 
-		if err := app.WriteFile(privateKeyPath, []byte(fmt.Sprintf("RINGTAIL_PRIVATE_KEY_%d", i+1))); err != nil {
+		if err := os.WriteFile(privateKeyPath, []byte(fmt.Sprintf("RINGTAIL_PRIVATE_KEY_%d", i+1)), 0600); err != nil {
 			return fmt.Errorf("failed to write private key: %w", err)
 		}
 
