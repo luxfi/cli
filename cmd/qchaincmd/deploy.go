@@ -4,6 +4,7 @@ package qchaincmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/models"
@@ -66,8 +67,8 @@ func deployQChain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("  Signature Algorithm: Ringtail-256")
 	ux.Logger.PrintToUser("  Consensus:           Quantum-Resistant Snow")
 
-	// Create deployment configuration
-	config := models.Sidecar{
+	// Create deployment configuration (to be used in future implementations)
+	_ = models.Sidecar{
 		Name:        "Q-Chain",
 		VM:          models.QuantumVM,
 		ChainID:     fmt.Sprintf("%d", networkID),
@@ -165,7 +166,7 @@ echo "WS Endpoint: ws://localhost:${RPC_PORT}/ext/bc/%s/ws"
 `, networkID, constants.QChainID, networkID, networkID, validators, constants.QChainID, constants.QChainID, constants.QChainID)
 
 	// Write deployment script
-	if err := app.WriteFile(scriptPath, []byte(deployCmd)); err != nil {
+	if err := os.WriteFile(scriptPath, []byte(deployCmd), 0644); err != nil {
 		return fmt.Errorf("failed to create deployment script: %w", err)
 	}
 

@@ -6,10 +6,8 @@ package subnet
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,7 +15,7 @@ import (
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/netrunner/api"
+	"github.com/luxfi/geth/ethclient"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -320,11 +318,8 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		url, err := url.Parse(rpc)
+		cClient, err := ethclient.Dial(rpc)
 		gomega.Expect(err).Should(gomega.BeNil())
-		port, err := strconv.Atoi(url.Port())
-		gomega.Expect(err).Should(gomega.BeNil())
-		cClient := api.NewEthClient(url.Hostname(), uint(port))
 
 		ethAddr := common.HexToAddress(addr)
 		balance, err := cClient.BalanceAt(context.Background(), ethAddr, nil)
