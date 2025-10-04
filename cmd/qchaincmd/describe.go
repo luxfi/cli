@@ -4,10 +4,9 @@ package qchaincmd
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/olekukonko/tablewriter"
@@ -22,7 +21,7 @@ func newDescribeCmd() *cobra.Command {
 		RunE:  describeQChain,
 	}
 
-	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, describeQChain)
+	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, true, networkoptions.DefaultSupportedNetworkOptions)
 
 	return cmd
 }
@@ -36,7 +35,7 @@ func describeQChain(cmd *cobra.Command, args []string) error {
 		globalNetworkFlags,
 		true,
 		false,
-		describeQChain,
+		networkoptions.DefaultSupportedNetworkOptions,
 		"",
 	)
 	if err != nil {
@@ -47,19 +46,10 @@ func describeQChain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("==================")
 
 	// Create table for display
-	table := tablewriter.NewWriter(ux.Logger.Writer())
-	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_LEFT})
-	table.SetRowLine(false)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetBorder(false)
-	table.SetTablePadding("\t")
-	table.SetNoWhiteSpace(true)
+	table := tablewriter.NewWriter(os.Stdout)
 
 	// Basic Information
-	header := []string{"Q-Chain", "Value"}
-	table.SetHeader(header)
+	table.Append([]string{"Property", "Value"})
 
 	// Network information
 	rows := [][]string{
@@ -80,14 +70,14 @@ func describeQChain(cmd *cobra.Command, args []string) error {
 	)
 
 	// Network configuration
-	if network.Kind == models.Local {
+	if network.Name() == "Local Network" {
 		rows = append(rows,
 			[]string{"Network ID", fmt.Sprintf("%d", constants.QChainMainnetID)},
 			[]string{"RPC Endpoint", fmt.Sprintf("http://127.0.0.1:9630/ext/bc/%s/rpc", constants.QChainID)},
 			[]string{"WS Endpoint", fmt.Sprintf("ws://127.0.0.1:9630/ext/bc/%s/ws", constants.QChainID)},
 		)
 	} else {
-		endpoint := network.Endpoint
+		endpoint := network.Endpoint()
 		rows = append(rows,
 			[]string{"Network ID", fmt.Sprintf("%d", constants.QChainMainnetID)},
 			[]string{"RPC Endpoint", fmt.Sprintf("%s/ext/bc/%s/rpc", endpoint, constants.QChainID)},
@@ -102,7 +92,9 @@ func describeQChain(cmd *cobra.Command, args []string) error {
 		[]string{"Security Level", "Post-Quantum (Level 5)"},
 	)
 
-	table.AppendBulk(rows)
+	for _, row := range rows {
+		table.Append(row)
+	}
 	table.Render()
 
 	ux.Logger.PrintToUser("")
