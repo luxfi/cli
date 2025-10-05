@@ -47,7 +47,7 @@ func TestInfoKnownVMs(t *testing.T) {
 	cases := []testCase{
 		{
 			strVer:   "v0.9.99",
-			repoName: "subnet-evm",
+			repoName: "evm",
 			vmBinDir: vmBinDir,
 			vmBin:    "mySubnetEVM",
 			dl:       binutils.NewSubnetEVMDownloader(),
@@ -414,7 +414,7 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *promptsmocks.Prompter) {
 	err := os.Mkdir(filepath.Join(testDir, "repos"), 0o755)
 	require.NoError(err)
 	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
-	app = &application.Lux{}
+	app = application.New()
 	mockPrompt := &promptsmocks.Prompter{}
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), mockPrompt, application.NewDownloader())
 
