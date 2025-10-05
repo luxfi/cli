@@ -305,7 +305,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	// create the user facing logger as a global var
 	ux.NewUserLog(log, os.Stdout)
 
-	app = &application.Lux{}
+	app = application.New()
 	app.Setup(testDir, log, config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	err = os.MkdirAll(app.GetSubnetDir(), constants.DefaultPerms755)
