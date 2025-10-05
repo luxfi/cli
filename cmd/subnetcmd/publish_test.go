@@ -414,7 +414,7 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *promptsmocks.Prompter) {
 	err := os.Mkdir(filepath.Join(testDir, "repos"), 0o755)
 	require.NoError(err)
 	ux.NewUserLog(luxlog.NewNoOpLogger(), io.Discard)
-	app = &application.Lux{}
+	app = application.New()
 	mockPrompt := &promptsmocks.Prompter{}
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), mockPrompt, application.NewDownloader())
 
