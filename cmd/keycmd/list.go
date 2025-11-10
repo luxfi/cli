@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/xvm"
+	"github.com/luxfi/node/vms/exchangevm"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
@@ -140,7 +140,7 @@ keys or for the ledger addresses associated to certain indices.`,
 }
 
 type Clients struct {
-	x             map[models.Network]xvm.Client
+	x             map[models.Network]exchangevm.Client
 	p             map[models.Network]platformvm.Client
 	c             map[models.Network]*ethclient.Client
 	cGeth         map[models.Network]*ethclient.Client
@@ -154,7 +154,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 	error,
 ) {
 	var err error
-	xClients := map[models.Network]xvm.Client{}
+	xClients := map[models.Network]exchangevm.Client{}
 	pClients := map[models.Network]platformvm.Client{}
 	cClients := map[models.Network]*ethclient.Client{}
 	cGethClients := map[models.Network]*ethclient.Client{}
@@ -166,7 +166,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 			pClients[network] = platformvm.NewClient(network.Endpoint())
 		}
 		if xchain {
-			xClients[network] = xvm.NewClient(network.Endpoint(), "X")
+			xClients[network] = exchangevm.NewClient(network.Endpoint(), "X")
 		}
 		if cchain {
 			client, err := ethclient.Dial(network.CChainEndpoint())
@@ -517,7 +517,7 @@ func getPChainAddrInfo(
 }
 
 func getXChainAddrInfo(
-	xClients map[models.Network]xvm.Client,
+	xClients map[models.Network]exchangevm.Client,
 	network models.Network,
 	xChainAddr string,
 	kind string,
@@ -696,7 +696,7 @@ func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error)
 	return balanceStr, nil
 }
 
-func getXChainBalanceStr(xClient xvm.Client, addr string) (string, error) {
+func getXChainBalanceStr(xClient exchangevm.Client, addr string) (string, error) {
 	xID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err
