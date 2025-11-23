@@ -59,12 +59,15 @@ type CreateFlags struct {
 }
 
 var (
-	createFlags CreateFlags
-	forceCreate bool
-	genesisPath string
-	vmFile      string
-	useRepo     bool
-	sovereign   bool
+	createFlags         CreateFlags
+	forceCreate         bool
+	genesisPath         string
+	vmFile              string
+	useRepo             bool
+	sovereign           bool
+	customVMRepoURL     string
+	customVMBranch      string
+	customVMBuildScript string
 
 	errEmptyBlockchainName                        = errors.New("invalid empty name")
 	errIllegalNameCharacter                       = errors.New("illegal name character: only letters, no special characters allowed")
