@@ -112,7 +112,7 @@ func GetOwners(network models.Network, subnetID ids.ID) (bool, []string, uint32,
 
 // Helper functions for better composability
 
-func getPlatformClient(network models.Network) (platformvm.Client, error) {
+func getPlatformClient(network models.Network) (*platformvm.Client, error) {
 	var api string
 	switch network {
 	case models.Testnet:
@@ -127,7 +127,7 @@ func getPlatformClient(network models.Network) (platformvm.Client, error) {
 	return platformvm.NewClient(api), nil
 }
 
-func getSubnetTx(pClient platformvm.Client, subnetID ids.ID) (*txs.Tx, error) {
+func getSubnetTx(pClient *platformvm.Client, subnetID ids.ID) (*txs.Tx, error) {
 	ctx := context.Background()
 	txBytes, err := pClient.GetTx(ctx, subnetID)
 	if err != nil {

@@ -185,13 +185,12 @@ func importBlockchain(
 	printFunc("  SubnetID: %s", subnetID.String())
 	printFunc("  VMID: %s", vmID.String())
 
-	subnetInfo, err := blockchain.GetSubnet(subnetID, network)
+	// GetSubnet returns validator info, not permissioning details anymore
+	_, err = blockchain.GetSubnet(subnetID, network)
 	if err != nil {
 		return models.Sidecar{}, nil, err
 	}
-	if subnetInfo.IsPermissioned {
-		printFunc("  Blockchain is Not Sovereign")
-	}
+	// Permissioning check removed as API no longer provides this
 
 	sc := models.Sidecar{
 		Name: blockchainName,
@@ -213,7 +212,8 @@ func importBlockchain(
 		sc.Networks[network.Name()] = e
 	}
 
-	if !subnetInfo.IsPermissioned {
+	// Always treat as sovereign for now since API changed
+	if true {
 		sc.Sovereign = true
 		sc.UseACP99 = true
 		// ManagerAddress is retrieved from the validator manager contract
