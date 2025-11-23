@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testCLIMinVersion = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.13.0", "minimum-version":""},"DevNet":{"latest-version":"v1.13.0", "minimum-version":""},"Testnet":{"latest-version":"v1.13.0", "minimum-version":"v1.13.0-testnet"},"Mainnet":{"latest-version":"v1.13.0", "minimum-version":"v1.13.0"}}}`)
+var testCLIMinVersion = []byte(`{"subnet-evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3", "minimum-version":""},"DevNet":{"latest-version":"v1.20.3", "minimum-version":""},"Testnet":{"latest-version":"v1.20.3", "minimum-version":"v1.20.3-testnet"},"Mainnet":{"latest-version":"v1.20.3", "minimum-version":"v1.20.3"}}}`)
 
 func TestCheckMinDependencyVersion(t *testing.T) {
 	tests := []struct {
@@ -30,7 +30,7 @@ func TestCheckMinDependencyVersion(t *testing.T) {
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
-			customVersion:     "v1.13.0-testnet",
+			customVersion:     "v1.20.3-testnet",
 			network:           models.NewTestnetNetwork(),
 		},
 		{
@@ -38,7 +38,7 @@ func TestCheckMinDependencyVersion(t *testing.T) {
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
-			customVersion:     "v1.13.0",
+			customVersion:     "v1.20.3",
 			network:           models.NewTestnetNetwork(),
 		},
 		{
@@ -46,7 +46,7 @@ func TestCheckMinDependencyVersion(t *testing.T) {
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
-			customVersion:     "v1.13.0-testnet",
+			customVersion:     "v1.20.3-testnet",
 			network:           models.NewTestnetNetwork(),
 		},
 		{
@@ -54,7 +54,7 @@ func TestCheckMinDependencyVersion(t *testing.T) {
 			dependency:        constants.LuxdRepoName,
 			cliDependencyData: testCLIMinVersion,
 			expectedError:     false,
-			customVersion:     "v1.13.1",
+			customVersion:     "v1.20.4",
 			network:           models.NewTestnetNetwork(),
 		},
 		{

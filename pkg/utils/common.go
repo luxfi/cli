@@ -28,7 +28,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/utils"

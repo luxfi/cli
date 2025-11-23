@@ -1,0 +1,9 @@
+{
+  "title": "Configuration",
+  "pages": [
+    "overview",
+    "node-config",
+    "blockchain-config",
+    "security"
+  ]
+}

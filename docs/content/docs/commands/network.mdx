@@ -1,0 +1,491 @@
+---
+title: Network Commands
+description: Complete reference for Lux CLI network management commands
+---
+
+# Network Commands
+
+The network command suite provides tools for starting, managing, and monitoring Lux networks.
+
+## Overview
+
+Network commands allow you to:
+- Start and stop local test networks
+- Configure network parameters
+- Monitor network status and health
+- Clean up network data
+- Manage network snapshots
+
+## Command Reference
+
+### network start
+
+Starts a local Lux network for development and testing.
+
+```bash
+lux network start [flags]
+```
+
+**Flags:**
+- `--num-nodes` - Number of nodes to start (default: 5)
+- `--blockchain-specs` - Deploy blockchains on start
+- `--custom-luxgo` - Path to custom node binary
+- `--latest-luxgo-version` - Use latest node version
+- `--luxgo-version` - Specific node version
+- `--snapshot` - Start from snapshot
+- `--no-api` - Disable API endpoints
+- `--partial` - Allow partial network start
+
+**Examples:**
+
+```bash
+# Start default 5-node network
+lux network start
+
+# Start with 10 nodes
+lux network start --num-nodes=10
+
+# Start with custom binary
+lux network start --custom-luxgo=/path/to/luxd
+
+# Start from snapshot
+lux network start --snapshot=mysnapshot
+
+# Start and deploy blockchains
+lux network start --blockchain-specs=mychain,otherchain
+```
+
+### network stop
+
+Stops the running local network.
+
+```bash
+lux network stop [flags]
+```
+
+**Flags:**
+- `--snapshot` - Save network state as snapshot
+
+**Examples:**
+
+```bash
+# Stop network
+lux network stop
+
+# Stop and save snapshot
+lux network stop --snapshot=mysnapshot
+```
+
+### network clean
+
+Removes all local network data and state.
+
+```bash
+lux network clean [flags]
+```
+
+**Flags:**
+- `--force` - Skip confirmation prompt
+- `--keep-snapshots` - Keep saved snapshots
+
+**Examples:**
+
+```bash
+# Clean all network data
+lux network clean
+
+# Clean but keep snapshots
+lux network clean --keep-snapshots
+
+# Force clean without prompt
+lux network clean --force
+```
+
+### network status
+
+Shows the status of the local network.
+
+```bash
+lux network status [flags]
+```
+
+**Flags:**
+- `--json` - Output in JSON format
+- `--endpoints` - Show all endpoints
+- `--nodes` - Show individual node status
+
+**Examples:**
+
+```bash
+# Show network status
+lux network status
+
+# Show with all endpoints
+lux network status --endpoints
+
+# Show individual nodes
+lux network status --nodes
+
+# Output as JSON
+lux network status --json
+```
+
+### network configure
+
+Configures network settings and parameters.
+
+```bash
+lux network configure [flags]
+```
+
+**Flags:**
+- `--log-level` - Set log level (debug, info, warn, error)
+- `--api-port` - API port (default: 9630)
+- `--staking-port` - Staking port (default: 9631)
+- `--db-dir` - Database directory
+- `--log-dir` - Log directory
+
+**Examples:**
+
+```bash
+# Configure with debug logging
+lux network configure --log-level=debug
+
+# Set custom ports
+lux network configure --api-port=9700 --staking-port=9701
+
+# Set custom directories
+lux network configure \
+  --db-dir=/custom/db \
+  --log-dir=/custom/logs
+```
+
+## Advanced Features
+
+### Network Snapshots
+
+Snapshots allow you to save and restore network state.
+
+**Create Snapshot:**
+```bash
+# During network stop
+lux network stop --snapshot=my-test-state
+
+# Or explicitly
+lux network snapshot create my-test-state
+```
+
+**List Snapshots:**
+```bash
+lux network snapshot list
+```
+
+**Load Snapshot:**
+```bash
+lux network start --snapshot=my-test-state
+```
+
+**Delete Snapshot:**
+```bash
+lux network snapshot delete my-test-state
+```
+
+### Custom Network Configuration
+
+Create a network configuration file for advanced setups.
+
+**network-config.json:**
+```json
+{
+  "numNodes": 5,
+  "nodeConfig": {
+    "log-level": "debug",
+    "api-admin-enabled": true,
+    "api-keystore-enabled": true,
+    "api-metrics-enabled": true,
+    "http-port": 9650,
+    "staking-port": 9651,
+    "db-type": "memdb"
+  },
+  "blockchains": [
+    {
+      "name": "mychain",
+      "vmName": "subnetevm",
+      "genesis": "./genesis.json"
+    }
+  ]
+}
+```
+
+**Use Configuration:**
+```bash
+lux network start --config=network-config.json
+```
+
+### Node Management
+
+Access individual nodes in the network.
+
+**Node Endpoints:**
+- Node 1: `http://127.0.0.1:9630`
+- Node 2: `http://127.0.0.1:9640`
+- Node 3: `http://127.0.0.1:9650`
+- Node 4: `http://127.0.0.1:9660`
+- Node 5: `http://127.0.0.1:9670`
+
+**Check Node Health:**
+```bash
+# Using curl
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"health.health"
+}' -H 'content-type:application/json' http://127.0.0.1:9650/ext/health
+
+# Using lux CLI
+lux network node health --node-index=0
+```
+
+### Blockchain Deployment
+
+Deploy blockchains to the local network.
+
+**Deploy on Start:**
+```bash
+lux network start --blockchain-specs=mychain
+```
+
+**Deploy to Running Network:**
+```bash
+lux blockchain deploy mychain --local
+```
+
+**Remove Blockchain:**
+```bash
+lux blockchain stop mychain --local
+```
+
+## Network Monitoring
+
+### Metrics Collection
+
+Enable metrics for monitoring.
+
+```bash
+# Start with metrics
+lux network start --metrics-enabled
+
+# Access metrics
+curl http://127.0.0.1:9650/ext/metrics
+```
+
+### Log Analysis
+
+Monitor network logs for debugging.
+
+```bash
+# View logs directory
+ls ~/.lux-cli/networks/local/nodes/node1/logs/
+
+# Tail main log
+tail -f ~/.lux-cli/networks/local/nodes/node1/logs/main.log
+
+# Search for errors
+grep ERROR ~/.lux-cli/networks/local/nodes/*/logs/*.log
+```
+
+### Performance Monitoring
+
+Monitor network performance metrics.
+
+```bash
+# Check TPS
+lux network performance --metric=tps
+
+# Check finality time
+lux network performance --metric=finality
+
+# Check validator stats
+lux network performance --metric=validators
+```
+
+## Development Workflows
+
+### Basic Development Flow
+
+```bash
+# 1. Clean previous state
+lux network clean
+
+# 2. Start fresh network
+lux network start
+
+# 3. Deploy your blockchain
+lux blockchain deploy mychain --local
+
+# 4. Run tests
+npm test
+
+# 5. Stop and save state
+lux network stop --snapshot=test-state
+```
+
+### Continuous Testing
+
+```bash
+#!/bin/bash
+# test-network.sh
+
+# Start network
+lux network start
+
+# Deploy contracts
+lux blockchain deploy mychain --local
+
+# Run test suite
+npm test
+
+# Capture exit code
+TEST_RESULT=$?
+
+# Stop network
+lux network stop
+
+# Exit with test result
+exit $TEST_RESULT
+```
+
+### Multi-Blockchain Testing
+
+```bash
+# Start network
+lux network start
+
+# Deploy multiple blockchains
+lux blockchain deploy chain1 --local
+lux blockchain deploy chain2 --local
+
+# Test inter-blockchain communication
+lux network test-warp --from=chain1 --to=chain2
+```
+
+## Troubleshooting
+
+### Network Won't Start
+
+**Issue**: "port already in use"
+```bash
+# Find process using port
+lsof -i :9650
+
+# Kill process
+kill -9 <PID>
+
+# Or use different ports
+lux network start --api-port=9700
+```
+
+**Issue**: "insufficient resources"
+```bash
+# Reduce number of nodes
+lux network start --num-nodes=3
+
+# Use in-memory database
+lux network start --db-type=memdb
+```
+
+### Network Crashes
+
+**Issue**: "node stopped unexpectedly"
+```bash
+# Check logs
+tail -100 ~/.lux-cli/networks/local/nodes/node1/logs/main.log
+
+# Start with debug logging
+lux network clean
+lux network start --log-level=debug
+```
+
+### Connection Issues
+
+**Issue**: "cannot connect to network"
+```bash
+# Check if network is running
+lux network status
+
+# Verify endpoints
+curl http://127.0.0.1:9650/ext/health
+
+# Restart network
+lux network stop
+lux network start
+```
+
+## Best Practices
+
+### Resource Management
+
+1. **Memory**: Each node uses ~500MB-1GB RAM
+2. **Disk**: Keep 10GB free for blockchain data
+3. **CPU**: Allocate 1 core per 2-3 nodes
+
+### Network Isolation
+
+- Use different ports for multiple networks
+- Clean between test runs
+- Use snapshots for reproducible state
+
+### Testing Strategy
+
+1. Start with minimal nodes (3-5)
+2. Test basic functionality first
+3. Scale up gradually
+4. Monitor resource usage
+5. Use snapshots for regression testing
+
+## Configuration Files
+
+### Node Configuration
+
+**~/.lux-cli/networks/config/node.json:**
+```json
+{
+  "log-level": "info",
+  "api-admin-enabled": false,
+  "api-keystore-enabled": false,
+  "api-metrics-enabled": true,
+  "health-check-frequency": "30s",
+  "network-peer-list-gossip-frequency": "1s",
+  "network-max-reconnect-delay": "1m"
+}
+```
+
+### Genesis Configuration
+
+**~/.lux-cli/networks/config/genesis.json:**
+```json
+{
+  "networkID": 12345,
+  "allocations": [
+    {
+      "avaxAddr": "X-custom1q2q2q2q2q2q2q2q2q2q2q2q2q2q2q2q2q2q2q2q2",
+      "initialAmount": 100000000000000,
+      "unlockSchedule": []
+    }
+  ],
+  "startTime": 1630000000,
+  "initialStakeDuration": 31536000,
+  "initialStakeDurationOffset": 5400,
+  "initialStakedFunds": [],
+  "initialStakers": [],
+  "cChainGenesis": "",
+  "message": "Local test network"
+}
+```
+
+## Related Commands
+
+- [`lux blockchain`](/docs/commands/blockchain) - Manage blockchains
+- [`lux node`](/docs/commands/node) - Node operations
+- [`lux validator`](/docs/commands/validator) - Validator management
+- [`lux config`](/docs/commands/config) - Configuration management

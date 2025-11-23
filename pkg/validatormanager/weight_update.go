@@ -340,7 +340,7 @@ func GetPChainL1ValidatorWeightMessage(
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, error) {
 	if l1SignedMessage != nil {
-		payload, err := warpPayload.ParsePayload(l1SignedMessage.UnsignedMessage.Payload)
+		payload, err := warpPayload.Parse(l1SignedMessage.UnsignedMessage.Payload)
 		if err != nil {
 			return nil, err
 		}
@@ -400,7 +400,7 @@ func GetL1ValidatorWeightMessageFromTx(
 	msgs := evm.GetWarpMessagesFromLogs(receipt.Logs)
 	for _, msg := range msgs {
 		payload := msg.Payload
-		parsedPayload, err := warpPayload.ParsePayload(payload)
+		parsedPayload, err := warpPayload.Parse(payload)
 		if err != nil {
 			return nil, err
 		}
@@ -469,7 +469,7 @@ func SearchForL1ValidatorWeightMessage(
 		msgs := evm.GetWarpMessagesFromLogs(utils.PointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
-			parsedPayload, err := warpPayload.ParsePayload(payload)
+			parsedPayload, err := warpPayload.Parse(payload)
 			if err != nil {
 				return nil, err
 			}

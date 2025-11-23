@@ -13,7 +13,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/genesis"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/sdk/models"
 	"github.com/stretchr/testify/require"
 )
@@ -1977,7 +1977,7 @@ func TestValidateWeightFunc(t *testing.T) {
 				err := validator(tt.input)
 				if tt.wantErr {
 					require.Error(t, err)
-					require.Contains(t, err.Error(), "must not exceed 100")
+					require.Contains(t, err.Error(), "weight cannot exceed 100")
 				} else {
 					require.NoError(t, err)
 				}
@@ -1985,36 +1985,35 @@ func TestValidateWeightFunc(t *testing.T) {
 		}
 	})
 
-	// Test with extra validation that fails for even numbers
-	t.Run("with extra validation odd numbers only", func(t *testing.T) {
-		// We can't directly test odd-only validation with our current implementation
-		// Let's use a reasonable range instead
+	// Test with a different range validation
+	t.Run("with different range validation", func(t *testing.T) {
+		// Test a different range to ensure the validator works with various min/max values
 		validator := validateWeightFunc(1, 1000)
 
-		// Test cases specific to this extra validation
+		// Test cases for this range validation
 		extraTests := []struct {
 			name    string
 			input   string
 			wantErr bool
 		}{
 			{
-				name:    "odd number",
+				name:    "minimum value",
 				input:   "1",
 				wantErr: false,
 			},
 			{
-				name:    "another odd number",
-				input:   "99",
+				name:    "middle value",
+				input:   "500",
 				wantErr: false,
 			},
 			{
-				name:    "even number",
-				input:   "2",
-				wantErr: true,
+				name:    "maximum value",
+				input:   "1000",
+				wantErr: false,
 			},
 			{
-				name:    "another even number",
-				input:   "100",
+				name:    "above maximum",
+				input:   "1001",
 				wantErr: true,
 			},
 		}
@@ -2024,7 +2023,7 @@ func TestValidateWeightFunc(t *testing.T) {
 				err := validator(tt.input)
 				if tt.wantErr {
 					require.Error(t, err)
-					require.Contains(t, err.Error(), "must be an odd number")
+					require.Contains(t, err.Error(), "weight cannot exceed 1000")
 				} else {
 					require.NoError(t, err)
 				}

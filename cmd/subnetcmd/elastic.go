@@ -22,7 +22,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/ux"
 
-	"github.com/luxfi/node/genesis"
+	"github.com/luxfi/genesis/pkg/genesis"
 
 	es "github.com/luxfi/cli/pkg/elasticsubnet"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"

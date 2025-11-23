@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/network/peer"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/sdk/models"
@@ -162,12 +162,18 @@ func GetBlockchainTimestamp(network models.Network) (time.Time, error) {
 	return platformCli.GetTimestamp(ctx)
 }
 
-func GetSubnet(subnetID ids.ID, network models.Network) (platformvm.GetSubnetClientResponse, error) {
+// GetSubnet returns subnet validators information
+func GetSubnet(subnetID ids.ID, network models.Network) (interface{}, error) {
 	api := network.Endpoint()
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
-	return pClient.GetSubnet(ctx, subnetID)
+	// GetSubnet has been replaced, using GetCurrentValidators instead
+	validators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+	if err != nil {
+		return nil, err
+	}
+	return validators, nil
 }
 
 func GetSubnetIDFromBlockchainID(blockchainID ids.ID, network models.Network) (ids.ID, error) {

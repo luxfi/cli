@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/crypto/secp256k1"
-	"github.com/luxfi/node/genesis"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 
 	"golang.org/x/exp/maps"
@@ -51,7 +51,7 @@ func GetDefaultNetworkConf(numNodes uint32) (
 	}
 	nodes := []*tmpnet.Node{}
 	for i := range numNodes {
-		node := tmpnet.NewNode("")
+		node := tmpnet.NewNode()
 		if int(i) < len(networkConf.NodeConfigs) {
 			maps.Copy(node.Flags, networkConf.NodeConfigs[i].Flags)
 		}

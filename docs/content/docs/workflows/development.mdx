@@ -1,0 +1,527 @@
+---
+title: Development Workflows
+description: Common development workflows and best practices with Lux CLI
+---
+
+# Development Workflows
+
+This guide covers common development workflows when building on the Lux network.
+
+## Local Development Setup
+
+### Initial Environment Setup
+
+Set up your development environment for blockchain development:
+
+```bash
+# 1. Install Lux CLI
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh
+
+# 2. Add to PATH
+echo 'export PATH=$PATH:~/.lux/bin' >> ~/.bashrc
+source ~/.bashrc
+
+# 3. Verify installation
+lux --version
+
+# 4. Configure for development
+lux config set network-id local
+lux config set log-level debug
+```
+
+### Create Development Network
+
+Start a local network for testing:
+
+```bash
+# Start 5-node network
+lux network start
+
+# Verify network is running
+lux network status
+
+# Get funded test accounts
+lux key create test-account-1
+lux key create test-account-2
+```
+
+## Blockchain Development Workflow
+
+### Step 1: Design Your Blockchain
+
+Define your blockchain requirements:
+
+```yaml
+# blockchain-spec.yaml
+name: my-defi-chain
+vm_type: subnet-evm
+consensus: bft
+token:
+  name: DeFi Token
+  symbol: DFT
+  decimals: 18
+  initial_supply: 1000000000
+
+gas_config:
+  min_base_fee: 25000000000
+  target_gas: 15000000
+  gas_limit: 8000000
+
+features:
+  - smart_contracts
+  - warp_messaging
+  - quantum_safe
+```
+
+### Step 2: Create Blockchain
+
+Generate blockchain configuration:
+
+```bash
+# Interactive creation
+lux blockchain create my-defi-chain
+
+# Or from specification
+lux blockchain create my-defi-chain \
+  --vm=subnet-evm \
+  --evm-chain-id=99999 \
+  --evm-token=DFT
+```
+
+### Step 3: Deploy Locally
+
+Deploy to local network for testing:
+
+```bash
+# Deploy blockchain
+lux blockchain deploy my-defi-chain --local
+
+# Save RPC endpoint
+export RPC_URL=$(lux blockchain describe my-defi-chain --json | jq -r '.rpc_url')
+echo "RPC URL: $RPC_URL"
+```
+
+### Step 4: Deploy Smart Contracts
+
+Deploy your smart contracts:
+
+```bash
+# Using Foundry
+forge create \
+  --rpc-url=$RPC_URL \
+  --private-key=$(lux key export test-account-1 --show-private) \
+  src/MyContract.sol:MyContract
+
+# Using Hardhat
+npx hardhat run scripts/deploy.js --network local-lux
+
+# Using Remix
+# Connect to Custom RPC with $RPC_URL
+```
+
+### Step 5: Test Your Application
+
+Run integration tests:
+
+```javascript
+// test/integration.test.js
+const { ethers } = require('ethers');
+
+describe('DeFi Chain Integration', () => {
+  let provider;
+  let signer;
+
+  beforeAll(async () => {
+    provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+    signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  });
+
+  test('can deploy contract', async () => {
+    const factory = new ethers.ContractFactory(abi, bytecode, signer);
+    const contract = await factory.deploy();
+    await contract.waitForDeployment();
+    expect(contract.address).toBeTruthy();
+  });
+});
+```
+
+### Step 6: Deploy to Testnet
+
+After local testing, deploy to testnet:
+
+```bash
+# Configure for testnet
+lux config set network-id testnet
+
+# Fund deployment key
+lux key transfer \
+  --from=faucet \
+  --to=$(lux key list test-account-1 --address) \
+  --amount=10
+
+# Deploy to testnet
+lux blockchain deploy my-defi-chain --testnet
+
+# Verify deployment
+lux blockchain describe my-defi-chain --deployed
+```
+
+## Validator Setup Workflow
+
+### Local Validator Testing
+
+Test validator operations locally:
+
+```bash
+# 1. Start local network
+lux network start
+
+# 2. Create validator key
+lux key create validator-key
+
+# 3. Add as validator
+lux validator add \
+  --node-id=$(lux node id) \
+  --stake=2000000000000000 \
+  --key=validator-key \
+  --local
+
+# 4. Verify validator status
+lux validator list --local
+```
+
+### Production Validator Setup
+
+Deploy a production validator:
+
+```bash
+# 1. Provision server (minimum 8 CPU, 16GB RAM)
+ssh validator-server
+
+# 2. Install node
+lux node install --latest
+
+# 3. Generate staking keys
+lux key create staking-key --type=secp256k1
+lux key create bls-key --type=bls
+
+# 4. Configure node
+lux node configure \
+  --network-id=mainnet \
+  --api-metrics-enabled=true
+
+# 5. Start node and sync
+lux node start
+lux node health --continuous
+
+# 6. Add as validator (after sync)
+lux validator add \
+  --node-id=$(lux node id) \
+  --stake=2000000000000000 \
+  --duration=8760h \
+  --delegation-fee=10
+```
+
+## Cross-Chain Development
+
+### Warp Messaging Setup
+
+Enable cross-chain communication:
+
+```bash
+# 1. Deploy source chain
+lux blockchain create source-chain --vm=subnet-evm
+lux blockchain deploy source-chain --local
+
+# 2. Deploy destination chain
+lux blockchain create dest-chain --vm=subnet-evm
+lux blockchain deploy dest-chain --local
+
+# 3. Configure warp messaging
+lux interchain messenger deploy \
+  --source=source-chain \
+  --destination=dest-chain
+
+# 4. Send cross-chain message
+lux interchain messenger send \
+  --from=source-chain \
+  --to=dest-chain \
+  --message="Hello from source!"
+```
+
+### Token Bridge Workflow
+
+Set up cross-chain token bridge:
+
+```bash
+# Deploy token transferrer
+lux interchain tokentransferrer deploy \
+  --source=chain-a \
+  --destination=chain-b \
+  --token-name=BridgedToken \
+  --token-symbol=BTK
+
+# Transfer tokens
+lux interchain tokentransferrer transfer \
+  --from=chain-a \
+  --to=chain-b \
+  --amount=1000 \
+  --recipient=0x123...
+```
+
+## Testing Workflows
+
+### Unit Testing
+
+Test individual components:
+
+```bash
+# Run Go tests
+go test ./...
+
+# Run Solidity tests
+forge test
+
+# Run JavaScript tests
+npm test
+```
+
+### Integration Testing
+
+Test full system integration:
+
+```bash
+#!/bin/bash
+# integration-test.sh
+
+# Start test network
+lux network start --snapshot=clean-state
+
+# Deploy test blockchains
+lux blockchain deploy test-chain-1 --local
+lux blockchain deploy test-chain-2 --local
+
+# Run integration suite
+npm run test:integration
+
+# Save successful state
+lux network stop --snapshot=integration-passed
+```
+
+### Load Testing
+
+Test system under load:
+
+```javascript
+// load-test.js
+const axios = require('axios');
+
+async function loadTest(rpcUrl, duration) {
+  const startTime = Date.now();
+  let requestCount = 0;
+  let errors = 0;
+
+  while (Date.now() - startTime < duration) {
+    try {
+      await axios.post(rpcUrl, {
+        jsonrpc: '2.0',
+        method: 'eth_blockNumber',
+        params: [],
+        id: requestCount++
+      });
+    } catch (error) {
+      errors++;
+    }
+  }
+
+  console.log(`Requests: ${requestCount}, Errors: ${errors}`);
+  console.log(`RPS: ${requestCount / (duration / 1000)}`);
+}
+
+loadTest(process.env.RPC_URL, 60000);
+```
+
+## CI/CD Workflows
+
+### GitHub Actions
+
+Automate testing with CI/CD:
+
+```yaml
+# .github/workflows/test.yml
+name: Test Blockchain
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Lux CLI
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh
+        echo "$HOME/.lux/bin" >> $GITHUB_PATH
+
+    - name: Start Network
+      run: lux network start
+
+    - name: Deploy Blockchain
+      run: lux blockchain deploy my-chain --local
+
+    - name: Run Tests
+      run: npm test
+
+    - name: Stop Network
+      if: always()
+      run: lux network stop
+```
+
+### Automated Deployment
+
+Deploy on successful tests:
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Testnet
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Deploy to Testnet
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        lux blockchain deploy my-chain \
+          --testnet \
+          --key=$DEPLOY_KEY
+```
+
+## Debugging Workflows
+
+### Transaction Debugging
+
+Debug failed transactions:
+
+```bash
+# Get transaction details
+lux transaction get --hash=0x123...
+
+# Trace transaction execution
+lux transaction trace --hash=0x123...
+
+# Simulate transaction
+lux transaction simulate \
+  --from=0xabc... \
+  --to=0xdef... \
+  --data=0x...
+```
+
+### Network Debugging
+
+Debug network issues:
+
+```bash
+# Check peer connections
+lux network peers
+
+# Analyze network traffic
+lux network analyze --duration=60
+
+# Export network state
+lux network export --output=network-debug.json
+```
+
+### Contract Debugging
+
+Debug smart contract issues:
+
+```javascript
+// Use console.log in contracts (Hardhat)
+contract MyContract {
+    function myFunction() public {
+        console.log("Debug value:", someVariable);
+    }
+}
+
+// Or use events for debugging
+event Debug(string message, uint256 value);
+emit Debug("checkpoint", myValue);
+```
+
+## Performance Optimization
+
+### Database Optimization
+
+```bash
+# Analyze database performance
+lux node db analyze
+
+# Compact database
+lux node db compact
+
+# Clear cache
+lux node cache clear
+```
+
+### Network Optimization
+
+```bash
+# Optimize peer connections
+lux network optimize-peers
+
+# Configure mempool
+lux blockchain configure my-chain \
+  --mempool-size=10000 \
+  --mempool-price-bump=10
+```
+
+## Migration Workflows
+
+### Blockchain Migration
+
+Migrate from another platform:
+
+```bash
+# 1. Export state from source
+lux migrate export \
+  --source=ethereum \
+  --block=latest \
+  --output=state.json
+
+# 2. Create new blockchain
+lux blockchain create migrated-chain \
+  --genesis=state.json
+
+# 3. Deploy and verify
+lux blockchain deploy migrated-chain --local
+lux migrate verify --blockchain=migrated-chain
+```
+
+## Best Practices
+
+1. **Version Control**: Track blockchain configurations in git
+2. **Environment Separation**: Use different keys for dev/test/prod
+3. **Automated Testing**: Run tests before every deployment
+4. **Monitoring**: Set up alerts for validator and blockchain health
+5. **Documentation**: Document custom VM features and APIs
+6. **Security Audits**: Audit smart contracts before mainnet deployment
+7. **Gradual Rollout**: Test on local → testnet → mainnet
+8. **Backup Strategy**: Regular backups of keys and configurations
+
+## Related Documentation
+
+- [Network Commands](/docs/commands/network)
+- [Blockchain Commands](/docs/commands/blockchain)
+- [Configuration Reference](/docs/configuration)
+- [Troubleshooting Guide](/docs/troubleshooting)

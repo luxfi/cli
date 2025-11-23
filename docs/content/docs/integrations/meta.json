@@ -1,0 +1,9 @@
+{
+  "title": "Integrations",
+  "pages": [
+    "smart-contracts",
+    "web3",
+    "monitoring",
+    "ci-cd"
+  ]
+}

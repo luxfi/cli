@@ -1,0 +1,303 @@
+---
+title: L1 Commands
+description: Create and manage sovereign L1 blockchains
+---
+
+# L1 Commands
+
+Sovereign L1 blockchains have their own validator sets, tokenomics, and consensus mechanisms. They operate independently while maintaining interoperability with other chains through IBC/Teleport.
+
+## Overview
+
+L1 chains in Lux are:
+- **Sovereign**: Independent validator sets and governance
+- **Customizable**: Choose consensus mechanism (PoA/PoS)
+- **Interoperable**: Cross-chain messaging via IBC/Teleport
+- **Quantum-Safe**: Optional Ringtail post-quantum signatures
+
+## Commands
+
+### lux l1 create
+
+Create a new sovereign L1 blockchain configuration.
+
+```bash
+lux l1 create [name] [flags]
+```
+
+**Flags:**
+- `--proof-of-authority` - Use PoA consensus (permissioned validators)
+- `--proof-of-stake` - Use PoS consensus (open staking)
+- `--evm` - Create EVM-compatible L1 (default)
+- `--custom-vm` - Use custom VM binary
+- `--token-name <string>` - Native token name
+- `--token-symbol <string>` - Native token symbol (max 4 chars)
+- `--evm-chain-id <uint>` - EVM chain ID (auto-generated if not set)
+- `--ringtail` - Enable post-quantum signatures
+- `-f, --force` - Overwrite existing configuration
+
+**Examples:**
+
+```bash
+# Interactive creation
+lux l1 create my-sovereign-l1
+
+# Create PoS L1 with specific parameters
+lux l1 create defi-chain \
+  --proof-of-stake \
+  --token-name "DeFi Token" \
+  --token-symbol "DEFI" \
+  --evm-chain-id 99999
+
+# Create quantum-safe L1
+lux l1 create quantum-chain \
+  --proof-of-authority \
+  --ringtail \
+  --token-symbol "QTC"
+```
+
+### lux l1 deploy
+
+Deploy an L1 blockchain to a network.
+
+```bash
+lux l1 deploy [name] [flags]
+```
+
+**Flags:**
+- `-l, --local` - Deploy to local network
+- `-t, --testnet` - Deploy to testnet
+- `-m, --mainnet` - Deploy to mainnet
+- `--use-local-machine` - Use local machine as bootstrap validator
+- `--num-validators <int>` - Number of initial validators (default: 5)
+- `--bootstrap-endpoints <list>` - Custom bootstrap node endpoints
+- `--stake-amount <uint>` - Initial stake per validator (PoS only)
+- `--delegation-fee <uint>` - Delegation fee percentage (PoS only)
+
+**Examples:**
+
+```bash
+# Deploy to local network
+lux l1 deploy my-sovereign-l1 --local
+
+# Deploy to testnet with custom validators
+lux l1 deploy my-sovereign-l1 \
+  --testnet \
+  --num-validators 3 \
+  --stake-amount 2000
+
+# Deploy to mainnet with bootstrap nodes
+lux l1 deploy production-l1 \
+  --mainnet \
+  --bootstrap-endpoints "node1.example.com,node2.example.com"
+```
+
+### lux l1 list
+
+List all configured L1 blockchains.
+
+```bash
+lux l1 list [flags]
+```
+
+**Flags:**
+- `--deployed` - Show only deployed L1s
+- `--network <string>` - Filter by network (local/testnet/mainnet)
+
+**Example Output:**
+```
+L1 Blockchains:
+┌─────────────────┬─────────────┬──────────┬────────────┬──────────┐
+│ Name            │ Consensus   │ Token    │ Network    │ Status   │
+├─────────────────┼─────────────┼──────────┼────────────┼──────────┤
+│ my-sovereign-l1 │ PoS         │ MSL      │ local      │ Running  │
+│ defi-chain      │ PoS         │ DEFI     │ testnet    │ Running  │
+│ quantum-chain   │ PoA         │ QTC      │ -          │ Created  │
+└─────────────────┴─────────────┴──────────┴────────────┴──────────┘
+```
+
+### lux l1 describe
+
+Show detailed information about an L1 blockchain.
+
+```bash
+lux l1 describe [name] [flags]
+```
+
+**Flags:**
+- `--genesis` - Show genesis configuration
+- `--validators` - List current validators
+- `--metrics` - Show performance metrics
+
+### lux l1 validator
+
+Manage validators for an L1 blockchain.
+
+```bash
+lux l1 validator [action] [name] [flags]
+```
+
+**Actions:**
+- `add` - Add a new validator
+- `remove` - Remove a validator
+- `list` - List all validators
+- `stake` - Manage staking (PoS only)
+
+**Examples:**
+
+```bash
+# Add validator to PoA L1
+lux l1 validator add my-sovereign-l1 \
+  --node-id NodeID-xxx \
+  --weight 100
+
+# Stake tokens in PoS L1
+lux l1 validator stake defi-chain \
+  --amount 5000 \
+  --duration 30d
+
+# List validators
+lux l1 validator list my-sovereign-l1
+```
+
+### lux l1 upgrade
+
+Upgrade an L1 blockchain configuration or VM.
+
+```bash
+lux l1 upgrade [name] [flags]
+```
+
+**Flags:**
+- `--vm-version <string>` - Target VM version
+- `--upgrade-time <timestamp>` - Schedule upgrade time
+- `--force` - Force immediate upgrade
+
+### lux l1 delete
+
+Delete an L1 blockchain configuration.
+
+```bash
+lux l1 delete [name] [flags]
+```
+
+**Flags:**
+- `--force` - Skip confirmation prompt
+- `--keep-data` - Preserve blockchain data
+
+## Configuration
+
+L1 configurations are stored in `~/.lux-cli/chains/[name]/`.
+
+### Genesis Configuration
+
+Example genesis for PoS L1:
+
+```json
+{
+  "config": {
+    "chainId": 99999,
+    "consensusType": "proof-of-stake",
+    "minStakeAmount": "1000000000000000000",
+    "minDelegationFee": 20000,
+    "minStakeDuration": 86400,
+    "maxStakeAmount": "100000000000000000000",
+    "rewardConfig": {
+      "rewardRate": "5000000000",
+      "supplyCap": "1000000000000000000000000"
+    }
+  },
+  "alloc": {
+    "0x...": {
+      "balance": "1000000000000000000000"
+    }
+  },
+  "validators": []
+}
+```
+
+## Advanced Features
+
+### Post-Quantum Security
+
+Enable Ringtail signatures for quantum resistance:
+
+```bash
+lux l1 create quantum-secure \
+  --ringtail \
+  --proof-of-stake
+```
+
+### Cross-Chain Messaging
+
+Set up IBC/Teleport for interoperability:
+
+```bash
+# Enable IBC on L1
+lux interchain enable my-sovereign-l1 \
+  --protocol ibc
+
+# Create channel to another L1
+lux interchain channel create \
+  --source my-sovereign-l1 \
+  --dest other-l1
+```
+
+### Custom VM Integration
+
+Use a custom VM implementation:
+
+```bash
+lux l1 create custom-logic \
+  --custom-vm \
+  --vm-path ./my-vm-binary \
+  --genesis-path ./genesis.json
+```
+
+## Best Practices
+
+1. **Validator Requirements**:
+   - Minimum 3 validators for PoA
+   - Minimum 5 validators for PoS
+   - Ensure geographic distribution
+
+2. **Token Economics**:
+   - Set reasonable staking minimums
+   - Configure appropriate delegation fees
+   - Plan token distribution carefully
+
+3. **Security**:
+   - Enable Ringtail for sensitive applications
+   - Use hardware key management for validators
+   - Regular security audits
+
+4. **Performance**:
+   - Monitor validator performance
+   - Optimize block size and gas limits
+   - Use appropriate consensus parameters
+
+## Troubleshooting
+
+### Common Issues
+
+**L1 won't deploy**
+- Check validator count meets minimum
+- Verify bootstrap nodes are accessible
+- Ensure sufficient balance for deployment
+
+**Validators not syncing**
+- Check network connectivity
+- Verify genesis hash matches
+- Review node logs for errors
+
+**Transaction failures**
+- Verify gas prices are sufficient
+- Check account balance
+- Confirm nonce is correct
+
+## Related Commands
+
+- [`lux l2`](/docs/commands/l2) - Create L2 rollups
+- [`lux validator`](/docs/commands/validator) - Validator management
+- [`lux interchain`](/docs/commands/interchain) - Cross-chain setup
+- [`lux network`](/docs/commands/network) - Network management

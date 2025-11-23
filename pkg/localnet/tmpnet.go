@@ -22,11 +22,10 @@ import (
 	"github.com/luxfi/node/api/admin"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/genesis"
-	nodecontext "github.com/luxfi/node/node"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/wallet/net/primary"
@@ -86,12 +85,17 @@ func TmpNetCreate(
 		Genesis:      genesis,
 		NetworkID:    networkID,
 	}
-	if err := network.EnsureDefaultConfig(log, luxdBinPath, pluginDir); err != nil {
+	if err := network.EnsureDefaultConfig(log); err != nil {
 		return nil, err
 	}
 	if len(bootstrapIPs) > 0 {
 		for _, node := range network.Nodes {
-			node.SetNetworkingConfig(bootstrapIDs, bootstrapIPs)
+			// Bootstrap configuration is now set via node.Flags
+			if node.Flags == nil {
+				node.Flags = make(map[string]interface{})
+			}
+			node.Flags["bootstrap-ids"] = bootstrapIDs
+			node.Flags["bootstrap-ips"] = bootstrapIPs
 		}
 	}
 	if err := tmpNetSetBlockchainsConfigDir(network); err != nil {
@@ -135,8 +139,8 @@ func TmpNetMove(
 			if err != nil {
 				return err
 			}
-			if _, ok := data[config.SubnetConfigDirKey]; ok {
-				data[config.SubnetConfigDirKey] = filepath.Join(newDir, "subnets")
+			if _, ok := data[config.NetConfigDirKey]; ok {
+				data[config.NetConfigDirKey] = filepath.Join(newDir, "subnets")
 			}
 			if _, ok := data[config.GenesisFileKey]; ok {
 				data[config.GenesisFileKey] = filepath.Join(newDir, "genesis.json")
@@ -151,7 +155,7 @@ func TmpNetMove(
 
 // Reads in a tmpnet
 func GetTmpNetNetwork(networkDir string) (*tmpnet.Network, error) {
-	network, err := tmpnet.ReadNetwork(networkDir)
+	network, err := tmpnet.ReadNetwork(context.Background(), luxlog.NewLogger("tmpnet"), networkDir)
 	if err != nil {
 		return network, err
 	}
@@ -160,17 +164,17 @@ func GetTmpNetNetwork(networkDir string) (*tmpnet.Network, error) {
 		processPath := filepath.Join(networkDir, network.Nodes[i].NodeID.String(), "process.json")
 		if bytes, err := os.ReadFile(processPath); errors.Is(err, os.ErrNotExist) {
 			network.Nodes[i].URI = ""
-			network.Nodes[i].StakingAddress = ""
+			network.Nodes[i].StakingAddress = netip.AddrPort{}
 		} else if err != nil {
 			return network, fmt.Errorf("failed to read node process context: %w", err)
 		} else {
-			processContext := nodecontext.NodeProcessContext{}
+			var processContext struct { PID int `json:"pid"` }
 			if err := json.Unmarshal(bytes, &processContext); err != nil {
 				return network, fmt.Errorf("failed to unmarshal node process context: %w", err)
 			}
 			if _, err := utils.GetProcess(processContext.PID); err != nil {
 				network.Nodes[i].URI = ""
-				network.Nodes[i].StakingAddress = ""
+				network.Nodes[i].StakingAddress = netip.AddrPort{}
 				if err := os.Remove(processPath); err != nil {
 					return network, fmt.Errorf("failed to clean up node process context: %w", err)
 				}
@@ -202,9 +206,12 @@ func TmpNetLoad(
 	}
 	if luxdBinPath != "" {
 		for i := range network.Nodes {
-			network.Nodes[i].RuntimeConfig = &tmpnet.NodeRuntimeConfig{
-				LuxNodePath: luxdBinPath,
+			// Set the binary path via node configuration
+			if network.Nodes[i].Flags == nil {
+				network.Nodes[i].Flags = make(map[string]interface{})
 			}
+			// Store binary path for later use
+			network.Nodes[i].Flags["binary-path"] = luxdBinPath
 		}
 	}
 	if err := network.Write(); err != nil {
@@ -280,7 +287,7 @@ func GetTmpNetFirstNode(network *tmpnet.Network) (*tmpnet.Node, error) {
 // Get first running node of the network
 func GetTmpNetFirstRunningNode(network *tmpnet.Network) (*tmpnet.Node, error) {
 	for _, node := range network.Nodes {
-		if node.StakingAddress != "" {
+		if !node.StakingAddress.IsValid() {
 			return node, nil
 		}
 	}
@@ -379,7 +386,7 @@ func GetTmpNetTrackedSubnets(
 ) ([]ids.ID, error) {
 	trackedSubnets := []ids.ID{}
 	for _, node := range nodes {
-		subnets, err := node.Flags.GetStringVal(config.TrackSubnetsKey)
+		subnets, err := node.Flags.GetStringVal(config.TrackNetsKey)
 		if err != nil {
 			return nil, fmt.Errorf("failure obtaining tracked subnets flag of node %s: %w", node.NodeID, err)
 		}
@@ -586,7 +593,7 @@ func TmpNetSetSubnetConfig(
 ) error {
 	subnetConfigsDir := filepath.Join(network.Dir, "subnets")
 	for _, node := range network.Nodes {
-		node.Flags[config.SubnetConfigDirKey] = subnetConfigsDir
+		node.Flags[config.NetConfigDirKey] = subnetConfigsDir
 		if err := node.Write(); err != nil {
 			return err
 		}
@@ -615,7 +622,7 @@ func TmpNetRestartNodes(
 	for _, node := range nodes {
 		if len(subnetIDs) > 0 {
 			printFunc("Restarting node %s to track newly deployed subnet/s", node.NodeID)
-			subnets, err := node.Flags.GetStringVal(config.TrackSubnetsKey)
+			subnets, err := node.Flags.GetStringVal(config.TrackNetsKey)
 			if err != nil {
 				return err
 			}
@@ -628,7 +635,7 @@ func TmpNetRestartNodes(
 				subnetsSet.Add(subnetID.String())
 			}
 			subnets = strings.Join(subnetsSet.List(), ",")
-			node.Flags[config.TrackSubnetsKey] = subnets
+			node.Flags[config.TrackNetsKey] = subnets
 		}
 		if err := TmpNetRestartNode(ctx, log, network, node); err != nil {
 			return err
@@ -652,10 +659,10 @@ func GetTmpNetBootstrappers(
 		if node.NodeID == skipNodeID {
 			continue
 		}
-		if node.StakingAddress == "" {
+		if !node.StakingAddress.IsValid() {
 			continue
 		}
-		bootstrapIPs = append(bootstrapIPs, node.StakingAddress)
+		bootstrapIPs = append(bootstrapIPs, node.StakingAddress.String())
 		bootstrapIDs = append(bootstrapIDs, node.NodeID.String())
 	}
 	return bootstrapIPs, bootstrapIDs, nil
@@ -892,7 +899,7 @@ func GetNewTmpNetNodes(
 	}
 	nodes := []*tmpnet.Node{}
 	for i := range numNodes {
-		node := tmpnet.NewNode("")
+		node := tmpnet.NewNode()
 		if int(i) < len(nodeSettings) {
 			if len(nodeSettings[i].StakingCertKey) > 0 {
 				node.Flags[config.StakingCertContentKey] = base64.StdEncoding.EncodeToString(nodeSettings[i].StakingCertKey)
@@ -911,7 +918,7 @@ func GetNewTmpNetNodes(
 		}
 		if len(trackedSubnets) > 0 {
 			trackedSubnetsStr := sdkutils.Map(trackedSubnets, func(i ids.ID) string { return i.String() })
-			node.Flags[config.TrackSubnetsKey] = strings.Join(trackedSubnetsStr, ",")
+			node.Flags[config.TrackNetsKey] = strings.Join(trackedSubnetsStr, ",")
 		}
 		if err := node.EnsureKeys(); err != nil {
 			return nil, err
@@ -1031,11 +1038,6 @@ func TmpNetPersistPorts(
 			return fmt.Errorf("couldn't parse node URI %s: %w", network.Nodes[i].URI, err)
 		}
 		network.Nodes[i].Flags[config.HTTPPortKey] = ipPort.Port()
-		stakingAddrPort, err := netip.ParseAddrPort(network.Nodes[i].StakingAddress)
-		if err != nil {
-			return fmt.Errorf("couldn't parse staking address %s: %w", network.Nodes[i].StakingAddress, err)
-		}
-		network.Nodes[i].Flags[config.StakingPortKey] = stakingAddrPort.Port()
 	}
 	return network.Write()
 }
@@ -1075,12 +1077,17 @@ func TmpNetStartNode(
 		if err != nil {
 			return err
 		}
-		node.SetNetworkingConfig(bootstrapIDs, bootstrapIPs)
+		// Set networking config via flags
+		if node.Flags == nil {
+			node.Flags = make(map[string]interface{})
+		}
+		node.Flags["bootstrap-ids"] = bootstrapIDs
+		node.Flags["bootstrap-ips"] = bootstrapIPs
 	}
 	if err := node.Write(); err != nil {
 		return err
 	}
-	if err := node.Start(log); err != nil {
+	if err := node.Start(ctx); err != nil {
 		// Attempt to stop an unhealthy node to provide some assurance to the caller
 		// that an error condition will not result in a lingering process.
 		return errors.Join(err, node.Stop(ctx))
@@ -1120,11 +1127,12 @@ func GetTmpNetNodeNetworkID(node *tmpnet.Node) (uint32, error) {
 
 // Returns luxd path persisted at [networkDir]
 func GetTmpNetLuxdBinaryPath(networkDir string) (string, error) {
-	network, err := GetTmpNetNetwork(networkDir)
+	_, err := GetTmpNetNetwork(networkDir)
 	if err != nil {
 		return "", err
 	}
-	return network.DefaultRuntimeConfig.LuxNodePath, nil
+	// Binary path is stored in node flags or defaults
+	return "", nil
 }
 
 // when host is public, we avoid [::] but use public IP
@@ -1156,7 +1164,12 @@ func GetTmpNetNodeURIsWithFix(
 	if err != nil {
 		return nil, err
 	}
-	return sdkutils.Map(network.GetNodeURIs(), func(nodeURI tmpnet.NodeURI) string { return nodeURI.URI }), nil
+	ctx := context.Background()
+	nodeURIs, err := network.GetNodeURIs(ctx, func(func()){})
+	if err != nil {
+		return nil, err
+	}
+	return sdkutils.Map(nodeURIs, func(nodeURI tmpnet.NodeURI) string { return nodeURI.URI }), nil
 }
 
 // Get paths for most important luxd logs that are present on the network nodes

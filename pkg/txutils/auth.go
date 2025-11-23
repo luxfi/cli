@@ -25,22 +25,22 @@ import (
 // controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners)
 func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	unsignedTx := tx.Unsigned
-	var subnetAuth verify.Verifiable
+	var netAuth verify.Verifiable
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveNetValidatorTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.AddNetValidatorTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.CreateChainTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.ConvertNetToL1Tx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
-	subnetInput, ok := subnetAuth.(*secp256k1fx.Input)
+	subnetInput, ok := netAuth.(*secp256k1fx.Input)
 	if !ok {
-		return nil, fmt.Errorf("expected subnetAuth of type *secp256k1fx.Input, got %T", subnetAuth)
+		return nil, fmt.Errorf("expected netAuth of type *secp256k1fx.Input, got %T", netAuth)
 	}
 	authSigners := []string{}
 	for _, sigIndex := range subnetInput.SigIndices {
