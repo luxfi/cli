@@ -43,12 +43,12 @@ manage your Blockchain configurations and live deployments.`,
 	cmd.AddCommand(newAddValidatorCmd())
 	// blockchain export
 	cmd.AddCommand(newExportCmd())
-	// blockchain export-rpc (RPC-based export for migration)
-	cmd.AddCommand(newExportRPCCmd())
-	// blockchain import-rpc (RPC-based import for migration)
-	cmd.AddCommand(newImportRPCCmd())
+	// blockchain export-data
+	cmd.AddCommand(newExportDataCmd())
 	// blockchain import
 	cmd.AddCommand(newImportCmd())
+	// blockchain import-data
+	cmd.AddCommand(newImportDataCmd())
 	// blockchain publish
 	cmd.AddCommand(newPublishCmd())
 	// blockchain upgrade
