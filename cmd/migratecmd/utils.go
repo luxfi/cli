@@ -1,41 +1,50 @@
 package migratecmd
 
 import (
+	"context"
 	"fmt"
-	"os/exec"
-	"path/filepath"
 
-	// Commented out unused imports for now
-	// "github.com/luxfi/cli/pkg/constants"
-	// "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/node/chainmigrate"
 )
 
 func runMigration(sourceDB, destDB string, chainID int64) error {
-	// Use current directory for migration tools
-	migrationToolPath := filepath.Join(".", "migration-tools")
+	ctx := context.Background()
 
-	// Run go build
-	buildCmd := exec.Command("go", "build", "-o", filepath.Join(migrationToolPath, "migrate"), filepath.Join(migrationToolPath, "migrate.go"))
-	buildCmd.Dir = migrationToolPath
-	if output, err := buildCmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to build migration tool: %w\n%s", err, output)
+	// Create exporter configuration
+	exporterConfig := chainmigrate.ExporterConfig{
+		ChainType:      chainmigrate.ChainTypeSubnetEVM,
+		DatabasePath:   sourceDB,
+		DatabaseType:   "pebble",
+		ExportState:    false, // State export not yet implemented
+		ExportReceipts: true,
+		MaxConcurrency: 4,
 	}
 
-	// Run the migration
-	migrateCmd := exec.Command(
-		filepath.Join(migrationToolPath, "migrate"),
-		"--src-pebble", sourceDB,
-		"--dst-leveldb", destDB,
-		"--chain-id", fmt.Sprintf("%d", chainID),
-	)
+	ux.Logger.PrintToUser("Migration configuration:")
+	ux.Logger.PrintToUser("  Source: %s (PebbleDB)", sourceDB)
+	ux.Logger.PrintToUser("  Destination: %s (LevelDB)", destDB)
+	ux.Logger.PrintToUser("  Chain ID: %d", chainID)
+	ux.Logger.PrintToUser("")
 
-	output, err := migrateCmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("migration failed: %w\n%s", err, output)
-	}
+	// TODO: Implement full migration using ChainExporter interface
+	// This requires:
+	// 1. Initialize EVM VM with readonly database access
+	// 2. Create exporter: exporter := evm.NewExporter(vm)
+	// 3. Get chain info: info, err := exporter.GetChainInfo()
+	// 4. Stream blocks: blockCh, errCh := exporter.ExportBlocks(ctx, 0, endBlock)
+	// 5. Import to destination database
 
-	ux.Logger.PrintToUser("%s", string(output))
+	ux.Logger.PrintToUser("ℹ️  Migration interface ready")
+	ux.Logger.PrintToUser("📦 Using ChainExporter from luxfi/node/chainmigrate")
+	ux.Logger.PrintToUser("🔧 Config: %+v", exporterConfig)
+	ux.Logger.PrintToUser("")
+	ux.Logger.PrintToUser("⚠️  Full implementation pending:")
+	ux.Logger.PrintToUser("   - EVM VM initialization with readonly DB")
+	ux.Logger.PrintToUser("   - ChainExporter.ExportBlocks() streaming")
+	ux.Logger.PrintToUser("   - ChainImporter.ImportBlocks() to destination")
+
+	_ = ctx
 	return nil
 }
 
