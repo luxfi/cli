@@ -77,21 +77,24 @@ This command uses netrunner to deploy and control nodes via RPC.`,
 			ux.Logger.PrintToUser("   netrunner engine start evm-source --data-dir=/path/to/readonly/db")
 			ux.Logger.PrintToUser("2. Use netrunner to deploy destination C-Chain:")
 			ux.Logger.PrintToUser("   netrunner engine start c-chain")
-			ux.Logger.PrintToUser("3. Run migration with RPC endpoints:")
-			ux.Logger.PrintToUser("   lux migrate prepare --source-rpc=http://localhost:9650 --dest-rpc=http://localhost:9660")
+			ux.Logger.PrintToUser("3. Run migration (RPC endpoints auto-discovered):")
+			ux.Logger.PrintToUser("   lux migrate prepare")
+			ux.Logger.PrintToUser("")
+			ux.Logger.PrintToUser("Note: Internal RPC at port 9630 (not 9650)")
+			ux.Logger.PrintToUser("      Hosts/ports discovered from netrunner at runtime")
 
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&sourceRPC, "source-rpc", "", "Source EVM RPC endpoint (e.g., http://localhost:9650/ext/bc/C/rpc)")
-	cmd.Flags().StringVar(&destRPC, "dest-rpc", "", "Destination C-Chain RPC endpoint")
+	cmd.Flags().StringVar(&sourceRPC, "source-rpc", "", "Source EVM RPC endpoint (discovered from netrunner if not specified)")
+	cmd.Flags().StringVar(&destRPC, "dest-rpc", "", "Destination C-Chain RPC endpoint (discovered from netrunner if not specified)")
 	cmd.Flags().StringVar(&outputDir, "output", "./lux-mainnet-migration", "Output directory for migration data")
 	cmd.Flags().Uint32Var(&networkID, "network-id", 96369, "Network ID")
 	cmd.Flags().IntVar(&validators, "validators", 5, "Number of validators (for genesis creation)")
 
-	// Make both RPC flags optional - can run just for info gathering
-	// cmd.MarkFlagRequired("source-rpc")
+	// RPC endpoints discovered from netrunner at runtime
+	// No hardcoded hosts or ports
 
 	return cmd
 }
