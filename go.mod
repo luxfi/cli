@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.0.0-lux.2
 	github.com/luxfi/netrunner v1.13.7-lux.2
-	github.com/luxfi/node v1.20.3
+	github.com/luxfi/node v1.20.1
 	github.com/luxfi/sdk v0.1.0-lux.16
 	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
@@ -276,3 +276,5 @@ require (
 // replace github.com/luxfi/geth => ../geth
 
 replace github.com/luxfi/netrunner => ../netrunner
+
+replace github.com/luxfi/node => ../node
