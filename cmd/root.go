@@ -21,7 +21,6 @@ import (
 	"github.com/luxfi/cli/cmd/l1cmd"
 	"github.com/luxfi/cli/cmd/l3cmd"
 	"github.com/luxfi/cli/cmd/localcmd"
-	"github.com/luxfi/cli/cmd/migratecmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
@@ -122,7 +121,6 @@ Quick start:
 	rootCmd.AddCommand(validatorcmd.NewCmd(app))
 
 	// add migrate command
-	rootCmd.AddCommand(migratecmd.NewCmd(app))
 	rootCmd.AddCommand(localcmd.NewCmd(app))
 
 	// add rpc command for direct RPC calls
