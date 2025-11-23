@@ -83,7 +83,7 @@ func stats(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildCurrentValidatorStats(pClient platformvm.Client, infoClient info.Client, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
+func buildCurrentValidatorStats(pClient *platformvm.Client, infoClient info.Client, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -159,19 +159,18 @@ func buildCurrentValidatorStats(pClient platformvm.Client, infoClient info.Clien
 
 // findAPIEndpoint tries first to create a client to a local node
 // if it doesn't find one, it tries public APIs
-func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
-	var i info.Client
+func findAPIEndpoint(network models.Network) (*platformvm.Client, info.Client) {
 
 	// first try local node
 	ctx := context.Background()
 	c := platformvm.NewClient(constants.LocalAPIEndpoint)
 	_, err := c.GetHeight(ctx)
 	if err == nil {
-		i = info.NewClient(constants.LocalAPIEndpoint)
+		i := info.NewClient(constants.LocalAPIEndpoint)
 		// try calling it to make sure it actually worked
 		_, _, err := i.GetNodeID(ctx)
 		if err == nil {
-			return c, i
+			return c, *i
 		}
 	}
 
@@ -181,7 +180,8 @@ func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
 	_, err = c.GetHeight(ctx)
 	if err == nil {
 		// also try to get a local client
-		i = info.NewClient(constants.LocalAPIEndpoint)
+		i2 := info.NewClient(constants.LocalAPIEndpoint)
+		return c, *i2
 	}
-	return c, i
+	return nil, info.Client{}
 }
