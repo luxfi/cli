@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/genesis"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"

@@ -1,0 +1,338 @@
+---
+title: Getting Started
+description: Quick start guide for Lux CLI v2
+---
+
+# Getting Started with Lux CLI
+
+This guide will help you get started with Lux CLI v2, the unified toolchain for creating sovereign L1s, based rollups (L2s), and app-specific chains (L3s).
+
+## Prerequisites
+
+### System Requirements
+
+- **Operating System**: Linux, macOS, or Windows (WSL2)
+- **Memory**: Minimum 8GB RAM (16GB recommended)
+- **Disk Space**: At least 10GB free space
+- **Network**: Stable internet connection
+- **Software**:
+  - Go 1.21+ (for building from source)
+  - Docker (optional, for containerized deployments)
+  - Git
+
+### Required Ports
+
+Ensure these ports are available:
+- `9630`: HTTP API port
+- `9631`: Staking/P2P port
+- `9632-9640`: Additional node ports (for multi-node setups)
+
+## Installation
+
+### Quick Install (Recommended)
+
+```bash
+# Download and install latest release
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh
+
+# Add to PATH
+export PATH=$PATH:~/.lux/bin
+
+# Verify installation
+lux --version
+```
+
+### Install from Source
+
+```bash
+# Clone repository
+git clone https://github.com/luxfi/cli
+cd cli
+
+# Build
+make build
+
+# Install
+make install
+
+# Verify
+lux --version
+```
+
+### Install with Homebrew (macOS)
+
+```bash
+brew tap luxfi/tap
+brew install lux-cli
+```
+
+## First Steps
+
+### 1. Initialize Configuration
+
+```bash
+# Set up initial configuration
+lux config init
+
+# Choose your preferences:
+# - Metrics collection: Yes/No
+# - Auto-update check: Yes/No
+# - Default network: local/testnet/mainnet
+```
+
+### 2. Start Local Network
+
+```bash
+# Start a 5-node local network
+lux network start
+
+# Check network status
+lux network status
+
+# View node endpoints
+lux network endpoints
+```
+
+### 3. Create Your First L1
+
+```bash
+# Interactive L1 creation
+lux l1 create my-first-l1
+
+# You'll be prompted for:
+# - Consensus type (PoA/PoS)
+# - Token name and symbol
+# - Initial validators
+# - Network parameters
+```
+
+### 4. Deploy the L1
+
+```bash
+# Deploy to local network
+lux l1 deploy my-first-l1 --local
+
+# Get RPC endpoint
+lux l1 describe my-first-l1 --rpc
+```
+
+## Understanding the Architecture
+
+### Three-Layer Model
+
+```
+┌─────────────────────────────────────┐
+│            L3: App Chains           │
+│   (Application-specific chains)     │
+├─────────────────────────────────────┤
+│         L2: Based Rollups           │
+│    (Scalability & lower costs)      │
+├─────────────────────────────────────┤
+│       L1: Sovereign Chains          │
+│  (Independent validation & tokens)  │
+└─────────────────────────────────────┘
+```
+
+### Key Concepts
+
+**L1 (Sovereign Chains)**:
+- Independent validator sets
+- Native tokens and tokenomics
+- Full sovereignty over consensus rules
+- Examples: Gaming chains, DeFi chains, Enterprise chains
+
+**L2 (Based Rollups)**:
+- Inherit security from L1 or Ethereum
+- Lower transaction costs
+- Higher throughput
+- Options: Based rollups, OP Stack compatible
+
+**L3 (App Chains)**:
+- Application-specific optimization
+- Minimal overhead
+- Custom execution environments
+- Examples: NFT marketplaces, DEXs, Games
+
+## Basic Workflows
+
+### Deploy a Complete Stack
+
+```bash
+# 1. Create sovereign L1
+lux l1 create sovereign-base --proof-of-stake
+
+# 2. Deploy L1
+lux l1 deploy sovereign-base --local
+
+# 3. Create L2 rollup on the L1
+lux l2 create fast-rollup \
+  --base sovereign-base \
+  --sequencer lux
+
+# 4. Deploy L2
+lux l2 deploy fast-rollup
+
+# 5. Create L3 app chain on the L2
+lux l3 create my-app \
+  --l2 fast-rollup \
+  --type gaming
+
+# 6. Deploy L3
+lux l3 deploy my-app
+```
+
+### Connect to Existing Networks
+
+```bash
+# Connect to testnet
+lux network connect testnet
+
+# Import existing blockchain
+lux blockchain import --network testnet --id <blockchain-id>
+
+# Join as validator
+lux validator join <blockchain-name> --testnet
+```
+
+### Key Management
+
+```bash
+# Create new key
+lux key create my-key
+
+# List keys
+lux key list
+
+# Export key (backup)
+lux key export my-key --output my-key.backup
+
+# Import key
+lux key import --file my-key.backup
+```
+
+## Configuration Files
+
+### CLI Configuration
+Location: `~/.lux-cli/config.json`
+
+```json
+{
+  "defaultNetwork": "local",
+  "metricsEnabled": true,
+  "checkUpdates": true,
+  "apiEndpoint": "http://localhost:9630",
+  "logLevel": "info"
+}
+```
+
+### Chain Configuration
+Location: `~/.lux-cli/chains/[name]/config.json`
+
+```json
+{
+  "chainName": "my-first-l1",
+  "chainId": 43114,
+  "consensus": "proof-of-stake",
+  "tokenSymbol": "MFL",
+  "validators": []
+}
+```
+
+## Next Steps
+
+### Tutorials
+- [Deploy a Sovereign L1](/docs/tutorials/deploy-l1)
+- [Create a Based Rollup](/docs/tutorials/create-l2)
+- [Build an App Chain](/docs/tutorials/build-l3)
+- [Cross-Chain Messaging](/docs/tutorials/cross-chain)
+
+### Advanced Topics
+- [Validator Management](/docs/validators)
+- [Post-Quantum Security](/docs/advanced/quantum)
+- [Custom VM Development](/docs/advanced/custom-vm)
+- [Performance Optimization](/docs/advanced/performance)
+
+### References
+- [Command Reference](/docs/commands)
+- [API Documentation](/docs/api)
+- [Troubleshooting Guide](/docs/troubleshooting)
+- [FAQ](/docs/faq)
+
+## Getting Help
+
+### Resources
+
+- **Documentation**: https://docs.lux.network
+- **GitHub**: https://github.com/luxfi/cli
+- **Discord**: https://discord.gg/lux
+- **Forum**: https://forum.lux.network
+
+### Quick Help
+
+```bash
+# General help
+lux --help
+
+# Command-specific help
+lux l1 --help
+lux l1 create --help
+
+# Version information
+lux --version
+```
+
+### Debugging
+
+```bash
+# Enable debug logging
+lux --log-level debug [command]
+
+# View logs
+tail -f ~/.lux-cli/logs/cli.log
+
+# Check system status
+lux network status
+lux l1 describe [name] --verbose
+```
+
+## Common Issues
+
+### Network Won't Start
+```bash
+# Clean old data
+lux network clean
+
+# Check ports
+lsof -i :9630-9640
+
+# Start with verbose logging
+lux network start --log-level debug
+```
+
+### Deployment Fails
+```bash
+# Check prerequisites
+lux network status
+
+# Verify configuration
+lux l1 describe [name] --genesis
+
+# Check logs
+lux logs --tail 100
+```
+
+### Transaction Errors
+```bash
+# Check balance
+lux wallet balance
+
+# Verify gas prices
+lux network gas-price
+
+# Check nonce
+lux wallet info --address [address]
+```
+
+---
+
+**Ready to build?** Start with creating your first [sovereign L1](/docs/tutorials/deploy-l1) or explore the [command reference](/docs/commands).

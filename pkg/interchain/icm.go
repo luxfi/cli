@@ -437,7 +437,10 @@ func GetWarpInfo(
 		ti.Version,
 	)
 	if err != nil {
-		return nil, err
+		// For now, ignore warp download errors and use empty values
+		// This happens when the warp-contracts repository is not available
+		ux.Logger.PrintToUser("Warning: Could not download warp assets, using empty values")
+		ti.MessengerDeployerAddress = ""
 	}
 	return &ti, nil
 }

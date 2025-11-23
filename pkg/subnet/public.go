@@ -752,7 +752,7 @@ func (d *PublicDeployer) IncreaseValidatorPChainBalance(
 				Amt: balance,
 				OutputOwners: secp256k1fx.OutputOwners{
 					Threshold: 1,
-					Addrs:     []ids.ShortID{validationID.ToShortID()},
+					Addrs:     []ids.ShortID{},
 				},
 			},
 		},

@@ -105,9 +105,8 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 	// Create L3 configuration
 	sc := &models.Sidecar{
-		Name:    l3Name,
-		Subnet:  l3Name,
-		Version: "2.0.0",
+		Name:   l3Name,
+		Subnet: l3Name,
 
 		// L3 specific
 		Sovereign:         false, // L3s are never sovereign

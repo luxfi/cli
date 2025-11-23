@@ -140,7 +140,7 @@ const (
 	// Docker images and repos
 	LuxdDockerImage = "luxfi/luxd"
 	LuxdGitRepo     = "https://github.com/luxfi/node"
-	LuxdRepoName    = "luxfi/node"
+	LuxdRepoName    = "node"
 
 	// Organizations
 	LuxOrg = "luxfi"

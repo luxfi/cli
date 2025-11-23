@@ -25,6 +25,7 @@ import (
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
+	"github.com/luxfi/cli/cmd/rpccmd"
 	"github.com/luxfi/cli/cmd/subnetcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
@@ -123,6 +124,9 @@ Quick start:
 	// add migrate command
 	rootCmd.AddCommand(migratecmd.NewCmd(app))
 	rootCmd.AddCommand(localcmd.NewCmd(app))
+
+	// add rpc command for direct RPC calls
+	rootCmd.AddCommand(rpccmd.NewCmd())
 
 	// add hidden backend command
 	rootCmd.AddCommand(backendcmd.NewCmd(app))
