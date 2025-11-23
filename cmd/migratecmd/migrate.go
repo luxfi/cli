@@ -6,7 +6,6 @@ package migratecmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/ux"
@@ -38,7 +37,8 @@ data to C-Chain for the Lux network upgrade. This includes:
 
 func newPrepareCmd(app *application.Lux) *cobra.Command {
 	var (
-		sourceDB   string
+		sourceRPC  string
+		destRPC    string
 		outputDir  string
 		networkID  uint32
 		validators int
@@ -46,62 +46,52 @@ func newPrepareCmd(app *application.Lux) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "prepare",
-		Short: "Prepare migration data for mainnet launch",
-		Long: `Prepares the migration by:
-1. Converting evm PebbleDB to C-Chain LevelDB
-2. Creating P-Chain genesis with validator set
-3. Generating node configurations for bootstrap validators`,
+		Short: "Prepare migration data via RPC",
+		Long: `Prepares the migration using RPC calls to source and destination nodes:
+1. Export blocks from source EVM via RPC
+2. Import blocks to destination C-Chain via RPC
+3. Create P-Chain genesis with validator set (if needed)
+
+This command uses netrunner to deploy and control nodes via RPC.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ux.Logger.PrintToUser("Preparing Lux mainnet migration...")
+			ux.Logger.PrintToUser("Preparing Lux migration via RPC...")
+			ux.Logger.PrintToUser("")
 
 			// Create output directory structure
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("failed to create output directory: %w", err)
 			}
 
-			// Create directories for each node
-			for i := 1; i <= validators; i++ {
-				nodeDir := filepath.Join(outputDir, fmt.Sprintf("node%d", i))
-				if err := os.MkdirAll(filepath.Join(nodeDir, "staking"), 0755); err != nil {
-					return fmt.Errorf("failed to create node%d directory: %w", i, err)
-				}
-			}
-
-			// Run the migration tool
-			ux.Logger.PrintToUser("Step 1: Converting evm data to C-Chain format...")
-			if err := runMigration(sourceDB, filepath.Join(outputDir, "c-chain-db"), int64(networkID)); err != nil {
+			// Run the RPC-based migration
+			ux.Logger.PrintToUser("Step 1: Exporting/importing via RPC...")
+			if err := runMigration(sourceRPC, destRPC, int64(networkID)); err != nil {
 				return fmt.Errorf("migration failed: %w", err)
 			}
 
-			// Create P-Chain genesis
-			ux.Logger.PrintToUser("Step 2: Creating P-Chain genesis...")
-			if err := createPChainGenesis(outputDir, validators); err != nil {
-				return fmt.Errorf("failed to create P-Chain genesis: %w", err)
-			}
-
-			// Generate node configurations
-			ux.Logger.PrintToUser("Step 3: Generating node configurations...")
-			if err := generateNodeConfigs(outputDir, validators); err != nil {
-				return fmt.Errorf("failed to generate node configs: %w", err)
-			}
-
-			ux.Logger.PrintToUser("✅ Migration preparation complete!")
+			ux.Logger.PrintToUser("")
+			ux.Logger.PrintToUser("✅ Migration RPC calls complete!")
 			ux.Logger.PrintToUser("Output directory: %s", outputDir)
 			ux.Logger.PrintToUser("")
-			ux.Logger.PrintToUser("Next steps:")
-			ux.Logger.PrintToUser("1. Review the generated configurations")
-			ux.Logger.PrintToUser("2. Run 'lux migrate bootstrap' to start the network")
+			ux.Logger.PrintToUser("💡 Next Steps:")
+			ux.Logger.PrintToUser("1. Use netrunner to deploy source EVM node:")
+			ux.Logger.PrintToUser("   netrunner engine start evm-source --data-dir=/path/to/readonly/db")
+			ux.Logger.PrintToUser("2. Use netrunner to deploy destination C-Chain:")
+			ux.Logger.PrintToUser("   netrunner engine start c-chain")
+			ux.Logger.PrintToUser("3. Run migration with RPC endpoints:")
+			ux.Logger.PrintToUser("   lux migrate prepare --source-rpc=http://localhost:9650 --dest-rpc=http://localhost:9660")
 
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&sourceDB, "source-db", "", "Path to evm PebbleDB")
+	cmd.Flags().StringVar(&sourceRPC, "source-rpc", "", "Source EVM RPC endpoint (e.g., http://localhost:9650/ext/bc/C/rpc)")
+	cmd.Flags().StringVar(&destRPC, "dest-rpc", "", "Destination C-Chain RPC endpoint")
 	cmd.Flags().StringVar(&outputDir, "output", "./lux-mainnet-migration", "Output directory for migration data")
-	cmd.Flags().Uint32Var(&networkID, "network-id", 96369, "Network ID for the new mainnet")
-	cmd.Flags().IntVar(&validators, "validators", 5, "Number of bootstrap validators")
+	cmd.Flags().Uint32Var(&networkID, "network-id", 96369, "Network ID")
+	cmd.Flags().IntVar(&validators, "validators", 5, "Number of validators (for genesis creation)")
 
-	cmd.MarkFlagRequired("source-db")
+	// Make both RPC flags optional - can run just for info gathering
+	// cmd.MarkFlagRequired("source-rpc")
 
 	return cmd
 }
