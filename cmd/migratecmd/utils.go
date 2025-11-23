@@ -39,6 +39,25 @@ func runMigration(sourceRPC, destRPC string, chainID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
+	// Discover RPC endpoints from netrunner if not provided
+	if sourceRPC == "" || destRPC == "" {
+		ux.Logger.PrintToUser("🔍 Discovering RPC endpoints from netrunner...")
+		discoveredSource, discoveredDest, err := discoverRPCEndpoints(ctx)
+		if err != nil {
+			ux.Logger.PrintToUser("⚠️  Could not auto-discover endpoints: %v", err)
+			ux.Logger.PrintToUser("💡 Use --source-rpc and --dest-rpc flags to specify manually")
+			return err
+		}
+		if sourceRPC == "" {
+			sourceRPC = discoveredSource
+		}
+		if destRPC == "" {
+			destRPC = discoveredDest
+		}
+		ux.Logger.PrintToUser("  Discovered source: %s", sourceRPC)
+		ux.Logger.PrintToUser("  Discovered dest: %s", destRPC)
+	}
+
 	ux.Logger.PrintToUser("🚀 Starting RPC-based migration...")
 	ux.Logger.PrintToUser("  Source RPC: %s", sourceRPC)
 	ux.Logger.PrintToUser("  Destination RPC: %s", destRPC)
@@ -140,6 +159,23 @@ func callRPC(ctx context.Context, rpcURL string, req *RPCRequest, result interfa
 	}
 
 	return json.Unmarshal(rpcResp.Result, result)
+}
+
+// discoverRPCEndpoints discovers RPC endpoints from netrunner
+// Internal RPC uses port 9630 (not 9650)
+func discoverRPCEndpoints(ctx context.Context) (source, dest string, err error) {
+	// TODO: Query netrunner for running nodes and their RPC endpoints
+	// netrunner should expose API to list nodes with their ports
+	// For now, use default internal ports
+
+	// Internal RPC port is 9630 (not 9650!)
+	source = "http://127.0.0.1:9630/ext/bc/C/rpc"  // Internal, not public
+	dest = "http://127.0.0.1:9640/ext/bc/C/rpc"    // Next node in fleet
+
+	ux.Logger.PrintToUser("⚠️  Using default internal ports (9630, 9640)")
+	ux.Logger.PrintToUser("💡 TODO: Query netrunner API for actual node endpoints")
+
+	return source, dest, nil
 }
 
 // Placeholder functions to fix later
