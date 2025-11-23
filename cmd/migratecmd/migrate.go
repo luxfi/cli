@@ -37,11 +37,12 @@ data to C-Chain for the Lux network upgrade. This includes:
 
 func newPrepareCmd(app *application.Lux) *cobra.Command {
 	var (
-		sourceRPC  string
-		destRPC    string
-		outputDir  string
-		networkID  uint32
-		validators int
+		sourceRPC       string
+		destRPC         string
+		blockchainID    string
+		outputDir       string
+		networkID       uint32
+		validators      int
 	)
 
 	cmd := &cobra.Command{
@@ -64,7 +65,7 @@ This command uses netrunner to deploy and control nodes via RPC.`,
 
 			// Run the RPC-based migration
 			ux.Logger.PrintToUser("Step 1: Exporting/importing via RPC...")
-			if err := runMigration(sourceRPC, destRPC, int64(networkID)); err != nil {
+			if err := runMigration(sourceRPC, destRPC, blockchainID, int64(networkID)); err != nil {
 				return fmt.Errorf("migration failed: %w", err)
 			}
 
@@ -89,12 +90,14 @@ This command uses netrunner to deploy and control nodes via RPC.`,
 
 	cmd.Flags().StringVar(&sourceRPC, "source-rpc", "", "Source EVM RPC endpoint (discovered from netrunner if not specified)")
 	cmd.Flags().StringVar(&destRPC, "dest-rpc", "", "Destination C-Chain RPC endpoint (discovered from netrunner if not specified)")
+	cmd.Flags().StringVar(&blockchainID, "blockchain-id", "dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ", "Old blockchain ID for ext/bc/<id>/rpc path")
 	cmd.Flags().StringVar(&outputDir, "output", "./lux-mainnet-migration", "Output directory for migration data")
 	cmd.Flags().Uint32Var(&networkID, "network-id", 96369, "Network ID")
 	cmd.Flags().IntVar(&validators, "validators", 5, "Number of validators (for genesis creation)")
 
 	// RPC endpoints discovered from netrunner at runtime
-	// No hardcoded hosts or ports
+	// Source: ext/bc/<blockchain-id>/rpc (old 96369 net)
+	// Dest: ext/bc/C/rpc (C-Chain)
 
 	return cmd
 }

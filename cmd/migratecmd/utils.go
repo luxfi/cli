@@ -35,14 +35,14 @@ type RPCError struct {
 }
 
 // runMigration performs migration via RPC to source and destination nodes
-func runMigration(sourceRPC, destRPC string, chainID int64) error {
+func runMigration(sourceRPC, destRPC, blockchainID string, chainID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
 	// Discover RPC endpoints from netrunner if not provided
 	if sourceRPC == "" || destRPC == "" {
 		ux.Logger.PrintToUser("🔍 Discovering RPC endpoints from netrunner...")
-		discoveredSource, discoveredDest, err := discoverRPCEndpoints(ctx)
+		discoveredSource, discoveredDest, err := discoverRPCEndpoints(ctx, blockchainID)
 		if err != nil {
 			ux.Logger.PrintToUser("⚠️  Could not auto-discover endpoints: %v", err)
 			ux.Logger.PrintToUser("💡 Use --source-rpc and --dest-rpc flags to specify manually")
@@ -163,17 +163,23 @@ func callRPC(ctx context.Context, rpcURL string, req *RPCRequest, result interfa
 
 // discoverRPCEndpoints discovers RPC endpoints from netrunner
 // Internal RPC uses port 9630 (not 9650)
-func discoverRPCEndpoints(ctx context.Context) (source, dest string, err error) {
+// Source: ext/bc/<blockchain-id>/rpc (old 96369 net)
+// Dest: ext/bc/C/rpc (C-Chain)
+func discoverRPCEndpoints(ctx context.Context, blockchainID string) (source, dest string, err error) {
 	// TODO: Query netrunner for running nodes and their RPC endpoints
 	// netrunner should expose API to list nodes with their ports
 	// For now, use default internal ports
 
-	// Internal RPC port is 9630 (not 9650!)
-	source = "http://127.0.0.1:9630/ext/bc/C/rpc"  // Internal, not public
-	dest = "http://127.0.0.1:9640/ext/bc/C/rpc"    // Next node in fleet
+	// Source: Old 96369 net (uses blockchain ID in path)
+	source = fmt.Sprintf("http://127.0.0.1:9630/ext/bc/%s/rpc", blockchainID)
+
+	// Dest: C-Chain (uses C alias in path)
+	dest = "http://127.0.0.1:9640/ext/bc/C/rpc"
 
 	ux.Logger.PrintToUser("⚠️  Using default internal ports (9630, 9640)")
 	ux.Logger.PrintToUser("💡 TODO: Query netrunner API for actual node endpoints")
+	ux.Logger.PrintToUser("  Source: ext/bc/%s/rpc (old 96369 net)", blockchainID)
+	ux.Logger.PrintToUser("  Dest: ext/bc/C/rpc (C-Chain)")
 
 	return source, dest, nil
 }
