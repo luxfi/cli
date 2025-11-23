@@ -3,174 +3,117 @@
 package blockchaincmd
 
 import (
+	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
 var (
-	exportOutput        string
-	customVMRepoURL     string
-	customVMBranch      string
-	customVMBuildScript string
+	exportID    string
+	exportRPC   string
+	exportStart uint64
+	exportEnd   uint64
+	exportOut   string
 )
 
 // lux blockchain export
 func newExportCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "export [blockchainName]",
-		Short: "Export deployment details",
-		Long: `The blockchain export command write the details of an existing Blockchain deploy to a file.
+		Use:   "export",
+		Short: "Export blockchain data via RPC",
+		Long: `Export blockchain blocks from a running node via RPC to JSONL format.
 
-The command prompts for an output path. You can also provide one with
-the --output flag.`,
-		RunE: exportSubnet,
-		Args: cobrautils.ExactArgs(1),
+Each block is written as a single JSON line for efficient streaming and processing.
+
+Example:
+  lux blockchain export --id=dnmzhuf6... --output=blocks.jsonl`,
+		RunE: exportFunc,
 	}
 
-	cmd.Flags().StringVarP(
-		&exportOutput,
-		"output",
-		"o",
-		"",
-		"write the export data to the provided file path",
-	)
-	cmd.Flags().StringVar(&customVMRepoURL, "custom-vm-repo-url", "", "custom vm repository url")
-	cmd.Flags().StringVar(&customVMBranch, "custom-vm-branch", "", "custom vm branch")
-	cmd.Flags().StringVar(&customVMBuildScript, "custom-vm-build-script", "", "custom vm build-script")
+	cmd.Flags().StringVar(&exportID, "id", "", "Blockchain ID (required)")
+	cmd.Flags().StringVar(&exportRPC, "rpc", "", "RPC endpoint (auto-discovered from ID)")
+	cmd.Flags().Uint64Var(&exportStart, "start-block", 0, "Start block")
+	cmd.Flags().Uint64Var(&exportEnd, "end-block", 0, "End block (0=current)")
+	cmd.Flags().StringVarP(&exportOut, "output", "o", "blocks.jsonl", "Output file (JSONL format)")
+
+	_ = cmd.MarkFlagRequired("id")
+
 	return cmd
 }
 
-func CallExportSubnet(blockchainName, exportPath string) error {
-	exportOutput = exportPath
-	return exportSubnet(nil, []string{blockchainName})
-}
+func exportFunc(cmd *cobra.Command, args []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
 
-func exportSubnet(_ *cobra.Command, args []string) error {
-	var err error
-	if exportOutput == "" {
-		pathPrompt := "Enter file path to write export data to"
-		exportOutput, err = app.Prompt.CaptureString(pathPrompt)
+	// Discover RPC if not provided
+	if exportRPC == "" {
+		exportRPC = discoverRPC(exportID)
+		ux.Logger.PrintToUser("🔍 RPC: %s", exportRPC)
+	}
+
+	// Get current block if end not specified
+	if exportEnd == 0 {
+		current, err := getCurrentBlock(ctx, exportRPC)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get current block: %w", err)
+		}
+		exportEnd = current
+	}
+
+	ux.Logger.PrintToUser("📤 Exporting blocks %d-%d to %s", exportStart, exportEnd, exportOut)
+
+	// Open output file
+	f, err := os.Create(exportOut)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %w", err)
+	}
+	defer f.Close()
+
+	writer := bufio.NewWriter(f)
+	defer writer.Flush()
+
+	// Export in batches, write as JSONL
+	batchSize := uint64(100)
+	exported := 0
+
+	for start := exportStart; start <= exportEnd; start += batchSize {
+		end := start + batchSize - 1
+		if end > exportEnd {
+			end = exportEnd
+		}
+
+		ux.Logger.PrintToUser("  Blocks %d-%d...", start, end)
+		blocks, err := getBlocks(ctx, exportRPC, start, end)
+		if err != nil {
+			return fmt.Errorf("failed to get blocks: %w", err)
+		}
+
+		// Write each block as a JSON line
+		for _, block := range blocks {
+			data, err := json.Marshal(block)
+			if err != nil {
+				return fmt.Errorf("failed to marshal block: %w", err)
+			}
+			if _, err := writer.Write(data); err != nil {
+				return fmt.Errorf("failed to write block: %w", err)
+			}
+			if _, err := writer.WriteString("\n"); err != nil {
+				return fmt.Errorf("failed to write newline: %w", err)
+			}
+			exported++
 		}
 	}
 
-	blockchainName := args[0]
-
-	if !app.SidecarExists(blockchainName) {
-		return fmt.Errorf("invalid blockchain %q", blockchainName)
+	if err := writer.Flush(); err != nil {
+		return fmt.Errorf("failed to flush output: %w", err)
 	}
 
-	sc, err := app.LoadSidecar(blockchainName)
-	if err != nil {
-		return err
-	}
-
-	if sc.VM == models.CustomVM {
-		if sc.CustomVMRepoURL == "" {
-			ux.Logger.PrintToUser("Custom VM source code repository, branch and build script not defined for subnet. Filling in the details now.")
-			if customVMRepoURL != "" {
-				ux.Logger.PrintToUser("Checking source code repository URL %s", customVMRepoURL)
-				if err := prompts.ValidateURL(customVMRepoURL, true); err != nil {
-					ux.Logger.PrintToUser("Invalid repository url %s: %s", customVMRepoURL, err)
-					customVMRepoURL = ""
-				}
-			}
-			if customVMRepoURL == "" {
-				customVMRepoURL, err = app.Prompt.CaptureURL("Source code repository URL")
-				if err != nil {
-					return err
-				}
-			}
-			if customVMBranch != "" {
-				ux.Logger.PrintToUser("Checking branch %s", customVMBranch)
-				if err := prompts.ValidateRepoBranch(customVMBranch); err != nil {
-					ux.Logger.PrintToUser("Invalid repository branch %s: %s", customVMBranch, err)
-					customVMBranch = ""
-				}
-			}
-			if customVMBranch == "" {
-				customVMBranch, err = app.Prompt.CaptureString("Branch")
-				if err != nil {
-					return err
-				}
-			}
-			if customVMBuildScript != "" {
-				ux.Logger.PrintToUser("Checking build script %s", customVMBuildScript)
-				if err := prompts.ValidateRepoFile(customVMBuildScript); err != nil {
-					ux.Logger.PrintToUser("Invalid repository build script %s: %s", customVMBuildScript, err)
-					customVMBuildScript = ""
-				}
-			}
-			if customVMBuildScript == "" {
-				customVMBuildScript, err = app.Prompt.CaptureString("Build script")
-				if err != nil {
-					return err
-				}
-			}
-			sc.CustomVMRepoURL = customVMRepoURL
-			sc.CustomVMBranch = customVMBranch
-			sc.CustomVMBuildScript = customVMBuildScript
-			if err := app.UpdateSidecar(&sc); err != nil {
-				return err
-			}
-		}
-	}
-
-	gen, err := app.LoadRawGenesis(blockchainName)
-	if err != nil {
-		return err
-	}
-
-	// Node configuration and chain configs are handled separately from the export
-	// These are managed through the deployment configuration
-	// var chainConfig, subnetConfig, networkUpgrades []byte
-	// var nodeConfig []byte
-	// if app.LuxdNodeConfigExists(blockchainName) {
-	// 	nodeConfig, err = app.LoadRawLuxdNodeConfig(blockchainName)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-	// if app.ChainConfigExists(blockchainName) {
-	// 	chainConfig, err = app.LoadRawChainConfig(blockchainName)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-	// if app.LuxdSubnetConfigExists(blockchainName) {
-	// 	subnetConfig, err = app.LoadRawLuxdSubnetConfig(blockchainName)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-	// if app.NetworkUpgradeExists(blockchainName) {
-	// 	networkUpgrades, err = app.LoadRawNetworkUpgrades(blockchainName)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	// The Exportable struct contains the essential configuration
-	// Additional configs are handled through the deployment process
-	exportData := models.Exportable{
-		Sidecar: sc,
-		Genesis: gen,
-	}
-	// Additional configs would need to be handled separately:
-	// chainConfig, subnetConfig, networkUpgrades
-
-	exportBytes, err := json.Marshal(exportData)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(exportOutput, exportBytes, constants.WriteReadReadPerms)
+	ux.Logger.PrintToUser("✅ Exported %d blocks to %s", exported, exportOut)
+	return nil
 }

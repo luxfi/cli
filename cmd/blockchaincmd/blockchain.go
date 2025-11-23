@@ -43,12 +43,8 @@ manage your Blockchain configurations and live deployments.`,
 	cmd.AddCommand(newAddValidatorCmd())
 	// blockchain export
 	cmd.AddCommand(newExportCmd())
-	// blockchain export-data
-	cmd.AddCommand(newExportDataCmd())
 	// blockchain import
 	cmd.AddCommand(newImportCmd())
-	// blockchain import-data
-	cmd.AddCommand(newImportDataCmd())
 	// blockchain publish
 	cmd.AddCommand(newPublishCmd())
 	// blockchain upgrade

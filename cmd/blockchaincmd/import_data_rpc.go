@@ -3,6 +3,7 @@
 package blockchaincmd
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,28 +15,28 @@ import (
 )
 
 var (
-	importDataID     string
-	importDataRPC    string
-	importDataDir    string
-	importDataInput  string
+	importDataID    string
+	importDataRPC   string
+	importDataInput string
 )
 
-// lux blockchain import --data-dir=...
+// lux blockchain import data
 func newImportDataCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import-data",
+		Use:   "data",
 		Short: "Import blockchain data via RPC",
-		Long: `Import blockchain blocks to a running node via RPC.
+		Long: `Import blockchain blocks to a running node via RPC from JSONL format.
+
+Reads blocks from a JSONL file (one JSON object per line) and imports them.
 
 Example:
-  lux blockchain import-data --id=C --input=blocks.json`,
+  lux blockchain import data --id=C --input=blocks.jsonl`,
 		RunE: importDataFunc,
 	}
 
 	cmd.Flags().StringVar(&importDataID, "id", "C", "Blockchain ID")
 	cmd.Flags().StringVar(&importDataRPC, "rpc", "", "RPC endpoint (auto-discovered from ID)")
-	cmd.Flags().StringVar(&importDataDir, "data-dir", "", "Data directory (for discovery)")
-	cmd.Flags().StringVar(&importDataInput, "input", "blocks.json", "Input file")
+	cmd.Flags().StringVarP(&importDataInput, "input", "i", "blocks.jsonl", "Input file (JSONL format)")
 
 	return cmd
 }
@@ -50,20 +51,39 @@ func importDataFunc(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("🔍 RPC: %s", importDataRPC)
 	}
 
-	// Read input file
-	data, err := os.ReadFile(importDataInput)
+	// Open input file
+	f, err := os.Open(importDataInput)
 	if err != nil {
-		return fmt.Errorf("failed to read input: %w", err)
+		return fmt.Errorf("failed to open input file: %w", err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	// Increase buffer size for large JSON lines
+	const maxCapacity = 10 * 1024 * 1024 // 10MB
+	buf := make([]byte, maxCapacity)
+	scanner.Buffer(buf, maxCapacity)
+
+	blocks := []interface{}{}
+	lineNum := 0
+
+	// Read all blocks from JSONL
+	for scanner.Scan() {
+		lineNum++
+		line := scanner.Bytes()
+		if len(line) == 0 {
+			continue
+		}
+
+		var block map[string]interface{}
+		if err := json.Unmarshal(line, &block); err != nil {
+			return fmt.Errorf("failed to parse line %d: %w", lineNum, err)
+		}
+		blocks = append(blocks, block)
 	}
 
-	var exportData map[string]interface{}
-	if err := json.Unmarshal(data, &exportData); err != nil {
-		return fmt.Errorf("failed to parse input: %w", err)
-	}
-
-	blocks, ok := exportData["blocks"].([]interface{})
-	if !ok {
-		return fmt.Errorf("invalid format: missing blocks array")
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("failed to read input file: %w", err)
 	}
 
 	ux.Logger.PrintToUser("📥 Importing %d blocks...", len(blocks))
@@ -90,19 +110,4 @@ func importDataFunc(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("✅ Imported %d blocks", imported)
 	return nil
-}
-
-func importBlocks(ctx context.Context, rpcURL string, blocks []interface{}) (int, error) {
-	req := &rpcRequest{
-		JSONRPC: "2.0",
-		Method:  "migrate_importBlocks",
-		Params:  []interface{}{blocks},
-		ID:      1,
-	}
-
-	var count int
-	if err := callRPC(ctx, rpcURL, req, &count); err != nil {
-		return 0, err
-	}
-	return count, nil
 }
