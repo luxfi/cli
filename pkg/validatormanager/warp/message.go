@@ -10,12 +10,25 @@ import (
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
 	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
 	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 )
 
-var ErrInvalidMessageType = errors.New("invalid message type")
+var (
+	ErrInvalidMessageType = errors.New("invalid message type")
+
+	// Codec for serializing/deserializing L1 validator messages
+	Codec codec.Manager
+)
+
+func init() {
+	Codec = codec.NewDefaultManager()
+	c := linearcodec.NewDefault()
+	Codec.RegisterCodec(0, c)
+}
 
 // PChainOwner represents an owner on the P-Chain
 type PChainOwner struct {
@@ -118,41 +131,35 @@ func ParseL1ValidatorWeight(payload []byte) (*L1ValidatorWeight, error) {
 
 // ParseRegisterL1Validator parses L1 validator registration from payload
 func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) {
-	// Use the warp payload parser
-	payloadObj, err := warpPayload.ParsePayload(payload)
+	// For now, parse as AddressedCall and extract data from payload bytes
+	payloadObj, err := warpPayload.Parse(payload)
 	if err != nil {
-		return nil, err
+		// If warp parsing fails, try direct deserialization
+		var reg L1ValidatorRegistration
+		if _, err := Codec.Unmarshal(payload, &reg); err != nil {
+			return nil, err
+		}
+		return &reg, nil
 	}
 
-	// Type assert to RegisterL1Validator
-	registerPayload, ok := payloadObj.(*warpPayload.RegisterL1Validator)
-	if !ok {
+	// Check if it's an AddressedCall that contains validator registration
+	addressedCall, ok := payloadObj.(*warpPayload.AddressedCall)
+	if ok && len(addressedCall.Payload) > 0 {
+		// Parse the inner payload as L1ValidatorRegistration
+		var reg L1ValidatorRegistration
+		if _, err := Codec.Unmarshal(addressedCall.Payload, &reg); err != nil {
+			return nil, err
+		}
+		return &reg, nil
+	}
+
+	// Fallback: try to unmarshal directly as L1ValidatorRegistration
+	var reg L1ValidatorRegistration
+	if _, err := Codec.Unmarshal(payload, &reg); err != nil {
 		return nil, ErrInvalidMessageType
 	}
 
-	// Convert SubnetID bytes to ids.ID
-	subnetID, err := ids.ToID(registerPayload.SubnetID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert NodeID bytes to ids.NodeID
-	nodeID, err := ids.ToNodeID(registerPayload.NodeID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert to local type
-	reg := &L1ValidatorRegistration{
-		ValidationID: subnetID, // Use SubnetID as validation ID for now
-		NodeID:       nodeID,
-		BLSPublicKey: registerPayload.BLSPublicKey,
-		Weight:       registerPayload.Weight,
-		Expiry:       registerPayload.RegistrationTime,
-		Valid:        true,
-	}
-
-	return reg, nil
+	return &reg, nil
 }
 
 // NewRegisterL1Validator creates a new L1 validator registration payload with proper signature
@@ -189,7 +196,7 @@ func NewL1ValidatorRegistration(validationID ids.ID, valid bool) (*warpPayload.L
 
 // ParseAddressedCall parses an addressed call from payload
 func ParseAddressedCall(payload []byte) (*warpPayload.AddressedCall, error) {
-	payloadObj, err := warpPayload.ParsePayload(payload)
+	payloadObj, err := warpPayload.Parse(payload)
 	if err != nil {
 		return nil, err
 	}

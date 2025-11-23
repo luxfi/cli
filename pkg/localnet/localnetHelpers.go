@@ -8,14 +8,29 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/net/primary"
+	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/sdk/models"
 )
+
+// emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
+type emptyEthKeychain struct{}
+
+func (e *emptyEthKeychain) GetEth(addr common.Address) (walletkeychain.Signer, bool) {
+	return nil, false
+}
+
+func (e *emptyEthKeychain) EthAddresses() set.Set[common.Address] {
+	return set.NewSet[common.Address](0)
+}
 
 // information that is persisted alongside the local network
 type ExtraLocalNetworkData struct {
@@ -108,15 +123,22 @@ func GetLocalNetworkWallet(
 	defer cancel()
 
 	// Create keychain for the wallet with EWOQ key for local testing
-	keychain := secp256k1fx.NewKeychain()
+	secpKeychain := secp256k1fx.NewKeychain()
 	// Load EWOQ test key
 	// For now, use an empty keychain since we need to convert the key format
 	// The EWOQ key conversion would need proper CB58 decoding
 
+	// Wrap the secp256k1fx keychain for wallet compatibility
+	nodeKeychain := keychain.WrapSecp256k1fxKeychain(secpKeychain)
+	walletKeychain := keychain.WrapNodeToWalletKeychain(nodeKeychain)
+
+	// Create empty ETH keychain for local testing (not needed for most operations)
+	ethKeychain := &emptyEthKeychain{}
+
 	walletConfig := &primary.WalletConfig{
 		URI:         endpoint,
-		LUXKeychain: keychain,
-		EthKeychain: keychain,
+		LUXKeychain: walletKeychain,
+		EthKeychain: ethKeychain,
 	}
 
 	return primary.MakeWallet(ctx, walletConfig)
