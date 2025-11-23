@@ -53,6 +53,9 @@ const (
 	// MigrateCmd is the migrate command name
 	MigrateCmd = "migrate"
 
+	// RPCCmd is the rpc command name
+	RPCCmd = "rpc"
+
 	// WarpCmd is the warp command name (for ICM/Interchain Messaging)
 	WarpCmd = "warp"
 )

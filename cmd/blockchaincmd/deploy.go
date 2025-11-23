@@ -33,7 +33,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm/fx"
 	"github.com/luxfi/node/vms/platformvm/signer"

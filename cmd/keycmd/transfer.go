@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -20,6 +21,7 @@ import (
 	eth_crypto "github.com/luxfi/crypto"
 	goethereumcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	cryptokeychain "github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
@@ -39,6 +41,17 @@ import (
 	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 )
+
+// emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
+type emptyEthKeychain struct{}
+
+func (e *emptyEthKeychain) GetEth(addr goethereumcommon.Address) (walletkeychain.Signer, bool) {
+	return nil, false
+}
+
+func (e *emptyEthKeychain) EthAddresses() set.Set[goethereumcommon.Address] {
+	return set.NewSet[goethereumcommon.Address](0)
+}
 
 const (
 	keyNameFlag         = "key"
@@ -257,7 +270,10 @@ func transferF(*cobra.Command, []string) error {
 		if err != nil {
 			return err
 		}
-		kc = sk.KeyChain()
+		// Wrap keychain for wallet compatibility
+		secpKC := sk.KeyChain()
+		nodeKC := keychain.WrapSecp256k1fxKeychain(secpKC)
+		kc = keychain.WrapNodeToWalletKeychain(nodeKC)
 	} else {
 		ledgerDevice, err := ledger.NewLedger()
 		if err != nil {
@@ -617,11 +633,10 @@ func pToPSend(
 	destinationAddrStr string,
 	amount uint64,
 ) error {
-	ethKeychain := secp256k1fx.NewKeychain()
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
-		EthKeychain: ethKeychain,
+		EthKeychain: &emptyEthKeychain{},
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -688,11 +703,10 @@ func pToXSend(
 	usingLedger bool,
 	amount uint64,
 ) error {
-	ethKeychain := secp256k1fx.NewKeychain()
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
-		EthKeychain: ethKeychain,
+		EthKeychain: &emptyEthKeychain{},
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -703,7 +717,7 @@ func pToXSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses(),
+		Addrs:     kc.Addresses().List(),
 	}
 	if err := exportFromP(
 		amount,
@@ -825,11 +839,10 @@ func pToCSend(
 	destinationAddrStr string,
 	amount uint64,
 ) error {
-	ethKeychain := secp256k1fx.NewKeychain()
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
-		EthKeychain: ethKeychain,
+		EthKeychain: &emptyEthKeychain{},
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -840,7 +853,7 @@ func pToCSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses(),
+		Addrs:     kc.Addresses().List(),
 	}
 	if err := exportFromP(
 		amount,
@@ -933,11 +946,11 @@ func cToPSend(
 	usingLedger bool,
 	amount uint64,
 ) error {
-	ethKeychain := sk.KeyChain()
+	// ethKeychain := sk.KeyChain() // Not used currently
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
-		EthKeychain: ethKeychain,
+		EthKeychain: &emptyEthKeychain{},
 	}
 	wallet, err := primary.MakeWallet(
 		context.Background(),
@@ -948,7 +961,7 @@ func cToPSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses(),
+		Addrs:     kc.Addresses().List(),
 	}
 	if err := exportFromC(
 		network,
@@ -1114,8 +1127,12 @@ func NewLedgerKeychain(ledgerDevice cryptokeychain.Ledger, indices []uint32) (wa
 }
 
 // Addresses returns the list of addresses
-func (lk *ledgerKeychain) Addresses() []ids.ShortID {
-	return lk.addresses
+func (lk *ledgerKeychain) Addresses() set.Set[ids.ShortID] {
+	result := set.NewSet[ids.ShortID](len(lk.addresses))
+	for _, addr := range lk.addresses {
+		result.Add(addr)
+	}
+	return result
 }
 
 // Get returns a signer for the given address
