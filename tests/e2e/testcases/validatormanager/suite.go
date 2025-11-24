@@ -146,7 +146,7 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertNetToL1Validator, error) {
 		BLSProofOfPossession: pop,
 		ChangeOwnerAddr:      ewoqPChainAddress,
 	}
-	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxdSubnetValidator([]models.SubnetValidator{bootstrapValidator})
+	luxdBootstrapValidators, err := networkcmd.ConvertToLuxdSubnetValidator([]models.SubnetValidator{bootstrapValidator})
 	if err != nil {
 		return nil, err
 	}
