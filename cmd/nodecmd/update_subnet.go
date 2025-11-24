@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/node"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/ssh"
@@ -47,7 +47,7 @@ func updateSubnet(_ *cobra.Command, args []string) error {
 	if local, ok := clusterConfig["Local"].(bool); ok && local {
 		return notImplementedForLocal("update")
 	}
-	if _, err := blockchaincmd.ValidateSubnetNameAndGetChains([]string{subnetName}); err != nil {
+	if _, err := networkcmd.ValidateSubnetNameAndGetChains([]string{subnetName}); err != nil {
 		return err
 	}
 	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))

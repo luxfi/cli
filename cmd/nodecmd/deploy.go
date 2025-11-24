@@ -7,7 +7,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/node"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/networkoptions"
@@ -46,7 +46,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	if err := node.CheckCluster(app, clusterName); err != nil {
 		return err
 	}
-	if _, err := blockchaincmd.ValidateSubnetNameAndGetChains([]string{subnetName}); err != nil {
+	if _, err := networkcmd.ValidateSubnetNameAndGetChains([]string{subnetName}); err != nil {
 		return err
 	}
 	clusterConfig, err := app.GetClusterConfig(clusterName)
@@ -86,7 +86,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 	useEwoqParam := true
 	sameControlKey := true
 
-	if err := blockchaincmd.CallDeploy(
+	if err := networkcmd.CallDeploy(
 		cmd,
 		subnetOnly,
 		subnetName,
