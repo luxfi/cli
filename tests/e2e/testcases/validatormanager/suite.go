@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/tests/e2e/commands"

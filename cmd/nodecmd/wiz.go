@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/interchaincmd/messengercmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
@@ -193,7 +193,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Creating the subnet"))
 		ux.Logger.PrintToUser("")
-		if err := blockchaincmd.CallCreate(
+		if err := networkcmd.CallCreate(
 			cmd,
 			subnetName,
 			forceSubnetCreate,
@@ -214,7 +214,7 @@ func wiz(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		if chainConf != "" || subnetConf != "" || nodeConf != "" {
-			if err := blockchaincmd.CallConfigure(
+			if err := networkcmd.CallConfigure(
 				cmd,
 				subnetName,
 				chainConf,
