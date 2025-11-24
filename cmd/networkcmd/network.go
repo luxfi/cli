@@ -47,8 +47,6 @@ This network currently supports multiple, concurrently deployed Subnets.`,
 	cmd.AddCommand(newStatusCmd())
 	// network quickstart
 	cmd.AddCommand(newQuickstartCmd())
-	// network import-genesis
-	cmd.AddCommand(newImportGenesisCmd())
 	// network export
 	cmd.AddCommand(newExportCmd())
 	// network import
