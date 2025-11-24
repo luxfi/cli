@@ -26,7 +26,7 @@ func createFile(t *testing.T, path string) {
 }
 
 func TestGetTmpNetAvailableLogs(t *testing.T) {
-	app := &application.Lux{}
+	app := application.New()
 	appDir, err := os.MkdirTemp(os.TempDir(), "cli-app-test")
 	require.NoError(t, err)
 	app.Setup(appDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
