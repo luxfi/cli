@@ -11,6 +11,7 @@ import (
 	"net/netip"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -75,19 +76,51 @@ func TmpNetCreate(
 	nodes []*tmpnet.Node,
 	bootstrap bool,
 ) (*tmpnet.Network, error) {
+	// Initialize defaultFlags if it's nil
+	if defaultFlags == nil {
+		defaultFlags = make(map[string]interface{})
+	}
+
 	if len(upgradeBytes) > 0 {
 		defaultFlags["upgrade-file-content"] = base64.StdEncoding.EncodeToString(upgradeBytes)
 	}
+	// Add network ID to default flags so nodes know which network they're on
+	defaultFlags["network-id"] = strconv.FormatUint(uint64(networkID), 10)
+
 	network := &tmpnet.Network{
 		Nodes:        nodes,
 		Dir:          networkDir,
 		DefaultFlags: defaultFlags,
 		Genesis:      genesis,
 		NetworkID:    networkID,
+		DefaultRuntimeConfig: tmpnet.NodeRuntimeConfig{
+			Process: &tmpnet.ProcessRuntimeConfig{
+				LuxNodePath: luxdBinPath,
+				PluginDir:   pluginDir,
+			},
+		},
 	}
+	// EnsureDefaultConfig only sets up defaults, it doesn't configure nodes
 	if err := network.EnsureDefaultConfig(log); err != nil {
 		return nil, err
 	}
+
+	// Manually configure each node (EnsureDefaultConfig doesn't do this anymore)
+	for _, node := range network.Nodes {
+		if err := network.EnsureNodeConfig(node); err != nil {
+			return nil, err
+		}
+		// Copy default flags to node flags (EnsureNodeConfig doesn't do this)
+		if node.Flags == nil {
+			node.Flags = make(map[string]interface{})
+		}
+		for k, v := range defaultFlags {
+			if _, exists := node.Flags[k]; !exists {
+				node.Flags[k] = v
+			}
+		}
+	}
+
 	if len(bootstrapIPs) > 0 {
 		for _, node := range network.Nodes {
 			// Bootstrap configuration is now set via node.Flags
@@ -1200,5 +1233,6 @@ func GetTmpNetAvailableLogs(
 			}
 		}
 	}
+	sort.Strings(logPaths)
 	return logPaths, nil
 }
