@@ -3,9 +3,9 @@
 package networkcmd
 
 import (
-	"fmt"
-
+	"github.com/luxfi/cli/cmd/networkcmd/upgradecmd"
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
 
@@ -15,37 +15,60 @@ var (
 	numNodes    uint32
 )
 
+// lux network (alias: blockchain, net)
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
 		Use:     "network",
-		Aliases: []string{"net"},
-		Short:   "Manage locally deployed subnets",
-		Long: `The network command suite provides a collection of tools for managing local Subnet
-deployments.
+		Aliases: []string{"blockchain", "net"},
+		Short:   "Create and deploy blockchains/networks",
+		Long: `The network command suite provides tools for developing and deploying blockchains.
 
-When you deploy a Subnet locally, it runs on a local, multi-node Lux network. The
-subnet deploy command starts this network in the background. This command suite allows you
-to shutdown, restart, and clear that network.
+In Lux, a blockchain IS a network - every blockchain can have sub-networks.
 
-This network currently supports multiple, concurrently deployed Subnets.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			err := cmd.Help()
-			if err != nil {
-				fmt.Println(err)
-			}
-		},
-		Args: cobra.ExactArgs(0),
+This command suite includes:
+- Blockchain lifecycle: create, deploy, describe, configure
+- Network management: start, stop, clean, status
+- Data operations: export, import
+- Validator management: add, remove, change weight
+
+Use 'lux network', 'lux blockchain', or 'lux net' interchangeably.`,
+		RunE: cobrautils.CommandSuiteUsage,
 	}
-	// network start
+
+	// Blockchain lifecycle commands
+	cmd.AddCommand(newCreateCmd())
+	cmd.AddCommand(newDeleteCmd())
+	cmd.AddCommand(newDeployCmd())
+	cmd.AddCommand(newDescribeCmd())
+	cmd.AddCommand(newListCmd())
+	cmd.AddCommand(newJoinCmd())
+	cmd.AddCommand(newPublishCmd())
+	cmd.AddCommand(newStatsCmd())
+	cmd.AddCommand(newConfigureCmd())
+	cmd.AddCommand(vmidCmd())
+	cmd.AddCommand(newConvertCmd())
+
+	// Validator commands
+	cmd.AddCommand(newAddValidatorCmd())
+	cmd.AddCommand(newRemoveValidatorCmd())
+	cmd.AddCommand(newValidatorsCmd())
+	cmd.AddCommand(newChangeOwnerCmd())
+	cmd.AddCommand(newChangeWeightCmd())
+
+	// Data operations
+	cmd.AddCommand(newExportCmd())
+	cmd.AddCommand(newImportCmd())
+
+	// Upgrade commands
+	cmd.AddCommand(upgradecmd.NewCmd(app))
+
+	// Local network operations
 	cmd.AddCommand(newStartCmd())
-	// network stop
 	cmd.AddCommand(newStopCmd())
-	// network clean
 	cmd.AddCommand(newCleanCmd())
-	// network status
 	cmd.AddCommand(newStatusCmd())
-	// network quickstart
 	cmd.AddCommand(newQuickstartCmd())
+
 	return cmd
 }

@@ -8,7 +8,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/cobrautils"
@@ -158,7 +158,7 @@ func addValidator(_ *cobra.Command, _ []string) error {
 	}
 
 	if nodeIDStr == "" {
-		nodeID, err = blockchaincmd.PromptNodeID("add as Primary Network Validator")
+		nodeID, err = networkcmd.PromptNodeID("add as Primary Network Validator")
 		if err != nil {
 			return err
 		}
