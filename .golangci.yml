@@ -1,4 +1,5 @@
 # https://golangci-lint.run/usage/configuration/
+version: v2
 run:
   timeout: 10m
   # skip auto-generated files.
