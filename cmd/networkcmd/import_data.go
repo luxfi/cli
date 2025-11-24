@@ -20,18 +20,18 @@ var (
 	importInput string
 )
 
-// lux network import-blocks
-func newImportBlocksCmd() *cobra.Command {
+// lux network import
+func newImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import-blocks",
+		Use:   "import",
 		Short: "Import blockchain blocks via RPC",
 		Long: `Import blockchain blocks to a running node via RPC from JSONL format.
 
 Reads blocks from a JSONL file (one JSON object per line) and imports them.
 
 Example:
-  lux network import-blocks --id=C --input=blocks.jsonl
-  lux net import-blocks --id=C --input=c-chain.jsonl`,
+  lux network import --id=C --input=blocks.jsonl
+  lux net import --id=C --input=c-chain.jsonl`,
 		RunE: importDataFunc,
 	}
 
