@@ -1,6 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
-package networkcmd
+package blockchaincmd
 
 import (
 	"bufio"
@@ -22,7 +22,7 @@ var (
 	exportOut   string
 )
 
-// lux network export
+// lux blockchain export
 func newExportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export",
@@ -32,8 +32,7 @@ func newExportCmd() *cobra.Command {
 Each block is written as a single JSON line for efficient streaming and processing.
 
 Example:
-  lux network export --id=dnmzhuf6... --output=blocks.jsonl
-  lux net export --id=C --output=c-chain.jsonl`,
+  lux blockchain export --id=dnmzhuf6... --output=blocks.jsonl`,
 		RunE: exportFunc,
 	}
 

@@ -1,6 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
-package networkcmd
+package blockchaincmd
 
 import (
 	"bufio"
@@ -20,18 +20,17 @@ var (
 	importInput string
 )
 
-// lux network import
-func newImportCmd() *cobra.Command {
+// lux blockchain import data
+func newImportDataCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import",
+		Use:   "data",
 		Short: "Import blockchain blocks via RPC",
 		Long: `Import blockchain blocks to a running node via RPC from JSONL format.
 
 Reads blocks from a JSONL file (one JSON object per line) and imports them.
 
 Example:
-  lux network import --id=C --input=blocks.jsonl
-  lux net import --id=C --input=c-chain.jsonl`,
+  lux blockchain import data --id=C --input=blocks.jsonl`,
 		RunE: importDataFunc,
 	}
 
