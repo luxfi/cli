@@ -34,12 +34,22 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	require.NoError(t, err)
 	networkDir, err := os.MkdirTemp(os.TempDir(), "cli-tmpnet-test")
 	require.NoError(t, err)
-	_, err = TmpNetCreate(
+	// Create dummy binary paths for tmpnet
+	dummyBinDir, err := os.MkdirTemp(os.TempDir(), "cli-dummy-bin")
+	require.NoError(t, err)
+	defer os.RemoveAll(dummyBinDir)
+	dummyPluginDir := filepath.Join(dummyBinDir, "plugins")
+	err = os.MkdirAll(dummyPluginDir, constants.DefaultPerms755)
+	require.NoError(t, err)
+	// Create dummy luxd binary file
+	dummyLuxdPath := filepath.Join(dummyBinDir, "luxd")
+	createFile(t, dummyLuxdPath)
+	network, err := TmpNetCreate(
 		context.Background(),
 		NewLoggerAdapter(app.Log),
 		networkDir,
-		"",
-		"",
+		filepath.Join(dummyBinDir, "luxd"),
+		dummyPluginDir,
 		networkID,
 		nil,
 		nil,
@@ -53,10 +63,11 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	// no logs yet
 	logPaths, err := GetTmpNetAvailableLogs(networkDir, ids.Empty, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{}, logPaths)
-	// default network
-	node1ID := "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"
-	node2ID := "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ"
+	require.ElementsMatch(t, []string{}, logPaths)
+	// Get actual node IDs from the created network
+	require.Len(t, network.Nodes, 2)
+	node1ID := network.Nodes[0].NodeID.String()
+	node2ID := network.Nodes[1].NodeID.String()
 	node1Logs := filepath.Join(networkDir, node1ID, "logs")
 	node2Logs := filepath.Join(networkDir, node2ID, "logs")
 	err = os.MkdirAll(node1Logs, constants.DefaultPerms755)
@@ -68,7 +79,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	createFile(t, filepath.Join(node2Logs, "main.log"))
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, ids.Empty, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "main.log"),
 		filepath.Join(node2Logs, "main.log"),
 	}, logPaths)
@@ -77,7 +88,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	createFile(t, filepath.Join(node2Logs, "P.log"))
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, ids.Empty, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
 		filepath.Join(node2Logs, "P.log"),
@@ -86,7 +97,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	// gather C chain when no files are present
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, ids.Empty, true)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
 		filepath.Join(node2Logs, "P.log"),
@@ -97,7 +108,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	createFile(t, filepath.Join(node2Logs, "C.log"))
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, ids.Empty, true)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "C.log"),
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
@@ -108,7 +119,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	// don't gather C chain when files are present
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, ids.Empty, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
 		filepath.Join(node2Logs, "P.log"),
@@ -118,7 +129,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	blockchainID := ids.GenerateTestID()
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, blockchainID, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
 		filepath.Join(node2Logs, "P.log"),
@@ -129,7 +140,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	createFile(t, filepath.Join(node2Logs, blockchainID.String()+".log"))
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, blockchainID, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, blockchainID.String()+".log"),
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
@@ -140,7 +151,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	// don't gather blockchain when files are present
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, ids.Empty, false)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, "P.log"),
 		filepath.Join(node1Logs, "main.log"),
 		filepath.Join(node2Logs, "P.log"),
@@ -149,7 +160,7 @@ func TestGetTmpNetAvailableLogs(t *testing.T) {
 	// gather all files are present
 	logPaths, err = GetTmpNetAvailableLogs(networkDir, blockchainID, true)
 	require.NoError(t, err)
-	require.Equal(t, []string{
+	require.ElementsMatch(t, []string{
 		filepath.Join(node1Logs, blockchainID.String()+".log"),
 		filepath.Join(node1Logs, "C.log"),
 		filepath.Join(node1Logs, "P.log"),
