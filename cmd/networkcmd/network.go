@@ -47,11 +47,11 @@ This network currently supports multiple, concurrently deployed Subnets.`,
 	cmd.AddCommand(newStatusCmd())
 	// network quickstart
 	cmd.AddCommand(newQuickstartCmd())
-	// network import
-	cmd.AddCommand(newImportCmd())
+	// network import-genesis
+	cmd.AddCommand(newImportGenesisCmd())
 	// network export
 	cmd.AddCommand(newExportCmd())
-	// network import-blocks
-	cmd.AddCommand(newImportBlocksCmd())
+	// network import
+	cmd.AddCommand(newImportCmd())
 	return cmd
 }

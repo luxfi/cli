@@ -24,9 +24,9 @@ var (
 	importBatchSize   uint64
 )
 
-func newImportCmd() *cobra.Command {
+func newImportGenesisCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import",
+		Use:   "import-genesis",
 		Short: "Import genesis data into BadgerDB archive",
 		Long: `The network import command imports blockchain data from an existing database
 (PebbleDB or LevelDB) into a BadgerDB archive for use with the dual-database architecture.
