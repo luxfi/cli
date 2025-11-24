@@ -121,7 +121,7 @@ func GetLocalNetworkLuxdVersion(app *application.Lux) (bool, string, int, error)
 	// version is in format lux/x.y.z, need to turn to semantic
 	splitVersion := strings.Split(versionResponse.Version, "/")
 	if len(splitVersion) != 2 {
-		return true, "", 0, fmt.Errorf("unable to parse luxd version " + versionResponse.Version)
+		return true, "", 0, fmt.Errorf("unable to parse luxd version %s", versionResponse.Version)
 	}
 	// index 0 should be lux, index 1 will be version
 	parsedVersion := "v" + splitVersion[1]
