@@ -14,7 +14,6 @@ import (
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
-	"github.com/luxfi/cli/cmd/blockchaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/interchaincmd"
 	"github.com/luxfi/cli/cmd/keycmd"
@@ -93,12 +92,11 @@ Quick start:
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
 	// add sub commands
-	rootCmd.AddCommand(blockchaincmd.NewCmd(app))
+	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (alias: blockchain, net)
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(l1cmd.NewCmd(app))
 	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
-	rootCmd.AddCommand(networkcmd.NewCmd(app))
 	rootCmd.AddCommand(nodecmd.NewCmd(app))
 	rootCmd.AddCommand(keycmd.NewCmd(app))
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/node"
 
-	blockchaincmd "github.com/luxfi/cli/cmd/blockchaincmd"
+	blockchaincmd "github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"

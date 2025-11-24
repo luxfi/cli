@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -103,7 +103,7 @@ func statusNode(_ *cobra.Command, args []string) error {
 	}
 	if blockchainName != "" {
 		// check subnet first
-		if _, err := blockchaincmd.ValidateSubnetNameAndGetChains([]string{blockchainName}); err != nil {
+		if _, err := networkcmd.ValidateSubnetNameAndGetChains([]string{blockchainName}); err != nil {
 			return err
 		}
 	}

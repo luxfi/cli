@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
@@ -183,7 +183,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 		}
 		for _, subnetName := range subnets {
 			if subnetName != "p" && subnetName != "x" && subnetName != "c" {
-				_, err = blockchaincmd.ValidateSubnetNameAndGetChains([]string{subnetName})
+				_, err = networkcmd.ValidateSubnetNameAndGetChains([]string{subnetName})
 				if err != nil {
 					return nil, err
 				}

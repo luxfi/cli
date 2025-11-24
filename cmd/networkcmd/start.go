@@ -34,8 +34,6 @@ var (
 	genesisImport string
 )
 
-const latest = "latest"
-
 // StartFlags contains configuration for starting a network
 type StartFlags struct {
 	UserProvidedAvagoVersion string

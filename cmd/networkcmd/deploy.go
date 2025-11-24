@@ -1,6 +1,6 @@
 // / Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
-package blockchaincmd
+package networkcmd
 
 import (
 	"encoding/hex"
@@ -13,7 +13,6 @@ import (
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/cmd/interchaincmd/messengercmd"
 	"github.com/luxfi/cli/cmd/interchaincmd/relayercmd"
-	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -69,7 +68,6 @@ var (
 	partialSync            bool
 	subnetOnly             bool
 	warpSpec               subnet.WarpSpec
-	numNodes               uint32
 	relayerAmount          float64
 	relayerKeyName         string
 	relayCChain            bool
@@ -594,8 +592,8 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 
 		ux.Logger.PrintToUser("")
-		if err := networkcmd.Start(
-			networkcmd.StartFlags{
+		if err := Start(
+			StartFlags{
 				UserProvidedLuxdVersion: luxdVersion,
 				LuxdBinaryPath:          deployFlags.LocalMachineFlags.LuxdBinaryPath,
 				NumNodes:                numNodes,
