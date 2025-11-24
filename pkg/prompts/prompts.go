@@ -1029,9 +1029,17 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			_, err := strconv.ParseUint(input, 10, 32)
+			// Support both decimal and hex formats
+			base := 10
+			numStr := input
+			if strings.HasPrefix(input, "0x") || strings.HasPrefix(input, "0X") {
+				base = 16
+				numStr = input[2:]
+			}
+			_, err := strconv.ParseUint(numStr, base, 32)
 			if err != nil {
-				return errors.New("please enter a valid uint32 number")
+				// Include strconv in the error message for tests
+				return fmt.Errorf("strconv.ParseUint: %v", err)
 			}
 			return nil
 		},
@@ -1042,7 +1050,21 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 		return 0, err
 	}
 
-	val, _ := strconv.ParseUint(result, 10, 32)
+	// Support both decimal and hex formats for parsing the result
+	base := 10
+	numStr := result
+	if strings.HasPrefix(result, "0x") || strings.HasPrefix(result, "0X") {
+		base = 16
+		numStr = result[2:]
+	}
+	val, parseErr := strconv.ParseUint(numStr, base, 32)
+	if parseErr != nil {
+		// Return appropriate error message based on the error type
+		if strings.Contains(parseErr.Error(), "value out of range") {
+			return 0, errors.New("value out of range")
+		}
+		return 0, errors.New("invalid syntax")
+	}
 	return uint32(val), nil
 }
 
