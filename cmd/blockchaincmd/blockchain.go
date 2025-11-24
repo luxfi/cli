@@ -41,6 +41,8 @@ manage your Blockchain configurations and live deployments.`,
 	cmd.AddCommand(newJoinCmd())
 	// blockchain addValidator
 	cmd.AddCommand(newAddValidatorCmd())
+	// blockchain export
+	cmd.AddCommand(newExportCmd())
 	// blockchain import
 	cmd.AddCommand(newImportCmd())
 	// blockchain publish
