@@ -1,6 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
-package blockchaincmd
+package networkcmd
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd/upgradecmd"
+	"github.com/luxfi/cli/cmd/networkcmd/upgradecmd"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
