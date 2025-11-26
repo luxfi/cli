@@ -120,7 +120,7 @@ type Prompter interface {
 	ChooseKeyOrLedger(goal string) (bool, error)
 	CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error)
 	CaptureListWithSize(prompt string, options []string, size int) ([]string, error)
-	CaptureFloat(promptStr string) (float64, error)
+	CaptureFloat(promptStr string, validator func(float64) error) (float64, error)
 	CaptureAddresses(promptStr string) ([]crypto.Address, error)
 	CaptureXChainAddress(promptStr string, network models.Network) (string, error)
 	CaptureValidatedString(promptStr string, validator func(string) error) (string, error)
@@ -959,13 +959,16 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 }
 
 // CaptureFloat prompts the user for a floating point number
-func (*realPrompter) CaptureFloat(promptStr string) (float64, error) {
+func (*realPrompter) CaptureFloat(promptStr string, validator func(float64) error) (float64, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			_, err := strconv.ParseFloat(input, 64)
+			val, err := strconv.ParseFloat(input, 64)
 			if err != nil {
-				return errors.New("please enter a valid number")
+				return fmt.Errorf("strconv.ParseFloat: %v", err)
+			}
+			if validator != nil {
+				return validator(val)
 			}
 			return nil
 		},
@@ -1170,7 +1173,7 @@ func (*realPrompter) CaptureInt(promptStr string, validator func(int) error) (in
 		Validate: func(input string) error {
 			val, err := strconv.Atoi(input)
 			if err != nil {
-				return errors.New("please enter a valid integer")
+				return fmt.Errorf("strconv.Atoi: %v", err)
 			}
 			if validator != nil {
 				return validator(val)
@@ -1194,7 +1197,7 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 		Validate: func(input string) error {
 			val, err := strconv.ParseUint(input, 10, 8)
 			if err != nil {
-				return errors.New("please enter a valid uint8 number (0-255)")
+				return fmt.Errorf("strconv.ParseUint: %v", err)
 			}
 			if val > 255 {
 				return errors.New("value must be between 0 and 255")

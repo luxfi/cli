@@ -556,7 +556,7 @@ func TestCaptureFloatWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			floatVal, err := prompter.CaptureFloat("Enter float:")
+			floatVal, err := prompter.CaptureFloat("Enter float:", tt.validator)
 
 			if tt.expectError {
 				require.Error(t, err)

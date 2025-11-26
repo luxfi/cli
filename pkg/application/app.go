@@ -80,6 +80,12 @@ func (p promptAdapter) CaptureWeight(promptStr string) (uint64, error) {
 	return p.Prompter.CaptureWeight(promptStr, nil)
 }
 
+// CaptureFloat adapts the CLI's CaptureFloat to SDK's signature
+func (p promptAdapter) CaptureFloat(promptStr string) (float64, error) {
+	// Call CLI's CaptureFloat with nil validator since SDK doesn't pass one
+	return p.Prompter.CaptureFloat(promptStr, nil)
+}
+
 // CapturePositiveInt adapts between the different Comparator types
 func (p promptAdapter) CapturePositiveInt(promptStr string, comparators []sdkprompts.Comparator) (int, error) {
 	// Convert SDK comparators to CLI comparators

@@ -111,7 +111,7 @@ Common upgrades:
 						return err
 					}
 
-					rewardRate, err := app.Prompt.CaptureFloat("Annual reward rate (%)")
+					rewardRate, err := app.Prompt.CaptureFloat("Annual reward rate (%)", nil)
 					if err != nil {
 						return err
 					}
