@@ -22,8 +22,8 @@ var (
 	testLuxdCompat5 = []byte("{\"39\": [\"v1.12.2\", \"v1.20.3\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
 	testLuxdCompat6 = []byte("{\"39\": [\"v1.12.2\", \"v1.20.3\", \"v1.20.4\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
 	testLuxdCompat7 = []byte("{\"40\": [\"v1.20.5\"],\"39\": [\"v1.12.2\", \"v1.20.3\", \"v1.20.4\"]}")
-	testCLICompat   = []byte(`{"subnetevm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latestVersion":"v1.20.3"},"Devnet":{"latestVersion":"v1.20.3"},"Testnet":{"latestVersion":"v1.20.3"},"Mainnet":{"latestVersion":"v1.20.3"}}}`)
-	testCLICompat2  = []byte(`{"subnetevm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latestVersion":"v1.20.3"},"Devnet":{"latestVersion":"v1.20.3"},"Testnet":{"latestVersion":"v1.20.3-testnet"},"Mainnet":{"latestVersion":"v1.20.3"}}}`)
+	testCLICompat   = []byte(`{"subnetevm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3"},"Devnet":{"latest-version":"v1.20.3"},"Testnet":{"latest-version":"v1.20.3"},"Mainnet":{"latest-version":"v1.20.3"}}}`)
+	testCLICompat2  = []byte(`{"subnetevm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3"},"Devnet":{"latest-version":"v1.20.3"},"Testnet":{"latest-version":"v1.20.3-testnet"},"Mainnet":{"latest-version":"v1.20.3"}}}`)
 )
 
 func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
