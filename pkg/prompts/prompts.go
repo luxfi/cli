@@ -1195,12 +1195,19 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			val, err := strconv.ParseUint(input, 10, 8)
+			// Support decimal, hex, and octal formats
+			base := 10
+			numStr := input
+			if strings.HasPrefix(input, "0x") || strings.HasPrefix(input, "0X") {
+				base = 16
+				numStr = input[2:]
+			} else if strings.HasPrefix(input, "0") && len(input) > 1 && input != "0" {
+				base = 8
+				numStr = input[1:]
+			}
+			_, err := strconv.ParseUint(numStr, base, 8)
 			if err != nil {
 				return fmt.Errorf("strconv.ParseUint: %v", err)
-			}
-			if val > 255 {
-				return errors.New("value must be between 0 and 255")
 			}
 			return nil
 		},
@@ -1211,7 +1218,17 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 		return 0, err
 	}
 
-	val, _ := strconv.ParseUint(result, 10, 8)
+	// Parse the result with the same logic
+	base := 10
+	numStr := result
+	if strings.HasPrefix(result, "0x") || strings.HasPrefix(result, "0X") {
+		base = 16
+		numStr = result[2:]
+	} else if strings.HasPrefix(result, "0") && len(result) > 1 && result != "0" {
+		base = 8
+		numStr = result[1:]
+	}
+	val, _ := strconv.ParseUint(numStr, base, 64)
 	return uint8(val), nil
 }
 
