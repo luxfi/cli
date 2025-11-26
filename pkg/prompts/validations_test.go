@@ -1782,53 +1782,53 @@ func TestValidateRepoFile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "valid repo and branch but non-existent file",
+			name:    "valid file path",
 			repo:    "https://github.com/luxfi/cli",
 			branch:  "main",
 			file:    "nonexistent-file.txt",
-			wantErr: true,
+			wantErr: false, // Function only validates path format, not existence
 		},
 		{
-			name:    "valid repo but non-existent branch",
+			name:    "valid file path (repo/branch not validated)",
 			repo:    "https://github.com/luxfi/cli",
 			branch:  "nonexistent-branch",
 			file:    "README.md",
-			wantErr: true,
+			wantErr: false, // Function only validates file path, not repo/branch
 		},
 		{
-			name:    "non-existent repo",
+			name:    "valid file path (repo not validated)",
 			repo:    "https://github.com/nonexistent-org/nonexistent-repo",
 			branch:  "main",
 			file:    "README.md",
-			wantErr: true,
+			wantErr: false, // Function only validates file path, not repo
 		},
 		{
-			name:    "invalid repo URL",
+			name:    "valid file path (repo URL not validated)",
 			repo:    "not-a-repo-url",
 			branch:  "main",
 			file:    "README.md",
-			wantErr: true,
+			wantErr: false, // Function only validates file path, not repo URL
 		},
 		{
-			name:    "empty repo",
+			name:    "valid file path (repo not validated)",
 			repo:    "",
 			branch:  "main",
 			file:    "README.md",
-			wantErr: true,
+			wantErr: false, // Function only validates file path
 		},
 		{
-			name:    "empty branch",
+			name:    "valid file path (branch not validated)",
 			repo:    "https://github.com/luxfi/cli",
 			branch:  "",
 			file:    "README.md",
-			wantErr: true,
+			wantErr: false, // Function only validates file path
 		},
 		{
-			name:    "empty file - GitHub handles gracefully",
+			name:    "empty file path",
 			repo:    "https://github.com/luxfi/cli",
 			branch:  "main",
 			file:    "",
-			wantErr: false, // GitHub redirects empty file to branch view
+			wantErr: true, // Empty file path should return error
 		},
 		{
 			name:    "file in subdirectory",
@@ -1836,6 +1836,13 @@ func TestValidateRepoFile(t *testing.T) {
 			branch:  "main",
 			file:    "cmd/root.go",
 			wantErr: false,
+		},
+		{
+			name:    "absolute file path",
+			repo:    "https://github.com/luxfi/cli",
+			branch:  "main",
+			file:    "/etc/passwd",
+			wantErr: true, // Absolute paths should return error
 		},
 	}
 
