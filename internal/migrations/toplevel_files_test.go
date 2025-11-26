@@ -24,7 +24,7 @@ func TestTopLevelFilesMigration(t *testing.T) {
 	require := require.New(t)
 	testDir := t.TempDir()
 
-	app := &application.Lux{}
+	app := application.New()
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	testSC1 := &models.Sidecar{

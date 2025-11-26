@@ -61,7 +61,7 @@ func TestEVMRenameMigration(t *testing.T) {
 			require := require.New(t)
 			testDir := t.TempDir()
 
-			app := &application.Lux{}
+			app := application.New()
 			app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 			err := app.CreateSidecar(tt.sc)
@@ -90,7 +90,7 @@ func TestEVMRenameMigration_EmptyDir(t *testing.T) {
 	require := require.New(t)
 	testDir := t.TempDir()
 
-	app := &application.Lux{}
+	app := application.New()
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	emptySubnetName := "emptySubnet"
