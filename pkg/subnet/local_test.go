@@ -74,6 +74,9 @@ func setupTest(t *testing.T) *require.Assertions {
 }
 
 func TestDeployToLocal(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	require := setupTest(t)
 	luxVersion := "v1.18.0"
 
