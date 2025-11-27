@@ -435,8 +435,9 @@ func ValidateRepoBranch(branch string) error {
 
 // ValidateRepoFile validates a repository file path
 func ValidateRepoFile(filepath string) error {
-	if filepath == "" {
-		return errors.New("file path cannot be empty")
+	// First check if non-empty using generic validator
+	if err := validateNonEmpty(filepath); err != nil {
+		return err
 	}
 	// Basic validation for file paths
 	if strings.HasPrefix(filepath, "/") {
