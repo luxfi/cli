@@ -1228,7 +1228,10 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 		base = 8
 		numStr = result[1:]
 	}
-	val, _ := strconv.ParseUint(numStr, base, 64)
+	val, err := strconv.ParseUint(numStr, base, 64)
+	if err != nil {
+		return 0, err
+	}
 	return uint8(val), nil
 }
 
