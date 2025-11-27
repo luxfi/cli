@@ -1719,44 +1719,37 @@ func TestValidateURL(t *testing.T) {
 func TestValidateRepoBranch(t *testing.T) {
 	tests := []struct {
 		name    string
-		repo    string
 		branch  string
 		wantErr bool
 	}{
 		{
-			name:    "valid repo and branch - lux-cli main",
-			repo:    "https://github.com/luxfi/cli",
+			name:    "valid branch name - main",
 			branch:  "main",
 			wantErr: false,
 		},
 		{
-			name:    "valid repo but non-existent branch",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "nonexistent-branch-12345",
-			wantErr: true,
+			name:    "valid branch name - feature/test",
+			branch:  "feature/test",
+			wantErr: false,
 		},
 		{
-			name:    "non-existent repo",
-			repo:    "https://github.com/nonexistent-org/nonexistent-repo",
-			branch:  "main",
-			wantErr: true,
+			name:    "valid branch name - with-dashes",
+			branch:  "with-dashes",
+			wantErr: false,
 		},
 		{
-			name:    "invalid repo URL",
-			repo:    "not-a-repo-url",
-			branch:  "main",
-			wantErr: true,
-		},
-		{
-			name:    "empty repo",
-			repo:    "",
-			branch:  "main",
-			wantErr: true,
+			name:    "valid branch name - with_underscores",
+			branch:  "with_underscores",
+			wantErr: false,
 		},
 		{
 			name:    "empty branch",
-			repo:    "https://github.com/luxfi/cli",
 			branch:  "",
+			wantErr: true,
+		},
+		{
+			name:    "branch with spaces",
+			branch:  "invalid branch name",
 			wantErr: true,
 		},
 	}
