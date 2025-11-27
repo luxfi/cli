@@ -796,20 +796,8 @@ func captureKeyName(prompt Prompter, goal string, keyDir string, includeEwoq boo
 
 func (*realPrompter) CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			val, err := strconv.ParseFloat(input, 64)
-			if err != nil {
-				return err
-			}
-			if val < minBalance {
-				return fmt.Errorf("balance must be at least %f", minBalance)
-			}
-			if val > availableBalance {
-				return fmt.Errorf("balance cannot exceed available balance of %f", availableBalance)
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateValidatorBalanceFunc(availableBalance, minBalance),
 	}
 	result, err := promptUIRunner(prompt)
 	if err != nil {
