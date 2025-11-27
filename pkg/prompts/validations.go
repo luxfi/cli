@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"net/http"
 	"net/mail"
 	"net/url"
 	"os"
@@ -385,8 +386,27 @@ func validateValidatorBalanceFunc(availableBalance float64, minBalance float64) 
 
 // RequestURL makes a GET request to validate URL connectivity
 func RequestURL(url string) error {
-	// For testing purposes, just check if URL is valid
-	return ValidateURLFormat(url)
+	// First validate the format
+	if err := ValidateURLFormat(url); err != nil {
+		return err
+	}
+
+	// Make HTTP HEAD request to check if URL is reachable
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+	resp, err := client.Head(url)
+	if err != nil {
+		return fmt.Errorf("failed to reach URL: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check for successful status codes (2xx or 3xx)
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("URL returned status %d", resp.StatusCode)
+	}
+
+	return nil
 }
 
 // ValidateURL validates URL format and optionally checks connectivity
