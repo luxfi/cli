@@ -30,14 +30,14 @@ func validateEmail(input string) error {
 
 func ValidateURLFormat(input string) error {
 	if input == "" {
-		return errors.New("URL cannot be empty")
+		return errors.New("empty url")
 	}
 	parsedURL, err := url.Parse(input)
 	if err != nil {
 		return err
 	}
 	if parsedURL.Scheme == "" {
-		return errors.New("URL must have a scheme (e.g., http:// or https://)")
+		return errors.New("invalid URI for request")
 	}
 	return nil
 }
