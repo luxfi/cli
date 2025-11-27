@@ -31,8 +31,14 @@ func ValidateURLFormat(input string) error {
 	if input == "" {
 		return errors.New("URL cannot be empty")
 	}
-	_, err := url.Parse(input)
-	return err
+	parsedURL, err := url.Parse(input)
+	if err != nil {
+		return err
+	}
+	if parsedURL.Scheme == "" {
+		return errors.New("URL must have a scheme (e.g., http:// or https://)")
+	}
+	return nil
 }
 
 func validatePositiveBigInt(input string) error {
@@ -254,6 +260,9 @@ func getXChainValidationFunc(network models.Network) func(string) error {
 func ValidateHexa(s string) error {
 	if !strings.HasPrefix(s, "0x") {
 		return errors.New("hexadecimal string must start with 0x")
+	}
+	if len(s) <= 2 {
+		return errors.New("hexadecimal string must have at least one character after 0x")
 	}
 	for _, c := range s[2:] {
 		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
