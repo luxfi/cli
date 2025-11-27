@@ -486,45 +486,52 @@ func (*realPrompter) CaptureEmail(promptStr string) (string, error) {
 }
 
 func (*realPrompter) CaptureURL(promptStr string, validateConnection bool) (string, error) {
-	prompt := promptui.Prompt{
-		Label:    promptStr,
-		Validate: ValidateURLFormat,
-	}
-
-	urlStr, err := promptUIRunner(prompt)
-	if err != nil {
-		return "", err
-	}
-
-	// Validate connection if requested
-	if validateConnection {
-		parsedURL, err := url.Parse(urlStr)
-		if err != nil {
-			return "", fmt.Errorf("invalid URL: %w", err)
+	// Loop until we get a valid URL (with connection check if requested)
+	for {
+		prompt := promptui.Prompt{
+			Label:    promptStr,
+			Validate: ValidateURLFormat,
 		}
 
-		// Try to connect to the URL
-		client := &http.Client{
-			Timeout: 5 * time.Second,
+		urlStr, err := promptUIRunner(prompt)
+		if err != nil {
+			return "", err
 		}
 
-		resp, err := client.Head(urlStr)
-		if err != nil {
-			// Try GET if HEAD fails
-			resp, err = client.Get(urlStr)
+		// Validate connection if requested
+		if validateConnection {
+			parsedURL, err := url.Parse(urlStr)
 			if err != nil {
-				return "", fmt.Errorf("failed to connect to %s: %w", parsedURL.Host, err)
+				return "", fmt.Errorf("invalid URL: %w", err)
+			}
+
+			// Try to connect to the URL
+			client := &http.Client{
+				Timeout: 5 * time.Second,
+			}
+
+			resp, err := client.Head(urlStr)
+			if err != nil {
+				// Try GET if HEAD fails
+				resp, err = client.Get(urlStr)
+				if err != nil {
+					// Connection failed, loop to prompt again
+					fmt.Printf("Failed to connect to %s: %v\n", parsedURL.Host, err)
+					continue
+				}
+			}
+			defer resp.Body.Close()
+
+			// Accept any successful response (2xx, 3xx)
+			if resp.StatusCode >= 400 {
+				// Bad status, loop to prompt again
+				fmt.Printf("URL returned error status %d\n", resp.StatusCode)
+				continue
 			}
 		}
-		defer resp.Body.Close()
 
-		// Accept any successful response (2xx, 3xx)
-		if resp.StatusCode >= 400 {
-			return "", fmt.Errorf("URL returned error status %d", resp.StatusCode)
-		}
+		return urlStr, nil
 	}
-
-	return urlStr, nil
 }
 
 func (*realPrompter) CaptureStringAllowEmpty(promptStr string) (string, error) {
