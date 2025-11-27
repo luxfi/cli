@@ -1131,17 +1131,8 @@ func (*realPrompter) CaptureValidatedString(promptStr string, validator func(str
 // CaptureRepoBranch prompts for a git branch from a repository
 func (*realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			if input == "" {
-				return errors.New("branch name cannot be empty")
-			}
-			// Basic validation for branch names
-			if strings.Contains(input, " ") {
-				return errors.New("branch name cannot contain spaces")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: ValidateRepoBranch,
 	}
 
 	return promptUIRunner(prompt)

@@ -3699,8 +3699,6 @@ func TestCaptureRepoBranchWithMonkeyPatch(t *testing.T) {
 				require.Equal(t, tt.promptStr, prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
-				callCount++
-
 				// Test validation function if no error expected from prompt
 				if tt.mockError == nil && tt.expectError && strings.Contains(tt.errorContains, "string cannot be empty") {
 					err := prompt.Validate(tt.mockReturn)
@@ -3708,21 +3706,34 @@ func TestCaptureRepoBranchWithMonkeyPatch(t *testing.T) {
 					return "", err
 				}
 
-				// For ValidateRepoBranch failure test, simulate multiple attempts
+				// For ValidateRepoBranch failure test, simulate multiple attempts with auto-retry
 				if strings.Contains(tt.name, "ValidateRepoBranch fails then succeeds") {
-					switch callCount {
-					case 1:
-						// First attempt: return invalid branch (will fail validation)
-						return "non-existent-branch-1", nil
-					case 2:
-						// Second attempt: return another invalid branch (will fail validation)
-						return "non-existent-branch-2", nil
-					default:
-						// Third attempt: return valid branch (will pass validation)
-						return tt.mockReturn, tt.mockError
+					// Simulate promptUI retry behavior: keep calling until validation passes
+					for {
+						callCount++
+						var value string
+						switch callCount {
+						case 1:
+							// First attempt: return invalid branch (will fail validation - has space)
+							value = "invalid branch 1"
+						case 2:
+							// Second attempt: return another invalid branch (will fail validation - has space)
+							value = "invalid branch 2"
+						default:
+							// Third attempt: return valid branch (will pass validation)
+							value = tt.mockReturn
+						}
+
+						// Check if validation passes
+						if err := prompt.Validate(value); err == nil {
+							// Validation passed, return this value
+							return value, tt.mockError
+						}
+						// Validation failed, continue to next iteration (retry)
 					}
 				}
 
+				callCount++
 				return tt.mockReturn, tt.mockError
 			}
 
