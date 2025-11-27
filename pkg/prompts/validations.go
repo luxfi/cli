@@ -288,7 +288,7 @@ func validateNewFilepath(input string) error {
 // validateNonEmpty validates that a string is not empty
 func validateNonEmpty(input string) error {
 	if input == "" {
-		return errors.New("input cannot be empty")
+		return errors.New("string cannot be empty")
 	}
 	return nil
 }
@@ -422,8 +422,9 @@ func ValidateURL(input string, checkConnection bool) error {
 
 // ValidateRepoBranch validates a git branch name
 func ValidateRepoBranch(branch string) error {
-	if branch == "" {
-		return errors.New("branch name cannot be empty")
+	// First check if non-empty using generic validator
+	if err := validateNonEmpty(branch); err != nil {
+		return err
 	}
 	// Basic validation for branch names
 	if strings.Contains(branch, " ") {
