@@ -890,7 +890,7 @@ func TestValidatePChainTestnetAddress(t *testing.T) {
 	}{
 		{
 			name:    "valid P-Chain address with Testnet HRP",
-			input:   "P-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			input:   "P-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u0805va",
 			wantErr: false, // Parse succeeds and HRP == "test"
 		},
 		{
@@ -945,7 +945,7 @@ func TestValidatePChainMainAddress(t *testing.T) {
 	}{
 		{
 			name:    "valid P-Chain address with Mainnet HRP",
-			input:   "P-lux18jma8ppw3nhx5r4ap8clazz0dps7rv5ukulre5",
+			input:   "P-lux18jma8ppw3nhx5r4ap8clazz0dps7rv5uv98e28",
 			wantErr: false, // Parse succeeds and HRP == "lux"
 		},
 		{
@@ -1181,7 +1181,7 @@ func TestValidateXChainTestnetAddress(t *testing.T) {
 	}{
 		{
 			name:    "valid X-Chain address with Testnet HRP",
-			input:   "X-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
+			input:   "X-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u0805va",
 			wantErr: false,
 		},
 		{
@@ -1236,7 +1236,7 @@ func TestValidateXChainMainAddress(t *testing.T) {
 	}{
 		{
 			name:    "valid X-Chain address with Mainnet HRP",
-			input:   "X-lux18jma8ppw3nhx5r4ap8clazz0dps7rv5ukulre5",
+			input:   "X-lux18jma8ppw3nhx5r4ap8clazz0dps7rv5uv98e28",
 			wantErr: false,
 		},
 		{
