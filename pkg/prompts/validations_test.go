@@ -1661,45 +1661,52 @@ func TestRequestURL(t *testing.T) {
 
 func TestValidateURL(t *testing.T) {
 	tests := []struct {
-		name    string
-		url     string
-		wantErr bool
+		name            string
+		url             string
+		checkConnection bool
+		wantErr         bool
 	}{
 		{
-			name:    "valid URL - GitHub",
-			url:     "https://github.com/luxfi/cli",
-			wantErr: false,
+			name:            "valid URL - GitHub",
+			url:             "https://github.com/luxfi/cli",
+			checkConnection: false,
+			wantErr:         false,
 		},
 		{
-			name:    "valid URL - Google",
-			url:     "https://www.google.com",
-			wantErr: false,
+			name:            "valid URL - Google",
+			url:             "https://www.google.com",
+			checkConnection: false,
+			wantErr:         false,
 		},
 		{
-			name:    "invalid URL format",
-			url:     "not-a-url",
-			wantErr: true,
+			name:            "invalid URL format",
+			url:             "not-a-url",
+			checkConnection: false,
+			wantErr:         true,
 		},
 		{
-			name:    "invalid URL - non-existent domain",
-			url:     "https://thisdomaindoesnotexist12345.com",
-			wantErr: true,
+			name:            "invalid URL - non-existent domain",
+			url:             "https://thisdomaindoesnotexist12345.com",
+			checkConnection: true,
+			wantErr:         true,
 		},
 		{
-			name:    "invalid URL - 404 page",
-			url:     "https://github.com/luxfi/cli/blob/main/nonexistent-file.txt",
-			wantErr: true,
+			name:            "invalid URL - 404 page",
+			url:             "https://github.com/luxfi/cli/blob/main/nonexistent-file.txt",
+			checkConnection: true,
+			wantErr:         true,
 		},
 		{
-			name:    "empty string",
-			url:     "",
-			wantErr: true,
+			name:            "empty string",
+			url:             "",
+			checkConnection: false,
+			wantErr:         true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateURL(tt.url, false)
+			err := ValidateURL(tt.url, tt.checkConnection)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
