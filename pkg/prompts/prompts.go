@@ -1141,17 +1141,8 @@ func (*realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, e
 // CaptureRepoFile prompts for a file path in a repository
 func (*realPrompter) CaptureRepoFile(promptStr string, repo string, branch string) (string, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			if input == "" {
-				return errors.New("file path cannot be empty")
-			}
-			// Basic validation for file paths
-			if strings.HasPrefix(input, "/") {
-				return errors.New("file path should be relative, not absolute")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: ValidateRepoFile,
 	}
 
 	return promptUIRunner(prompt)
