@@ -374,11 +374,14 @@ func validateValidatorBalanceFunc(availableBalance float64, minBalance float64) 
 		if err != nil {
 			return err
 		}
+		if val <= 0 {
+			return fmt.Errorf("entered value has to be greater than 0 LUX")
+		}
 		if val < minBalance {
-			return fmt.Errorf("balance must be at least %f", minBalance)
+			return fmt.Errorf("validator balance must be at least %.2f LUX", minBalance)
 		}
 		if val > availableBalance {
-			return fmt.Errorf("balance cannot exceed available balance of %f", availableBalance)
+			return fmt.Errorf("current balance of %.2f is not sufficient", availableBalance)
 		}
 		return nil
 	}
