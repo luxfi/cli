@@ -1238,22 +1238,8 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 // CaptureFujiDuration prompts for a staking duration on Fuji testnet
 func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			duration, err := time.ParseDuration(input)
-			if err != nil {
-				return fmt.Errorf("invalid duration format: %v", err)
-			}
-			// Fuji min staking duration is 24 hours
-			if duration < 24*time.Hour {
-				return errors.New("duration must be at least 24 hours for Fuji")
-			}
-			// Fuji max staking duration is 365 days
-			if duration > 365*24*time.Hour {
-				return errors.New("duration cannot exceed 365 days for Fuji")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateTestnetStakingDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
@@ -1267,22 +1253,8 @@ func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error
 // CaptureMainnetDuration prompts for a staking duration on mainnet
 func (*realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			duration, err := time.ParseDuration(input)
-			if err != nil {
-				return fmt.Errorf("invalid duration format: %v", err)
-			}
-			// Mainnet min staking duration is 2 weeks
-			if duration < 14*24*time.Hour {
-				return errors.New("duration must be at least 2 weeks for mainnet")
-			}
-			// Mainnet max staking duration is 1 year
-			if duration > 365*24*time.Hour {
-				return errors.New("duration cannot exceed 1 year for mainnet")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateMainnetStakingDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
@@ -1296,22 +1268,8 @@ func (*realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, er
 // CaptureMainnetL1StakingDuration prompts for an L1 staking duration on mainnet
 func (*realPrompter) CaptureMainnetL1StakingDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			duration, err := time.ParseDuration(input)
-			if err != nil {
-				return fmt.Errorf("invalid duration format: %v", err)
-			}
-			// L1 min staking duration is 48 hours
-			if duration < 48*time.Hour {
-				return errors.New("L1 staking duration must be at least 48 hours for mainnet")
-			}
-			// L1 max staking duration is 1 year
-			if duration > 365*24*time.Hour {
-				return errors.New("L1 staking duration cannot exceed 1 year for mainnet")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateMainnetL1StakingDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)

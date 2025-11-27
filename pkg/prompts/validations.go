@@ -181,7 +181,7 @@ func getPChainValidationFunc(network models.Network) func(string) error {
 		return validatePChainTestnetAddress
 	case models.Mainnet:
 		return validatePChainMainAddress
-	case models.Local:
+	case models.Local, models.Devnet:
 		return validatePChainLocalAddress
 	default:
 		return func(string) error {
@@ -248,7 +248,7 @@ func getXChainValidationFunc(network models.Network) func(string) error {
 		return validateXChainTestnetAddress
 	case models.Mainnet:
 		return validateXChainMainAddress
-	case models.Local:
+	case models.Local, models.Devnet:
 		return validateXChainLocalAddress
 	default:
 		return func(string) error {
@@ -301,11 +301,11 @@ func validateMainnetStakingDuration(input string) error {
 	}
 	// Mainnet min staking duration is 2 weeks
 	if duration < 14*24*time.Hour {
-		return errors.New("duration must be at least 2 weeks for mainnet")
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(14*24*time.Hour))
 	}
 	// Mainnet max staking duration is 1 year
 	if duration > 365*24*time.Hour {
-		return errors.New("duration cannot exceed 1 year for mainnet")
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(365*24*time.Hour))
 	}
 	return nil
 }
@@ -318,11 +318,11 @@ func validateMainnetL1StakingDuration(input string) error {
 	}
 	// L1 min staking duration is 24 hours
 	if duration < 24*time.Hour {
-		return errors.New("L1 staking duration must be at least 24 hours for mainnet")
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(24*time.Hour))
 	}
 	// L1 max staking duration is 1 year
 	if duration > 365*24*time.Hour {
-		return errors.New("L1 staking duration cannot exceed 1 year for mainnet")
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(365*24*time.Hour))
 	}
 	return nil
 }
@@ -333,13 +333,13 @@ func validateTestnetStakingDuration(input string) error {
 	if err != nil {
 		return fmt.Errorf("invalid duration format: %v", err)
 	}
-	// Testnet/Fuji min staking duration is 24 hours
+	// Testnet min staking duration is 24 hours
 	if duration < 24*time.Hour {
-		return errors.New("duration must be at least 24 hours for testnet")
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(24*time.Hour))
 	}
-	// Testnet/Fuji max staking duration is 365 days
+	// Testnet max staking duration is 365 days
 	if duration > 365*24*time.Hour {
-		return errors.New("duration cannot exceed 365 days for testnet")
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(365*24*time.Hour))
 	}
 	return nil
 }
