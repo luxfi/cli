@@ -315,9 +315,9 @@ func validateMainnetL1StakingDuration(input string) error {
 	if err != nil {
 		return fmt.Errorf("invalid duration format: %v", err)
 	}
-	// L1 min staking duration is 48 hours
-	if duration < 48*time.Hour {
-		return errors.New("L1 staking duration must be at least 48 hours for mainnet")
+	// L1 min staking duration is 24 hours
+	if duration < 24*time.Hour {
+		return errors.New("L1 staking duration must be at least 24 hours for mainnet")
 	}
 	// L1 max staking duration is 1 year
 	if duration > 365*24*time.Hour {
