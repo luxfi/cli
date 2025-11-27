@@ -217,7 +217,7 @@ func CaptureListDecision[T comparable](
 func (*realPrompter) CaptureDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
-		Validate: validateStakingDuration,
+		Validate: validateDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
