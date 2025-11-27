@@ -3548,8 +3548,6 @@ func TestCaptureRepoFileWithMonkeyPatch(t *testing.T) {
 				require.Equal(t, tt.promptStr, prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
-				callCount++
-
 				// Test validation function if no error expected from prompt
 				if tt.mockError == nil && tt.expectError && strings.Contains(tt.errorContains, "string cannot be empty") {
 					err := prompt.Validate(tt.mockReturn)
@@ -3557,21 +3555,34 @@ func TestCaptureRepoFileWithMonkeyPatch(t *testing.T) {
 					return "", err
 				}
 
-				// For ValidateRepoFile failure test, simulate multiple attempts
+				// For ValidateRepoFile failure test, simulate multiple attempts with auto-retry
 				if strings.Contains(tt.name, "ValidateRepoFile fails then succeeds") {
-					switch callCount {
-					case 1:
-						// First attempt: return invalid file (will fail validation)
-						return "non-existent-file-1.xyz", nil
-					case 2:
-						// Second attempt: return another invalid file (will fail validation)
-						return "non-existent-file-2.xyz", nil
-					default:
-						// Third attempt: return valid file (will pass validation)
-						return tt.mockReturn, tt.mockError
+					// Simulate promptUI retry behavior: keep calling until validation passes
+					for {
+						callCount++
+						var value string
+						switch callCount {
+						case 1:
+							// First attempt: return invalid file (will fail validation - absolute path)
+							value = "/absolute/path/file1.txt"
+						case 2:
+							// Second attempt: return another invalid file (will fail validation - absolute path)
+							value = "/absolute/path/file2.txt"
+						default:
+							// Third attempt: return valid file (will pass validation)
+							value = tt.mockReturn
+						}
+
+						// Check if validation passes
+						if err := prompt.Validate(value); err == nil {
+							// Validation passed, return this value
+							return value, tt.mockError
+						}
+						// Validation failed, continue to next iteration (retry)
 					}
 				}
 
+				callCount++
 				return tt.mockReturn, tt.mockError
 			}
 
