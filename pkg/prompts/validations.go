@@ -198,7 +198,7 @@ func validateXChainAddress(input string) (string, error) {
 	}
 
 	if chainID != "X" {
-		return "", errors.New("this is not an XChain address")
+		return "", errors.New("not a XChain address")
 	}
 	return hrp, nil
 }
