@@ -399,7 +399,6 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 					// Validation done after capture
 					amountFlt, err = app.Prompt.CaptureFloat(
 						fmt.Sprintf("Amount to transfer (available: %f)", balanceFlt),
-						nil,
 					)
 					if err != nil {
 						return err
