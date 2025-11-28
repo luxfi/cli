@@ -1101,13 +1101,8 @@ func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error
 // CaptureXChainAddress prompts for an X-Chain address
 func (*realPrompter) CaptureXChainAddress(promptStr string, network models.Network) (string, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			if !strings.HasPrefix(input, "X-") && !strings.HasPrefix(input, "x-") {
-				return errors.New("X-Chain address must start with X- or x-")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: getXChainValidationFunc(network),
 	}
 
 	return promptUIRunner(prompt)
