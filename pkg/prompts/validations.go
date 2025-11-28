@@ -76,7 +76,7 @@ func validateTime(input string) error {
 	if t.Before(time.Now().Add(constants.StakingStartLeadTime)) {
 		return fmt.Errorf("time should be at least start from now + %s", constants.StakingStartLeadTime)
 	}
-	return err
+	return nil
 }
 
 func validateNodeID(input string) error {
