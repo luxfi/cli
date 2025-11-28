@@ -10,7 +10,7 @@ const (
 	DefaultPerms755    = 0o755
 	WriteReadReadPerms = 0o644
 
-	BaseDirName = ".cli"
+	BaseDirName = ".lux"
 	LogDir      = "logs"
 
 	ServerRunFile = "gRPCserver.run"
@@ -70,7 +70,7 @@ const (
 	E2EDockerLoopbackHost      = "127.0.0.1"
 	GCPDefaultImageProvider    = "canonical"
 	GCPImageFilter             = "ubuntu-os-cloud"
-	CloudNodeCLIConfigBasePath = "/home/ubuntu/.cli"
+	CloudNodeCLIConfigBasePath = "/home/ubuntu/.lux"
 	CodespaceNameEnvVar        = "CODESPACE_NAME"
 	AnsibleSSHShellParams      = "-o StrictHostKeyChecking=no"
 	RemoteSSHUser              = "ubuntu"
@@ -165,7 +165,7 @@ const (
 	LPMPluginDir     = "lpm-plugins"
 
 	// Cloud node paths
-	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.cli/bin/subnet-evm"
+	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.lux/bin/subnet-evm"
 
 	// File names
 	UpgradeBytesFileName         = "upgrade.json"
@@ -275,7 +275,7 @@ const (
 	StakingMinimumLeadTime     = 25 * time.Second
 	DevnetStakingStartLeadTime = 30 * time.Second
 
-	DefaultConfigFileName = ".cli"
+	DefaultConfigFileName = ".lux"
 	DefaultConfigFileType = "json"
 
 	CliRepoName = "cli"

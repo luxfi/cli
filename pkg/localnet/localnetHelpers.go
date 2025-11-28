@@ -108,15 +108,18 @@ func GetLocalNetworkWallet(
 	defer cancel()
 
 	// Create keychain for the wallet with EWOQ key for local testing
-	keychain := secp256k1fx.NewKeychain()
+	secpKeychain := secp256k1fx.NewKeychain()
 	// Load EWOQ test key
 	// For now, use an empty keychain since we need to convert the key format
 	// The EWOQ key conversion would need proper CB58 decoding
 
+	// Use KeychainAdapter to implement wallet/keychain.Keychain and c.EthKeychain interfaces
+	keychainAdapter := primary.NewKeychainAdapter(secpKeychain)
+
 	walletConfig := &primary.WalletConfig{
 		URI:         endpoint,
-		LUXKeychain: keychain,
-		EthKeychain: keychain,
+		LUXKeychain: keychainAdapter,
+		EthKeychain: keychainAdapter,
 	}
 
 	return primary.MakeWallet(ctx, walletConfig)
