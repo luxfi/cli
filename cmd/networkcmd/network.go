@@ -18,8 +18,9 @@ var (
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
-		Use:   "network",
-		Short: "Manage locally deployed subnets",
+		Use:     "network",
+		Aliases: []string{"net", "blockchain"},
+		Short:   "Manage locally deployed networks/blockchains",
 		Long: `The network command suite provides a collection of tools for managing local Subnet
 deployments.
 
@@ -46,7 +47,13 @@ This network currently supports multiple, concurrently deployed Subnets.`,
 	cmd.AddCommand(newStatusCmd())
 	// network quickstart
 	cmd.AddCommand(newQuickstartCmd())
-	// network import
-	cmd.AddCommand(newImportCmd())
+	// network export (RPC-based)
+	cmd.AddCommand(newExportRPCCmd())
+	// network import (RPC-based)
+	cmd.AddCommand(newImportRPCCmd())
+	// network set-head (VM metadata)
+	cmd.AddCommand(newSetHeadCmd())
+	// network import-blocks (Direct DB import)
+	cmd.AddCommand(newImportBlocksCmd())
 	return cmd
 }

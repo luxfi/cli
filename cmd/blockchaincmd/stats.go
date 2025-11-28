@@ -83,7 +83,7 @@ func stats(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func buildCurrentValidatorStats(pClient platformvm.Client, infoClient info.Client, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
+func buildCurrentValidatorStats(pClient *platformvm.Client, infoClient *info.Client, table *tablewriter.Table, subnetID ids.ID) ([][]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -159,8 +159,8 @@ func buildCurrentValidatorStats(pClient platformvm.Client, infoClient info.Clien
 
 // findAPIEndpoint tries first to create a client to a local node
 // if it doesn't find one, it tries public APIs
-func findAPIEndpoint(network models.Network) (platformvm.Client, info.Client) {
-	var i info.Client
+func findAPIEndpoint(network models.Network) (*platformvm.Client, *info.Client) {
+	var i *info.Client
 
 	// first try local node
 	ctx := context.Background()

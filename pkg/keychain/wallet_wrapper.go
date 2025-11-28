@@ -4,6 +4,7 @@ package keychain
 
 import (
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	wallkeychain "github.com/luxfi/node/wallet/keychain"
 )
@@ -23,9 +24,7 @@ func (w *CryptoToWalletWrapper) Get(addr ids.ShortID) (wallkeychain.Signer, bool
 	return w.cryptoKC.Get(addr)
 }
 
-// Addresses returns the addresses managed by this keychain as a slice
-func (w *CryptoToWalletWrapper) Addresses() []ids.ShortID {
-	// Convert set to slice
-	addrSet := w.cryptoKC.Addresses()
-	return addrSet.List()
+// Addresses returns the addresses managed by this keychain
+func (w *CryptoToWalletWrapper) Addresses() set.Set[ids.ShortID] {
+	return w.cryptoKC.Addresses()
 }

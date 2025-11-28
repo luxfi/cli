@@ -27,6 +27,7 @@ var (
 	snapshotName           string
 	mainnet                bool
 	testnet                bool
+	numValidators          int
 	// BadgerDB flags
 	dbEngine      string
 	archiveDir    string
@@ -68,13 +69,17 @@ already running.`,
 
 	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", latest, "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
-	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 21 validators")
-	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 11 validators")
+	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start mainnet network")
+	cmd.Flags().BoolVar(&testnet, "testnet", false, "start testnet network")
+	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
 	// BadgerDB flags
 	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
 	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
 	cmd.Flags().BoolVar(&archiveShared, "archive-shared", false, "enable shared read-only access to archive database")
 	cmd.Flags().StringVar(&genesisImport, "genesis-path", "", "path to genesis database to import (PebbleDB or LevelDB)")
+
+	// Add state loading flags
+	AddStateFlags(cmd)
 
 	return cmd
 }
@@ -189,6 +194,12 @@ func StartNetwork(*cobra.Command, []string) error {
 	} else {
 		ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
 		ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
+
+		// Load existing subnet state if provided
+		if err := LoadExistingSubnetState(outputDir); err != nil {
+			ux.Logger.PrintToUser("Warning: Failed to load existing subnet state: %v", err)
+			// Continue without the state - don't fail the entire network start
+		}
 	}
 
 	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
@@ -264,9 +275,12 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 	)
 }
 
-// StartMainnet starts a mainnet network with 21 validator nodes
+// StartMainnet starts a mainnet network with configurable validator nodes
 func StartMainnet() error {
-	ux.Logger.PrintToUser("Starting Lux mainnet with 21 validator nodes...")
+	if numValidators < 1 {
+		numValidators = constants.LocalNetworkNumNodes
+	}
+	ux.Logger.PrintToUser("Starting Lux mainnet with %d validators...", numValidators)
 
 	// Check if local luxd binary exists
 	localLuxdPath := "/home/z/work/lux/node/build/luxd"
@@ -298,57 +312,42 @@ func StartMainnet() error {
 		// Copy to first validator's data directory will be handled post-launch
 	}
 
-	// Build mainnet configuration with proper consensus parameters
+	// Build mainnet configuration for single-node local development
+	// Use real mainnet with staking keys and k=1 consensus parameters
+	// Note: http-port and staking-port are managed by netrunner, don't set them here
 	globalNodeConfig := `{
-		"network-id": "96369",
-		"db-type": "pebbledb",
-		"staking-enabled": true,
-		"sybil-protection-enabled": true,
-		"health-check-frequency": "30s",
-		"http-port": 9630,
-		"staking-port": 9631,
-		"consensus-sample-size": 21,
-		"consensus-quorum-size": 15,
-		"consensus-virtuous-commit-threshold": 21,
-		"consensus-rogue-commit-threshold": 28,
-		"consensus-concurrent-repolls": 3,
-		"consensus-optimal-processing": 50,
-		"consensus-max-processing": 3000,
-		"consensus-max-time-processing": 3000000000,
-		"stake-max-consumption-rate": 120000,
-		"stake-min-consumption-rate": 100000,
-		"stake-minted-reward": 64000000,
-		"stake-supply-cap": 3000000000000000,
-		"uptime-requirement": 0.8,
-		"max-stake-duration": 31536000,
-		"min-stake-duration": 1209600,
-		"min-validator-stake": 2000000000000,
-		"min-delegator-stake": 25000000000,
-		"delegation-fee-cap": 200000,
-		"stake-minting-period": 31536000,
-		"log-level": "info"
+		"log-level": "info",
+		"network-id": 96369,
+		"consensus-sample-size": 1,
+		"consensus-quorum-size": 1,
+		"consensus-virtuous-commit-threshold": 1,
+		"consensus-rogue-commit-threshold": 1,
+		"skip-bootstrap": true,
+		"sybil-protection-enabled": false,
+		"network-health-min-conn-peers": 0
 	}`
 
-	// Prepare chain configs with genesis files
-	chainConfigs := map[string]string{}
-	genesisPath := "/home/z/work/lux/genesis/configs/mainnet"
-
-	// Read genesis files and add to chain configs
-	for _, chain := range []string{"C", "P", "X"} {
-		genesisFile := fmt.Sprintf("%s/%s/genesis.json", genesisPath, chain)
-		if genesisData, err := os.ReadFile(genesisFile); err == nil {
-			chainConfigs[chain] = string(genesisData)
-		} else {
-			ux.Logger.PrintToUser("Warning: Could not read %s genesis file: %v", chain, err)
-		}
+	// C-Chain runtime config (not genesis)
+	chainConfigs := map[string]string{
+		"C": `{
+			"pruning-enabled": false,
+			"local-txs-enabled": true,
+			"allow-unprotected-txs": true,
+			"state-sync-enabled": false,
+			"eth-apis": ["eth", "personal", "admin", "debug", "web3", "net", "txpool"]
+		}`,
 	}
 
 	// Build start options
 	rootDataDir := path.Join(app.GetRunDir(), "mainnet-"+time.Now().Format("20060102-150405"))
 
+	// Don't pass networkID to netrunner - let --dev flag handle the genesis internally
+	// The --dev flag creates a proper single-node development network
+
 	opts := []client.OpOption{
 		client.WithExecPath(nodeBinPath),
-		client.WithNumNodes(21),
+		client.WithNumNodes(uint32(numValidators)),
+		// Don't use WithNetworkId - use --dev mode for local testing
 		client.WithGlobalNodeConfig(globalNodeConfig),
 		client.WithRootDataDir(rootDataDir),
 		client.WithReassignPortsIfUsed(true),
@@ -364,12 +363,12 @@ func StartMainnet() error {
 
 	ctx := binutils.GetAsyncContext()
 
-	ux.Logger.PrintToUser("Starting network with 21 validators...")
+	ux.Logger.PrintToUser("Starting network with %d validators...", numValidators)
 	ux.Logger.PrintToUser("Network ID: 96369")
 	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
 
-	// Start the network
-	startResp, err := cli.Start(ctx, path.Join(rootDataDir, "netrunner.log"), opts...)
+	// Start the network - first parameter is execPath (luxd binary)
+	startResp, err := cli.Start(ctx, nodeBinPath, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
@@ -383,7 +382,7 @@ func StartMainnet() error {
 		statusResp, err := cli.Status(ctx)
 		if err == nil && statusResp != nil && statusResp.ClusterInfo != nil {
 			// Check if cluster itself is healthy
-			if statusResp.ClusterInfo.Healthy && len(statusResp.ClusterInfo.NodeInfos) == 21 {
+			if statusResp.ClusterInfo.Healthy && len(statusResp.ClusterInfo.NodeInfos) == numValidators {
 				healthy = true
 				break
 			}
@@ -416,7 +415,7 @@ func StartMainnet() error {
 	}
 
 	// Display endpoints
-	ux.Logger.PrintToUser("\nMainnet started successfully with 21 validators!")
+	ux.Logger.PrintToUser("\nMainnet started successfully with %d validators!", numValidators)
 	ux.Logger.PrintToUser("\nRPC Endpoints:")
 
 	if startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {

@@ -110,12 +110,18 @@ func runDev(flags *devFlags) error {
 	}
 
 	// Build luxd command
-	luxdPath := filepath.Join(app.GetBaseDir(), "bin", "luxd")
-	if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
-		// Try the node build directory
-		luxdPath = filepath.Join(app.GetBaseDir(), "..", "..", "node", "build", "luxd")
+	// First try the environment variable
+	luxdPath := os.Getenv("LUXD_PATH")
+	if luxdPath == "" {
+		// Try the standard build location
+		luxdPath = "/home/z/work/lux/node/build/luxd"
 		if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
-			return fmt.Errorf("luxd binary not found. Please build it first with './scripts/build.sh'")
+			// Try lux-cli bin directory
+			homeDir, _ := os.UserHomeDir()
+			luxdPath = filepath.Join(homeDir, ".lux-cli", "bin", "luxd")
+			if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
+				return fmt.Errorf("luxd binary not found. Please build it first with './scripts/build.sh' or set LUXD_PATH")
+			}
 		}
 	}
 
@@ -123,24 +129,19 @@ func runDev(flags *devFlags) error {
 		"--network-id", fmt.Sprintf("%d", flags.chainID),
 		"--data-dir", flags.dataDir,
 		"--db-dir", filepath.Join(flags.dataDir, "db"),
-		"--staking-tls-key-file", filepath.Join(flags.dataDir, "staking", "staker.key"),
-		"--staking-tls-cert-file", filepath.Join(flags.dataDir, "staking", "staker.crt"),
 		"--chain-config-dir", filepath.Join(flags.dataDir, "configs", "chains"),
-		"--genesis-file", filepath.Join(flags.dataDir, "genesis.json"),
-		"--skip-bootstrap",
-		"--staking-enabled=false",
-		"--sybil-protection-enabled=false",
-		"--consensus-sample-size=1",
-		"--consensus-quorum-size=1",
-		"--public-ip=127.0.0.1",
-		"--http-host=0.0.0.0",
+		"--consensus-sample-size", "1",
+		"--consensus-quorum-size", "1",
+		"--public-ip", "127.0.0.1",
+		"--http-host", "0.0.0.0",
 		"--http-port", fmt.Sprintf("%d", flags.httpPort),
 		"--staking-port", fmt.Sprintf("%d", flags.stakingPort),
-		"--api-admin-enabled=true",
-		"--api-keystore-enabled=true",
-		"--api-metrics-enabled=true",
-		"--index-enabled=true",
-		"--log-level=info",
+		"--api-admin-enabled",
+		"--api-metrics-enabled",
+		"--index-enabled",
+		"--log-level", "info",
+		"--staking-enabled=false",
+		"--sybil-protection-enabled=false",
 	}
 
 	cmd := exec.Command(luxdPath, args...)

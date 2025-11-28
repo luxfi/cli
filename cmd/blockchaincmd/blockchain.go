@@ -41,10 +41,10 @@ manage your Blockchain configurations and live deployments.`,
 	cmd.AddCommand(newJoinCmd())
 	// blockchain addValidator
 	cmd.AddCommand(newAddValidatorCmd())
-	// blockchain export
-	cmd.AddCommand(newExportCmd())
-	// blockchain import
-	cmd.AddCommand(newImportCmd())
+	// blockchain export-config (for deployment config)
+	cmd.AddCommand(newExportConfigCmd())
+	// blockchain import-config (for deployment config)
+	cmd.AddCommand(newImportConfigCmd())
 	// blockchain publish
 	cmd.AddCommand(newPublishCmd())
 	// blockchain upgrade

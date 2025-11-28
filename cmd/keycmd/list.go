@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/xvm"
+	"github.com/luxfi/node/vms/exchangevm"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
@@ -140,8 +140,8 @@ keys or for the ledger addresses associated to certain indices.`,
 }
 
 type Clients struct {
-	x             map[models.Network]xvm.Client
-	p             map[models.Network]platformvm.Client
+	x             map[models.Network]*exchangevm.Client
+	p             map[models.Network]*platformvm.Client
 	c             map[models.Network]*ethclient.Client
 	cGeth         map[models.Network]*ethclient.Client
 	evm           map[models.Network]map[string]*ethclient.Client
@@ -154,8 +154,8 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 	error,
 ) {
 	var err error
-	xClients := map[models.Network]xvm.Client{}
-	pClients := map[models.Network]platformvm.Client{}
+	xClients := map[models.Network]*exchangevm.Client{}
+	pClients := map[models.Network]*platformvm.Client{}
 	cClients := map[models.Network]*ethclient.Client{}
 	cGethClients := map[models.Network]*ethclient.Client{}
 	evmClients := map[models.Network]map[string]*ethclient.Client{}
@@ -166,7 +166,7 @@ func getClients(networks []models.Network, pchain bool, cchain bool, xchain bool
 			pClients[network] = platformvm.NewClient(network.Endpoint())
 		}
 		if xchain {
-			xClients[network] = xvm.NewClient(network.Endpoint(), "X")
+			xClients[network] = exchangevm.NewClient(network.Endpoint(), "X")
 		}
 		if cchain {
 			client, err := ethclient.Dial(network.CChainEndpoint())
@@ -437,7 +437,7 @@ func getStoredKeyInfo(
 }
 
 func getLedgerIndicesInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	ledgerIndices []uint32,
 	networks []models.Network,
 ) ([]addressInfo, error) {
@@ -465,7 +465,7 @@ func getLedgerIndicesInfo(
 }
 
 func getLedgerIndexInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	index uint32,
 	networks []models.Network,
 	addr ids.ShortID,
@@ -492,7 +492,7 @@ func getLedgerIndexInfo(
 }
 
 func getPChainAddrInfo(
-	pClients map[models.Network]platformvm.Client,
+	pClients map[models.Network]*platformvm.Client,
 	network models.Network,
 	pChainAddr string,
 	kind string,
@@ -517,7 +517,7 @@ func getPChainAddrInfo(
 }
 
 func getXChainAddrInfo(
-	xClients map[models.Network]xvm.Client,
+	xClients map[models.Network]*exchangevm.Client,
 	network models.Network,
 	xChainAddr string,
 	kind string,
@@ -673,7 +673,7 @@ func formatCChainBalance(balance *big.Int) (string, error) {
 	return balanceStr, nil
 }
 
-func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error) {
+func getPChainBalanceStr(pClient *platformvm.Client, addr string) (string, error) {
 	pID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err
@@ -696,7 +696,7 @@ func getPChainBalanceStr(pClient platformvm.Client, addr string) (string, error)
 	return balanceStr, nil
 }
 
-func getXChainBalanceStr(xClient xvm.Client, addr string) (string, error) {
+func getXChainBalanceStr(xClient *exchangevm.Client, addr string) (string, error) {
 	xID, err := address.ParseToID(addr)
 	if err != nil {
 		return "", err

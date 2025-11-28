@@ -223,7 +223,7 @@ func migrateCluster(
 		if err != nil {
 			return fmt.Errorf("failure reading legacy local network conf: %w", err)
 		}
-		trackSubnetsStr, err = utils.GetJSONKey[string](nodeConfig.Flags, luxdconfig.TrackSubnetsKey)
+		trackSubnetsStr, err = utils.GetJSONKey[string](nodeConfig.Flags, luxdconfig.TrackNetsKey)
 		if err != nil && !errors.Is(err, constants.ErrKeyNotFoundOnMap) {
 			return fmt.Errorf("failure reading legacy local network conf: %w", err)
 		}
