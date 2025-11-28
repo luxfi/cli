@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/contract"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -28,7 +29,7 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	xvmtxs "github.com/luxfi/node/vms/xvm/txs"
+	exchangevmtxs "github.com/luxfi/node/vms/exchangevm/txs"
 	"github.com/luxfi/node/wallet/chain/c"
 	"github.com/luxfi/node/wallet/chain/p/builder"
 	walletkeychain "github.com/luxfi/node/wallet/keychain"
@@ -257,7 +258,7 @@ func transferF(*cobra.Command, []string) error {
 		if err != nil {
 			return err
 		}
-		kc = sk.KeyChain()
+		kc = primary.NewKeychainAdapter(sk.KeyChain())
 	} else {
 		ledgerDevice, err := ledger.NewLedger()
 		if err != nil {
@@ -617,7 +618,7 @@ func pToPSend(
 	destinationAddrStr string,
 	amount uint64,
 ) error {
-	ethKeychain := secp256k1fx.NewKeychain()
+	ethKeychain := primary.NewKeychainAdapter(secp256k1fx.NewKeychain())
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
@@ -688,7 +689,7 @@ func pToXSend(
 	usingLedger bool,
 	amount uint64,
 ) error {
-	ethKeychain := secp256k1fx.NewKeychain()
+	ethKeychain := primary.NewKeychainAdapter(secp256k1fx.NewKeychain())
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
@@ -703,7 +704,7 @@ func pToXSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses(),
+		Addrs:     kc.Addresses().List(),
 	}
 	if err := exportFromP(
 		amount,
@@ -796,7 +797,7 @@ func importIntoX(
 	if err != nil {
 		return fmt.Errorf("error building tx: %w", err)
 	}
-	tx := xvmtxs.Tx{Unsigned: unsignedTx}
+	tx := exchangevmtxs.Tx{Unsigned: unsignedTx}
 	if err := wallet.X().Signer().Sign(context.Background(), &tx); err != nil {
 		return fmt.Errorf("error signing tx: %w", err)
 	}
@@ -825,7 +826,7 @@ func pToCSend(
 	destinationAddrStr string,
 	amount uint64,
 ) error {
-	ethKeychain := secp256k1fx.NewKeychain()
+	ethKeychain := primary.NewKeychainAdapter(secp256k1fx.NewKeychain())
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
@@ -840,7 +841,7 @@ func pToCSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses(),
+		Addrs:     kc.Addresses().List(),
 	}
 	if err := exportFromP(
 		amount,
@@ -933,7 +934,7 @@ func cToPSend(
 	usingLedger bool,
 	amount uint64,
 ) error {
-	ethKeychain := sk.KeyChain()
+	ethKeychain := primary.NewKeychainAdapter(sk.KeyChain())
 	walletConfig := &primary.WalletConfig{
 		URI:         network.Endpoint(),
 		LUXKeychain: kc,
@@ -948,7 +949,7 @@ func cToPSend(
 	}
 	to := secp256k1fx.OutputOwners{
 		Threshold: 1,
-		Addrs:     kc.Addresses(),
+		Addrs:     kc.Addresses().List(),
 	}
 	if err := exportFromC(
 		network,
@@ -1113,9 +1114,11 @@ func NewLedgerKeychain(ledgerDevice cryptokeychain.Ledger, indices []uint32) (wa
 	}, nil
 }
 
-// Addresses returns the list of addresses
-func (lk *ledgerKeychain) Addresses() []ids.ShortID {
-	return lk.addresses
+// Addresses returns the set of addresses
+func (lk *ledgerKeychain) Addresses() set.Set[ids.ShortID] {
+	addrSet := set.Set[ids.ShortID]{}
+	addrSet.Add(lk.addresses...)
+	return addrSet
 }
 
 // Get returns a signer for the given address
