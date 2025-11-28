@@ -31,7 +31,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm/status"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
