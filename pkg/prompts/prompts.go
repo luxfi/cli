@@ -1068,34 +1068,28 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 
 // CaptureAddresses prompts for multiple addresses
 func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error) {
-	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			// Validate comma-separated addresses
-			parts := strings.Split(input, ",")
-			for _, part := range parts {
-				addr := strings.TrimSpace(part)
-				if !strings.HasPrefix(addr, "0x") || len(addr) != 42 {
-					return fmt.Errorf("invalid address format: %s", addr)
-				}
-			}
-			return nil
-		},
-	}
+	for {
+		result, err := utilsReadLongString(promptui.IconGood+" "+promptStr+" ")
+		if err != nil {
+			return nil, err
+		}
 
-	result, err := promptUIRunner(prompt)
-	if err != nil {
-		return nil, err
-	}
+		// Validate addresses
+		if err := validateAddresses(result); err != nil {
+			fmt.Printf("Invalid input: %v\n", err)
+			continue  // Retry on validation failure
+		}
 
-	parts := strings.Split(result, ",")
-	addresses := make([]crypto.Address, 0, len(parts))
-	for _, part := range parts {
-		addr := strings.TrimSpace(part)
-		addresses = append(addresses, crypto.HexToAddress(addr))
-	}
+		// Parse and return valid addresses
+		parts := strings.Split(result, ",")
+		addresses := make([]crypto.Address, 0, len(parts))
+		for _, part := range parts {
+			addr := strings.TrimSpace(part)
+			addresses = append(addresses, crypto.HexToAddress(addr))
+		}
 
-	return addresses, nil
+		return addresses, nil
+	}
 }
 
 // CaptureXChainAddress prompts for an X-Chain address
