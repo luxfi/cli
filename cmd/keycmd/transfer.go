@@ -374,7 +374,7 @@ func transferF(*cobra.Command, []string) error {
 
 func captureAmount(tokenDesc string) (float64, error) {
 	promptStr := fmt.Sprintf("Amount to send (%s)", tokenDesc)
-	amountFlt, err := app.Prompt.CaptureFloat(promptStr, nil)
+	amountFlt, err := app.Prompt.CaptureFloat(promptStr)
 	if err != nil {
 		return 0, err
 	}
@@ -423,7 +423,7 @@ func intraEvmSend(
 		}
 	}
 	if amountFlt == 0 {
-		amountFlt, err = app.Prompt.CaptureFloat("Amount to transfer", nil)
+		amountFlt, err = app.Prompt.CaptureFloat("Amount to transfer")
 		if err != nil {
 			return err
 		}
