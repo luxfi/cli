@@ -1290,9 +1290,22 @@ func TestCaptureXChainAddressWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			// Network was used with CaptureXChainAddress but CaptureAddress doesn't need it
 
-			addr, err := prompter.CaptureAddress("Enter X-Chain address:")
+		// Convert network string to models.Network
+		var network models.Network
+		switch tt.network {
+		case "devnet":
+			network = models.NewDevnetNetwork()
+		case "testnet":
+			network = models.NewTestnetNetwork()
+		case "mainnet":
+			network = models.NewMainnetNetwork()
+		default:
+			network = models.NewLocalNetwork()
+		}
+			
+
+			addr, err := prompter.CaptureXChainAddress("Enter X-Chain address:", network)
 
 			if tt.expectError {
 				require.Error(t, err)
