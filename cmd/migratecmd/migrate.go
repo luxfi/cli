@@ -147,15 +147,74 @@ func newBootstrapCmd(app *application.Lux) *cobra.Command {
 }
 
 func newImportCmd(app *application.Lux) *cobra.Command {
+	var (
+		sourceRPC   string
+		destRPC     string
+		workers     int
+		batchSize   int
+		startBlock  uint64
+		endBlock    uint64
+		deployOldSubnet bool
+		queryHeight bool
+	)
+
 	cmd := &cobra.Command{
 		Use:   "import",
-		Short: "Import evm data into running C-Chain",
-		Long:  `Imports historical evm data into a running C-Chain`,
+		Short: "Import evm data into running C-Chain via RPC",
+		Long: `Imports historical evm data from SubnetEVM into a running C-Chain via parallel RPC calls.
+
+This command loads the old subnet at runtime and reads blocks via RPC - no file copying!
+It uses maximum parallelization with configurable worker pools.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ux.Logger.PrintToUser("This command will be implemented for importing data into a running network")
+			// Check if we need to deploy the old subnet first
+			if deployOldSubnet {
+				ux.Logger.PrintToUser("Deploying old subnet with existing data...")
+				if err := deployOldSubnetForImport(); err != nil {
+					return fmt.Errorf("failed to deploy old subnet: %w", err)
+				}
+			}
+
+			// Query block height if requested
+			if queryHeight {
+				height, err := queryBlockHeight(sourceRPC)
+				if err != nil {
+					return fmt.Errorf("failed to query block height: %w", err)
+				}
+				ux.Logger.PrintToUser("Current block height: %d", height)
+				if endBlock == 0 {
+					endBlock = height
+				}
+			}
+
+			// Start the parallel RPC import
+			ux.Logger.PrintToUser("Starting parallel RPC import from SubnetEVM to C-Chain...")
+			ux.Logger.PrintToUser("Source: %s", sourceRPC)
+			ux.Logger.PrintToUser("Destination: %s", destRPC)
+			ux.Logger.PrintToUser("Workers: %d", workers)
+			ux.Logger.PrintToUser("Batch size: %d", batchSize)
+			ux.Logger.PrintToUser("Block range: %d to %d", startBlock, endBlock)
+
+			if err := runParallelRPCImport(sourceRPC, destRPC, workers, batchSize, startBlock, endBlock); err != nil {
+				return fmt.Errorf("import failed: %w", err)
+			}
+
+			ux.Logger.PrintToUser("✅ Import completed successfully!")
 			return nil
 		},
 	}
+
+	// Use standardized ~/.lux paths
+	defaultSourceRPC := "http://localhost:9640/ext/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc"
+	defaultDestRPC := "http://localhost:9630/ext/bc/C/rpc"
+
+	cmd.Flags().StringVar(&sourceRPC, "source", defaultSourceRPC, "Source RPC endpoint (SubnetEVM)")
+	cmd.Flags().StringVar(&destRPC, "dest", defaultDestRPC, "Destination RPC endpoint (C-Chain)")
+	cmd.Flags().IntVar(&workers, "workers", 200, "Number of parallel workers")
+	cmd.Flags().IntVar(&batchSize, "batch", 1000, "Batch size for RPC calls")
+	cmd.Flags().Uint64Var(&startBlock, "start", 0, "Start block number")
+	cmd.Flags().Uint64Var(&endBlock, "end", 0, "End block number (0 = latest)")
+	cmd.Flags().BoolVar(&deployOldSubnet, "deploy-subnet", false, "Deploy old subnet before import")
+	cmd.Flags().BoolVar(&queryHeight, "query-height", true, "Query and display current block height")
 
 	return cmd
 }
