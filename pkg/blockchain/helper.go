@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/network/peer"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/sdk/models"
@@ -162,12 +162,12 @@ func GetBlockchainTimestamp(network models.Network) (time.Time, error) {
 	return platformCli.GetTimestamp(ctx)
 }
 
-func GetSubnet(subnetID ids.ID, network models.Network) (platformvm.GetSubnetClientResponse, error) {
+func GetSubnet(subnetID ids.ID, network models.Network) (platformvm.GetNetClientResponse, error) {
 	api := network.Endpoint()
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
-	return pClient.GetSubnet(ctx, subnetID)
+	return pClient.GetNet(ctx, subnetID)
 }
 
 func GetSubnetIDFromBlockchainID(blockchainID ids.ID, network models.Network) (ids.ID, error) {
