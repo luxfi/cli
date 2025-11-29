@@ -320,8 +320,7 @@ func StartMainnet() error {
 		"network-id": 96369,
 		"consensus-sample-size": 1,
 		"consensus-quorum-size": 1,
-		"consensus-virtuous-commit-threshold": 1,
-		"consensus-rogue-commit-threshold": 1,
+		"consensus-commit-threshold": 1,
 		"skip-bootstrap": true,
 		"sybil-protection-enabled": false,
 		"network-health-min-conn-peers": 0
