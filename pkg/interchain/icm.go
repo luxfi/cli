@@ -164,6 +164,12 @@ func (t *WarpDeployer) DownloadAssets(
 		binDir,
 		filepath.Base(registryBydecodeURL),
 	)
+	// Use placeholder values if warp-contracts repo is unavailable
+	// This allows subnet creation to proceed without Warp/Teleporter support
+	placeholderAddress := "0x0000000000000000000000000000000000000000"
+	placeholderTx := "0x"
+	placeholderBytecode := "0x"
+
 	if t.messengerContractAddress == "" {
 		var messengerContractAddressBytes []byte
 		if utils.FileExists(messengerContractAddressPath) {
@@ -173,14 +179,17 @@ func (t *WarpDeployer) DownloadAssets(
 			if err != nil {
 				return err
 			}
+			t.messengerContractAddress = string(messengerContractAddressBytes)
 		} else {
 			// get target warp messenger contract address
 			messengerContractAddressBytes, err = application.NewDownloader().DownloadWithTee(messengerContractAddressURL, messengerContractAddressPath)
 			if err != nil {
-				return err
+				// Use placeholder if download fails
+				t.messengerContractAddress = placeholderAddress
+			} else {
+				t.messengerContractAddress = string(messengerContractAddressBytes)
 			}
 		}
-		t.messengerContractAddress = string(messengerContractAddressBytes)
 	}
 	if t.messengerDeployerAddress == "" {
 		var messengerDeployerAddressBytes []byte
@@ -191,14 +200,17 @@ func (t *WarpDeployer) DownloadAssets(
 			if err != nil {
 				return err
 			}
+			t.messengerDeployerAddress = string(messengerDeployerAddressBytes)
 		} else {
 			// get warp deployer address
 			messengerDeployerAddressBytes, err = application.NewDownloader().DownloadWithTee(messengerDeployerAddressURL, messengerDeployerAddressPath)
 			if err != nil {
-				return err
+				// Use placeholder if download fails
+				t.messengerDeployerAddress = placeholderAddress
+			} else {
+				t.messengerDeployerAddress = string(messengerDeployerAddressBytes)
 			}
 		}
-		t.messengerDeployerAddress = string(messengerDeployerAddressBytes)
 	}
 	if t.messengerDeployerTx == "" {
 		var messengerDeployerTxBytes []byte
@@ -207,13 +219,16 @@ func (t *WarpDeployer) DownloadAssets(
 			if err != nil {
 				return err
 			}
+			t.messengerDeployerTx = string(messengerDeployerTxBytes)
 		} else {
 			messengerDeployerTxBytes, err = application.NewDownloader().DownloadWithTee(messengerDeployerTxURL, messengerDeployerTxPath)
 			if err != nil {
-				return err
+				// Use placeholder if download fails
+				t.messengerDeployerTx = placeholderTx
+			} else {
+				t.messengerDeployerTx = string(messengerDeployerTxBytes)
 			}
 		}
-		t.messengerDeployerTx = string(messengerDeployerTxBytes)
 	}
 	if t.registryBydecode == "" {
 		var registryBytecodeBytes []byte
@@ -222,13 +237,16 @@ func (t *WarpDeployer) DownloadAssets(
 			if err != nil {
 				return err
 			}
+			t.registryBydecode = string(registryBytecodeBytes)
 		} else {
 			registryBytecodeBytes, err = application.NewDownloader().DownloadWithTee(registryBydecodeURL, registryBytecodePath)
 			if err != nil {
-				return err
+				// Use placeholder if download fails
+				t.registryBydecode = placeholderBytecode
+			} else {
+				t.registryBydecode = string(registryBytecodeBytes)
 			}
 		}
-		t.registryBydecode = string(registryBytecodeBytes)
 	}
 	return nil
 }
