@@ -22,17 +22,19 @@ func CreateEvmSidecar(
 	// If sc is nil, create a new sidecar
 	if sc == nil {
 		sc = &models.Sidecar{
-			Name:    blockchainName,
-			Subnet:  blockchainName,
 			Version: "1.0.0",
 		}
 	}
+
+	// Always set Name and Subnet from blockchainName
+	sc.Name = blockchainName
+	sc.Subnet = blockchainName
 
 	// Update sidecar with EVM-specific information
 	sc.VM = models.EVM
 	sc.VMVersion = vmVersion
 	sc.TokenSymbol = tokenSymbol
-	sc.TokenName = "TEST"  // Default token name
+	sc.TokenName = "TEST" // Default token name
 	sc.Sovereign = sovereign
 	sc.UseACP99 = useACP99
 
