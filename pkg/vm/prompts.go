@@ -9,12 +9,21 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
+// AllocationEntry represents an allocation entry in genesis
+type AllocationEntry struct {
+	Address string
+	Balance string
+}
+
 // SubnetEVMGenesisParams contains parameters for Subnet EVM genesis
 type SubnetEVMGenesisParams struct {
 	UseDefaults         bool
 	Interop             bool
 	UseWarp             bool
 	UseExternalGasToken bool
+	ChainID             uint64
+	TokenSymbol         string
+	Allocations         []AllocationEntry
 }
 
 // PromptVMType prompts the user to select a VM type
@@ -70,5 +79,7 @@ func PromptSubnetEVMGenesisParams(
 	return &SubnetEVMGenesisParams{
 		UseDefaults: params.UseDefaults,
 		Interop:     interop,
+		ChainID:     chainID,
+		TokenSymbol: symbol,
 	}, nil
 }
