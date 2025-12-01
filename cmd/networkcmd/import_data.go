@@ -3,14 +3,13 @@
 package networkcmd
 
 import (
-	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/migrate"
+	"github.com/luxfi/migrate/jsonl"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,8 @@ func newImportDataCmd() *cobra.Command {
 		Short: "Import blockchain blocks via RPC",
 		Long: `Import blockchain blocks to a running node via RPC from JSONL format.
 
-Reads blocks from a JSONL file (one JSON object per line) and imports them.
+Reads blocks from a JSONL file (one JSON object per line) and imports them
+using the github.com/luxfi/migrate package.
 
 Example:
   lux blockchain import data --id=C --input=blocks.jsonl`,
@@ -48,51 +48,49 @@ func importDataFunc(cmd *cobra.Command, args []string) error {
 	// Discover RPC if not provided
 	if importRPC == "" {
 		importRPC = discoverRPC(importID)
-		ux.Logger.PrintToUser("🔍 RPC: %s", importRPC)
+		ux.Logger.PrintToUser("RPC: %s", importRPC)
 	}
 
-	// Open input file
-	f, err := os.Open(importInput)
+	// Determine VM type from ID
+	vmType := vmTypeFromID(importID)
+	ux.Logger.PrintToUser("VM Type: %s", vmType)
+
+	// Create importer using migrate package
+	importer, err := migrate.NewImporter(migrate.ImporterConfig{
+		VMType: vmType,
+		RPCURL: importRPC,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create importer: %w", err)
+	}
+	defer importer.Close()
+
+	// Open JSONL reader
+	reader, err := jsonl.NewReader(importInput)
 	if err != nil {
 		return fmt.Errorf("failed to open input file: %w", err)
 	}
-	defer f.Close()
+	defer reader.Close()
 
-	scanner := bufio.NewScanner(f)
-	// Increase buffer size for large JSON lines
-	const maxCapacity = 10 * 1024 * 1024 // 10MB
-	buf := make([]byte, maxCapacity)
-	scanner.Buffer(buf, maxCapacity)
-
-	blocks := []interface{}{}
-	lineNum := 0
-
-	// Read all blocks from JSONL
-	for scanner.Scan() {
-		lineNum++
-		line := scanner.Bytes()
-		if len(line) == 0 {
-			continue
-		}
-
-		var block map[string]interface{}
-		if err := json.Unmarshal(line, &block); err != nil {
-			return fmt.Errorf("failed to parse line %d: %w", lineNum, err)
-		}
-		blocks = append(blocks, block)
+	// Read all blocks
+	blocks, err := reader.ReadAllBlocks()
+	if err != nil {
+		return fmt.Errorf("failed to read blocks: %w", err)
 	}
 
-	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("failed to read input file: %w", err)
-	}
-
-	ux.Logger.PrintToUser("📥 Importing %d blocks...", len(blocks))
+	ux.Logger.PrintToUser("Importing %d blocks...", len(blocks))
 
 	// Import in batches
 	batchSize := 100
 	imported := 0
 
 	for i := 0; i < len(blocks); i += batchSize {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		end := i + batchSize
 		if end > len(blocks) {
 			end = len(blocks)
@@ -101,13 +99,35 @@ func importDataFunc(cmd *cobra.Command, args []string) error {
 		batch := blocks[i:end]
 		ux.Logger.PrintToUser("  Batch %d-%d...", i, end-1)
 
-		count, err := importBlocks(ctx, importRPC, batch)
-		if err != nil {
-			return fmt.Errorf("failed to import batch: %w", err)
+		if err := importer.ImportBlocks(batch); err != nil {
+			return fmt.Errorf("failed to import batch %d-%d: %w", i, end-1, err)
 		}
-		imported += count
+		imported += len(batch)
 	}
 
-	ux.Logger.PrintToUser("✅ Imported %d blocks", imported)
+	// Finalize and verify
+	if len(blocks) > 0 {
+		lastBlock := blocks[len(blocks)-1]
+		if err := importer.FinalizeImport(lastBlock.Number); err != nil {
+			ux.Logger.PrintToUser("Warning: finalization check failed: %v", err)
+		}
+	}
+
+	ux.Logger.PrintToUser("Imported %d blocks", imported)
 	return nil
+}
+
+// vmTypeFromID converts a blockchain ID to a VMType
+func vmTypeFromID(id string) migrate.VMType {
+	switch id {
+	case "C":
+		return migrate.VMTypeCChain
+	case "P":
+		return migrate.VMTypePChain
+	case "X":
+		return migrate.VMTypeXChain
+	default:
+		// Default to C-Chain for subnet imports
+		return migrate.VMTypeCChain
+	}
 }
