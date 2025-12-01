@@ -64,6 +64,7 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 
 require (
 	github.com/luxfi/math v0.1.4
+	github.com/luxfi/migrate v1.0.0
 	github.com/tyler-smith/go-bip32 v1.0.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.36.0
@@ -278,3 +279,5 @@ require (
 replace github.com/luxfi/netrunner => ../netrunner
 
 replace github.com/luxfi/node => ../node
+
+replace github.com/luxfi/migrate => ../migrate
