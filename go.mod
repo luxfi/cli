@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.0.0-lux.2
 	github.com/luxfi/netrunner v1.13.7-lux.2
-	github.com/luxfi/node v1.20.1
+	github.com/luxfi/node v1.20.3
 	github.com/luxfi/sdk v0.1.0-lux.16
 	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
@@ -122,7 +122,7 @@ require (
 	github.com/emicklei/dot v1.9.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/ethereum/c-kzg-4844/v2 v2.1.3 // indirect
+	github.com/ethereum/c-kzg-4844/v2 v2.1.5 // indirect
 	github.com/ethereum/go-bigmodexpfix v0.0.0-20250911101455-f9e208c548ab // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
@@ -280,4 +280,5 @@ replace github.com/luxfi/netrunner => ../netrunner
 
 replace github.com/luxfi/node => ../node
 
-replace github.com/luxfi/migrate => ../migrate
+// migrate is now published - no local replace needed
+// replace github.com/luxfi/migrate => ../migrate
