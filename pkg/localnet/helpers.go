@@ -179,6 +179,10 @@ func TrackSubnet(
 		if err := TmpNetSetDefaultAliases(ctx, networkDir); err != nil {
 			return err
 		}
+		// Persist the subnet ID for automatic tracking on restart
+		if err := AddTrackedSubnet(app, subnetID.String()); err != nil {
+			printFunc("Warning: failed to persist subnet tracking config: %v", err)
+		}
 	}
 	nodeURIs, err := GetTmpNetNodeURIsWithFix(networkDir)
 	if err != nil {
