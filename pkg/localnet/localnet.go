@@ -273,6 +273,21 @@ func CreateLocalNetwork(
 	if err := json.Unmarshal([]byte(nodeConfigStr), &nodeConfig); err != nil {
 		return fmt.Errorf("invalid common node config JSON: %w", err)
 	}
+
+	// Restore tracked subnets from persisted state for auto-tracking on restart
+	trackedSubnets, devMode, err := getPersistedTrackingConfig(networkDir)
+	if err != nil {
+		app.Log.Warn("failed to load persisted tracking config", "error", err)
+	}
+	// Apply tracking configuration to node flags
+	if devMode {
+		nodeConfig["track-subnets"] = "all"
+		app.Log.Info("dev mode enabled: tracking all subnets automatically")
+	} else if len(trackedSubnets) > 0 {
+		nodeConfig["track-subnets"] = strings.Join(trackedSubnets, ",")
+		app.Log.Info("restoring tracked subnets", "subnets", trackedSubnets)
+	}
+
 	maps.Copy(defaultFlags, nodeConfig)
 	// create network
 	ctx, cancel := GetLocalNetworkDefaultContext()
@@ -315,6 +330,21 @@ func LoadLocalNetwork(
 	if err := json.Unmarshal([]byte(nodeConfigStr), &nodeConfig); err != nil {
 		return fmt.Errorf("invalid common node config JSON: %w", err)
 	}
+
+	// Restore tracked subnets from persisted state for auto-tracking on restart
+	trackedSubnets, devMode, err := getPersistedTrackingConfig(networkDir)
+	if err != nil {
+		app.Log.Warn("failed to load persisted tracking config", "error", err)
+	}
+	// Apply tracking configuration to node flags
+	if devMode {
+		nodeConfig["track-subnets"] = "all"
+		app.Log.Info("dev mode enabled: tracking all subnets automatically")
+	} else if len(trackedSubnets) > 0 {
+		nodeConfig["track-subnets"] = strings.Join(trackedSubnets, ",")
+		app.Log.Info("restoring tracked subnets", "subnets", trackedSubnets)
+	}
+
 	network, err := GetTmpNetNetwork(networkDir)
 	if err != nil {
 		return err

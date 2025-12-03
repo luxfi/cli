@@ -12,6 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -27,6 +28,8 @@ var (
 	snapshotName           string
 	mainnet                bool
 	testnet                bool
+	// Dev mode flag for automatic subnet tracking
+	devMode bool
 	// BadgerDB flags
 	dbEngine      string
 	archiveDir    string
@@ -68,6 +71,7 @@ already running.`,
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 21 validators")
 	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 11 validators")
+	cmd.Flags().BoolVar(&devMode, "dev-mode", false, "enable dev mode: automatically track all subnets")
 	// BadgerDB flags
 	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
 	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
@@ -198,6 +202,16 @@ func StartNetwork(*cobra.Command, []string) error {
 	if subnet.HasEndpoints(clusterInfo) {
 		ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
 		ux.PrintTableEndpoints(clusterInfo)
+	}
+
+
+	// Persist dev mode setting if enabled
+	if devMode {
+		if err := localnet.SetDevMode(app, true); err != nil {
+			ux.Logger.PrintToUser("Warning: failed to persist dev mode setting: %v", err)
+		} else {
+			ux.Logger.PrintToUser("Dev mode enabled: all subnets will be automatically tracked")
+		}
 	}
 
 	return nil
