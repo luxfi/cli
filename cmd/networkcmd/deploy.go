@@ -17,6 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/dependencies"
+	"github.com/luxfi/cli/pkg/globalconfig"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
@@ -592,11 +593,16 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 
 		ux.Logger.PrintToUser("")
+		// Get effective numNodes from config hierarchy if not overridden by flag
+		effectiveNumNodes := numNodes
+		if configNodes, err := globalconfig.GetNumNodes(app.GetBaseDir(), numNodes, false); err == nil {
+			effectiveNumNodes = configNodes
+		}
 		if err := Start(
 			StartFlags{
 				UserProvidedLuxdVersion: luxdVersion,
 				LuxdBinaryPath:          deployFlags.LocalMachineFlags.LuxdBinaryPath,
-				NumNodes:                numNodes,
+				NumNodes:                effectiveNumNodes,
 			},
 			false,
 		); err != nil {
