@@ -78,10 +78,12 @@ var (
 
 	validatorManagerAddress        string
 	deployFlags                    BlockchainDeployFlags
+	forceRedeploy                  bool
 	errMutuallyExlusiveControlKeys = errors.New("--control-keys and --same-control-key are mutually exclusive")
 	ErrMutuallyExlusiveKeyLedger   = errors.New("key source flags --key, --ledger/--ledger-addrs are mutually exclusive")
 	ErrStoredKeyOnMainnet          = errors.New("key --key is not available for mainnet operations")
 	errMutuallyExlusiveSubnetFlags = errors.New("--subnet-only and --subnet-id are mutually exclusive")
+	ErrBlockchainAlreadyDeployed   = errors.New("blockchain already deployed to this network")
 )
 
 type BlockchainDeployFlags struct {
@@ -135,6 +137,7 @@ so you can take your locally tested Blockchain and deploy it on Testnet or Mainn
 	cmd.Flags().Uint32Var(&mainnetChainID, "mainnet-chain-id", 0, "use different ChainID for mainnet deployment")
 	cmd.Flags().BoolVar(&subnetOnly, "subnet-only", false, "command stops after CreateSubnetTx and returns SubnetID")
 	cmd.Flags().BoolVar(&deployFlags.ConvertOnly, "convert-only", false, "avoid node track, restart and poa manager setup")
+	cmd.Flags().BoolVar(&forceRedeploy, "force", false, "force redeploy even if blockchain already deployed (local network only)")
 
 	localNetworkGroup := flags.RegisterFlagGroup(cmd, "Local Network Flags", "show-local-network-flags", true, func(set *pflag.FlagSet) {
 		set.Uint32Var(&numNodes, "num-nodes", constants.LocalNetworkNumNodes, "number of nodes to be created on local network deploy")
@@ -625,7 +628,22 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			if b, err := localnet.BlockchainAlreadyDeployedOnLocalNetwork(app, blockchainName); err != nil {
 				return err
 			} else if b {
-				return fmt.Errorf("blockchain %s has already been deployed", blockchainName)
+				if forceRedeploy {
+					ux.Logger.PrintToUser("Blockchain %s already deployed. Force redeploying with --force...", blockchainName)
+					ux.Logger.PrintToUser("Running 'network clean' to reset state...")
+					if err := clean(nil, nil); err != nil {
+						return fmt.Errorf("failed to clean network for redeployment: %w", err)
+					}
+				} else {
+					ux.Logger.PrintToUser("")
+					ux.Logger.PrintToUser("Blockchain %s has already been deployed to the local network.", blockchainName)
+					ux.Logger.PrintToUser("")
+					ux.Logger.PrintToUser("Options:")
+					ux.Logger.PrintToUser("  1. Use --force to clean and redeploy: lux network deploy %s --force", blockchainName)
+					ux.Logger.PrintToUser("  2. Run 'lux network clean' first, then deploy again")
+					ux.Logger.PrintToUser("  3. Deploy to a different network (testnet/mainnet)")
+					return ErrBlockchainAlreadyDeployed
+				}
 			}
 		}
 	}

@@ -1,0 +1,263 @@
+// Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+package networkcmd
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/netspec"
+	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
+	"github.com/spf13/cobra"
+)
+
+var (
+	specExportPath   string
+	specExportFormat string
+)
+
+// newSpecExportCmd creates the network spec-export command.
+func newSpecExportCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "spec-export [networkName]",
+		Short: "Export current network state as a declarative specification",
+		Long: `Export the current network configuration to a YAML or JSON specification file.
+
+This allows you to:
+- Version control your network configuration
+- Recreate the same network on another machine
+- Share network configurations with team members
+- Migrate from imperative to declarative network management
+
+The exported specification can be applied using 'lux network apply'.
+
+Usage:
+  lux network spec-export mynetwork -o spec.yaml
+  lux network spec-export mynetwork -o spec.json --format json`,
+		RunE:    specExport,
+		PreRunE: cobrautils.MaximumNArgs(1),
+	}
+
+	cmd.Flags().StringVarP(&specExportPath, "output", "o", "", "output file path (default: stdout)")
+	cmd.Flags().StringVar(&specExportFormat, "format", "yaml", "output format: yaml or json")
+
+	return cmd
+}
+
+// specExport exports the current network state as a specification.
+func specExport(cmd *cobra.Command, args []string) error {
+	networkName := "local"
+	if len(args) > 0 {
+		networkName = args[0]
+	}
+
+	// Build spec from current state
+	spec, err := buildSpecFromCurrentState(networkName)
+	if err != nil {
+		return fmt.Errorf("failed to build specification: %w", err)
+	}
+
+	// Determine output format
+	format := strings.ToLower(specExportFormat)
+	if specExportPath != "" {
+		ext := strings.ToLower(filepath.Ext(specExportPath))
+		if ext == ".json" {
+			format = "json"
+		} else if ext == ".yaml" || ext == ".yml" {
+			format = "yaml"
+		}
+	}
+
+	// Generate output
+	var data []byte
+	switch format {
+	case "json":
+		data, err = netspec.StateToJSON(stateToExportable(spec))
+		if err != nil {
+			return fmt.Errorf("failed to marshal JSON: %w", err)
+		}
+	default:
+		data, err = specToYAML(spec)
+		if err != nil {
+			return fmt.Errorf("failed to marshal YAML: %w", err)
+		}
+	}
+
+	// Write output
+	if specExportPath == "" {
+		fmt.Print(string(data))
+	} else {
+		if err := os.WriteFile(specExportPath, data, 0644); err != nil {
+			return fmt.Errorf("failed to write file: %w", err)
+		}
+		ux.Logger.GreenCheckmarkToUser("Specification exported to %s", specExportPath)
+	}
+
+	return nil
+}
+
+// buildSpecFromCurrentState builds a NetworkSpec from current deployed state.
+func buildSpecFromCurrentState(networkName string) (*netspec.NetworkSpec, error) {
+	spec := &netspec.NetworkSpec{
+		APIVersion: netspec.CurrentAPIVersion,
+		Kind:       netspec.KindNetwork,
+		Network: netspec.NetworkConfig{
+			Name:  networkName,
+			Nodes: 5, // Default
+		},
+	}
+
+	// Get running node count
+	if running, _ := isNetworkRunning(); running {
+		spec.Network.Nodes = getRunningNodeCount()
+	}
+
+	// Scan for deployed blockchains
+	subnetDir := app.GetSubnetDir()
+	entries, err := os.ReadDir(subnetDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return spec, nil
+		}
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		sc, err := app.LoadSidecar(entry.Name())
+		if err != nil {
+			continue
+		}
+
+		subnet := netspec.SubnetSpec{
+			Name:      sc.Name,
+			VM:        vmTypeToString(sc.VM),
+			VMVersion: sc.VMVersion,
+			ChainID:   parseChainID(sc.ChainID),
+		}
+
+		if sc.TokenSymbol != "" {
+			subnet.TokenSymbol = sc.TokenSymbol
+		}
+
+		// Check if sovereign
+		subnet.Sovereign = sc.Sovereign
+
+		// Get validator management
+		if sc.ValidatorManagement != "" {
+			subnet.ValidatorManagement = sc.ValidatorManagement
+		}
+
+		// Default validators to 3
+		subnet.Validators = 3
+
+		spec.Network.Subnets = append(spec.Network.Subnets, subnet)
+	}
+
+	return spec, nil
+}
+
+// stateToExportable converts a spec to a NetworkState for JSON export.
+func stateToExportable(spec *netspec.NetworkSpec) *netspec.NetworkState {
+	state := &netspec.NetworkState{
+		Name:  spec.Network.Name,
+		Nodes: spec.Network.Nodes,
+	}
+
+	for _, s := range spec.Network.Subnets {
+		state.Subnets = append(state.Subnets, netspec.SubnetState{
+			Name:      s.Name,
+			VM:        s.VM,
+			VMVersion: s.VMVersion,
+			ChainID:   s.ChainID,
+		})
+	}
+
+	return state
+}
+
+// specToYAML converts a NetworkSpec to YAML bytes.
+func specToYAML(spec *netspec.NetworkSpec) ([]byte, error) {
+	// Build YAML manually for clean output
+	var sb strings.Builder
+
+	sb.WriteString("# Lux Network Specification\n")
+	sb.WriteString("# Generated by: lux network spec-export\n")
+	sb.WriteString("# Apply with: lux network apply -f <this-file>\n\n")
+
+	sb.WriteString(fmt.Sprintf("apiVersion: %s\n", spec.APIVersion))
+	sb.WriteString(fmt.Sprintf("kind: %s\n\n", spec.Kind))
+
+	sb.WriteString("network:\n")
+	sb.WriteString(fmt.Sprintf("  name: %s\n", spec.Network.Name))
+	sb.WriteString(fmt.Sprintf("  nodes: %d\n", spec.Network.Nodes))
+
+	if spec.Network.LuxdVersion != "" {
+		sb.WriteString(fmt.Sprintf("  luxdVersion: %s\n", spec.Network.LuxdVersion))
+	}
+
+	if len(spec.Network.Subnets) > 0 {
+		sb.WriteString("  subnets:\n")
+		for _, s := range spec.Network.Subnets {
+			sb.WriteString(fmt.Sprintf("    - name: %s\n", s.Name))
+			sb.WriteString(fmt.Sprintf("      vm: %s\n", s.VM))
+
+			if s.VMVersion != "" {
+				sb.WriteString(fmt.Sprintf("      vmVersion: %s\n", s.VMVersion))
+			}
+
+			if s.ChainID != 0 {
+				sb.WriteString(fmt.Sprintf("      chainId: %d\n", s.ChainID))
+			}
+
+			if s.TokenSymbol != "" {
+				sb.WriteString(fmt.Sprintf("      tokenSymbol: %s\n", s.TokenSymbol))
+			}
+
+			if s.Validators != 0 {
+				sb.WriteString(fmt.Sprintf("      validators: %d\n", s.Validators))
+			}
+
+			if s.Genesis != "" {
+				sb.WriteString(fmt.Sprintf("      genesis: %s\n", s.Genesis))
+			}
+
+			if s.Sovereign {
+				sb.WriteString("      sovereign: true\n")
+			}
+
+			if s.ValidatorManagement != "" {
+				sb.WriteString(fmt.Sprintf("      validatorManagement: %s\n", s.ValidatorManagement))
+			}
+
+			if s.TestDefaults {
+				sb.WriteString("      testDefaults: true\n")
+			}
+
+			if s.ProductionDefaults {
+				sb.WriteString("      productionDefaults: true\n")
+			}
+		}
+	}
+
+	return []byte(sb.String()), nil
+}
+
+// vmTypeToString converts a VMType to string.
+func vmTypeToString(vm models.VMType) string {
+	switch vm {
+	case models.SubnetEvm:
+		return "subnet-evm"
+	case models.CustomVM:
+		return "custom"
+	default:
+		return "subnet-evm"
+	}
+}

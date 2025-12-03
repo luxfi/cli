@@ -1,0 +1,45 @@
+# Lux Network Specification
+# This is an example Infrastructure as Code (IaC) specification
+# for declaratively managing Lux networks.
+#
+# Apply with: lux network apply -f network-spec.yaml
+# Export current state: lux network spec-export -o current-state.yaml
+
+apiVersion: lux.network/v1
+kind: Network
+
+network:
+  # Network name - must be unique
+  name: mydevnet
+
+  # Number of validator nodes (default: 5)
+  nodes: 5
+
+  # Luxd version (optional, default: latest)
+  # luxdVersion: v1.20.3
+
+  # Subnets/Blockchains to deploy
+  subnets:
+    # Example 1: Simple EVM chain with test defaults
+    - name: mychain
+      vm: subnet-evm
+      chainId: 12345
+      tokenSymbol: MYT
+      validators: 3
+      testDefaults: true
+
+    # Example 2: Production-ready EVM chain
+    - name: prodchain
+      vm: subnet-evm
+      chainId: 54321
+      tokenSymbol: PRD
+      validators: 5
+      productionDefaults: true
+      sovereign: true
+      validatorManagement: proof-of-authority
+
+    # Example 3: Custom genesis file
+    # - name: customchain
+    #   vm: subnet-evm
+    #   genesis: ./custom-genesis.json
+    #   validators: 3
