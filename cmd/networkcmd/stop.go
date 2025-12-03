@@ -7,6 +7,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/local"
 	"github.com/luxfi/netrunner/server"
@@ -48,6 +49,13 @@ func StopNetwork(*cobra.Command, []string) error {
 }
 
 func saveNetwork() error {
+	if err := localnet.SaveNetworkState(app); err != nil {
+		app.Log.Warn("failed to save network state", zap.Error(err))
+		ux.Logger.PrintToUser("Warning: could not save state: %v", err)
+	} else {
+		ux.Logger.PrintToUser("Network state saved")
+	}
+
 	cli, err := binutils.NewGRPCClient(binutils.WithAvoidRPCVersionCheck(true))
 	if err != nil {
 		return err
