@@ -58,4 +58,7 @@ const (
 
 	// WarpCmd is the warp command name (for ICM/Interchain Messaging)
 	WarpCmd = "warp"
+
+	// DoctorCmd is the doctor command name
+	DoctorCmd = "doctor"
 )

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/cmd/configcmd"
+	"github.com/luxfi/cli/cmd/doctorcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
@@ -126,6 +127,10 @@ Quick start:
 
 	// add hidden backend command
 	rootCmd.AddCommand(backendcmd.NewCmd(app))
+
+	// add doctor command for environment checks
+	rootCmd.AddCommand(doctorcmd.NewCmd(app))
+
 	return rootCmd
 }
 
