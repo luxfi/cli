@@ -24,7 +24,11 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 		},
 	}
 	app = injectedApp
-	// set user metrics collection preferences cmd
+	// config subcommands
+	cmd.AddCommand(newInitCmd())
+	cmd.AddCommand(newSetCmd())
+	cmd.AddCommand(newGetCmd())
+	cmd.AddCommand(newListCmd())
 	cmd.AddCommand(newMetricsCmd())
 
 	return cmd
