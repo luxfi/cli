@@ -70,5 +70,9 @@ Use 'lux network', 'lux blockchain', or 'lux net' interchangeably.`,
 	cmd.AddCommand(newStatusCmd())
 	cmd.AddCommand(newQuickstartCmd())
 
+	// Infrastructure as Code (IaC) commands
+	cmd.AddCommand(newApplyCmd())
+	cmd.AddCommand(newSpecExportCmd())
+
 	return cmd
 }
