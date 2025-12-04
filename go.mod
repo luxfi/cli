@@ -16,15 +16,15 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.17.6
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v1.16.19
-	github.com/luxfi/geth v1.16.39
+	github.com/luxfi/evm v0.8.1
+	github.com/luxfi/geth v1.16.40
 	github.com/luxfi/ids v1.1.2
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.24
-	github.com/luxfi/lpm v1.0.0-lux.2
-	github.com/luxfi/netrunner v1.14.0
-	github.com/luxfi/node v1.20.3
-	github.com/luxfi/sdk v1.8.2
+	github.com/luxfi/lpm v1.7.12
+	github.com/luxfi/netrunner v1.13.5-lux.3
+	github.com/luxfi/node v1.20.1
+	github.com/luxfi/sdk v1.7.0-lux.4
 	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -128,8 +128,10 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/ferranbt/fastssz v1.0.0 // indirect
+	github.com/fjl/gencodec v0.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
+	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
 	github.com/getsentry/sentry-go v0.35.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
@@ -176,7 +178,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.21.2 // indirect
+	github.com/luxfi/consensus v1.22.1 // indirect
 	github.com/luxfi/database v1.2.7 // indirect
 	github.com/luxfi/metric v1.4.5 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
@@ -275,7 +277,6 @@ require (
 // replace github.com/luxfi/evm => ../evm
 
 // replace github.com/luxfi/geth => ../geth
-
 
 // migrate is now published - no local replace needed
 // replace github.com/luxfi/migrate => ../migrate
