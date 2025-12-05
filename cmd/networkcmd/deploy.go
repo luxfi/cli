@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/cmd/flags"
-	"github.com/luxfi/cli/cmd/interchaincmd/messengercmd"
 	"github.com/luxfi/cli/cmd/interchaincmd/relayercmd"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
@@ -938,7 +937,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			BlockchainName: blockchainName,
 		}
 		chainSpec.SetEnabled(true, false, false, false, false)
-		deployWarpFlags := messengercmd.DeployFlags{
 			ChainFlags: chainSpec,
 			PrivateKeyFlags: contract.PrivateKeyFlags{
 				KeyName: warpKeyName,
@@ -954,7 +952,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			CChainKeyName:                cchainIcmKeyName,
 		}
 		ux.Logger.PrintToUser("")
-		if err := messengercmd.CallDeploy([]string{}, deployWarpFlags, network); err != nil {
 			warpErr = err
 			ux.Logger.RedXToUser("Interchain Messaging is not deployed due to: %v", warpErr)
 		} else {
