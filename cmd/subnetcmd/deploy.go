@@ -16,7 +16,6 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/cli/pkg/localnetworkinterface"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/txutils"
 	utilspkg "github.com/luxfi/cli/pkg/utils"

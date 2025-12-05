@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
