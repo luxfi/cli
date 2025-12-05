@@ -76,12 +76,6 @@ func describe(_ *cobra.Command, _ []string) error {
 		return err
 	}
 	if network.Kind() == models.Local {
-		if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
-			return err
-		} else if b {
-			warpMessengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
-			warpRegistryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
-		}
 	} else if network.ClusterName() != "" {
 		if clusterConfig, err := app.GetClusterConfig(network.ClusterName()); err != nil {
 			return err
