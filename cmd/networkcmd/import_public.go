@@ -5,6 +5,7 @@ package networkcmd
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"

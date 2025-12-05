@@ -3,9 +3,10 @@
 package networkcmd
 
 import (
-	"github.com/luxfi/cli/pkg/localnet"
 	"errors"
 	"os"
+
+	"github.com/luxfi/cli/pkg/localnet"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
