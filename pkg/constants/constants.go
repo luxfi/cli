@@ -35,18 +35,20 @@ const (
 	MaxNumOfLogFiles = 5
 	RetainOldFiles   = 0 // retain all old log files
 
-	RequestTimeout         = 3 * time.Minute
+	// RequestTimeout increased from 3 to 10 minutes to match netrunner's
+	// waitForHealthyTimeout for proper mainnet validator bootstrapping
+	RequestTimeout         = 10 * time.Minute
 	E2ERequestTimeout      = 30 * time.Second
-	ANRRequestTimeout      = 3 * time.Minute
+	ANRRequestTimeout      = 10 * time.Minute
 	APIRequestTimeout      = 30 * time.Second
 	APIRequestLargeTimeout = 2 * time.Minute
 
 	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
 	TestnetAPIEndpoint    = "https://api.lux-test.network"
-	MainnetAPIEndpoint    = "https://api.lux.network"
+	MainnetAPIEndpoint    = "http://127.0.0.1:9630" // Local mainnet for development
 
 	// WebSocket endpoints
-	MainnetWSEndpoint = "wss://api.lux.network/ext/bc/C/ws"
+	MainnetWSEndpoint = "ws://127.0.0.1:9630/ext/bc/C/ws" // Local mainnet WS for development
 	TestnetWSEndpoint = "wss://api.lux-test.network/ext/bc/C/ws"
 
 	// Default values for relayer and validators

@@ -3,21 +3,24 @@
 package networkcmd
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/netrunner/client"
+	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
-	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
@@ -126,10 +129,11 @@ func StartNetwork(*cobra.Command, []string) error {
 	}
 	ux.Logger.PrintToUser("%s", startMsg)
 
-	outputDirPrefix := path.Join(app.GetRunDir(), "restart")
-	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)
-	if err != nil {
-		return err
+	// Use stable directory path for persistence across restarts
+	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
+	outputDir := path.Join(app.GetRunDir(), "local_network")
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	pluginDir := app.GetPluginsDir()
@@ -149,6 +153,15 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	// Build node config with BadgerDB options
 	nodeConfig := make(map[string]interface{})
+
+	// Auto-track deployed subnets - eliminates the track-subnets gotcha
+	subnetIDs, trackErr := subnet.GetLocallyDeployedSubnetIDs(app)
+	if trackErr == nil && len(subnetIDs) > 0 {
+		trackSubnetsStr := strings.Join(subnetIDs, ",")
+		ux.Logger.PrintToUser("Auto-tracking %d deployed subnet(s): %s", len(subnetIDs), trackSubnetsStr)
+		// Add track-subnets to node config
+		nodeConfig["track-subnets"] = trackSubnetsStr
+	}
 	if configStr != "" {
 		if err := json.Unmarshal([]byte(configStr), &nodeConfig); err != nil {
 			return fmt.Errorf("invalid node config: %w", err)
@@ -180,25 +193,79 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	ctx := binutils.GetAsyncContext()
 
-	pp, err := cli.LoadSnapshot(
-		ctx,
-		snapshotName,
-		loadSnapshotOpts...,
-	)
+	// Check if we have a valid snapshot with nodes (db directory with node subdirs)
+	snapshotPath := path.Join(app.GetSnapshotsDir(), "anr-snapshot-"+snapshotName)
+	dbPath := path.Join(snapshotPath, "db")
+	hasValidSnapshot := false
 
-	if err != nil {
-		if !server.IsServerError(err, server.ErrAlreadyBootstrapped) {
-			return fmt.Errorf("failed to start network with the persisted snapshot: %w", err)
+	if fi, dbErr := os.Stat(dbPath); dbErr == nil && fi.IsDir() {
+		entries, _ := os.ReadDir(dbPath)
+		for _, e := range entries {
+			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
+				hasValidSnapshot = true
+				break
+			}
 		}
-		ux.Logger.PrintToUser("Network has already been booted. Wait until healthy...")
-	} else {
-		ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
-		ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
+	}
 
-		// Load existing subnet state if provided
-		if err := LoadExistingSubnetState(outputDir); err != nil {
-			ux.Logger.PrintToUser("Warning: Failed to load existing subnet state: %v", err)
-			// Continue without the state - don't fail the entire network start
+	var pp *rpcpb.LoadSnapshotResponse
+	var loadErr error
+
+	if hasValidSnapshot {
+		// Load from existing snapshot
+		pp, loadErr = cli.LoadSnapshot(
+			ctx,
+			snapshotName,
+			loadSnapshotOpts...,
+		)
+
+		if loadErr != nil {
+			if !server.IsServerError(loadErr, server.ErrAlreadyBootstrapped) {
+				return fmt.Errorf("failed to start network with the persisted snapshot: %w", loadErr)
+			}
+			ux.Logger.PrintToUser("Network has already been booted. Wait until healthy...")
+		} else {
+			ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
+			ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
+
+			// Load existing subnet state if provided
+			if err := LoadExistingSubnetState(outputDir); err != nil {
+				ux.Logger.PrintToUser("Warning: Failed to load existing subnet state: %v", err)
+				// Continue without the state - don't fail the entire network start
+			}
+		}
+	} else {
+		// Start fresh network - no valid snapshot with nodes exists
+		ux.Logger.PrintToUser("No valid snapshot found, starting fresh local network...")
+
+		startOpts := []client.OpOption{
+			client.WithExecPath(nodeBinPath),
+			client.WithNumNodes(uint32(numValidators)),
+			client.WithRootDataDir(outputDir),
+			client.WithReassignPortsIfUsed(true),
+			client.WithPluginDir(pluginDir),
+		}
+
+		// Add global node config if present
+		if len(nodeConfig) > 0 {
+			updatedConfigBytes, marshalErr := json.Marshal(nodeConfig)
+			if marshalErr != nil {
+				return fmt.Errorf("failed to marshal node config: %w", marshalErr)
+			}
+			startOpts = append(startOpts, client.WithGlobalNodeConfig(string(updatedConfigBytes)))
+		}
+
+		startResp, startErr := cli.Start(ctx, nodeBinPath, startOpts...)
+		if startErr != nil {
+			// Check if network is already bootstrapped (started via `network start --mainnet/--testnet`)
+			if server.IsServerError(startErr, server.ErrAlreadyBootstrapped) {
+				ux.Logger.PrintToUser("Network has already been started. Continuing with existing network...")
+			} else {
+				return fmt.Errorf("failed to start fresh network: %w", startErr)
+			}
+		} else {
+			ux.Logger.PrintToUser("Fresh network started. Wait until healthy...")
+			ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", startResp.ClusterInfo.RootDataDir)
 		}
 	}
 
@@ -315,15 +382,18 @@ func StartMainnet() error {
 	// Build mainnet configuration for single-node local development
 	// Use real mainnet with staking keys and k=1 consensus parameters
 	// Note: http-port and staking-port are managed by netrunner, don't set them here
+	// skip-bootstrap=true is now safe because the node's createDAG() has been fixed
+	// to properly initialize X-Chain and C-Chain in skip-bootstrap mode
 	globalNodeConfig := `{
 		"log-level": "info",
 		"network-id": 96369,
 		"consensus-sample-size": 1,
 		"consensus-quorum-size": 1,
 		"consensus-commit-threshold": 1,
-		"skip-bootstrap": true,
 		"sybil-protection-enabled": false,
-		"network-health-min-conn-peers": 0
+		"network-health-min-conn-peers": 0,
+		"skip-bootstrap": true,
+		"poa-single-node-mode": true
 	}`
 
 	// C-Chain runtime config (not genesis)
@@ -433,73 +503,309 @@ func StartMainnet() error {
 	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
 	ux.Logger.PrintToUser("Network is ready for use!")
 
-	return nil
-}
+	// Save local network metadata so deploy commands can find the network
+	// The networkDir is in the format rootDataDir/network_timestamp
+	// Find the actual network directory
+	networkDir := ""
+	entries, err := os.ReadDir(rootDataDir)
+	if err == nil {
+		for _, entry := range entries {
+			if entry.IsDir() && strings.HasPrefix(entry.Name(), "network_") {
+				networkDir = path.Join(rootDataDir, entry.Name())
+				break
+			}
+		}
+	}
+	if networkDir != "" {
+		// Create tmpnet-compatible config.json for blockchain deploy commands
+		if err := writeTmpnetConfig(networkDir, startResp.ClusterInfo, nodeBinPath); err != nil {
+			ux.Logger.PrintToUser("Warning: Failed to write tmpnet config: %v", err)
+		} else {
+			ux.Logger.PrintToUser("Network config written to %s/config.json", networkDir)
+		}
 
-// StartTestnet starts a testnet network with 11 validator nodes
-func StartTestnet() error {
-	ux.Logger.PrintToUser("Starting Lux testnet with 11 validator nodes...")
-
-	// First, ensure we have validator keys generated
-	keysDir := "/home/z/.luxd/keys/testnet"
-	if _, err := os.Stat(keysDir + "/validator-0/staking.crt"); os.IsNotExist(err) {
-		ux.Logger.PrintToUser("Generating validator keys for testnet...")
-		genkeysCmd := exec.Command("/home/z/.luxd/genkeys", "testnet")
-		genkeysCmd.Stdout = os.Stdout
-		genkeysCmd.Stderr = os.Stderr
-		if err := genkeysCmd.Run(); err != nil {
-			return fmt.Errorf("failed to generate keys: %w", err)
+		if err := localnet.SaveLocalNetworkMeta(app, networkDir); err != nil {
+			ux.Logger.PrintToUser("Warning: Failed to save network metadata: %v", err)
+		} else {
+			ux.Logger.PrintToUser("Network metadata saved to %s", networkDir)
 		}
 	}
 
-	ux.Logger.PrintToUser("Using keys from %s", keysDir)
+	return nil
+}
 
-	// Build the command to start luxd with testnet configuration
-	luxdPath := "/home/z/work/lux/node/bin/luxd"
+// tmpnetNetworkConfig represents the config.json format expected by tmpnet.ReadNetwork
+type tmpnetNetworkConfig struct {
+	UUID                 string                 `json:"UUID"`
+	NetworkID            uint32                 `json:"NetworkID"`
+	Owner                string                 `json:"Owner"`
+	Genesis              json.RawMessage        `json:"Genesis,omitempty"`
+	DefaultFlags         map[string]string      `json:"DefaultFlags"`
+	DefaultRuntimeConfig tmpnetRuntimeConfig    `json:"DefaultRuntimeConfig,omitempty"`
+	Nodes                []tmpnetNodeConfig     `json:"Nodes"`
+}
 
-	// Check if luxd exists
-	if _, err := os.Stat(luxdPath); os.IsNotExist(err) {
-		return fmt.Errorf("luxd binary not found at %s. Please build it first with 'make build-node'", luxdPath)
+type tmpnetRuntimeConfig struct {
+	Process *tmpnetProcessConfig `json:"process,omitempty"`
+}
+
+type tmpnetProcessConfig struct {
+	LuxPath string `json:"luxPath,omitempty"`
+}
+
+type tmpnetNodeConfig struct {
+	DataDir string            `json:"DataDir"`
+	Flags   map[string]string `json:"Flags,omitempty"`
+}
+
+// tmpnetNodeFileConfig represents the per-node config.json format (with flags and runtimeConfig)
+type tmpnetNodeFileConfig struct {
+	Flags         map[string]string   `json:"flags"`
+	RuntimeConfig tmpnetRuntimeConfig `json:"runtimeConfig"`
+}
+
+// writeTmpnetConfig creates a config.json file compatible with tmpnet.ReadNetwork
+func writeTmpnetConfig(networkDir string, clusterInfo *rpcpb.ClusterInfo, luxdPath string) error {
+	// Build nodes list from cluster info
+	nodes := make([]tmpnetNodeConfig, 0)
+	if clusterInfo != nil {
+		for _, nodeName := range clusterInfo.NodeNames {
+			// Node directories are named node1, node2, etc.
+			nodes = append(nodes, tmpnetNodeConfig{
+				DataDir: nodeName, // Relative path like "node1"
+				Flags:   map[string]string{},
+			})
+		}
 	}
 
-	// Testnet configuration (faster parameters)
-	args := []string{
-		"--network-id=96368",
-		"--staking-enabled=true",
-		"--consensus-x-enabled=false",
-		"--consensus-shutdown-timeout=3s",
-		"--consensus-gossip-frequency=5s",
-		"--consensus-k=11",
-		"--consensus-alpha-preference=7",
-		"--consensus-alpha-confidence=9",
-		"--consensus-beta=5",
-		"--consensus-concurrent-repolls=5",
-		"--consensus-optimal-processing=5",
-		"--consensus-max-processing-time=6300000000", // 6.3s in nanoseconds
-		"--staking-tls-cert-file=/home/z/.luxd/keys/testnet/validator-0/staking.crt",
-		"--staking-tls-key-file=/home/z/.luxd/keys/testnet/validator-0/staking.key",
-		"--staking-signer-key-file=/home/z/.luxd/keys/testnet/validator-0/signer.key",
-		"--genesis=/home/z/work/lux/genesis/configs/testnet",
-		"--chain-data-dir=/home/z/.luxd/testnet-data",
-		"--db-dir=/home/z/.luxd/testnet-db",
-		"--log-dir=/home/z/.luxd/testnet-logs",
-		"--http-port=9630",
-		"--staking-port=9651",
+	// Read genesis from first node if available
+	var genesisData json.RawMessage
+	if len(nodes) > 0 {
+		genesisPath := path.Join(networkDir, nodes[0].DataDir, "genesis.json")
+		if data, err := os.ReadFile(genesisPath); err == nil {
+			genesisData = data
+		}
 	}
 
-	// Execute luxd
-	cmd := exec.Command(luxdPath, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	ux.Logger.PrintToUser("Starting luxd with command: %s %v", luxdPath, args)
-
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start luxd: %w", err)
+	config := tmpnetNetworkConfig{
+		UUID:      fmt.Sprintf("mainnet-%d-deploy", 96369),
+		NetworkID: 96369,
+		Owner:     "lux-cli",
+		Genesis:   genesisData,
+		DefaultFlags: map[string]string{
+			"network-id": "96369",
+		},
+		DefaultRuntimeConfig: tmpnetRuntimeConfig{
+			Process: &tmpnetProcessConfig{
+				LuxPath: luxdPath,
+			},
+		},
+		Nodes: nodes,
 	}
 
-	ux.Logger.PrintToUser("Testnet started successfully!")
-	ux.Logger.PrintToUser("RPC endpoint: http://localhost:9630")
-	ux.Logger.PrintToUser("Node logs: ~/.luxd/testnet-logs/")
+	configBytes, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	configPath := path.Join(networkDir, "config.json")
+	if err := os.WriteFile(configPath, configBytes, 0644); err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+
+	// Write per-node config.json files
+	if clusterInfo != nil && clusterInfo.NodeInfos != nil {
+		for i, nodeName := range clusterInfo.NodeNames {
+			nodeInfo := clusterInfo.NodeInfos[nodeName]
+			if nodeInfo == nil {
+				continue
+			}
+
+			nodeDir := path.Join(networkDir, nodeName)
+			genesisFile := path.Join(nodeDir, "genesis.json")
+
+			// Calculate ports based on node index
+			httpPort := 9630 + (i * 2)
+			stakingPort := 9631 + (i * 2)
+
+			// Read staking credentials
+			var stakingTLSKey, stakingTLSCert, stakingSignerKey string
+
+			// Try to read staking key from node directory (base64 encoded content)
+			if keyData, err := os.ReadFile(path.Join(nodeDir, "staking.key")); err == nil {
+				stakingTLSKey = base64Encode(keyData)
+			}
+			if certData, err := os.ReadFile(path.Join(nodeDir, "staking.crt")); err == nil {
+				stakingTLSCert = base64Encode(certData)
+			}
+			if signerData, err := os.ReadFile(path.Join(nodeDir, "signer.key")); err == nil {
+				stakingSignerKey = base64Encode(signerData)
+			}
+
+			nodeConfig := tmpnetNodeFileConfig{
+				Flags: map[string]string{
+					"data-dir":                       nodeDir,
+					"network-id":                     "96369",
+					"http-port":                      fmt.Sprintf("%d", httpPort),
+					"staking-port":                   fmt.Sprintf("%d", stakingPort),
+					"genesis-file":                   genesisFile,
+					"staking-tls-key-file-content":   stakingTLSKey,
+					"staking-tls-cert-file-content":  stakingTLSCert,
+					"staking-signer-key-file-content": stakingSignerKey,
+				},
+				RuntimeConfig: tmpnetRuntimeConfig{
+					Process: &tmpnetProcessConfig{
+						LuxPath: luxdPath,
+					},
+				},
+			}
+
+			nodeConfigBytes, err := json.MarshalIndent(nodeConfig, "", "  ")
+			if err != nil {
+				return fmt.Errorf("failed to marshal node config: %w", err)
+			}
+
+			nodeConfigPath := path.Join(nodeDir, "config.json")
+			if err := os.WriteFile(nodeConfigPath, nodeConfigBytes, 0644); err != nil {
+				return fmt.Errorf("failed to write node config: %w", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// base64Encode encodes bytes to base64 string
+func base64Encode(data []byte) string {
+	return base64.StdEncoding.EncodeToString(data)
+}
+
+// StartTestnet starts a testnet network with configurable validator nodes
+func StartTestnet() error {
+	if numValidators < 1 {
+		numValidators = constants.LocalNetworkNumNodes
+	}
+	ux.Logger.PrintToUser("Starting Lux testnet with %d validators...", numValidators)
+
+	// Check if local luxd binary exists
+	localLuxdPath := "/home/z/work/lux/node/build/luxd"
+	if _, err := os.Stat(localLuxdPath); os.IsNotExist(err) {
+		return fmt.Errorf("luxd binary not found at %s. Please run 'make build-node' first", localLuxdPath)
+	}
+
+	// Use local binary instead of downloading
+	sd := subnet.NewLocalDeployer(app, "", "")
+
+	// Start netrunner server
+	if err := sd.StartServer(); err != nil {
+		return err
+	}
+
+	// Use local binary path
+	nodeBinPath := localLuxdPath
+
+	// Get gRPC client
+	cli, err := binutils.NewGRPCClient()
+	if err != nil {
+		return err
+	}
+
+	// Build testnet configuration for local development
+	// Use testnet with staking keys and k=1 consensus parameters
+	globalNodeConfig := `{
+		"log-level": "info",
+		"network-id": 96368,
+		"consensus-sample-size": 1,
+		"consensus-quorum-size": 1,
+		"consensus-commit-threshold": 1,
+		"sybil-protection-enabled": false,
+		"network-health-min-conn-peers": 0,
+		"skip-bootstrap": true,
+		"poa-single-node-mode": true
+	}`
+
+	// C-Chain runtime config (not genesis)
+	chainConfigs := map[string]string{
+		"C": `{
+			"pruning-enabled": false,
+			"local-txs-enabled": true,
+			"allow-unprotected-txs": true,
+			"state-sync-enabled": false,
+			"eth-apis": ["eth", "personal", "admin", "debug", "web3", "net", "txpool"]
+		}`,
+	}
+
+	// Build start options
+	rootDataDir := path.Join(app.GetRunDir(), "testnet-"+time.Now().Format("20060102-150405"))
+
+	opts := []client.OpOption{
+		client.WithExecPath(nodeBinPath),
+		client.WithNumNodes(uint32(numValidators)),
+		client.WithGlobalNodeConfig(globalNodeConfig),
+		client.WithRootDataDir(rootDataDir),
+		client.WithReassignPortsIfUsed(true),
+		client.WithDynamicPorts(false), // Use fixed ports starting from 9630
+		client.WithChainConfigs(chainConfigs),
+	}
+
+	// Add plugin directory if it exists
+	pluginDir := path.Join(app.GetPluginsDir(), "evm")
+	if _, err := os.Stat(pluginDir); err == nil {
+		opts = append(opts, client.WithPluginDir(pluginDir))
+	}
+
+	ctx := binutils.GetAsyncContext()
+
+	ux.Logger.PrintToUser("Starting network with %d validators...", numValidators)
+	ux.Logger.PrintToUser("Network ID: 96368")
+	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
+
+	// Start the network
+	startResp, err := cli.Start(ctx, nodeBinPath, opts...)
+	if err != nil {
+		return fmt.Errorf("failed to start network: %w", err)
+	}
+
+	// Wait for healthy network
+	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
+	healthCheckStart := time.Now()
+	healthy := false
+
+	for !healthy && time.Since(healthCheckStart) < 5*time.Minute {
+		statusResp, err := cli.Status(ctx)
+		if err == nil && statusResp != nil && statusResp.ClusterInfo != nil {
+			if statusResp.ClusterInfo.Healthy && len(statusResp.ClusterInfo.NodeInfos) == numValidators {
+				healthy = true
+				break
+			}
+			ux.Logger.PrintToUser("Waiting for cluster to become healthy... (%d nodes)", len(statusResp.ClusterInfo.NodeInfos))
+		}
+		time.Sleep(5 * time.Second)
+	}
+
+	if !healthy {
+		return fmt.Errorf("network failed to become healthy after 5 minutes")
+	}
+
+	// Display endpoints
+	ux.Logger.PrintToUser("\nTestnet started successfully with %d validators!", numValidators)
+	ux.Logger.PrintToUser("\nRPC Endpoints:")
+
+	if startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {
+		for i, nodeName := range startResp.ClusterInfo.NodeNames {
+			if nodeInfo, ok := startResp.ClusterInfo.NodeInfos[nodeName]; ok && nodeInfo != nil && nodeInfo.Uri != "" {
+				ux.Logger.PrintToUser("  Validator %d: %s", i+1, nodeInfo.Uri)
+			}
+		}
+
+		// Get first node's URI
+		if firstNodeInfo, ok := startResp.ClusterInfo.NodeInfos[startResp.ClusterInfo.NodeNames[0]]; ok && firstNodeInfo != nil {
+			ux.Logger.PrintToUser("\nPrimary RPC endpoint: %s", firstNodeInfo.Uri)
+		}
+	}
+
+	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
+	ux.Logger.PrintToUser("Network is ready for use!")
+
 	return nil
 }

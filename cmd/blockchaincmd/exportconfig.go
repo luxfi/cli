@@ -22,12 +22,12 @@ var (
 	customVMBuildScript string
 )
 
-// lux blockchain export
-func newExportCmd() *cobra.Command {
+// lux blockchain export-config
+func newExportConfigCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "export [blockchainName]",
-		Short: "Export deployment details",
-		Long: `The blockchain export command write the details of an existing Blockchain deploy to a file.
+		Use:   "export-config [blockchainName]",
+		Short: "Export deployment configuration details",
+		Long: `The blockchain export-config command writes the configuration details of an existing Blockchain deployment to a file.
 
 The command prompts for an output path. You can also provide one with
 the --output flag.`,

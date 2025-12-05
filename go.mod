@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.25.4
+go 1.25.5
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -16,16 +16,16 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.17.7
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v1.16.19
+	github.com/luxfi/evm v1.16.20
 	github.com/luxfi/geth v1.16.40
-	github.com/luxfi/ids v1.1.2
+	github.com/luxfi/ids v1.1.3
 	github.com/luxfi/ledger-lux-go v1.0.0
-	github.com/luxfi/log v1.1.22
-	github.com/luxfi/lpm v1.0.0-lux.2
-	github.com/luxfi/netrunner v1.13.7-lux.2
-	github.com/luxfi/node v1.20.5
-	github.com/luxfi/sdk v0.1.0-lux.16
-	github.com/luxfi/warp v1.16.16
+	github.com/luxfi/log v1.1.24
+	github.com/luxfi/lpm v1.0.4
+	github.com/luxfi/netrunner v1.14.3
+	github.com/luxfi/node v1.21.3
+	github.com/luxfi/sdk v1.16.23
+	github.com/luxfi/warp v1.16.19
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/mitchellh/go-wordwrap v1.0.1
@@ -62,32 +62,13 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
-// TEMPORARY: Local replaces for development - DO NOT COMMIT
-replace github.com/luxfi/netrunner => ../netrunner
-
-replace github.com/luxfi/evm => ../evm
-
-replace github.com/luxfi/consensus => ../consensus
-
-replace github.com/luxfi/genesis => ../genesis
-
-replace github.com/luxfi/node => ../node
-
-replace github.com/luxfi/geth => ../geth
-
-replace github.com/luxfi/sdk => ../sdk
-
-replace github.com/luxfi/lpm => ../lpm
-
-replace github.com/luxfi/ids => ../ids
-
 require (
 	github.com/cockroachdb/pebble v1.1.5
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/dgraph-io/badger/v4 v4.8.0
 	github.com/ethereum/go-ethereum v1.16.7
-	github.com/luxfi/genesis v1.2.2
-	github.com/luxfi/math v0.1.4
+	github.com/luxfi/genesis v1.2.4
+	github.com/luxfi/math v0.1.5
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	golang.org/x/term v0.36.0
 )
@@ -182,13 +163,9 @@ require (
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
-	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
-	github.com/huin/goupnp v1.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/jackpal/gateway v1.1.1 // indirect
-	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -199,7 +176,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.22.1 // indirect
+	github.com/luxfi/consensus v1.22.2 // indirect
 	github.com/luxfi/database v1.2.7 // indirect
 	github.com/luxfi/metric v1.4.5 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect

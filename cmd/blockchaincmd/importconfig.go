@@ -7,11 +7,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// lux blockchain import
-func newImportCmd() *cobra.Command {
+// lux blockchain import-config
+func newImportConfigCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import",
-		Short: "Import blockchains into lux-cli",
+		Use:   "import-config",
+		Short: "Import blockchain configurations into lux-cli",
 		Long: `Import blockchain configurations into lux-cli.
 
 This command suite supports importing from a file created on another computer,
