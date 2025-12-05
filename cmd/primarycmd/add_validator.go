@@ -176,8 +176,8 @@ func addValidator(_ *cobra.Command, _ []string) error {
 			return err
 		}
 	}
-	if weight < minValStake {
-		return fmt.Errorf("illegal weight, must be greater than or equal to %d: %d", minValStake, weight)
+	if weight < uint64(1000000000000) {
+		return fmt.Errorf("illegal weight, must be greater than or equal to %d: %d", uint64(1000000000000), weight)
 	}
 
 	// Estimate fee based on network type and transaction complexity
