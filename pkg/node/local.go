@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/cli/pkg/dependencies"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -116,20 +116,29 @@ func StartLocalNode(
 		spinSession := ux.NewUserSpinner()
 		spinner := spinSession.SpinToUser("Booting Network. Wait until healthy...")
 
-		_, err = localnet.CreateLocalCluster(
+		// Convert validators to []interface{}
+		validators := make([]interface{}, 0)
+
+		// Get node version from settings - use "latest" if not specified
+		nodeVer := "latest"
+		if luxdVersionSetting.UseCustomLuxgoVersion != "" {
+			nodeVer = luxdVersionSetting.UseCustomLuxgoVersion
+		}
+
+		_, _, err = localnet.CreateLocalCluster(
 			app,
 			ux.Logger.PrintToUser,
-			clusterName,
+			nodeVer,
 			luxdBinaryPath,
-			pluginDir,
+			clusterName,
 			defaultFlags,
 			connectionSettings,
 			numNodes,
 			nodeSettings,
-			[]ids.ID{},
+			validators,
 			network,
-			true, // Download DB
-			true, // Bootstrap
+			true, // enableMonitoring
+			false, // disableGrpcGateway
 		)
 		if err != nil {
 			ux.SpinFailWithError(spinner, "", err)
@@ -147,14 +156,24 @@ func StartLocalNode(
 	ux.Logger.PrintToUser("Network ready to use.")
 	ux.Logger.PrintToUser("")
 
-	cluster, err := localnet.GetLocalCluster(app, clusterName)
+	clusterData, err := localnet.GetLocalCluster(app, clusterName)
 	if err != nil {
 		return err
 	}
-	for _, node := range cluster.Nodes {
-		ux.Logger.PrintToUser("URI: %s", node.URI)
-		ux.Logger.PrintToUser("NodeID: %s", node.NodeID)
-		ux.Logger.PrintToUser("")
+
+	// Type assert to access Nodes
+	if cluster, ok := clusterData.(*localnet.LocalCluster); ok && cluster != nil {
+		for _, nodeData := range cluster.Nodes {
+			if node, ok := nodeData.(map[string]interface{}); ok {
+				if uri, ok := node["URI"].(string); ok {
+					ux.Logger.PrintToUser("URI: %s", uri)
+				}
+				if nodeID, ok := node["NodeID"].(string); ok {
+					ux.Logger.PrintToUser("NodeID: %s", nodeID)
+				}
+				ux.Logger.PrintToUser("")
+			}
+		}
 	}
 
 	return nil
