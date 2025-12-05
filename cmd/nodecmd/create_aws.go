@@ -227,7 +227,6 @@ func createEC2Instances(ec2Svc map[string]*awsAPI.AwsCloud,
 		if err != nil {
 			return instanceIDs, elasticIPs, sshCertPath, keyPairName, err
 		}
-		if replaceKeyPair && !forMonitoring {
 			// delete existing key pair on AWS console and download the newly created key pair file
 			// in .ssh dir (will overwrite existing file in .ssh dir)
 			if keyPairExists {
