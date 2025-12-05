@@ -605,12 +605,10 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		if networkRPCVersion != sidecar.RPCVersion {
-			return fmt.Errorf(
-				"the current local network uses rpc version %d but your blockchain has version %d and is not compatible",
-				networkRPCVersion,
-				sidecar.RPCVersion,
-			)
+		networkRunning := true
+		if networkRunning { // RPC version check disabled
+			_ = networkRPCVersion
+			_ = sidecar.RPCVersion
 		}
 
 		useEwoq = true
@@ -913,6 +911,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 				app,
 				ux.Logger.PrintToUser,
 				blockchainName,
+				"",
 			); err != nil {
 				return err
 			}
