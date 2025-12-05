@@ -32,6 +32,8 @@ const (
 var (
 	ErrMutuallyExlusiveKeySource = errors.New("key source flags --key, --ewoq, --ledger/--ledger-addrs are mutually exclusive")
 	ErrEwoqKeyOnTestnetOrMainnet = errors.New("key source ewoq is not available for mainnet/testnet operations")
+	// AllowInsecureKeysOnMainnet allows ewoq and stored keys on mainnet for development
+	AllowInsecureKeysOnMainnet = false
 )
 
 type Keychain struct {
@@ -155,10 +157,10 @@ func GetKeychainFromCmdLineFlags(
 			}
 		}
 	case network == models.Mainnet:
-		if useEwoq || keyName == "ewoq" {
+		if (useEwoq || keyName == "ewoq") && !AllowInsecureKeysOnMainnet {
 			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
-		if keyName == "" {
+		if keyName == "" && !useEwoq {
 			useLedger = true
 		} else {
 			ux.Logger.PrintToUser("")

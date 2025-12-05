@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/luxfi/cli/pkg/subnet"
@@ -21,6 +23,26 @@ import (
 
 var ErrNoLuxdVersion = errors.New("unable to find a compatible luxd version")
 
+// DefaultCLIDependencyMap provides fallback version info when remote fetch fails
+var DefaultCLIDependencyMap = models.CLIDependencyMap{
+	RPC: 42,
+	Luxd: map[string]models.NetworkVersions{
+		"Mainnet": {
+			LatestVersion:  "v1.21.0",
+			MinimumVersion: "v1.20.0",
+		},
+		"Testnet": {
+			LatestVersion:  "v1.21.0",
+			MinimumVersion: "v1.20.0",
+		},
+		"Local Network": {
+			LatestVersion:  "v1.21.0",
+			MinimumVersion: "v1.20.0",
+		},
+	},
+	SubnetEVM: "v0.6.12",
+}
+
 func GetLatestLuxdByProtocolVersion(app *application.Lux, rpcVersion int) (string, error) {
 	useVersion, err := GetAvailableLuxdVersions(app, rpcVersion, constants.LuxdCompatibilityURL)
 	if err != nil {
@@ -30,14 +52,30 @@ func GetLatestLuxdByProtocolVersion(app *application.Lux, rpcVersion int) (strin
 }
 
 func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName string, network models.Network, rpcVersion *int) (string, error) {
+	var parsedDependency models.CLIDependencyMap
+
+	// Try to load from remote URL first
 	dependencyBytes, err := app.Downloader.Download(constants.CLILatestDependencyURL)
 	if err != nil {
-		return "", err
+		// Try to load from local min-version.json file (in CLI repo or executable directory)
+		localPath := findLocalMinVersionFile()
+		if localPath != "" {
+			dependencyBytes, err = os.ReadFile(localPath)
+		}
+		if err != nil || localPath == "" {
+			// Fall back to embedded default
+			ux.Logger.PrintToUser("Using embedded dependency versions (remote fetch failed)")
+			parsedDependency = DefaultCLIDependencyMap
+		}
 	}
 
-	var parsedDependency models.CLIDependencyMap
-	if err = json.Unmarshal(dependencyBytes, &parsedDependency); err != nil {
-		return "", err
+	// Only parse if we don't have the default already set
+	if parsedDependency.RPC == 0 && dependencyBytes != nil {
+		if err = json.Unmarshal(dependencyBytes, &parsedDependency); err != nil {
+			// Fall back to embedded default on parse error
+			ux.Logger.PrintToUser("Using embedded dependency versions (parse error)")
+			parsedDependency = DefaultCLIDependencyMap
+		}
 	}
 
 	switch dependencyName {
@@ -56,6 +94,41 @@ func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName
 	default:
 		return "", fmt.Errorf("unsupported dependency: %s", dependencyName)
 	}
+}
+
+// findLocalMinVersionFile searches for min-version.json in common locations
+func findLocalMinVersionFile() string {
+	// Get executable directory
+	execPath, err := os.Executable()
+	if err == nil {
+		execDir := filepath.Dir(execPath)
+		// Check in same directory as executable
+		path := filepath.Join(execDir, "..", "min-version.json")
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+		// Check in parent directory (for bin/lux -> min-version.json)
+		path = filepath.Join(execDir, "..", "min-version.json")
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+
+	// Check current working directory
+	if _, err := os.Stat("min-version.json"); err == nil {
+		return "min-version.json"
+	}
+
+	// Check in ~/.lux directory
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		path := filepath.Join(homeDir, ".lux", "min-version.json")
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+
+	return ""
 }
 
 // GetLuxdVersionsForRPC returns list of compatible lux go versions for a specified rpcVersion
