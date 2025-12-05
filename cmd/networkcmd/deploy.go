@@ -837,9 +837,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 
 	// needs to first stop relayer so non sovereign subnets successfully restart
-	if sidecar.TeleporterReady && !warpSpec.SkipWarpDeploy && !warpSpec.SkipRelayerDeploy && network != models.Mainnet {
-		_ = relayercmd.CallStop(nil, relayercmd.StopFlags{}, network)
-	}
 
 	tracked := false
 
@@ -931,9 +928,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 
 	var warpErr, relayerErr error
-	if sidecar.TeleporterReady && tracked && !warpSpec.SkipWarpDeploy {
-						return err
-					}
 				if network == models.Local || deployFlags.LocalMachineFlags.UseLocalMachine {
 					relayerKeyName, _, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainName)
 					if err != nil {
