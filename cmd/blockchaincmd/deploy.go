@@ -28,7 +28,6 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/api/info"
@@ -80,6 +79,7 @@ var (
 
 	validatorManagerAddress        string
 	deployFlags                    BlockchainDeployFlags
+	allowInsecureKeys              bool
 	errMutuallyExlusiveControlKeys = errors.New("--control-keys and --same-control-key are mutually exclusive")
 	ErrMutuallyExlusiveKeyLedger   = errors.New("key source flags --key, --ledger/--ledger-addrs are mutually exclusive")
 	ErrStoredKeyOnMainnet          = errors.New("key --key is not available for mainnet operations")
@@ -137,6 +137,7 @@ so you can take your locally tested Blockchain and deploy it on Testnet or Mainn
 	cmd.Flags().Uint32Var(&mainnetChainID, "mainnet-chain-id", 0, "use different ChainID for mainnet deployment")
 	cmd.Flags().BoolVar(&subnetOnly, "subnet-only", false, "command stops after CreateSubnetTx and returns SubnetID")
 	cmd.Flags().BoolVar(&deployFlags.ConvertOnly, "convert-only", false, "avoid node track, restart and poa manager setup")
+	cmd.Flags().BoolVar(&allowInsecureKeys, "allow-insecure-keys", false, "allow ewoq/stored keys on mainnet (development only, INSECURE)")
 
 	localNetworkGroup := flags.RegisterFlagGroup(cmd, "Local Network Flags", "show-local-network-flags", true, func(set *pflag.FlagSet) {
 		set.Uint32Var(&numNodes, "num-nodes", constants.LocalNetworkNumNodes, "number of nodes to be created on local network deploy")
@@ -415,6 +416,34 @@ func prepareBootstrapValidators(
 			ux.Logger.PrintToUser("Using [%s] to be set as a change owner for leftover LUX", bootstrapValidatorFlags.ChangeOwnerAddress)
 		}
 	}
+
+	// Handle auto-bootstrap from running local nodes
+	if bootstrapValidatorFlags.LocalBootstrap {
+		ux.Logger.PrintToUser("Scanning for running nodes on localhost...")
+		var endpoints []string
+
+		// Scan predefined ports for running nodes
+		// Standard ports: 9630, 9632, 9634, 9636, 9638 (5 nodes with staking ports 9631, 9633, etc.)
+		basePorts := []int{9630, 9632, 9634, 9636, 9638}
+		for _, port := range basePorts {
+			endpoint := fmt.Sprintf("http://127.0.0.1:%d", port)
+			infoClient := info.NewClient(endpoint)
+			ctx, cancel := utils.GetAPIContext()
+			nodeID, _, infoErr := infoClient.GetNodeID(ctx)
+			cancel()
+			if infoErr == nil {
+				ux.Logger.PrintToUser("  Found node %s at %s", nodeID, endpoint)
+				endpoints = append(endpoints, endpoint)
+			}
+		}
+
+		if len(endpoints) == 0 {
+			return fmt.Errorf("no running nodes found on localhost (checked ports 9630,9632,9634,9636,9638)")
+		}
+		ux.Logger.PrintToUser("Found %d running node(s) for bootstrap", len(endpoints))
+		bootstrapValidatorFlags.BootstrapEndpoints = endpoints
+	}
+
 	if !bootstrapValidatorFlags.GenerateNodeID && bootstrapValidatorFlags.BootstrapEndpoints == nil && bootstrapValidatorFlags.BootstrapValidatorsJSONFilePath == "" {
 		if cancel, err := StartLocalMachine(
 			network,
@@ -607,11 +636,12 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 		// check if blockchain rpc version matches what is currently running
 		// for the case version or binary was provided
-		_, _, networkRPCVersion, err := localnet.GetLocalNetworkLuxdVersion(app)
+		isRunning, _, networkRPCVersion, err := localnet.GetLocalNetworkLuxdVersion(app)
 		if err != nil {
 			return err
 		}
-		if networkRPCVersion != sidecar.RPCVersion {
+		// Only check version if network is running and we got a valid version
+		if isRunning && networkRPCVersion != sidecar.RPCVersion {
 			return fmt.Errorf(
 				"the current local network uses rpc version %d but your blockchain has version %d and is not compatible",
 				networkRPCVersion,
@@ -624,10 +654,20 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		if !sidecar.Sovereign {
 			// sovereign blockchains are deployed into new local clusters,
 			// non sovereign blockchains are deployed into the local network itself
+			// Check if blockchain exists on P-Chain but tracking was incomplete
+			networkModel := sidecar.Networks[network.Name()]
+			needsRetracking := networkModel.SubnetID != ids.Empty &&
+				networkModel.BlockchainID != ids.Empty &&
+				len(networkModel.RPCEndpoints) == 0
+
 			if b, err := localnet.BlockchainAlreadyDeployedOnLocalNetwork(app, blockchainName); err != nil {
 				return err
-			} else if b {
+			} else if b && !needsRetracking {
 				return fmt.Errorf("blockchain %s has already been deployed", blockchainName)
+			} else if needsRetracking {
+				ux.Logger.PrintToUser("Blockchain %s exists but tracking was incomplete, attempting to re-track...", blockchainName)
+				// Skip to tracking step - set flags to reuse existing subnet/blockchain
+				subnetIDStr = networkModel.SubnetID.String()
 			}
 		}
 	}
@@ -662,6 +702,11 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 	// Add buffer for transaction fees (0.01 LUX)
 	fee += 10_000_000 // 0.01 LUX in nLUX
+
+	// Set insecure key flag for keychain
+	if allowInsecureKeys {
+		keychain.AllowInsecureKeysOnMainnet = true
+	}
 
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
@@ -916,6 +961,11 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		); err != nil {
 			return err
 		}
+		// Check convert-only flag for non-sovereign blockchains as well
+		if deployFlags.ConvertOnly {
+			printSuccessfulConvertOnlyOutput(blockchainName, subnetID.String(), false)
+			return nil
+		}
 		if network == models.Local && !simulatedPublicNetwork() {
 			ux.Logger.PrintToUser("")
 			if err := localnet.LocalNetworkTrackSubnet(
@@ -1116,44 +1166,42 @@ func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]
 		if err != nil {
 			return nil, fmt.Errorf("failure parsing BLS info: %w", err)
 		}
-		// Convert BLS public key from byte array to *bls.PublicKey
-		blsPubKey, err := bls.PublicKeyFromCompressedBytes(blsInfo.PublicKey[:])
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse BLS public key: %w", err)
-		}
-		// Parse change owner address when provided (for future use)
+
+		// Parse change owner address for the owner fields
+		var ownerAddresses []ids.ShortID
 		if validator.ChangeOwnerAddr != "" {
-			// For now, we'll just validate the address format
-			_, err := address.ParseToIDs([]string{validator.ChangeOwnerAddr})
+			parsedAddrs, err := address.ParseToIDs([]string{validator.ChangeOwnerAddr})
 			if err != nil {
 				return nil, fmt.Errorf("failure parsing change owner address: %w", err)
 			}
-			// The owner handling might need to be done differently with LP99
+			ownerAddresses = parsedAddrs
 		}
+
+		// If no change owner address provided, use threshold 0 (no owner)
+		// which makes the output unspendable but valid
+		threshold := uint32(0)
+		if len(ownerAddresses) > 0 {
+			threshold = 1
+		}
+
 		// Convert nodeID to byte slice for types.JSONByteSlice
 		nodeIDBytes := nodeID.Bytes()
 
-		// Create ProofOfPossession from BLS public key
-		// For now, using empty proof since we don't have the private key
-		var blsPubKeyBytes [bls.PublicKeyLen]byte
-		copy(blsPubKeyBytes[:], bls.PublicKeyToCompressedBytes(blsPubKey))
-
+		// Use the blsInfo which contains both PublicKey and ProofOfPossession
+		// from ConvertToBLSProofOfPossession
 		bootstrapValidator := &txs.ConvertNetToL1Validator{
 			NodeID:  types.JSONByteSlice(nodeIDBytes[:]),
 			Weight:  validator.Weight,
 			Balance: validator.Balance,
-			Signer: signer.ProofOfPossession{
-				PublicKey: blsPubKeyBytes,
-				// ProofOfPossession would need to be generated with private key
-			},
-			// These fields are required but we'll use empty owners for now
+			Signer:  blsInfo,
+			// Use the change owner address for both remaining balance and deactivation
 			RemainingBalanceOwner: message.PChainOwner{
-				Threshold: 1,
-				Addresses: []ids.ShortID{},
+				Threshold: threshold,
+				Addresses: ownerAddresses,
 			},
 			DeactivationOwner: message.PChainOwner{
-				Threshold: 1,
-				Addresses: []ids.ShortID{},
+				Threshold: threshold,
+				Addresses: ownerAddresses,
 			},
 		}
 		bootstrapValidators = append(bootstrapValidators, bootstrapValidator)

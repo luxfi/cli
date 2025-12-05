@@ -88,8 +88,17 @@ func CreateLocalCluster(
 		return nil, err
 	}
 	// for 1-node clusters we need to overwrite tmpnet's default
-	if err := TmpNetEnableSybilProtection(networkDir); err != nil {
-		return nil, err
+	// But only enable sybil protection if the genesis has initial stakers
+	// Networks without initial stakers must run with sybil protection disabled
+	if unparsedGenesis != nil && len(unparsedGenesis.InitialStakers) > 0 {
+		if err := TmpNetEnableSybilProtection(networkDir); err != nil {
+			return nil, err
+		}
+	} else {
+		// Disable sybil protection for networks without initial stakers
+		if err := TmpNetDisableSybilProtection(networkDir); err != nil {
+			return nil, err
+		}
 	}
 	if downloadDB {
 		// preseed nodes db from public archive. ignore errors

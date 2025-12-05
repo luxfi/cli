@@ -29,8 +29,8 @@ import (
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/wallet/net/primary"
-	"github.com/luxfi/node/wallet/net/primary/common"
+	"github.com/luxfi/sdk/wallet/primary"
+	"github.com/luxfi/sdk/wallet/primary/common"
 	sdkutils "github.com/luxfi/sdk/utils"
 
 	dircopy "github.com/otiai10/copy"
@@ -85,16 +85,26 @@ func TmpNetCreate(
 		DefaultFlags: defaultFlags,
 		Genesis:      genesis,
 		NetworkID:    networkID,
+		// Set DefaultRuntimeConfig BEFORE calling EnsureDefaultConfig
+		DefaultRuntimeConfig: tmpnet.NodeRuntimeConfig{
+			Process: &tmpnet.ProcessRuntimeConfig{
+				LuxNodePath: luxdBinPath,
+				PluginDir:   pluginDir,
+			},
+		},
 	}
 	if err := network.EnsureDefaultConfig(log); err != nil {
 		return nil, err
 	}
-	// Set luxd binary path and plugin dir in default runtime config
-	if network.DefaultRuntimeConfig.Process == nil {
-		network.DefaultRuntimeConfig.Process = &tmpnet.ProcessRuntimeConfig{}
+	// EnsureNodeConfig must be called for each node to set DataDir before Write() is called
+	// Also set the network-name flag so GetTmpNetNodeNetworkID can read it from persisted config
+	networkIDStr := strconv.FormatUint(uint64(networkID), 10)
+	for _, node := range network.Nodes {
+		if err := network.EnsureNodeConfig(node); err != nil {
+			return nil, err
+		}
+		node.Flags[config.NetworkNameKey] = networkIDStr
 	}
-	network.DefaultRuntimeConfig.Process.LuxNodePath = luxdBinPath
-	network.DefaultRuntimeConfig.Process.PluginDir = pluginDir
 	if len(bootstrapIPs) > 0 {
 		for _, node := range network.Nodes {
 			node.Flags[config.BootstrapIDsKey] = strings.Join(bootstrapIDs, ",")
@@ -166,7 +176,8 @@ func GetTmpNetNetwork(networkDir string) (*tmpnet.Network, error) {
 	}
 	for i := range network.Nodes {
 		// ensure that URI and StakingAddress are empty if the process does not exists
-		processPath := filepath.Join(networkDir, network.Nodes[i].NodeID.String(), "process.json")
+		// Use node's DataDir instead of assuming NodeID-based directory names
+		processPath := filepath.Join(network.Nodes[i].DataDir, "process.json")
 		if bytes, err := os.ReadFile(processPath); errors.Is(err, os.ErrNotExist) {
 			network.Nodes[i].URI = ""
 			network.Nodes[i].StakingAddress = netip.AddrPort{}
@@ -673,10 +684,48 @@ func GetTmpNetBootstrappers(
 }
 
 // Get network genesis
+// First tries network-level genesis.json. If that doesn't have initialStakers,
+// falls back to node1/genesis.json which contains the complete genesis with validators.
 func GetTmpNetGenesis(
 	networkDir string,
 ) ([]byte, error) {
-	return os.ReadFile(filepath.Join(networkDir, "genesis.json"))
+	// Try network-level genesis first
+	networkGenesis := filepath.Join(networkDir, "genesis.json")
+	genesisBytes, err := os.ReadFile(networkGenesis)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if network genesis has initialStakers
+	var unparsedGenesis genesis.UnparsedConfig
+	if err := json.Unmarshal(genesisBytes, &unparsedGenesis); err != nil {
+		return nil, fmt.Errorf("failed to parse network genesis: %w", err)
+	}
+
+	// If network genesis has initial stakers, use it
+	if len(unparsedGenesis.InitialStakers) > 0 {
+		return genesisBytes, nil
+	}
+
+	// Otherwise, try node1/genesis.json which should have the complete genesis
+	node1Genesis := filepath.Join(networkDir, "node1", "genesis.json")
+	if _, err := os.Stat(node1Genesis); err == nil {
+		node1GenesisBytes, err := os.ReadFile(node1Genesis)
+		if err != nil {
+			return nil, err
+		}
+		// Verify node1 genesis has initialStakers
+		var node1UnparsedGenesis genesis.UnparsedConfig
+		if err := json.Unmarshal(node1GenesisBytes, &node1UnparsedGenesis); err != nil {
+			return genesisBytes, nil // Fall back to network genesis on parse error
+		}
+		if len(node1UnparsedGenesis.InitialStakers) > 0 {
+			return node1GenesisBytes, nil
+		}
+	}
+
+	// Return network genesis as fallback
+	return genesisBytes, nil
 }
 
 // Get network upgrade
@@ -1028,6 +1077,22 @@ func TmpNetEnableSybilProtection(
 	network.DefaultFlags[config.SybilProtectionEnabledKey] = true
 	for i := range network.Nodes {
 		network.Nodes[i].Flags[config.SybilProtectionEnabledKey] = true
+	}
+	return network.Write()
+}
+
+// Disables sybil protection on [networkDir]
+// This is needed for networks without initial stakers in genesis
+func TmpNetDisableSybilProtection(
+	networkDir string,
+) error {
+	network, err := GetTmpNetNetwork(networkDir)
+	if err != nil {
+		return err
+	}
+	network.DefaultFlags[config.SybilProtectionEnabledKey] = false
+	for i := range network.Nodes {
+		network.Nodes[i].Flags[config.SybilProtectionEnabledKey] = false
 	}
 	return network.Write()
 }

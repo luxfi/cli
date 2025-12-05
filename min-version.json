@@ -1,0 +1,18 @@
+{
+  "rpc": 42,
+  "luxd": {
+    "Mainnet": {
+      "latestVersion": "v1.21.0",
+      "minimumVersion": "v1.20.0"
+    },
+    "Testnet": {
+      "latestVersion": "v1.21.0",
+      "minimumVersion": "v1.20.0"
+    },
+    "Local Network": {
+      "latestVersion": "v1.21.0",
+      "minimumVersion": "v1.20.0"
+    }
+  },
+  "subnetevm": "v0.6.12"
+}

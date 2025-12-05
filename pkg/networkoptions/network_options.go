@@ -306,11 +306,10 @@ func GetNetworkFromCmdLineFlags(
 		networkOption = Cluster
 	case networkFlags.Endpoint != "":
 		switch networkFlags.Endpoint {
-		case constants.MainnetAPIEndpoint:
-			networkOption = Mainnet
 		case constants.TestnetAPIEndpoint:
 			networkOption = Testnet
 		case constants.LocalAPIEndpoint:
+			// LocalAPIEndpoint and MainnetAPIEndpoint may be the same in dev mode
 			networkOption = Local
 		default:
 			networkOption = Devnet

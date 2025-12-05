@@ -140,8 +140,6 @@ func runDev(flags *devFlags) error {
 		"--api-metrics-enabled",
 		"--index-enabled",
 		"--log-level", "info",
-		"--staking-enabled=false",
-		"--sybil-protection-enabled=false",
 	}
 
 	cmd := exec.Command(luxdPath, args...)

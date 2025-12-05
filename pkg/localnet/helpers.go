@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/models"
 )
 
@@ -88,8 +88,10 @@ func UpdateBlockchainConfig(
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal([]byte(nodeConfigStr), &nodeConfig); err != nil {
-		return fmt.Errorf("invalid common node config JSON: %w", err)
+	if nodeConfigStr != "" {
+		if err := json.Unmarshal([]byte(nodeConfigStr), &nodeConfig); err != nil {
+			return fmt.Errorf("invalid common node config JSON: %w", err)
+		}
 	}
 	// blockchain node config
 	if app.LuxdNodeConfigExists(blockchainName) {
@@ -205,4 +207,23 @@ func GetNetworkModel(
 		return models.Undefined, err
 	}
 	return models.NetworkFromNetworkID(networkID), nil
+}
+
+// GetLocalNetworkNodeURIs returns URIs for all running nodes in the local network.
+// It first tries to get them from the local network, and if that fails,
+// uses the default local endpoint.
+func GetLocalNetworkNodeURIs(app *application.Lux) ([]string, error) {
+	// First try to get from tmpnet metadata
+	if isRunning, err := IsLocalNetworkRunning(app); err != nil {
+		return nil, err
+	} else if isRunning {
+		networkDir, err := GetLocalNetworkDir(app)
+		if err != nil {
+			return nil, err
+		}
+		return GetTmpNetNodeURIsWithFix(networkDir)
+	}
+	// If no tmpnet metadata, return the default local endpoint
+	// This covers networks started via gRPC or other methods
+	return []string{"http://127.0.0.1:9630"}, nil
 }

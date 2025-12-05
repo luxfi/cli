@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "chainId": "96369",
+  "blockchainId": "",
+  "networkId": 0,
+  "exportTime": "2025-11-23T10:53:16.618391991Z",
+  "startBlock": 0,
+  "endBlock": 0,
+  "blocks": [],
+  "state": {},
+  "metadata": {
+    "blockCount": 0,
+    "exportHost": "van",
+    "exportTool": "lux-cli"
+  }
+}

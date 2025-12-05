@@ -1,0 +1,241 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"math/big"
+	"os"
+	"path/filepath"
+)
+
+const (
+	// Real treasury from migrated genesis
+	realTreasury = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
+	chainID      = 96369
+	dbPath       = "/tmp/lux-c-chain-import"
+	nodeDir      = "/home/z/work/lux/node"
+)
+
+// Genesis structure for C-Chain
+type Genesis struct {
+	Config    json.RawMessage        `json:"config"`
+	Alloc     map[string]AllocEntry `json:"alloc"`
+	Coinbase  string                `json:"coinbase"`
+	GasLimit  string                `json:"gasLimit"`
+	GasUsed   string                `json:"gasUsed"`
+	Number    string                `json:"number"`
+	Timestamp string                `json:"timestamp"`
+}
+
+type AllocEntry struct {
+	Balance string `json:"balance"`
+}
+
+func main() {
+	fmt.Println("=== LUX C-Chain Migration Tool ===")
+	fmt.Printf("Chain ID: %d\n", chainID)
+	fmt.Printf("Database: %s\n", dbPath)
+	fmt.Printf("Treasury: %s\n\n", realTreasury)
+
+	// Step 1: Verify database exists
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		fmt.Println("ERROR: Imported database not found at", dbPath)
+		os.Exit(1)
+	}
+
+	// Step 2: Create proper config directory
+	configDir := filepath.Join(os.Getenv("HOME"), ".luxd-migrated")
+	os.MkdirAll(filepath.Join(configDir, "configs", "chains", "C"), 0755)
+
+	// Step 3: Verify genesis exists
+	genesisPath := filepath.Join(configDir, "configs", "chains", "C", "genesis.json")
+	genesisData, err := ioutil.ReadFile(genesisPath)
+	if err != nil {
+		fmt.Printf("ERROR: Cannot read genesis at %s: %v\n", genesisPath, err)
+		os.Exit(1)
+	}
+
+	var genesis Genesis
+	if err := json.Unmarshal(genesisData, &genesis); err != nil {
+		fmt.Printf("ERROR: Invalid genesis: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Step 4: Verify treasury account
+	if alloc, ok := genesis.Alloc[realTreasury]; ok {
+		balance := new(big.Int)
+		balance.SetString(alloc.Balance, 10)
+		fmt.Printf("✓ Treasury found with balance: %s wei\n", balance.String())
+	} else {
+		fmt.Println("WARNING: Treasury not in genesis alloc")
+	}
+
+	// Step 5: Create node config
+	nodeConfig := map[string]interface{}{
+		"network-id":                chainID,
+		"staking-enabled":           false,
+		"health-check-frequency":    "5s",
+		"db-dir":                    dbPath,
+		"chain-data-dir":            filepath.Join(dbPath, "chaindata"),
+		"log-level":                 "info",
+		"http-host":                 "0.0.0.0",
+		"http-port":                 9630,
+		"staking-port":              9631,
+		"api-admin-enabled":         true,
+		"api-eth-enabled":           true,
+		"api-web3-enabled":          true,
+		"api-debug-enabled":         true,
+		"api-personal-enabled":      true,
+		"api-txpool-enabled":        true,
+		"api-net-enabled":           true,
+		"chain-config-dir":          filepath.Join(configDir, "configs", "chains"),
+		"vm-manager-api-enabled":    true,
+		"pruning-enabled":           false,
+	}
+
+	configPath := filepath.Join(configDir, "config.json")
+	configData, _ := json.MarshalIndent(nodeConfig, "", "  ")
+	ioutil.WriteFile(configPath, configData, 0644)
+
+	fmt.Println("\n=== Configuration Complete ===")
+	fmt.Printf("Config: %s\n", configPath)
+	fmt.Printf("Genesis: %s\n", genesisPath)
+	fmt.Printf("Database: %s\n\n", dbPath)
+
+	// Step 6: Build launch script
+	launchScript := fmt.Sprintf(`#!/bin/bash
+# LUX Migrated Chain Launcher
+
+LUXD="%s/build/luxd"
+
+if [ ! -f "$LUXD" ]; then
+    echo "Building luxd..."
+    cd %s && ./scripts/build.sh
+fi
+
+echo "Starting migrated LUX node..."
+echo "Chain ID: %d"
+echo "Database: %s"
+echo "Treasury: %s"
+echo ""
+
+# Launch with migrated database
+exec "$LUXD" \
+    --config-file=%s \
+    --db-dir=%s \
+    --chain-data-dir=%s/chaindata \
+    --network-id=%d \
+    --http-port=9630 \
+    --staking-port=9631 \
+    --staking-enabled=false \
+    --health-check-frequency=5s \
+    --api-admin-enabled \
+    --api-eth-enabled \
+    --api-web3-enabled \
+    --api-debug-enabled \
+    --api-personal-enabled \
+    --api-txpool-enabled \
+    --api-net-enabled \
+    --log-level=info
+`, nodeDir, nodeDir, chainID, dbPath, realTreasury,
+		configPath, dbPath, dbPath, chainID)
+
+	scriptPath := "/home/z/work/lux/cli/launch-migrated.sh"
+	ioutil.WriteFile(scriptPath, []byte(launchScript), 0755)
+
+	fmt.Println("=== Launch Script Created ===")
+	fmt.Printf("Script: %s\n", scriptPath)
+	fmt.Println("\nTo start the migrated node, run:")
+	fmt.Printf("  %s\n", scriptPath)
+
+	// Step 7: Create balance checker
+	checkerScript := fmt.Sprintf(`#!/usr/bin/env python3
+import json
+import requests
+import sys
+
+RPC_URL = "http://localhost:9630/ext/bc/C/rpc"
+TREASURY = "%s"
+
+def check_balance(address):
+    payload = {
+        "jsonrpc": "2.0",
+        "method": "eth_getBalance",
+        "params": [address, "latest"],
+        "id": 1
+    }
+
+    try:
+        response = requests.post(RPC_URL, json=payload, timeout=5)
+        result = response.json()
+
+        if 'result' in result:
+            balance_hex = result['result']
+            balance_wei = int(balance_hex, 16)
+            balance_lux = balance_wei / 10**18
+
+            print(f"Address: {address}")
+            print(f"Balance: {balance_wei} wei")
+            print(f"Balance: {balance_lux:.6f} LUX")
+            return balance_wei
+        else:
+            print(f"Error: {result}")
+            return None
+    except Exception as e:
+        print(f"Connection failed: {e}")
+        print("Make sure the node is running on port 9630")
+        return None
+
+def get_block_height():
+    payload = {
+        "jsonrpc": "2.0",
+        "method": "eth_blockNumber",
+        "params": [],
+        "id": 1
+    }
+
+    try:
+        response = requests.post(RPC_URL, json=payload, timeout=5)
+        result = response.json()
+
+        if 'result' in result:
+            height = int(result['result'], 16)
+            print(f"Current block height: {height}")
+            return height
+        else:
+            print(f"Error: {result}")
+            return None
+    except Exception as e:
+        print(f"Connection failed: {e}")
+        return None
+
+if __name__ == "__main__":
+    print("=== LUX Migrated Chain Balance Checker ===")
+    print(f"RPC: {RPC_URL}")
+    print()
+
+    # Check block height
+    get_block_height()
+    print()
+
+    # Check treasury balance
+    print("Treasury Account:")
+    check_balance(TREASURY)
+    print()
+
+    # Check additional addresses if provided
+    if len(sys.argv) > 1:
+        for addr in sys.argv[1:]:
+            print(f"Checking {addr}:")
+            check_balance(addr)
+            print()
+`, realTreasury)
+
+	checkerPath := "/home/z/work/lux/cli/check-balance.py"
+	ioutil.WriteFile(checkerPath, []byte(checkerScript), 0755)
+
+	fmt.Printf("\nBalance checker: %s\n", checkerPath)
+	fmt.Println("\nTo check balances after node starts:")
+	fmt.Printf("  python3 %s [address]\n", checkerPath)
+}
