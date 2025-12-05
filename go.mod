@@ -22,7 +22,7 @@ require (
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/lpm v1.0.4
-	github.com/luxfi/netrunner v1.14.3
+	github.com/luxfi/netrunner v1.14.6
 	github.com/luxfi/node v1.21.3
 	github.com/luxfi/sdk v1.16.23
 	github.com/luxfi/warp v1.16.19
@@ -65,8 +65,6 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 require (
 	github.com/cockroachdb/pebble v1.1.5
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/dgraph-io/badger/v4 v4.8.0
-	github.com/ethereum/go-ethereum v1.16.7
 	github.com/luxfi/genesis v1.2.4
 	github.com/luxfi/math v0.1.5
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
@@ -117,6 +115,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
 	github.com/dgraph-io/ristretto v0.2.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
