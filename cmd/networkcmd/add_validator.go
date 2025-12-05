@@ -3,10 +3,11 @@
 package networkcmd
 
 import (
-	"github.com/luxfi/cli/pkg/localnet"
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/luxfi/cli/pkg/localnet"
 
 	"github.com/luxfi/crypto"
 	sdkutils "github.com/luxfi/sdk/utils"
@@ -289,7 +290,7 @@ func addValidator(cmd *cobra.Command, args []string) error {
 	// if user chose to upsize a local node to add another local validator
 	var localValidatorClusterName string
 	if createLocalValidator {
-		localValidatorClusterName = localnet.LocalClusterName(network, blockchainName)
+		localValidatorClusterName = localnet.LocalClusterName()
 		node, err := localnet.AddNodeToLocalCluster(app, ux.Logger.PrintToUser, localValidatorClusterName, httpPort, stakingPort)
 		if err != nil {
 			return err
