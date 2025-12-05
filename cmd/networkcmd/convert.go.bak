@@ -3,7 +3,6 @@
 package networkcmd
 
 import (
-	"github.com/luxfi/cli/pkg/localnet"
 	"fmt"
 	"math/big"
 	"os"
