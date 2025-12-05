@@ -11,6 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -439,10 +440,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	storageDir := app.GetLocalRelayerStorageDir(network)
 	// localNetworkRootDir := ""
 	if network == models.Local {
-		_, err = localnet.GetLocalNetworkDir(app)
-		if err != nil {
-			return err
-		}
+		_ = localnet.GetLocalNetworkDir(app)
 	}
 	configPath := app.GetLocalRelayerConfigPath()
 	logPath := app.GetLocalRelayerLogPath(network)
