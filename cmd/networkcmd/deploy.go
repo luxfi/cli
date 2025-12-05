@@ -18,7 +18,6 @@ import (
 	"github.com/luxfi/cli/pkg/dependencies"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/metrics"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/subnet"
