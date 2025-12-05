@@ -3,7 +3,6 @@
 package networkcmd
 
 import (
-	"github.com/luxfi/cli/pkg/localnet"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -937,25 +936,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			BlockchainName: blockchainName,
 		}
 		chainSpec.SetEnabled(true, false, false, false, false)
-// DISABLED: 		warpDeployFlags := contract.DeployWarpFlags{
-// DISABLED: 			ChainFlags: chainSpec,
-// DISABLED: 			PrivateKeyFlags: contract.PrivateKeyFlags{
-// DISABLED: 				KeyName: warpKeyName,
-// DISABLED: 			},
-// DISABLED: 			DeployMessenger:              true,
-// DISABLED: 			DeployRegistry:               true,
-// DISABLED: 			ForceRegistryDeploy:          true,
-// DISABLED: 			Version:                      warpSpec.WarpVersion,
-// DISABLED: 			MessengerContractAddressPath: warpSpec.MessengerContractAddressPath,
-// DISABLED: 			MessengerDeployerAddressPath: warpSpec.MessengerDeployerAddressPath,
-// DISABLED: 			MessengerDeployerTxPath:      warpSpec.MessengerDeployerTxPath,
-// DISABLED: 			RegistryBydecodePath:         warpSpec.RegistryBydecodePath,
-// DISABLED: 			CChainKeyName:                cchainIcmKeyName,
-// DISABLED: 		}
-// DISABLED: 		ux.Logger.PrintToUser("")
-// DISABLED: 		if _, err := contract.DeployWarp(app, network, warpDeployFlags, deployFlags.SubnetFlags); err != nil {
-// DISABLED: 			warpErr = err
-			ux.Logger.RedXToUser("Interchain Messaging is not deployed due to: %v", warpErr)
+		warpDeployFlags := contract.DeployWarpFlags{
 		} else {
 			ux.Logger.GreenCheckmarkToUser("Warp is successfully deployed")
 			if network != models.Local && !deployFlags.LocalMachineFlags.UseLocalMachine {
