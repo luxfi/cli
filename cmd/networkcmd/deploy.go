@@ -934,8 +934,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	if sidecar.TeleporterReady && tracked && !warpSpec.SkipWarpDeploy {
 						return err
 					}
-					deployRelayerFlags.BlockchainsToRelay = utils.Unique(sdkutils.Map(blockchains, func(i localnet.BlockchainInfo) string { return i.Name }))
-				}
 				if network == models.Local || deployFlags.LocalMachineFlags.UseLocalMachine {
 					relayerKeyName, _, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainName)
 					if err != nil {
