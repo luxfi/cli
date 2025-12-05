@@ -932,37 +932,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 
 	var warpErr, relayerErr error
 	if sidecar.TeleporterReady && tracked && !warpSpec.SkipWarpDeploy {
-		chainSpec := contract.ChainSpec{
-			BlockchainName: blockchainName,
-		}
-		chainSpec.SetEnabled(true, false, false, false, false)
-						return err
-					} else {
-						hasData := false
-						if b, ok := bRaw.(bool); ok {
-							hasData = b
-						}
-						if hasData {
-							if relayerPath, ok := extraLocalNetworkData["RelayerPath"].(string); ok {
-								warpSpec.RelayerBinPath = relayerPath
-							}
-						}
-					}
-				}
-				deployRelayerFlags := relayercmd.DeployFlags{
-					Version:            warpSpec.RelayerVersion,
-					BinPath:            warpSpec.RelayerBinPath,
-					LogLevel:           warpSpec.RelayerLogLevel,
-					RelayCChain:        relayCChain,
-					CChainFundingKey:   cChainFundingKey,
-					BlockchainsToRelay: []string{blockchainName},
-					Key:                relayerKeyName,
-					Amount:             relayerAmount,
-					AllowPrivateIPs:    relayerAllowPrivateIPs,
-				}
-				if network == models.Local {
-					blockchains, err := localnet.GetLocalNetworkBlockchainsInfo(app)
-					if err != nil {
 						return err
 					}
 					deployRelayerFlags.BlockchainsToRelay = utils.Unique(sdkutils.Map(blockchains, func(i localnet.BlockchainInfo) string { return i.Name }))
