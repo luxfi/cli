@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/cmd/networkcmd"
-	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
