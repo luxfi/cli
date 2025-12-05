@@ -279,7 +279,9 @@ func InitializeValidatorManager(
 			app,
 			ux.Logger.PrintToUser,
 			clusterName,
-			blockchainName, "", "",
+			blockchainName,
+			"",
+			"",
 		); err != nil {
 			return false, err
 		}
