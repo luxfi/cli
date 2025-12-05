@@ -21,7 +21,6 @@ cluster.`,
 		Args: cobrautils.ExactArgs(1),
 		RunE: addDashboard,
 	}
-	cmd.Flags().StringVar(&customGrafanaDashboardPath, "add-grafana-dashboard", "", "path to additional grafana dashboard json file")
 	cmd.Flags().StringVar(&blockchainName, "subnet", "", "subnet that the dasbhoard is intended for (if any)")
 	return cmd
 }
@@ -35,7 +34,6 @@ func addDashboard(_ *cobra.Command, args []string) error {
 	if isLocal, ok := clusterConfig["local"].(bool); ok && isLocal {
 		return notImplementedForLocal("addDashboard")
 	}
-	if customGrafanaDashboardPath != "" {
 		if err := addCustomDashboard(clusterName, blockchainName); err != nil {
 			return err
 		}
@@ -53,5 +51,4 @@ func addCustomDashboard(clusterName, blockchainName string) error {
 	if err != nil {
 		return err
 	}
-	return ssh.RunSSHUpdateMonitoringDashboards(monitoringHosts[0], app.GetMonitoringDashboardDir()+"/", customGrafanaDashboardPath, chainID)
 }

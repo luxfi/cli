@@ -21,6 +21,5 @@ You can check the updated status by calling lux node status <clusterName>`,
 	// node devnet deploy
 	cmd.AddCommand(newDeployCmd())
 	// node devnet wiz
-	cmd.AddCommand(newWizCmd())
 	return cmd
 }
