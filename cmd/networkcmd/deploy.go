@@ -937,17 +937,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 		chainSpec.SetEnabled(true, false, false, false, false)
 		warpDeployFlags := contract.DeployWarpFlags{
-			ux.Logger.GreenCheckmarkToUser("Warp is successfully deployed")
-			if network != models.Local && !deployFlags.LocalMachineFlags.UseLocalMachine {
-				if flag := cmd.Flags().Lookup(skipRelayerFlagName); flag != nil && !flag.Changed {
-					ux.Logger.PrintToUser("")
-					yes, err := app.Prompt.CaptureYesNo("Do you want to setup local relayer for the messages to be interchanged, as Interchain Messaging was deployed to your blockchain?")
-					if err != nil {
-						return err
-					}
-					warpSpec.SkipRelayerDeploy = !yes
-				}
-			}
 			if !warpSpec.SkipRelayerDeploy && network != models.Mainnet {
 				if network == models.Local && warpSpec.RelayerBinPath == "" && warpSpec.RelayerVersion == constants.DefaultRelayerVersion {
 					if bRaw, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
