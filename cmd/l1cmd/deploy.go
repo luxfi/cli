@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
