@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.25.4
+go 1.25.5
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -14,18 +14,18 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.17.6
+	github.com/luxfi/crypto v1.17.7
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.8.1
+	github.com/luxfi/evm v1.16.20
 	github.com/luxfi/geth v1.16.40
 	github.com/luxfi/ids v1.1.2
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/lpm v1.7.12
-	github.com/luxfi/netrunner v1.13.5-lux.3
-	github.com/luxfi/node v1.20.1
+	github.com/luxfi/netrunner v1.14.3
+	github.com/luxfi/node v1.21.3
 	github.com/luxfi/sdk v1.7.0-lux.4
-	github.com/luxfi/warp v1.16.16
+	github.com/luxfi/warp v1.16.19
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/mitchellh/go-wordwrap v1.0.1
@@ -63,7 +63,7 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
 require (
-	github.com/luxfi/math v0.1.4
+	github.com/luxfi/math v0.1.5
 	github.com/luxfi/migrate v1.0.0
 	github.com/tyler-smith/go-bip32 v1.0.0
 	github.com/tyler-smith/go-bip39 v1.1.0
@@ -100,6 +100,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6 // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
+	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.6.2-0.20251027185721-da1faa40b98c // indirect
@@ -116,7 +117,9 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/dgraph-io/badger/v3 v3.2103.5 // indirect
 	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
+	github.com/dgraph-io/ristretto v0.2.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.9.0 // indirect
@@ -178,8 +181,9 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.22.1 // indirect
+	github.com/luxfi/consensus v1.22.2 // indirect
 	github.com/luxfi/database v1.2.7 // indirect
+	github.com/luxfi/genesis v1.2.4 // indirect
 	github.com/luxfi/metric v1.4.5 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
@@ -232,6 +236,7 @@ require (
 	github.com/zondax/golem v0.27.0 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
 	github.com/zondax/ledger-go v1.0.1 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
