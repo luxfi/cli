@@ -11,9 +11,11 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/version"
 	sdkutils "github.com/luxfi/sdk/utils"
 
 	"golang.org/x/exp/maps"
@@ -94,29 +96,42 @@ func GetLocalNetworkEndpoint(app *application.Lux) (string, error) {
 func GetLocalNetworkBlockchainsInfo(app *application.Lux) ([]BlockchainInfo, error) {
 	endpoint, err := GetLocalNetworkEndpoint(app)
 	if err != nil {
-		return nil, err
+		// If no tmpnet metadata, try the default local endpoint (for gRPC-started networks)
+		if errors.Is(err, ErrNetworkNotRunning) {
+			endpoint = constants.LocalAPIEndpoint
+		} else {
+			return nil, err
+		}
 	}
 	return GetBlockchainsInfo(endpoint)
 }
 
 // Returns luxd version and RPC version for the local network
 func GetLocalNetworkLuxdVersion(app *application.Lux) (bool, string, int, error) {
-	// not actually an error, network just not running
+	var endpoint string
+
+	// First try to get endpoint from tmpnet metadata
 	if isRunning, err := IsLocalNetworkRunning(app); err != nil {
 		return true, "", 0, err
-	} else if !isRunning {
-		return false, "", 0, nil
+	} else if isRunning {
+		endpoint, err = GetLocalNetworkEndpoint(app)
+		if err != nil {
+			return true, "", 0, err
+		}
+	} else {
+		// If no tmpnet metadata, try the default local endpoint (for gRPC-started networks)
+		endpoint = constants.LocalAPIEndpoint
 	}
-	endpoint, err := GetLocalNetworkEndpoint(app)
-	if err != nil {
-		return true, "", 0, err
-	}
+
 	ctx, cancel := sdkutils.GetAPIContext()
 	defer cancel()
 	infoClient := info.NewClient(endpoint)
 	versionResponse, err := infoClient.GetNodeVersion(ctx)
 	if err != nil {
-		return true, "", 0, err
+		// If we couldn't connect, network is not running
+		// Return the current RPC version from node constants to prevent
+		// version mismatch errors when nodes are temporarily unavailable
+		return false, "", int(version.RPCChainVMProtocol), nil
 	}
 	// version is in format lux/x.y.z, need to turn to semantic
 	splitVersion := strings.Split(versionResponse.Version, "/")

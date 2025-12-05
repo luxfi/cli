@@ -23,6 +23,17 @@ func GetNetworkBalance(address ids.ShortID, network models.Network) (uint64, err
 		return 0, fmt.Errorf("failed to get balance: %w", err)
 	}
 
-	// Return the unlocked balance
-	return uint64(response.Unlocked), nil
+	// Check top-level unlocked first (for backward compatibility)
+	if response.Unlocked > 0 {
+		return uint64(response.Unlocked), nil
+	}
+
+	// If top-level unlocked is 0, sum all unlocked balances from the map
+	// This handles custom networks where the LUX asset ID may not be set correctly
+	var totalUnlocked uint64
+	for _, balance := range response.Unlockeds {
+		totalUnlocked += uint64(balance)
+	}
+
+	return totalUnlocked, nil
 }

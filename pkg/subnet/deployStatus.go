@@ -43,3 +43,37 @@ func GetLocallyDeployedSubnetsFromFile(app *application.Lux) ([]string, error) {
 
 	return deployedSubnets, nil
 }
+
+// GetLocallyDeployedSubnetIDs returns a list of subnet IDs for locally deployed subnets
+// This is used for auto-tracking subnets when starting the local network
+func GetLocallyDeployedSubnetIDs(app *application.Lux) ([]string, error) {
+	allSubnetDirs, err := os.ReadDir(app.GetSubnetDir())
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	subnetIDs := []string{}
+
+	for _, subnetDir := range allSubnetDirs {
+		if !subnetDir.IsDir() {
+			continue
+		}
+		// read sidecar file
+		sc, err := app.LoadSidecar(subnetDir.Name())
+		if err != nil {
+			continue // skip on any error
+		}
+
+		// check if sidecar contains local deployment info with a valid SubnetID
+		if network, ok := sc.Networks[models.Local.String()]; ok {
+			if network.SubnetID.String() != "" && network.SubnetID.String() != "11111111111111111111111111111111LpoYY" {
+				subnetIDs = append(subnetIDs, network.SubnetID.String())
+			}
+		}
+	}
+
+	return subnetIDs, nil
+}
