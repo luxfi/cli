@@ -95,8 +95,6 @@ Quick start:
 	rootCmd.AddCommand(l1cmd.NewCmd(app))
 	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
-	rootCmd.AddCommand(nodecmd.NewCmd(app))
-	rootCmd.AddCommand(keycmd.NewCmd(app))
 
 	// add transaction command
 	rootCmd.AddCommand(transactioncmd.NewCmd(app))
