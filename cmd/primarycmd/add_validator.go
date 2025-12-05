@@ -168,12 +168,10 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	minValStake, err := nodecmd.GetMinStakingAmount(network)
 	if err != nil {
 		return err
 	}
 	if weight == 0 {
-		weight, err = nodecmd.PromptWeightPrimaryNetwork(network)
 		if err != nil {
 			return err
 		}
@@ -198,12 +196,10 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	start, duration, err = nodecmd.GetTimeParametersPrimaryNetwork(network, 0, duration, startTimeStr, false)
 	if err != nil {
 		return err
 	}
 	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
-	nodecmd.PrintNodeJoinPrimaryNetworkOutput(nodeID, weight, network, start)
 	if delegationFee == 0 {
 		delegationFee, err = getDelegationFeeOption(app, network)
 		if err != nil {
