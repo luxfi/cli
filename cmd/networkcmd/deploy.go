@@ -928,6 +928,27 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 
 	var warpErr, relayerErr error
+				if network == models.Local || deployFlags.LocalMachineFlags.UseLocalMachine {
+					relayerKeyName, _, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainName)
+					if err != nil {
+						return err
+					}
+					deployRelayerFlags.Key = relayerKeyName
+					deployRelayerFlags.Amount = constants.DefaultRelayerAmount
+					deployRelayerFlags.BlockchainFundingKey = constants.WarpKeyName
+				}
+				if network == models.Local {
+					deployRelayerFlags.CChainFundingKey = "ewoq"
+					deployRelayerFlags.CChainAmount = constants.DefaultRelayerAmount
+				}
+				if err := relayercmd.CallDeploy(nil, deployRelayerFlags, network); err != nil {
+					relayerErr = err
+					ux.Logger.RedXToUser("Relayer is not deployed due to: %v", relayerErr)
+				} else {
+					ux.Logger.GreenCheckmarkToUser("Relayer is successfully deployed")
+				}
+			}
+		}
 	}
 
 	flags := make(map[string]string)
