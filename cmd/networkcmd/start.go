@@ -387,13 +387,8 @@ func StartMainnet() error {
 	globalNodeConfig := `{
 		"log-level": "info",
 		"network-id": 96369,
-		"consensus-sample-size": 1,
-		"consensus-quorum-size": 1,
-		"consensus-commit-threshold": 1,
 		"sybil-protection-enabled": false,
-		"network-health-min-conn-peers": 0,
-		"skip-bootstrap": true,
-		"poa-single-node-mode": true
+		"network-health-min-conn-peers": 0
 	}`
 
 	// C-Chain runtime config (not genesis)
@@ -711,17 +706,12 @@ func StartTestnet() error {
 	}
 
 	// Build testnet configuration for local development
-	// Use testnet with staking keys and k=1 consensus parameters
+	// Use testnet with staking keys and sybil protection disabled
 	globalNodeConfig := `{
 		"log-level": "info",
 		"network-id": 96368,
-		"consensus-sample-size": 1,
-		"consensus-quorum-size": 1,
-		"consensus-commit-threshold": 1,
 		"sybil-protection-enabled": false,
-		"network-health-min-conn-peers": 0,
-		"skip-bootstrap": true,
-		"poa-single-node-mode": true
+		"network-health-min-conn-peers": 0
 	}`
 
 	// C-Chain runtime config (not genesis)
