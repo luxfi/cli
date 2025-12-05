@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/cmd/networkcmd"
-	"github.com/luxfi/cli/cmd/interchaincmd/messengercmd"
 	"github.com/luxfi/cli/pkg/ansible"
 	awsAPI "github.com/luxfi/cli/pkg/cloud/aws"
 	"github.com/luxfi/cli/pkg/cobrautils"
@@ -398,7 +397,6 @@ func wiz(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser("%s", luxlog.Green.Wrap("Setting up Warp on subnet"))
 		ux.Logger.PrintToUser("")
-		flags := messengercmd.DeployFlags{
 			ChainFlags: contract.ChainSpec{
 				BlockchainName: subnetName,
 			},
@@ -418,7 +416,6 @@ func wiz(cmd *cobra.Command, args []string) error {
 			RegistryBydecodePath:         warpRegistryBydecodePath,
 			IncludeCChain:                true,
 		}
-		if err := messengercmd.CallDeploy([]string{}, flags, models.UndefinedNetwork); err != nil {
 			return err
 		}
 		ux.Logger.PrintToUser("")
