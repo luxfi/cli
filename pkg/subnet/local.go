@@ -45,7 +45,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/chain/c"
+	"github.com/luxfi/sdk/wallet/chain/c"
 	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/node/wallet/net/primary"
 	"github.com/luxfi/sdk/models"
