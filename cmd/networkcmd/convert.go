@@ -3,11 +3,12 @@
 package networkcmd
 
 import (
-	"github.com/luxfi/cli/pkg/localnet"
 	"fmt"
 	"math/big"
 	"os"
 	"time"
+
+	"github.com/luxfi/cli/pkg/localnet"
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/blockchain"
@@ -107,7 +108,7 @@ func StartLocalMachine(
 		bootstrapValidatorFlags.BootstrapValidatorsJSONFilePath == "" {
 		localMachineFlags.UseLocalMachine = true
 	}
-	clusterName := localnet.LocalClusterName(network, blockchainName)
+	clusterName := localnet.LocalClusterName()
 	if clusterNameFlagValue != "" {
 		clusterName = clusterNameFlagValue
 		if localnet.LocalClusterExists(app, clusterName) {
@@ -278,7 +279,7 @@ func InitializeValidatorManager(
 			app,
 			ux.Logger.PrintToUser,
 			clusterName,
-			blockchainName,
+			blockchainName, "", "",
 		); err != nil {
 			return false, err
 		}
