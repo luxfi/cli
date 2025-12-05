@@ -11,12 +11,10 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/cmd/flags"
-	"github.com/luxfi/cli/cmd/interchaincmd/relayercmd"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/dependencies"
-	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/metrics"
 	"github.com/luxfi/cli/pkg/networkoptions"
@@ -37,7 +35,6 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/platformvm/warp/message"
 	"github.com/luxfi/node/vms/types"
-	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/prompts/comparator"
@@ -928,28 +925,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 
 	var warpErr, relayerErr error
-				if network == models.Local || deployFlags.LocalMachineFlags.UseLocalMachine {
-					relayerKeyName, _, _, err := relayer.GetDefaultRelayerKeyInfo(app, blockchainName)
-					if err != nil {
-						return err
-					}
-					deployRelayerFlags.Key = relayerKeyName
-					deployRelayerFlags.Amount = constants.DefaultRelayerAmount
-					deployRelayerFlags.BlockchainFundingKey = constants.WarpKeyName
-				}
-				if network == models.Local {
-					deployRelayerFlags.CChainFundingKey = "ewoq"
-					deployRelayerFlags.CChainAmount = constants.DefaultRelayerAmount
-				}
-				if err := relayercmd.CallDeploy(nil, deployRelayerFlags, network); err != nil {
-					relayerErr = err
-					ux.Logger.RedXToUser("Relayer is not deployed due to: %v", relayerErr)
-				} else {
-					ux.Logger.GreenCheckmarkToUser("Relayer is successfully deployed")
-				}
-			}
-		}
-	}
 
 	flags := make(map[string]string)
 	flags[constants.MetricsNetwork] = network.Name()
