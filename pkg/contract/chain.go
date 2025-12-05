@@ -8,8 +8,8 @@ import (
 
 	cmdflags "github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
@@ -435,15 +435,24 @@ func GetCChainWarpInfo(
 	registryAddress := ""
 	switch {
 	case network.Kind() == models.Local:
-		b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, "")
+		hasDataRaw, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, "")
 		if err != nil {
 			return "", "", err
 		}
-		if !b {
+		// Check if hasData is nil or false (it's interface{} so we need to check)
+		hasData := hasDataRaw != nil
+		if b, ok := hasDataRaw.(bool); ok {
+			hasData = b
+		}
+		if !hasData {
 			return "", "", fmt.Errorf("no extra local network data available")
 		}
-		messengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
-		registryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
+		if msg, ok := extraLocalNetworkData["CChainTeleporterMessengerAddress"].(string); ok {
+			messengerAddress = msg
+		}
+		if reg, ok := extraLocalNetworkData["CChainTeleporterRegistryAddress"].(string); ok {
+			registryAddress = reg
+		}
 	case network.ClusterName() != "":
 		clusterConfig, err := app.GetClusterConfig(network.ClusterName())
 		if err != nil {

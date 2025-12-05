@@ -9,6 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/ssh"
@@ -93,17 +94,23 @@ func CallStart(_ []string, flags StartFlags, network models.Network) error {
 		}
 		// localNetworkRootDir := ""
 		if network.Kind() == models.Local {
-			_, err = localnet.GetLocalNetworkDir(app)
-			if err != nil {
-				return err
-			}
+			_ = localnet.GetLocalNetworkDir(app)
 		}
 		relayerConfigPath := app.GetLocalRelayerConfigPath()
 		if network.Kind() == models.Local && flags.BinPath == "" && flags.Version == constants.DefaultRelayerVersion {
-			if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
+			if bRaw, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 				return err
-			} else if b {
-				flags.BinPath = extraLocalNetworkData.RelayerPath
+			} else {
+				// Check if bRaw indicates data is available
+				hasData := false
+				if b, ok := bRaw.(bool); ok {
+					hasData = b
+				}
+				if hasData {
+					if relayerPath, ok := extraLocalNetworkData["RelayerPath"].(string); ok {
+						flags.BinPath = relayerPath
+					}
+				}
 			}
 		}
 		if !utils.FileExists(relayerConfigPath) {
@@ -120,7 +127,11 @@ func CallStart(_ []string, flags StartFlags, network models.Network) error {
 		); err != nil {
 			return err
 		} else if network.Kind() == models.Local {
-			if err := localnet.WriteExtraLocalNetworkData(app, "", binPath, "", ""); err != nil {
+			// Write relayer path to extra network data
+			extraData := map[string]interface{}{
+				"RelayerPath": binPath,
+			}
+			if err := localnet.WriteExtraLocalNetworkData(app, extraData); err != nil {
 				return err
 			}
 		}
