@@ -937,7 +937,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 		chainSpec.SetEnabled(true, false, false, false, false)
 		warpDeployFlags := contract.DeployWarpFlags{
-		} else {
 			ux.Logger.GreenCheckmarkToUser("Warp is successfully deployed")
 			if network != models.Local && !deployFlags.LocalMachineFlags.UseLocalMachine {
 				if flag := cmd.Flags().Lookup(skipRelayerFlagName); flag != nil && !flag.Changed {
