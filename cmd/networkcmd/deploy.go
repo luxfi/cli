@@ -936,10 +936,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			BlockchainName: blockchainName,
 		}
 		chainSpec.SetEnabled(true, false, false, false, false)
-		warpDeployFlags := contract.DeployWarpFlags{
-			if !warpSpec.SkipRelayerDeploy && network != models.Mainnet {
-				if network == models.Local && warpSpec.RelayerBinPath == "" && warpSpec.RelayerVersion == constants.DefaultRelayerVersion {
-					if bRaw, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
 						return err
 					} else {
 						hasData := false
