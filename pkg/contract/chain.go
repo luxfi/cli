@@ -9,7 +9,6 @@ import (
 	cmdflags "github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
