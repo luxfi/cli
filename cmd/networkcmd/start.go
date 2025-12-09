@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/luxfi/cli/pkg/binutils"
@@ -26,6 +28,7 @@ var (
 	snapshotName           string
 	mainnet                bool
 	testnet                bool
+	nodePath               string // Path to custom luxd binary
 	// BadgerDB flags
 	dbEngine      string
 	archiveDir    string
@@ -48,6 +51,51 @@ func Start(flags StartFlags, printEndpoints bool) error {
 	return StartNetwork(nil, nil)
 }
 
+const nodeBinaryName = "luxd"
+
+// findNodeBinary locates the node binary using the following priority:
+// 1. User-provided --node-path flag
+// 2. Node binary in PATH
+// 3. Relative to CLI binary: ../node/build/<nodeBinaryName>
+func findNodeBinary() (string, error) {
+	// Priority 1: User-provided path via --node-path flag
+	if nodePath != "" {
+		if _, err := os.Stat(nodePath); os.IsNotExist(err) {
+			return "", fmt.Errorf("%s binary not found at specified path: %s", nodeBinaryName, nodePath)
+		}
+		return nodePath, nil
+	}
+
+	// Priority 2: Check if node binary is in PATH
+	if binaryPath, err := exec.LookPath(nodeBinaryName); err == nil {
+		return binaryPath, nil
+	}
+
+	// Priority 3: Look relative to CLI binary location
+	// Get the path of the current executable
+	execPath, err := os.Executable()
+	if err == nil {
+		// Resolve any symlinks
+		execPath, err = filepath.EvalSymlinks(execPath)
+		if err == nil {
+			// CLI is typically at cli/bin/lux, so node binary would be at ../node/build/<nodeBinaryName>
+			cliDir := filepath.Dir(filepath.Dir(execPath)) // Go up two levels from bin/lux
+			relativePath := filepath.Join(cliDir, "..", "node", "build", nodeBinaryName)
+			if absPath, err := filepath.Abs(relativePath); err == nil {
+				if _, err := os.Stat(absPath); err == nil {
+					return absPath, nil
+				}
+			}
+		}
+	}
+
+	return "", fmt.Errorf("%s binary not found. Please either:\n"+
+		"  1. Use --node-path to specify the path to %s\n"+
+		"  2. Add %s to your PATH\n"+
+		"  3. Build %s in the sibling node directory (../node/build/%s)",
+		nodeBinaryName, nodeBinaryName, nodeBinaryName, nodeBinaryName, nodeBinaryName)
+}
+
 func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
@@ -64,6 +112,7 @@ already running.`,
 	}
 
 	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", latest, "use this version of node (ex: v1.17.12)")
+	cmd.Flags().StringVar(&nodePath, "node-path", "", "path to local luxd binary (overrides --node-version)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 5 validators")
 	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 5 validators")
@@ -267,16 +316,9 @@ func StartMainnet() error {
 	ux.Logger.PrintToUser("Starting Lux mainnet with 5 validator nodes...")
 	ux.Logger.PrintToUser("Network ID: 96369")
 
-	// Get user's home directory for cross-platform support
-	homeDir, err := os.UserHomeDir()
+	localNodePath, err := findNodeBinary()
 	if err != nil {
-		return fmt.Errorf("failed to get home directory: %w", err)
-	}
-
-	// Check if local luxd binary exists
-	localLuxdPath := homeDir + "/work/lux/node/build/luxd"
-	if _, err := os.Stat(localLuxdPath); os.IsNotExist(err) {
-		return fmt.Errorf("luxd binary not found at %s. Please run 'make build-node' first", localLuxdPath)
+		return err
 	}
 
 	// Use local binary instead of downloading
@@ -327,12 +369,12 @@ func StartMainnet() error {
 	ctx := binutils.GetAsyncContext()
 
 	ux.Logger.PrintToUser("Starting network with genesis from luxfi/genesis package...")
-	ux.Logger.PrintToUser("Using luxd binary: %s", localLuxdPath)
+	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
 	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
 
 	// Start the network - netrunner handles genesis via luxfi/genesis
 	// First arg is exec path (luxd binary), not log path
-	startResp, err := cli.Start(ctx, localLuxdPath, opts...)
+	startResp, err := cli.Start(ctx, localNodePath, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
@@ -374,16 +416,9 @@ func StartTestnet() error {
 	ux.Logger.PrintToUser("Starting Lux testnet with 5 validator nodes...")
 	ux.Logger.PrintToUser("Network ID: 96368")
 
-	// Get user's home directory for cross-platform support
-	homeDir, err := os.UserHomeDir()
+	localNodePath, err := findNodeBinary()
 	if err != nil {
-		return fmt.Errorf("failed to get home directory: %w", err)
-	}
-
-	// Check if local luxd binary exists
-	localLuxdPath := homeDir + "/work/lux/node/build/luxd"
-	if _, err := os.Stat(localLuxdPath); os.IsNotExist(err) {
-		return fmt.Errorf("luxd binary not found at %s. Please run 'make build-node' first", localLuxdPath)
+		return err
 	}
 
 	// Use local binary instead of downloading
@@ -434,12 +469,12 @@ func StartTestnet() error {
 	ctx := binutils.GetAsyncContext()
 
 	ux.Logger.PrintToUser("Starting network with genesis from luxfi/genesis package...")
-	ux.Logger.PrintToUser("Using luxd binary: %s", localLuxdPath)
+	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
 	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
 
 	// Start the network - netrunner handles genesis via luxfi/genesis
 	// First arg is exec path (luxd binary), not log path
-	startResp, err := cli.Start(ctx, localLuxdPath, opts...)
+	startResp, err := cli.Start(ctx, localNodePath, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
