@@ -1291,19 +1291,18 @@ func TestCaptureXChainAddressWithMonkeyPatch(t *testing.T) {
 
 			prompter := &realPrompter{}
 
-		// Convert network string to models.Network
-		var network models.Network
-		switch tt.network {
-		case "devnet":
-			network = models.NewDevnetNetwork()
-		case "testnet":
-			network = models.NewTestnetNetwork()
-		case "mainnet":
-			network = models.NewMainnetNetwork()
-		default:
-			network = models.NewLocalNetwork()
-		}
-			
+			// Convert network string to models.Network
+			var network models.Network
+			switch tt.network {
+			case "devnet":
+				network = models.NewDevnetNetwork()
+			case "testnet":
+				network = models.NewTestnetNetwork()
+			case "mainnet":
+				network = models.NewMainnetNetwork()
+			default:
+				network = models.NewLocalNetwork()
+			}
 
 			addr, err := prompter.CaptureXChainAddress("Enter X-Chain address:", network)
 
