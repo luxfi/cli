@@ -8,8 +8,10 @@ import (
 	"bytes"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/luxfi/crypto/secp256k1"
@@ -47,6 +49,14 @@ const (
 	privKeyEncPfx = "PrivateKey-"
 	privKeySize   = 64
 
+	// LocalKeyName is the name of the local development key file
+	LocalKeyName = "local-key"
+	// LocalKeyPath is the path where the local key is stored
+	LocalKeyPath = "~/.lux/keys/" + LocalKeyName + ".pk"
+
+	// DEPRECATED: EwoqPrivateKey is the legacy hardcoded EWOQ key.
+	// DO NOT USE for new code - this is a publicly known key and is a security risk.
+	// Use GetLocalKey() instead which generates a unique local key on first use.
 	rawEwoqPk      = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
 	EwoqPrivateKey = privKeyEncPfx + rawEwoqPk
 )
@@ -385,4 +395,59 @@ func (m *SoftKey) Match(owners *secp256k1fx.OutputOwners, time uint64) ([]uint32
 		copy(pks[i][:], addr[:])
 	}
 	return indices, pks, ok
+}
+
+// GetLocalKeyPath returns the expanded path to the local key file
+func GetLocalKeyPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".lux", "keys", LocalKeyName+".pk")
+}
+
+// GetOrCreateLocalKey loads the local development key from ~/.lux/keys/local-key.pk,
+// generating a new one if it doesn't exist. This is the secure replacement for
+// the hardcoded EWOQ key.
+func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
+	keyPath := GetLocalKeyPath()
+	if keyPath == "" {
+		return nil, errors.New("could not determine home directory")
+	}
+
+	// Create the keys directory if it doesn't exist
+	keyDir := filepath.Dir(keyPath)
+	if err := os.MkdirAll(keyDir, 0700); err != nil {
+		return nil, fmt.Errorf("failed to create key directory: %w", err)
+	}
+
+	// Try to load existing key
+	if _, err := os.Stat(keyPath); err == nil {
+		return LoadSoft(networkID, keyPath)
+	}
+
+	// Generate a new key
+	newKey, err := NewSoft(networkID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate local key: %w", err)
+	}
+
+	// Save the new key
+	if err := newKey.Save(keyPath); err != nil {
+		return nil, fmt.Errorf("failed to save local key: %w", err)
+	}
+
+	return newKey, nil
+}
+
+// GetLocalPrivateKey returns the secp256k1 private key for local development.
+// It loads from ~/.lux/keys/local-key.pk, generating a new key if needed.
+func GetLocalPrivateKey() (*secp256k1.PrivateKey, error) {
+	// Use local network ID (12345) as default for key loading
+	const localNetworkID = 12345
+	softKey, err := GetOrCreateLocalKey(localNetworkID)
+	if err != nil {
+		return nil, err
+	}
+	return softKey.Key(), nil
 }

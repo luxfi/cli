@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/ids"
@@ -63,9 +64,10 @@ func GetDefaultNetworkConf(numNodes uint32) (
 		}
 		nodes = append(nodes, node)
 	}
-	localKey := genesis.GetLocalKey()
-	if localKey == nil {
-		return 0, nil, nil, nil, nil, fmt.Errorf("no keys found in ~/.lux/keys - please generate validator keys first")
+	// Use the CLI's secure local key system - generates on first use
+	localKey, err := key.GetLocalPrivateKey()
+	if err != nil {
+		return 0, nil, nil, nil, nil, fmt.Errorf("failed to get local key: %w", err)
 	}
 
 	// Create genesis config directly using genesis package types
