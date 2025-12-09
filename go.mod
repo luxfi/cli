@@ -34,7 +34,6 @@ require (
 	github.com/onsi/gomega v1.38.0
 	github.com/otiai10/copy v1.14.1 // indirect
 	github.com/pborman/ansi v1.0.0
-	github.com/pingcap/errors v0.11.4
 	github.com/posthog/posthog-go v1.6.1
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
@@ -47,8 +46,8 @@ require (
 	golang.org/x/crypto v0.43.0
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
 	golang.org/x/mod v0.28.0
-	golang.org/x/net v0.45.0
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/net v0.45.0 // indirect
+	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.17.0
 	golang.org/x/text v0.30.0
 	google.golang.org/api v0.247.0
@@ -66,8 +65,6 @@ require (
 	github.com/luxfi/genesis v1.2.4
 	github.com/luxfi/math v0.1.5
 	github.com/luxfi/migrate v1.0.0
-	github.com/tyler-smith/go-bip32 v1.0.0
-	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.36.0
 )
 
@@ -77,8 +74,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.8.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
-	github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e // indirect
-	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6 // indirect
@@ -250,3 +245,5 @@ require (
 
 // migrate is now published - no local replace needed
 // replace github.com/luxfi/migrate => ../migrate
+
+replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
