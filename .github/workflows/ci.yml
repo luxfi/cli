@@ -15,31 +15,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-      
+
       - name: Install dependencies
-        run: |
-          export GOSUMDB=off
-          export GOPROXY=direct
-          go mod download
-      
+        run: go mod download
+
       - name: Run go vet
-        run: |
-          export GOSUMDB=off
-          export GOPROXY=direct
-          go vet ./... || true
-      
+        run: go vet ./... || true
+
       - name: Run go fmt check
         run: |
           if [ -n "$(go fmt ./...)" ]; then
             echo "Please run 'go fmt ./...' to format your code"
             exit 1
           fi
-      
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
@@ -58,15 +52,10 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
 
       - name: Install dependencies
-        run: |
-          export GOSUMDB=off
-          export GOPROXY=direct
-          go mod download
+        run: go mod download
 
       - name: Run tests
         run: |
-          export GOSUMDB=off
-          export GOPROXY=direct
           # Run tests for specific packages that should pass
           go test -v -race -coverprofile=coverage.out \
             ./pkg/constants/... \
@@ -75,7 +64,7 @@ jobs:
             ./pkg/utils/... \
             ./pkg/models/... \
             ./cmd/... || true
-      
+
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
@@ -96,21 +85,19 @@ jobs:
             arch: arm64
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-      
+
       - name: Build CLI
         env:
           GOOS: ${{ matrix.os }}
           GOARCH: ${{ matrix.arch }}
-          GOSUMDB: off
-          GOPROXY: direct
-        run: |
-          go build -v -o bin/lux-${{ matrix.os }}-${{ matrix.arch }} .
-      
+          CGO_ENABLED: 0
+        run: go build -v -o bin/lux-${{ matrix.os }}-${{ matrix.arch }} .
+
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
@@ -123,21 +110,21 @@ jobs:
     needs: [build, test-cli]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-      
+
       - name: Download Linux binary
         uses: actions/download-artifact@v4
         with:
           name: lux-linux-amd64
           path: bin/
-      
+
       - name: Make binary executable
         run: chmod +x bin/lux-linux-amd64
-      
+
       - name: Run integration tests
         run: |
           cd tests/e2e
@@ -148,17 +135,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-      
+
       - name: Run gosec
         uses: securego/gosec@master
         with:
           args: -fmt json -out gosec-report.json ./...
-      
+
       - name: Upload security report
         uses: actions/upload-artifact@v4
         with:
@@ -171,7 +158,7 @@ jobs:
     needs: [test-cli]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Download CLI coverage
         uses: actions/download-artifact@v4
         with:

@@ -16,18 +16,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25.1'
+        go-version-file: 'go.mod'
 
     - name: Build
-      run: |
-        # Disable checksum verification for private repositories
-        export GOSUMDB=off
-        export GOPROXY=direct
-        go build -v ./...
+      run: go build -v ./...
 
     - name: Test
       run: |
-        export GOSUMDB=off
-        export GOPROXY=direct
         # Run tests but allow failures in test packages with known issues
         go test ./cmd/... ./pkg/constants/... ./pkg/types/... ./pkg/binutils/... ./pkg/utils/... -v || true
