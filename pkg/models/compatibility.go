@@ -21,6 +21,6 @@ type CLIDependencyMap struct {
 
 // NetworkVersions represents versions for a network
 type NetworkVersions struct {
-	LatestVersion  string `json:"latestVersion"`
-	MinimumVersion string `json:"minimumVersion"`
+	LatestVersion  string `json:"latest-version"`
+	MinimumVersion string `json:"minimum-version"`
 }

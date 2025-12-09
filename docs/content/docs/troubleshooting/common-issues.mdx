@@ -1,0 +1,660 @@
+---
+title: Troubleshooting Guide
+description: Solutions to common issues when using Lux CLI and running nodes
+---
+
+# Troubleshooting Guide
+
+This guide helps you diagnose and resolve common issues with Lux CLI, node operations, and blockchain deployments.
+
+## Installation Issues
+
+### CLI Installation Fails
+
+**Problem**: Installation script fails with permission errors
+
+```bash
+Error: Permission denied when installing to /usr/local/bin
+```
+
+**Solution**:
+
+```bash
+# Option 1: Install to user directory
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh -s -- --install-dir=$HOME/.lux/bin
+
+# Option 2: Use sudo (less recommended)
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sudo sh
+
+# Add to PATH
+echo 'export PATH=$PATH:$HOME/.lux/bin' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Command Not Found
+
+**Problem**: `lux: command not found` after installation
+
+**Solution**:
+
+```bash
+# Check installation location
+ls -la ~/.lux/bin/
+
+# Add to PATH permanently
+echo 'export PATH=$PATH:$HOME/.lux/bin' >> ~/.bashrc
+echo 'export PATH=$PATH:$HOME/.lux/bin' >> ~/.zshrc  # For zsh users
+
+# Reload shell configuration
+source ~/.bashrc  # or source ~/.zshrc
+
+# Verify
+which lux
+lux --version
+```
+
+### Version Mismatch
+
+**Problem**: CLI version doesn't match expected version
+
+**Solution**:
+
+```bash
+# Check current version
+lux --version
+
+# Update to latest
+lux update
+
+# Or reinstall
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh
+
+# Install specific version
+lux update --version=v1.2.3
+```
+
+## Network Issues
+
+### Network Won't Start
+
+**Problem**: `lux network start` fails
+
+**Diagnosis**:
+
+```bash
+# Check for port conflicts
+lsof -i :9650-9670
+netstat -tuln | grep -E "9650|9651"
+
+# Check disk space
+df -h
+
+# Check system resources
+free -h
+```
+
+**Solutions**:
+
+```bash
+# Solution 1: Kill conflicting processes
+kill -9 $(lsof -t -i:9650)
+
+# Solution 2: Use different ports
+lux network start --api-port=9700 --staking-port=9701
+
+# Solution 3: Clean and restart
+lux network clean
+lux network start
+
+# Solution 4: Reduce node count
+lux network start --num-nodes=3
+```
+
+### Nodes Keep Crashing
+
+**Problem**: Network starts but nodes crash immediately
+
+**Diagnosis**:
+
+```bash
+# Check logs
+tail -f ~/.lux-cli/networks/local/nodes/node1/logs/main.log
+
+# Check system logs
+journalctl -xe | grep lux
+
+# Monitor resource usage
+top -p $(pgrep luxd)
+```
+
+**Solutions**:
+
+```bash
+# Increase memory limits
+ulimit -v unlimited
+
+# Use in-memory database
+lux network start --db-type=memdb
+
+# Disable unnecessary features
+lux network start \
+  --api-admin-enabled=false \
+  --api-keystore-enabled=false
+```
+
+### Cannot Connect to Network
+
+**Problem**: API calls fail with connection errors
+
+**Diagnosis**:
+
+```bash
+# Test connectivity
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"info.getNodeID"
+}' -H 'content-type:application/json' http://127.0.0.1:9630/ext/info
+
+# Check if node is running
+ps aux | grep luxd
+
+# Check network status
+lux network status
+```
+
+**Solutions**:
+
+```bash
+# Restart network
+lux network stop
+lux network start
+
+# Check firewall
+sudo ufw status
+sudo ufw allow 9630/tcp
+
+# Use correct endpoint
+export LUX_API_ENDPOINT=http://127.0.0.1:9630
+```
+
+## Node Issues
+
+### Node Won't Sync
+
+**Problem**: Node stays at 0% sync
+
+**Diagnosis**:
+
+```bash
+# Check bootstrap status
+lux node status --detailed
+
+# Check peer connections
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"info.peers"
+}' -H 'content-type:application/json' http://127.0.0.1:9650/ext/info
+
+# Check logs for errors
+grep ERROR ~/.luxd/logs/main.log
+```
+
+**Solutions**:
+
+```bash
+# Add bootstrap nodes
+lux node configure \
+  --bootstrap-ips=bootstrap1.lux.network:9651,bootstrap2.lux.network:9651
+
+# Clear database and resync
+lux node stop
+rm -rf ~/.luxd/db/*
+lux node start
+
+# Check time sync
+timedatectl status
+sudo ntpdate -s time.nist.gov
+```
+
+### High CPU/Memory Usage
+
+**Problem**: Node consuming excessive resources
+
+**Diagnosis**:
+
+```bash
+# Monitor resources
+htop
+iostat -x 1
+
+# Check database size
+du -sh ~/.luxd/db/
+
+# Profile node
+lux node profile --duration=60
+```
+
+**Solutions**:
+
+```bash
+# Reduce cache size
+lux node configure --db-cache-size=256
+
+# Limit peer connections
+lux node configure \
+  --network-peer-list-size=20 \
+  --network-peer-list-validator-size=15
+
+# Enable pruning
+lux node configure --pruning-enabled=true
+
+# Restart with limits
+systemctl edit luxd
+# Add:
+# [Service]
+# CPUQuota=80%
+# MemoryMax=8G
+```
+
+### BLS Signature Errors
+
+**Problem**: "invalid proof of possession" or BLS key errors
+
+**Diagnosis**:
+
+```bash
+# Check BLS key exists
+ls -la ~/.luxd/staking/signer.key
+
+# Verify BLS public key
+lux key list --type=bls
+```
+
+**Solutions**:
+
+```bash
+# Generate new BLS key
+lux key create bls-key --type=bls
+
+# Update node configuration
+lux node configure --staking-signer-key=~/.luxd/staking/signer.key
+
+# For local networks, disable BLS
+lux network start --bls-signatures-enabled=false
+```
+
+## Blockchain Issues
+
+### Deployment Fails
+
+**Problem**: Cannot deploy blockchain
+
+**Diagnosis**:
+
+```bash
+# Check balance
+lux key balance deployment-key
+
+# Check if name exists
+lux blockchain list
+
+# Check network status
+lux network status
+```
+
+**Solutions**:
+
+```bash
+# Fund deployment key
+lux key transfer \
+  --from=funded-key \
+  --to=deployment-key \
+  --amount=10
+
+# Use different name
+lux blockchain delete old-name
+lux blockchain create new-name
+
+# Deploy to correct network
+lux blockchain deploy mychain --local  # or --testnet
+```
+
+### VM Not Found
+
+**Problem**: "VM not found" error
+
+**Solutions**:
+
+```bash
+# Check VM installation
+ls -la ~/.lux-cli/vms/
+
+# Reinstall VM
+lux blockchain vm install --vm-id=subnetevm
+
+# Use correct VM ID
+lux blockchain create mychain --vm=subnet-evm  # Use alias
+```
+
+### Transaction Failures
+
+**Problem**: Transactions fail or timeout
+
+**Diagnosis**:
+
+```bash
+# Check gas price
+lux blockchain gas-price mychain
+
+# Check nonce
+lux transaction nonce --address=0x...
+
+# Check mempool
+lux blockchain mempool mychain
+```
+
+**Solutions**:
+
+```bash
+# Increase gas price
+lux transaction send \
+  --gas-price=50gwei \
+  --gas-limit=3000000
+
+# Reset nonce
+lux transaction send --nonce=123
+
+# Clear stuck transactions
+lux blockchain clear-mempool mychain
+```
+
+## Validator Issues
+
+### Cannot Add Validator
+
+**Problem**: Adding validator fails
+
+**Diagnosis**:
+
+```bash
+# Check if already validating
+lux validator status --node-id=NodeID-...
+
+# Check stake amount
+lux key balance staking-key
+
+# Check node ID
+lux node id
+```
+
+**Solutions**:
+
+```bash
+# Ensure minimum stake (2000 LUX for mainnet)
+lux key transfer \
+  --to=staking-key \
+  --amount=2001
+
+# Wait for node sync
+lux node health --continuous
+
+# Use correct time format
+lux validator add \
+  --start-time="2024-12-01T00:00:00Z" \
+  --duration=8760h
+```
+
+### Low Validator Uptime
+
+**Problem**: Validator uptime below threshold
+
+**Diagnosis**:
+
+```bash
+# Check uptime
+lux validator uptime --node-id=NodeID-...
+
+# Check connectivity
+ping -c 10 bootstrap1.lux.network
+
+# Check system uptime
+uptime
+```
+
+**Solutions**:
+
+```bash
+# Improve network stability
+# Use ethernet instead of WiFi
+# Configure static IP
+
+# Set up monitoring
+lux validator monitor \
+  --node-id=NodeID-... \
+  --alert-email=admin@example.com
+
+# Use systemd for auto-restart
+sudo systemctl enable luxd
+sudo systemctl start luxd
+```
+
+## Key Management Issues
+
+### Lost Private Key
+
+**Problem**: Cannot access funds due to lost key
+
+**Prevention**:
+
+```bash
+# Always backup keys
+lux key export mykey --output=backup.key
+
+# Use hardware wallets
+lux key import ledger --ledger
+
+# Use mnemonic phrases
+lux key create mykey --mnemonic
+```
+
+**Recovery Options**:
+
+```bash
+# From backup
+lux key import recovered --file=backup.key
+
+# From mnemonic
+lux key import recovered --mnemonic
+
+# From ledger
+lux key import recovered --ledger
+```
+
+### Key Import Fails
+
+**Problem**: Cannot import key from file
+
+**Solutions**:
+
+```bash
+# Check file format
+file mykey.pk
+
+# Convert formats
+# From hex to base64
+xxd -r -p hex.key | base64 > base64.key
+
+# Fix permissions
+chmod 600 mykey.pk
+
+# Specify format
+lux key import mykey --file=key.pk --format=hex
+```
+
+## Performance Issues
+
+### Slow Transaction Processing
+
+**Diagnosis**:
+
+```bash
+# Check mempool size
+lux blockchain mempool-size mychain
+
+# Check block production
+lux blockchain block-rate mychain
+
+# Check network latency
+ping -c 10 validator.example.com
+```
+
+**Solutions**:
+
+```bash
+# Increase mempool size
+lux blockchain configure mychain \
+  --mempool-size=10000
+
+# Optimize gas settings
+lux blockchain configure mychain \
+  --min-gas-price=25gwei \
+  --gas-limit=10000000
+
+# Add more validators
+lux validator add --blockchain=mychain
+```
+
+### Database Corruption
+
+**Problem**: Database errors or corruption
+
+**Diagnosis**:
+
+```bash
+# Check database integrity
+lux node db verify
+
+# Check disk errors
+dmesg | grep -i error
+smartctl -a /dev/sda
+```
+
+**Solutions**:
+
+```bash
+# Repair database
+lux node stop
+lux node db repair
+lux node start
+
+# Rebuild from snapshot
+lux node stop
+rm -rf ~/.luxd/db
+lux node restore --snapshot=latest
+lux node start
+
+# Full resync
+lux node stop
+rm -rf ~/.luxd/db
+lux node start --bootstrap-retry-enabled=true
+```
+
+## Debug Commands
+
+### Enable Debug Logging
+
+```bash
+# CLI debug mode
+lux --log-level=debug <command>
+
+# Node debug mode
+lux node configure --log-level=debug
+
+# Specific module debugging
+lux node configure --log-level="consensus=debug,network=info"
+```
+
+### Collect Diagnostic Information
+
+```bash
+#!/bin/bash
+# diagnostic.sh
+
+echo "=== System Info ==="
+uname -a
+free -h
+df -h
+
+echo "=== Network Info ==="
+ip addr
+netstat -tuln
+
+echo "=== Lux Status ==="
+lux --version
+lux network status
+lux node status
+
+echo "=== Recent Logs ==="
+tail -100 ~/.luxd/logs/main.log
+
+echo "=== Process Info ==="
+ps aux | grep lux
+```
+
+### Common Log Patterns
+
+```bash
+# Find errors
+grep -i error ~/.luxd/logs/*.log
+
+# Find panics
+grep -i panic ~/.luxd/logs/*.log
+
+# Find connection issues
+grep -i "connection refused\|timeout" ~/.luxd/logs/*.log
+
+# Find consensus issues
+grep -i "consensus\|conflict" ~/.luxd/logs/*.log
+```
+
+## Getting Help
+
+### Community Support
+
+1. **Discord**: Join the Lux Discord for real-time help
+2. **GitHub Issues**: Report bugs at github.com/luxfi/cli
+3. **Forum**: Detailed discussions at forum.lux.network
+4. **Documentation**: Full docs at docs.lux.network
+
+### Diagnostic Information to Provide
+
+When asking for help, include:
+
+```bash
+# Version information
+lux --version
+lux node version
+
+# System information
+uname -a
+lscpu | head -10
+free -h
+
+# Error messages
+# Copy exact error messages
+
+# Configuration (sanitized)
+lux config list
+
+# Recent logs
+tail -100 ~/.luxd/logs/main.log
+```
+
+## Related Documentation
+
+- [Network Commands](/docs/commands/network)
+- [Node Commands](/docs/commands/node)
+- [Configuration Reference](/docs/configuration)
+- [Development Workflows](/docs/workflows/development)
