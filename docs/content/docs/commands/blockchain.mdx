@@ -1,0 +1,645 @@
+---
+title: Blockchain Commands
+description: Complete reference for Lux CLI blockchain commands
+---
+
+# Blockchain Commands
+
+The blockchain command suite provides tools for creating, deploying, and managing blockchains on the Lux network.
+
+## Overview
+
+The blockchain commands allow you to:
+- Create new blockchain configurations
+- Deploy blockchains to local, testnet, or mainnet
+- Manage validator sets for your blockchains
+- Configure and upgrade deployed blockchains
+- Export/import blockchain configurations
+
+## Command Reference
+
+### blockchain create
+
+Creates a new blockchain configuration with customizable VM and parameters.
+
+```bash
+lux blockchain create <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain to create
+
+**Flags:**
+- `--genesis` - Path to custom genesis file
+- `--vm` - VM type: `Subnet-EVM`, `Custom`
+- `--evm-chain-id` - Chain ID for EVM chains
+- `--evm-token` - Token name for native gas token
+- `--evm-version` - Version of Subnet-EVM to use
+- `--from-github-repo` - Import VM from a GitHub repository
+- `--force` - Overwrite existing configuration
+
+**Examples:**
+
+```bash
+# Create a Subnet-EVM blockchain
+lux blockchain create mychain --vm=Subnet-EVM --evm-chain-id=99999
+
+# Create with custom genesis
+lux blockchain create customchain --genesis=/path/to/genesis.json --vm=Custom
+
+# Import VM from GitHub
+lux blockchain create githubvm --from-github-repo=org/repo
+```
+
+### blockchain deploy
+
+Deploys a blockchain configuration to a network.
+
+```bash
+lux blockchain deploy <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain to deploy
+
+**Flags:**
+- `--local` - Deploy to local network
+- `--testnet` - Deploy to testnet
+- `--mainnet` - Deploy to mainnet
+- `--endpoint` - Custom RPC endpoint
+- `--key` - Key to use for deployment
+- `--control-keys` - Control keys for the blockchain
+- `--threshold` - Signature threshold
+
+**Examples:**
+
+```bash
+# Deploy to local network
+lux blockchain deploy mychain --local
+
+# Deploy to testnet with custom key
+lux blockchain deploy mychain --testnet --key=mykey
+
+# Deploy with control keys
+lux blockchain deploy mychain --mainnet \
+  --control-keys=P-lux1abc...,P-lux1def... \
+  --threshold=2
+```
+
+### blockchain describe
+
+Shows detailed information about a blockchain configuration.
+
+```bash
+lux blockchain describe <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--genesis` - Print raw genesis file
+- `--deployed` - Show deployment information
+
+**Examples:**
+
+```bash
+# Show blockchain summary
+lux blockchain describe mychain
+
+# Show genesis configuration
+lux blockchain describe mychain --genesis
+
+# Show deployment details
+lux blockchain describe mychain --deployed
+```
+
+### blockchain list
+
+Lists all blockchain configurations.
+
+```bash
+lux blockchain list [flags]
+```
+
+**Flags:**
+- `--deployed` - Show only deployed blockchains
+- `--json` - Output in JSON format
+
+**Examples:**
+
+```bash
+# List all blockchains
+lux blockchain list
+
+# List deployed blockchains
+lux blockchain list --deployed
+
+# Output as JSON
+lux blockchain list --json
+```
+
+### blockchain delete
+
+Deletes a blockchain configuration.
+
+```bash
+lux blockchain delete <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain to delete
+
+**Flags:**
+- `--force` - Skip confirmation prompt
+
+**Examples:**
+
+```bash
+# Delete blockchain
+lux blockchain delete mychain
+
+# Force delete without confirmation
+lux blockchain delete mychain --force
+```
+
+### blockchain addValidator
+
+Adds a validator to a deployed blockchain.
+
+```bash
+lux blockchain addValidator <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--node-id` - Node ID of validator to add
+- `--weight` - Validator weight (PoS) or 1 (PoA)
+- `--balance` - Initial balance for validator
+- `--start-time` - Start time for validation
+- `--duration` - Validation duration
+- `--key` - Key to sign transaction
+
+**Examples:**
+
+```bash
+# Add PoA validator
+lux blockchain addValidator mychain \
+  --node-id=NodeID-AbC123... \
+  --key=mykey
+
+# Add PoS validator with weight
+lux blockchain addValidator mychain \
+  --node-id=NodeID-XyZ789... \
+  --weight=1000000 \
+  --balance=100000000000
+```
+
+### blockchain removeValidator
+
+Removes a validator from a blockchain.
+
+```bash
+lux blockchain removeValidator <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--node-id` - Node ID to remove
+- `--key` - Key to sign transaction
+
+**Examples:**
+
+```bash
+# Remove validator
+lux blockchain removeValidator mychain \
+  --node-id=NodeID-AbC123... \
+  --key=mykey
+```
+
+### blockchain changeOwner
+
+Changes the owner of a deployed blockchain.
+
+```bash
+lux blockchain changeOwner <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--new-owner` - New owner address
+- `--key` - Current owner's key
+
+**Examples:**
+
+```bash
+# Change blockchain owner
+lux blockchain changeOwner mychain \
+  --new-owner=P-lux1newowner... \
+  --key=currentkey
+```
+
+### blockchain changeWeight
+
+Changes the weight of a validator (PoA blockchains only).
+
+```bash
+lux blockchain changeWeight <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--node-id` - Node ID of validator
+- `--weight` - New weight value
+- `--key` - Key to sign transaction
+
+**Examples:**
+
+```bash
+# Change validator weight
+lux blockchain changeWeight mychain \
+  --node-id=NodeID-AbC123... \
+  --weight=2000000 \
+  --key=ownerkey
+```
+
+### blockchain configure
+
+Configures a blockchain's settings and VM configuration.
+
+```bash
+lux blockchain configure <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--config` - Path to config file
+- `--chain-config` - Path to chain config
+- `--per-node-config` - Per-node configuration
+- `--subnet-config` - Subnet-level configuration
+
+**Examples:**
+
+```bash
+# Apply chain configuration
+lux blockchain configure mychain \
+  --chain-config=/path/to/chain.json
+
+# Apply subnet configuration
+lux blockchain configure mychain \
+  --subnet-config=/path/to/subnet.json
+```
+
+### blockchain export
+
+Exports a blockchain configuration to a file.
+
+```bash
+lux blockchain export <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--output` - Output file path
+- `--include-genesis` - Include genesis in export
+
+**Examples:**
+
+```bash
+# Export blockchain config
+lux blockchain export mychain --output=mychain.json
+
+# Export with genesis
+lux blockchain export mychain \
+  --output=mychain-full.json \
+  --include-genesis
+```
+
+### blockchain import
+
+Imports a blockchain configuration from a file or public network.
+
+```bash
+lux blockchain import [flags]
+```
+
+**Flags:**
+- `--file` - Import from file
+- `--github` - Import from GitHub
+- `--blockchain-id` - Import from running blockchain
+- `--network` - Network to import from
+
+**Examples:**
+
+```bash
+# Import from file
+lux blockchain import --file=blockchain.json
+
+# Import from GitHub
+lux blockchain import --github=org/repo
+
+# Import from running blockchain
+lux blockchain import \
+  --blockchain-id=2JVSBoinj... \
+  --network=mainnet
+```
+
+### blockchain join
+
+Configures a node to validate a blockchain.
+
+```bash
+lux blockchain join <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--node-config` - Path to node config
+- `--plugin-dir` - Plugin directory path
+- `--force` - Force join without checks
+
+**Examples:**
+
+```bash
+# Join blockchain as validator
+lux blockchain join mychain
+
+# Join with custom config
+lux blockchain join mychain \
+  --node-config=/path/to/config.json \
+  --plugin-dir=/custom/plugins
+```
+
+### blockchain publish
+
+Publishes a blockchain's VM to a repository.
+
+```bash
+lux blockchain publish <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--repo` - Repository URL
+- `--branch` - Git branch
+- `--force` - Force push
+
+**Examples:**
+
+```bash
+# Publish VM to GitHub
+lux blockchain publish mychain \
+  --repo=https://github.com/org/repo \
+  --branch=main
+```
+
+### blockchain stats
+
+Shows statistics for a deployed blockchain.
+
+```bash
+lux blockchain stats <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--json` - Output as JSON
+- `--validators` - Include validator stats
+
+**Examples:**
+
+```bash
+# Show blockchain statistics
+lux blockchain stats mychain
+
+# Include validator information
+lux blockchain stats mychain --validators
+
+# Output as JSON
+lux blockchain stats mychain --json
+```
+
+### blockchain upgrade
+
+Manages blockchain upgrades.
+
+```bash
+lux blockchain upgrade <subcommand> <name> [flags]
+```
+
+**Subcommands:**
+- `apply` - Apply an upgrade
+- `export` - Export upgrade configuration
+- `import` - Import upgrade configuration
+- `print` - Print scheduled upgrades
+- `generate` - Generate upgrade configuration
+
+**Examples:**
+
+```bash
+# Apply VM upgrade
+lux blockchain upgrade apply mychain \
+  --version=v1.2.0 \
+  --activation-time=2024-12-31T00:00:00Z
+
+# Export upgrade config
+lux blockchain upgrade export mychain \
+  --output=upgrade.json
+
+# Print pending upgrades
+lux blockchain upgrade print mychain
+```
+
+### blockchain validators
+
+Lists validators for a blockchain.
+
+```bash
+lux blockchain validators <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Flags:**
+- `--json` - Output as JSON
+- `--pending` - Include pending validators
+
+**Examples:**
+
+```bash
+# List current validators
+lux blockchain validators mychain
+
+# Include pending validators
+lux blockchain validators mychain --pending
+
+# Output as JSON
+lux blockchain validators mychain --json
+```
+
+### blockchain vmid
+
+Shows the VM ID for a blockchain.
+
+```bash
+lux blockchain vmid <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of the blockchain
+
+**Examples:**
+
+```bash
+# Get VM ID
+lux blockchain vmid mychain
+```
+
+## Blockchain Types
+
+### Subnet-EVM
+
+EVM-compatible blockchain with Ethereum tooling support.
+
+**Features:**
+- Smart contract support
+- Web3 compatibility
+- MetaMask integration
+- Custom gas token
+
+**Configuration:**
+```json
+{
+  "chainId": 99999,
+  "nativeCurrency": {
+    "name": "MyToken",
+    "symbol": "MTK",
+    "decimals": 18
+  },
+  "gasConfig": {
+    "gasLimit": 8000000,
+    "targetGas": 15000000,
+    "baseFee": 25000000000,
+    "minBaseFee": 25000000000
+  }
+}
+```
+
+### Custom VM
+
+Deploy custom virtual machines with specific functionality.
+
+**Requirements:**
+- VM binary compiled for target platform
+- Genesis file defining initial state
+- VM ID (generated from binary)
+
+**Example Genesis:**
+```json
+{
+  "timestamp": 0,
+  "gasLimit": "0x7A1200",
+  "difficulty": "0x0",
+  "alloc": {
+    "0x1000000000000000000000000000000000000001": {
+      "balance": "0x21e19e0c9bab2400000"
+    }
+  }
+}
+```
+
+## Best Practices
+
+### Deployment Strategy
+
+1. **Development**: Test on local network first
+2. **Staging**: Deploy to testnet for integration testing
+3. **Production**: Deploy to mainnet with proper key management
+
+### Key Management
+
+- Use hardware wallets for mainnet deployments
+- Rotate control keys regularly
+- Implement multi-signature thresholds
+- Store keys securely offline
+
+### Monitoring
+
+- Track validator uptime
+- Monitor blockchain metrics
+- Set up alerts for validator issues
+- Regular backup of configurations
+
+### Upgrades
+
+- Test upgrades on testnet first
+- Schedule upgrades during low-activity periods
+- Communicate upgrade schedules to validators
+- Have rollback plan ready
+
+## Common Issues
+
+### Deployment Fails
+
+**Issue**: "insufficient balance"
+```bash
+# Check balance
+lux key balance <key-name>
+
+# Fund the key
+lux transaction send --to=<address> --amount=<amount>
+```
+
+**Issue**: "blockchain already exists"
+```bash
+# Use different name or delete existing
+lux blockchain delete <name>
+lux blockchain create <name>
+```
+
+### Validator Issues
+
+**Issue**: "validator not found"
+```bash
+# Verify node is running
+lux node status --node-id=<node-id>
+
+# Check if node is already validating
+lux blockchain validators <blockchain>
+```
+
+**Issue**: "invalid proof of possession"
+```bash
+# Regenerate BLS keys
+lux key create --type=bls
+
+# Update validator with new keys
+lux blockchain addValidator --bls-key=<new-key>
+```
+
+## Related Commands
+
+- [`lux network`](/docs/commands/network) - Manage local networks
+- [`lux node`](/docs/commands/node) - Manage node operations
+- [`lux key`](/docs/commands/key) - Manage cryptographic keys
+- [`lux validator`](/docs/commands/validator) - Validator management
+- [`lux transaction`](/docs/commands/transaction) - Send transactions

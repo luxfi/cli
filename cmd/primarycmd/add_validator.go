@@ -8,8 +8,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
-	"github.com/luxfi/cli/cmd/nodecmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -158,7 +157,7 @@ func addValidator(_ *cobra.Command, _ []string) error {
 	}
 
 	if nodeIDStr == "" {
-		nodeID, err = blockchaincmd.PromptNodeID("add as Primary Network Validator")
+		nodeID, err = networkcmd.PromptNodeID("add as Primary Network Validator")
 		if err != nil {
 			return err
 		}
@@ -169,18 +168,16 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	minValStake, err := nodecmd.GetMinStakingAmount(network)
 	if err != nil {
 		return err
 	}
 	if weight == 0 {
-		weight, err = nodecmd.PromptWeightPrimaryNetwork(network)
 		if err != nil {
 			return err
 		}
 	}
-	if weight < minValStake {
-		return fmt.Errorf("illegal weight, must be greater than or equal to %d: %d", minValStake, weight)
+	if weight < uint64(1000000000000) {
+		return fmt.Errorf("illegal weight, must be greater than or equal to %d: %d", uint64(1000000000000), weight)
 	}
 
 	// Estimate fee based on network type and transaction complexity
@@ -199,12 +196,10 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	start, duration, err = nodecmd.GetTimeParametersPrimaryNetwork(network, 0, duration, startTimeStr, false)
 	if err != nil {
 		return err
 	}
 	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
-	nodecmd.PrintNodeJoinPrimaryNetworkOutput(nodeID, weight, network, start)
 	if delegationFee == 0 {
 		delegationFee, err = getDelegationFeeOption(app, network)
 		if err != nil {

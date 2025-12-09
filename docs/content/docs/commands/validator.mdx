@@ -1,0 +1,504 @@
+---
+title: Validator Commands
+description: Complete reference for Lux CLI validator management commands
+---
+
+# Validator Commands
+
+The validator command suite provides tools for managing validators on the Lux network.
+
+## Overview
+
+Validator commands allow you to:
+- Add validators to the Primary Network or L1s
+- Query validator status and statistics
+- Manage delegations
+- Remove validators from networks
+- Monitor validator health and performance
+
+## Command Reference
+
+### validator add
+
+Adds a validator to the Primary Network or an L1.
+
+```bash
+lux validator add [flags]
+```
+
+**Flags:**
+- `--node-id` - Node ID of the validator
+- `--stake` - Amount to stake (in nLUX)
+- `--start-time` - Validation start time
+- `--end-time` - Validation end time
+- `--delegation-fee` - Fee percentage for delegators (2-100)
+- `--key` - Key to pay transaction fee
+- `--blockchain` - Target blockchain (optional, for L1s)
+
+**Examples:**
+
+```bash
+# Add Primary Network validator
+lux validator add \
+  --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
+  --stake=2000000000000000 \
+  --start-time="2024-12-01 00:00:00" \
+  --end-time="2025-12-01 00:00:00" \
+  --delegation-fee=10
+
+# Add L1 validator
+lux validator add \
+  --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
+  --blockchain=mychain \
+  --stake=100000000000
+```
+
+### validator list
+
+Lists validators for a network or blockchain.
+
+```bash
+lux validator list [flags]
+```
+
+**Flags:**
+- `--blockchain` - Blockchain to query (default: Primary Network)
+- `--pending` - Include pending validators
+- `--json` - Output as JSON
+- `--subnet-id` - Query by subnet ID
+
+**Examples:**
+
+```bash
+# List Primary Network validators
+lux validator list
+
+# List L1 validators
+lux validator list --blockchain=mychain
+
+# Include pending validators
+lux validator list --pending
+
+# Output as JSON
+lux validator list --json
+```
+
+### validator status
+
+Shows detailed status of a specific validator.
+
+```bash
+lux validator status [flags]
+```
+
+**Flags:**
+- `--node-id` - Node ID to query
+- `--blockchain` - Blockchain context
+- `--detailed` - Show detailed information
+
+**Examples:**
+
+```bash
+# Check validator status
+lux validator status --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+
+# Check on specific blockchain
+lux validator status \
+  --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
+  --blockchain=mychain
+
+# Get detailed information
+lux validator status \
+  --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
+  --detailed
+```
+
+### validator remove
+
+Removes a validator from an L1 (Primary Network validators cannot be removed early).
+
+```bash
+lux validator remove [flags]
+```
+
+**Flags:**
+- `--node-id` - Node ID to remove
+- `--blockchain` - L1 blockchain
+- `--key` - Key to sign transaction
+
+**Examples:**
+
+```bash
+# Remove L1 validator
+lux validator remove \
+  --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
+  --blockchain=mychain \
+  --key=owner-key
+```
+
+### validator delegate
+
+Delegates stake to an existing validator.
+
+```bash
+lux validator delegate [flags]
+```
+
+**Flags:**
+- `--node-id` - Validator to delegate to
+- `--stake` - Amount to delegate
+- `--start-time` - Delegation start time
+- `--end-time` - Delegation end time
+- `--key` - Key to pay with
+- `--reward-address` - Address to receive rewards
+
+**Examples:**
+
+```bash
+# Delegate to validator
+lux validator delegate \
+  --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
+  --stake=25000000000000 \
+  --start-time="2024-12-01 00:00:00" \
+  --end-time="2025-06-01 00:00:00" \
+  --reward-address=P-lux1abcd...
+```
+
+### validator stats
+
+Shows statistics for validators.
+
+```bash
+lux validator stats [flags]
+```
+
+**Flags:**
+- `--node-id` - Specific validator (optional)
+- `--blockchain` - Blockchain context
+- `--period` - Time period (24h, 7d, 30d)
+
+**Examples:**
+
+```bash
+# Get all validator stats
+lux validator stats
+
+# Get specific validator stats
+lux validator stats --node-id=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg
+
+# Get L1 validator stats
+lux validator stats --blockchain=mychain
+
+# Get 30-day statistics
+lux validator stats --period=30d
+```
+
+## Validator Types
+
+### Primary Network Validators
+
+Validators that secure the entire Lux network.
+
+**Requirements:**
+- Minimum stake: 2,000 LUX
+- Maximum stake: 3,000,000 LUX
+- Minimum duration: 2 weeks
+- Maximum duration: 1 year
+- Hardware requirements: 8 CPU, 16GB RAM, 1TB disk
+
+### L1 Validators
+
+Validators that secure specific L1 blockchains.
+
+**Requirements:**
+- Must be Primary Network validator first
+- L1-specific stake requirements
+- L1-specific hardware requirements
+- May require whitelisting
+
+### Delegators
+
+Users who stake with existing validators.
+
+**Requirements:**
+- Minimum delegation: 25 LUX
+- Share validator's delegation fee
+- Cannot delegate to multiple validators simultaneously
+
+## Staking Economics
+
+### Rewards Calculation
+
+```
+Annual Reward = Stake * RewardRate * Uptime%
+
+Where:
+- RewardRate varies by total network stake
+- Uptime% is validator's availability
+- Maximum annual rate: ~10%
+```
+
+### Delegation Fees
+
+```
+Delegator Reward = (Total Reward * (100 - Fee%)) / 100
+Validator Commission = (Total Reward * Fee%) / 100
+```
+
+### Staking Timeline
+
+```
+Start Time → Active Validation → End Time → Reward Distribution
+    ↓              ↓                 ↓              ↓
+  Pending     Validating        Complete      Claimable
+```
+
+## Monitoring & Maintenance
+
+### Health Monitoring
+
+Monitor validator health and performance:
+
+```bash
+# Check validator uptime
+lux validator uptime --node-id=NodeID-...
+
+# Monitor performance metrics
+lux validator metrics --node-id=NodeID-...
+
+# Set up alerts
+lux validator alert \
+  --node-id=NodeID-... \
+  --uptime-threshold=80 \
+  --email=admin@example.com
+```
+
+### Backup & Recovery
+
+Backup validator keys and configuration:
+
+```bash
+# Backup staking keys
+cp ~/.luxd/staking/staker.key ./backup/
+cp ~/.luxd/staking/staker.crt ./backup/
+
+# Backup node configuration
+cp ~/.luxd/configs/node.json ./backup/
+
+# Backup BLS keys
+cp ~/.luxd/staking/signer.key ./backup/
+```
+
+### Key Rotation
+
+Rotate validator keys safely:
+
+```bash
+# 1. Generate new keys
+lux key create new-staking-key --type=secp256k1
+lux key create new-bls-key --type=bls
+
+# 2. Wait for current validation period to end
+
+# 3. Re-add validator with new keys
+lux validator add \
+  --node-id=<new-node-id> \
+  --key=new-staking-key
+```
+
+## Advanced Configuration
+
+### Multi-Region Setup
+
+Deploy validators across regions for resilience:
+
+```yaml
+# validator-config.yaml
+regions:
+  - name: us-east
+    node-id: NodeID-ABC...
+    endpoint: validator1.example.com
+
+  - name: eu-west
+    node-id: NodeID-DEF...
+    endpoint: validator2.example.com
+
+  - name: asia-pac
+    node-id: NodeID-GHI...
+    endpoint: validator3.example.com
+```
+
+### Load Balancing
+
+Configure load balancing for high availability:
+
+```nginx
+upstream validators {
+    server validator1.example.com:9651;
+    server validator2.example.com:9651;
+    server validator3.example.com:9651;
+}
+```
+
+### Monitoring Stack
+
+Set up comprehensive monitoring:
+
+```yaml
+# docker-compose.yml
+services:
+  prometheus:
+    image: prometheus/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_DATASOURCE_PROMETHEUS_URL=http://prometheus:9090
+
+  alertmanager:
+    image: prometheus/alertmanager
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+```
+
+## Common Issues & Solutions
+
+### Validator Not Active
+
+**Issue**: Validator added but not showing as active
+
+```bash
+# Check pending validators
+lux validator list --pending
+
+# Verify start time
+lux validator status --node-id=NodeID-...
+
+# Solution: Wait for start time or check transaction status
+```
+
+### Low Uptime
+
+**Issue**: Validator uptime below threshold
+
+```bash
+# Check node connectivity
+lux node ping --node-id=NodeID-...
+
+# Check system resources
+ssh validator-host "top -n 1"
+
+# Solution: Improve network stability, upgrade hardware
+```
+
+### Staking Transaction Fails
+
+**Issue**: Cannot add validator
+
+```bash
+# Check balance
+lux key balance <key-name>
+
+# Check if already validating
+lux validator status --node-id=NodeID-...
+
+# Solution: Ensure sufficient balance and node isn't already validating
+```
+
+### BLS Key Issues
+
+**Issue**: Invalid BLS signature
+
+```bash
+# Regenerate BLS keys
+lux key create bls-key --type=bls
+
+# Update node configuration
+lux node configure \
+  --staking-signer-key=bls-key
+
+# Restart node
+lux node restart
+```
+
+## Security Best Practices
+
+### Key Management
+
+1. **Use Hardware Security Modules (HSMs)**
+   - Store keys in HSMs for production validators
+   - Enable key encryption at rest
+   - Implement key rotation policies
+
+2. **Access Control**
+   - Use SSH keys, not passwords
+   - Implement IP whitelisting
+   - Enable 2FA for server access
+
+3. **Network Security**
+   - Use VPN for management access
+   - Configure firewalls properly
+   - Enable DDoS protection
+
+### Operational Security
+
+1. **Monitoring & Alerts**
+   - Set up 24/7 monitoring
+   - Configure multiple alert channels
+   - Test alert systems regularly
+
+2. **Backup Strategy**
+   - Regular key backups
+   - Geographic distribution
+   - Test recovery procedures
+
+3. **Update Management**
+   - Test updates on testnet first
+   - Schedule maintenance windows
+   - Have rollback procedures ready
+
+## Performance Optimization
+
+### System Tuning
+
+```bash
+# Increase file descriptors
+ulimit -n 65535
+
+# Optimize network stack
+sysctl -w net.core.rmem_max=134217728
+sysctl -w net.core.wmem_max=134217728
+
+# Set CPU governor
+cpupower frequency-set -g performance
+```
+
+### Database Optimization
+
+```toml
+# config.toml
+[database]
+type = "leveldb"
+cache_size = 768
+write_buffer_size = 128
+```
+
+### Network Optimization
+
+```bash
+# Enable TCP BBR
+sysctl -w net.ipv4.tcp_congestion_control=bbr
+
+# Increase connection limits
+sysctl -w net.core.somaxconn=65535
+```
+
+## Related Commands
+
+- [`lux node`](/docs/commands/node) - Node management
+- [`lux key`](/docs/commands/key) - Key management
+- [`lux blockchain`](/docs/commands/blockchain) - Blockchain operations
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux transaction`](/docs/commands/transaction) - Transaction operations

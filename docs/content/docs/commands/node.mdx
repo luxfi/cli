@@ -1,0 +1,687 @@
+---
+title: Node Commands
+description: Complete reference for Lux CLI node management commands
+---
+
+# Node Commands
+
+The node command suite provides comprehensive tools for managing Lux node operations, configuration, and monitoring.
+
+## Overview
+
+Node commands allow you to:
+- Install and configure Lux node software
+- Start, stop, and manage node processes
+- Monitor node health and performance
+- Manage node updates and backups
+- Configure node parameters and APIs
+
+## Command Reference
+
+### node install
+
+Installs or updates the Lux node software.
+
+```bash
+lux node install [flags]
+```
+
+**Flags:**
+- `--version` - Specific version to install
+- `--latest` - Install latest stable version
+- `--use-custom-binary` - Path to custom binary
+- `--binary-path` - Installation directory
+
+**Examples:**
+
+```bash
+# Install latest version
+lux node install --latest
+
+# Install specific version
+lux node install --version=v1.11.0
+
+# Install custom binary
+lux node install --use-custom-binary=/path/to/luxd
+```
+
+### node start
+
+Starts the Lux node process.
+
+```bash
+lux node start [flags]
+```
+
+**Flags:**
+- `--config-file` - Path to config file
+- `--data-dir` - Data directory path
+- `--log-level` - Logging level
+- `--api-port` - API port (default: 9630)
+- `--staking-port` - Staking port (default: 9631)
+
+**Examples:**
+
+```bash
+# Start with default settings
+lux node start
+
+# Start with custom config
+lux node start --config-file=./node.json
+
+# Start with debug logging
+lux node start --log-level=debug
+
+# Custom ports
+lux node start --api-port=9700 --staking-port=9701
+```
+
+### node stop
+
+Stops the running node process.
+
+```bash
+lux node stop [flags]
+```
+
+**Flags:**
+- `--force` - Force stop without graceful shutdown
+- `--timeout` - Shutdown timeout in seconds
+
+**Examples:**
+
+```bash
+# Graceful stop
+lux node stop
+
+# Force stop
+lux node stop --force
+
+# Stop with timeout
+lux node stop --timeout=30
+```
+
+### node status
+
+Shows the current status of the node.
+
+```bash
+lux node status [flags]
+```
+
+**Flags:**
+- `--json` - Output as JSON
+- `--detailed` - Show detailed information
+- `--metrics` - Include performance metrics
+
+**Examples:**
+
+```bash
+# Basic status
+lux node status
+
+# Detailed status with metrics
+lux node status --detailed --metrics
+
+# JSON output for monitoring
+lux node status --json
+```
+
+### node health
+
+Checks the health of the node and its chains.
+
+```bash
+lux node health [flags]
+```
+
+**Flags:**
+- `--chains` - Check specific chains
+- `--continuous` - Continuous monitoring
+- `--interval` - Check interval (seconds)
+
+**Examples:**
+
+```bash
+# Check overall health
+lux node health
+
+# Check specific chains
+lux node health --chains=P,X,C
+
+# Continuous monitoring
+lux node health --continuous --interval=10
+```
+
+### node configure
+
+Configures node parameters and settings.
+
+```bash
+lux node configure [flags]
+```
+
+**Flags:**
+- `--api-admin-enabled` - Enable admin API
+- `--api-keystore-enabled` - Enable keystore API
+- `--api-metrics-enabled` - Enable metrics API
+- `--network-id` - Network ID to connect to
+- `--bootstrap-ips` - Bootstrap node IPs
+
+**Examples:**
+
+```bash
+# Enable APIs
+lux node configure \
+  --api-admin-enabled=true \
+  --api-metrics-enabled=true
+
+# Set network
+lux node configure --network-id=testnet
+
+# Add bootstrap nodes
+lux node configure \
+  --bootstrap-ips=1.2.3.4:9651,5.6.7.8:9651
+```
+
+### node backup
+
+Creates a backup of node data.
+
+```bash
+lux node backup [flags]
+```
+
+**Flags:**
+- `--output` - Backup destination
+- `--include-logs` - Include log files
+- `--compress` - Compress backup
+
+**Examples:**
+
+```bash
+# Basic backup
+lux node backup --output=./backup-$(date +%Y%m%d).tar
+
+# Compressed backup with logs
+lux node backup \
+  --output=./full-backup.tar.gz \
+  --include-logs \
+  --compress
+```
+
+### node restore
+
+Restores node from a backup.
+
+```bash
+lux node restore [flags]
+```
+
+**Flags:**
+- `--backup` - Backup file path
+- `--data-dir` - Restore destination
+- `--overwrite` - Overwrite existing data
+
+**Examples:**
+
+```bash
+# Restore from backup
+lux node restore --backup=./backup.tar
+
+# Restore to specific directory
+lux node restore \
+  --backup=./backup.tar \
+  --data-dir=/custom/data
+
+# Force overwrite
+lux node restore \
+  --backup=./backup.tar \
+  --overwrite
+```
+
+### node logs
+
+View and manage node logs.
+
+```bash
+lux node logs [flags]
+```
+
+**Flags:**
+- `--follow` - Follow log output
+- `--tail` - Number of lines to show
+- `--filter` - Filter log entries
+- `--level` - Filter by log level
+
+**Examples:**
+
+```bash
+# View recent logs
+lux node logs --tail=100
+
+# Follow logs
+lux node logs --follow
+
+# Filter errors only
+lux node logs --level=error
+
+# Search logs
+lux node logs --filter="consensus"
+```
+
+### node update
+
+Updates the node software.
+
+```bash
+lux node update [flags]
+```
+
+**Flags:**
+- `--version` - Target version
+- `--check` - Check for updates only
+- `--auto-restart` - Restart after update
+
+**Examples:**
+
+```bash
+# Check for updates
+lux node update --check
+
+# Update to latest
+lux node update
+
+# Update to specific version
+lux node update --version=v1.11.0
+
+# Update and restart
+lux node update --auto-restart
+```
+
+### node export
+
+Exports node configuration and data.
+
+```bash
+lux node export [flags]
+```
+
+**Flags:**
+- `--output` - Export file path
+- `--include-keys` - Include staking keys
+- `--format` - Export format (json, yaml)
+
+**Examples:**
+
+```bash
+# Export configuration
+lux node export --output=node-config.json
+
+# Export with keys
+lux node export \
+  --output=full-export.json \
+  --include-keys
+
+# Export as YAML
+lux node export \
+  --output=config.yaml \
+  --format=yaml
+```
+
+## Node Configuration
+
+### Configuration File
+
+Create a comprehensive node configuration file:
+
+```json
+{
+  "network-id": "mainnet",
+  "api-admin-enabled": false,
+  "api-keystore-enabled": false,
+  "api-metrics-enabled": true,
+  "http-host": "127.0.0.1",
+  "http-port": 9650,
+  "staking-port": 9651,
+  "log-level": "info",
+  "log-dir": "./logs",
+  "db-dir": "./db",
+  "staking-enabled": true,
+  "staking-tls-cert-file": "./staking/staker.crt",
+  "staking-tls-key-file": "./staking/staker.key",
+  "bootstrap-ips": [
+    "bootstrap1.lux.network:9651",
+    "bootstrap2.lux.network:9651"
+  ],
+  "bootstrap-ids": [
+    "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
+    "NodeID-8CrVPQZ4VSqgL8zTdvL14G8HqAfrBr4z"
+  ]
+}
+```
+
+### Environment Variables
+
+Configure node using environment variables:
+
+```bash
+export LUX_NETWORK_ID=mainnet
+export LUX_HTTP_PORT=9650
+export LUX_STAKING_PORT=9651
+export LUX_LOG_LEVEL=info
+export LUX_DATA_DIR=/var/lib/luxd
+```
+
+### Command-Line Flags
+
+Override configuration with command-line flags:
+
+```bash
+luxd \
+  --network-id=mainnet \
+  --http-port=9650 \
+  --staking-port=9651 \
+  --log-level=debug \
+  --api-metrics-enabled=true
+```
+
+## Performance Tuning
+
+### System Requirements
+
+**Minimum Requirements:**
+- CPU: 4 cores
+- RAM: 8 GB
+- Storage: 200 GB SSD
+- Network: 5 Mbps
+
+**Recommended Requirements:**
+- CPU: 8 cores
+- RAM: 16 GB
+- Storage: 1 TB NVMe SSD
+- Network: 25 Mbps
+
+### OS Optimization
+
+```bash
+# Increase file descriptors
+echo "* soft nofile 65535" >> /etc/security/limits.conf
+echo "* hard nofile 65535" >> /etc/security/limits.conf
+
+# Optimize network stack
+cat >> /etc/sysctl.conf << EOF
+net.core.rmem_max = 134217728
+net.core.wmem_max = 134217728
+net.ipv4.tcp_rmem = 4096 87380 134217728
+net.ipv4.tcp_wmem = 4096 65536 134217728
+net.core.netdev_max_backlog = 5000
+EOF
+
+# Apply settings
+sysctl -p
+```
+
+### Database Optimization
+
+```json
+{
+  "db-type": "leveldb",
+  "db-cache-size": 768,
+  "db-handle-limit": 1024,
+  "db-write-buffer-size": 128
+}
+```
+
+## Monitoring
+
+### Prometheus Metrics
+
+Enable and configure Prometheus metrics:
+
+```bash
+# Enable metrics API
+lux node configure --api-metrics-enabled=true
+
+# Prometheus configuration
+cat > prometheus.yml << EOF
+scrape_configs:
+  - job_name: 'lux-node'
+    static_configs:
+      - targets: ['localhost:9650']
+    metrics_path: '/ext/metrics'
+EOF
+
+# Start Prometheus
+prometheus --config.file=prometheus.yml
+```
+
+### Grafana Dashboard
+
+Import Lux node dashboard:
+
+```json
+{
+  "dashboard": {
+    "title": "Lux Node Metrics",
+    "panels": [
+      {
+        "title": "CPU Usage",
+        "targets": [
+          {
+            "expr": "process_cpu_seconds_total"
+          }
+        ]
+      },
+      {
+        "title": "Memory Usage",
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes"
+          }
+        ]
+      },
+      {
+        "title": "Peer Count",
+        "targets": [
+          {
+            "expr": "network_peers"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Health Checks
+
+Set up automated health monitoring:
+
+```bash
+#!/bin/bash
+# health-monitor.sh
+
+while true; do
+    HEALTH=$(lux node health --json)
+
+    if ! echo $HEALTH | jq -e '.healthy' > /dev/null; then
+        echo "Node unhealthy: $HEALTH"
+        # Send alert
+        curl -X POST https://hooks.slack.com/services/YOUR/WEBHOOK \
+          -H 'Content-Type: application/json' \
+          -d '{"text":"Node is unhealthy!"}'
+    fi
+
+    sleep 60
+done
+```
+
+## Troubleshooting
+
+### Node Won't Start
+
+```bash
+# Check if already running
+ps aux | grep luxd
+
+# Check port availability
+netstat -tuln | grep -E '9650|9651'
+
+# Check logs
+tail -100 ~/.luxd/logs/main.log
+
+# Verify configuration
+lux node validate-config
+```
+
+### Sync Issues
+
+```bash
+# Check bootstrap status
+lux node status --detailed
+
+# Add more bootstrap nodes
+lux node configure \
+  --bootstrap-ips=1.2.3.4:9651,5.6.7.8:9651
+
+# Clear database and resync
+lux node stop
+rm -rf ~/.luxd/db
+lux node start
+```
+
+### High Resource Usage
+
+```bash
+# Check resource consumption
+top -p $(pgrep luxd)
+
+# Reduce database cache
+lux node configure --db-cache-size=256
+
+# Limit peer connections
+lux node configure --network-peer-list-size=20
+```
+
+## Security Hardening
+
+### Firewall Configuration
+
+```bash
+# Allow only necessary ports
+ufw allow 9651/tcp comment 'Lux staking'
+ufw allow from 127.0.0.1 to any port 9650 comment 'Lux API local only'
+ufw enable
+```
+
+### API Security
+
+```json
+{
+  "api-admin-enabled": false,
+  "api-keystore-enabled": false,
+  "api-auth-required": true,
+  "api-auth-password": "secure-password",
+  "http-allowed-origins": ["http://localhost"],
+  "http-allowed-hosts": ["localhost"]
+}
+```
+
+### TLS Configuration
+
+```bash
+# Generate TLS certificates
+openssl req -x509 -newkey rsa:4096 \
+  -keyout staker.key -out staker.crt \
+  -days 365 -nodes
+
+# Configure node
+lux node configure \
+  --staking-tls-cert-file=./staker.crt \
+  --staking-tls-key-file=./staker.key
+```
+
+## Automation
+
+### Systemd Service
+
+```ini
+# /etc/systemd/system/luxd.service
+[Unit]
+Description=Lux Node
+After=network.target
+
+[Service]
+Type=simple
+User=lux
+Group=lux
+ExecStart=/usr/local/bin/luxd --config-file=/etc/lux/node.json
+ExecStop=/usr/bin/lux node stop
+Restart=always
+RestartSec=10
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile
+FROM alpine:latest
+
+RUN apk add --no-cache curl bash
+
+# Install node
+RUN curl -sSfL https://raw.githubusercontent.com/luxfi/node/main/scripts/install.sh | sh
+
+# Configure
+COPY node.json /root/.luxd/configs/node.json
+
+EXPOSE 9650 9651
+
+CMD ["luxd"]
+```
+
+### Kubernetes Deployment
+
+```yaml
+# lux-node.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: lux-node
+spec:
+  serviceName: lux-node
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: luxd
+        image: luxfi/node:latest
+        ports:
+        - containerPort: 9650
+          name: api
+        - containerPort: 9651
+          name: staking
+        volumeMounts:
+        - name: data
+          mountPath: /root/.luxd
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 500Gi
+```
+
+## Related Commands
+
+- [`lux validator`](/docs/commands/validator) - Validator operations
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux blockchain`](/docs/commands/blockchain) - Blockchain operations
+- [`lux key`](/docs/commands/key) - Key management

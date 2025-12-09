@@ -1,0 +1,300 @@
+---
+title: Introduction
+description: Command-line interface for Lux network operations
+---
+
+# Lux CLI
+
+The official command-line interface for interacting with the Lux network, managing validators, creating chains, and performing various blockchain operations.
+
+## Features
+
+- **Network Management**: Start, stop, and manage Lux networks
+- **Validator Operations**: Add, remove, and query validators
+- **Chain Management**: Create and manage blockchains
+- **Wallet Operations**: Key management and transactions
+- **Subnet/L1 Management**: Create and configure sovereign L1 chains
+- **Testing Tools**: Local network simulation and testing
+
+## Installation
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/luxfi/cli
+cd cli
+
+# Build
+make build
+
+# Install globally
+make install
+```
+
+### From Binary
+
+```bash
+# Download latest release
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh
+
+# Add to PATH
+export PATH=$PATH:~/.lux/bin
+```
+
+## Quick Start
+
+### Start a Local Network
+
+```bash
+# Start 5-node local network
+lux network start
+
+# Check network status
+lux network status
+
+# Stop network
+lux network stop
+```
+
+### Create a Blockchain
+
+```bash
+# Create new L1 blockchain
+lux blockchain create mychain
+
+# Deploy to local network
+lux blockchain deploy mychain --local
+
+# Get blockchain info
+lux blockchain info mychain
+```
+
+### Manage Validators
+
+```bash
+# Add validator
+lux validator add --node-id=NodeID-... --stake=1000000
+
+# List validators
+lux validator list
+
+# Remove validator
+lux validator remove --node-id=NodeID-...
+```
+
+## Command Reference
+
+### Network Commands
+
+```bash
+# Start local network
+lux network start [--num-nodes=5]
+
+# Stop local network
+lux network stop
+
+# Clean network data
+lux network clean
+
+# Network status
+lux network status
+
+# Network configuration
+lux network configure
+```
+
+### Blockchain Commands
+
+```bash
+# Create blockchain
+lux blockchain create <name> [--vm=<vm-type>]
+
+# Deploy blockchain
+lux blockchain deploy <name> [--local|--testnet|--mainnet]
+
+# Describe blockchain
+lux blockchain describe <name>
+
+# List blockchains
+lux blockchain list
+
+# Delete blockchain
+lux blockchain delete <name>
+```
+
+### Validator Commands
+
+```bash
+# Add validator
+lux validator add \
+  --node-id=<node-id> \
+  --stake=<amount> \
+  --start-time=<time> \
+  --duration=<duration>
+
+# List validators
+lux validator list [--net=<net-id>]
+
+# Remove validator
+lux validator remove --node-id=<node-id>
+
+# Validator info
+lux validator info --node-id=<node-id>
+```
+
+### Wallet Commands
+
+```bash
+# Create wallet
+lux wallet create
+
+# Import key
+lux wallet import --key-file=<file>
+
+# List addresses
+lux wallet list
+
+# Get balance
+lux wallet balance --address=<address>
+
+# Send transaction
+lux wallet send \
+  --to=<address> \
+  --amount=<amount>
+```
+
+### Subnet/L1 Commands
+
+```bash
+# Create subnet
+lux subnet create <name>
+
+# Add validators to subnet
+lux subnet addValidator <name> \
+  --node-id=<node-id>
+
+# Deploy subnet
+lux subnet deploy <name> [--local|--testnet|--mainnet]
+
+# Subnet info
+lux subnet info <name>
+```
+
+## Configuration
+
+### Global Config
+
+```bash
+# Set config value
+lux config set <key> <value>
+
+# Get config value
+lux config get <key>
+
+# List all config
+lux config list
+
+# Reset config
+lux config reset
+```
+
+### Common Config Keys
+
+- `network-id`: Default network (mainnet, testnet)
+- `rpc-endpoint`: Node RPC endpoint
+- `key-dir`: Directory for keys
+- `log-level`: Logging level
+- `output-format`: Output format (text, json)
+
+## Examples
+
+### Local Development Workflow
+
+```bash
+# 1. Start local network
+lux network start
+
+# 2. Create and deploy blockchain
+lux blockchain create myvm --vm=custom
+lux blockchain deploy myvm --local
+
+# 3. Test your blockchain
+lux blockchain call myvm --method=myMethod --params='{"key":"value"}'
+
+# 4. Monitor
+lux network status
+```
+
+### Mainnet Validator Setup
+
+```bash
+# 1. Generate node ID
+lux node id
+
+# 2. Fund your address
+lux wallet create
+# Send LUX to your address
+
+# 3. Add as validator
+lux validator add \
+  --node-id=$(lux node id) \
+  --stake=2000000000000 \
+  --start-time=$(date -u +%s -d "+5 minutes") \
+  --duration=31536000
+
+# 4. Verify
+lux validator list --net=mainnet
+```
+
+### Create Sovereign L1 (Quantum-Safe)
+
+```bash
+# Create L1 with Quasar Protocol
+lux subnet create my-quantum-l1 \
+  --quantum-safe \
+  --consensus=quasar
+
+# Configure validators
+lux subnet addValidator my-quantum-l1 \
+  --node-id=NodeID-...
+
+# Deploy
+lux subnet deploy my-quantum-l1 --mainnet
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Network won't start**
+```bash
+# Clean old data
+lux network clean
+
+# Check ports
+lsof -i :9650-9655
+
+# Try with verbose logging
+lux network start --log-level=debug
+```
+
+**Transaction fails**
+```bash
+# Check balance
+lux wallet balance
+
+# Verify network connection
+lux network status
+
+# Check gas fees
+lux blockchain estimate-gas
+```
+
+## Next Steps
+
+- [Command Reference](/docs/commands) - Complete command documentation
+- [Network Setup](/docs/network) - Configure custom networks
+- [Blockchain Development](/docs/blockchain) - Build and deploy blockchains
+- [Validator Guide](/docs/validators) - Run a validator node
+- [Wallet Management](/docs/wallet) - Manage keys and transactions
