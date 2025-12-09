@@ -35,7 +35,6 @@ import (
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
@@ -107,12 +106,12 @@ func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, 
 	return d.doDeploy(chain, chainGenesis, genesisPath)
 }
 
-func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
+func getAssetID(wallet primary.Wallet, ownerAddr ids.ShortID, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
 	xWallet := wallet.X()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
+			ownerAddr,
 		},
 	}
 	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
@@ -196,14 +195,22 @@ func IssueTransformSubnetTx(
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
-	subnetAssetID, err := getAssetID(wallet, tokenName, tokenSymbol, maxSupply)
+
+	// Get the first address from the keychain for ownership
+	addrs := kc.Addresses()
+	if addrs.Len() == 0 {
+		return ids.Empty, ids.Empty, errors.New("keychain has no addresses")
+	}
+	ownerAddr := addrs.List()[0]
+
+	subnetAssetID, err := getAssetID(wallet, ownerAddr, tokenName, tokenSymbol, maxSupply)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
+			ownerAddr,
 		},
 	}
 	err = exportToPChain(wallet, owner, subnetAssetID, maxSupply)
@@ -258,10 +265,18 @@ func IssueAddPermissionlessValidatorTx(
 	if err != nil {
 		return ids.Empty, err
 	}
+
+	// Get the first address from the keychain for ownership
+	addrs := kc.Addresses()
+	if addrs.Len() == 0 {
+		return ids.Empty, errors.New("keychain has no addresses")
+	}
+	ownerAddr := addrs.List()[0]
+
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
+			ownerAddr,
 		},
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
