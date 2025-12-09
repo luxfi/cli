@@ -6,11 +6,14 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/genesis/pkg/genesis"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/utils/units"
 
 	"golang.org/x/exp/maps"
 )
@@ -60,11 +63,87 @@ func GetDefaultNetworkConf(numNodes uint32) (
 		}
 		nodes = append(nodes, node)
 	}
-	unparsedGenesis, err := tmpnet.NewTestGenesisWithFunds(constants.LocalNetworkID, nodes, []*secp256k1.PrivateKey{
-		genesis.EWOQKey,
-	})
+	localKey := genesis.GetLocalKey()
+	if localKey == nil {
+		return 0, nil, nil, nil, nil, fmt.Errorf("no keys found in ~/.lux/keys - please generate validator keys first")
+	}
+
+	// Create genesis config directly using genesis package types
+	unparsedGenesis, err := createTestGenesis(constants.LocalNetworkID, nodes, localKey)
 	if err != nil {
 		return 0, nil, nil, nil, nil, err
 	}
 	return constants.LocalNetworkID, unparsedGenesis, []byte(networkConf.Upgrade), networkConf.CommonFlags, nodes, nil
+}
+
+// createTestGenesis creates a test genesis configuration
+func createTestGenesis(networkID uint32, nodes []*tmpnet.Node, fundedKey *secp256k1.PrivateKey) (*genesis.UnparsedConfig, error) {
+	startTime := time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+	config := &genesis.UnparsedConfig{
+		NetworkID:                  networkID,
+		StartTime:                  uint64(startTime.Unix()),
+		InitialStakeDuration:       uint64((365 * 24 * time.Hour).Seconds()),
+		InitialStakeDurationOffset: 0,
+		Message:                    "LUX Test Genesis",
+	}
+
+	// Add allocations for funded key
+	addr := fundedKey.Address()
+	addrStr := addr.String()
+	config.Allocations = append(config.Allocations, genesis.UnparsedAllocation{
+		LUXAddr:       addrStr,
+		InitialAmount: 300 * units.MegaLux,
+	})
+	config.InitialStakedFunds = append(config.InitialStakedFunds, addrStr)
+
+	// Add initial stakers from nodes
+	for _, node := range nodes {
+		if node.NodeID != ids.EmptyNodeID {
+			config.InitialStakers = append(config.InitialStakers, genesis.UnparsedStaker{
+				NodeID:        node.NodeID,
+				RewardAddress: addrStr,
+				DelegationFee: 20000, // 2%
+			})
+		}
+	}
+
+	// Add basic C-Chain genesis
+	config.CChainGenesis = getBasicCChainGenesis(networkID)
+
+	return config, nil
+}
+
+// getBasicCChainGenesis returns a basic C-Chain genesis configuration
+func getBasicCChainGenesis(networkID uint32) string {
+	chainID := int64(networkID)
+
+	genesis := map[string]interface{}{
+		"config": map[string]interface{}{
+			"chainId":             chainID,
+			"homesteadBlock":      0,
+			"eip150Block":         0,
+			"eip155Block":         0,
+			"eip158Block":         0,
+			"byzantiumBlock":      0,
+			"constantinopleBlock": 0,
+			"petersburgBlock":     0,
+			"istanbulBlock":       0,
+			"muirGlacierBlock":    0,
+		},
+		"nonce":      "0x0",
+		"timestamp":  "0x0",
+		"extraData":  "0x00",
+		"gasLimit":   fmt.Sprintf("0x%x", 8000000),
+		"difficulty": "0x1",
+		"mixHash":    "0x0000000000000000000000000000000000000000000000000000000000000000",
+		"coinbase":   "0x0000000000000000000000000000000000000000",
+		"alloc":      map[string]interface{}{},
+		"number":     "0x0",
+		"gasUsed":    "0x0",
+		"parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+	}
+
+	data, _ := json.Marshal(genesis)
+	return string(data)
 }
