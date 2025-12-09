@@ -223,10 +223,12 @@ func GetKeychain(
 		return NewKeychain(network, kc, ledgerDevice, ledgerIndices), nil
 	}
 	if useEwoq {
-		keyPath := app.GetKeyPath("ewoq")
-		sf, err := key.LoadSoft(network.ID(), keyPath)
+		// SECURITY: Use the secure local-key instead of the publicly known ewoq key.
+		// The -e/--ewoq flag now uses ~/.lux/keys/local-key.pk which is generated
+		// on first use with a unique random key per machine.
+		sf, err := key.GetOrCreateLocalKey(network.ID())
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get local key: %w", err)
 		}
 		kc := sf.KeyChain()
 		wrappedKc := WrapSecp256k1fxKeychain(kc)

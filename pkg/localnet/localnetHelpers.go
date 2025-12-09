@@ -12,12 +12,10 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/cb58"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/wallet/primary"
 )
 
 // information that is persisted alongside the local network
@@ -95,7 +93,8 @@ func GetLocalNetworkRelayerConfigPath(app *application.Lux, networkDir string) (
 }
 
 // GetLocalNetworkWallet returns a wallet that can operate on the local network
-// initialized to recognize all given [subnetIDs] as pre generated
+// initialized to recognize all given [subnetIDs] as pre generated.
+// Uses the secure local-key from ~/.lux/keys/ instead of hardcoded EWOQ key.
 func GetLocalNetworkWallet(
 	app *application.Lux,
 	subnetIDs []ids.ID,
@@ -110,21 +109,15 @@ func GetLocalNetworkWallet(
 	ctx, cancel := GetLocalNetworkDefaultContext()
 	defer cancel()
 
-	// Load the EWOQ key for local testing
-	// EwoqPrivateKey format is "PrivateKey-ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
-	// We need to extract the raw key part and decode it
-	rawEwoqPk := "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
-	skBytes, err := cb58.Decode(rawEwoqPk)
+	// Load the local key for local development - this is a unique key per machine,
+	// NOT the publicly-known EWOQ key which is a security risk
+	localPrivKey, err := key.GetLocalPrivateKey()
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode EWOQ key: %w", err)
-	}
-	ewoqPrivKey, err := secp256k1.ToPrivateKey(skBytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create EWOQ private key: %w", err)
+		return nil, fmt.Errorf("failed to load local key: %w", err)
 	}
 
-	// Create keychain for the wallet with EWOQ key for local testing
-	secpKeychain := secp256k1fx.NewKeychain(ewoqPrivKey)
+	// Create keychain for the wallet with local key
+	secpKeychain := secp256k1fx.NewKeychain(localPrivKey)
 
 	// Use KeychainAdapter to implement wallet/keychain.Keychain and c.EthKeychain interfaces
 	keychainAdapter := primary.NewKeychainAdapter(secpKeychain)
@@ -139,9 +132,6 @@ func GetLocalNetworkWallet(
 	// support standard AVM API methods.
 	return primary.MakePChainWallet(ctx, walletConfig)
 }
-
-// Ensure key package is imported for consistency even if not directly used here
-var _ = key.EwoqPrivateKey
 
 // Gathers extra information for the local network, not available on the primary storage
 func GetExtraLocalNetworkData(app *application.Lux, rootDataDir string) (bool, ExtraLocalNetworkData, error) {
