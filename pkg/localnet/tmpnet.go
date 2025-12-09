@@ -250,7 +250,7 @@ func TmpNetStop(
 	// Initiate stop on all nodes
 	for _, node := range network.Nodes {
 		node.URI = "" // avoid saving metrics snapshot
-		if err := node.InitiateStop(ctx); err != nil {
+		if err := node.InitiateStop(); err != nil {
 			errs = append(errs, fmt.Errorf("failed to stop node %s: %w", node.NodeID, err))
 		}
 	}
@@ -401,10 +401,7 @@ func GetTmpNetTrackedSubnets(
 ) ([]ids.ID, error) {
 	trackedSubnets := []ids.ID{}
 	for _, node := range nodes {
-		subnets, err := node.Flags.GetStringVal(config.TrackNetsKey)
-		if err != nil {
-			return nil, fmt.Errorf("failure obtaining tracked subnets flag of node %s: %w", node.NodeID, err)
-		}
+		subnets := node.Flags.GetStringVal(config.TrackNetsKey)
 		subnets = strings.TrimSpace(subnets)
 		if subnets != "" {
 			for _, subnetStr := range strings.Split(subnets, ",") {
@@ -494,10 +491,7 @@ func TmpNetInstallVM(
 	binaryPath string,
 	vmID ids.ID,
 ) error {
-	pluginDir, err := network.DefaultFlags.GetStringVal(config.PluginDirKey)
-	if err != nil {
-		return err
-	}
+	pluginDir := network.DefaultFlags.GetStringVal(config.PluginDirKey)
 	pluginPath := filepath.Join(pluginDir, vmID.String())
 	return utils.SetupExecFile(log, binaryPath, pluginPath)
 }
@@ -540,10 +534,7 @@ func TmpNetSetNodeBlockchainConfig(
 		if node.NodeID != nodeID {
 			continue
 		}
-		blockchainsConfigDir, err := node.Flags.GetStringVal(config.ChainConfigDirKey)
-		if err != nil {
-			return err
-		}
+		blockchainsConfigDir := node.Flags.GetStringVal(config.ChainConfigDirKey)
 		configPath = filepath.Join(
 			blockchainsConfigDir,
 			blockchainID.String(),
@@ -637,10 +628,7 @@ func TmpNetRestartNodes(
 	for _, node := range nodes {
 		if len(subnetIDs) > 0 {
 			printFunc("Restarting node %s to track newly deployed subnet/s", node.NodeID)
-			subnets, err := node.Flags.GetStringVal(config.TrackNetsKey)
-			if err != nil {
-				return err
-			}
+			subnets := node.Flags.GetStringVal(config.TrackNetsKey)
 			subnetsSet := set.Set[string]{}
 			subnets = strings.TrimSpace(subnets)
 			if subnets != "" {
@@ -736,10 +724,7 @@ func GetTmpNetUpgrade(
 	if err != nil {
 		return nil, err
 	}
-	encodedUpgrade, err := network.DefaultFlags.GetStringVal("upgrade-file-content")
-	if err != nil {
-		return nil, err
-	}
+	encodedUpgrade := network.DefaultFlags.GetStringVal("upgrade-file-content")
 	return base64.StdEncoding.DecodeString(encodedUpgrade)
 }
 
@@ -1155,8 +1140,7 @@ func TmpNetStartNode(
 	if err := node.Write(); err != nil {
 		return err
 	}
-	// Start now takes context instead of logger
-	if err := node.Start(ctx); err != nil {
+	if err := node.Start(ctx, log); err != nil {
 		// Attempt to stop an unhealthy node to provide some assurance to the caller
 		// that an error condition will not result in a lingering process.
 		return errors.Join(err, node.Stop(ctx))
@@ -1183,10 +1167,7 @@ func GetTmpNetNetworkID(network *tmpnet.Network) (uint32, error) {
 
 // Returns Network ID of a [node]
 func GetTmpNetNodeNetworkID(node *tmpnet.Node) (uint32, error) {
-	networkIDStr, err := node.Flags.GetStringVal(config.NetworkNameKey)
-	if err != nil {
-		return 0, err
-	}
+	networkIDStr := node.Flags.GetStringVal(config.NetworkNameKey)
 	networkID, err := strconv.ParseUint(networkIDStr, 10, 32)
 	if err != nil {
 		return 0, err
@@ -1218,10 +1199,7 @@ func GetTmpNetNetworkWithURIFix(networkDir string) (*tmpnet.Network, error) {
 		return network, err
 	}
 	for _, node := range network.Nodes {
-		nodeIP, err := node.Flags.GetStringVal(config.PublicIPKey)
-		if err != nil {
-			return network, err
-		}
+		nodeIP := node.Flags.GetStringVal(config.PublicIPKey)
 		node.URI = fixURI(node.URI, nodeIP)
 	}
 	return network, nil
