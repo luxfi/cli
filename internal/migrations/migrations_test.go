@@ -22,7 +22,7 @@ func TestRunMigrations(t *testing.T) {
 	require := require.New(t)
 	testDir := t.TempDir()
 
-	app := &application.Lux{}
+	app := application.New()
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	type migTest struct {

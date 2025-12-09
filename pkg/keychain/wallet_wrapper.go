@@ -24,7 +24,7 @@ func (w *CryptoToWalletWrapper) Get(addr ids.ShortID) (wallkeychain.Signer, bool
 	return w.cryptoKC.Get(addr)
 }
 
-// Addresses returns the addresses managed by this keychain
+// Addresses returns the addresses managed by this keychain as a set
 func (w *CryptoToWalletWrapper) Addresses() set.Set[ids.ShortID] {
 	return w.cryptoKC.Addresses()
 }

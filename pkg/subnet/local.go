@@ -40,7 +40,7 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm"
-	pchainapi "github.com/luxfi/node/vms/platformvm/api"
+	platformapi "github.com/luxfi/node/vms/platformvm/api"
 	"github.com/luxfi/node/vms/platformvm/reward"
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -841,8 +841,8 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 	defer cancel()
 
 	// Get validators that will be active in the future (pending validators)
-	futureTime := pchainapi.Height(time.Now().Add(time.Hour).Unix())
-	validators, err := pClient.GetValidatorsAt(ctx, subnetID, futureTime)
+	futureTime := uint64(time.Now().Add(time.Hour).Unix())
+	validators, err := pClient.GetValidatorsAt(ctx, subnetID, platformapi.Height(futureTime))
 	if err != nil {
 		return false, err
 	}

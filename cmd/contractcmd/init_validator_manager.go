@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/cmd/blockchaincmd"
+	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
@@ -142,7 +142,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	// Get bootstrap validators from the blockchain configuration
 	// Note: Using empty validator list as NetworkData doesn't have validators
 	var bootstrapValidators []models.SubnetValidator
-	luxdBootstrapValidators, err := blockchaincmd.ConvertToLuxdSubnetValidator(bootstrapValidators)
+	luxdBootstrapValidators, err := networkcmd.ConvertToLuxdSubnetValidator(bootstrapValidators)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		if !deployed {
 			// it is not in genesis
 			ux.Logger.PrintToUser("Deploying Proof of Stake Validator Manager contract on blockchain %s ...", blockchainName)
-			proxyOwnerPrivateKey, err := blockchaincmd.GetProxyOwnerPrivateKey(
+			proxyOwnerPrivateKey, err := networkcmd.GetProxyOwnerPrivateKey(
 				app,
 				network,
 				sc.ProxyContractOwner,

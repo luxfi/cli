@@ -163,8 +163,8 @@ func (m *Prompter) CaptureListWithSize(prompt string, options []string, size int
 	return args.Get(0).([]string), args.Error(1)
 }
 
-func (m *Prompter) CaptureFloat(promptStr string) (float64, error) {
-	args := m.Called(promptStr)
+func (m *Prompter) CaptureFloat(promptStr string, validator func(float64) error) (float64, error) {
+	args := m.Called(promptStr, validator)
 	return args.Get(0).(float64), args.Error(1)
 }
 

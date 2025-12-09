@@ -1,0 +1,9 @@
+{
+  "title": "Workflows",
+  "pages": [
+    "development",
+    "validator-setup",
+    "cross-chain",
+    "testing"
+  ]
+}

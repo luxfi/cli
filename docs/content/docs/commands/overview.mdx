@@ -1,0 +1,102 @@
+---
+title: Command Reference
+description: Complete reference for all Lux CLI commands
+---
+
+# Lux CLI Command Reference
+
+The Lux CLI provides a comprehensive set of commands for managing blockchains, networks, and validators across L1, L2, and L3 architectures.
+
+## Architecture Overview
+
+Lux CLI v2 introduces a hierarchical blockchain architecture:
+
+- **L1**: Sovereign chains with independent validation
+- **L2**: Based rollups or OP Stack compatible chains
+- **L3**: App-specific chains built on L2s
+
+## Available Commands
+
+### Core Blockchain Commands
+
+- [`blockchain`](/docs/commands/blockchain) - Create and deploy blockchains (legacy)
+- [`l1`](/docs/commands/l1) - Manage sovereign L1 blockchains
+- [`l2`](/docs/commands/l2) - Deploy and manage L2 rollups
+- [`l3`](/docs/commands/l3) - Create app-specific L3 chains
+
+### Network Management
+
+- [`network`](/docs/commands/network) - Manage local development networks
+- [`node`](/docs/commands/node) - Control Lux node operations
+- [`local`](/docs/commands/local) - Local development utilities
+
+### Configuration & Keys
+
+- [`config`](/docs/commands/config) - CLI configuration management
+- [`key`](/docs/commands/key) - Signing key management
+- [`wallet`](/docs/commands/wallet) - Wallet operations
+
+### Cross-Chain & Contracts
+
+- [`interchain`](/docs/commands/interchain) - Cross-chain messaging setup
+- [`contract`](/docs/commands/contract) - Smart contract deployment
+
+### Validation & Staking
+
+- [`validator`](/docs/commands/validator) - Validator management
+- [`primary`](/docs/commands/primary) - Primary network operations
+
+### Utilities
+
+- [`transaction`](/docs/commands/transaction) - Sign and execute transactions
+- [`migrate`](/docs/commands/migrate) - Migration utilities
+- [`update`](/docs/commands/update) - Check for CLI updates
+
+## Command Structure
+
+All commands follow a consistent structure:
+
+```bash
+lux [command] [subcommand] [flags]
+```
+
+### Global Flags
+
+These flags are available for all commands:
+
+- `--config <file>` - Config file location (default: `$HOME/.cli.json`)
+- `--log-level <level>` - Log verbosity (ERROR, INFO, DEBUG)
+- `--skip-update-check` - Skip checking for new CLI versions
+
+## Quick Examples
+
+### Create a Sovereign L1
+```bash
+lux l1 create my-sovereign-chain --proof-of-stake
+```
+
+### Deploy an L2 Rollup
+```bash
+lux l2 create my-rollup --sequencer lux
+```
+
+### Build an L3 App Chain
+```bash
+lux l3 create my-app --l2 my-rollup
+```
+
+## Getting Help
+
+For detailed help on any command:
+
+```bash
+lux [command] --help
+lux [command] [subcommand] --help
+```
+
+## Next Steps
+
+- [Getting Started Guide](/docs/getting-started)
+- [L1 Command Reference](/docs/commands/l1)
+- [Network Setup](/docs/network)
+- [Troubleshooting](/docs/troubleshooting)

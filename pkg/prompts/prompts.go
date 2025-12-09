@@ -120,7 +120,7 @@ type Prompter interface {
 	ChooseKeyOrLedger(goal string) (bool, error)
 	CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error)
 	CaptureListWithSize(prompt string, options []string, size int) ([]string, error)
-	CaptureFloat(promptStr string) (float64, error)
+	CaptureFloat(promptStr string, validator func(float64) error) (float64, error)
 	CaptureAddresses(promptStr string) ([]crypto.Address, error)
 	CaptureXChainAddress(promptStr string, network models.Network) (string, error)
 	CaptureValidatedString(promptStr string, validator func(string) error) (string, error)
@@ -217,7 +217,7 @@ func CaptureListDecision[T comparable](
 func (*realPrompter) CaptureDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
-		Validate: validateStakingDuration,
+		Validate: validateDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
@@ -486,45 +486,52 @@ func (*realPrompter) CaptureEmail(promptStr string) (string, error) {
 }
 
 func (*realPrompter) CaptureURL(promptStr string, validateConnection bool) (string, error) {
-	prompt := promptui.Prompt{
-		Label:    promptStr,
-		Validate: ValidateURLFormat,
-	}
-
-	urlStr, err := promptUIRunner(prompt)
-	if err != nil {
-		return "", err
-	}
-
-	// Validate connection if requested
-	if validateConnection {
-		parsedURL, err := url.Parse(urlStr)
-		if err != nil {
-			return "", fmt.Errorf("invalid URL: %w", err)
+	// Loop until we get a valid URL (with connection check if requested)
+	for {
+		prompt := promptui.Prompt{
+			Label:    promptStr,
+			Validate: ValidateURLFormat,
 		}
 
-		// Try to connect to the URL
-		client := &http.Client{
-			Timeout: 5 * time.Second,
+		urlStr, err := promptUIRunner(prompt)
+		if err != nil {
+			return "", err
 		}
 
-		resp, err := client.Head(urlStr)
-		if err != nil {
-			// Try GET if HEAD fails
-			resp, err = client.Get(urlStr)
+		// Validate connection if requested
+		if validateConnection {
+			parsedURL, err := url.Parse(urlStr)
 			if err != nil {
-				return "", fmt.Errorf("failed to connect to %s: %w", parsedURL.Host, err)
+				return "", fmt.Errorf("invalid URL: %w", err)
+			}
+
+			// Try to connect to the URL
+			client := &http.Client{
+				Timeout: 5 * time.Second,
+			}
+
+			resp, err := client.Head(urlStr)
+			if err != nil {
+				// Try GET if HEAD fails
+				resp, err = client.Get(urlStr)
+				if err != nil {
+					// Connection failed, loop to prompt again
+					fmt.Printf("Failed to connect to %s: %v\n", parsedURL.Host, err)
+					continue
+				}
+			}
+			defer resp.Body.Close()
+
+			// Accept any successful response (2xx, 3xx)
+			if resp.StatusCode >= 400 {
+				// Bad status, loop to prompt again
+				fmt.Printf("URL returned error status %d\n", resp.StatusCode)
+				continue
 			}
 		}
-		defer resp.Body.Close()
 
-		// Accept any successful response (2xx, 3xx)
-		if resp.StatusCode >= 400 {
-			return "", fmt.Errorf("URL returned error status %d", resp.StatusCode)
-		}
+		return urlStr, nil
 	}
-
-	return urlStr, nil
 }
 
 func (*realPrompter) CaptureStringAllowEmpty(promptStr string) (string, error) {
@@ -646,7 +653,7 @@ func (prompter *realPrompter) ChooseKeyOrLedger(goal string) (bool, error) {
 		ledgerOption = "Use ledger"
 	)
 	option, err := prompter.CaptureList(
-		fmt.Sprintf("Which key source should be used to %s?", goal),
+		fmt.Sprintf("Which key should be used %s?", goal),
 		[]string{keyOption, ledgerOption},
 	)
 	if err != nil {
@@ -789,20 +796,8 @@ func captureKeyName(prompt Prompter, goal string, keyDir string, includeEwoq boo
 
 func (*realPrompter) CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			val, err := strconv.ParseFloat(input, 64)
-			if err != nil {
-				return err
-			}
-			if val < minBalance {
-				return fmt.Errorf("balance must be at least %f", minBalance)
-			}
-			if val > availableBalance {
-				return fmt.Errorf("balance cannot exceed available balance of %f", availableBalance)
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateValidatorBalanceFunc(availableBalance, minBalance),
 	}
 	result, err := promptUIRunner(prompt)
 	if err != nil {
@@ -959,13 +954,16 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 }
 
 // CaptureFloat prompts the user for a floating point number
-func (*realPrompter) CaptureFloat(promptStr string) (float64, error) {
+func (*realPrompter) CaptureFloat(promptStr string, validator func(float64) error) (float64, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			_, err := strconv.ParseFloat(input, 64)
+			val, err := strconv.ParseFloat(input, 64)
 			if err != nil {
-				return errors.New("please enter a valid number")
+				return fmt.Errorf("strconv.ParseFloat: %v", err)
+			}
+			if validator != nil {
+				return validator(val)
 			}
 			return nil
 		},
@@ -1029,9 +1027,17 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			_, err := strconv.ParseUint(input, 10, 32)
+			// Support both decimal and hex formats
+			base := 10
+			numStr := input
+			if strings.HasPrefix(input, "0x") || strings.HasPrefix(input, "0X") {
+				base = 16
+				numStr = input[2:]
+			}
+			_, err := strconv.ParseUint(numStr, base, 32)
 			if err != nil {
-				return errors.New("please enter a valid uint32 number")
+				// Include strconv in the error message for tests
+				return fmt.Errorf("strconv.ParseUint: %v", err)
 			}
 			return nil
 		},
@@ -1042,52 +1048,55 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 		return 0, err
 	}
 
-	val, _ := strconv.ParseUint(result, 10, 32)
+	// Support both decimal and hex formats for parsing the result
+	base := 10
+	numStr := result
+	if strings.HasPrefix(result, "0x") || strings.HasPrefix(result, "0X") {
+		base = 16
+		numStr = result[2:]
+	}
+	val, parseErr := strconv.ParseUint(numStr, base, 32)
+	if parseErr != nil {
+		// Return appropriate error message based on the error type
+		if strings.Contains(parseErr.Error(), "value out of range") {
+			return 0, errors.New("value out of range")
+		}
+		return 0, errors.New("invalid syntax")
+	}
 	return uint32(val), nil
 }
 
 // CaptureAddresses prompts for multiple addresses
 func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error) {
-	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			// Validate comma-separated addresses
-			parts := strings.Split(input, ",")
-			for _, part := range parts {
-				addr := strings.TrimSpace(part)
-				if !strings.HasPrefix(addr, "0x") || len(addr) != 42 {
-					return fmt.Errorf("invalid address format: %s", addr)
-				}
-			}
-			return nil
-		},
-	}
+	for {
+		result, err := utilsReadLongString(promptui.IconGood+" "+promptStr+" ")
+		if err != nil {
+			return nil, err
+		}
 
-	result, err := promptUIRunner(prompt)
-	if err != nil {
-		return nil, err
-	}
+		// Validate addresses
+		if err := validateAddresses(result); err != nil {
+			fmt.Printf("Invalid input: %v\n", err)
+			continue  // Retry on validation failure
+		}
 
-	parts := strings.Split(result, ",")
-	addresses := make([]crypto.Address, 0, len(parts))
-	for _, part := range parts {
-		addr := strings.TrimSpace(part)
-		addresses = append(addresses, crypto.HexToAddress(addr))
-	}
+		// Parse and return valid addresses
+		parts := strings.Split(result, ",")
+		addresses := make([]crypto.Address, 0, len(parts))
+		for _, part := range parts {
+			addr := strings.TrimSpace(part)
+			addresses = append(addresses, crypto.HexToAddress(addr))
+		}
 
-	return addresses, nil
+		return addresses, nil
+	}
 }
 
 // CaptureXChainAddress prompts for an X-Chain address
 func (*realPrompter) CaptureXChainAddress(promptStr string, network models.Network) (string, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			if !strings.HasPrefix(input, "X-") && !strings.HasPrefix(input, "x-") {
-				return errors.New("X-Chain address must start with X- or x-")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: getXChainValidationFunc(network),
 	}
 
 	return promptUIRunner(prompt)
@@ -1106,17 +1115,8 @@ func (*realPrompter) CaptureValidatedString(promptStr string, validator func(str
 // CaptureRepoBranch prompts for a git branch from a repository
 func (*realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			if input == "" {
-				return errors.New("branch name cannot be empty")
-			}
-			// Basic validation for branch names
-			if strings.Contains(input, " ") {
-				return errors.New("branch name cannot contain spaces")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: ValidateRepoBranch,
 	}
 
 	return promptUIRunner(prompt)
@@ -1125,17 +1125,8 @@ func (*realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, e
 // CaptureRepoFile prompts for a file path in a repository
 func (*realPrompter) CaptureRepoFile(promptStr string, repo string, branch string) (string, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			if input == "" {
-				return errors.New("file path cannot be empty")
-			}
-			// Basic validation for file paths
-			if strings.HasPrefix(input, "/") {
-				return errors.New("file path should be relative, not absolute")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: ValidateRepoFile,
 	}
 
 	return promptUIRunner(prompt)
@@ -1148,7 +1139,7 @@ func (*realPrompter) CaptureInt(promptStr string, validator func(int) error) (in
 		Validate: func(input string) error {
 			val, err := strconv.Atoi(input)
 			if err != nil {
-				return errors.New("please enter a valid integer")
+				return fmt.Errorf("strconv.Atoi: %v", err)
 			}
 			if validator != nil {
 				return validator(val)
@@ -1170,12 +1161,19 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			val, err := strconv.ParseUint(input, 10, 8)
-			if err != nil {
-				return errors.New("please enter a valid uint8 number (0-255)")
+			// Support decimal, hex, and octal formats
+			base := 10
+			numStr := input
+			if strings.HasPrefix(input, "0x") || strings.HasPrefix(input, "0X") {
+				base = 16
+				numStr = input[2:]
+			} else if strings.HasPrefix(input, "0") && len(input) > 1 && input != "0" {
+				base = 8
+				numStr = input[1:]
 			}
-			if val > 255 {
-				return errors.New("value must be between 0 and 255")
+			_, err := strconv.ParseUint(numStr, base, 8)
+			if err != nil {
+				return fmt.Errorf("strconv.ParseUint: %v", err)
 			}
 			return nil
 		},
@@ -1186,29 +1184,28 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 		return 0, err
 	}
 
-	val, _ := strconv.ParseUint(result, 10, 8)
+	// Parse the result with the same logic
+	base := 10
+	numStr := result
+	if strings.HasPrefix(result, "0x") || strings.HasPrefix(result, "0X") {
+		base = 16
+		numStr = result[2:]
+	} else if strings.HasPrefix(result, "0") && len(result) > 1 && result != "0" {
+		base = 8
+		numStr = result[1:]
+	}
+	val, err := strconv.ParseUint(numStr, base, 64)
+	if err != nil {
+		return 0, err
+	}
 	return uint8(val), nil
 }
 
 // CaptureFujiDuration prompts for a staking duration on Fuji testnet
 func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			duration, err := time.ParseDuration(input)
-			if err != nil {
-				return fmt.Errorf("invalid duration format: %v", err)
-			}
-			// Fuji min staking duration is 24 hours
-			if duration < 24*time.Hour {
-				return errors.New("duration must be at least 24 hours for Fuji")
-			}
-			// Fuji max staking duration is 365 days
-			if duration > 365*24*time.Hour {
-				return errors.New("duration cannot exceed 365 days for Fuji")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateTestnetStakingDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
@@ -1222,22 +1219,8 @@ func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error
 // CaptureMainnetDuration prompts for a staking duration on mainnet
 func (*realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			duration, err := time.ParseDuration(input)
-			if err != nil {
-				return fmt.Errorf("invalid duration format: %v", err)
-			}
-			// Mainnet min staking duration is 2 weeks
-			if duration < 14*24*time.Hour {
-				return errors.New("duration must be at least 2 weeks for mainnet")
-			}
-			// Mainnet max staking duration is 1 year
-			if duration > 365*24*time.Hour {
-				return errors.New("duration cannot exceed 1 year for mainnet")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateMainnetStakingDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
@@ -1251,22 +1234,8 @@ func (*realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, er
 // CaptureMainnetL1StakingDuration prompts for an L1 staking duration on mainnet
 func (*realPrompter) CaptureMainnetL1StakingDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
-		Label: promptStr,
-		Validate: func(input string) error {
-			duration, err := time.ParseDuration(input)
-			if err != nil {
-				return fmt.Errorf("invalid duration format: %v", err)
-			}
-			// L1 min staking duration is 48 hours
-			if duration < 48*time.Hour {
-				return errors.New("L1 staking duration must be at least 48 hours for mainnet")
-			}
-			// L1 max staking duration is 1 year
-			if duration > 365*24*time.Hour {
-				return errors.New("L1 staking duration cannot exceed 1 year for mainnet")
-			}
-			return nil
-		},
+		Label:    promptStr,
+		Validate: validateMainnetL1StakingDuration,
 	}
 
 	durationStr, err := promptUIRunner(prompt)
