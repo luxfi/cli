@@ -3,7 +3,6 @@
 package interchaincmd
 
 import (
-	"github.com/luxfi/cli/cmd/interchaincmd/messengercmd"
 	"github.com/luxfi/cli/cmd/interchaincmd/relayercmd"
 	"github.com/luxfi/cli/cmd/interchaincmd/tokentransferrercmd"
 	"github.com/luxfi/cli/pkg/application"
@@ -28,6 +27,5 @@ set and manage interoperability between blockchains.`,
 	// interchain relayer
 	cmd.AddCommand(relayercmd.NewCmd(app))
 	// interchain messenger
-	cmd.AddCommand(messengercmd.NewCmd(app))
 	return cmd
 }

@@ -11,7 +11,6 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -76,12 +75,6 @@ func describe(_ *cobra.Command, _ []string) error {
 		return err
 	}
 	if network.Kind() == models.Local {
-		if b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, ""); err != nil {
-			return err
-		} else if b {
-			warpMessengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
-			warpRegistryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
-		}
 	} else if network.ClusterName() != "" {
 		if clusterConfig, err := app.GetClusterConfig(network.ClusterName()); err != nil {
 			return err
