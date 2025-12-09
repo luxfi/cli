@@ -234,7 +234,7 @@ func removeFromLocal(subnetName string) error {
 		return err
 	}
 
-	testKey := genesis.EWOQKey
+	testKey := genesis.GetLocalKey()
 	secpKeyChain := secp256k1fx.NewKeychain(testKey)
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
