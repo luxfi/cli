@@ -31,16 +31,12 @@ func PromptAddress(prompter Prompter, prompt string) (string, error) {
 }
 
 // ValidateAddress validates an Ethereum address
+// Accepts addresses with or without 0x prefix
 func ValidateAddress(addr string) error {
-	if !strings.HasPrefix(addr, "0x") {
-		return fmt.Errorf("invalid address format: must start with 0x")
-	}
-	if len(addr) != 42 { // 0x + 40 hex chars
-		return fmt.Errorf("invalid address length: expected 42 characters")
-	}
-	// Try to parse as common.Address
+	// common.IsHexAddress accepts both formats (with and without 0x)
+	// and validates length and hex characters
 	if !common.IsHexAddress(addr) {
-		return fmt.Errorf("invalid hex address")
+		return fmt.Errorf("invalid address")
 	}
 	return nil
 }

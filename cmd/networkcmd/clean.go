@@ -6,11 +6,12 @@ import (
 	"errors"
 	"os"
 
+	"github.com/luxfi/cli/pkg/localnet"
+
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/interchain/signatureaggregator"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"

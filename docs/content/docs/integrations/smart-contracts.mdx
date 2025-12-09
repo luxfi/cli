@@ -1,0 +1,652 @@
+---
+title: Smart Contract Integration
+description: Integrating smart contracts with Lux blockchain using CLI
+---
+
+# Smart Contract Integration
+
+This guide covers deploying and interacting with smart contracts on Lux blockchains.
+
+## Development Environment Setup
+
+### Prerequisites
+
+Install development tools:
+
+```bash
+# Foundry (Recommended)
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
+# Hardhat
+npm install --global hardhat
+
+# Remix IDE
+# Use online at https://remix.ethereum.org
+# Or install locally:
+npm install --global @remix-project/remixd
+```
+
+### Configure Network Connection
+
+Set up RPC connection to your blockchain:
+
+```javascript
+// hardhat.config.js
+module.exports = {
+  networks: {
+    luxLocal: {
+      url: "http://127.0.0.1:9630/ext/bc/C/rpc",
+      chainId: 99999,
+      accounts: [process.env.PRIVATE_KEY]
+    },
+    luxTestnet: {
+      url: "https://api.testnet.lux.network/ext/bc/C/rpc",
+      chainId: 99998,
+      accounts: [process.env.PRIVATE_KEY]
+    }
+  }
+};
+```
+
+```toml
+# foundry.toml
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+[rpc_endpoints]
+lux_local = "http://127.0.0.1:9630/ext/bc/C/rpc"
+lux_testnet = "https://api.testnet.lux.network/ext/bc/C/rpc"
+```
+
+## Contract Development
+
+### Basic ERC20 Token
+
+```solidity
+// contracts/LuxToken.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract LuxToken is ERC20, Ownable {
+    uint256 public constant MAX_SUPPLY = 1000000 * 10**18;
+
+    constructor() ERC20("Lux Token", "LUXT") Ownable(msg.sender) {
+        _mint(msg.sender, MAX_SUPPLY);
+    }
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        require(totalSupply() + amount <= MAX_SUPPLY, "Max supply exceeded");
+        _mint(to, amount);
+    }
+}
+```
+
+### NFT Collection
+
+```solidity
+// contracts/LuxNFT.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract LuxNFT is ERC721, ERC721URIStorage, Ownable {
+    uint256 private _tokenIdCounter;
+
+    constructor() ERC721("Lux NFT", "LUXN") Ownable(msg.sender) {}
+
+    function safeMint(address to, string memory uri) public onlyOwner {
+        uint256 tokenId = _tokenIdCounter++;
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uri);
+    }
+
+    function tokenURI(uint256 tokenId)
+        public view override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public view override(ERC721, ERC721URIStorage)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+}
+```
+
+### DeFi Protocol Example
+
+```solidity
+// contracts/LuxVault.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+contract LuxVault is ReentrancyGuard {
+    IERC20 public immutable token;
+
+    mapping(address => uint256) public balances;
+    uint256 public totalSupply;
+
+    event Deposit(address indexed user, uint256 amount);
+    event Withdraw(address indexed user, uint256 amount);
+
+    constructor(address _token) {
+        token = IERC20(_token);
+    }
+
+    function deposit(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be greater than 0");
+
+        token.transferFrom(msg.sender, address(this), amount);
+        balances[msg.sender] += amount;
+        totalSupply += amount;
+
+        emit Deposit(msg.sender, amount);
+    }
+
+    function withdraw(uint256 amount) external nonReentrant {
+        require(amount > 0, "Amount must be greater than 0");
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        balances[msg.sender] -= amount;
+        totalSupply -= amount;
+        token.transfer(msg.sender, amount);
+
+        emit Withdraw(msg.sender, amount);
+    }
+}
+```
+
+## Deployment
+
+### Using Lux CLI
+
+Deploy contracts through the CLI:
+
+```bash
+# Deploy blockchain first
+lux blockchain create defi-chain --vm=subnet-evm
+lux blockchain deploy defi-chain --local
+
+# Get RPC URL
+export RPC_URL=$(lux blockchain describe defi-chain --json | jq -r '.rpc_url')
+
+# Deploy contract with cast (Foundry)
+forge create \
+  --rpc-url=$RPC_URL \
+  --private-key=$(lux key export deployer --show-private) \
+  src/LuxToken.sol:LuxToken
+```
+
+### Using Foundry
+
+```bash
+# Deploy script
+cat > script/Deploy.s.sol << 'EOF'
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "forge-std/Script.sol";
+import "../src/LuxToken.sol";
+
+contract DeployScript is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
+
+        LuxToken token = new LuxToken();
+        console.log("Token deployed at:", address(token));
+
+        vm.stopBroadcast();
+    }
+}
+EOF
+
+# Run deployment
+forge script script/Deploy.s.sol \
+  --rpc-url=$RPC_URL \
+  --broadcast \
+  --verify
+```
+
+### Using Hardhat
+
+```javascript
+// scripts/deploy.js
+async function main() {
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying with:", deployer.address);
+
+  const Token = await ethers.getContractFactory("LuxToken");
+  const token = await Token.deploy();
+  await token.waitForDeployment();
+
+  console.log("Token deployed to:", await token.getAddress());
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+```
+
+```bash
+# Deploy
+npx hardhat run scripts/deploy.js --network luxLocal
+```
+
+## Contract Interaction
+
+### Using Lux CLI
+
+Interact with deployed contracts:
+
+```bash
+# Call read function
+lux contract call \
+  --address=0x123... \
+  --abi=./abi/LuxToken.json \
+  --function=balanceOf \
+  --args='["0x456..."]'
+
+# Send transaction
+lux contract send \
+  --address=0x123... \
+  --abi=./abi/LuxToken.json \
+  --function=transfer \
+  --args='["0x789...", "1000000000000000000"]' \
+  --key=sender-key
+```
+
+### Using Cast (Foundry)
+
+```bash
+# Read balance
+cast call 0x123... "balanceOf(address)" 0x456... --rpc-url=$RPC_URL
+
+# Transfer tokens
+cast send 0x123... \
+  "transfer(address,uint256)" \
+  0x789... 1000000000000000000 \
+  --private-key=$PRIVATE_KEY \
+  --rpc-url=$RPC_URL
+
+# Check events
+cast logs \
+  --address=0x123... \
+  --from-block=0 \
+  --rpc-url=$RPC_URL
+```
+
+### Using JavaScript/ethers.js
+
+```javascript
+// interact.js
+const ethers = require('ethers');
+
+async function interact() {
+  // Connect to network
+  const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+  const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+  // Load contract
+  const tokenAddress = "0x123...";
+  const tokenABI = require('./abi/LuxToken.json');
+  const token = new ethers.Contract(tokenAddress, tokenABI, signer);
+
+  // Read data
+  const balance = await token.balanceOf(signer.address);
+  console.log("Balance:", ethers.formatEther(balance));
+
+  // Send transaction
+  const tx = await token.transfer("0x789...", ethers.parseEther("10"));
+  const receipt = await tx.wait();
+  console.log("Transfer complete:", receipt.hash);
+}
+
+interact();
+```
+
+## Cross-Chain Integration
+
+### Warp Messaging
+
+Enable cross-chain communication:
+
+```solidity
+// contracts/CrossChainMessenger.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@luxfi/warp/interfaces/IWarpMessenger.sol";
+
+contract CrossChainMessenger {
+    IWarpMessenger public constant warp = IWarpMessenger(0x0200000000000000000000000000000000000005);
+
+    mapping(bytes32 => bool) public receivedMessages;
+
+    event MessageSent(bytes32 indexed messageID, address destination, bytes message);
+    event MessageReceived(bytes32 indexed messageID, address source, bytes message);
+
+    function sendMessage(
+        bytes32 destinationChainID,
+        address destinationAddress,
+        bytes calldata message
+    ) external {
+        bytes32 messageID = warp.sendWarpMessage(
+            destinationChainID,
+            destinationAddress,
+            message
+        );
+        emit MessageSent(messageID, destinationAddress, message);
+    }
+
+    function receiveMessage(
+        bytes32 messageID,
+        address sourceAddress,
+        bytes calldata message
+    ) external {
+        require(!receivedMessages[messageID], "Message already received");
+
+        // Verify message with warp precompile
+        require(
+            warp.verifyWarpMessage(messageID, sourceAddress, message),
+            "Invalid message"
+        );
+
+        receivedMessages[messageID] = true;
+        emit MessageReceived(messageID, sourceAddress, message);
+
+        // Process message
+        _processMessage(sourceAddress, message);
+    }
+
+    function _processMessage(address source, bytes memory message) internal {
+        // Implement message processing logic
+    }
+}
+```
+
+### Token Bridge
+
+Bridge tokens between chains:
+
+```bash
+# Deploy bridge contracts
+lux interchain tokentransferrer deploy \
+  --source-blockchain=chain-a \
+  --destination-blockchain=chain-b \
+  --token-name=BridgedLUX \
+  --token-symbol=bLUX
+
+# Bridge tokens
+lux interchain tokentransferrer transfer \
+  --source-blockchain=chain-a \
+  --destination-blockchain=chain-b \
+  --amount=100 \
+  --recipient=0x123...
+```
+
+## Gas Optimization
+
+### Contract Optimization Tips
+
+```solidity
+// Gas-efficient patterns
+contract GasOptimized {
+    // Pack structs
+    struct User {
+        uint128 balance;    // Slot 1
+        uint64 lastUpdate;  // Slot 1
+        uint64 id;          // Slot 1
+        address wallet;     // Slot 2
+    }
+
+    // Use events for data storage
+    event DataStored(address indexed user, bytes data);
+
+    // Batch operations
+    function batchTransfer(
+        address[] calldata recipients,
+        uint256[] calldata amounts
+    ) external {
+        require(recipients.length == amounts.length, "Length mismatch");
+        for (uint256 i = 0; i < recipients.length;) {
+            _transfer(recipients[i], amounts[i]);
+            unchecked { ++i; }
+        }
+    }
+}
+```
+
+### Monitor Gas Usage
+
+```bash
+# Estimate gas
+cast estimate \
+  --from=0x123... \
+  0x456... \
+  "transfer(address,uint256)" \
+  0x789... 1000000000000000000 \
+  --rpc-url=$RPC_URL
+
+# Get gas price
+lux blockchain gas-price mychain
+
+# Optimize deployment size
+forge build --sizes
+```
+
+## Testing
+
+### Unit Tests
+
+```solidity
+// test/LuxToken.t.sol
+pragma solidity ^0.8.20;
+
+import "forge-std/Test.sol";
+import "../src/LuxToken.sol";
+
+contract LuxTokenTest is Test {
+    LuxToken public token;
+    address public alice = address(0x1);
+    address public bob = address(0x2);
+
+    function setUp() public {
+        token = new LuxToken();
+        token.transfer(alice, 1000 ether);
+    }
+
+    function testTransfer() public {
+        vm.prank(alice);
+        token.transfer(bob, 100 ether);
+
+        assertEq(token.balanceOf(bob), 100 ether);
+        assertEq(token.balanceOf(alice), 900 ether);
+    }
+
+    function testFailTransferInsufficientBalance() public {
+        vm.prank(alice);
+        token.transfer(bob, 2000 ether);
+    }
+}
+```
+
+```bash
+# Run tests
+forge test -vvv
+
+# Run specific test
+forge test --match-test testTransfer
+
+# Gas report
+forge test --gas-report
+```
+
+### Integration Tests
+
+```javascript
+// test/integration.test.js
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+describe("Integration Tests", function() {
+  let token, vault, owner, addr1;
+
+  beforeEach(async function() {
+    [owner, addr1] = await ethers.getSigners();
+
+    const Token = await ethers.getContractFactory("LuxToken");
+    token = await Token.deploy();
+
+    const Vault = await ethers.getContractFactory("LuxVault");
+    vault = await Vault.deploy(await token.getAddress());
+  });
+
+  it("Should deposit and withdraw", async function() {
+    // Approve vault
+    await token.approve(await vault.getAddress(), ethers.parseEther("100"));
+
+    // Deposit
+    await vault.deposit(ethers.parseEther("50"));
+    expect(await vault.balances(owner.address)).to.equal(ethers.parseEther("50"));
+
+    // Withdraw
+    await vault.withdraw(ethers.parseEther("25"));
+    expect(await vault.balances(owner.address)).to.equal(ethers.parseEther("25"));
+  });
+});
+```
+
+## Security Best Practices
+
+### Audit Checklist
+
+1. **Access Control**: Verify all admin functions
+2. **Reentrancy**: Use guards on external calls
+3. **Integer Overflow**: Use Solidity 0.8+ or SafeMath
+4. **Front-Running**: Implement commit-reveal patterns
+5. **Oracle Manipulation**: Use multiple price feeds
+6. **Flash Loan Attacks**: Validate state changes
+
+### Security Tools
+
+```bash
+# Slither - Static analysis
+pip install slither-analyzer
+slither .
+
+# Mythril - Security analysis
+pip install mythril
+myth analyze contracts/LuxToken.sol
+
+# Echidna - Fuzzing
+docker run -v "$PWD":/code trailofbits/echidna
+```
+
+## Monitoring & Analytics
+
+### Event Monitoring
+
+```javascript
+// monitor.js
+const ethers = require('ethers');
+
+async function monitor() {
+  const provider = new ethers.WebSocketProvider(process.env.WS_URL);
+  const contract = new ethers.Contract(contractAddress, abi, provider);
+
+  // Listen to events
+  contract.on("Transfer", (from, to, value, event) => {
+    console.log(`Transfer: ${from} → ${to}: ${ethers.formatEther(value)}`);
+  });
+
+  // Query past events
+  const filter = contract.filters.Transfer();
+  const events = await contract.queryFilter(filter, -1000);
+  console.log(`Found ${events.length} transfer events`);
+}
+
+monitor();
+```
+
+### Analytics Dashboard
+
+```bash
+# Export contract data
+lux contract export \
+  --address=0x123... \
+  --from-block=0 \
+  --output=contract-data.json
+
+# Generate analytics
+lux contract analyze \
+  --data=contract-data.json \
+  --metrics=transactions,users,volume
+```
+
+## Common Patterns
+
+### Proxy Pattern
+
+```solidity
+// Upgradeable contract using OpenZeppelin
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract MyContractV1 is Initializable, UUPSUpgradeable {
+    function initialize() public initializer {
+        __UUPSUpgradeable_init();
+    }
+
+    function _authorizeUpgrade(address) internal override onlyOwner {}
+}
+```
+
+### Factory Pattern
+
+```solidity
+contract TokenFactory {
+    mapping(address => address[]) public userTokens;
+
+    event TokenCreated(address indexed creator, address token);
+
+    function createToken(
+        string memory name,
+        string memory symbol,
+        uint256 supply
+    ) external returns (address) {
+        LuxToken token = new LuxToken(name, symbol, supply);
+        token.transferOwnership(msg.sender);
+
+        userTokens[msg.sender].push(address(token));
+        emit TokenCreated(msg.sender, address(token));
+
+        return address(token);
+    }
+}
+```
+
+## Related Documentation
+
+- [Blockchain Commands](/docs/commands/blockchain)
+- [Development Workflows](/docs/workflows/development)
+- [Configuration Reference](/docs/configuration)
+- [Warp Messaging](/docs/commands/interchain)
