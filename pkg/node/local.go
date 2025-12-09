@@ -137,7 +137,7 @@ func StartLocalNode(
 			nodeSettings,
 			validators,
 			network,
-			true, // enableMonitoring
+			true,  // enableMonitoring
 			false, // disableGrpcGateway
 		)
 		if err != nil {

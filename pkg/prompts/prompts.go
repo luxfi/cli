@@ -1069,7 +1069,7 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 // CaptureAddresses prompts for multiple addresses
 func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error) {
 	for {
-		result, err := utilsReadLongString(promptui.IconGood+" "+promptStr+" ")
+		result, err := utilsReadLongString(promptui.IconGood + " " + promptStr + " ")
 		if err != nil {
 			return nil, err
 		}
@@ -1077,7 +1077,7 @@ func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error
 		// Validate addresses
 		if err := validateAddresses(result); err != nil {
 			fmt.Printf("Invalid input: %v\n", err)
-			continue  // Retry on validation failure
+			continue // Retry on validation failure
 		}
 
 		// Parse and return valid addresses

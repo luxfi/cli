@@ -32,7 +32,7 @@ func CreateEvmSidecar(
 	sc.VM = models.EVM
 	sc.VMVersion = vmVersion
 	sc.TokenSymbol = tokenSymbol
-	sc.TokenName = "TEST"  // Default token name
+	sc.TokenName = "TEST" // Default token name
 	sc.Sovereign = sovereign
 	sc.UseACP99 = useACP99
 
