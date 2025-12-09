@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"net/http"
 	"net/mail"
 	"net/url"
 	"os"
@@ -29,10 +30,16 @@ func validateEmail(input string) error {
 
 func ValidateURLFormat(input string) error {
 	if input == "" {
-		return errors.New("URL cannot be empty")
+		return errors.New("empty url")
 	}
-	_, err := url.Parse(input)
-	return err
+	parsedURL, err := url.Parse(input)
+	if err != nil {
+		return err
+	}
+	if parsedURL.Scheme == "" {
+		return errors.New("invalid URI for request")
+	}
+	return nil
 }
 
 func validatePositiveBigInt(input string) error {
@@ -69,7 +76,7 @@ func validateTime(input string) error {
 	if t.Before(time.Now().Add(constants.StakingStartLeadTime)) {
 		return fmt.Errorf("time should be at least start from now + %s", constants.StakingStartLeadTime)
 	}
-	return err
+	return nil
 }
 
 func validateNodeID(input string) error {
@@ -174,7 +181,7 @@ func getPChainValidationFunc(network models.Network) func(string) error {
 		return validatePChainTestnetAddress
 	case models.Mainnet:
 		return validatePChainMainAddress
-	case models.Local:
+	case models.Local, models.Devnet:
 		return validatePChainLocalAddress
 	default:
 		return func(string) error {
@@ -191,7 +198,7 @@ func validateXChainAddress(input string) (string, error) {
 	}
 
 	if chainID != "X" {
-		return "", errors.New("this is not an XChain address")
+		return "", errors.New("not a XChain address")
 	}
 	return hrp, nil
 }
@@ -241,7 +248,7 @@ func getXChainValidationFunc(network models.Network) func(string) error {
 		return validateXChainTestnetAddress
 	case models.Mainnet:
 		return validateXChainMainAddress
-	case models.Local:
+	case models.Local, models.Devnet:
 		return validateXChainLocalAddress
 	default:
 		return func(string) error {
@@ -254,6 +261,9 @@ func getXChainValidationFunc(network models.Network) func(string) error {
 func ValidateHexa(s string) error {
 	if !strings.HasPrefix(s, "0x") {
 		return errors.New("hexadecimal string must start with 0x")
+	}
+	if len(s) <= 2 {
+		return errors.New("hexadecimal string must have at least one character after 0x")
 	}
 	for _, c := range s[2:] {
 		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
@@ -278,7 +288,7 @@ func validateNewFilepath(input string) error {
 // validateNonEmpty validates that a string is not empty
 func validateNonEmpty(input string) error {
 	if input == "" {
-		return errors.New("input cannot be empty")
+		return errors.New("string cannot be empty")
 	}
 	return nil
 }
@@ -291,11 +301,11 @@ func validateMainnetStakingDuration(input string) error {
 	}
 	// Mainnet min staking duration is 2 weeks
 	if duration < 14*24*time.Hour {
-		return errors.New("duration must be at least 2 weeks for mainnet")
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(14*24*time.Hour))
 	}
 	// Mainnet max staking duration is 1 year
 	if duration > 365*24*time.Hour {
-		return errors.New("duration cannot exceed 1 year for mainnet")
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(365*24*time.Hour))
 	}
 	return nil
 }
@@ -306,13 +316,13 @@ func validateMainnetL1StakingDuration(input string) error {
 	if err != nil {
 		return fmt.Errorf("invalid duration format: %v", err)
 	}
-	// L1 min staking duration is 48 hours
-	if duration < 48*time.Hour {
-		return errors.New("L1 staking duration must be at least 48 hours for mainnet")
+	// L1 min staking duration is 24 hours
+	if duration < 24*time.Hour {
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(24*time.Hour))
 	}
 	// L1 max staking duration is 1 year
 	if duration > 365*24*time.Hour {
-		return errors.New("L1 staking duration cannot exceed 1 year for mainnet")
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(365*24*time.Hour))
 	}
 	return nil
 }
@@ -323,13 +333,13 @@ func validateTestnetStakingDuration(input string) error {
 	if err != nil {
 		return fmt.Errorf("invalid duration format: %v", err)
 	}
-	// Testnet/Fuji min staking duration is 24 hours
+	// Testnet min staking duration is 24 hours
 	if duration < 24*time.Hour {
-		return errors.New("duration must be at least 24 hours for testnet")
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(24*time.Hour))
 	}
-	// Testnet/Fuji max staking duration is 365 days
+	// Testnet max staking duration is 365 days
 	if duration > 365*24*time.Hour {
-		return errors.New("duration cannot exceed 365 days for testnet")
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(365*24*time.Hour))
 	}
 	return nil
 }
@@ -364,11 +374,14 @@ func validateValidatorBalanceFunc(availableBalance float64, minBalance float64) 
 		if err != nil {
 			return err
 		}
+		if val <= 0 {
+			return fmt.Errorf("entered value has to be greater than 0 LUX")
+		}
 		if val < minBalance {
-			return fmt.Errorf("balance must be at least %f", minBalance)
+			return fmt.Errorf("validator balance must be at least %.2f LUX", minBalance)
 		}
 		if val > availableBalance {
-			return fmt.Errorf("balance cannot exceed available balance of %f", availableBalance)
+			return fmt.Errorf("current balance of %.2f is not sufficient", availableBalance)
 		}
 		return nil
 	}
@@ -376,8 +389,27 @@ func validateValidatorBalanceFunc(availableBalance float64, minBalance float64) 
 
 // RequestURL makes a GET request to validate URL connectivity
 func RequestURL(url string) error {
-	// For testing purposes, just check if URL is valid
-	return ValidateURLFormat(url)
+	// First validate the format
+	if err := ValidateURLFormat(url); err != nil {
+		return err
+	}
+
+	// Make HTTP HEAD request to check if URL is reachable
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+	resp, err := client.Head(url)
+	if err != nil {
+		return fmt.Errorf("failed to reach URL: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check for successful status codes (2xx or 3xx)
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("URL returned status %d", resp.StatusCode)
+	}
+
+	return nil
 }
 
 // ValidateURL validates URL format and optionally checks connectivity
@@ -393,8 +425,9 @@ func ValidateURL(input string, checkConnection bool) error {
 
 // ValidateRepoBranch validates a git branch name
 func ValidateRepoBranch(branch string) error {
-	if branch == "" {
-		return errors.New("branch name cannot be empty")
+	// First check if non-empty using generic validator
+	if err := validateNonEmpty(branch); err != nil {
+		return err
 	}
 	// Basic validation for branch names
 	if strings.Contains(branch, " ") {
@@ -405,8 +438,9 @@ func ValidateRepoBranch(branch string) error {
 
 // ValidateRepoFile validates a repository file path
 func ValidateRepoFile(filepath string) error {
-	if filepath == "" {
-		return errors.New("file path cannot be empty")
+	// First check if non-empty using generic validator
+	if err := validateNonEmpty(filepath); err != nil {
+		return err
 	}
 	// Basic validation for file paths
 	if strings.HasPrefix(filepath, "/") {

@@ -1,0 +1,568 @@
+---
+title: Configuration Reference
+description: Complete configuration reference for Lux CLI and node operations
+---
+
+# Configuration Reference
+
+This guide covers all configuration options for Lux CLI, node operations, and blockchain deployments.
+
+## CLI Configuration
+
+### Configuration File Location
+
+The Lux CLI stores configuration in these locations:
+
+```bash
+# Main configuration
+~/.lux-cli/config.json
+
+# Network-specific configs
+~/.lux-cli/networks/*/config.json
+
+# Blockchain configurations
+~/.lux-cli/blockchains/*/config.json
+
+# Key storage
+~/.lux-cli/keys/
+```
+
+### Global Configuration
+
+Set global CLI preferences:
+
+```json
+{
+  "default_network": "mainnet",
+  "api_endpoints": {
+    "mainnet": "https://api.lux.network",
+    "testnet": "https://api.testnet.lux.network",
+    "local": "http://localhost:9630"
+  },
+  "output_format": "text",
+  "log_level": "info",
+  "telemetry_enabled": false,
+  "auto_update": true,
+  "key_dir": "~/.lux-cli/keys",
+  "snapshot_dir": "~/.lux-cli/snapshots",
+  "plugin_dir": "~/.lux-cli/plugins"
+}
+```
+
+### Environment Variables
+
+Configure CLI via environment variables:
+
+```bash
+# Network selection
+export LUX_NETWORK=mainnet
+
+# API endpoints
+export LUX_API_ENDPOINT=https://api.lux.network
+
+# Output format
+export LUX_OUTPUT_FORMAT=json
+
+# Log level
+export LUX_LOG_LEVEL=debug
+
+# Disable telemetry
+export LUX_TELEMETRY_ENABLED=false
+```
+
+### Command-Line Flags
+
+Override configuration with flags:
+
+```bash
+lux --network=testnet --output=json --log-level=debug <command>
+```
+
+## Node Configuration
+
+### Node Config File
+
+Complete node configuration reference:
+
+```json
+{
+  // Network Settings
+  "network-id": "mainnet",
+  "network-max-reconnect-delay": "1m",
+  "network-max-clock-difference": "10s",
+  "network-compression-type": "zstd",
+  "network-require-validator-to-connect": false,
+  "network-peer-list-gossip-frequency": "1s",
+  "network-peer-list-num-validator-ips": 15,
+  "network-peer-list-validator-gossip-size": 20,
+
+  // API Settings
+  "api-admin-enabled": false,
+  "api-ipcs-enabled": false,
+  "api-keystore-enabled": false,
+  "api-metrics-enabled": true,
+  "api-health-enabled": true,
+  "api-info-enabled": true,
+  "api-auth-required": false,
+  "api-auth-password": "",
+
+  // HTTP Server
+  "http-host": "127.0.0.1",
+  "http-port": 9650,
+  "http-tls-enabled": false,
+  "http-tls-cert-file": "",
+  "http-tls-key-file": "",
+  "http-allowed-origins": "*",
+  "http-allowed-hosts": ["localhost", "127.0.0.1"],
+  "http-shutdown-wait": "10s",
+  "http-shutdown-timeout": "30s",
+
+  // Staking
+  "staking-enabled": true,
+  "staking-port": 9651,
+  "staking-tls-cert-file": "./staking/staker.crt",
+  "staking-tls-key-file": "./staking/staker.key",
+  "staking-ephemeral-cert-enabled": false,
+  "staking-max-pending-msgs": 1024,
+
+  // Database
+  "db-type": "leveldb",
+  "db-dir": "./db",
+  "db-config": {
+    "cache-size": 768,
+    "handle-limit": 1024,
+    "write-buffer-size": 128
+  },
+
+  // Logging
+  "log-level": "info",
+  "log-format": "auto",
+  "log-dir": "./logs",
+  "log-file-size": 8,
+  "log-file-count": 7,
+  "log-display-level": "info",
+
+  // Chain Configs
+  "chain-config-dir": "./configs/chains",
+  "chain-data-dir": "./chaindata",
+  "chain-aliases": {
+    "P": "platform",
+    "X": "exchange",
+    "C": "contract"
+  },
+
+  // Bootstrap
+  "bootstrap-ips": [
+    "bootstrap1.lux.network:9651",
+    "bootstrap2.lux.network:9651"
+  ],
+  "bootstrap-ids": [
+    "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
+    "NodeID-8CrVPQZ4VSqgL8zTdvL14G8HqAfrBr4z"
+  ],
+  "bootstrap-max-time-get-ancestors": "1m",
+  "bootstrap-ancestors-max-containers-sent": 2000,
+
+  // Consensus
+  "consensus-shutdown-timeout": "30s",
+  "consensus-gossip-frequency": "10s",
+  "consensus-app-gossip-non-validator-size": 10,
+  "consensus-app-gossip-validator-size": 10,
+
+  // Health Check
+  "health-check-frequency": "30s",
+  "health-check-averager-halflife": "10s",
+
+  // Benchlist (Ban Settings)
+  "benchlist-duration": "1h",
+  "benchlist-fail-threshold": 10,
+  "benchlist-min-failing-duration": "5m",
+
+  // Resource Limits
+  "fd-limit": 32768,
+  "meter-vms-enabled": true,
+  "router-health-max-drop-rate": 0.1,
+  "router-health-max-outstanding-duration": "1m",
+
+  // Profiling
+  "profile-continuous-enabled": false,
+  "profile-continuous-freq": "15m",
+  "profile-continuous-max-files": 10
+}
+```
+
+### Chain Configuration
+
+Configure individual blockchains:
+
+```json
+{
+  "chain-id": "2JVSBoinj...",
+  "vm-id": "subnetevm",
+
+  // VM-specific settings (Subnet-EVM example)
+  "config": {
+    "eth-apis": ["eth", "net", "web3", "debug", "trace"],
+
+    "chain-config": {
+      "chainId": 99999,
+      "homesteadBlock": 0,
+      "eip150Block": 0,
+      "eip155Block": 0,
+      "eip158Block": 0,
+      "byzantiumBlock": 0,
+      "constantinopleBlock": 0,
+      "petersburgBlock": 0,
+      "istanbulBlock": 0,
+      "muirGlacierBlock": 0,
+      "berlinBlock": 0,
+      "londonBlock": 0
+    },
+
+    "gas-config": {
+      "gas-limit": 8000000,
+      "min-gas-price": 25000000000,
+      "target-gas": 15000000,
+      "base-fee-change-denominator": 36,
+      "min-block-gas-cost": 0,
+      "max-block-gas-cost": 1000000,
+      "block-gas-cost-step": 200000
+    },
+
+    "mempool-config": {
+      "priority-gossip-addresses": [],
+      "tx-pool-price-limit": 1,
+      "tx-pool-price-bump": 10,
+      "tx-pool-account-slots": 16,
+      "tx-pool-global-slots": 5120,
+      "tx-pool-account-queue": 64,
+      "tx-pool-global-queue": 1024
+    },
+
+    "pruning-config": {
+      "pruning-enabled": true,
+      "allow-missing-tries": false,
+      "preimages-enabled": false
+    },
+
+    "snapshot-config": {
+      "snapshot-async": true,
+      "snapshot-verification-enabled": false
+    },
+
+    "admin-api-enabled": false,
+    "admin-api-dir": "./admin",
+
+    "warp-api-enabled": true,
+
+    "local-txs-enabled": false,
+    "tx-lookup-limit": 0,
+    "skip-upgrade-check": false,
+
+    "log-level": "info",
+    "log-json-format": false
+  }
+}
+```
+
+### Genesis Configuration
+
+Define blockchain genesis state:
+
+```json
+{
+  "config": {
+    "chainId": 99999,
+    "feeConfig": {
+      "gasLimit": 8000000,
+      "minBaseFee": 25000000000,
+      "targetGas": 15000000,
+      "baseFeeChangeDenominator": 36
+    },
+    "allowFeeRecipients": true,
+    "contractDeployerAllowListConfig": {
+      "allowListAdmins": ["0x1234..."],
+      "enabled": []
+    },
+    "contractNativeMinterConfig": {
+      "allowListAdmins": ["0x1234..."],
+      "enabled": [],
+      "mintConfig": {
+        "0x5678...": {
+          "initialSupply": "1000000000000000000000"
+        }
+      }
+    }
+  },
+  "nonce": "0x0",
+  "timestamp": "0x0",
+  "gasLimit": "0x7A1200",
+  "difficulty": "0x0",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "coinbase": "0x0000000000000000000000000000000000000000",
+  "alloc": {
+    "0x1000000000000000000000000000000000000001": {
+      "balance": "0x21e19e0c9bab2400000"
+    },
+    "0x1000000000000000000000000000000000000002": {
+      "balance": "0x21e19e0c9bab2400000"
+    }
+  }
+}
+```
+
+## Validator Configuration
+
+### Validator Settings
+
+Configure validator behavior:
+
+```json
+{
+  "validator": {
+    "staking-enabled": true,
+    "staking-port": 9651,
+    "staking-signer-key-file": "./staking/signer.key",
+    "delegation-fee": 10,
+    "min-delegation-fee": 2,
+    "min-delegation-stake": 25000000000,
+    "min-validator-stake": 2000000000000000,
+    "max-stake-duration": "8760h",
+    "max-validator-weight-factor": 5,
+    "uptime-requirement": 0.8,
+    "uptime-metric-freq": "30s"
+  }
+}
+```
+
+### BLS Key Configuration
+
+Configure BLS signatures:
+
+```json
+{
+  "bls": {
+    "bls-signature-enabled": true,
+    "bls-key-file": "./staking/bls.key",
+    "bls-pub-key-file": "./staking/bls.pub"
+  }
+}
+```
+
+## Network Configuration
+
+### Local Network
+
+Configuration for local development:
+
+```json
+{
+  "network": {
+    "num-nodes": 5,
+    "network-id": 12345,
+    "enable-api": true,
+    "api-port-start": 9650,
+    "staking-port-start": 9651,
+    "db-type": "memdb",
+    "log-level": "debug"
+  }
+}
+```
+
+### Custom Network
+
+Define custom network parameters:
+
+```json
+{
+  "network_id": 99999,
+  "genesis": {
+    "networkID": 99999,
+    "allocations": [
+      {
+        "avaxAddr": "X-custom1...",
+        "initialAmount": 100000000000000,
+        "unlockSchedule": []
+      }
+    ],
+    "startTime": 1640000000,
+    "initialStakeDuration": 31536000,
+    "initialStakers": [
+      {
+        "nodeID": "NodeID-...",
+        "rewardAddress": "P-custom1...",
+        "delegationFee": 10
+      }
+    ]
+  }
+}
+```
+
+## Security Configuration
+
+### API Security
+
+Configure API access control:
+
+```json
+{
+  "api-auth-required": true,
+  "api-auth-password-file": "./api-auth-password",
+  "api-allowed-origins": [
+    "https://app.example.com"
+  ],
+  "api-allowed-hosts": [
+    "api.example.com"
+  ],
+  "http-tls-enabled": true,
+  "http-tls-cert-file": "./certs/server.crt",
+  "http-tls-key-file": "./certs/server.key"
+}
+```
+
+### Firewall Rules
+
+Network security configuration:
+
+```yaml
+# firewall-rules.yaml
+rules:
+  - name: allow-staking
+    port: 9651
+    protocol: tcp
+    source: 0.0.0.0/0
+
+  - name: allow-api-local
+    port: 9650
+    protocol: tcp
+    source: 127.0.0.1/32
+
+  - name: deny-all
+    action: deny
+    source: 0.0.0.0/0
+```
+
+## Performance Tuning
+
+### Resource Limits
+
+```json
+{
+  "performance": {
+    "fd-limit": 65535,
+    "cpu-throttle": 0.75,
+    "memory-limit": "14GB",
+    "disk-throttle-read": 1000,
+    "disk-throttle-write": 1000,
+    "network-throttle-inbound": 1024,
+    "network-throttle-outbound": 1024,
+    "meter-vms-enabled": true,
+    "parallel-tx-processing": true,
+    "async-processing-enabled": true
+  }
+}
+```
+
+### Database Optimization
+
+```json
+{
+  "db-config": {
+    "type": "pebbledb",
+    "cache-size": 2048,
+    "write-buffer-size": 256,
+    "max-open-files": 5000,
+    "max-concurrent-compactions": 4,
+    "l0-file-num-compaction-trigger": 4,
+    "bytes-per-sync": 524288,
+    "wal-bytes-per-sync": 524288
+  }
+}
+```
+
+## Monitoring Configuration
+
+### Metrics Collection
+
+```json
+{
+  "metrics": {
+    "enabled": true,
+    "prometheus-enabled": true,
+    "prometheus-port": 9090,
+    "namespace": "lux",
+    "update-frequency": "30s",
+    "detailed-metrics": false
+  }
+}
+```
+
+### Logging Configuration
+
+```json
+{
+  "logging": {
+    "log-level": "info",
+    "log-format": "json",
+    "log-dir": "./logs",
+    "log-rotation-enabled": true,
+    "log-rotation-size": "100MB",
+    "log-rotation-count": 10,
+    "log-rotation-age": "7d",
+    "log-compression": true,
+    "log-display-plugin-logs": false
+  }
+}
+```
+
+## Plugin Configuration
+
+### VM Plugins
+
+```json
+{
+  "plugin-dir": "./plugins",
+  "vm-aliases": {
+    "customvm": "qjftIO8HJO9H2J3KL45H6J78K",
+    "myvm": "aBcDeF1234567890AbCdEf12"
+  },
+  "vm-configs": {
+    "customvm": {
+      "setting1": "value1",
+      "setting2": 123
+    }
+  }
+}
+```
+
+## Configuration Validation
+
+Validate configuration files:
+
+```bash
+# Validate node config
+lux node validate-config --config=node.json
+
+# Validate chain config
+lux blockchain validate-config --config=chain.json
+
+# Validate genesis
+lux blockchain validate-genesis --genesis=genesis.json
+```
+
+## Best Practices
+
+1. **Version Control**: Store configurations in git
+2. **Environment Separation**: Use different configs for dev/test/prod
+3. **Secrets Management**: Never commit passwords or private keys
+4. **Incremental Changes**: Test configuration changes gradually
+5. **Documentation**: Comment complex configuration options
+6. **Validation**: Always validate configs before deployment
+7. **Backup**: Keep backups of working configurations
+
+## Related Documentation
+
+- [CLI Commands](/docs/commands/overview)
+- [Development Workflows](/docs/workflows/development)
+- [Troubleshooting Guide](/docs/troubleshooting)
+- [Security Best Practices](/docs/security)

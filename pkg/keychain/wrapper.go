@@ -17,7 +17,7 @@ type NodeToLedgerWrapper struct {
 }
 
 // WrapNodeKeychain wraps a node keychain to implement ledger keychain interface
-func WrapNodeKeychain(nodeKC nodekeychain.Keychain) ledgerkeychain.Keychain {
+func WrapNodeKeychain(nodeKC nodekeychain.Keychain) *NodeToLedgerWrapper {
 	return &NodeToLedgerWrapper{nodeKC: nodeKC}
 }
 
@@ -32,15 +32,10 @@ func (w *NodeToLedgerWrapper) Get(addr ids.ShortID) (ledgerkeychain.Signer, bool
 }
 
 // Addresses returns the addresses managed by this keychain as a set
-func (w *NodeToLedgerWrapper) Addresses() ledgerkeychain.Set[ids.ShortID] {
+func (w *NodeToLedgerWrapper) Addresses() set.Set[ids.ShortID] {
 	// Get the set from node keychain
 	addrSet := w.nodeKC.Addresses()
-	// Create a new ledger keychain compatible set
-	ledgerSet := make(ledgerkeychain.Set[ids.ShortID])
-	for addr := range addrSet {
-		ledgerSet[addr] = struct{}{}
-	}
-	return ledgerSet
+	return addrSet
 }
 
 // Secp256k1fxToNodeWrapper wraps a secp256k1fx keychain to implement node keychain interface
@@ -83,7 +78,7 @@ func (w *NodeToWalletWrapper) Get(addr ids.ShortID) (walletkeychain.Signer, bool
 	return signer, true
 }
 
-// Addresses returns the addresses managed by this keychain
+// Addresses returns the addresses managed by this keychain as a set
 func (w *NodeToWalletWrapper) Addresses() set.Set[ids.ShortID] {
 	return w.nodeKC.Addresses()
 }

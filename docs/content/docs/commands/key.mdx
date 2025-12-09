@@ -1,0 +1,542 @@
+---
+title: Key Commands
+description: Complete reference for Lux CLI key management commands
+---
+
+# Key Commands
+
+The key command suite provides comprehensive cryptographic key management for the Lux network.
+
+## Overview
+
+Key commands allow you to:
+- Create and manage secp256k1, BLS, and ed25519 keys
+- Import/export keys securely
+- Query balances and transfer funds
+- Sign and verify messages
+- Manage hardware wallet integration
+
+## Command Reference
+
+### key create
+
+Creates a new cryptographic key.
+
+```bash
+lux key create <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name for the key
+
+**Flags:**
+- `--type` - Key type: `secp256k1` (default), `bls`, `ed25519`
+- `--file` - Save to file instead of keystore
+- `--password` - Password for key encryption
+- `--force` - Overwrite existing key
+
+**Examples:**
+
+```bash
+# Create default secp256k1 key
+lux key create mykey
+
+# Create BLS key for validator signing
+lux key create validator-bls --type=bls
+
+# Create ed25519 key
+lux key create signing-key --type=ed25519
+
+# Save to file with password
+lux key create secure-key --file=./mykey.pk --password
+```
+
+### key list
+
+Lists all keys in the keystore.
+
+```bash
+lux key list [flags]
+```
+
+**Flags:**
+- `--all-networks` - Show keys for all networks
+- `--network` - Filter by network
+- `--show-private` - Display private keys (DANGEROUS)
+- `--json` - Output as JSON
+
+**Examples:**
+
+```bash
+# List all keys
+lux key list
+
+# List mainnet keys only
+lux key list --network=mainnet
+
+# List with private keys (careful!)
+lux key list --show-private
+
+# JSON output for scripts
+lux key list --json
+```
+
+### key import
+
+Imports a key from file or mnemonic phrase.
+
+```bash
+lux key import <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name for imported key
+
+**Flags:**
+- `--file` - Import from file
+- `--mnemonic` - Import from mnemonic phrase
+- `--private-key` - Import raw private key
+- `--ledger` - Import from Ledger device
+
+**Examples:**
+
+```bash
+# Import from file
+lux key import recovered --file=./backup.key
+
+# Import from mnemonic
+lux key import wallet --mnemonic
+
+# Import private key
+lux key import imported --private-key=0x123...
+
+# Import from Ledger
+lux key import hardware --ledger
+```
+
+### key export
+
+Exports a key to file or displays it.
+
+```bash
+lux key export <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of key to export
+
+**Flags:**
+- `--output` - Output file path
+- `--format` - Export format: `hex`, `base64`, `json`
+- `--include-private` - Include private key
+
+**Examples:**
+
+```bash
+# Export to file
+lux key export mykey --output=./backup.key
+
+# Export as hex
+lux key export mykey --format=hex
+
+# Export with private key
+lux key export mykey --include-private --output=./full-backup.key
+```
+
+### key delete
+
+Deletes a key from the keystore.
+
+```bash
+lux key delete <name> [flags]
+```
+
+**Arguments:**
+- `name` - Name of key to delete
+
+**Flags:**
+- `--force` - Skip confirmation
+
+**Examples:**
+
+```bash
+# Delete key with confirmation
+lux key delete oldkey
+
+# Force delete
+lux key delete oldkey --force
+```
+
+### key balance
+
+Shows balance for a key across chains.
+
+```bash
+lux key balance <name> [flags]
+```
+
+**Arguments:**
+- `name` - Key name
+
+**Flags:**
+- `--chain` - Specific chain (P, X, C)
+- `--blockchain` - Custom blockchain
+- `--token` - Specific token/asset
+
+**Examples:**
+
+```bash
+# Check all balances
+lux key balance mykey
+
+# Check P-Chain balance
+lux key balance mykey --chain=P
+
+# Check custom token balance
+lux key balance mykey --blockchain=mychain --token=MTK
+```
+
+### key transfer
+
+Transfers funds between keys or addresses.
+
+```bash
+lux key transfer [flags]
+```
+
+**Flags:**
+- `--from` - Source key name
+- `--to` - Destination address or key
+- `--amount` - Amount to transfer
+- `--chain` - Chain to transfer on
+- `--token` - Token to transfer
+
+**Examples:**
+
+```bash
+# Transfer LUX on C-Chain
+lux key transfer \
+  --from=mykey \
+  --to=0x123... \
+  --amount=100 \
+  --chain=C
+
+# Transfer custom token
+lux key transfer \
+  --from=mykey \
+  --to=recipient-key \
+  --amount=1000 \
+  --token=MTK
+```
+
+### key sign
+
+Signs a message or transaction.
+
+```bash
+lux key sign <name> [flags]
+```
+
+**Arguments:**
+- `name` - Key to sign with
+
+**Flags:**
+- `--message` - Message to sign
+- `--file` - File to sign
+- `--format` - Output format
+
+**Examples:**
+
+```bash
+# Sign message
+lux key sign mykey --message="Hello World"
+
+# Sign file
+lux key sign mykey --file=./document.pdf
+
+# Sign and output as base64
+lux key sign mykey --message="data" --format=base64
+```
+
+### key verify
+
+Verifies a signature.
+
+```bash
+lux key verify [flags]
+```
+
+**Flags:**
+- `--signature` - Signature to verify
+- `--message` - Original message
+- `--public-key` - Public key
+- `--address` - Or verify with address
+
+**Examples:**
+
+```bash
+# Verify with public key
+lux key verify \
+  --signature=0xabc... \
+  --message="Hello World" \
+  --public-key=0x04...
+
+# Verify with address
+lux key verify \
+  --signature=0xabc... \
+  --message="Hello World" \
+  --address=P-lux1...
+```
+
+## Key Types
+
+### secp256k1 Keys
+
+Standard keys used for most operations.
+
+**Uses:**
+- Transaction signing
+- Account addresses
+- General cryptography
+
+**Format:**
+```
+Private: 32 bytes (256 bits)
+Public: 33 bytes (compressed) or 65 bytes (uncompressed)
+Address: P-lux1... (P-Chain), X-lux1... (X-Chain), 0x... (C-Chain)
+```
+
+### BLS Keys
+
+Boneh-Lynn-Shacham keys for validator operations.
+
+**Uses:**
+- Validator signatures
+- Threshold signatures
+- Aggregate signatures
+
+**Format:**
+```
+Private: 32 bytes
+Public: 48 bytes
+Signature: 96 bytes
+```
+
+### ed25519 Keys
+
+Edwards curve keys for specific applications.
+
+**Uses:**
+- Fast signature verification
+- Deterministic signatures
+- Specific VM requirements
+
+**Format:**
+```
+Private: 32 bytes
+Public: 32 bytes
+Signature: 64 bytes
+```
+
+## Hardware Wallet Support
+
+### Ledger Integration
+
+Connect and use Ledger hardware wallets.
+
+**Setup:**
+```bash
+# List Ledger devices
+lux key ledger list
+
+# Import from Ledger
+lux key import my-ledger --ledger --path="m/44'/9000'/0'/0/0"
+
+# Sign with Ledger
+lux key sign my-ledger --message="Sign this" --ledger
+```
+
+**Derivation Paths:**
+- Lux default: `m/44'/9000'/0'/0/0`
+- Ethereum compatible: `m/44'/60'/0'/0/0`
+- Custom paths supported
+
+### Trezor Support
+
+Use Trezor devices for key management.
+
+```bash
+# Import from Trezor
+lux key import my-trezor --trezor
+
+# List Trezor accounts
+lux key trezor accounts
+```
+
+## Security Best Practices
+
+### Key Storage
+
+**DO:**
+- Use hardware wallets for large amounts
+- Encrypt keys with strong passwords
+- Store backups in multiple locations
+- Use different keys for different purposes
+
+**DON'T:**
+- Store keys in plain text
+- Share private keys
+- Use same key across networks
+- Keep large amounts in hot wallets
+
+### Password Management
+
+```bash
+# Use password file (more secure than CLI)
+lux key create mykey --password-file=./pass.txt
+
+# Use environment variable
+export LUX_KEY_PASSWORD="strong-password"
+lux key create mykey --password-env
+
+# Interactive prompt (most secure)
+lux key create mykey --password
+```
+
+### Backup Strategy
+
+```bash
+#!/bin/bash
+# backup-keys.sh
+
+BACKUP_DIR="./backups/$(date +%Y%m%d)"
+mkdir -p $BACKUP_DIR
+
+# Export all keys
+for key in $(lux key list --json | jq -r '.[].name'); do
+    lux key export $key --output=$BACKUP_DIR/$key.bak
+done
+
+# Encrypt backup
+tar czf - $BACKUP_DIR | gpg -c > keys-backup.tar.gz.gpg
+
+# Clean up
+rm -rf $BACKUP_DIR
+```
+
+## Advanced Usage
+
+### Multi-Signature Setup
+
+Create multi-sig addresses and transactions.
+
+```bash
+# Create threshold key group
+lux key multisig create \
+  --keys=key1,key2,key3 \
+  --threshold=2 \
+  --name=multisig-wallet
+
+# Sign with multiple keys
+lux key multisig sign \
+  --wallet=multisig-wallet \
+  --key=key1 \
+  --transaction=tx.json
+
+# Combine signatures
+lux key multisig combine \
+  --signatures=sig1.json,sig2.json
+```
+
+### Key Derivation
+
+Derive multiple keys from a seed.
+
+```bash
+# Derive child keys
+lux key derive \
+  --master=master-key \
+  --path="m/44'/9000'/0'/0/0" \
+  --count=10
+
+# HD wallet creation
+lux key hd create my-wallet \
+  --mnemonic \
+  --derivation="m/44'/9000'/0'" \
+  --accounts=5
+```
+
+### Programmatic Key Management
+
+Use keys in scripts and automation.
+
+```python
+#!/usr/bin/env python3
+import subprocess
+import json
+
+# List keys
+result = subprocess.run(
+    ["lux", "key", "list", "--json"],
+    capture_output=True,
+    text=True
+)
+keys = json.loads(result.stdout)
+
+# Check balances
+for key in keys:
+    balance = subprocess.run(
+        ["lux", "key", "balance", key["name"]],
+        capture_output=True,
+        text=True
+    )
+    print(f"{key['name']}: {balance.stdout}")
+```
+
+## Troubleshooting
+
+### Key Not Found
+
+```bash
+# Check key exists
+lux key list
+
+# Check correct network
+lux key list --network=mainnet
+
+# Reimport if needed
+lux key import recovered --file=./backup.key
+```
+
+### Permission Denied
+
+```bash
+# Fix keystore permissions
+chmod 700 ~/.lux-cli/keys
+chmod 600 ~/.lux-cli/keys/*
+
+# Check ownership
+chown -R $(whoami) ~/.lux-cli/keys
+```
+
+### Hardware Wallet Issues
+
+```bash
+# Update device firmware
+# Install required udev rules (Linux)
+sudo cp /usr/share/doc/ledger-live/udev/20-hw1.rules /etc/udev/rules.d/
+
+# Restart udev
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+# Check device connection
+lux key ledger list --debug
+```
+
+## Related Commands
+
+- [`lux validator`](/docs/commands/validator) - Use keys for validation
+- [`lux transaction`](/docs/commands/transaction) - Sign transactions
+- [`lux blockchain`](/docs/commands/blockchain) - Deploy with keys
+- [`lux wallet`](/docs/wallet) - Wallet operations

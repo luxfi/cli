@@ -48,10 +48,9 @@ type testMapper struct {
 }
 
 func newTestMapper(t *testing.T) *testMapper {
-	app := &application.Lux{
-		Downloader: application.NewDownloader(),
-		Log:        luxlog.NewNoOpLogger(),
-	}
+	app := application.New()
+	app.Downloader = application.NewDownloader()
+	app.Log = luxlog.NewNoOpLogger()
 	return &testMapper{
 		app,
 		nil,

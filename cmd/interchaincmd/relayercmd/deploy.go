@@ -396,7 +396,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 				case isCChainDestination && flags.CChainAmount != 0:
 					amountFlt = flags.CChainAmount
 				default:
-					// CaptureFloat doesn't support validation function, validate after
+					// Validation done after capture
 					amountFlt, err = app.Prompt.CaptureFloat(
 						fmt.Sprintf("Amount to transfer (available: %f)", balanceFlt),
 					)
@@ -440,10 +440,7 @@ func CallDeploy(_ []string, flags DeployFlags, network models.Network) error {
 	storageDir := app.GetLocalRelayerStorageDir(network)
 	// localNetworkRootDir := ""
 	if network == models.Local {
-		_, err = localnet.GetLocalNetworkDir(app)
-		if err != nil {
-			return err
-		}
+		_ = localnet.GetLocalNetworkDir(app)
 	}
 	configPath := app.GetLocalRelayerConfigPath()
 	logPath := app.GetLocalRelayerLogPath(network)

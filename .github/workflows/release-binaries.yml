@@ -6,7 +6,23 @@ on:
       - 'v*'
 
 jobs:
+  # Validate version is < v2.0.0 (Go modules v2+ requirement)
+  validate-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          if [ "$MAJOR" -ge 2 ]; then
+            echo "ERROR: Version v$VERSION requires /v$MAJOR in import paths for Go modules"
+            echo "Use v1.x.x versions only (per global CLAUDE.md instructions)"
+            exit 1
+          fi
+          echo "Version v$VERSION is valid (< v2.0.0)"
+
   create-release:
+    needs: validate-version
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -109,3 +125,73 @@ jobs:
           asset_path: ./lux-darwin-arm64.tar.gz
           asset_name: lux-darwin-arm64.tar.gz
           asset_content_type: application/gzip
+
+  release-windows-amd64:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Build
+        run: |
+          # Note: Some local network commands may have reduced functionality on Windows
+          # due to syscall.Sync() usage in netrunner package (Unix-only API)
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o lux.exe main.go
+          zip lux-windows-amd64.zip lux.exe
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./lux-windows-amd64.zip
+          asset_name: lux-windows-amd64.zip
+          asset_content_type: application/zip
+
+  generate-checksums:
+    needs: [create-release, release-linux-amd64, release-linux-arm64, release-darwin-amd64, release-darwin-arm64, release-windows-amd64]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Build all platforms for checksums
+        run: |
+          # Linux
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o lux main.go
+          tar -czf lux-linux-amd64.tar.gz lux
+          rm lux
+
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o lux main.go
+          tar -czf lux-linux-arm64.tar.gz lux
+          rm lux
+
+          # Darwin
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -v -o lux main.go
+          tar -czf lux-darwin-amd64.tar.gz lux
+          rm lux
+
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -v -o lux main.go
+          tar -czf lux-darwin-arm64.tar.gz lux
+          rm lux
+
+          # Windows
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o lux.exe main.go
+          zip lux-windows-amd64.zip lux.exe
+          rm lux.exe
+
+          # Generate SHA256 checksums
+          sha256sum lux-*.tar.gz lux-*.zip > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - name: Upload checksums
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./SHA256SUMS.txt
+          asset_name: SHA256SUMS.txt
+          asset_content_type: text/plain

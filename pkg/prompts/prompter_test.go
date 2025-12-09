@@ -911,9 +911,9 @@ func TestCaptureDateWithMonkeyPatch(t *testing.T) {
 
 	// Create test times with sufficient buffer for processing delays
 	now := time.Now().UTC()
-	futureTime := now.Add(time.Hour) // Well beyond the 5-minute lead time
+	futureTime := now.Add(time.Hour) // Well beyond the lead time requirement
 	pastTime := now.Add(-time.Hour)
-	closeTime := now.Add(4 * time.Minute) // Less than 5-minute lead time
+	closeTime := now.Add(30 * time.Second) // Less than 1-minute lead time
 
 	tests := []struct {
 		name          string
@@ -934,7 +934,7 @@ func TestCaptureDateWithMonkeyPatch(t *testing.T) {
 			name:         "valid time with exact format",
 			mockReturn:   "2025-12-25 15:30:45",
 			mockError:    nil,
-			expectedTime: time.Date(2022-2025, 12, 25, 15, 30, 45, 0, time.UTC),
+			expectedTime: time.Date(2025, 12, 25, 15, 30, 45, 0, time.UTC),
 			expectError:  false,
 		},
 		{

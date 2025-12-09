@@ -1,0 +1,125 @@
+// Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+package networkcmd
+
+import (
+	"fmt"
+
+	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/keychain"
+	"github.com/luxfi/cli/pkg/networkoptions"
+	"github.com/luxfi/cli/pkg/txutils"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/prompts"
+
+	"github.com/spf13/cobra"
+)
+
+var globalNetworkFlags networkoptions.NetworkFlags
+
+func CreateBlockchainFirst(cmd *cobra.Command, blockchainName string, skipPrompt bool) error {
+	if !app.BlockchainConfigExists(blockchainName) {
+		if !skipPrompt {
+			yes, err := app.Prompt.CaptureNoYes(fmt.Sprintf("Blockchain %s is not created yet. Do you want to create it first?", blockchainName))
+			if err != nil {
+				return err
+			}
+			if !yes {
+				return fmt.Errorf("blockchain not available and not being created first")
+			}
+		}
+		return createBlockchainConfig(cmd, []string{blockchainName})
+	}
+	return nil
+}
+
+func DeployBlockchainFirst(cmd *cobra.Command, blockchainName string, skipPrompt bool) error {
+	var (
+		doDeploy       bool
+		msg            string
+		errIfNoChoosen error
+	)
+	if !app.BlockchainConfigExists(blockchainName) {
+		doDeploy = true
+		msg = fmt.Sprintf("Blockchain %s is not created yet. Do you want to create it first?", blockchainName)
+		errIfNoChoosen = fmt.Errorf("blockchain not available and not being created first")
+	} else {
+		filteredSupportedNetworkOptions, _, _, err := networkoptions.GetSupportedNetworkOptionsForSubnet(app, blockchainName, networkoptions.DefaultSupportedNetworkOptions)
+		if err != nil {
+			return err
+		}
+		if len(filteredSupportedNetworkOptions) == 0 {
+			doDeploy = true
+			msg = fmt.Sprintf("Blockchain %s is not deployed yet to a supported network. Do you want to deploy it first?", blockchainName)
+			errIfNoChoosen = fmt.Errorf("blockchain not deployed and not being deployed first")
+		}
+	}
+	if doDeploy {
+		if !skipPrompt {
+			yes, err := app.Prompt.CaptureNoYes(msg)
+			if err != nil {
+				return err
+			}
+			if !yes {
+				return errIfNoChoosen
+			}
+		}
+		return runDeploy(cmd, []string{blockchainName})
+	}
+	return nil
+}
+
+func UpdateKeychainWithSubnetControlKeys(
+	kc *keychain.Keychain,
+	network models.Network,
+	blockchainName string,
+) error {
+	sc, err := app.LoadSidecar(blockchainName)
+	if err != nil {
+		return err
+	}
+	subnetID := sc.Networks[network.Name()].SubnetID
+	if subnetID == ids.Empty {
+		return constants.ErrNoSubnetID
+	}
+	_, controlKeys, _, err := txutils.GetOwners(network, subnetID)
+	if err != nil {
+		return err
+	}
+	// add control keys to the keychain whenever possible
+	if err := kc.AddAddresses(controlKeys); err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetProxyOwnerPrivateKey(
+	app *application.Lux,
+	network models.Network,
+	proxyContractOwner string,
+	printFunc func(msg string, args ...interface{}),
+) (string, error) {
+	found, _, _, proxyOwnerPrivateKey, err := contract.SearchForManagedKey(
+		app.GetSDKApp(),
+		network,
+		proxyContractOwner,
+		true,
+	)
+	if err != nil {
+		return "", err
+	}
+	if !found {
+		printFunc("Private key for proxy owner address %s was not found", proxyContractOwner)
+		proxyOwnerPrivateKey, err = prompts.PromptPrivateKey(
+			app.Prompt,
+			"configure validator manager proxy for PoS",
+		)
+		if err != nil {
+			return "", err
+		}
+	}
+	return proxyOwnerPrivateKey, nil
+}

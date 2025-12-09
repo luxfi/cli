@@ -1,0 +1,15 @@
+{
+  "title": "Command Reference",
+  "pages": [
+    "overview",
+    "blockchain",
+    "network",
+    "node",
+    "validator",
+    "key",
+    "l1",
+    "transaction",
+    "interchain",
+    "config"
+  ]
+}

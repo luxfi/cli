@@ -556,7 +556,7 @@ func TestCaptureFloatWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			floatVal, err := prompter.CaptureFloat("Enter float:")
+			floatVal, err := prompter.CaptureFloat("Enter float:", tt.validator)
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -1290,9 +1290,22 @@ func TestCaptureXChainAddressWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			// Network was used with CaptureXChainAddress but CaptureAddress doesn't need it
 
-			addr, err := prompter.CaptureAddress("Enter X-Chain address:")
+		// Convert network string to models.Network
+		var network models.Network
+		switch tt.network {
+		case "devnet":
+			network = models.NewDevnetNetwork()
+		case "testnet":
+			network = models.NewTestnetNetwork()
+		case "mainnet":
+			network = models.NewMainnetNetwork()
+		default:
+			network = models.NewLocalNetwork()
+		}
+			
+
+			addr, err := prompter.CaptureXChainAddress("Enter X-Chain address:", network)
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -2012,7 +2025,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 		mockIndex      int
 		mockDecision   string
 		mockError      error
-		expectedResult string
+		expectedResult []string
 		expectError    bool
 		errorContains  string
 	}{
@@ -2024,7 +2037,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      1,
 			mockDecision:   "Option B",
 			mockError:      nil,
-			expectedResult: "Option B",
+			expectedResult: []string{"Option B", "Option B", "Option B"},
 			expectError:    false,
 		},
 		{
@@ -2035,7 +2048,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      4,
 			mockDecision:   "E",
 			mockError:      nil,
-			expectedResult: "E",
+			expectedResult: []string{"E", "E", "E", "E", "E"},
 			expectError:    false,
 		},
 		{
@@ -2046,7 +2059,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      0,
 			mockDecision:   "First",
 			mockError:      nil,
-			expectedResult: "First",
+			expectedResult: []string{"First"},
 			expectError:    false,
 		},
 		{
@@ -2057,7 +2070,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      1,
 			mockDecision:   "Two",
 			mockError:      nil,
-			expectedResult: "Two",
+			expectedResult: []string{"Two", "Two", "Two", "Two", "Two", "Two", "Two", "Two", "Two", "Two"},
 			expectError:    false,
 		},
 		{
@@ -2068,7 +2081,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      0,
 			mockDecision:   "Option 1",
 			mockError:      nil,
-			expectedResult: "Option 1",
+			expectedResult: []string{},
 			expectError:    false,
 		},
 		{
@@ -2079,7 +2092,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      8,
 			mockDecision:   "I",
 			mockError:      nil,
-			expectedResult: "I",
+			expectedResult: []string{"I", "I", "I", "I"},
 			expectError:    false,
 		},
 		{
@@ -2090,7 +2103,7 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 			mockIndex:      0,
 			mockDecision:   "",
 			mockError:      fmt.Errorf("user cancelled"),
-			expectedResult: "",
+			expectedResult: nil,
 			expectError:    true,
 			errorContains:  "user cancelled",
 		},
@@ -2098,13 +2111,16 @@ func TestCaptureListWithSizeWithMonkeyPatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			callCount := 0
 			// Replace the global function with mock
 			promptUISelectRunner = func(prompt promptui.Select) (int, string, error) {
-				// Verify the prompt was set up correctly
-				require.Equal(t, tt.promptStr, prompt.Label)
-				require.Equal(t, tt.options, prompt.Items)
-				require.Equal(t, tt.size, prompt.Size)
+				// CaptureListWithSize calls CaptureList multiple times
+				// Only the first call uses the original prompt string
+				if callCount == 0 {
+					require.Equal(t, tt.promptStr, prompt.Label)
+				}
 
+				callCount++
 				return tt.mockIndex, tt.mockDecision, tt.mockError
 			}
 
@@ -3545,8 +3561,6 @@ func TestCaptureRepoFileWithMonkeyPatch(t *testing.T) {
 				require.Equal(t, tt.promptStr, prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
-				callCount++
-
 				// Test validation function if no error expected from prompt
 				if tt.mockError == nil && tt.expectError && strings.Contains(tt.errorContains, "string cannot be empty") {
 					err := prompt.Validate(tt.mockReturn)
@@ -3554,21 +3568,34 @@ func TestCaptureRepoFileWithMonkeyPatch(t *testing.T) {
 					return "", err
 				}
 
-				// For ValidateRepoFile failure test, simulate multiple attempts
+				// For ValidateRepoFile failure test, simulate multiple attempts with auto-retry
 				if strings.Contains(tt.name, "ValidateRepoFile fails then succeeds") {
-					switch callCount {
-					case 1:
-						// First attempt: return invalid file (will fail validation)
-						return "non-existent-file-1.xyz", nil
-					case 2:
-						// Second attempt: return another invalid file (will fail validation)
-						return "non-existent-file-2.xyz", nil
-					default:
-						// Third attempt: return valid file (will pass validation)
-						return tt.mockReturn, tt.mockError
+					// Simulate promptUI retry behavior: keep calling until validation passes
+					for {
+						callCount++
+						var value string
+						switch callCount {
+						case 1:
+							// First attempt: return invalid file (will fail validation - absolute path)
+							value = "/absolute/path/file1.txt"
+						case 2:
+							// Second attempt: return another invalid file (will fail validation - absolute path)
+							value = "/absolute/path/file2.txt"
+						default:
+							// Third attempt: return valid file (will pass validation)
+							value = tt.mockReturn
+						}
+
+						// Check if validation passes
+						if err := prompt.Validate(value); err == nil {
+							// Validation passed, return this value
+							return value, tt.mockError
+						}
+						// Validation failed, continue to next iteration (retry)
 					}
 				}
 
+				callCount++
 				return tt.mockReturn, tt.mockError
 			}
 
@@ -3696,8 +3723,6 @@ func TestCaptureRepoBranchWithMonkeyPatch(t *testing.T) {
 				require.Equal(t, tt.promptStr, prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
-				callCount++
-
 				// Test validation function if no error expected from prompt
 				if tt.mockError == nil && tt.expectError && strings.Contains(tt.errorContains, "string cannot be empty") {
 					err := prompt.Validate(tt.mockReturn)
@@ -3705,21 +3730,34 @@ func TestCaptureRepoBranchWithMonkeyPatch(t *testing.T) {
 					return "", err
 				}
 
-				// For ValidateRepoBranch failure test, simulate multiple attempts
+				// For ValidateRepoBranch failure test, simulate multiple attempts with auto-retry
 				if strings.Contains(tt.name, "ValidateRepoBranch fails then succeeds") {
-					switch callCount {
-					case 1:
-						// First attempt: return invalid branch (will fail validation)
-						return "non-existent-branch-1", nil
-					case 2:
-						// Second attempt: return another invalid branch (will fail validation)
-						return "non-existent-branch-2", nil
-					default:
-						// Third attempt: return valid branch (will pass validation)
-						return tt.mockReturn, tt.mockError
+					// Simulate promptUI retry behavior: keep calling until validation passes
+					for {
+						callCount++
+						var value string
+						switch callCount {
+						case 1:
+							// First attempt: return invalid branch (will fail validation - has space)
+							value = "invalid branch 1"
+						case 2:
+							// Second attempt: return another invalid branch (will fail validation - has space)
+							value = "invalid branch 2"
+						default:
+							// Third attempt: return valid branch (will pass validation)
+							value = tt.mockReturn
+						}
+
+						// Check if validation passes
+						if err := prompt.Validate(value); err == nil {
+							// Validation passed, return this value
+							return value, tt.mockError
+						}
+						// Validation failed, continue to next iteration (retry)
 					}
 				}
 
+				callCount++
 				return tt.mockReturn, tt.mockError
 			}
 

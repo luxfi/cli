@@ -74,6 +74,9 @@ func setupTest(t *testing.T) *require.Assertions {
 }
 
 func TestDeployToLocal(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
 	require := setupTest(t)
 	luxVersion := "v1.18.0"
 
@@ -89,7 +92,7 @@ func TestDeployToLocal(t *testing.T) {
 		require.NoError(err)
 	}()
 
-	app := &application.Lux{}
+	app := application.New()
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
 	binDir := filepath.Join(app.GetLuxBinDir(), "node-"+luxVersion)
