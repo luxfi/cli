@@ -8,10 +8,10 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/models"
+	_ "github.com/luxfi/netrunner/client" // For future use
+	_ "github.com/luxfi/netrunner/local"  // For future use
+	_ "github.com/luxfi/netrunner/server" // For future use
 	sdkModels "github.com/luxfi/sdk/models"
-	_ "github.com/luxfi/netrunner/client"  // For future use
-	_ "github.com/luxfi/netrunner/local"   // For future use
-	_ "github.com/luxfi/netrunner/server"  // For future use
 )
 
 // ConnectionSettings contains connection information for a local network

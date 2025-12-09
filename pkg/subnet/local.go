@@ -26,6 +26,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/ids"
@@ -34,7 +35,6 @@ import (
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
@@ -45,10 +45,10 @@ import (
 	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/sdk/wallet/chain/c"
 	walletkeychain "github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/node/wallet/net/primary"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/wallet/chain/c"
 	"go.uber.org/zap"
 )
 
