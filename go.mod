@@ -246,4 +246,5 @@ require (
 // migrate is now published - no local replace needed
 // replace github.com/luxfi/migrate => ../migrate
 
-replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
+// Local replace directives for development only - do not commit
+// replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
