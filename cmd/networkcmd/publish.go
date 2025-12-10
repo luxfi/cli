@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -38,7 +38,7 @@ var (
 		"only blockchains which have already been deployed to either testnet (testnet) or mainnet can be published")
 )
 
-type newPublisherFunc func(string, string, string) subnet.Publisher
+type newPublisherFunc func(string, string, string) net.Publisher
 
 // lux blockchain publish
 func newPublishCmd() *cobra.Command {
@@ -76,7 +76,7 @@ func publish(_ *cobra.Command, args []string) error {
 	if !isReadyToPublish(&sc) {
 		return errSubnetNotDeployed
 	}
-	return doPublish(&sc, blockchainName, subnet.NewPublisher)
+	return doPublish(&sc, blockchainName, net.NewPublisher)
 }
 
 // isReadyToPublish currently means if deployed to testnet and/or main

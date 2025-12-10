@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/netrunner/client"
@@ -149,7 +149,7 @@ func StartNetwork(*cobra.Command, []string) error {
 		return err
 	}
 
-	sd := subnet.NewLocalDeployer(app, luxVersion, "")
+	sd := net.NewLocalDeployer(app, luxVersion, "")
 
 	if err := sd.StartServer(); err != nil {
 		return err
@@ -199,7 +199,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	nodeConfig := make(map[string]interface{})
 
 	// Auto-track deployed nets - eliminates the track-subnets gotcha
-	netIDs, trackErr := subnet.GetLocallyDeployedNetIDs(app)
+	netIDs, trackErr := net.GetLocallyDeployedNetIDs(app)
 	if trackErr == nil && len(netIDs) > 0 {
 		trackNetsStr := strings.Join(netIDs, ",")
 		ux.Logger.PrintToUser("Auto-tracking %d deployed net(s): %s", len(netIDs), trackNetsStr)
@@ -209,7 +209,7 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	// Prepare canonical chain configs directory and set it for all nodes
 	// This must happen BEFORE nodes start so VMs can initialize with genesis configs
-	chainConfigDir, chainConfigErr := subnet.PrepareCanonicalChainConfigs(app)
+	chainConfigDir, chainConfigErr := net.PrepareCanonicalChainConfigs(app)
 	if chainConfigErr != nil {
 		ux.Logger.PrintToUser("Warning: failed to prepare chain configs: %v", chainConfigErr)
 	} else if chainConfigDir != "" {
@@ -324,18 +324,18 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	// Copy chain configs from canonical ~/.lux/subnets/ to network node directories
 	// This must happen before WaitForHealthy so VMs can initialize with their genesis
-	if err := subnet.CopySubnetChainConfigsToNetwork(app, outputDir); err != nil {
+	if err := net.CopySubnetChainConfigsToNetwork(app, outputDir); err != nil {
 		ux.Logger.PrintToUser("Warning: Failed to copy subnet chain configs: %v", err)
 		// Continue - this is not fatal for networks without subnets
 	}
 
-	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
+	clusterInfo, err := net.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
 
 	fmt.Println()
-	if subnet.HasEndpoints(clusterInfo) {
+	if net.HasEndpoints(clusterInfo) {
 		ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
 		ux.PrintTableEndpoints(clusterInfo)
 	}
@@ -350,7 +350,7 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 	}
 
 	// Need to determine which subnets have been deployed
-	locallyDeployedSubnets, err := subnet.GetLocallyDeployedSubnetsFromFile(app)
+	locallyDeployedSubnets, err := net.GetLocallyDeployedSubnetsFromFile(app)
 	if err != nil {
 		return "", err
 	}
@@ -417,7 +417,7 @@ func StartMainnet() error {
 	}
 
 	// Use local binary instead of downloading
-	sd := subnet.NewLocalDeployer(app, "", "")
+	sd := net.NewLocalDeployer(app, "", "")
 
 	// Start netrunner server
 	if err := sd.StartServer(); err != nil {
@@ -479,7 +479,7 @@ func StartMainnet() error {
 
 	// Wait for healthy network
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
-	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
+	clusterInfo, err := net.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
@@ -497,7 +497,7 @@ func StartMainnet() error {
 	}
 
 	// Show table of endpoints
-	if subnet.HasEndpoints(clusterInfo) {
+	if net.HasEndpoints(clusterInfo) {
 		ux.PrintTableEndpoints(clusterInfo)
 	}
 
@@ -523,7 +523,7 @@ func StartTestnet() error {
 	}
 
 	// Use local binary instead of downloading
-	sd := subnet.NewLocalDeployer(app, "", "")
+	sd := net.NewLocalDeployer(app, "", "")
 
 	// Start netrunner server
 	if err := sd.StartServer(); err != nil {
@@ -582,7 +582,7 @@ func StartTestnet() error {
 
 	// Wait for healthy network
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
-	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
+	clusterInfo, err := net.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
@@ -600,7 +600,7 @@ func StartTestnet() error {
 	}
 
 	// Show table of endpoints
-	if subnet.HasEndpoints(clusterInfo) {
+	if net.HasEndpoints(clusterInfo) {
 		ux.PrintTableEndpoints(clusterInfo)
 	}
 

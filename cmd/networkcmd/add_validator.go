@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -332,7 +332,7 @@ func addValidator(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 	if !sovereign {
 		return CallAddValidatorNonSOV(deployer, network, kc, useLedger, blockchainName, nodeIDStr, defaultValidatorParams, waitForTxAcceptance)
 	}
@@ -370,7 +370,7 @@ func promptValidatorBalanceLUX(availableBalance float64) (float64, error) {
 }
 
 func CallAddValidator(
-	deployer *subnet.PublicDeployer,
+	deployer *net.PublicDeployer,
 	network models.Network,
 	kc *keychain.Keychain,
 	blockchainName string,
@@ -664,7 +664,7 @@ func CallAddValidator(
 }
 
 func CallAddValidatorNonSOV(
-	deployer *subnet.PublicDeployer,
+	deployer *net.PublicDeployer,
 	network models.Network,
 	kc *keychain.Keychain,
 	useLedgerSetting bool,
