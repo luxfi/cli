@@ -30,13 +30,6 @@ type rpcError struct {
 	Message string `json:"message"`
 }
 
-func discoverRPC(blockchainID string) string {
-	if blockchainID == "C" {
-		return "http://127.0.0.1:9630/ext/bc/C/rpc"
-	}
-	return fmt.Sprintf("http://127.0.0.1:9630/ext/bc/%s/rpc", blockchainID)
-}
-
 func callRPC(ctx context.Context, rpcURL string, req *rpcRequest, result interface{}) error {
 	reqBody, err := json.Marshal(req)
 	if err != nil {

@@ -27,71 +27,66 @@ var (
 	branch          string
 )
 
-// lux blockchain import file
-func newImportFileCmd() *cobra.Command {
+// lux network import config
+func newImportConfigCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "file [blockchainPath]",
-		Short: "Import an existing blockchain config",
-		RunE:  importFile,
-		Args:  cobrautils.MaximumNArgs(1),
-		Long: `The blockchain import command will import a blockchain configuration from a file or a git repository.
+		Use:   "config [path]",
+		Short: "Import blockchain configuration from file or repository",
+		Long: `Import a blockchain configuration from a file or a git repository.
 
-To import from a file, you can optionally provide the path as a command-line argument.
-Alternatively, running the command without any arguments triggers an interactive wizard.
-To import from a repository, go through the wizard. By default, an imported Blockchain doesn't 
-overwrite an existing Blockchain with the same name. To allow overwrites, provide the --force
-flag.`,
+USAGE:
+  lux network import config /path/to/config.json     # From file
+  lux network import config --repo=luxfi/plugins-core --blockchain=mychain
+
+OPTIONS:
+  --force        Overwrite existing configuration
+  --repo         Repository to import from (e.g., luxfi/plugins-core)
+  --branch       Repository branch to use
+  --blockchain   Blockchain configuration to import from repo
+
+EXAMPLES:
+  # Import from exported config file
+  lux network import config ~/exports/mychain.json
+
+  # Import from repository
+  lux network import config --repo=luxfi/plugins-core --blockchain=defi-chain`,
+		RunE: importConfigFunc,
+		Args: cobrautils.MaximumNArgs(1),
 	}
-	cmd.Flags().BoolVarP(
-		&overwriteImport,
-		"force",
-		"f",
-		false,
-		"overwrite the existing configuration if one exists",
-	)
-	cmd.Flags().StringVar(
-		&repoOrURL,
-		"repo",
-		"",
-		"the repo to import (ex: luxfi/plugins-core) or url to download the repo from",
-	)
-	cmd.Flags().StringVar(
-		&branch,
-		"branch",
-		"",
-		"the repo branch to use if downloading a new repo",
-	)
-	cmd.Flags().StringVar(
-		&subnetAlias,
-		"blockchain",
-		"",
-		"the blockchain configuration to import from the provided repo",
-	)
+
+	cmd.Flags().BoolVarP(&overwriteImport, "force", "f", false, "Overwrite existing configuration")
+	cmd.Flags().StringVar(&repoOrURL, "repo", "", "Repository to import from (e.g., luxfi/plugins-core)")
+	cmd.Flags().StringVar(&branch, "branch", "", "Repository branch to use")
+	cmd.Flags().StringVar(&subnetAlias, "blockchain", "", "Blockchain configuration to import from repo")
+
 	return cmd
 }
 
-func importFile(_ *cobra.Command, args []string) error {
+func importConfigFunc(_ *cobra.Command, args []string) error {
+	// If path provided as argument, use that
 	if len(args) == 1 {
-		importPath := args[0]
-		return importFromFile(importPath)
+		return importFromFile(args[0])
 	}
 
-	if repoOrURL == "" && branch == "" && subnetAlias == "" {
-		fileOption := "File"
-		lpmOption := "Repository"
-		typeOptions := []string{fileOption, lpmOption}
-		promptStr := "Would you like to import your blockchain from a file or a repository?"
-		result, err := app.Prompt.CaptureList(promptStr, typeOptions)
-		if err != nil {
-			return err
-		}
-
-		if result == fileOption {
-			return importFromFile("")
-		}
+	// If repo flags provided, use LPM
+	if repoOrURL != "" || branch != "" || subnetAlias != "" {
+		return importFromLPM()
 	}
 
-	// Option must be LPM
+	// Interactive mode
+	fileOption := "File"
+	lpmOption := "Repository"
+	typeOptions := []string{fileOption, lpmOption}
+	promptStr := "Would you like to import your blockchain from a file or a repository?"
+	result, err := app.Prompt.CaptureList(promptStr, typeOptions)
+	if err != nil {
+		return err
+	}
+
+	if result == fileOption {
+		return importFromFile("")
+	}
+
 	return importFromLPM()
 }
 
@@ -122,7 +117,7 @@ func importFromFile(importPath string) error {
 	}
 
 	if app.GenesisExists(blockchainName) && !overwriteImport {
-		return errors.New("blockchain already exists. Use --" + forceFlag + " parameter to overwrite")
+		return errors.New("blockchain already exists. Use --force parameter to overwrite")
 	}
 
 	if importable.Sidecar.VM == models.CustomVM {
@@ -135,9 +130,6 @@ func importFromFile(importPath string) error {
 		if importable.Sidecar.CustomVMBuildScript == "" {
 			return fmt.Errorf("build script must be defined for custom vm import")
 		}
-
-		// Custom VM building is handled during deployment
-		// The VM binary will be built when the subnet is deployed
 
 		vmPath := app.GetCustomVMPath(blockchainName)
 		rpcVersion, err := vm.GetVMBinaryProtocolVersion(vmPath)
@@ -153,35 +145,10 @@ func importFromFile(importPath string) error {
 		return err
 	}
 
-	// NodeConfig is handled separately from the Exportable struct
-	// Remove any existing node config file
 	_ = os.RemoveAll(app.GetLuxdNodeConfigPath(blockchainName))
-
-	// ChainConfig, SubnetConfig, NetworkUpgrades are handled separately
-	// These configurations are stored in the sidecar
-	// if importable.ChainConfig != nil {
-	// 	if err := app.WriteChainConfigFile(blockchainName, importable.ChainConfig); err != nil {
-	// 		return err
-	// 	}
-	// } else {
 	_ = os.RemoveAll(app.GetChainConfigPath(blockchainName))
-	// }
-
-	// if importable.SubnetConfig != nil {
-	// 	if err := app.WriteLuxdSubnetConfigFile(blockchainName, importable.SubnetConfig); err != nil {
-	// 		return err
-	// 	}
-	// } else {
 	_ = os.RemoveAll(app.GetLuxdSubnetConfigPath(blockchainName))
-	// }
-
-	// if importable.NetworkUpgrades != nil {
-	// 	if err := app.WriteNetworkUpgradesFile(blockchainName, importable.NetworkUpgrades); err != nil {
-	// 		return err
-	// 	}
-	// } else {
 	_ = os.RemoveAll(app.GetUpgradeBytesFilepath(blockchainName))
-	// }
 
 	if err := app.CreateSidecar(&importable.Sidecar); err != nil {
 		return err
@@ -193,7 +160,6 @@ func importFromFile(importPath string) error {
 }
 
 func importFromLPM() error {
-	// setup lpm
 	usr, err := user.Current()
 	if err != nil {
 		return err
@@ -209,7 +175,6 @@ func importFromLPM() error {
 
 	var repoAlias string
 	var repoURL *url.URL
-	var promptStr string
 	customRepo := "Download new repo"
 
 	if repoOrURL != "" {
@@ -240,7 +205,7 @@ func importFromLPM() error {
 
 	if repoAlias == customRepo {
 		if repoURL == nil {
-			promptStr = "Enter your repo URL"
+			promptStr := "Enter your repo URL"
 			repoURL, err = app.Prompt.CaptureGitURL(promptStr)
 			if err != nil {
 				return err
@@ -252,7 +217,7 @@ func importFromLPM() error {
 			masterBranch := "master"
 			customBranch := "custom"
 			branchList := []string{mainBranch, masterBranch, customBranch}
-			promptStr = "What branch would you like to import from"
+			promptStr := "What branch would you like to import from"
 			branch, err = app.Prompt.CaptureList(promptStr, branchList)
 			if err != nil {
 				return err
@@ -287,7 +252,7 @@ func importFromLPM() error {
 			return fmt.Errorf("unable to find blockchain %s", subnetAlias)
 		}
 	} else {
-		promptStr = "Select a blockchain to import"
+		promptStr := "Select a blockchain to import"
 		subnet, err = app.Prompt.CaptureList(promptStr, subnets)
 		if err != nil {
 			return err
@@ -296,7 +261,6 @@ func importFromLPM() error {
 
 	subnetKey := lpmintegration.MakeKey(repoAlias, subnet)
 
-	// Populate the sidecar and create a genesis
 	subnetDescr, err := lpmintegration.LoadSubnetFile(app, subnetKey)
 	if err != nil {
 		return err
@@ -306,8 +270,6 @@ func importFromLPM() error {
 
 	if len(subnetDescr.VMs) == 0 {
 		return errors.New("no vms found in the given blockchain")
-	} else if len(subnetDescr.VMs) == 0 {
-		return errors.New("multiple vm blockchains are not supported")
 	}
 
 	vmDescr, err := lpmintegration.LoadVMFile(app, repoAlias, subnetDescr.VMs[0])
@@ -315,7 +277,6 @@ func importFromLPM() error {
 		return err
 	}
 
-	// this is automatically tagged as a custom VM, so we don't check the RPC
 	rpcVersion := 0
 
 	sidecar := models.Sidecar{
@@ -324,7 +285,7 @@ func importFromLPM() error {
 		RPCVersion:      rpcVersion,
 		Subnet:          subnetDescr.Alias,
 		TokenName:       constants.DefaultTokenName,
-		TokenSymbol:     "TEST", // Default test token symbol
+		TokenSymbol:     "TEST",
 		Version:         constants.SidecarVersion,
 		ImportedFromLPM: true,
 		ImportedVMID:    vmDescr.ID,
@@ -341,6 +302,5 @@ func importFromLPM() error {
 		return err
 	}
 
-	// Create an empty genesis
 	return app.WriteGenesisFile(subnetDescr.Alias, []byte{})
 }

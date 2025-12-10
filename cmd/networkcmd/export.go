@@ -32,7 +32,10 @@ func newExportCmd() *cobra.Command {
 Each block is written as a single JSON line for efficient streaming and processing.
 
 Example:
-  lux blockchain export --id=dnmzhuf6... --output=blocks.jsonl`,
+  lux blockchain export --id=dnmzhuf6... --output=blocks.jsonl
+
+For exporting from a database file directly (no running node):
+  lux network export db /path/to/pebbledb`,
 		RunE: exportFunc,
 	}
 
@@ -43,6 +46,9 @@ Example:
 	cmd.Flags().StringVarP(&exportOut, "output", "o", "blocks.jsonl", "Output file (JSONL format)")
 
 	_ = cmd.MarkFlagRequired("id")
+
+	// Add subcommand for database export
+	cmd.AddCommand(newExportDBCmd())
 
 	return cmd
 }
