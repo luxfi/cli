@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/constants"
 	promptsmocks "github.com/luxfi/cli/pkg/prompts/mocks"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
@@ -421,7 +421,7 @@ func setupTestEnv(t *testing.T) (*require.Assertions, *promptsmocks.Prompter) {
 	return require, mockPrompt
 }
 
-func newTestPublisher(string, string, string) subnet.Publisher {
+func newTestPublisher(string, string, string) net.Publisher {
 	mockPub := &mocks.Publisher{}
 	mockPub.On("GetRepo").Return(&git.Repository{}, nil)
 	mockPub.On("Publish", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
