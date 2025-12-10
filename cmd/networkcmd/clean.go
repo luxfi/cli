@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/interchain/relayer"
 	"github.com/luxfi/cli/pkg/interchain/signatureaggregator"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"
@@ -87,7 +87,7 @@ func clean(*cobra.Command, []string) error {
 
 func removeLocalDeployInfoFromSidecars() error {
 	// Remove all local deployment info from sidecar files
-	deployedSubnets, err := subnet.GetLocallyDeployedSubnetsFromFile(app)
+	deployedSubnets, err := net.GetLocallyDeployedSubnetsFromFile(app)
 	if err != nil {
 		return err
 	}

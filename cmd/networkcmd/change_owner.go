@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -140,7 +140,7 @@ func changeOwner(_ *cobra.Command, args []string) error {
 	}
 
 	// Create a deployer instance to transfer subnet ownership
-	_ = subnet.NewPublicDeployer(app, false, kc.Keychain, network)
+	_ = net.NewPublicDeployer(app, false, kc.Keychain, network)
 
 	// Transfer subnet ownership functionality not yet implemented
 	// This will be added when the method is available in SDK

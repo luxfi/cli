@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/ssh"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/math/set"
@@ -26,7 +26,7 @@ func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidC
 	if err != nil {
 		return err
 	}
-	if err := subnet.ValidateSubnetNameAndGetChains(blockchainName); err != nil {
+	if err := net.ValidateSubnetNameAndGetChains(blockchainName); err != nil {
 		return err
 	}
 	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
