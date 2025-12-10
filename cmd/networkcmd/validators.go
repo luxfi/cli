@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/models"
@@ -63,7 +63,7 @@ func printValidators(_ *cobra.Command, args []string) error {
 
 	subnetID := deployInfo.SubnetID
 
-	validators, err := subnet.GetSubnetValidators(subnetID)
+	validators, err := net.GetSubnetValidators(subnetID)
 	if err != nil {
 		return err
 	}

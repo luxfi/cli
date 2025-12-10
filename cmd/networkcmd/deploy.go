@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/metrics"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -62,7 +62,7 @@ var (
 	skipCreatePrompt       bool
 	partialSync            bool
 	subnetOnly             bool
-	warpSpec               subnet.WarpSpec
+	warpSpec               net.WarpSpec
 	relayerAmount          float64
 	relayerKeyName         string
 	relayCChain            bool
@@ -816,7 +816,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Your blockchain auth keys for chain creation: %s", subnetAuthKeys)
 
 	// deploy to public network
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 
 	if createSubnet {
 		subnetID, err = deployer.DeploySubnet(controlKeys, threshold)

@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -226,7 +226,7 @@ func setWeight(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	deployer := subnet.NewPublicDeployer(app, false, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, false, kc.Keychain, network)
 
 	if sc.UseACP99 {
 		ux.Logger.PrintToUser("%s", luxlog.Yellow.Wrap("Validator Manager Protocol: V2"))
@@ -319,7 +319,7 @@ func setWeight(_ *cobra.Command, args []string) error {
 }
 
 func changeWeightACP99(
-	deployer *subnet.PublicDeployer,
+	deployer *net.PublicDeployer,
 	network models.Network,
 	blockchainName string,
 	nodeID ids.NodeID,

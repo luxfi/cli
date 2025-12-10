@@ -11,7 +11,7 @@ import (
 )
 
 func CreateCustomSubnetConfig(app *application.Lux, subnetName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {
-	ux.Logger.PrintToUser("creating custom VM subnet %s", subnetName)
+	ux.Logger.PrintToUser("creating custom VM net %s", subnetName)
 
 	genesisBytes, err := loadCustomGenesis(app, genesisPath)
 	if err != nil {

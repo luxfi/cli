@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
@@ -850,7 +850,7 @@ func GetValidators(subnetName string) ([]string, error) {
 		return nil, errors.New("no subnet id")
 	}
 	// Get NodeIDs of all validators on the subnet
-	validators, err := subnet.GetSubnetValidators(subnetID)
+	validators, err := net.GetSubnetValidators(subnetID)
 	if err != nil {
 		return nil, err
 	}
@@ -867,7 +867,7 @@ func GetCurrentSupply(subnetName string) error {
 		return err
 	}
 	subnetID := sc.Networks[models.Local.String()].SubnetID
-	return subnet.GetCurrentSupply(subnetID)
+	return net.GetCurrentSupply(subnetID)
 }
 
 func IsNodeInPendingValidator(subnetName string, nodeID string) (bool, error) {
@@ -876,7 +876,7 @@ func IsNodeInPendingValidator(subnetName string, nodeID string) (bool, error) {
 		return false, err
 	}
 	subnetID := sc.Networks[models.Local.String()].SubnetID
-	return subnet.CheckNodeIsInSubnetPendingValidators(subnetID, nodeID)
+	return net.CheckNodeIsInSubnetPendingValidators(subnetID, nodeID)
 }
 
 func CheckAllNodesAreCurrentValidators(subnetName string) (bool, error) {

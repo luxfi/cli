@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -209,9 +209,9 @@ func removeValidator(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	deployer := subnet.NewPublicDeployer(app, kc.UsesLedger, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, kc.UsesLedger, kc.Keychain, network)
 	if validatorKind == validatorsdk.NonSovereignValidator {
-		isValidator, err := subnet.IsSubnetValidator(subnetID, nodeID, network)
+		isValidator, err := net.IsSubnetValidator(subnetID, nodeID, network)
 		if err != nil {
 			// just warn the user, don't fail
 			ux.Logger.PrintToUser("failed to check if node is a validator on the subnet: %s", err)
@@ -253,7 +253,7 @@ func isBootstrapValidatorForNetwork(nodeID ids.NodeID, scNetwork models.NetworkD
 }
 
 func removeValidatorSOV(
-	deployer *subnet.PublicDeployer,
+	deployer *net.PublicDeployer,
 	network models.Network,
 	blockchainName string,
 	nodeID ids.NodeID,
@@ -441,7 +441,7 @@ func removeValidatorSOV(
 	return nil
 }
 
-func removeValidatorNonSOV(deployer *subnet.PublicDeployer, network models.Network, subnetID ids.ID, kc *keychain.Keychain, blockchainName string, nodeID ids.NodeID) error {
+func removeValidatorNonSOV(deployer *net.PublicDeployer, network models.Network, subnetID ids.ID, kc *keychain.Keychain, blockchainName string, nodeID ids.NodeID) error {
 	_, controlKeys, threshold, err := txutils.GetOwners(network, subnetID)
 	if err != nil {
 		return err

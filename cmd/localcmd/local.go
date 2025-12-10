@@ -7,7 +7,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
@@ -47,7 +47,7 @@ func newStartCmd() *cobra.Command {
 }
 
 func startLocalNetwork(*cobra.Command, []string) error {
-	sd := subnet.NewLocalDeployer(app, "latest", "")
+	sd := net.NewLocalDeployer(app, "latest", "")
 
 	if err := sd.StartServer(); err != nil {
 		return err
@@ -90,13 +90,13 @@ func startLocalNetwork(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
 	}
 
-	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
+	clusterInfo, err := net.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
 
 	fmt.Println()
-	if subnet.HasEndpoints(clusterInfo) {
+	if net.HasEndpoints(clusterInfo) {
 		ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
 		ux.PrintTableEndpoints(clusterInfo)
 	}

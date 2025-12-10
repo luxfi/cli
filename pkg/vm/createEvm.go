@@ -69,7 +69,7 @@ func createEvmGenesis(
 	subnetName string,
 	evmVersion string,
 ) ([]byte, *models.Sidecar, error) {
-	ux.Logger.PrintToUser("creating subnet %s", subnetName)
+	ux.Logger.PrintToUser("creating net %s", subnetName)
 
 	genesis := core.Genesis{}
 	conf := params.SubnetEVMDefaultChainConfig

@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -108,7 +108,7 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 	balance = uint64(balanceLUX * float64(units.Lux))
 
 	// Create deployer and increase validator balance
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 	if err := deployer.IncreaseValidatorPChainBalance(validationID, balance); err != nil {
 		return fmt.Errorf("failed to increase validator balance: %w", err)
 	}
