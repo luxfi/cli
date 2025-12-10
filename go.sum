@@ -422,8 +422,8 @@ github.com/luxfi/netrunner v1.14.8 h1:yzQTpvrAQy/z9KavwGJFT3lTqkFLnyAQVFzUD80mGj
 github.com/luxfi/netrunner v1.14.8/go.mod h1:TzgN6UPoVnEv3edaM/TO+4Pp8aQVyvBeSbdq6/OEmWM=
 github.com/luxfi/node v1.21.11 h1:Gj7ccCaJ0qadsoMz9M3e7+WadUccA6JQraTAfbTK4SA=
 github.com/luxfi/node v1.21.11/go.mod h1:P8oadRkpiRU0Ezuj48KTUhZRGoJEdB8EbPEeMbXWnR4=
-github.com/luxfi/sdk v1.16.23 h1:we2fNa3NUKyYMK99jz0eNdt9KtlD4ch8T4ihNt7TpA4=
-github.com/luxfi/sdk v1.16.23/go.mod h1:fH6V/cXtJzBZ/XimghK9ARkGlvNS9lf4rqZFYOZqM8s=
+github.com/luxfi/sdk v1.16.24 h1:G3cyhaRqiwRW6MHayk9QjjsaKCtMTT3a6iNPd5Heryg=
+github.com/luxfi/sdk v1.16.24/go.mod h1:q67cI86plt5dvTjw+ozrkzqLKbob+L5yJJotPBH34p4=
 github.com/luxfi/trace v0.1.2 h1:KhRZbk2lQQmmYZjdTWcZKCYkLfu7/VUiLFIsWFKhkwg=
 github.com/luxfi/trace v0.1.2/go.mod h1:4SleFc5NVbQYEfn6rYafdfxvHJ+QSdkGAIfKiICYvQE=
 github.com/luxfi/warp v1.16.26 h1:XawtVax9UXd9NbIuQt4aY74ypfAvzkypW4LqdIuBnHM=
