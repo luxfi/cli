@@ -14,7 +14,7 @@ import (
 
 func main() {
 	subnetID := "Y1irJDjzPA69zqMgg2wZ6r1ufWcSpSpWoLoGchRugYsp7bvRz"
-	blockchainID := "2NmYKwKZ4Ewvki6rZQBeMhXeMxDmfKox14fyqnz1KFXVJnXX2e"
+	blockchainID := "28xQzMVUhfySnzYYGtECjRf4nXW8aSkevGAYMb4TdwCQwA8Gxu"
 
 	fmt.Printf("Tracking subnet:\n  SubnetID: %s\n  BlockchainID: %s\n", subnetID, blockchainID)
 
