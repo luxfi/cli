@@ -322,13 +322,6 @@ func StartNetwork(*cobra.Command, []string) error {
 		}
 	}
 
-	// Copy chain configs from canonical ~/.lux/subnets/ to network node directories
-	// This must happen before WaitForHealthy so VMs can initialize with their genesis
-	if err := net.CopySubnetChainConfigsToNetwork(app, outputDir); err != nil {
-		ux.Logger.PrintToUser("Warning: Failed to copy subnet chain configs: %v", err)
-		// Continue - this is not fatal for networks without subnets
-	}
-
 	clusterInfo, err := net.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
