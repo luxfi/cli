@@ -84,9 +84,9 @@ func GetHRP(networkID uint32) string {
 	switch networkID {
 	case constants.LocalID:
 		return constants.LocalHRP
-	case constants.TestnetID:
+	case constants.TestnetID, constants.LuxTestnetID:
 		return constants.TestnetHRP
-	case constants.MainnetID:
+	case constants.MainnetID, constants.LuxMainnetID:
 		return constants.MainnetHRP
 	default:
 		return constants.FallbackHRP

@@ -15,6 +15,17 @@ func CreateCustomSidecar(
 	blockchainName string,
 	vmVersion string,
 ) (*models.Sidecar, error) {
+	// If sc is nil, create a new sidecar
+	if sc == nil {
+		sc = &models.Sidecar{
+			Version: "1.0.0",
+		}
+	}
+
+	// Always set Name and Subnet from blockchainName
+	sc.Name = blockchainName
+	sc.Subnet = blockchainName
+
 	// Update sidecar with custom VM information
 	sc.VM = models.CustomVM
 	sc.VMVersion = vmVersion

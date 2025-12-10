@@ -160,7 +160,6 @@ func buildCurrentValidatorStats(pClient *platformvm.Client, infoClient info.Clie
 // findAPIEndpoint tries first to create a client to a local node
 // if it doesn't find one, it tries public APIs
 func findAPIEndpoint(network models.Network) (*platformvm.Client, info.Client) {
-
 	// first try local node
 	ctx := context.Background()
 	c := platformvm.NewClient(constants.LocalAPIEndpoint)
