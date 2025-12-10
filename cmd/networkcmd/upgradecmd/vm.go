@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/plugins"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -153,7 +153,7 @@ func selectNetworkToUpgrade(sc models.Sidecar, upgradeOptions []string) (string,
 	}
 
 	// get locally deployed subnets from file since network is shut down
-	locallyDeployedSubnets, err := subnet.GetLocallyDeployedSubnetsFromFile(app)
+	locallyDeployedSubnets, err := net.GetLocallyDeployedSubnetsFromFile(app)
 	if err != nil {
 		return "", fmt.Errorf("unable to read deployed subnets: %w", err)
 	}
