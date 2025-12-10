@@ -123,7 +123,7 @@ func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 		GwPort:              gRPCGatewayEndpoint,
 		DialTimeout:         gRPCDialTimeout,
 		SnapshotsDir:        snapshotsDir,
-		RedirectNodesOutput: false,
+		RedirectNodesOutput: true,
 	}, adaptedLog)
 }
 
@@ -197,6 +197,9 @@ func StartServerProcess(app *application.Lux) error {
 
 	args := []string{constants.BackendCmd}
 	cmd := exec.Command(thisBin, args...)
+	// Inherit environment variables from the parent process
+	// This is important for passing DISABLE_MIGRATION_DETECTION and other env vars to the backend
+	cmd.Env = os.Environ()
 
 	outputDirPrefix := path.Join(app.GetRunDir(), "server")
 	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)

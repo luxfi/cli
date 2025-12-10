@@ -37,7 +37,7 @@ func GetLocalNetworkConnectionInfo(app *application.Lux) (ConnectionSettings, er
 	// Use netrunner client to get local network info
 	// For now, return default localhost settings
 	return ConnectionSettings{
-		Endpoint:  "http://localhost:9650",
+		Endpoint:  "http://localhost:9630",
 		Network:   nil,
 		NetworkID: 1337, // Default local network ID
 	}, nil
@@ -58,7 +58,7 @@ func LocalClusterHealth(app *application.Lux, clusterName string) (bool, bool, e
 // GetLocalClusterURIs returns the URIs for a local cluster
 func GetLocalClusterURIs(app *application.Lux, clusterName string) ([]string, error) {
 	// Get cluster URIs from netrunner
-	return []string{"http://localhost:9650"}, nil
+	return []string{"http://localhost:9630"}, nil
 }
 
 // LocalCluster represents a local network cluster
@@ -150,7 +150,7 @@ func StartLocalNetwork(app *application.Lux, clusterName, nodeVersion string) er
 func PrintEndpoints(app *application.Lux, printFn func(string, ...interface{}), blockchainName string) error {
 	// Print blockchain endpoints
 	printFn("Blockchain: %s", blockchainName)
-	printFn("RPC Endpoint: http://localhost:9650/ext/bc/%s/rpc", blockchainName)
+	printFn("RPC Endpoint: http://localhost:9630/ext/bc/%s/rpc", blockchainName)
 	return nil
 }
 
@@ -241,7 +241,7 @@ func AddNodeToLocalCluster(
 	network uint32,
 ) (NodeInfo, error) {
 	// Add node using netrunner
-	return NodeInfo{URI: "http://localhost:9650"}, nil
+	return NodeInfo{URI: "http://localhost:9630"}, nil
 }
 
 // RefreshLocalClusterAliases refreshes cluster aliases

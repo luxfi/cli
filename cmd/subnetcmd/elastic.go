@@ -403,7 +403,7 @@ func transformElasticSubnetLocal(sc models.Sidecar, subnetName string, tokenName
 	ux.Logger.PrintToUser("Starting Elastic Subnet Transformation")
 	cancel := make(chan struct{})
 	go ux.PrintWait(cancel)
-	testKey := genesis.EWOQKey
+	testKey := genesis.GetLocalKey()
 	secpKeyChain := secp256k1fx.NewKeychain(testKey)
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
@@ -605,7 +605,7 @@ func transformValidatorsToPermissionlessLocal(sc models.Sidecar, subnetID ids.ID
 func handleRemoveAndAddValidators(sc models.Sidecar, subnetID ids.ID, validator ids.NodeID, stakedAmount uint64) error {
 	startTime := time.Now().Add(constants.StakingMinimumLeadTime).UTC()
 	endTime := startTime.Add(constants.MinStakeDuration)
-	testKey := genesis.EWOQKey
+	testKey := genesis.GetLocalKey()
 	secpKeyChain := secp256k1fx.NewKeychain(testKey)
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
