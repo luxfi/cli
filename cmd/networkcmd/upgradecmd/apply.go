@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/params/extras"
@@ -207,13 +207,13 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 		return err
 	}
 
-	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
+	clusterInfo, err := net.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
 
 	fmt.Println()
-	if subnet.HasEndpoints(clusterInfo) {
+	if net.HasEndpoints(clusterInfo) {
 		ux.Logger.PrintToUser("Network restarted and ready to use. Upgrade bytes have been applied to running nodes at these endpoints.")
 
 		nextUpgrade, err := getEarliestUpcomingTimestamp(precmpUpgrades)

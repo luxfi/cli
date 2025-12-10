@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	warpgenesis "github.com/luxfi/cli/pkg/interchain/genesis"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -262,7 +262,7 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 		// }
 		// warpKeyAddress = k.C()
 	}
-	_, subnetAirdropAddress, _, err := subnet.GetDefaultSubnetAirdropKeyInfo(app, sc.Name)
+	_, subnetAirdropAddress, _, err := net.GetDefaultSubnetAirdropKeyInfo(app, sc.Name)
 	if err != nil {
 		return err
 	}

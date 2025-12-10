@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/sdk/utils"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ func CallDeleteBlockchain(blockchainName string) error {
 	dataFound := false
 
 	// rm airdrop key if exists
-	airdropKeyName, _, _, err := subnet.GetDefaultSubnetAirdropKeyInfo(app, blockchainName)
+	airdropKeyName, _, _, err := net.GetDefaultSubnetAirdropKeyInfo(app, blockchainName)
 	if err != nil {
 		return err
 	}

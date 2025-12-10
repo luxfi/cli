@@ -15,12 +15,12 @@ import (
 )
 
 func getChainID(app *application.Lux) (*big.Int, error) {
-	ux.Logger.PrintToUser("Enter your subnet's ChainId. It can be any positive integer.")
+	ux.Logger.PrintToUser("Enter your net's ChainId. It can be any positive integer.")
 	return app.Prompt.CapturePositiveBigInt("ChainId")
 }
 
 func getTokenName(app *application.Lux) (string, error) {
-	ux.Logger.PrintToUser("Select a symbol for your subnet's native token")
+	ux.Logger.PrintToUser("Select a symbol for your net's native token")
 	tokenName, err := app.Prompt.CaptureString("Token symbol")
 	if err != nil {
 		return "", err

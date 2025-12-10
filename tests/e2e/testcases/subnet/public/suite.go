@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/ids"
@@ -143,7 +143,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// GetCurrentSupply will return error if queried for non-elastic subnet
-		err = subnet.GetCurrentSupply(subnetID)
+		err = net.GetCurrentSupply(subnetID)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 
 		_, err = commands.SimulateTestnetTransformSubnet(subnetName, keyName)
@@ -153,7 +153,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		gomega.Expect(exists).Should(gomega.BeTrue())
 
 		// GetCurrentSupply will return result if queried for elastic subnet
-		err = subnet.GetCurrentSupply(subnetID)
+		err = net.GetCurrentSupply(subnetID)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		_, err = commands.SimulateTestnetTransformSubnet(subnetName, keyName)
@@ -175,7 +175,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		// confirm current validator set
 		subnetID, err := ids.FromString(subnetIDStr)
 		gomega.Expect(err).Should(gomega.BeNil())
-		validators, err := subnet.GetSubnetValidators(subnetID)
+		validators, err := net.GetSubnetValidators(subnetID)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(validators)).Should(gomega.Equal(5))
 
@@ -193,7 +193,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		_ = commands.SimulateTestnetRemoveValidator(subnetName, keyName, validatorToRemove)
 
 		// confirm current validator set
-		validators, err = subnet.GetSubnetValidators(subnetID)
+		validators, err = net.GetSubnetValidators(subnetID)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(validators)).Should(gomega.Equal(4))
 

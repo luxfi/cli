@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	cliprompts "github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
@@ -199,7 +199,7 @@ func addValidator(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 	if delegationFee == 0 {
 		delegationFee, err = getDelegationFeeOption(app, network)
 		if err != nil {
