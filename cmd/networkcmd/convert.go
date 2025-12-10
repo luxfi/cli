@@ -388,8 +388,8 @@ func InitializeValidatorManager(
 		bootstrapValidatorsInterface[i] = v
 	}
 
-	subnetSDK := blockchainSDK.Subnet{
-		SubnetID:            subnetID,
+	netSDK := blockchainSDK.Net{
+		NetID:               subnetID,
 		BlockchainID:        blockchainID,
 		OwnerAddress:        &ownerAddress,
 		RPC:                 rpcURL,
@@ -432,7 +432,7 @@ func InitializeValidatorManager(
 		if !found {
 			return tracked, fmt.Errorf("could not find validator manager owner private key")
 		}
-		if err := subnetSDK.InitializeProofOfStake(
+		if err := netSDK.InitializeProofOfStake(
 			app.Log,
 			network.SDKNetwork(),
 			genesisPrivateKey,
@@ -455,7 +455,7 @@ func InitializeValidatorManager(
 		ux.Logger.GreenCheckmarkToUser("Proof of Stake Validator Manager contract successfully initialized on blockchain %s", blockchainName)
 	} else {
 		ux.Logger.PrintToUser("Initializing Proof of Authority Validator Manager contract on blockchain %s ...", blockchainName)
-		if err := subnetSDK.InitializeProofOfAuthority(
+		if err := netSDK.InitializeProofOfAuthority(
 			app.Log,
 			network.SDKNetwork(),
 			genesisPrivateKey,
