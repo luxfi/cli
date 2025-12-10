@@ -182,8 +182,8 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	for i, v := range luxdBootstrapValidators {
 		validators[i] = v
 	}
-	subnetSDK := blockchainSDK.Subnet{
-		SubnetID:            subnetID,
+	netSDK := blockchainSDK.Net{
+		NetID:               subnetID,
 		BlockchainID:        blockchainID,
 		BootstrapValidators: validators,
 		OwnerAddress:        &ownerAddress,
@@ -207,7 +207,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Initializing Proof of Authority Validator Manager contract on blockchain %s"), blockchainName)
 		if err := validatormanager.SetupPoA(
 			aggregatorLogger, // Use aggregatorLogger instead of app.Log
-			subnetSDK,
+			netSDK,
 			network,
 			privateKey,
 			aggregatorLogger,
@@ -280,7 +280,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		}
 		if err := validatormanager.SetupPoS(
 			aggregatorLogger, // Use aggregatorLogger instead of app.Log
-			subnetSDK,
+			netSDK,
 			network,
 			privateKey,
 			aggregatorLogger,

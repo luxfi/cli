@@ -209,8 +209,8 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 			validators = append(validators, v)
 		}
 		ownerAddress := common.HexToAddress(ewoqEVMAddress)
-		subnetSDK := blockchainSDK.Subnet{
-			SubnetID:            subnetID,
+		netSDK := blockchainSDK.Net{
+			NetID:               subnetID,
 			BlockchainID:        blockchainID,
 			OwnerAddress:        &ownerAddress,
 			RPC:                 rpcURL,
@@ -219,7 +219,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 
 		_, cancel := utils.GetSignatureAggregatorContext()
 		defer cancel()
-		err = subnetSDK.InitializeProofOfAuthority(
+		err = netSDK.InitializeProofOfAuthority(
 			luxlog.NoLog{},
 			network.SDKNetwork(),
 			k.PrivKeyHex(),
