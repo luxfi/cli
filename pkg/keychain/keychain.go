@@ -32,6 +32,8 @@ const (
 var (
 	ErrMutuallyExlusiveKeySource = errors.New("key source flags --key, --ewoq, --ledger/--ledger-addrs are mutually exclusive")
 	ErrEwoqKeyOnTestnetOrMainnet = errors.New("key source ewoq is not available for mainnet/testnet operations")
+	// AllowInsecureKeysOnMainnet allows ewoq and stored keys on mainnet for development
+	AllowInsecureKeysOnMainnet = false
 )
 
 type Keychain struct {
@@ -155,10 +157,10 @@ func GetKeychainFromCmdLineFlags(
 			}
 		}
 	case network == models.Mainnet:
-		if useEwoq || keyName == "ewoq" {
+		if (useEwoq || keyName == "ewoq") && !AllowInsecureKeysOnMainnet {
 			return nil, ErrEwoqKeyOnTestnetOrMainnet
 		}
-		if keyName == "" {
+		if keyName == "" && !useEwoq {
 			useLedger = true
 		} else {
 			ux.Logger.PrintToUser("")
@@ -221,10 +223,12 @@ func GetKeychain(
 		return NewKeychain(network, kc, ledgerDevice, ledgerIndices), nil
 	}
 	if useEwoq {
-		keyPath := app.GetKeyPath("ewoq")
-		sf, err := key.LoadSoft(network.ID(), keyPath)
+		// SECURITY: Use the secure local-key instead of the publicly known ewoq key.
+		// The -e/--ewoq flag now uses ~/.lux/keys/local-key.pk which is generated
+		// on first use with a unique random key per machine.
+		sf, err := key.GetOrCreateLocalKey(network.ID())
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get local key: %w", err)
 		}
 		kc := sf.KeyChain()
 		wrappedKc := WrapSecp256k1fxKeychain(kc)

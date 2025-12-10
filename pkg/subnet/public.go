@@ -27,10 +27,10 @@ import (
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/net/primary"
-	"github.com/luxfi/node/wallet/net/primary/common"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/chain/c"
+	"github.com/luxfi/sdk/wallet/primary"
+	"github.com/luxfi/sdk/wallet/primary/common"
 )
 
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")
@@ -295,12 +295,15 @@ func (d *PublicDeployer) DeploySubnet(
 	controlKeys []string,
 	threshold uint32,
 ) (ids.ID, error) {
+	ux.Logger.PrintToUser("DeploySubnet: starting...")
 	wallet, err := d.loadWallet()
 	if err != nil {
 		return ids.Empty, err
 	}
+	ux.Logger.PrintToUser("DeploySubnet: calling createSubnetTx...")
 	subnetID, err := d.createSubnetTx(controlKeys, threshold, wallet)
 	if err != nil {
+		ux.Logger.PrintToUser("DeploySubnet: createSubnetTx error: %v", err)
 		return ids.Empty, err
 	}
 	ux.Logger.PrintToUser("Subnet has been created with ID: %s", subnetID.String())
@@ -410,6 +413,7 @@ func (d *PublicDeployer) Sign(
 
 func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error) {
 	ctx := context.Background()
+	ux.Logger.PrintToUser("loadWallet: starting...")
 
 	var api string
 	switch d.network {
@@ -423,6 +427,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	default:
 		return nil, fmt.Errorf("unsupported public network")
 	}
+	ux.Logger.PrintToUser("loadWallet: using API endpoint %s", api)
 
 	// Create empty EthKeychain if kc doesn't implement it
 	var ethKc c.EthKeychain
@@ -432,14 +437,28 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
-		URI:         api,
-		LUXKeychain: keychainwrapper.WrapCryptoKeychain(d.kc),
-		EthKeychain: ethKc,
+
+	// Build the set of P-Chain transactions to fetch (e.g., subnet creation txs)
+	// This is needed so the wallet knows about subnet owners when creating blockchain txs
+	pChainTxsToFetch := set.Set[ids.ID]{}
+	for _, txID := range preloadTxs {
+		pChainTxsToFetch.Add(txID)
+	}
+
+	ux.Logger.PrintToUser("loadWallet: creating P-Chain wallet...")
+	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
+	// support standard AVM API methods.
+	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
+		URI:              api,
+		LUXKeychain:      keychainwrapper.WrapCryptoKeychain(d.kc),
+		EthKeychain:      ethKc,
+		PChainTxsToFetch: pChainTxsToFetch,
 	})
 	if err != nil {
+		ux.Logger.PrintToUser("loadWallet: error creating wallet: %v", err)
 		return nil, err
 	}
+	ux.Logger.PrintToUser("loadWallet: wallet created successfully")
 	return wallet, nil
 }
 
@@ -560,9 +579,9 @@ func (d *PublicDeployer) ConvertL1(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	managerAddress ethcommon.Address,
-	validators []interface{}, // []*txs.ConvertNetToL1Validator when available
+	validators []interface{}, // []*txs.ConvertNetToL1Validator
 ) (bool, ids.ID, *txs.Tx, []string, error) {
-	ux.Logger.PrintToUser("Now calling ConvertSubnetToL1Tx...")
+	ux.Logger.PrintToUser("Now calling ConvertNetToL1Tx...")
 
 	// Get wallet
 	wallet, err := d.loadWallet(subnetID)
@@ -575,54 +594,51 @@ func (d *PublicDeployer) ConvertL1(
 		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing auth keys: %w", err)
 	}
 
-	// Build ConvertSubnetToL1Tx using the wallet builder
+	// Convert []interface{} to []*txs.ConvertNetToL1Validator
+	convertValidators := make([]*txs.ConvertNetToL1Validator, 0, len(validators))
+	for _, v := range validators {
+		if validator, ok := v.(*txs.ConvertNetToL1Validator); ok {
+			convertValidators = append(convertValidators, validator)
+		} else {
+			return false, ids.Empty, nil, nil, fmt.Errorf("invalid validator type: expected *txs.ConvertNetToL1Validator, got %T", v)
+		}
+	}
+
+	// Build ConvertNetToL1Tx using the wallet builder
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 
-	// NewConvertSubnetToL1Tx not yet implemented in wallet builder
-	// For now, return an error until the functionality is available
-	_ = wallet
-	_ = options
-	_ = validators
-	_ = blockchainID
-	_ = managerAddress
+	unsignedTx, err := wallet.P().Builder().NewConvertNetToL1Tx(
+		subnetID,
+		blockchainID,
+		managerAddress.Bytes(),
+		convertValidators,
+		options...,
+	)
+	if err != nil {
+		return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertNetToL1Tx: %w", err)
+	}
 
-	return false, ids.Empty, nil, nil, fmt.Errorf("ConvertSubnetToL1Tx not yet implemented in wallet builder")
+	tx := txs.Tx{Unsigned: unsignedTx}
+	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
+	defer cancel()
+	if err := wallet.P().Signer().Sign(ctx, &tx); err != nil {
+		return false, ids.Empty, nil, nil, fmt.Errorf("error signing tx: %w", err)
+	}
 
-	// The following code will be enabled when wallet builder supports ConvertSubnetToL1Tx:
-	/*
-		unsignedTx, err := wallet.P().Builder().NewConvertSubnetToL1Tx(
-			subnetID,
-			blockchainID,
-			managerAddress.Bytes(),
-			validators,
-			options...,
-		)
-		if err != nil {
-			return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertSubnetToL1Tx: %w", err)
-		}
+	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(&tx, controlKeys)
+	if err != nil {
+		return false, ids.Empty, nil, nil, err
+	}
 
-		tx := txs.Tx{Unsigned: unsignedTx}
-		ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
-		defer cancel()
-		if err := wallet.P().Signer().Sign(ctx, &tx); err != nil {
-			return false, ids.Empty, nil, nil, fmt.Errorf("error signing tx: %w", err)
-		}
-
-		_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(&tx, controlKeys)
+	if len(remainingSubnetAuthKeys) == 0 {
+		// Commit the transaction
+		txID, err := d.Commit(&tx)
 		if err != nil {
 			return false, ids.Empty, nil, nil, err
 		}
-
-		if len(remainingSubnetAuthKeys) == 0 {
-			// Commit the transaction
-			txID, err := d.Commit(&tx)
-			if err != nil {
-				return false, ids.Empty, nil, nil, err
-			}
-			return true, txID, &tx, remainingSubnetAuthKeys, nil
-		}
-		return false, ids.Empty, &tx, remainingSubnetAuthKeys, nil
-	*/
+		return true, txID, &tx, remainingSubnetAuthKeys, nil
+	}
+	return false, ids.Empty, &tx, remainingSubnetAuthKeys, nil
 }
 
 func (*PublicDeployer) signTx(
@@ -636,10 +652,12 @@ func (*PublicDeployer) signTx(
 }
 
 func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
+	ux.Logger.PrintToUser("createSubnetTx: starting with control keys: %v", controlKeys)
 	addrs, err := address.ParseToIDs(controlKeys)
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failure parsing control keys: %w", err)
 	}
+	ux.Logger.PrintToUser("createSubnetTx: parsed addresses: %v", addrs)
 	owners := &secp256k1fx.OutputOwners{
 		Addrs:     addrs,
 		Threshold: threshold,
@@ -649,10 +667,13 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
 	}
+	ux.Logger.PrintToUser("createSubnetTx: calling IssueCreateNetTx...")
 	tx, err := wallet.P().IssueCreateNetTx(owners, opts...)
 	if err != nil {
+		ux.Logger.PrintToUser("createSubnetTx: IssueCreateNetTx error: %v", err)
 		return ids.Empty, err
 	}
+	ux.Logger.PrintToUser("createSubnetTx: tx issued successfully with ID: %s", tx.ID().String())
 	return tx.ID(), nil
 }
 

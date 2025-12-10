@@ -26,12 +26,12 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/client"
+	anrnetwork "github.com/luxfi/netrunner/network"
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
@@ -46,7 +46,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	walletkeychain "github.com/luxfi/node/wallet/keychain"
-	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"go.uber.org/zap"
@@ -106,12 +106,12 @@ func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, 
 	return d.doDeploy(chain, chainGenesis, genesisPath)
 }
 
-func getAssetID(wallet primary.Wallet, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
+func getAssetID(wallet primary.Wallet, ownerAddr ids.ShortID, tokenName string, tokenSymbol string, maxSupply uint64) (ids.ID, error) {
 	xWallet := wallet.X()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
+			ownerAddr,
 		},
 	}
 	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
@@ -195,14 +195,22 @@ func IssueTransformSubnetTx(
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
-	subnetAssetID, err := getAssetID(wallet, tokenName, tokenSymbol, maxSupply)
+
+	// Get the first address from the keychain for ownership
+	addrs := kc.Addresses()
+	if addrs.Len() == 0 {
+		return ids.Empty, ids.Empty, errors.New("keychain has no addresses")
+	}
+	ownerAddr := addrs.List()[0]
+
+	subnetAssetID, err := getAssetID(wallet, ownerAddr, tokenName, tokenSymbol, maxSupply)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
+			ownerAddr,
 		},
 	}
 	err = exportToPChain(wallet, owner, subnetAssetID, maxSupply)
@@ -247,7 +255,9 @@ func IssueAddPermissionlessValidatorTx(
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
+	// support standard AVM API methods.
+	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
 		EthKeychain: ethKc,
@@ -255,10 +265,18 @@ func IssueAddPermissionlessValidatorTx(
 	if err != nil {
 		return ids.Empty, err
 	}
+
+	// Get the first address from the keychain for ownership
+	addrs := kc.Addresses()
+	if addrs.Len() == 0 {
+		return ids.Empty, errors.New("keychain has no addresses")
+	}
+	ownerAddr := addrs.List()[0]
+
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
+			ownerAddr,
 		},
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
@@ -652,54 +670,40 @@ func getExpectedDefaultSnapshotSHA256Sum() (string, error) {
 // Initialize default snapshot with bootstrap snapshot archive
 // If force flag is set to true, overwrite the default snapshot if it exists
 func SetDefaultSnapshot(snapshotsDir string, force bool) error {
-	bootstrapSnapshotArchivePath := filepath.Join(snapshotsDir, constants.BootstrapSnapshotArchiveName)
-	// will download either if file not exists or if sha256 sum is not the same
-	downloadSnapshot := false
-	if _, err := os.Stat(bootstrapSnapshotArchivePath); os.IsNotExist(err) {
-		downloadSnapshot = true
-	} else {
-		gotSum, err := utils.GetSHA256FromDisk(bootstrapSnapshotArchivePath)
-		if err != nil {
-			return err
-		}
-		expectedSum, err := getExpectedDefaultSnapshotSHA256Sum()
-		if err != nil {
-			ux.Logger.PrintToUser("Warning: failure verifying that the local snapshot is the latest one: %s", err)
-		} else if gotSum != expectedSum {
-			downloadSnapshot = true
-		}
-	}
-	if downloadSnapshot {
-		resp, err := http.Get(constants.BootstrapSnapshotURL)
-		if err != nil {
-			return fmt.Errorf("failed downloading bootstrap snapshot: %w", err)
-		}
-		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("failed downloading bootstrap snapshot: unexpected http status code: %d", resp.StatusCode)
-		}
-		defer resp.Body.Close()
-		bootstrapSnapshotBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("failed downloading bootstrap snapshot: %w", err)
-		}
-		if err := os.WriteFile(bootstrapSnapshotArchivePath, bootstrapSnapshotBytes, WriteReadReadPerms); err != nil {
-			return fmt.Errorf("failed writing down bootstrap snapshot: %w", err)
-		}
-	}
 	defaultSnapshotPath := filepath.Join(snapshotsDir, "anr-snapshot-"+constants.DefaultSnapshotName)
 	if force {
 		if err := os.RemoveAll(defaultSnapshotPath); err != nil {
 			return fmt.Errorf("failed removing default snapshot: %w", err)
 		}
 	}
+	// Always create a fresh snapshot with embedded genesis from netrunner
+	// This avoids downloading potentially corrupted snapshots from GitHub
 	if _, err := os.Stat(defaultSnapshotPath); os.IsNotExist(err) {
-		bootstrapSnapshotBytes, err := os.ReadFile(bootstrapSnapshotArchivePath)
+		if err := os.MkdirAll(defaultSnapshotPath, 0o755); err != nil {
+			return fmt.Errorf("failed creating snapshot directory: %w", err)
+		}
+		// Create network.json with embedded genesis from netrunner
+		genesis, err := anrnetwork.LoadLocalGenesis()
 		if err != nil {
-			return fmt.Errorf("failed reading bootstrap snapshot: %w", err)
+			return fmt.Errorf("failed loading local genesis: %w", err)
 		}
-		if err := binutils.InstallArchive("tar.gz", bootstrapSnapshotBytes, snapshotsDir); err != nil {
-			return fmt.Errorf("failed installing bootstrap snapshot: %w", err)
+		genesisBytes, err := json.Marshal(genesis)
+		if err != nil {
+			return fmt.Errorf("failed marshaling genesis: %w", err)
 		}
+		networkConfig := map[string]interface{}{
+			"genesis":   string(genesisBytes),
+			"networkID": 1337,
+		}
+		networkBytes, err := json.MarshalIndent(networkConfig, "", "  ")
+		if err != nil {
+			return fmt.Errorf("failed marshaling network config: %w", err)
+		}
+		networkJsonPath := filepath.Join(defaultSnapshotPath, "network.json")
+		if err := os.WriteFile(networkJsonPath, networkBytes, WriteReadReadPerms); err != nil {
+			return fmt.Errorf("failed writing network.json: %w", err)
+		}
+		ux.Logger.PrintToUser("Created fresh snapshot with embedded genesis")
 	}
 	return nil
 }
@@ -711,7 +715,7 @@ func (d *LocalDeployer) startNetwork(
 	nodeBinPath string,
 	runDir string,
 ) error {
-	loadSnapshotOpts := []client.OpOption{
+	opts := []client.OpOption{
 		client.WithExecPath(nodeBinPath),
 		client.WithRootDataDir(runDir),
 		client.WithReassignPortsIfUsed(true),
@@ -724,19 +728,48 @@ func (d *LocalDeployer) startNetwork(
 		return nil
 	}
 	if configStr != "" {
-		loadSnapshotOpts = append(loadSnapshotOpts, client.WithGlobalNodeConfig(configStr))
+		opts = append(opts, client.WithGlobalNodeConfig(configStr))
 	}
 
-	pp, err := cli.LoadSnapshot(
-		ctx,
-		constants.DefaultSnapshotName,
-		loadSnapshotOpts...,
-	)
+	// Try to load from snapshot first, if it has valid nodes
+	snapshotPath := filepath.Join(d.app.GetSnapshotsDir(), "anr-snapshot-"+constants.DefaultSnapshotName)
+	dbPath := filepath.Join(snapshotPath, "db")
+
+	// Check if we have a valid snapshot with nodes (db directory with node subdirs)
+	if fi, dbErr := os.Stat(dbPath); dbErr == nil && fi.IsDir() {
+		// Check if there's at least one node directory
+		entries, _ := os.ReadDir(dbPath)
+		hasNodes := false
+		for _, e := range entries {
+			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
+				hasNodes = true
+				break
+			}
+		}
+		if hasNodes {
+			pp, err := cli.LoadSnapshot(
+				ctx,
+				constants.DefaultSnapshotName,
+				opts...,
+			)
+			if err == nil {
+				ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
+				ux.Logger.PrintToUser("Starting network from snapshot...")
+				return nil
+			}
+			// If LoadSnapshot fails, fall through to Start
+			ux.Logger.PrintToUser("Snapshot load failed, starting fresh network: %s", err)
+		}
+	}
+
+	// Start a fresh network using netrunner's embedded genesis
+	ux.Logger.PrintToUser("Starting fresh local network...")
+	pp, err := cli.Start(ctx, nodeBinPath, opts...)
 	if err != nil {
-		return fmt.Errorf("failed to start network :%w", err)
+		return fmt.Errorf("failed to start network: %w", err)
 	}
 	ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
-	ux.Logger.PrintToUser("Starting network...")
+	ux.Logger.PrintToUser("Network started successfully")
 	return nil
 }
 
@@ -774,7 +807,9 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 		// Create a minimal EthKeychain implementation
 		ethKc = &emptyEthKeychain{}
 	}
-	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
+	// support standard AVM API methods.
+	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
 		EthKeychain: ethKc,

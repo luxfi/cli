@@ -38,12 +38,12 @@ func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
-	subnetInput, ok := netAuth.(*secp256k1fx.Input)
+	netInput, ok := netAuth.(*secp256k1fx.Input)
 	if !ok {
 		return nil, fmt.Errorf("expected netAuth of type *secp256k1fx.Input, got %T", netAuth)
 	}
 	authSigners := []string{}
-	for _, sigIndex := range subnetInput.SigIndices {
+	for _, sigIndex := range netInput.SigIndices {
 		if sigIndex >= uint32(len(controlKeys)) {
 			return nil, fmt.Errorf("signer index %d exceeds number of control keys", sigIndex)
 		}

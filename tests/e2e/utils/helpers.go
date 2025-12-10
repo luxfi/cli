@@ -37,7 +37,7 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/net/primary"
+	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/models"
 )
 

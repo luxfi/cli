@@ -7,44 +7,61 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
+)
+
+// Alignment constants for backward compatibility
+var (
+	ALIGN_LEFT   = tw.AlignLeft
+	ALIGN_CENTER = tw.AlignCenter
+	ALIGN_RIGHT  = tw.AlignRight
 )
 
 // TableCompatWrapper provides backward compatibility for tablewriter v0.0.5 API
-// on top of tablewriter v0.0.5+ (maintaining compatibility)
+// on top of tablewriter v1.0.9+
 type TableCompatWrapper struct {
 	*tablewriter.Table
-	headers []string
+	headers   []string
+	alignment tw.Align
 }
 
 // NewCompatTable creates a new table with v0.0.5-like API
 func NewCompatTable() *TableCompatWrapper {
 	return &TableCompatWrapper{
-		Table: tablewriter.NewWriter(os.Stdout),
+		Table:     tablewriter.NewTable(os.Stdout),
+		alignment: tw.AlignLeft,
 	}
 }
 
 // SetHeader sets the headers using the old API
 func (t *TableCompatWrapper) SetHeader(headers []string) {
 	t.headers = headers
-	t.Table.SetHeader(headers)
+	// Convert []string to []any for the new API
+	anyHeaders := make([]any, len(headers))
+	for i, h := range headers {
+		anyHeaders[i] = h
+	}
+	t.Table.Header(anyHeaders...)
 }
 
-// SetRowLine enables/disables row lines
+// SetRowLine is a no-op in v1.0.9 (row lines controlled via renderer settings)
 func (t *TableCompatWrapper) SetRowLine(enable bool) {
-	t.Table.SetRowLine(enable)
+	// Row lines are now controlled via renderer configuration
+	// This is a no-op for compatibility
 }
 
-// SetAutoMergeCells enables/disables cell merging
+// SetAutoMergeCells is a no-op in v1.0.9 (merge mode controlled via config)
 func (t *TableCompatWrapper) SetAutoMergeCells(enable bool) {
-	t.Table.SetAutoMergeCells(enable)
+	// Cell merging is now controlled via config.Row.Formatting.MergeMode
+	// This is a no-op for compatibility
 }
-
-// SetAlignment sets the alignment (compatibility constant)
-const ALIGN_LEFT = tablewriter.ALIGN_LEFT
 
 // SetAlignment sets the alignment for rows
-func (t *TableCompatWrapper) SetAlignment(align int) {
-	t.Table.SetAlignment(align)
+func (t *TableCompatWrapper) SetAlignment(align tw.Align) {
+	t.alignment = align
+	t.Table.Configure(func(config *tablewriter.Config) {
+		config.Row.Alignment.Global = t.alignment
+	})
 }
 
 // AppendCompat adds a row using string slice (old API)

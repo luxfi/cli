@@ -53,9 +53,8 @@ func (w *Secp256k1fxToNodeWrapper) Get(addr ids.ShortID) (nodekeychain.Signer, b
 	return w.secpKC.Get(addr)
 }
 
-// Addresses returns the addresses managed by this keychain as a set
+// Addresses returns the addresses managed by this keychain
 func (w *Secp256k1fxToNodeWrapper) Addresses() set.Set[ids.ShortID] {
-	// Already returns a set
 	return w.secpKC.Addresses()
 }
 
@@ -81,6 +80,5 @@ func (w *NodeToWalletWrapper) Get(addr ids.ShortID) (walletkeychain.Signer, bool
 
 // Addresses returns the addresses managed by this keychain as a set
 func (w *NodeToWalletWrapper) Addresses() set.Set[ids.ShortID] {
-	// Return the set directly
 	return w.nodeKC.Addresses()
 }
