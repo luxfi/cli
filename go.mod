@@ -21,11 +21,11 @@ require (
 	github.com/luxfi/ids v1.1.3
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.24
-	github.com/luxfi/lpm v1.7.12
-	github.com/luxfi/netrunner v1.14.3
-	github.com/luxfi/node v1.21.3
+	github.com/luxfi/lpm v1.7.13
+	github.com/luxfi/netrunner v1.14.8
+	github.com/luxfi/node v1.21.11
 	github.com/luxfi/sdk v1.16.23
-	github.com/luxfi/warp v1.16.19
+	github.com/luxfi/warp v1.16.26
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/mitchellh/go-wordwrap v1.0.1
@@ -62,9 +62,12 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
 require (
-	github.com/luxfi/genesis v1.2.4
+	github.com/cockroachdb/pebble v1.1.5
+	github.com/dgraph-io/badger/v3 v3.2103.5
+	github.com/luxfi/genesis v1.2.9
 	github.com/luxfi/math v0.1.5
 	github.com/luxfi/migrate v1.0.0
+	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	golang.org/x/term v0.36.0
 )
 
@@ -96,13 +99,13 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6 // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
+	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.6.2-0.20251027185721-da1faa40b98c // indirect
 	github.com/cockroachdb/errors v1.12.0 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
-	github.com/cockroachdb/pebble v1.1.5 // indirect
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20250429170803-42689b6311bb // indirect
 	github.com/consensys/gnark-crypto v0.19.2 // indirect
@@ -113,6 +116,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
+	github.com/dgraph-io/ristretto v0.2.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.9.0 // indirect
@@ -202,7 +206,6 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/supranational/blst v0.3.16-0.20250831170142-f48500c1fdbe // indirect
-	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
@@ -210,6 +213,7 @@ require (
 	github.com/zondax/golem v0.27.0 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
 	github.com/zondax/ledger-go v1.0.1 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
@@ -245,6 +249,3 @@ require (
 
 // migrate is now published - no local replace needed
 // replace github.com/luxfi/migrate => ../migrate
-
-// Local replace directives for development only - do not commit
-// replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
