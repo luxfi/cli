@@ -81,7 +81,7 @@ func AddBootstrapValidatorFlagsToCmd(cmd *cobra.Command, bootstrapFlags *Bootstr
 			"set the LUX balance of each bootstrap validator that will be used for continuous fee on P-Chain (setting balance=1 equals to 1 LUX for each bootstrap validator)",
 		)
 		set.StringVar(&bootstrapFlags.ChangeOwnerAddress, changeOwnerAddressFlag, "", "address that will receive change if node is no longer L1 validator")
-		set.BoolVar(&bootstrapFlags.LocalBootstrap, localBootstrapFlag, false, "auto-detect running nodes on localhost (ports 9630,9632,9634,9636,9638) as bootstrap validators")
+		set.BoolVar(&bootstrapFlags.LocalBootstrap, localBootstrapFlag, true, "auto-detect running nodes on localhost (ports 9630,9632,9634,9636,9638) as bootstrap validators")
 		bootstrapValidatorPreRun := func(cmd *cobra.Command, _ []string) error {
 			if err := validateBootstrapValidatorFlags(cmd, *bootstrapFlags); err != nil {
 				return err

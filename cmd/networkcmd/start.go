@@ -3,7 +3,6 @@
 package networkcmd
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -15,7 +14,6 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/subnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -200,13 +198,22 @@ func StartNetwork(*cobra.Command, []string) error {
 	// Build node config with BadgerDB options
 	nodeConfig := make(map[string]interface{})
 
-	// Auto-track deployed subnets - eliminates the track-subnets gotcha
-	subnetIDs, trackErr := subnet.GetLocallyDeployedSubnetIDs(app)
-	if trackErr == nil && len(subnetIDs) > 0 {
-		trackSubnetsStr := strings.Join(subnetIDs, ",")
-		ux.Logger.PrintToUser("Auto-tracking %d deployed subnet(s): %s", len(subnetIDs), trackSubnetsStr)
-		// Add track-subnets to node config
-		nodeConfig["track-subnets"] = trackSubnetsStr
+	// Auto-track deployed nets - eliminates the track-subnets gotcha
+	netIDs, trackErr := subnet.GetLocallyDeployedNetIDs(app)
+	if trackErr == nil && len(netIDs) > 0 {
+		trackNetsStr := strings.Join(netIDs, ",")
+		ux.Logger.PrintToUser("Auto-tracking %d deployed net(s): %s", len(netIDs), trackNetsStr)
+		// Add track-subnets to node config (luxd still uses track-subnets internally)
+		nodeConfig["track-subnets"] = trackNetsStr
+	}
+
+	// Prepare canonical chain configs directory and set it for all nodes
+	// This must happen BEFORE nodes start so VMs can initialize with genesis configs
+	chainConfigDir, chainConfigErr := subnet.PrepareCanonicalChainConfigs(app)
+	if chainConfigErr != nil {
+		ux.Logger.PrintToUser("Warning: failed to prepare chain configs: %v", chainConfigErr)
+	} else if chainConfigDir != "" {
+		nodeConfig["chain-config-dir"] = chainConfigDir
 	}
 	if configStr != "" {
 		if err := json.Unmarshal([]byte(configStr), &nodeConfig); err != nil {
@@ -313,6 +320,13 @@ func StartNetwork(*cobra.Command, []string) error {
 			ux.Logger.PrintToUser("Fresh network started. Wait until healthy...")
 			ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", startResp.ClusterInfo.RootDataDir)
 		}
+	}
+
+	// Copy chain configs from canonical ~/.lux/subnets/ to network node directories
+	// This must happen before WaitForHealthy so VMs can initialize with their genesis
+	if err := subnet.CopySubnetChainConfigsToNetwork(app, outputDir); err != nil {
+		ux.Logger.PrintToUser("Warning: Failed to copy subnet chain configs: %v", err)
+		// Continue - this is not fatal for networks without subnets
 	}
 
 	clusterInfo, err := subnet.WaitForHealthy(ctx, cli)
