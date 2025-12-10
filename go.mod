@@ -14,7 +14,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.17.7
+	github.com/luxfi/crypto v1.17.8
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v1.16.20
 	github.com/luxfi/geth v1.16.40
@@ -64,7 +64,7 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 require (
 	github.com/cockroachdb/pebble v1.1.5
 	github.com/dgraph-io/badger/v3 v3.2103.5
-	github.com/luxfi/genesis v1.2.9
+	github.com/luxfi/genesis v1.2.10
 	github.com/luxfi/math v0.1.5
 	github.com/luxfi/migrate v1.0.0
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
@@ -167,7 +167,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/consensus v1.22.2 // indirect
+	github.com/luxfi/consensus v1.22.4 // indirect
 	github.com/luxfi/database v1.2.7 // indirect
 	github.com/luxfi/metric v1.4.5 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
@@ -238,14 +238,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-// replace github.com/luxfi/consensus => ../consensus
-
-// replace github.com/luxfi/node => ../node
-
-// replace github.com/luxfi/evm => ../evm
-
-// replace github.com/luxfi/geth => ../geth
-
-// migrate is now published - no local replace needed
-// replace github.com/luxfi/migrate => ../migrate
