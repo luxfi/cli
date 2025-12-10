@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
-	"github.com/luxfi/cli/cmd/subnetcmd"
+	"github.com/luxfi/cli/cmd/netcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
@@ -93,7 +93,7 @@ Quick start:
 	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (alias: blockchain, net)
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(l1cmd.NewCmd(app))
-	rootCmd.AddCommand(subnetcmd.NewCmd(app)) // l2 with subnet alias
+	rootCmd.AddCommand(netcmd.NewCmd(app)) // l2 with subnet alias
 	rootCmd.AddCommand(l3cmd.NewCmd(app))
 
 	// add transaction command

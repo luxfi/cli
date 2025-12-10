@@ -5,8 +5,8 @@ package transactioncmd
 import (
 	"errors"
 
-	"github.com/luxfi/cli/cmd/subnetcmd"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/cmd/netcmd"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -62,7 +62,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	}
 
 	if useLedger && keyName != "" {
-		return subnetcmd.ErrMutuallyExlusiveKeyLedger
+		return netcmd.ErrMutuallyExlusiveKeyLedger
 	}
 
 	// we need network to decide if ledger is forced (mainnet)
@@ -81,7 +81,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	case models.Mainnet:
 		useLedger = true
 		if keyName != "" {
-			return subnetcmd.ErrStoredKeyOnMainnet
+			return netcmd.ErrStoredKeyOnMainnet
 		}
 	default:
 		return errors.New("unsupported network")
@@ -110,19 +110,19 @@ func signTx(_ *cobra.Command, args []string) error {
 	}
 
 	if len(remainingSubnetAuthKeys) == 0 {
-		subnetcmd.PrintReadyToSignMsg(subnetName, inputTxPath)
+		netcmd.PrintReadyToSignMsg(subnetName, inputTxPath)
 		return nil
 	}
 
 	// get keychain accessor
-	kc, err := subnetcmd.GetKeychain(useLedger, ledgerAddresses, keyName, network)
+	kc, err := netcmd.GetKeychain(useLedger, ledgerAddresses, keyName, network)
 	if err != nil {
 		return err
 	}
 
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc, network)
+	deployer := net.NewPublicDeployer(app, useLedger, kc, network)
 	if err := deployer.Sign(tx, remainingSubnetAuthKeys, subnetID); err != nil {
-		if errors.Is(err, subnet.ErrNoSubnetAuthKeysInWallet) {
+		if errors.Is(err, net.ErrNoSubnetAuthKeysInWallet) {
 			ux.Logger.PrintToUser("There are no required subnet auth keys present in the wallet")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("Expected one of:")
@@ -140,7 +140,7 @@ func signTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := subnetcmd.SaveNotFullySignedTx(
+	if err := netcmd.SaveNotFullySignedTx(
 		"Tx",
 		tx,
 		subnetName,

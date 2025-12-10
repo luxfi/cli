@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/node"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
-	"github.com/luxfi/cli/pkg/subnet"
+	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -473,7 +473,7 @@ func InitializeValidatorManager(
 
 func convertSubnetToL1(
 	bootstrapValidators []models.SubnetValidator,
-	deployer *subnet.PublicDeployer,
+	deployer *net.PublicDeployer,
 	subnetID, blockchainID ids.ID,
 	network models.Network,
 	chain string,
@@ -763,7 +763,7 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Your auth keys for add validator tx creation: %s", subnetAuthKeys)
 
 	// deploy to public network
-	deployer := subnet.NewPublicDeployer(app, useLedger, kc.Keychain, network)
+	deployer := net.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 
 	luxdBootstrapValidators, cancel, savePartialTx, err := convertSubnetToL1(
 		bootstrapValidators,
