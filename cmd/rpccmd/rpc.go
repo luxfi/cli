@@ -23,15 +23,15 @@ func NewCmd() *cobra.Command {
 
 Examples:
   # Get P-Chain height
-  lux rpc call --method platform.getHeight --endpoint http://localhost:9650/ext/bc/P
+  lux rpc call --method platform.getHeight --endpoint http://localhost:9630/ext/bc/P
 
   # Get blockchains with params
-  lux rpc call --method platform.getBlockchains --params '{}' --endpoint http://localhost:9650/ext/bc/P
+  lux rpc call --method platform.getBlockchains --params '{}' --endpoint http://localhost:9630/ext/bc/P
 
   # Create blockchain
   lux rpc call --method platform.createBlockchain \
     --params '{"vmID":"...", "name":"mychain", "genesis":"..."}' \
-    --endpoint http://localhost:9650/ext/bc/P
+    --endpoint http://localhost:9630/ext/bc/P
 `,
 		RunE: nil,
 	}
@@ -121,7 +121,7 @@ func newCallCmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&method, "method", "", "RPC method to call (required)")
 	cmd.Flags().StringVar(&params, "params", "", "JSON params object (optional)")
-	cmd.Flags().StringVar(&endpoint, "endpoint", "http://localhost:9650/ext/bc/P", "RPC endpoint URL")
+	cmd.Flags().StringVar(&endpoint, "endpoint", "http://localhost:9630/ext/bc/P", "RPC endpoint URL")
 	cmd.Flags().IntVar(&timeout, "timeout", 30, "Request timeout in seconds")
 
 	_ = cmd.MarkFlagRequired("method")
