@@ -25,8 +25,10 @@ var (
 	// This is the current c-chain gas config
 	StarterFeeConfig = fees.DefaultFeeConfig
 
-	PrefundedEwoqAddress = common.HexToAddress("0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC")
-	PrefundedEwoqPrivate = "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027"
+	// DefaultFundedAddress is the default prefunded address for local development
+	// This corresponds to the mainnet-ops key in ~/.lux/keys/mainnet-ops
+	// Private keys should be loaded from key files, not hardcoded in source code
+	DefaultFundedAddress = common.HexToAddress("0xe495301d73ea70fa87fb5e5f2b337f1656d22f3f")
 
 	oneLux = new(big.Int).SetUint64(1000000000000000000)
 )

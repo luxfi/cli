@@ -532,8 +532,8 @@ func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) err
 	for address := range evmGenesis.Alloc {
 		amount := evmGenesis.Alloc[address].Balance
 		formattedAmount := new(big.Int).Div(amount, big.NewInt(params.Ether))
-		if address == vm.PrefundedEwoqAddress {
-			ux.Logger.PrintToUser("Funded address:   %s with %s (10^18) - private key: %s", address, formattedAmount.String(), vm.PrefundedEwoqPrivate)
+		if address == vm.DefaultFundedAddress {
+			ux.Logger.PrintToUser("Funded address:   %s with %s (10^18) - see ~/.lux/keys/mainnet-ops for private key", address, formattedAmount.String())
 		} else {
 			ux.Logger.PrintToUser("Funded address:   %s with %s", address, formattedAmount.String())
 		}

@@ -291,7 +291,7 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 				description = luxlog.Orange.Wrap("Used by Warp")
 			case subnetAirdropAddress:
 				description = luxlog.Orange.Wrap("Main funded account")
-			case vm.PrefundedEwoqAddress.Hex():
+			case vm.DefaultFundedAddress.Hex():
 				description = luxlog.Orange.Wrap("Main funded account")
 			case sc.ValidatorManagerOwner:
 				description = luxlog.Orange.Wrap("Validator Manager Owner")
