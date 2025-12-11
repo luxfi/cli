@@ -11,7 +11,6 @@ require (
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/go-git/go-git/v5 v5.16.2
-	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.17.9
@@ -28,7 +27,6 @@ require (
 	github.com/luxfi/warp v1.16.26
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
-	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/onsi/ginkgo/v2 v2.25.1
 	github.com/onsi/gomega v1.38.0
@@ -38,8 +36,8 @@ require (
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/afero v1.14.0
-	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/cobra v1.10.2
+	github.com/spf13/pflag v1.0.9
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
