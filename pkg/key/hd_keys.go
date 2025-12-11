@@ -347,6 +347,8 @@ func LoadKeySet(name string) (*HDKeySet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode EC public key: %w", err)
 	}
+	// Derive address from public key
+	keySet.ECAddress = deriveECAddress(keySet.ECPublicKey)
 
 	// Load BLS keys
 	blsDir := filepath.Join(baseDir, BLSKeyDir)
