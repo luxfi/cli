@@ -157,7 +157,8 @@ const (
 	EVMInstallDir   = "evm"
 
 	// Directories
-	SubnetDir        = "subnets"
+	NetDir           = "nets"
+	SubnetDir        = NetDir // Alias for backward compatibility
 	ReposDir         = "repos"
 	SnapshotsDirName = "snapshots"
 	CustomVMDir      = "customvms"
