@@ -132,5 +132,5 @@ func getSubnetPath(repoPath, subnetName string) string {
 	}
 
 	// Default to the standard structure
-	return filepath.Join(repoPath, constants.SubnetDir, subnetName+constants.YAMLSuffix)
+	return filepath.Join(repoPath, constants.NetDir, subnetName+constants.YAMLSuffix)
 }
