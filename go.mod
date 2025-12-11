@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.25.5
+go 1.23.4
 
 // All dependencies use proper tagged versions for reproducibility
 
