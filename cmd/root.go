@@ -46,7 +46,7 @@ var (
 	app *application.Lux
 
 	logLevel  string
-	Version   = "1.9.8"
+	Version   = "1.9.17"
 	cfgFile   string
 	skipCheck bool
 )
