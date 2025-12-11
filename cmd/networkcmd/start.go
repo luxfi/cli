@@ -10,7 +10,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -40,11 +39,9 @@ var (
 
 // StartFlags contains configuration for starting a network
 type StartFlags struct {
-	UserProvidedAvagoVersion string
-	AvagoBinaryPath          string
-	UserProvidedLuxdVersion  string
-	LuxdBinaryPath           string
-	NumNodes                 uint32
+	UserProvidedLuxdVersion string
+	LuxdBinaryPath          string
+	NumNodes                uint32
 }
 
 // Start starts the local network with the given flags
@@ -438,8 +435,31 @@ func StartMainnet() error {
 		"api-admin-enabled": true
 	}`
 
-	// Build start options
-	rootDataDir := path.Join(app.GetRunDir(), "mainnet-"+time.Now().Format("20060102-150405"))
+	// Use stable directory path for persistence across restarts
+	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
+	// Check for existing mainnet run to resume from
+	rootDataDir := path.Join(app.GetRunDir(), "mainnet")
+
+	// Check if --state-path was provided (user wants to resume from specific state)
+	if statePath != "" {
+		ux.Logger.PrintToUser("Resuming from user-provided state: %s", statePath)
+	} else {
+		// Check for existing mainnet data to resume from
+		if fi, err := os.Stat(rootDataDir); err == nil && fi.IsDir() {
+			// Check if there's actually node data in there
+			entries, _ := os.ReadDir(rootDataDir)
+			for _, e := range entries {
+				if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
+					ux.Logger.PrintToUser("Found existing mainnet data, resuming from: %s", rootDataDir)
+					break
+				}
+			}
+		}
+	}
+
+	if err := os.MkdirAll(rootDataDir, 0755); err != nil {
+		return fmt.Errorf("failed to create mainnet directory: %w", err)
+	}
 
 	// Don't pass networkID to netrunner - let --dev flag handle the genesis internally
 	// The --dev flag creates a proper single-node development network
@@ -544,8 +564,24 @@ func StartTestnet() error {
 		"api-admin-enabled": true
 	}`
 
-	// Build start options
-	rootDataDir := path.Join(app.GetRunDir(), "testnet-"+time.Now().Format("20060102-150405"))
+	// Use stable directory path for persistence across restarts
+	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
+	rootDataDir := path.Join(app.GetRunDir(), "testnet")
+
+	// Check for existing testnet data to resume from
+	if fi, err := os.Stat(rootDataDir); err == nil && fi.IsDir() {
+		entries, _ := os.ReadDir(rootDataDir)
+		for _, e := range entries {
+			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
+				ux.Logger.PrintToUser("Found existing testnet data, resuming from: %s", rootDataDir)
+				break
+			}
+		}
+	}
+
+	if err := os.MkdirAll(rootDataDir, 0755); err != nil {
+		return fmt.Errorf("failed to create testnet directory: %w", err)
+	}
 
 	opts := []client.OpOption{
 		client.WithNumNodes(uint32(numValidators)),
