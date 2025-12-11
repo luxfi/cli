@@ -144,55 +144,64 @@ func importFunc(_ *cobra.Command, args []string) error {
 }
 
 func importFile(ctx context.Context, importer migrate.Importer, file string) (int, error) {
-	// Open JSONL reader
-	reader, err := jsonl.NewReader(file)
-	if err != nil {
-		return 0, fmt.Errorf("failed to open: %w", err)
-	}
-	defer reader.Close()
+	// Use streaming reader for memory efficiency with large files
+	streamReader := jsonl.NewStreamReader(file)
+	blocks, errs := streamReader.ReadBlocks()
 
-	// Read all blocks from this file
-	blocks, err := reader.ReadAllBlocks()
-	if err != nil {
-		return 0, fmt.Errorf("failed to read blocks: %w", err)
-	}
-
-	if len(blocks) == 0 {
-		ux.Logger.PrintToUser("  (empty file, skipping)")
-		return 0, nil
-	}
-
-	ux.Logger.PrintToUser("  %d blocks (height %d to %d)", len(blocks), blocks[0].Number, blocks[len(blocks)-1].Number)
-
-	// Import in batches
+	// Import blocks as they stream in, batching for efficiency
 	batchSize := 100
+	batch := make([]*migrate.BlockData, 0, batchSize)
 	imported := 0
+	lastProgress := time.Now()
+	var firstBlock, lastBlock *migrate.BlockData
 
-	for i := 0; i < len(blocks); i += batchSize {
+	for {
 		select {
 		case <-ctx.Done():
 			return imported, ctx.Err()
-		default:
-		}
 
-		end := i + batchSize
-		if end > len(blocks) {
-			end = len(blocks)
-		}
+		case err := <-errs:
+			if err != nil {
+				return imported, fmt.Errorf("stream error: %w", err)
+			}
 
-		batch := blocks[i:end]
-		if err := importer.ImportBlocks(batch); err != nil {
-			return imported, fmt.Errorf("failed to import blocks %d-%d: %w", blocks[i].Number, blocks[end-1].Number, err)
-		}
-		imported += len(batch)
+		case block, ok := <-blocks:
+			if !ok {
+				// Channel closed, import remaining batch
+				if len(batch) > 0 {
+					if err := importer.ImportBlocks(batch); err != nil {
+						return imported, fmt.Errorf("failed to import final batch: %w", err)
+					}
+					imported += len(batch)
+				}
+				if firstBlock != nil && lastBlock != nil {
+					ux.Logger.PrintToUser("  %d blocks (height %d to %d)", imported, firstBlock.Number, lastBlock.Number)
+				}
+				return imported, nil
+			}
 
-		// Progress every 1000 blocks
-		if imported%1000 == 0 || end == len(blocks) {
-			ux.Logger.PrintToUser("  imported %d/%d blocks", imported, len(blocks))
+			if firstBlock == nil {
+				firstBlock = block
+			}
+			lastBlock = block
+			batch = append(batch, block)
+
+			// Flush batch when full
+			if len(batch) >= batchSize {
+				if err := importer.ImportBlocks(batch); err != nil {
+					return imported, fmt.Errorf("failed to import blocks at %d: %w", batch[0].Number, err)
+				}
+				imported += len(batch)
+				batch = batch[:0]
+
+				// Progress every 5 seconds or 10000 blocks
+				if time.Since(lastProgress) > 5*time.Second || imported%10000 == 0 {
+					ux.Logger.PrintToUser("  imported %d blocks (latest: %d)", imported, lastBlock.Number)
+					lastProgress = time.Now()
+				}
+			}
 		}
 	}
-
-	return imported, nil
 }
 
 // findJSONLFiles finds all .jsonl files in a directory, sorted by name
