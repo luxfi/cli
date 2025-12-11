@@ -120,7 +120,7 @@ func TestNoRepoPath(t *testing.T) {
 
 	// try with existing files
 	noRepoPath = t.TempDir()
-	subnetDir := filepath.Join(noRepoPath, constants.SubnetDir)
+	subnetDir := filepath.Join(noRepoPath, constants.NetDir)
 	vmDir := filepath.Join(noRepoPath, constants.VMDir)
 	err = os.MkdirAll(subnetDir, constants.DefaultPerms755)
 	require.NoError(err)
@@ -332,7 +332,7 @@ func TestIsPublished(t *testing.T) {
 	require.NoError(err)
 	require.False(published)
 
-	goodDir1 := filepath.Join(reposDir, "dummyRepo", constants.SubnetDir, testSubnet)
+	goodDir1 := filepath.Join(reposDir, "dummyRepo", constants.NetDir, testSubnet)
 	err = os.MkdirAll(goodDir1, constants.DefaultPerms755)
 	require.NoError(err)
 	published, err = isAlreadyPublished(testSubnet)
@@ -345,7 +345,7 @@ func TestIsPublished(t *testing.T) {
 	require.NoError(err)
 	require.True(published)
 
-	goodDir2 := filepath.Join(reposDir, "dummyRepo2", constants.SubnetDir, testSubnet)
+	goodDir2 := filepath.Join(reposDir, "dummyRepo2", constants.NetDir, testSubnet)
 	err = os.MkdirAll(goodDir2, constants.DefaultPerms755)
 	require.NoError(err)
 	published, err = isAlreadyPublished(testSubnet)

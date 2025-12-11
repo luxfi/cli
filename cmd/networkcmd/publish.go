@@ -168,7 +168,7 @@ func doPublish(sc *models.Sidecar, blockchainName string, publisherCreateFunc ne
 			ux.Logger.PrintToUser(
 				"The given --no-repo-path at %s did not exist; created it with permissions %o", noRepoPath, constants.DefaultPerms755)
 		}
-		subnetFile := filepath.Join(noRepoPath, constants.SubnetDir, blockchainName+constants.YAMLSuffix)
+		subnetFile := filepath.Join(noRepoPath, constants.NetDir, blockchainName+constants.YAMLSuffix)
 		vmFile := filepath.Join(noRepoPath, constants.VMDir, vm.Alias+constants.YAMLSuffix)
 		if !forceWrite {
 			// do not automatically overwrite

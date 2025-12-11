@@ -71,11 +71,11 @@ func TestTopLevelFilesMigration(t *testing.T) {
 	require.NoError(err)
 
 	// make sure all the new files have been created and the old ones don't exist anymore
-	d, err := os.Stat(filepath.Join(app.GetBaseDir(), constants.SubnetDir))
+	d, err := os.Stat(filepath.Join(app.GetBaseDir(), constants.NetDir))
 	require.NoError(err)
 	require.True(d.IsDir())
 	for _, c := range cars {
-		d, err = os.Stat(filepath.Join(app.GetBaseDir(), constants.SubnetDir, c.Name))
+		d, err = os.Stat(filepath.Join(app.GetBaseDir(), constants.NetDir, c.Name))
 		require.NoError(err)
 		require.True(d.IsDir())
 		oldSCFileName := filepath.Join(app.GetBaseDir(), c.Name+constants.SidecarSuffix)
