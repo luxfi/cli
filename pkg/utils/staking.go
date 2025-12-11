@@ -3,9 +3,12 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"time"
@@ -13,6 +16,8 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
+	"github.com/luxfi/crypto/mldsa"
+	"github.com/luxfi/crypto/ringtail"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
@@ -111,7 +116,7 @@ func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, subne
 func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, error) {
 	ctx, cancel := GetAPIContext()
 	defer cancel()
-	networkEndpoint, blockchainID, err := SplitLuxgoRPCURI(rpcURL)
+	networkEndpoint, blockchainID, err := SplitRPCURI(rpcURL)
 	if err != nil {
 		return 0, err
 	}
@@ -129,4 +134,188 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 	}
 
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
+}
+
+// NewRingtailKeyBytes generates a new Ringtail private key and returns it as bytes
+func NewRingtailKeyBytes() ([]byte, error) {
+	factory := &ringtail.Factory{}
+	privKey, err := factory.NewPrivateKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate Ringtail key: %w", err)
+	}
+	return privKey.Scalar.Bytes(), nil
+}
+
+// ToRingtailPublicKey converts Ringtail private key bytes to public key bytes
+func ToRingtailPublicKey(keyBytes []byte) ([]byte, error) {
+	factory := &ringtail.Factory{}
+	privKey := &ringtail.PrivateKey{Scalar: new(big.Int).SetBytes(keyBytes)}
+	pubKey, err := factory.ToPublicKey(privKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive Ringtail public key: %w", err)
+	}
+	return pubKey.Bytes(), nil
+}
+
+// NewMLDSAKeyBytes generates a new ML-DSA private key and returns it as bytes
+// Uses MLDSA65 (192-bit security, NIST Level 3) as the default
+func NewMLDSAKeyBytes() ([]byte, error) {
+	privKey, err := mldsa.GenerateKey(rand.Reader, mldsa.MLDSA65)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate ML-DSA key: %w", err)
+	}
+	return privKey.Bytes(), nil
+}
+
+// ToMLDSAPublicKey converts ML-DSA private key bytes to public key bytes
+func ToMLDSAPublicKey(keyBytes []byte) ([]byte, error) {
+	privKey, err := mldsa.PrivateKeyFromBytes(mldsa.MLDSA65, keyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ML-DSA private key: %w", err)
+	}
+	return privKey.PublicKey.Bytes(), nil
+}
+
+// QuantumKeys holds all quantum-safe keys for a validator
+type QuantumKeys struct {
+	BLSSecretKey      []byte
+	BLSPublicKey      []byte
+	BLSPoP            []byte
+	RingtailSecretKey []byte
+	RingtailPublicKey []byte
+	MLDSASecretKey    []byte
+	MLDSAPublicKey    []byte
+}
+
+// GenerateAllQuantumKeys generates BLS, Ringtail, and ML-DSA keys for a validator
+func GenerateAllQuantumKeys() (*QuantumKeys, error) {
+	keys := &QuantumKeys{}
+	var err error
+
+	// Generate BLS key
+	keys.BLSSecretKey, err = NewBlsSecretKeyBytes()
+	if err != nil {
+		return nil, fmt.Errorf("BLS key generation failed: %w", err)
+	}
+	keys.BLSPublicKey, keys.BLSPoP, err = ToBLSPoP(keys.BLSSecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("BLS public key derivation failed: %w", err)
+	}
+
+	// Generate Ringtail key
+	keys.RingtailSecretKey, err = NewRingtailKeyBytes()
+	if err != nil {
+		return nil, fmt.Errorf("Ringtail key generation failed: %w", err)
+	}
+	keys.RingtailPublicKey, err = ToRingtailPublicKey(keys.RingtailSecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("Ringtail public key derivation failed: %w", err)
+	}
+
+	// Generate ML-DSA key
+	keys.MLDSASecretKey, err = NewMLDSAKeyBytes()
+	if err != nil {
+		return nil, fmt.Errorf("ML-DSA key generation failed: %w", err)
+	}
+	keys.MLDSAPublicKey, err = ToMLDSAPublicKey(keys.MLDSASecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("ML-DSA public key derivation failed: %w", err)
+	}
+
+	return keys, nil
+}
+
+// SaveQuantumKeys saves all quantum keys to the specified directory
+func SaveQuantumKeys(nodeDir string, keys *QuantumKeys) error {
+	// Save BLS key
+	blsPath := filepath.Join(nodeDir, constants.BLSKeyFileName)
+	if err := os.WriteFile(blsPath, keys.BLSSecretKey, 0600); err != nil {
+		return fmt.Errorf("failed to save BLS key: %w", err)
+	}
+
+	// Save Ringtail key (hex encoded)
+	ringtailPath := filepath.Join(nodeDir, constants.RingtailKeyFileName)
+	ringtailHex := hex.EncodeToString(keys.RingtailSecretKey)
+	if err := os.WriteFile(ringtailPath, []byte(ringtailHex), 0600); err != nil {
+		return fmt.Errorf("failed to save Ringtail key: %w", err)
+	}
+
+	// Save ML-DSA key (hex encoded)
+	mldsaPath := filepath.Join(nodeDir, constants.MLDSAKeyFileName)
+	mldsaHex := hex.EncodeToString(keys.MLDSASecretKey)
+	if err := os.WriteFile(mldsaPath, []byte(mldsaHex), 0600); err != nil {
+		return fmt.Errorf("failed to save ML-DSA key: %w", err)
+	}
+
+	return nil
+}
+
+// LoadQuantumKeys loads all quantum keys from the specified directory
+func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
+	keys := &QuantumKeys{}
+	var err error
+
+	// Load BLS key
+	blsPath := filepath.Join(nodeDir, constants.BLSKeyFileName)
+	keys.BLSSecretKey, err = os.ReadFile(blsPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load BLS key: %w", err)
+	}
+	keys.BLSPublicKey, keys.BLSPoP, err = ToBLSPoP(keys.BLSSecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive BLS public key: %w", err)
+	}
+
+	// Load Ringtail key
+	ringtailPath := filepath.Join(nodeDir, constants.RingtailKeyFileName)
+	ringtailHex, err := os.ReadFile(ringtailPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load Ringtail key: %w", err)
+	}
+	keys.RingtailSecretKey, err = hex.DecodeString(string(ringtailHex))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode Ringtail key: %w", err)
+	}
+	keys.RingtailPublicKey, err = ToRingtailPublicKey(keys.RingtailSecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive Ringtail public key: %w", err)
+	}
+
+	// Load ML-DSA key
+	mldsaPath := filepath.Join(nodeDir, constants.MLDSAKeyFileName)
+	mldsaHex, err := os.ReadFile(mldsaPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load ML-DSA key: %w", err)
+	}
+	keys.MLDSASecretKey, err = hex.DecodeString(string(mldsaHex))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode ML-DSA key: %w", err)
+	}
+	keys.MLDSAPublicKey, err = ToMLDSAPublicKey(keys.MLDSASecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive ML-DSA public key: %w", err)
+	}
+
+	return keys, nil
+}
+
+// GetQuantumNodeParams returns node id and all quantum public keys
+func GetQuantumNodeParams(nodeDir string) (
+	ids.NodeID,
+	*QuantumKeys,
+	error,
+) {
+	certBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.StakerCertFileName))
+	if err != nil {
+		return ids.EmptyNodeID, nil, err
+	}
+	nodeID, err := ToNodeID(certBytes)
+	if err != nil {
+		return ids.EmptyNodeID, nil, err
+	}
+	keys, err := LoadQuantumKeys(nodeDir)
+	if err != nil {
+		return ids.EmptyNodeID, nil, err
+	}
+	return nodeID, keys, nil
 }
