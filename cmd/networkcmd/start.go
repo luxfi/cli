@@ -429,7 +429,7 @@ func StartMainnet() error {
 	// http-host is required for RPC to be accessible
 	globalNodeConfig := `{
 		"network-id": 96369,
-		"db-type": "pebbledb",
+		"db-type": "badgerdb",
 		"sybil-protection-enabled": true,
 		"network-allow-private-ips": true,
 		"health-check-frequency": "30s",
@@ -536,7 +536,7 @@ func StartTestnet() error {
 	// http-host is required for RPC to be accessible
 	globalNodeConfig := `{
 		"network-id": 96368,
-		"db-type": "pebbledb",
+		"db-type": "badgerdb",
 		"sybil-protection-enabled": true,
 		"health-check-frequency": "30s",
 		"log-level": "info",
