@@ -38,7 +38,7 @@ func migrateTopLevelFiles(app *application.Lux, runner *migrationRunner) error {
 		parts := strings.Split(fileName, constants.SuffixSeparator)
 		subnet = parts[0]
 		suffix = parts[1]
-		newDir := filepath.Join(baseDir, constants.SubnetDir, subnet)
+		newDir := filepath.Join(baseDir, constants.NetDir, subnet)
 		// instead of checking if it already exists, just let's try to create the dir
 		// if it already exists this will not return an error
 		if err := os.MkdirAll(newDir, constants.DefaultPerms755); err != nil {
