@@ -15,8 +15,8 @@ import (
 
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
-	"github.com/luxfi/cli/cmd/interchaincmd"
 	"github.com/luxfi/cli/cmd/keycmd"
+	"github.com/luxfi/cli/cmd/warpcmd"
 	"github.com/luxfi/cli/cmd/l1cmd"
 	"github.com/luxfi/cli/cmd/l3cmd"
 	"github.com/luxfi/cli/cmd/localcmd"
@@ -46,7 +46,7 @@ var (
 	app *application.Lux
 
 	logLevel  string
-	Version   = "1.9.7"
+	Version   = "1.9.8"
 	cfgFile   string
 	skipCheck bool
 )
@@ -106,8 +106,8 @@ Quick start:
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
 
-	// add interchain command
-	rootCmd.AddCommand(interchaincmd.NewCmd(app))
+	// add warp command (cross-chain messaging)
+	rootCmd.AddCommand(warpcmd.NewCmd(app))
 
 	// add contract command
 	rootCmd.AddCommand(contractcmd.NewCmd(app))

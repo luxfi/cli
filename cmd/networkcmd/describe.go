@@ -11,8 +11,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	warpgenesis "github.com/luxfi/cli/pkg/interchain/genesis"
 	"github.com/luxfi/cli/pkg/localnet"
+	warpgenesis "github.com/luxfi/cli/pkg/warp/genesis"
 	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/interchain"
+	"github.com/luxfi/cli/pkg/warp"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 )
@@ -18,7 +18,7 @@ import (
 func CreateEVMGenesisWithParams(
 	app *application.Lux,
 	params SubnetEVMGenesisParams,
-	warpInfo *interchain.WarpInfo,
+	warpInfo *warp.WarpInfo,
 	addWarpRegistryToGenesis bool,
 	proxyContractOwner string,
 	rewardBasisPoints uint64,
