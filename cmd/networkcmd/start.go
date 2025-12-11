@@ -431,6 +431,7 @@ func StartMainnet() error {
 		"network-id": 96369,
 		"db-type": "pebbledb",
 		"sybil-protection-enabled": true,
+		"network-allow-private-ips": true,
 		"health-check-frequency": "30s",
 		"log-level": "info",
 		"http-host": "127.0.0.1",
