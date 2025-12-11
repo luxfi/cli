@@ -59,6 +59,7 @@ Use 'lux network', 'lux blockchain', or 'lux net' interchangeably.`,
 	// Data operations
 	cmd.AddCommand(newExportCmd())
 	cmd.AddCommand(newImportCmd())
+	cmd.AddCommand(newSetHeadCmd())
 
 	// Upgrade commands
 	cmd.AddCommand(upgradecmd.NewCmd(app))

@@ -107,7 +107,7 @@ const (
 	DefaultTokenName = "TEST"
 
 	// Default versions
-	DefaultLuxdVersion = "v1.13.4"
+	DefaultLuxdVersion = "v1.21.0"
 
 	// Staking constants
 	BootstrapValidatorBalanceNanoLUX = 1_000_000_000_000 // 1000 LUX
@@ -154,9 +154,10 @@ const (
 	EVMRepoName = "evm"
 
 	// Install directories
-	LuxInstallDir   = "lux"
-	LuxGoInstallDir = "luxgo"
-	EVMInstallDir   = "evm"
+	LuxInstallDir       = "lux"
+	LuxNodeInstallDir   = "luxd"
+	LuxGoInstallDir     = "luxd" // Deprecated: use LuxNodeInstallDir
+	EVMInstallDir       = "evm"
 
 	// Directories
 	NetDir   = "nets"
