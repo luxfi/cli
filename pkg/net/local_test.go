@@ -134,7 +134,7 @@ func TestDeployToLocal(t *testing.T) {
 	require.NoError(err)
 	// create dummy sidecar file, also checked by deploy
 	sidecar := `{"VM": "EVM"}`
-	testSubnetDir := filepath.Join(testDir, constants.SubnetDir, testChainName)
+	testSubnetDir := filepath.Join(testDir, constants.NetDir, testChainName)
 	err = os.MkdirAll(testSubnetDir, constants.DefaultPerms755)
 	require.NoError(err)
 	testSidecar, err := os.Create(filepath.Join(testSubnetDir, constants.SidecarFileName))

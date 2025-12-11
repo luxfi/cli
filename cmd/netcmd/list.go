@@ -108,7 +108,7 @@ func listSubnets(cmd *cobra.Command, args []string) error {
 }
 
 func getSidecars(app *application.Lux) ([]*models.Sidecar, error) {
-	subnets, err := os.ReadDir(filepath.Join(app.GetBaseDir(), constants.SubnetDir))
+	subnets, err := os.ReadDir(filepath.Join(app.GetBaseDir(), constants.NetDir))
 	if err != nil {
 		return nil, err
 	}

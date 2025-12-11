@@ -278,7 +278,7 @@ func setupEnv() (string, error) {
 	}
 
 	// Create subnet dir if it doesn't exist
-	subnetDir := filepath.Join(baseDir, constants.SubnetDir)
+	subnetDir := filepath.Join(baseDir, constants.NetDir)
 	if err = os.MkdirAll(subnetDir, os.ModePerm); err != nil {
 		fmt.Printf("failed creating the subnet dir %s: %s\n", subnetDir, err)
 		os.Exit(1)

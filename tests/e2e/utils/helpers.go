@@ -69,7 +69,7 @@ func GetLPMDir() string {
 }
 
 func ChainConfigExists(subnetName string) (bool, error) {
-	cfgPath := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.ChainConfigFileName)
+	cfgPath := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.ChainConfigFileName)
 	cfgExists := true
 	if _, err := os.Stat(cfgPath); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -82,7 +82,7 @@ func ChainConfigExists(subnetName string) (bool, error) {
 }
 
 func PerNodeChainConfigExists(subnetName string) (bool, error) {
-	cfgPath := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.PerNodeChainConfigFileName)
+	cfgPath := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.PerNodeChainConfigFileName)
 	cfgExists := true
 	if _, err := os.Stat(cfgPath); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -95,7 +95,7 @@ func PerNodeChainConfigExists(subnetName string) (bool, error) {
 }
 
 func genesisExists(subnetName string) (bool, error) {
-	genesis := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.GenesisFileName)
+	genesis := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.GenesisFileName)
 	genesisExists := true
 	if _, err := os.Stat(genesis); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -108,7 +108,7 @@ func genesisExists(subnetName string) (bool, error) {
 }
 
 func sidecarExists(subnetName string) (bool, error) {
-	sidecar := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
+	sidecar := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.SidecarFileName)
 	sidecarExists := true
 	if _, err := os.Stat(sidecar); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -121,7 +121,7 @@ func sidecarExists(subnetName string) (bool, error) {
 }
 
 func ElasticSubnetConfigExists(subnetName string) (bool, error) {
-	elasticSubnetConfig := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.ElasticSubnetConfigFileName)
+	elasticSubnetConfig := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.ElasticSubnetConfigFileName)
 	elasticSubnetConfigExists := true
 	if _, err := os.Stat(elasticSubnetConfig); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -170,7 +170,7 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 		return fmt.Errorf("failed to access sidecar for %s: not found", subnetName)
 	}
 
-	sidecar := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
+	sidecar := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.SidecarFileName)
 
 	jsonBytes, err := os.ReadFile(sidecar)
 	if err != nil {
@@ -217,7 +217,7 @@ func SubnetCustomVMExists(subnetName string) (bool, error) {
 }
 
 func SubnetLPMVMExists(subnetName string) (bool, error) {
-	sidecarPath := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
+	sidecarPath := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.SidecarFileName)
 	jsonBytes, err := os.ReadFile(sidecarPath)
 	if err != nil {
 		return false, err
@@ -257,7 +257,7 @@ func KeyExists(keyName string) (bool, error) {
 }
 
 func DeleteConfigs(subnetName string) error {
-	subnetDir := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName)
+	subnetDir := filepath.Join(GetBaseDir(), constants.NetDir, subnetName)
 	if _, err := os.Stat(subnetDir); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
@@ -820,7 +820,7 @@ func GetSideCar(subnetName string) (models.Sidecar, error) {
 		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: not found", subnetName)
 	}
 
-	sidecar := filepath.Join(GetBaseDir(), constants.SubnetDir, subnetName, constants.SidecarFileName)
+	sidecar := filepath.Join(GetBaseDir(), constants.NetDir, subnetName, constants.SidecarFileName)
 
 	jsonBytes, err := os.ReadFile(sidecar)
 	if err != nil {

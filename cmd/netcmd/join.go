@@ -352,7 +352,7 @@ func handleValidatorJoinElasticSubnet(sc models.Sidecar, network models.Network,
 	ux.Logger.PrintToUser("")
 
 	assetID := sc.ElasticSubnet[models.Local.String()].AssetID
-	testKey := genesis.GetLocalKey()
+	testKey := genesis.EWOQKey
 	secpKeyChain := secp256k1fx.NewKeychain(testKey)
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
