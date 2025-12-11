@@ -13,7 +13,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 
@@ -21,7 +20,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/crypto/mldsa"
-	"github.com/luxfi/crypto/corona"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/hkdf"
 )
@@ -202,15 +201,13 @@ func deriveBLSPublicKey(privateKey []byte) ([]byte, []byte, error) {
 	return pkBytes, sigBytes, nil
 }
 
-// deriveCoronaPublicKey derives Corona public key
+// deriveCoronaPublicKey derives secp256k1 public key (Corona placeholder)
 func deriveCoronaPublicKey(privateKey []byte) ([]byte, error) {
-	factory := &corona.Factory{}
-	privKey := &corona.PrivateKey{Scalar: new(big.Int).SetBytes(privateKey)}
-	pubKey, err := factory.ToPublicKey(privKey)
+	privKey, err := secp256k1.ToPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}
-	return pubKey.Bytes(), nil
+	return privKey.PublicKey().Bytes(), nil
 }
 
 // deriveMLDSAKeys derives ML-DSA keys from seed
