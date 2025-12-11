@@ -17,7 +17,7 @@ require (
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.8.8
 	github.com/luxfi/geth v1.16.42
-	github.com/luxfi/ids v1.1.3
+	github.com/luxfi/ids v1.2.0
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/lpm v1.7.13
