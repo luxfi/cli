@@ -33,7 +33,7 @@ type WalletKeyInfo struct {
 
 func main() {
 	// Flags
-	uri := flag.String("uri", "http://127.0.0.1:9650", "Node API URI")
+	uri := flag.String("uri", "http://127.0.0.1:9630", "Node API URI")
 	genesisFile := flag.String("genesis", "", "Path to genesis JSON file")
 	name := flag.String("name", "ZOO", "Name of the chain")
 	networkName := flag.String("network", "lux-testnet", "Network name (lux-mainnet, lux-testnet, etc.)")

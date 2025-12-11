@@ -181,7 +181,7 @@ lux node configure --network-id=testnet
 
 # Add bootstrap nodes
 lux node configure \
-  --bootstrap-ips=1.2.3.4:9651,5.6.7.8:9651
+  --bootstrap-ips=1.2.3.4:9631,5.6.7.8:9631
 ```
 
 ### node backup
@@ -342,8 +342,8 @@ Create a comprehensive node configuration file:
   "api-keystore-enabled": false,
   "api-metrics-enabled": true,
   "http-host": "127.0.0.1",
-  "http-port": 9650,
-  "staking-port": 9651,
+  "http-port": 9630,
+  "staking-port": 9631,
   "log-level": "info",
   "log-dir": "./logs",
   "db-dir": "./db",
@@ -351,8 +351,8 @@ Create a comprehensive node configuration file:
   "staking-tls-cert-file": "./staking/staker.crt",
   "staking-tls-key-file": "./staking/staker.key",
   "bootstrap-ips": [
-    "bootstrap1.lux.network:9651",
-    "bootstrap2.lux.network:9651"
+    "bootstrap1.lux.network:9631",
+    "bootstrap2.lux.network:9631"
   ],
   "bootstrap-ids": [
     "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
@@ -367,8 +367,8 @@ Configure node using environment variables:
 
 ```bash
 export LUX_NETWORK_ID=mainnet
-export LUX_HTTP_PORT=9650
-export LUX_STAKING_PORT=9651
+export LUX_HTTP_PORT=9630
+export LUX_STAKING_PORT=9631
 export LUX_LOG_LEVEL=info
 export LUX_DATA_DIR=/var/lib/luxd
 ```
@@ -380,8 +380,8 @@ Override configuration with command-line flags:
 ```bash
 luxd \
   --network-id=mainnet \
-  --http-port=9650 \
-  --staking-port=9651 \
+  --http-port=9630 \
+  --staking-port=9631 \
   --log-level=debug \
   --api-metrics-enabled=true
 ```
@@ -448,7 +448,7 @@ cat > prometheus.yml << EOF
 scrape_configs:
   - job_name: 'lux-node'
     static_configs:
-      - targets: ['localhost:9650']
+      - targets: ['localhost:9630']
     metrics_path: '/ext/metrics'
 EOF
 
@@ -526,7 +526,7 @@ done
 ps aux | grep luxd
 
 # Check port availability
-netstat -tuln | grep -E '9650|9651'
+netstat -tuln | grep -E '9630|9631'
 
 # Check logs
 tail -100 ~/.luxd/logs/main.log
@@ -543,7 +543,7 @@ lux node status --detailed
 
 # Add more bootstrap nodes
 lux node configure \
-  --bootstrap-ips=1.2.3.4:9651,5.6.7.8:9651
+  --bootstrap-ips=1.2.3.4:9631,5.6.7.8:9631
 
 # Clear database and resync
 lux node stop
@@ -570,8 +570,8 @@ lux node configure --network-peer-list-size=20
 
 ```bash
 # Allow only necessary ports
-ufw allow 9651/tcp comment 'Lux staking'
-ufw allow from 127.0.0.1 to any port 9650 comment 'Lux API local only'
+ufw allow 9631/tcp comment 'Lux staking'
+ufw allow from 127.0.0.1 to any port 9630 comment 'Lux API local only'
 ufw enable
 ```
 
@@ -640,7 +640,7 @@ RUN curl -sSfL https://raw.githubusercontent.com/luxfi/node/main/scripts/install
 # Configure
 COPY node.json /root/.luxd/configs/node.json
 
-EXPOSE 9650 9651
+EXPOSE 9630 9631
 
 CMD ["luxd"]
 ```
@@ -662,9 +662,9 @@ spec:
       - name: luxd
         image: luxfi/node:latest
         ports:
-        - containerPort: 9650
+        - containerPort: 9630
           name: api
-        - containerPort: 9651
+        - containerPort: 9631
           name: staking
         volumeMounts:
         - name: data

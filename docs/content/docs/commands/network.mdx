@@ -203,8 +203,8 @@ Create a network configuration file for advanced setups.
     "api-admin-enabled": true,
     "api-keystore-enabled": true,
     "api-metrics-enabled": true,
-    "http-port": 9650,
-    "staking-port": 9651,
+    "http-port": 9630,
+    "staking-port": 9631,
     "db-type": "memdb"
   },
   "blockchains": [
@@ -229,7 +229,7 @@ Access individual nodes in the network.
 **Node Endpoints:**
 - Node 1: `http://127.0.0.1:9630`
 - Node 2: `http://127.0.0.1:9640`
-- Node 3: `http://127.0.0.1:9650`
+- Node 3: `http://127.0.0.1:9630`
 - Node 4: `http://127.0.0.1:9660`
 - Node 5: `http://127.0.0.1:9670`
 
@@ -240,7 +240,7 @@ curl -X POST --data '{
     "jsonrpc":"2.0",
     "id":1,
     "method":"health.health"
-}' -H 'content-type:application/json' http://127.0.0.1:9650/ext/health
+}' -H 'content-type:application/json' http://127.0.0.1:9630/ext/health
 
 # Using lux CLI
 lux network node health --node-index=0
@@ -276,7 +276,7 @@ Enable metrics for monitoring.
 lux network start --metrics-enabled
 
 # Access metrics
-curl http://127.0.0.1:9650/ext/metrics
+curl http://127.0.0.1:9630/ext/metrics
 ```
 
 ### Log Analysis
@@ -376,7 +376,7 @@ lux network test-warp --from=chain1 --to=chain2
 **Issue**: "port already in use"
 ```bash
 # Find process using port
-lsof -i :9650
+lsof -i :9630
 
 # Kill process
 kill -9 <PID>
@@ -414,7 +414,7 @@ lux network start --log-level=debug
 lux network status
 
 # Verify endpoints
-curl http://127.0.0.1:9650/ext/health
+curl http://127.0.0.1:9630/ext/health
 
 # Restart network
 lux network stop
