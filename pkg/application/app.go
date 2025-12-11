@@ -127,8 +127,13 @@ func (app *Lux) GetLuxBinDir() string {
 	return filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir, constants.LuxInstallDir)
 }
 
+func (app *Lux) GetLuxNodeBinDir() string {
+	return filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir, constants.LuxNodeInstallDir)
+}
+
+// GetLuxgoBinDir is deprecated, use GetLuxNodeBinDir instead
 func (app *Lux) GetLuxgoBinDir() string {
-	return filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir, constants.LuxGoInstallDir)
+	return app.GetLuxNodeBinDir()
 }
 
 func (app *Lux) GetEVMBinDir() string {
