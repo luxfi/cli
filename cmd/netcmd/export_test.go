@@ -57,7 +57,7 @@ func TestExportImportSubnet(t *testing.T) {
 	err = exportSubnet(nil, []string{testSubnet})
 	require.NoError(err)
 	require.FileExists(exportOutput)
-	sidecarFile := filepath.Join(app.GetBaseDir(), constants.SubnetDir, testSubnet, constants.SidecarFileName)
+	sidecarFile := filepath.Join(app.GetBaseDir(), constants.NetDir, testSubnet, constants.SidecarFileName)
 	orig, err := os.ReadFile(sidecarFile)
 	require.NoError(err)
 
@@ -79,7 +79,7 @@ func TestExportImportSubnet(t *testing.T) {
 	require.ErrorIs(err, os.ErrNotExist)
 	err = importSubnet(nil, []string{exportOutput})
 	require.ErrorContains(err, "subnet already exists")
-	genFile := filepath.Join(app.GetBaseDir(), constants.SubnetDir, testSubnet, constants.GenesisFileName)
+	genFile := filepath.Join(app.GetBaseDir(), constants.NetDir, testSubnet, constants.GenesisFileName)
 	err = os.Remove(genFile)
 	require.NoError(err)
 	err = importSubnet(nil, []string{exportOutput})
