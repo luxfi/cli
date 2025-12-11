@@ -5,10 +5,12 @@ package networkcmd
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/migrate"
+	_ "github.com/luxfi/migrate/cchain"   // Register C-Chain exporter
 	"github.com/luxfi/migrate/jsonl"
 	_ "github.com/luxfi/migrate/subnetevm" // Register SubnetEVM exporter
 	"github.com/spf13/cobra"
@@ -19,6 +21,7 @@ var (
 	exportDBOutput     string
 	exportDBStartBlock uint64
 	exportDBEndBlock   uint64
+	exportDBVMType     string
 )
 
 // lux network export db
@@ -40,7 +43,10 @@ EXAMPLES:
   lux network export db ~/work/lux/state/chaindata/zoo-mainnet-200200/db/pebbledb
 
   # Export specific block range
-  lux network export db ~/work/lux/state/chaindata/zoo-mainnet-200200/db/pebbledb --start=0 --end=10000`,
+  lux network export db ~/work/lux/state/chaindata/zoo-mainnet-200200/db/pebbledb --start=0 --end=10000
+
+  # Export C-Chain data (from geth/coreth database)
+  lux network export db ~/.node/chain-data/C/pebbledb --vm-type=cchain -o cchain-blocks.jsonl`,
 		RunE: exportDBFunc,
 		Args: cobra.ExactArgs(1),
 	}
@@ -48,6 +54,7 @@ EXAMPLES:
 	cmd.Flags().StringVarP(&exportDBOutput, "output", "o", "blocks.jsonl", "Output file (JSONL format)")
 	cmd.Flags().Uint64Var(&exportDBStartBlock, "start", 0, "Start block (default: 0)")
 	cmd.Flags().Uint64Var(&exportDBEndBlock, "end", 0, "End block (0=latest)")
+	cmd.Flags().StringVar(&exportDBVMType, "vm-type", "subnetevm", "VM type: subnetevm, cchain")
 
 	return cmd
 }
@@ -58,11 +65,22 @@ func exportDBFunc(_ *cobra.Command, args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Minute)
 	defer cancel()
 
-	ux.Logger.PrintToUser("Opening database: %s", dbPath)
+	// Determine VM type
+	var vmType migrate.VMType
+	switch strings.ToLower(exportDBVMType) {
+	case "subnetevm", "subnet-evm", "evm":
+		vmType = migrate.VMTypeSubnetEVM
+	case "cchain", "c-chain", "c", "coreth", "geth":
+		vmType = migrate.VMTypeCChain
+	default:
+		return fmt.Errorf("unsupported VM type: %s (supported: subnetevm, cchain)", exportDBVMType)
+	}
+
+	ux.Logger.PrintToUser("Opening database: %s (VM type: %s)", dbPath, vmType)
 
 	// Create exporter using migrate package
 	exporter, err := migrate.NewExporter(migrate.ExporterConfig{
-		VMType:       migrate.VMTypeSubnetEVM,
+		VMType:       vmType,
 		DatabasePath: dbPath,
 		DatabaseType: "pebble",
 	})
