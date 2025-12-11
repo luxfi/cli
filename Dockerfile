@@ -15,21 +15,15 @@ COPY . .
 # Build CLI binary
 RUN CGO_ENABLED=0 GOOS=linux go build -o lux -ldflags="-s -w" main.go
 
-# Runtime stage
-FROM alpine:latest
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
+# Runtime stage - use distroless for minimal size and security
+# The static variant includes ca-certificates
+FROM gcr.io/distroless/static-debian12:nonroot
 
 # Copy CLI binary from builder
 COPY --from=builder /build/lux /usr/local/bin/lux
 
-# Create directories for CLI data
-RUN mkdir -p /root/.lux-cli
-
-# Set environment
-ENV PATH="/usr/local/bin:${PATH}"
+# Run as nonroot user (uid: 65532)
+USER nonroot:nonroot
 
 # Default command
 ENTRYPOINT ["lux"]
