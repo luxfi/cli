@@ -1,7 +1,23 @@
 # Lux CLI - Multi-stage Docker Build
-ARG GO_VERSION=1.23.4
+# Stage 1: Install Go 1.25.5 from source
+FROM debian:bookworm-slim AS go-builder
 
-FROM golang:${GO_VERSION}-bookworm AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG GO_VERSION=1.25.5
+ARG TARGETARCH
+
+RUN wget -q "https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz" \
+    && tar -C /usr/local -xzf "go${GO_VERSION}.linux-${TARGETARCH}.tar.gz" \
+    && rm "go${GO_VERSION}.linux-${TARGETARCH}.tar.gz"
+
+# Stage 2: Build the CLI
+FROM debian:bookworm-slim AS builder
+
+COPY --from=go-builder /usr/local/go /usr/local/go
+ENV PATH="/usr/local/go/bin:${PATH}"
 
 WORKDIR /build
 
