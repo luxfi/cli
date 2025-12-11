@@ -15,8 +15,8 @@ import (
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/interchain"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/warp"
 	"github.com/luxfi/cli/pkg/metrics"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/utils"
@@ -99,7 +99,7 @@ configuration, pass the -f flag.`,
 	}
 	cmd.Flags().StringVar(&genesisPath, "genesis", "", "file path of genesis to use")
 	cmd.Flags().BoolVarP(&forceCreate, forceFlag, "f", false, "overwrite the existing configuration if one exists")
-	cmd.Flags().BoolVar(&createFlags.enableDebugging, "debug", true, "enable blockchain debugging")
+	cmd.Flags().BoolVar(&createFlags.enableDebugging, "debug", false, "enable blockchain debugging")
 
 	sovGroup := flags.RegisterFlagGroup(cmd, "Subnet-Only-Validators (SOV) Flags", "show-sov-flags", true, func(set *pflag.FlagSet) {
 		set.BoolVar(&createFlags.useACP99, "acp99", true, "use ACP99 contracts instead of v1.0.0 for validator managers")
@@ -267,7 +267,7 @@ func createBlockchainConfig(cmd *cobra.Command, args []string) error {
 	}
 
 	// get Warp info
-	warpInfo, err := interchain.GetWarpInfo(app)
+	warpInfo, err := warp.GetWarpInfo(app)
 	if err != nil {
 		return err
 	}
