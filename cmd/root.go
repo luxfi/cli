@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/interchaincmd"
+	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/l1cmd"
 	"github.com/luxfi/cli/cmd/l3cmd"
 	"github.com/luxfi/cli/cmd/localcmd"
@@ -113,6 +114,9 @@ Quick start:
 
 	// add validator command
 	rootCmd.AddCommand(validatorcmd.NewCmd(app))
+
+	// add key management command
+	rootCmd.AddCommand(keycmd.NewCmd(app))
 
 	// add migrate command
 	rootCmd.AddCommand(localcmd.NewCmd(app))
