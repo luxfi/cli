@@ -68,6 +68,7 @@ require (
 	github.com/luxfi/math v1.0.0
 	github.com/luxfi/migrate v1.0.0
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
+	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.36.0
 )
 
