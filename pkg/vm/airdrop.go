@@ -27,7 +27,7 @@ func getDefaultAllocation(defaultAirdropAmount string) (core.GenesisAlloc, error
 		return allocation, errors.New("unable to decode default allocation")
 	}
 
-	allocation[PrefundedEwoqAddress] = core.GenesisAccount{
+	allocation[DefaultFundedAddress] = core.GenesisAccount{
 		Balance: defaultAmount,
 	}
 	return allocation, nil
