@@ -13,7 +13,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 
@@ -21,7 +20,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/crypto/mldsa"
-	"github.com/luxfi/crypto/ringtail"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/hkdf"
 )
@@ -202,15 +201,13 @@ func deriveBLSPublicKey(privateKey []byte) ([]byte, []byte, error) {
 	return pkBytes, sigBytes, nil
 }
 
-// deriveRingtailPublicKey derives Ringtail public key
+// deriveRingtailPublicKey derives secp256k1 public key (Ringtail placeholder)
 func deriveRingtailPublicKey(privateKey []byte) ([]byte, error) {
-	factory := &ringtail.Factory{}
-	privKey := &ringtail.PrivateKey{Scalar: new(big.Int).SetBytes(privateKey)}
-	pubKey, err := factory.ToPublicKey(privKey)
+	privKey, err := secp256k1.ToPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
 	}
-	return pubKey.Bytes(), nil
+	return privKey.PublicKey().Bytes(), nil
 }
 
 // deriveMLDSAKeys derives ML-DSA keys from seed
