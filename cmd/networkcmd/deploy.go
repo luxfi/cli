@@ -260,7 +260,7 @@ func checkSubnetEVMDefaultAddressNotInAlloc(network models.Network, chain string
 		}
 		allocAddressMap := genesis.Alloc
 		for address := range allocAddressMap {
-			if address.String() == vm.PrefundedEwoqAddress.String() {
+			if address.String() == vm.DefaultFundedAddress.String() {
 				return fmt.Errorf("can't airdrop to default address on public networks, please edit the genesis by calling `lux blockchain create %s --force`", chain)
 			}
 		}
