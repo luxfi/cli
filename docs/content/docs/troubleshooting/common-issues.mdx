@@ -83,8 +83,8 @@ lux update --version=v1.2.3
 
 ```bash
 # Check for port conflicts
-lsof -i :9650-9670
-netstat -tuln | grep -E "9650|9651"
+lsof -i :9630-9670
+netstat -tuln | grep -E "9630|9631"
 
 # Check disk space
 df -h
@@ -97,7 +97,7 @@ free -h
 
 ```bash
 # Solution 1: Kill conflicting processes
-kill -9 $(lsof -t -i:9650)
+kill -9 $(lsof -t -i:9630)
 
 # Solution 2: Use different ports
 lux network start --api-port=9700 --staking-port=9701
@@ -195,7 +195,7 @@ curl -X POST --data '{
     "jsonrpc":"2.0",
     "id":1,
     "method":"info.peers"
-}' -H 'content-type:application/json' http://127.0.0.1:9650/ext/info
+}' -H 'content-type:application/json' http://127.0.0.1:9630/ext/info
 
 # Check logs for errors
 grep ERROR ~/.luxd/logs/main.log
@@ -206,7 +206,7 @@ grep ERROR ~/.luxd/logs/main.log
 ```bash
 # Add bootstrap nodes
 lux node configure \
-  --bootstrap-ips=bootstrap1.lux.network:9651,bootstrap2.lux.network:9651
+  --bootstrap-ips=bootstrap1.lux.network:9631,bootstrap2.lux.network:9631
 
 # Clear database and resync
 lux node stop

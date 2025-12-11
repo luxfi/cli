@@ -108,7 +108,7 @@ Complete node configuration reference:
 
   // HTTP Server
   "http-host": "127.0.0.1",
-  "http-port": 9650,
+  "http-port": 9630,
   "http-tls-enabled": false,
   "http-tls-cert-file": "",
   "http-tls-key-file": "",
@@ -119,7 +119,7 @@ Complete node configuration reference:
 
   // Staking
   "staking-enabled": true,
-  "staking-port": 9651,
+  "staking-port": 9631,
   "staking-tls-cert-file": "./staking/staker.crt",
   "staking-tls-key-file": "./staking/staker.key",
   "staking-ephemeral-cert-enabled": false,
@@ -153,8 +153,8 @@ Complete node configuration reference:
 
   // Bootstrap
   "bootstrap-ips": [
-    "bootstrap1.lux.network:9651",
-    "bootstrap2.lux.network:9651"
+    "bootstrap1.lux.network:9631",
+    "bootstrap2.lux.network:9631"
   ],
   "bootstrap-ids": [
     "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
@@ -321,7 +321,7 @@ Configure validator behavior:
 {
   "validator": {
     "staking-enabled": true,
-    "staking-port": 9651,
+    "staking-port": 9631,
     "staking-signer-key-file": "./staking/signer.key",
     "delegation-fee": 10,
     "min-delegation-fee": 2,
@@ -361,8 +361,8 @@ Configuration for local development:
     "num-nodes": 5,
     "network-id": 12345,
     "enable-api": true,
-    "api-port-start": 9650,
-    "staking-port-start": 9651,
+    "api-port-start": 9630,
+    "staking-port-start": 9631,
     "db-type": "memdb",
     "log-level": "debug"
   }
@@ -428,12 +428,12 @@ Network security configuration:
 # firewall-rules.yaml
 rules:
   - name: allow-staking
-    port: 9651
+    port: 9631
     protocol: tcp
     source: 0.0.0.0/0
 
   - name: allow-api-local
-    port: 9650
+    port: 9630
     protocol: tcp
     source: 127.0.0.1/32
 
