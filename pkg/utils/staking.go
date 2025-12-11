@@ -8,7 +8,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"math/big"
 	"os"
 	"path/filepath"
 	"time"
@@ -17,7 +16,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/crypto/mldsa"
-	"github.com/luxfi/crypto/ringtail"
+	"github.com/luxfi/crypto/secp256k1"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
@@ -136,25 +135,23 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
 }
 
-// NewRingtailKeyBytes generates a new Ringtail private key and returns it as bytes
+// NewRingtailKeyBytes generates a new secp256k1 private key and returns it as bytes
+// Note: "Ringtail" is a placeholder name - we use standard secp256k1 for now
 func NewRingtailKeyBytes() ([]byte, error) {
-	factory := &ringtail.Factory{}
-	privKey, err := factory.NewPrivateKey()
+	privKey, err := secp256k1.NewPrivateKey()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate Ringtail key: %w", err)
+		return nil, fmt.Errorf("failed to generate secp256k1 key: %w", err)
 	}
-	return privKey.Scalar.Bytes(), nil
+	return privKey.Bytes(), nil
 }
 
-// ToRingtailPublicKey converts Ringtail private key bytes to public key bytes
+// ToRingtailPublicKey converts secp256k1 private key bytes to public key bytes
 func ToRingtailPublicKey(keyBytes []byte) ([]byte, error) {
-	factory := &ringtail.Factory{}
-	privKey := &ringtail.PrivateKey{Scalar: new(big.Int).SetBytes(keyBytes)}
-	pubKey, err := factory.ToPublicKey(privKey)
+	privKey, err := secp256k1.ToPrivateKey(keyBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to derive Ringtail public key: %w", err)
+		return nil, fmt.Errorf("failed to parse secp256k1 private key: %w", err)
 	}
-	return pubKey.Bytes(), nil
+	return privKey.PublicKey().Bytes(), nil
 }
 
 // NewMLDSAKeyBytes generates a new ML-DSA private key and returns it as bytes
