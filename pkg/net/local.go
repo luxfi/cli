@@ -561,7 +561,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 	}
 
 	pluginDir := d.app.GetPluginsDir()
-	nodeBinPath := filepath.Join(luxDir, "node")
+	nodeBinPath := filepath.Join(luxDir, "luxd")
 
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
 		return "", fmt.Errorf("could not create pluginDir %s", pluginDir)
