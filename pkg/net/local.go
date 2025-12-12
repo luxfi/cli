@@ -24,7 +24,6 @@ import (
 	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/params"
@@ -532,11 +531,7 @@ func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) err
 	for address := range evmGenesis.Alloc {
 		amount := evmGenesis.Alloc[address].Balance
 		formattedAmount := new(big.Int).Div(amount, big.NewInt(params.Ether))
-		if address == vm.DefaultFundedAddress {
-			ux.Logger.PrintToUser("Funded address:   %s with %s (10^18) - see ~/.lux/keys/mainnet-ops for private key", address, formattedAmount.String())
-		} else {
-			ux.Logger.PrintToUser("Funded address:   %s with %s", address, formattedAmount.String())
-		}
+		ux.Logger.PrintToUser("Funded address:   %s with %s", address, formattedAmount.String())
 	}
 	ux.Logger.PrintToUser("Network name:     %s", chain)
 	ux.Logger.PrintToUser("Chain ID:         %s", evmGenesis.Config.ChainID)

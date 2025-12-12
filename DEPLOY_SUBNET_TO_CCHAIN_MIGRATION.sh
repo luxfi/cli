@@ -7,10 +7,10 @@ echo ""
 
 # Configuration
 MIGRATION_DIR="/home/z/work/lux/cli/lux-mainnet-migration"
-SUBNET_DB="/home/z/.avalanche-cli/runs/network_original_subnet/node1/chains/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+SUBNET_DB="/home/z/.lux/runs/network_original_subnet/node1/chains/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 NETWORK_ID=96369
 NUM_VALIDATORS=5
-LUX_CLI="/home/z/work/lux/cli/bin/lux-cli"
+LUX_CLI="/home/z/work/lux/cli/bin/lux"
 
 # Colors for output
 RED='\033[0;31m'
@@ -158,14 +158,14 @@ echo ""
 echo "RPC Endpoints:"
 echo "  Node 1: http://localhost:9630/ext/bc/C/rpc"
 echo "  Node 2: http://localhost:9640/ext/bc/C/rpc"
-echo "  Node 3: http://localhost:9650/ext/bc/C/rpc"
+echo "  Node 3: http://localhost:9630/ext/bc/C/rpc"
 echo "  Node 4: http://localhost:9660/ext/bc/C/rpc"
 echo "  Node 5: http://localhost:9670/ext/bc/C/rpc"
 echo ""
 echo "WebSocket Endpoints:"
 echo "  Node 1: ws://localhost:9630/ext/bc/C/ws"
 echo "  Node 2: ws://localhost:9640/ext/bc/C/ws"
-echo "  Node 3: ws://localhost:9650/ext/bc/C/ws"
+echo "  Node 3: ws://localhost:9630/ext/bc/C/ws"
 echo "  Node 4: ws://localhost:9660/ext/bc/C/ws"
 echo "  Node 5: ws://localhost:9670/ext/bc/C/ws"
 echo ""
