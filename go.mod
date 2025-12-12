@@ -59,8 +59,6 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
-// TEMPORARY: Local replace for testing P-Chain allocation fix - REMOVE BEFORE COMMIT
-
 require (
 	github.com/cockroachdb/pebble v1.1.5
 	github.com/dgraph-io/badger/v3 v3.2103.5

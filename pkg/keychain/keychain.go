@@ -30,9 +30,9 @@ const (
 )
 
 var (
-	ErrMutuallyExlusiveKeySource = errors.New("key source flags --key, --ewoq, --ledger/--ledger-addrs are mutually exclusive")
-	ErrEwoqKeyOnTestnetOrMainnet = errors.New("key source ewoq is not available for mainnet/testnet operations")
-	// AllowInsecureKeysOnMainnet allows ewoq and stored keys on mainnet for development
+	ErrMutuallyExlusiveKeySource = errors.New("key source flags --key and --ledger/--ledger-addrs are mutually exclusive")
+	// AllowInsecureKeysOnMainnet is a flag that allows use of software keys on mainnet
+	// This should only be set to true for testing or if you understand the security risks
 	AllowInsecureKeysOnMainnet = false
 )
 
@@ -112,7 +112,7 @@ func GetKeychainFromCmdLineFlags(
 	keychainGoal string,
 	network models.Network,
 	keyName string,
-	useEwoq bool,
+	useLocalKey bool,
 	useLedger bool,
 	ledgerAddresses []string,
 	requiredFunds uint64,
@@ -122,32 +122,29 @@ func GetKeychainFromCmdLineFlags(
 		useLedger = true
 	}
 	// check mutually exclusive flags
-	if !flags.EnsureMutuallyExclusive([]bool{useLedger, useEwoq, keyName != ""}) {
+	if !flags.EnsureMutuallyExclusive([]bool{useLedger, useLocalKey, keyName != ""}) {
 		return nil, ErrMutuallyExlusiveKeySource
 	}
 	switch {
 	case network == models.Local:
 		// prompt the user if no key source was provided
-		if !useEwoq && !useLedger && keyName == "" {
+		if !useLocalKey && !useLedger && keyName == "" {
 			var err error
-			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), true)
+			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), false)
 			if err != nil {
 				return nil, err
 			}
 		}
 	case network == models.Devnet:
 		// prompt the user if no key source was provided
-		if !useEwoq && !useLedger && keyName == "" {
+		if !useLocalKey && !useLedger && keyName == "" {
 			var err error
-			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), true)
+			useLedger, keyName, err = prompts.GetKeyOrLedger(app.Prompt, keychainGoal, app.GetKeyDir(), false)
 			if err != nil {
 				return nil, err
 			}
 		}
 	case network == models.Testnet:
-		if useEwoq || keyName == "ewoq" {
-			return nil, ErrEwoqKeyOnTestnetOrMainnet
-		}
 		// prompt the user if no key source was provided
 		if !useLedger && keyName == "" {
 			var err error
@@ -157,10 +154,7 @@ func GetKeychainFromCmdLineFlags(
 			}
 		}
 	case network == models.Mainnet:
-		if (useEwoq || keyName == "ewoq") && !AllowInsecureKeysOnMainnet {
-			return nil, ErrEwoqKeyOnTestnetOrMainnet
-		}
-		if keyName == "" && !useEwoq {
+		if keyName == "" && !useLocalKey {
 			useLedger = true
 		} else {
 			ux.Logger.PrintToUser("")
@@ -172,20 +166,20 @@ func GetKeychainFromCmdLineFlags(
 	network.HandlePublicNetworkSimulation()
 
 	// get keychain accessor
-	return GetKeychain(app, useEwoq, useLedger, ledgerAddresses, keyName, network, requiredFunds)
+	return GetKeychain(app, useLocalKey, useLedger, ledgerAddresses, keyName, network, requiredFunds)
 }
 
 func GetKeychain(
 	app *application.Lux,
-	useEwoq bool,
+	useLocalKey bool,
 	useLedger bool,
 	ledgerAddresses []string,
 	keyName string,
 	network models.Network,
 	requiredFunds uint64,
 ) (*Keychain, error) {
-	if !useEwoq && !useLedger && keyName == "" {
-		return nil, fmt.Errorf("one of the options ewoq/ledger/keyName must be provided")
+	if !useLocalKey && !useLedger && keyName == "" {
+		return nil, fmt.Errorf("one of the options local-key/ledger/keyName must be provided")
 	}
 	// get keychain accessor
 	if useLedger {
@@ -222,9 +216,8 @@ func GetKeychain(
 		}
 		return NewKeychain(network, kc, ledgerDevice, ledgerIndices), nil
 	}
-	if useEwoq {
-		// SECURITY: Use the secure local-key instead of the publicly known ewoq key.
-		// The -e/--ewoq flag now uses ~/.lux/keys/local-key.pk which is generated
+	if useLocalKey {
+		// Use the local-key from ~/.lux/keys/local-key.pk which is generated
 		// on first use with a unique random key per machine.
 		sf, err := key.GetOrCreateLocalKey(network.ID())
 		if err != nil {
