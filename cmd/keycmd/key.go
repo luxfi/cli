@@ -59,6 +59,7 @@ Examples:
 	cmd.AddCommand(newExportCmd())
 	cmd.AddCommand(newImportCmd())
 	cmd.AddCommand(newGenerateCmd())
+	cmd.AddCommand(newGenesisCmd())
 
 	return cmd
 }
