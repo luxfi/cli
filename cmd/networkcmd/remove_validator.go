@@ -117,7 +117,7 @@ func removeValidator(_ *cobra.Command, args []string) error {
 		"to pay for transaction fees on P-Chain",
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,

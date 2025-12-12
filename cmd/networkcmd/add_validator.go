@@ -109,7 +109,7 @@ Testnet or Mainnet.`,
 		0,
 		"set the LUX balance of the validator that will be used for continuous fee on P-Chain",
 	)
-	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [testnet/devnet only]")
+	cmd.Flags().BoolVarP(&useLocalKey, "local-key", "e", false, "use local key (~/.lux/keys/local-key.pk) [testnet/devnet only]")
 	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	cmd.Flags().StringVar(&nodeIDStr, "node-id", "", "node-id of the validator to add")
@@ -235,7 +235,7 @@ func addValidator(cmd *cobra.Command, args []string) error {
 		"to pay for transaction fees on P-Chain",
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,
