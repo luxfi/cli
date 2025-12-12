@@ -19,6 +19,7 @@ const (
 	balanceFlag                = "balance"
 	changeOwnerAddressFlag     = "change-owner-address"
 	localBootstrapFlag         = "local-bootstrap"
+	noLocalBootstrapFlag       = "no-local-bootstrap"
 )
 
 type BootstrapValidatorFlags struct {
@@ -29,6 +30,7 @@ type BootstrapValidatorFlags struct {
 	DeployBalanceLUX                float64
 	ChangeOwnerAddress              string
 	LocalBootstrap                  bool
+	NoLocalBootstrap                bool
 }
 
 func validateBootstrapFilepathFlag(cmd *cobra.Command, bootstrapValidatorFlags BootstrapValidatorFlags) error {
@@ -81,8 +83,13 @@ func AddBootstrapValidatorFlagsToCmd(cmd *cobra.Command, bootstrapFlags *Bootstr
 			"set the LUX balance of each bootstrap validator that will be used for continuous fee on P-Chain (setting balance=1 equals to 1 LUX for each bootstrap validator)",
 		)
 		set.StringVar(&bootstrapFlags.ChangeOwnerAddress, changeOwnerAddressFlag, "", "address that will receive change if node is no longer L1 validator")
-		set.BoolVar(&bootstrapFlags.LocalBootstrap, localBootstrapFlag, true, "auto-detect running nodes on localhost (ports 9630,9632,9634,9636,9638) as bootstrap validators")
+		set.BoolVar(&bootstrapFlags.LocalBootstrap, localBootstrapFlag, true, "auto-detect running nodes on localhost (ports 9630,9632,9634,9636,9638) as bootstrap validators (default: true)")
+		set.BoolVar(&bootstrapFlags.NoLocalBootstrap, noLocalBootstrapFlag, false, "disable auto-detection of local bootstrap validators")
 		bootstrapValidatorPreRun := func(cmd *cobra.Command, _ []string) error {
+			// Handle --no-local-bootstrap flag overriding --local-bootstrap
+			if bootstrapFlags.NoLocalBootstrap {
+				bootstrapFlags.LocalBootstrap = false
+			}
 			if err := validateBootstrapValidatorFlags(cmd, *bootstrapFlags); err != nil {
 				return err
 			}
