@@ -105,6 +105,9 @@ const (
 	// LatestLuxd2EVMKey represents the latest Luxd to EVM compatibility key
 	LatestLuxd2EVMKey = "v1.12.0"
 
-	// EwoqEVMAddress is the EVM address for the Ewoq test key
-	EwoqEVMAddress = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
+	// LocalTestEVMAddress is the EVM address for the local test key (used in E2E tests)
+	// NOTE: Tests still use this fixed address for compatibility; production uses env vars
+	LocalTestEVMAddress = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
+	// Deprecated: Use LocalTestEVMAddress instead
+	EwoqEVMAddress = LocalTestEVMAddress
 )

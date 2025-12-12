@@ -22,9 +22,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/ux"
 
-	"github.com/luxfi/genesis/pkg/genesis"
-
 	es "github.com/luxfi/cli/pkg/elasticsubnet"
+	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/ids"
@@ -403,8 +402,12 @@ func transformElasticSubnetLocal(sc models.Sidecar, subnetName string, tokenName
 	ux.Logger.PrintToUser("Starting Elastic Net Transformation")
 	cancel := make(chan struct{})
 	go ux.PrintWait(cancel)
-	testKey := genesis.EWOQKey
-	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Load local key from environment or ~/.lux/keys/local-key.pk
+	localKey, err := key.GetOrCreateLocalKey(constants.LocalNetworkID)
+	if err != nil {
+		return err
+	}
+	secpKeyChain := secp256k1fx.NewKeychain(localKey.Key())
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
 	txID, assetID, err := net.IssueTransformSubnetTx(elasticSubnetConfig, keyChain, subnetID, tokenName, tokenSymbol, elasticSubnetConfig.MaxSupply)
@@ -605,11 +608,15 @@ func transformValidatorsToPermissionlessLocal(sc models.Sidecar, subnetID ids.ID
 func handleRemoveAndAddValidators(sc models.Sidecar, subnetID ids.ID, validator ids.NodeID, stakedAmount uint64) error {
 	startTime := time.Now().Add(constants.StakingMinimumLeadTime).UTC()
 	endTime := startTime.Add(constants.MinStakeDuration)
-	testKey := genesis.EWOQKey
-	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Load local key from environment or ~/.lux/keys/local-key.pk
+	localKey, err := key.GetOrCreateLocalKey(constants.LocalNetworkID)
+	if err != nil {
+		return err
+	}
+	secpKeyChain := secp256k1fx.NewKeychain(localKey.Key())
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
-	_, err := net.IssueRemoveSubnetValidatorTx(keyChain, subnetID, validator)
+	_, err = net.IssueRemoveSubnetValidatorTx(keyChain, subnetID, validator)
 	if err != nil {
 		return err
 	}

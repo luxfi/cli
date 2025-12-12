@@ -220,7 +220,7 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	// Add BadgerDB configuration if specified
 	if dbEngine != "" {
-		nodeConfig["db-engine"] = dbEngine
+		nodeConfig["db-type"] = dbEngine
 	}
 	if archiveDir != "" {
 		nodeConfig["archive-dir"] = archiveDir

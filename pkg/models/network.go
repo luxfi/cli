@@ -41,7 +41,7 @@ func (s Network) String() string {
 func (s Network) NetworkID() (uint32, error) {
 	switch s {
 	case Mainnet:
-		return lux_constants.MainnetID, nil
+		return lux_constants.LuxMainnetID, nil // Use 96369 for LUX mainnet
 	case Testnet:
 		return lux_constants.TestnetID, nil
 	case Local:
@@ -90,7 +90,7 @@ func NetworkFromString(s string) Network {
 
 func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
-	case lux_constants.MainnetID:
+	case lux_constants.LuxMainnetID, lux_constants.MainnetID:
 		return Mainnet
 	case lux_constants.TestnetID:
 		return Testnet

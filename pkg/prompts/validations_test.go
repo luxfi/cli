@@ -802,13 +802,13 @@ func TestValidatePChainAddress(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name:        "valid P-Chain address - ewoq test address",
+			name:        "valid P-Chain address - test address",
 			input:       "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
 			expectedHRP: "custom",
 			wantErr:     false,
 		},
 		{
-			name:        "valid address format but not P-Chain - X-Chain ewoq",
+			name:        "valid address format but not P-Chain - X-Chain test",
 			input:       "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
 			expectedHRP: "",
 			wantErr:     true, // Parse succeeds but chainID != "P"

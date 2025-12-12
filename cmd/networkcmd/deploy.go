@@ -55,7 +55,7 @@ var (
 	subnetAuthKeys         []string
 	outputTxPath           string
 	useLedger              bool
-	useEwoq                bool
+	useLocalKey            bool
 	ledgerAddresses        []string
 	subnetIDStr            string
 	mainnetChainID         uint32
@@ -124,14 +124,14 @@ so you can take your locally tested Blockchain and deploy it on Testnet or Mainn
 
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet deploy only]")
 	cmd.Flags().StringVar(&outputTxPath, "output-tx-path", "", "file path of the blockchain creation tx (for multi-sig signing)")
-	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [local/devnet deploy only]")
+	cmd.Flags().BoolVarP(&useLocalKey, "local-key", "e", false, "use local key (~/.lux/keys/local-key.pk) [local/devnet deploy only]")
 	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	cmd.Flags().StringVarP(&subnetIDStr, "subnet-id", "u", "", "do not create a subnet, deploy the blockchain into the given subnet id")
 	cmd.Flags().Uint32Var(&mainnetChainID, "mainnet-chain-id", 0, "use different ChainID for mainnet deployment")
 	cmd.Flags().BoolVar(&subnetOnly, "subnet-only", false, "command stops after CreateSubnetTx and returns SubnetID")
 	cmd.Flags().BoolVar(&deployFlags.ConvertOnly, "convert-only", false, "avoid node track, restart and poa manager setup")
-	cmd.Flags().BoolVar(&allowInsecureKeys, "allow-insecure-keys", false, "allow ewoq/stored keys on mainnet (development only, INSECURE)")
+	cmd.Flags().BoolVar(&allowInsecureKeys, "allow-insecure-keys", false, "allow stored keys on mainnet (development only, INSECURE)")
 
 	localNetworkGroup := flags.RegisterFlagGroup(cmd, "Local Network Flags", "show-local-network-flags", true, func(set *pflag.FlagSet) {
 		set.Uint32Var(&numNodes, "num-nodes", constants.LocalNetworkNumNodes, "number of nodes to be created on local network deploy")
@@ -205,7 +205,7 @@ func CallDeploy(
 	networkFlags networkoptions.NetworkFlags,
 	keyNameParam string,
 	useLedgerParam bool,
-	useEwoqParam bool,
+	useLocalKeyParam bool,
 	sameControlKeyParam bool,
 ) error {
 	subnetOnly = subnetOnlyParam
@@ -213,7 +213,7 @@ func CallDeploy(
 	sameControlKey = sameControlKeyParam
 	keyName = keyNameParam
 	useLedger = useLedgerParam
-	useEwoq = useEwoqParam
+	useLocalKey = useLocalKeyParam
 	return deployBlockchain(cmd, []string{blockchainName})
 }
 
@@ -717,7 +717,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		constants.PayTxsFeesMsg,
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,

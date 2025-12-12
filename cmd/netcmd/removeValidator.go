@@ -8,11 +8,11 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/models"
@@ -234,8 +234,12 @@ func removeFromLocal(subnetName string) error {
 		return err
 	}
 
-	testKey := genesis.EWOQKey
-	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Load local key from environment or ~/.lux/keys/local-key.pk
+	localKey, err := key.GetOrCreateLocalKey(constants.LocalNetworkID)
+	if err != nil {
+		return fmt.Errorf("failed to load local key: %w", err)
+	}
+	secpKeyChain := secp256k1fx.NewKeychain(localKey.Key())
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
 	_, err = net.IssueRemoveSubnetValidatorTx(keyChain, subnetID, nodeID)

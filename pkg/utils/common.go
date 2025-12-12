@@ -645,7 +645,7 @@ func E2EDocker() bool {
 }
 
 // GetKeyNames returns all key names in the key directory
-func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
+func GetKeyNames(keyDir string) ([]string, error) {
 	files, err := os.ReadDir(keyDir)
 	if err != nil {
 		return nil, err
@@ -655,10 +655,6 @@ func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".pk") {
 			keyName := strings.TrimSuffix(f.Name(), ".pk")
-			// Skip ewoq key if includeEwoq is false
-			if !includeEwoq && keyName == "ewoq" {
-				continue
-			}
 			keys = append(keys, keyName)
 		}
 	}
