@@ -27,10 +27,10 @@ func TestGetAllocationCustomUnits(t *testing.T) {
 	airdropInputAmount := new(big.Int)
 	airdropInputAmount.SetString("1000000", 10)
 
+	// Expected amount is input * oneLux (10^18)
 	expectedAmount := new(big.Int)
-	expectedAmount.SetString(defaultEvmAirdropAmount, 10)
+	expectedAmount.SetString("1000000000000000000000000", 10) // 1000000 * 10^18
 
-	mockPrompt.On("CaptureList", mock.Anything, mock.Anything).Return(customAirdrop, nil)
 	mockPrompt.On("CaptureAddress", mock.Anything).Return(testAirdropCryptoAddress, nil)
 	mockPrompt.On("CapturePositiveBigInt", mock.Anything).Return(airdropInputAmount, nil)
 	mockPrompt.On("CaptureNoYes", mock.Anything).Return(false, nil)

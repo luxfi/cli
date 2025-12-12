@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/cb58"
@@ -443,9 +444,8 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 // GetLocalPrivateKey returns the secp256k1 private key for local development.
 // It loads from ~/.lux/keys/local-key.pk, generating a new key if needed.
 func GetLocalPrivateKey() (*secp256k1.PrivateKey, error) {
-	// Use local network ID (12345) as default for key loading
-	const localNetworkID = 12345
-	softKey, err := GetOrCreateLocalKey(localNetworkID)
+	// Use local network ID (1337) as default for key loading
+	softKey, err := GetOrCreateLocalKey(constants.LocalNetworkID)
 	if err != nil {
 		return nil, err
 	}
