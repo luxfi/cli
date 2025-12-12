@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/cli/pkg/localnet"
+	"github.com/luxfi/cli/pkg/localnetworkinterface"
 	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	utilspkg "github.com/luxfi/cli/pkg/utils"
@@ -276,7 +276,7 @@ func deploySubnet(cmd *cobra.Command, args []string) error {
 		// skip rpc check if using custom vm
 		if sidecar.VM != models.CustomVM {
 			// check if selected version matches what is currently running
-			nc := localnet.NewStatusChecker()
+			nc := localnetworkinterface.NewStatusChecker()
 			userProvidedLuxVersion, err = checkForInvalidDeployAndGetLuxVersion(nc, sidecar.RPCVersion)
 			if err != nil {
 				return err
@@ -870,7 +870,7 @@ func PrintDeployResults(chain string, subnetID ids.ID, blockchainID ids.ID) erro
 
 // Determines the appropriate version of node to run with. Returns an error if
 // that version conflicts with the current deployment.
-func checkForInvalidDeployAndGetLuxVersion(network localnet.StatusChecker, configuredRPCVersion int) (string, error) {
+func checkForInvalidDeployAndGetLuxVersion(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
 	// get current network
 	runningLuxVersion, runningRPCVersion, networkRunning, err := network.GetCurrentNetworkVersion()
 	if err != nil {
