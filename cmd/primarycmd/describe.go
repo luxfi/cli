@@ -96,8 +96,8 @@ func describe(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	// Load the ewoq key for local networks
-	k, err := key.NewSoft(network.ID(), key.WithPrivateKeyEncoded(key.EwoqPrivateKey))
+	// Load the local key for local networks (from env vars or ~/.lux/keys/local-key.pk)
+	k, err := key.GetOrCreateLocalKey(network.ID())
 	if err != nil {
 		return err
 	}

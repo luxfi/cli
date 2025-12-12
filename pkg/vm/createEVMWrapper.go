@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/warp"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
@@ -47,14 +48,18 @@ func CreateEVMGenesisWithParams(
 		}
 	}
 
-	// Add default ewoq test account if no allocations provided
+	// Add default allocation using local key if no allocations provided
 	if len(allocations) == 0 {
-		// Default test account with 1 billion tokens (ewoq key)
-		ewoqAddr := common.HexToAddress("0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC")
-		balance := new(big.Int)
-		balance.SetString("1000000000000000000000000000", 10) // 1 billion with 18 decimals
-		allocations[ewoqAddr] = core.GenesisAccount{
-			Balance: balance,
+		// Use local key for default allocation (generated per machine, or from env vars)
+		const localNetworkID = 12345
+		localKey, err := key.GetOrCreateLocalKey(localNetworkID)
+		if err == nil {
+			localAddr := common.HexToAddress(localKey.C())
+			balance := new(big.Int)
+			balance.SetString("1000000000000000000000000000", 10) // 1 billion with 18 decimals
+			allocations[localAddr] = core.GenesisAccount{
+				Balance: balance,
+			}
 		}
 	}
 

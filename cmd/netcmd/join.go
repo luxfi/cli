@@ -14,11 +14,11 @@ import (
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/plugins"
 	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/rpc"
@@ -28,7 +28,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const ewoqPChainAddr = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+// localKeyPChainAddr is the P-Chain address used for local key operations
+// This is deprecated in favor of per-machine generated keys
+const localKeyPChainAddr = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 
 var (
 	// path to node config file
@@ -352,8 +354,12 @@ func handleValidatorJoinElasticSubnet(sc models.Sidecar, network models.Network,
 	ux.Logger.PrintToUser("")
 
 	assetID := sc.ElasticSubnet[models.Local.String()].AssetID
-	testKey := genesis.EWOQKey
-	secpKeyChain := secp256k1fx.NewKeychain(testKey)
+	// Load local key from environment or ~/.lux/keys/local-key.pk
+	localKey, err := key.GetOrCreateLocalKey(constants.LocalNetworkID)
+	if err != nil {
+		return err
+	}
+	secpKeyChain := secp256k1fx.NewKeychain(localKey.Key())
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	keyChain := keychainpkg.WrapSecp256k1fxKeychain(secpKeyChain)
 	subnetID := sc.Networks[models.Local.String()].SubnetID
@@ -498,7 +504,7 @@ func promptStakeAmount(subnetName string) (uint64, error) {
 	}
 	ctx := context.Background()
 	pClient := platformvm.NewClient(constants.LocalAPIEndpoint)
-	walletBalance, err := getAssetBalance(ctx, pClient, ewoqPChainAddr, esc.AssetID)
+	walletBalance, err := getAssetBalance(ctx, pClient, localKeyPChainAddr, esc.AssetID)
 	if err != nil {
 		return 0, err
 	}

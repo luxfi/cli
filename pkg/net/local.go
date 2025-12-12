@@ -428,7 +428,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	// so we get incremental selection
 	sort.Strings(subnetIDs)
 	if len(subnetIDs) == 0 {
-		return ids.Empty, ids.Empty, errors.New("the network has not preloaded subnet IDs. Please use 'lux network deploy <subnet> --local --ewoq' instead of 'lux subnet deploy'")
+		return ids.Empty, ids.Empty, errors.New("the network has not preloaded subnet IDs. Please use 'lux network deploy <subnet> --local --local-key' instead of 'lux subnet deploy'")
 	}
 	subnetIDStr := subnetIDs[numBlockchains%len(subnetIDs)]
 

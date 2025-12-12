@@ -720,8 +720,8 @@ func FundLedgerAddress(amount uint64) error {
 	}
 	ledgerAddr := ledgerAddrs[0]
 
-	// get genesis funded wallet
-	sk, err := key.LoadSoft(constants.LocalNetworkID, EwoqKeyPath)
+	// get genesis funded wallet (using local test key)
+	sk, err := key.LoadSoft(constants.LocalNetworkID, LocalKeyPath)
 	if err != nil {
 		return err
 	}
@@ -938,10 +938,10 @@ func GetLocalClusterUris() ([]string, error) {
 	return uris, nil
 }
 
-// FundAddress funds an address with LUX tokens from the ewoq account
+// FundAddress funds an address with LUX tokens from the local test key account
 func FundAddress(addr ids.ShortID, amount uint64) error {
-	// Get genesis funded wallet
-	sk, err := key.LoadSoft(constants.LocalNetworkID, EwoqKeyPath)
+	// Get genesis funded wallet (using local test key)
+	sk, err := key.LoadSoft(constants.LocalNetworkID, LocalKeyPath)
 	if err != nil {
 		return err
 	}
@@ -1099,9 +1099,9 @@ func ParseAddrBalanceFromKeyListOutput(output string, keyName string, chain stri
 	// For now, return dummy values to allow compilation
 
 	// Example output format:
-	// NAME     CHAIN     ADDRESS                                    BALANCE
-	// ewoq     P-Chain   P-custom1q2hnx...                         30000000
-	// ewoq     C-Chain   0x8db97C7cEce249c2b98bDC0226Cc4C2A57BF52FC 50000000
+	// NAME       CHAIN     ADDRESS                                    BALANCE
+	// local-key  P-Chain   P-custom1q2hnx...                         30000000
+	// local-key  C-Chain   0x...                                     50000000
 
 	lines := strings.Split(output, "\n")
 	for _, line := range lines {

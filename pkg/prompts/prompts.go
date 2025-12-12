@@ -672,7 +672,7 @@ func contains[T comparable](list []T, element T) bool {
 }
 
 // GetKeyOrLedger prompts user to choose between key or ledger
-func GetKeyOrLedger(prompter Prompter, goal string, keyDir string, includeEwoq bool) (bool, string, error) {
+func GetKeyOrLedger(prompter Prompter, goal string, keyDir string) (bool, string, error) {
 	useStoredKey, err := prompter.ChooseKeyOrLedger(goal)
 	if err != nil {
 		return false, "", err
@@ -680,7 +680,7 @@ func GetKeyOrLedger(prompter Prompter, goal string, keyDir string, includeEwoq b
 	if !useStoredKey {
 		return true, "", nil
 	}
-	keyName, err := captureKeyName(prompter, goal, keyDir, includeEwoq)
+	keyName, err := captureKeyName(prompter, goal, keyDir)
 	if err != nil {
 		return false, "", err
 	}
@@ -753,7 +753,7 @@ func GetTestnetKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, s
 	if !useStoredKey {
 		return true, "", nil
 	}
-	keyName, err := captureKeyName(prompt, goal, keyDir, true) // include ewoq by default
+	keyName, err := captureKeyName(prompt, goal, keyDir)
 	if err != nil {
 		if errors.Is(err, errNoKeys) {
 			ux.Logger.PrintToUser("No private keys have been found. Signing transactions on Testnet without a private key " +
@@ -764,7 +764,7 @@ func GetTestnetKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, s
 	return false, keyName, nil
 }
 
-func captureKeyName(prompt Prompter, goal string, keyDir string, includeEwoq bool) (string, error) {
+func captureKeyName(prompt Prompter, goal string, keyDir string) (string, error) {
 	files, err := os.ReadDir(keyDir)
 	if err != nil {
 		return "", err
@@ -778,10 +778,6 @@ func captureKeyName(prompt Prompter, goal string, keyDir string, includeEwoq boo
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), constants.KeySuffix) {
 			keyName := strings.TrimSuffix(f.Name(), constants.KeySuffix)
-			// Skip ewoq key if includeEwoq is false
-			if !includeEwoq && keyName == "ewoq" {
-				continue
-			}
 			keys = append(keys, keyName)
 		}
 	}

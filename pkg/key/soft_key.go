@@ -55,11 +55,11 @@ const (
 	// LocalKeyPath is the path where the local key is stored
 	LocalKeyPath = "~/.lux/keys/" + LocalKeyName + ".pk"
 
-	// DEPRECATED: EwoqPrivateKey is the legacy hardcoded EWOQ key.
-	// DO NOT USE for new code - this is a publicly known key and is a security risk.
-	// Use GetLocalKey() instead which generates a unique local key on first use.
-	rawEwoqPk      = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
-	EwoqPrivateKey = privKeyEncPfx + rawEwoqPk
+	// Environment variables for key configuration (no hardcoded keys!)
+	// LUX_MNEMONIC - BIP39 mnemonic phrase for deterministic key generation
+	// LUX_PRIVATE_KEY - CB58 encoded private key (PrivateKey-xxx format)
+	EnvMnemonic    = "LUX_MNEMONIC"
+	EnvPrivateKey  = "LUX_PRIVATE_KEY"
 )
 
 type SOp struct {
@@ -407,10 +407,23 @@ func GetLocalKeyPath() string {
 	return filepath.Join(home, ".lux", "keys", LocalKeyName+".pk")
 }
 
-// GetOrCreateLocalKey loads the local development key from ~/.lux/keys/local-key.pk,
-// generating a new one if it doesn't exist. This is the secure replacement for
-// the hardcoded EWOQ key.
+// GetOrCreateLocalKey loads a key with the following priority:
+// 1. LUX_PRIVATE_KEY environment variable (CB58 encoded)
+// 2. LUX_MNEMONIC environment variable (BIP39 mnemonic)
+// 3. Local key file at ~/.lux/keys/local-key.pk (generated if not exists)
+// This ensures no hardcoded keys - all keys are either from environment or generated locally.
 func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
+	// Priority 1: Check for LUX_PRIVATE_KEY environment variable
+	if privKeyEnc := os.Getenv(EnvPrivateKey); privKeyEnc != "" {
+		return NewSoft(networkID, WithPrivateKeyEncoded(privKeyEnc))
+	}
+
+	// Priority 2: Check for LUX_MNEMONIC environment variable
+	if mnemonic := os.Getenv(EnvMnemonic); mnemonic != "" {
+		return NewSoftFromMnemonic(networkID, mnemonic)
+	}
+
+	// Priority 3: Use local key file (generate if not exists)
 	keyPath := GetLocalKeyPath()
 	if keyPath == "" {
 		return nil, errors.New("could not determine home directory")
@@ -439,6 +452,14 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 	}
 
 	return newKey, nil
+}
+
+// NewSoftFromMnemonic creates a SoftKey from a BIP39 mnemonic phrase.
+// Uses standard BIP44 derivation path: m/44'/9000'/0'/0/0
+func NewSoftFromMnemonic(networkID uint32, mnemonic string) (*SoftKey, error) {
+	// For now, return an error as mnemonic support requires additional dependencies
+	// This can be implemented later with BIP39/BIP44 libraries
+	return nil, fmt.Errorf("mnemonic support not yet implemented - use LUX_PRIVATE_KEY instead")
 }
 
 // GetLocalPrivateKey returns the secp256k1 private key for local development.

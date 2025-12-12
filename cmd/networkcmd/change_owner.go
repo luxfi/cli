@@ -31,7 +31,7 @@ func newChangeOwnerCmd() *cobra.Command {
 	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)")
 	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet]")
-	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [testnet/devnet]")
+	cmd.Flags().BoolVarP(&useLocalKey, "local-key", "e", false, "use local key (~/.lux/keys/local-key.pk) [testnet/devnet]")
 	cmd.Flags().StringSliceVar(&subnetAuthKeys, "auth-keys", nil, "control keys that will be used to authenticate transfer blockchain ownership tx")
 	cmd.Flags().BoolVarP(&sameControlKey, "same-control-key", "s", false, "use the fee-paying key as control key")
 	cmd.Flags().StringSliceVar(&controlKeys, "control-keys", nil, "addresses that may make blockchain changes")
@@ -67,7 +67,7 @@ func changeOwner(_ *cobra.Command, args []string) error {
 		"pay fees",
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,

@@ -693,7 +693,7 @@ func convertBlockchain(cmd *cobra.Command, args []string) error {
 		constants.PayTxsFeesMsg,
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,
