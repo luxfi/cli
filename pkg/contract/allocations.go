@@ -38,8 +38,7 @@ func GetDefaultBlockchainAirdropKeyInfo(
 // preference to the ones expected to be default
 // it searches for:
 // 1) default CLI allocation key for blockchains
-// 2) ewoq
-// 3) all other stored keys managed by CLI
+// 2) all other stored keys managed by CLI
 // returns address + private key when found
 func GetBlockchainAirdropKeyInfo(
 	app *application.Lux,
@@ -62,18 +61,6 @@ func GetBlockchainAirdropKeyInfo(
 			}
 		}
 	}
-	// Try to load ewoq key
-	ewoqPath := app.GetKeyPath("ewoq")
-	if utils.FileExists(ewoqPath) {
-		ewoq, err := key.LoadSoft(network.ID(), ewoqPath)
-		if err == nil {
-			for address := range genesis.Alloc {
-				if address.Hex() == ewoq.C() {
-					return "ewoq", ewoq.C(), ewoq.PrivKeyHex(), nil
-				}
-			}
-		}
-	}
 	maxBalance := big.NewInt(0)
 	maxBalanceKeyName := ""
 	maxBalanceAddr := ""
@@ -84,7 +71,7 @@ func GetBlockchainAirdropKeyInfo(
 		}
 		// Convert geth common.Address to crypto.Address
 		cryptoAddr := crypto.Address(address.Bytes())
-		found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr, false)
+		found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr)
 		if err != nil {
 			return "", "", "", err
 		}
@@ -102,9 +89,8 @@ func SearchForManagedKey(
 	app *application.Lux,
 	network models.Network,
 	address crypto.Address,
-	includeEwoq bool,
 ) (bool, string, string, string, error) {
-	keyNames, err := utils.GetKeyNames(app.GetKeyDir(), includeEwoq)
+	keyNames, err := utils.GetKeyNames(app.GetKeyDir())
 	if err != nil {
 		return false, "", "", "", err
 	}
@@ -220,7 +206,7 @@ func getGenesisNativeMinterAdmin(
 		for _, admin := range allowListCfg.AllowListConfig.AdminAddresses {
 			// Convert geth address to crypto.Address
 			cryptoAddr := crypto.Address(admin.Bytes())
-			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr, true)
+			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr)
 			if err != nil {
 				return false, false, "", "", "", err
 			}
@@ -253,7 +239,7 @@ func getGenesisNativeMinterManager(
 		for _, admin := range allowListCfg.AllowListConfig.ManagerAddresses {
 			// Convert geth address to crypto.Address
 			cryptoAddr := crypto.Address(admin.Bytes())
-			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr, true)
+			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr)
 			if err != nil {
 				return false, false, "", "", "", err
 			}

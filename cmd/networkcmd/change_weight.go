@@ -57,7 +57,7 @@ The L1 has to be a Proof of Authority L1.`,
 	sigAggGroup := flags.AddSignatureAggregatorFlagsToCmd(cmd, &changeWeightFlags.SigAggFlags)
 	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet/devnet only]")
 	cmd.Flags().Uint64Var(&newWeight, "weight", 0, "set the new staking weight of the validator")
-	cmd.Flags().BoolVarP(&useEwoq, "ewoq", "e", false, "use ewoq key [testnet/devnet only]")
+	cmd.Flags().BoolVarP(&useLocalKey, "local-key", "e", false, "use local key (~/.lux/keys/local-key.pk) [testnet/devnet only]")
 	cmd.Flags().StringVar(&nodeIDStr, "node-id", "", "node-id of the validator")
 	cmd.Flags().StringVar(&nodeEndpoint, "node-endpoint", "", "gather node id/bls from publicly available luxd apis on the given endpoint")
 	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)")
@@ -102,7 +102,7 @@ func setWeight(_ *cobra.Command, args []string) error {
 		"to pay for transaction fees on P-Chain",
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,

@@ -24,7 +24,7 @@ import (
 var (
 	keyName         string
 	useLedger       bool
-	useEwoq         bool
+	useLocalKey     bool
 	ledgerAddresses []string
 	balanceLUX      float64
 )
@@ -79,7 +79,7 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 		constants.PayTxsFeesMsg,
 		network,
 		keyName,
-		useEwoq,
+		useLocalKey,
 		useLedger,
 		ledgerAddresses,
 		fee,
