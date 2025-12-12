@@ -60,7 +60,6 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
 // TEMPORARY: Local replace for testing P-Chain allocation fix - REMOVE BEFORE COMMIT
-replace github.com/luxfi/netrunner => /home/z/work/lux/netrunner
 
 require (
 	github.com/cockroachdb/pebble v1.1.5
