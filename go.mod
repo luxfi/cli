@@ -13,7 +13,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.17.15
+	github.com/luxfi/crypto v1.17.18
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.8.10
 	github.com/luxfi/geth v1.16.46
@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/netrunner v1.14.10
 	github.com/luxfi/node v1.22.2
 	github.com/luxfi/sdk v1.16.25
-	github.com/luxfi/warp v1.16.26
+	github.com/luxfi/warp v1.16.27
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
@@ -103,7 +103,7 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
-	github.com/cloudflare/circl v1.6.2-0.20251027185721-da1faa40b98c // indirect
+	github.com/cloudflare/circl v1.6.2-0.20251204010831-23491bd573cf // indirect
 	github.com/cockroachdb/errors v1.12.0 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
