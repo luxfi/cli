@@ -23,7 +23,6 @@ import (
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
@@ -251,20 +250,10 @@ func getChainsInSubnet(blockchainName string) ([]string, error) {
 }
 
 func checkSubnetEVMDefaultAddressNotInAlloc(network models.Network, chain string) error {
-	if network != models.Local &&
-		network != models.Devnet &&
-		!simulatedPublicNetwork() {
-		genesis, err := app.LoadEvmGenesis(chain)
-		if err != nil {
-			return err
-		}
-		allocAddressMap := genesis.Alloc
-		for address := range allocAddressMap {
-			if address.String() == vm.DefaultFundedAddress.String() {
-				return fmt.Errorf("can't airdrop to default address on public networks, please edit the genesis by calling `lux blockchain create %s --force`", chain)
-			}
-		}
-	}
+	// No hardcoded default addresses to check - all genesis addresses are user-specified
+	// Users must generate/provide their own keys for airdrops
+	_ = network
+	_ = chain
 	return nil
 }
 

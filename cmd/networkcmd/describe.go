@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
@@ -290,8 +289,6 @@ func printAllocations(sc models.Sidecar, genesis core.Genesis) error {
 			case warpKeyAddress:
 				description = luxlog.Orange.Wrap("Used by Warp")
 			case subnetAirdropAddress:
-				description = luxlog.Orange.Wrap("Main funded account")
-			case vm.DefaultFundedAddress.Hex():
 				description = luxlog.Orange.Wrap("Main funded account")
 			case sc.ValidatorManagerOwner:
 				description = luxlog.Orange.Wrap("Validator Manager Owner")
