@@ -4,7 +4,6 @@
 package vm
 
 import (
-	"errors"
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/application"
@@ -15,24 +14,11 @@ import (
 )
 
 const (
-	defaultAirdrop = "Airdrop 1 million tokens to the default address (do not use in production)"
-	customAirdrop  = "Customize your airdrop"
-	extendAirdrop  = "Would you like to airdrop more tokens?"
+	extendAirdrop = "Would you like to airdrop more tokens?"
 )
 
-func getDefaultAllocation(defaultAirdropAmount string) (core.GenesisAlloc, error) {
-	allocation := core.GenesisAlloc{}
-	defaultAmount, ok := new(big.Int).SetString(defaultAirdropAmount, 10)
-	if !ok {
-		return allocation, errors.New("unable to decode default allocation")
-	}
-
-	allocation[DefaultFundedAddress] = core.GenesisAccount{
-		Balance: defaultAmount,
-	}
-	return allocation, nil
-}
-
+// getAllocation prompts the user to specify addresses and amounts for the airdrop.
+// There is no default option - users must always provide their own addresses.
 func getAllocation(
 	app *application.Lux,
 	defaultAirdropAmount string,
@@ -41,24 +27,8 @@ func getAllocation(
 ) (core.GenesisAlloc, statemachine.StateDirection, error) {
 	allocation := core.GenesisAlloc{}
 
-	airdropType, err := app.Prompt.CaptureList(
-		"How would you like to distribute funds",
-		[]string{defaultAirdrop, customAirdrop, goBackMsg},
-	)
-	if err != nil {
-		return allocation, statemachine.Stop, err
-	}
-
-	if airdropType == defaultAirdrop {
-		alloc, err := getDefaultAllocation(defaultAirdropAmount)
-		return alloc, statemachine.Forward, err
-	}
-
-	if airdropType == goBackMsg {
-		return allocation, statemachine.Backward, nil
-	}
-
 	var addressHex crypto.Address
+	var err error
 
 	for {
 		addressHex, err = app.Prompt.CaptureAddress("Address to airdrop to")
