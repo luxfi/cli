@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -593,28 +594,44 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 		app.Log.Debug("Deploy local")
 
-		luxdVersion := deployFlags.LocalMachineFlags.UserProvidedLuxdVersion
-
-		if luxdVersion == constants.DefaultLuxdVersion && deployFlags.LocalMachineFlags.LuxdBinaryPath == "" {
-			luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, network, &sidecar.RPCVersion)
-			if err != nil {
-				if err != dependencies.ErrNoLuxdVersion {
-					return err
-				}
-				luxdVersion = constants.LatestPreReleaseVersionTag
+		// Check if network is already running before trying to start it
+		// This avoids unnecessary binary downloads when deploying to a running network
+		networkAlreadyRunning := false
+		cli, cliErr := binutils.NewGRPCClient()
+		if cliErr == nil {
+			ctx := binutils.GetAsyncContext()
+			status, statusErr := cli.Status(ctx)
+			cli.Close()
+			if statusErr == nil && status != nil && status.ClusterInfo != nil && status.ClusterInfo.Healthy {
+				networkAlreadyRunning = true
+				ux.Logger.PrintToUser("Local network is already running, skipping network start...")
 			}
 		}
 
-		ux.Logger.PrintToUser("")
-		if err := Start(
-			StartFlags{
-				UserProvidedLuxdVersion: luxdVersion,
-				LuxdBinaryPath:          deployFlags.LocalMachineFlags.LuxdBinaryPath,
-				NumNodes:                numNodes,
-			},
-			false,
-		); err != nil {
-			return err
+		if !networkAlreadyRunning {
+			luxdVersion := deployFlags.LocalMachineFlags.UserProvidedLuxdVersion
+
+			if luxdVersion == constants.DefaultLuxdVersion && deployFlags.LocalMachineFlags.LuxdBinaryPath == "" {
+				luxdVersion, err = dependencies.GetLatestCLISupportedDependencyVersion(app, constants.LuxdRepoName, network, &sidecar.RPCVersion)
+				if err != nil {
+					if err != dependencies.ErrNoLuxdVersion {
+						return err
+					}
+					luxdVersion = constants.LatestPreReleaseVersionTag
+				}
+			}
+
+			ux.Logger.PrintToUser("")
+			if err := Start(
+				StartFlags{
+					UserProvidedLuxdVersion: luxdVersion,
+					LuxdBinaryPath:          deployFlags.LocalMachineFlags.LuxdBinaryPath,
+					NumNodes:                numNodes,
+				},
+				false,
+			); err != nil {
+				return err
+			}
 		}
 
 		// check if blockchain rpc version matches what is currently running
@@ -631,7 +648,12 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 			_ = sidecar.RPCVersion
 		}
 
-		useEwoq = true
+		// Only default to first validator key if no key source was specified
+		// This allows --key flag to work with local deploys
+		if keyName == "" && !useLedger {
+			// Default to first validator key for local network
+			keyName = "validator_000"
+		}
 
 		if !sidecar.Sovereign {
 			// sovereign blockchains are deployed into new local clusters,
