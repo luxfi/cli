@@ -13,7 +13,7 @@ NC='\033[0m'
 # Configuration
 LUXD="/home/z/work/lux/node/build/luxd"
 DATA_DIR="/home/z/.luxd-mainnet-96369"
-SUBNET_DB="/home/z/.avalanche-cli/runs/network_original_subnet/node1/chains/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+SUBNET_DB="/home/z/.lux/runs/network_original_subnet/node1/chains/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 BLOCKCHAIN_ID="2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 CCHAIN_DIR="$DATA_DIR/chains/C"
 
