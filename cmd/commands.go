@@ -58,4 +58,7 @@ const (
 
 	// WarpCmd is the warp command name (for ICM/Interchain Messaging)
 	WarpCmd = "warp"
+
+	// DexCmd is the dex command name (for decentralized exchange)
+	DexCmd = "dex"
 )

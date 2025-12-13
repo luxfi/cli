@@ -15,6 +15,7 @@ import (
 
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
+	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/warpcmd"
 	"github.com/luxfi/cli/cmd/l1cmd"
@@ -108,6 +109,9 @@ Quick start:
 
 	// add warp command (cross-chain messaging)
 	rootCmd.AddCommand(warpcmd.NewCmd(app))
+
+	// add dex command (decentralized exchange)
+	rootCmd.AddCommand(dexcmd.NewCmd(app))
 
 	// add contract command
 	rootCmd.AddCommand(contractcmd.NewCmd(app))
