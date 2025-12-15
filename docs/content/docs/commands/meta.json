@@ -1,15 +1,18 @@
 {
-  "title": "Command Reference",
+  "title": "Commands",
   "pages": [
     "overview",
-    "blockchain",
-    "network",
-    "node",
-    "validator",
-    "key",
     "l1",
+    "l2",
+    "l3",
+    "network",
+    "key",
+    "validator",
+    "contract",
     "transaction",
-    "interchain",
-    "config"
+    "warp",
+    "dex",
+    "config",
+    "primary"
   ]
 }

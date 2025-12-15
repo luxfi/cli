@@ -1,0 +1,483 @@
+---
+title: Transaction Commands
+description: Sign and manage blockchain transactions
+---
+
+# Transaction Commands
+
+The transaction command suite provides tools for creating, signing, and managing blockchain transactions on Lux networks.
+
+## Overview
+
+Transaction operations include:
+- **Sign**: Sign transactions with managed keys
+- **Commit**: Submit transactions to the network
+- **Multi-sig**: Manage multi-signature transactions
+- **Batch**: Process multiple transactions
+
+## Commands
+
+### lux transaction sign
+
+Sign a transaction with a managed key.
+
+```bash
+lux transaction sign [flags]
+```
+
+**Flags:**
+- `--tx <file>` - Transaction file to sign
+- `--tx-data <hex>` - Raw transaction data
+- `--key <name>` - Key name to use for signing
+- `--chain <name>` - Target chain
+- `--output <file>` - Output file for signed transaction
+- `--keychain` - Use keychain-stored key
+
+**Examples:**
+
+```bash
+# Sign transaction from file
+lux transaction sign \
+  --tx ./unsigned-tx.json \
+  --key my-validator
+
+# Sign raw transaction data
+lux transaction sign \
+  --tx-data 0xf86c... \
+  --key my-key \
+  --output signed-tx.json
+
+# Sign for specific chain
+lux transaction sign \
+  --tx ./tx.json \
+  --key validator1 \
+  --chain my-l1
+```
+
+### lux transaction commit
+
+Submit a signed transaction to the network.
+
+```bash
+lux transaction commit [flags]
+```
+
+**Flags:**
+- `--tx <file>` - Signed transaction file
+- `--tx-data <hex>` - Signed transaction data
+- `--chain <name>` - Target chain
+- `--wait` - Wait for confirmation
+- `--timeout <duration>` - Confirmation timeout
+
+**Examples:**
+
+```bash
+# Commit transaction
+lux transaction commit \
+  --tx ./signed-tx.json \
+  --chain my-l1
+
+# Commit and wait for confirmation
+lux transaction commit \
+  --tx-data 0xf86c... \
+  --chain my-l2 \
+  --wait \
+  --timeout 2m
+
+# Output:
+# Transaction submitted: 0xabc123...
+# Block: 12345
+# Status: Success
+# Gas used: 21000
+```
+
+### lux transaction status
+
+Check the status of a transaction.
+
+```bash
+lux transaction status [tx-hash] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Chain to query
+- `--watch` - Watch for status changes
+- `--format <type>` - Output format: text, json
+
+**Examples:**
+
+```bash
+# Check transaction status
+lux transaction status 0xabc123... \
+  --chain my-l1
+
+# Watch transaction
+lux transaction status 0xabc123... \
+  --chain my-l1 \
+  --watch
+
+# Output:
+# Transaction: 0xabc123...
+# Status: Confirmed
+# Block: 12345
+# Confirmations: 10
+# Gas used: 21000
+# From: 0x1234...
+# To: 0x5678...
+# Value: 1.0 LUX
+```
+
+### lux transaction create
+
+Create an unsigned transaction.
+
+```bash
+lux transaction create [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--from <address>` - Sender address
+- `--to <address>` - Recipient address
+- `--value <amount>` - Amount to transfer
+- `--data <hex>` - Transaction data
+- `--gas-limit <uint>` - Gas limit
+- `--gas-price <uint>` - Gas price
+- `--nonce <uint>` - Transaction nonce
+- `--output <file>` - Output file
+
+**Examples:**
+
+```bash
+# Create simple transfer
+lux transaction create \
+  --chain my-l1 \
+  --from 0x1234... \
+  --to 0x5678... \
+  --value 1000000000000000000 \
+  --output tx.json
+
+# Create contract call
+lux transaction create \
+  --chain my-l1 \
+  --from 0x1234... \
+  --to 0xContract... \
+  --data 0xa9059cbb... \
+  --gas-limit 100000 \
+  --output tx.json
+```
+
+### lux transaction send
+
+Create, sign, and send a transaction in one step.
+
+```bash
+lux transaction send [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--key <name>` - Key to use
+- `--to <address>` - Recipient address
+- `--value <amount>` - Amount to transfer
+- `--data <hex>` - Transaction data
+- `--gas-limit <uint>` - Gas limit
+- `--wait` - Wait for confirmation
+
+**Examples:**
+
+```bash
+# Send simple transfer
+lux transaction send \
+  --chain my-l1 \
+  --key my-wallet \
+  --to 0x5678... \
+  --value 1.0 \
+  --wait
+
+# Send with data
+lux transaction send \
+  --chain my-l1 \
+  --key deployer \
+  --to 0xContract... \
+  --data 0xa9059cbb... \
+  --gas-limit 100000
+```
+
+### lux transaction estimate
+
+Estimate gas for a transaction.
+
+```bash
+lux transaction estimate [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--from <address>` - Sender address
+- `--to <address>` - Recipient address
+- `--value <amount>` - Amount to transfer
+- `--data <hex>` - Transaction data
+
+**Examples:**
+
+```bash
+# Estimate gas for transfer
+lux transaction estimate \
+  --chain my-l1 \
+  --from 0x1234... \
+  --to 0x5678... \
+  --value 1.0
+
+# Output:
+# Gas estimate: 21000
+# Gas price: 25 gwei
+# Total cost: 0.000525 LUX
+```
+
+### lux transaction decode
+
+Decode transaction data.
+
+```bash
+lux transaction decode [flags]
+```
+
+**Flags:**
+- `--tx <file>` - Transaction file
+- `--tx-data <hex>` - Raw transaction data
+- `--abi <file>` - Contract ABI for method decoding
+
+**Examples:**
+
+```bash
+# Decode transaction
+lux transaction decode \
+  --tx-data 0xf86c...
+
+# Decode with ABI
+lux transaction decode \
+  --tx-data 0xa9059cbb... \
+  --abi ./contract.abi.json
+
+# Output:
+# Method: transfer(address,uint256)
+# Parameters:
+#   to: 0x5678...
+#   amount: 1000000000000000000
+```
+
+### lux transaction list
+
+List pending transactions.
+
+```bash
+lux transaction list [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--address <addr>` - Filter by address
+- `--pending` - Show only pending
+- `--limit <int>` - Number of transactions
+
+**Examples:**
+
+```bash
+# List pending transactions
+lux transaction list \
+  --chain my-l1 \
+  --address 0x1234... \
+  --pending
+
+# Output:
+# Pending Transactions:
+# ┌─────────────┬────────────┬─────────┬───────────┐
+# │ Hash        │ To         │ Value   │ Nonce     │
+# ├─────────────┼────────────┼─────────┼───────────┤
+# │ 0xabc1...   │ 0x5678...  │ 1.0 LUX │ 42        │
+# │ 0xdef2...   │ 0x9abc...  │ 0.5 LUX │ 43        │
+# └─────────────┴────────────┴─────────┴───────────┘
+```
+
+### lux transaction cancel
+
+Cancel a pending transaction.
+
+```bash
+lux transaction cancel [tx-hash] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--key <name>` - Key to use for replacement
+- `--gas-price <uint>` - Higher gas price for replacement
+
+**Examples:**
+
+```bash
+# Cancel pending transaction
+lux transaction cancel 0xabc123... \
+  --chain my-l1 \
+  --key my-wallet \
+  --gas-price 50gwei
+```
+
+### lux transaction speedup
+
+Speed up a pending transaction.
+
+```bash
+lux transaction speedup [tx-hash] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--key <name>` - Key to use
+- `--gas-price <uint>` - New gas price (must be higher)
+
+**Examples:**
+
+```bash
+# Speed up transaction
+lux transaction speedup 0xabc123... \
+  --chain my-l1 \
+  --key my-wallet \
+  --gas-price 75gwei
+```
+
+## Multi-Signature Transactions
+
+### Create Multi-Sig Transaction
+
+```bash
+# Create multi-sig proposal
+lux transaction multisig create \
+  --chain my-l1 \
+  --multisig 0xMultisig... \
+  --to 0x5678... \
+  --value 10.0 \
+  --output proposal.json
+```
+
+### Sign Multi-Sig Transaction
+
+```bash
+# Sign as one of the signers
+lux transaction multisig sign \
+  --proposal proposal.json \
+  --key signer1 \
+  --output proposal-signed.json
+```
+
+### Execute Multi-Sig Transaction
+
+```bash
+# Execute when threshold reached
+lux transaction multisig execute \
+  --proposal proposal-signed.json \
+  --chain my-l1
+```
+
+## Batch Operations
+
+### Batch Send
+
+```bash
+# Send multiple transactions from file
+lux transaction batch \
+  --chain my-l1 \
+  --key my-wallet \
+  --file transactions.json \
+  --parallel 5
+
+# transactions.json format:
+# [
+#   {"to": "0x...", "value": "1.0"},
+#   {"to": "0x...", "value": "2.0", "data": "0x..."}
+# ]
+```
+
+## Configuration
+
+### Transaction Defaults
+
+Stored in `~/.lux-cli/config.json`:
+
+```json
+{
+  "transaction": {
+    "defaultGasLimit": 21000,
+    "gasMultiplier": 1.1,
+    "confirmationBlocks": 1,
+    "timeout": "2m"
+  }
+}
+```
+
+## Best Practices
+
+1. **Gas Management**:
+   - Always estimate gas before sending
+   - Use appropriate gas price for network conditions
+   - Set reasonable gas limits
+
+2. **Nonce Management**:
+   - Let CLI auto-manage nonces when possible
+   - Track pending transactions
+   - Handle nonce gaps properly
+
+3. **Security**:
+   - Verify transaction details before signing
+   - Use hardware keys for large transactions
+   - Implement multi-sig for team funds
+
+4. **Error Handling**:
+   - Check transaction status after submission
+   - Handle timeouts gracefully
+   - Implement retry logic
+
+## Troubleshooting
+
+### Common Issues
+
+**Transaction stuck**
+- Check gas price vs network average
+- Verify nonce is correct
+- Use `speedup` or `cancel` commands
+
+**Nonce too low**
+- Check pending transactions
+- Reset nonce with explicit value
+- Clear pending queue
+
+**Out of gas**
+- Increase gas limit
+- Simplify transaction data
+- Check contract requirements
+
+### Debug Commands
+
+```bash
+# Debug transaction
+lux transaction debug \
+  --tx-hash 0xabc... \
+  --chain my-l1
+
+# Trace transaction
+lux transaction trace \
+  --tx-hash 0xabc... \
+  --chain my-l1
+
+# Simulate transaction
+lux transaction simulate \
+  --tx tx.json \
+  --chain my-l1
+```
+
+## Related Commands
+
+- [`lux key`](/docs/commands/key) - Key management
+- [`lux contract`](/docs/commands/contract) - Contract operations
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux warp`](/docs/commands/warp) - Cross-chain messaging

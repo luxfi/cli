@@ -1,0 +1,405 @@
+---
+title: DEX Commands
+description: Decentralized exchange operations
+---
+
+# DEX Commands
+
+The DEX command suite provides tools for interacting with decentralized exchanges on Lux networks. Swap tokens, provide liquidity, and manage trading operations.
+
+## Overview
+
+DEX features include:
+- **Token Swaps**: Exchange tokens across pairs
+- **Liquidity Provision**: Add/remove liquidity to pools
+- **Price Quotes**: Get real-time pricing
+- **Cross-Chain Swaps**: Trade across L1/L2/L3 chains
+
+## Commands
+
+### lux dex swap
+
+Swap tokens on a decentralized exchange.
+
+```bash
+lux dex swap [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Chain to execute swap on
+- `--from-token <address>` - Token to sell (native if omitted)
+- `--to-token <address>` - Token to buy
+- `--amount <uint>` - Amount to swap
+- `--min-out <uint>` - Minimum output amount (slippage protection)
+- `--router <address>` - DEX router contract address
+- `--deadline <duration>` - Transaction deadline (default: 20m)
+
+**Examples:**
+
+```bash
+# Swap native token for ERC20
+lux dex swap \
+  --chain my-l1 \
+  --to-token 0xUSDC... \
+  --amount 1000000000000000000 \
+  --min-out 990000000
+
+# Swap ERC20 to ERC20
+lux dex swap \
+  --chain my-l1 \
+  --from-token 0xUSDC... \
+  --to-token 0xWETH... \
+  --amount 1000000000 \
+  --min-out 500000000000000000
+
+# Swap with custom router
+lux dex swap \
+  --chain my-l2 \
+  --from-token 0xUSDC... \
+  --to-token 0xDAI... \
+  --amount 100000000 \
+  --router 0xMyRouter...
+```
+
+### lux dex quote
+
+Get a price quote for a swap.
+
+```bash
+lux dex quote [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Chain to query
+- `--from-token <address>` - Token to sell
+- `--to-token <address>` - Token to buy
+- `--amount <uint>` - Amount to swap
+- `--router <address>` - DEX router address
+
+**Examples:**
+
+```bash
+# Get quote for native to ERC20
+lux dex quote \
+  --chain my-l1 \
+  --to-token 0xUSDC... \
+  --amount 1000000000000000000
+
+# Quote output:
+# Input:  1.0 LUX
+# Output: 1,000.00 USDC
+# Rate:   1 LUX = 1,000 USDC
+# Impact: 0.05%
+# Path:   LUX -> WLUX -> USDC
+```
+
+### lux dex liquidity
+
+Manage liquidity pool positions.
+
+```bash
+lux dex liquidity [action] [flags]
+```
+
+**Actions:**
+- `add` - Add liquidity to a pool
+- `remove` - Remove liquidity from a pool
+- `positions` - List your LP positions
+- `pools` - List available pools
+
+**Add Liquidity Flags:**
+- `--chain <name>` - Chain name
+- `--token-a <address>` - First token
+- `--token-b <address>` - Second token
+- `--amount-a <uint>` - Amount of first token
+- `--amount-b <uint>` - Amount of second token
+- `--min-a <uint>` - Minimum first token (slippage)
+- `--min-b <uint>` - Minimum second token (slippage)
+
+**Remove Liquidity Flags:**
+- `--chain <name>` - Chain name
+- `--lp-token <address>` - LP token address
+- `--amount <uint>` - Amount of LP tokens to burn
+- `--min-a <uint>` - Minimum first token out
+- `--min-b <uint>` - Minimum second token out
+
+**Examples:**
+
+```bash
+# Add liquidity to pool
+lux dex liquidity add \
+  --chain my-l1 \
+  --token-a 0xWLUX... \
+  --token-b 0xUSDC... \
+  --amount-a 10000000000000000000 \
+  --amount-b 10000000000
+
+# Remove liquidity
+lux dex liquidity remove \
+  --chain my-l1 \
+  --lp-token 0xLP... \
+  --amount 5000000000000000000
+
+# List positions
+lux dex liquidity positions \
+  --chain my-l1 \
+  --address 0x1234...
+
+# List available pools
+lux dex liquidity pools \
+  --chain my-l1
+```
+
+### lux dex price
+
+Get token prices and pair information.
+
+```bash
+lux dex price [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Chain name
+- `--token <address>` - Token address
+- `--base <address>` - Base token (default: native)
+- `--pair <address>` - Specific pair address
+
+**Examples:**
+
+```bash
+# Get token price in native
+lux dex price \
+  --chain my-l1 \
+  --token 0xUSDC...
+
+# Get price against specific base
+lux dex price \
+  --chain my-l1 \
+  --token 0xWBTC... \
+  --base 0xUSDC...
+
+# Output:
+# Token:    WBTC (0x...)
+# Price:    42,000.00 USDC
+# 24h Vol:  $1.2M
+# Liq:      $500K
+```
+
+### lux dex pairs
+
+List and search trading pairs.
+
+```bash
+lux dex pairs [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Chain name
+- `--token <address>` - Filter by token
+- `--min-liquidity <uint>` - Minimum liquidity
+- `--sort <field>` - Sort by: volume, liquidity, apr
+
+**Examples:**
+
+```bash
+# List all pairs
+lux dex pairs --chain my-l1
+
+# Filter by token
+lux dex pairs \
+  --chain my-l1 \
+  --token 0xUSDC...
+
+# Sort by volume
+lux dex pairs \
+  --chain my-l1 \
+  --sort volume \
+  --min-liquidity 100000
+
+# Output:
+# Pairs on my-l1:
+# ┌────────────────┬───────────────┬───────────┬─────────┐
+# │ Pair           │ Liquidity     │ 24h Vol   │ APR     │
+# ├────────────────┼───────────────┼───────────┼─────────┤
+# │ LUX/USDC       │ $5.2M         │ $1.8M     │ 12.5%   │
+# │ WBTC/LUX       │ $2.1M         │ $890K     │ 8.2%    │
+# │ ETH/USDC       │ $1.5M         │ $520K     │ 6.1%    │
+# └────────────────┴───────────────┴───────────┴─────────┘
+```
+
+### lux dex router
+
+Manage DEX router configurations.
+
+```bash
+lux dex router [action] [flags]
+```
+
+**Actions:**
+- `add` - Add a router configuration
+- `remove` - Remove a router
+- `list` - List configured routers
+- `default` - Set default router
+
+**Examples:**
+
+```bash
+# Add router
+lux dex router add \
+  --chain my-l1 \
+  --name "MyDEX" \
+  --address 0xRouter...
+
+# Set default router
+lux dex router default \
+  --chain my-l1 \
+  --name "MyDEX"
+
+# List routers
+lux dex router list --chain my-l1
+```
+
+## Cross-Chain Swaps
+
+Swap tokens across different chains using Warp:
+
+```bash
+# Cross-chain swap
+lux dex swap \
+  --from-chain my-l1 \
+  --to-chain my-l2 \
+  --from-token 0xUSDC_L1... \
+  --to-token 0xWETH_L2... \
+  --amount 1000000000 \
+  --cross-chain
+
+# This will:
+# 1. Swap USDC for bridgeable token on L1
+# 2. Bridge tokens to L2 via Warp
+# 3. Swap to WETH on L2
+```
+
+## Supported DEX Protocols
+
+### Uniswap V2 Compatible
+
+Standard AMM operations:
+
+```bash
+lux dex swap \
+  --chain my-l1 \
+  --router 0xUniV2Router... \
+  --from-token 0xA... \
+  --to-token 0xB... \
+  --amount 1000
+```
+
+### Uniswap V3 Compatible
+
+Concentrated liquidity:
+
+```bash
+lux dex liquidity add \
+  --chain my-l1 \
+  --router 0xUniV3Router... \
+  --token-a 0xA... \
+  --token-b 0xB... \
+  --amount-a 1000 \
+  --tick-lower -887220 \
+  --tick-upper 887220
+```
+
+## Configuration
+
+### DEX Configuration
+
+Stored in `~/.lux-cli/dex/config.json`:
+
+```json
+{
+  "chains": {
+    "my-l1": {
+      "defaultRouter": "0x...",
+      "routers": {
+        "MyDEX": "0x...",
+        "OtherDEX": "0x..."
+      },
+      "tokens": {
+        "USDC": "0x...",
+        "WLUX": "0x..."
+      }
+    }
+  },
+  "slippage": 0.5,
+  "deadline": "20m",
+  "gasMultiplier": 1.1
+}
+```
+
+## Best Practices
+
+1. **Slippage Protection**:
+   - Always set `--min-out` for swaps
+   - Use appropriate slippage for volatility
+
+2. **Gas Optimization**:
+   - Batch operations when possible
+   - Monitor gas prices
+
+3. **Liquidity Management**:
+   - Diversify across pools
+   - Monitor impermanent loss
+   - Consider concentrated liquidity
+
+4. **Cross-Chain Swaps**:
+   - Account for bridge fees
+   - Consider price differences
+   - Monitor message delivery
+
+## Troubleshooting
+
+### Common Issues
+
+**Swap failed**
+- Check token allowances
+- Verify sufficient balance
+- Review slippage settings
+
+**Insufficient liquidity**
+- Try smaller amounts
+- Check alternative routes
+- Use aggregator routers
+
+**Cross-chain swap stuck**
+- Check Warp message status
+- Verify relayer is running
+- Review bridge confirmations
+
+### Debug Commands
+
+```bash
+# Check token allowance
+lux dex allowance \
+  --chain my-l1 \
+  --token 0xUSDC... \
+  --spender 0xRouter...
+
+# Simulate swap
+lux dex simulate \
+  --chain my-l1 \
+  --from-token 0xA... \
+  --to-token 0xB... \
+  --amount 1000
+
+# Check pool reserves
+lux dex reserves \
+  --chain my-l1 \
+  --pair 0xPair...
+```
+
+## Related Commands
+
+- [`lux warp`](/docs/commands/warp) - Cross-chain messaging
+- [`lux contract`](/docs/commands/contract) - Contract deployment
+- [`lux key`](/docs/commands/key) - Key management
+- [`lux transaction`](/docs/commands/transaction) - Transaction handling

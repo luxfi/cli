@@ -1,0 +1,385 @@
+---
+title: L2 Commands
+description: Create and deploy L2 based rollups
+---
+
+# L2 Commands
+
+L2s (formerly subnets) are based rollups that derive their security from an L1 sequencer. They support multiple sequencing models and provide flexible deployment options.
+
+## Overview
+
+L2 chains in Lux support:
+- **Lux Sequencer**: 100ms blocks, lowest cost (default)
+- **Ethereum Sequencer**: 12s blocks, highest security
+- **Lux Sequencer**: 2s blocks, fast finality
+- **OP Stack**: Optimism ecosystem compatible
+- **External Sequencer**: Traditional centralized sequencing
+
+## Commands
+
+### lux l2 create
+
+Create a new L2 rollup configuration.
+
+```bash
+lux l2 create [name] [flags]
+```
+
+**Flags:**
+- `--sequencer <type>` - Sequencer type: lux, ethereum, lux, op, external (default: lux)
+- `--evm` - Create EVM-compatible L2 (default)
+- `--token-name <string>` - Native token name
+- `--token-symbol <string>` - Native token symbol (max 4 chars)
+- `--evm-chain-id <uint>` - EVM chain ID
+- `--blob-enabled` - Enable EIP-4844 blob support
+- `--preconfirms` - Enable pre-confirmations (sub-100ms ack)
+- `-f, --force` - Overwrite existing configuration
+
+**Examples:**
+
+```bash
+# Interactive creation
+lux l2 create my-rollup
+
+# Create Lux-sequenced L2 with blobs
+lux l2 create fast-rollup \
+  --sequencer lux \
+  --blob-enabled \
+  --preconfirms \
+  --token-symbol "FAST"
+
+# Create OP Stack compatible L2
+lux l2 create op-rollup \
+  --sequencer op \
+  --token-name "OP Token" \
+  --token-symbol "OPT"
+
+# Create Ethereum-secured L2
+lux l2 create secure-rollup \
+  --sequencer ethereum \
+  --evm-chain-id 88888
+```
+
+### lux l2 deploy
+
+Deploy an L2 rollup to a network.
+
+```bash
+lux l2 deploy [name] [flags]
+```
+
+**Flags:**
+- `-l, --local` - Deploy to local network
+- `-t, --testnet` - Deploy to testnet
+- `-m, --mainnet` - Deploy to mainnet
+- `--use-local-machine` - Use local machine as bootstrap validator
+- `--num-validators <int>` - Number of initial validators
+- `--blob-commitment <string>` - Data availability commitment
+
+**Examples:**
+
+```bash
+# Deploy to local network
+lux l2 deploy my-rollup --local
+
+# Deploy to testnet
+lux l2 deploy my-rollup --testnet
+
+# Deploy to mainnet with validators
+lux l2 deploy production-rollup \
+  --mainnet \
+  --num-validators 5
+```
+
+### lux l2 list
+
+List all configured L2 rollups.
+
+```bash
+lux l2 list [flags]
+```
+
+**Flags:**
+- `--deployed` - Show only deployed L2s
+- `--network <string>` - Filter by network
+
+**Example Output:**
+```
+L2 Rollups:
+┌─────────────────┬─────────────┬──────────┬────────────┬──────────┐
+│ Name            │ Sequencer   │ Token    │ Network    │ Status   │
+├─────────────────┼─────────────┼──────────┼────────────┼──────────┤
+│ my-rollup       │ lux         │ ROLL     │ local      │ Running  │
+│ fast-rollup     │ lux         │ FAST     │ testnet    │ Running  │
+│ op-rollup       │ op          │ OPT      │ -          │ Created  │
+└─────────────────┴─────────────┴──────────┴────────────┴──────────┘
+```
+
+### lux l2 describe
+
+Show detailed information about an L2 rollup.
+
+```bash
+lux l2 describe [name] [flags]
+```
+
+**Flags:**
+- `--genesis` - Show genesis configuration
+- `--validators` - List current validators
+- `--metrics` - Show performance metrics
+- `--sequencer-info` - Show sequencer details
+
+### lux l2 addValidator
+
+Add a validator to an L2 rollup.
+
+```bash
+lux l2 addValidator [name] [flags]
+```
+
+**Flags:**
+- `--node-id <string>` - Validator node ID
+- `--weight <uint>` - Validator weight
+- `--start-time <timestamp>` - Validation start time
+- `--end-time <timestamp>` - Validation end time
+
+### lux l2 removeValidator
+
+Remove a validator from an L2 rollup.
+
+```bash
+lux l2 removeValidator [name] [flags]
+```
+
+**Flags:**
+- `--node-id <string>` - Validator node ID to remove
+- `--force` - Skip confirmation
+
+### lux l2 configure
+
+Modify L2 rollup configuration.
+
+```bash
+lux l2 configure [name] [flags]
+```
+
+**Flags:**
+- `--gas-config` - Configure gas parameters
+- `--sequencer-config` - Update sequencer settings
+- `--upgrade-config` - Configure upgrade parameters
+
+### lux l2 export
+
+Export L2 configuration.
+
+```bash
+lux l2 export [name] [flags]
+```
+
+**Flags:**
+- `--output <file>` - Output file path
+- `--include-state` - Include chain state
+
+### lux l2 import
+
+Import L2 configuration.
+
+```bash
+lux l2 import [name] [flags]
+```
+
+**Flags:**
+- `--file <path>` - Configuration file to import
+- `--force` - Overwrite existing configuration
+
+### lux l2 upgrade
+
+Upgrade an L2 rollup.
+
+```bash
+lux l2 upgrade [name] [flags]
+```
+
+**Subcommands:**
+- `vm` - Upgrade VM version
+- `apply` - Apply upgrade configuration
+- `generate` - Generate upgrade configuration
+- `print` - Print current upgrade schedule
+
+### lux l2 join
+
+Join a node to an existing L2 rollup.
+
+```bash
+lux l2 join [name] [flags]
+```
+
+**Flags:**
+- `--node-config <file>` - Node configuration file
+- `--luxd-config <file>` - Luxd configuration
+
+### lux l2 delete
+
+Delete an L2 rollup configuration.
+
+```bash
+lux l2 delete [name] [flags]
+```
+
+**Flags:**
+- `--force` - Skip confirmation
+- `--keep-data` - Preserve rollup data
+
+## Sequencer Models
+
+### Lux Sequencer (Default)
+
+Fastest option with 100ms block times:
+- Ultra-low latency transactions
+- Lowest gas costs
+- Native Lux integration
+
+```bash
+lux l2 create ultra-fast --sequencer lux --preconfirms
+```
+
+### Ethereum Sequencer
+
+Maximum security with Ethereum L1:
+- 12-second block times
+- Inherits Ethereum security
+- EIP-4844 blob support
+
+```bash
+lux l2 create secure --sequencer ethereum --blob-enabled
+```
+
+### Lux Sequencer
+
+Balanced performance:
+- 2-second block times
+- Fast finality
+- Native interoperability
+
+```bash
+lux l2 create balanced --sequencer lux
+```
+
+### OP Stack
+
+Optimism ecosystem compatibility:
+- Standard OP Stack deployment
+- Bedrock compatibility
+- Cross-OP bridge support
+
+```bash
+lux l2 create op-chain --sequencer op
+```
+
+## EIP-4844 Blob Support
+
+Enable blob data availability for reduced costs:
+
+```bash
+# Create L2 with blob support
+lux l2 create blob-rollup \
+  --sequencer ethereum \
+  --blob-enabled
+
+# Check blob status
+lux l2 describe blob-rollup --metrics
+```
+
+## Pre-confirmations
+
+Enable sub-100ms transaction acknowledgment:
+
+```bash
+# Create L2 with pre-confirmations
+lux l2 create instant-rollup \
+  --sequencer lux \
+  --preconfirms
+
+# Transactions receive acknowledgment in <100ms
+```
+
+## Cross-Chain Messaging
+
+Set up IBC/Teleport for L2:
+
+```bash
+# Enable messaging on L2
+lux warp enable my-rollup
+
+# Create channel to another chain
+lux warp message send \
+  --source my-rollup \
+  --dest other-chain \
+  --message "test"
+```
+
+## Configuration Files
+
+L2 configurations stored in `~/.lux-cli/l2s/[name]/`.
+
+### Genesis Configuration
+
+```json
+{
+  "config": {
+    "chainId": 88888,
+    "sequencerType": "lux",
+    "blobEnabled": true,
+    "preconfirmsEnabled": true,
+    "blockTime": 100
+  },
+  "alloc": {
+    "0x...": {
+      "balance": "1000000000000000000000"
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Sequencer Selection**:
+   - Use Lux for maximum speed
+   - Use Ethereum for maximum security
+   - Use OP for Optimism ecosystem
+
+2. **Data Availability**:
+   - Enable blobs for cost reduction
+   - Monitor blob commitments
+
+3. **Performance**:
+   - Enable pre-confirmations for UX
+   - Monitor sequencer latency
+   - Optimize gas parameters
+
+## Troubleshooting
+
+### Common Issues
+
+**L2 won't deploy**
+- Verify sequencer endpoint is accessible
+- Check validator configuration
+- Ensure sufficient balance
+
+**High latency**
+- Check sequencer health
+- Verify network connectivity
+- Review blob commitment status
+
+**Transaction failures**
+- Verify gas settings
+- Check sequencer queue
+- Review nonce management
+
+## Related Commands
+
+- [`lux l1`](/docs/commands/l1) - Sovereign L1 management
+- [`lux l3`](/docs/commands/l3) - App-specific chains
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux warp`](/docs/commands/warp) - Cross-chain messaging

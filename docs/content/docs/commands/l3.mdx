@@ -1,0 +1,320 @@
+---
+title: L3 Commands
+description: Create and deploy app-specific L3 chains
+---
+
+# L3 Commands
+
+L3s are application-specific chains built on top of L2 rollups. They provide dedicated execution environments for specific use cases while inheriting security from their parent L2.
+
+## Overview
+
+L3 chains in Lux are:
+- **App-Specific**: Tailored for particular applications
+- **Cost-Efficient**: Lowest transaction costs
+- **Customizable**: Full control over chain parameters
+- **Composable**: Bridge assets to/from parent L2
+
+## Commands
+
+### lux l3 create
+
+Create a new L3 app chain configuration.
+
+```bash
+lux l3 create [name] [flags]
+```
+
+**Flags:**
+- `--l2 <name>` - Parent L2 rollup name (required)
+- `--evm` - Create EVM-compatible L3 (default)
+- `--custom-vm` - Use custom VM binary
+- `--token-name <string>` - Native token name
+- `--token-symbol <string>` - Native token symbol
+- `--evm-chain-id <uint>` - EVM chain ID
+- `--gas-token <address>` - Custom gas token address
+- `-f, --force` - Overwrite existing configuration
+
+**Examples:**
+
+```bash
+# Interactive creation
+lux l3 create my-app
+
+# Create L3 on specific L2 parent
+lux l3 create game-chain \
+  --l2 my-rollup \
+  --token-name "Game Token" \
+  --token-symbol "GAME"
+
+# Create L3 with custom gas token
+lux l3 create defi-app \
+  --l2 fast-rollup \
+  --gas-token 0x1234...
+```
+
+### lux l3 deploy
+
+Deploy an L3 app chain.
+
+```bash
+lux l3 deploy [name] [flags]
+```
+
+**Flags:**
+- `--l2 <name>` - Parent L2 name
+- `--num-sequencers <int>` - Number of sequencers
+- `--bridge-config <file>` - Bridge configuration file
+
+**Examples:**
+
+```bash
+# Deploy L3 to parent L2
+lux l3 deploy my-app --l2 my-rollup
+
+# Deploy with custom bridge
+lux l3 deploy game-chain \
+  --l2 fast-rollup \
+  --bridge-config ./bridge.json
+```
+
+### lux l3 list
+
+List all configured L3 chains.
+
+```bash
+lux l3 list [flags]
+```
+
+**Flags:**
+- `--l2 <name>` - Filter by parent L2
+- `--deployed` - Show only deployed L3s
+
+**Example Output:**
+```
+L3 App Chains:
+┌──────────────┬────────────┬──────────┬────────────┬──────────┐
+│ Name         │ Parent L2  │ Token    │ Chain ID   │ Status   │
+├──────────────┼────────────┼──────────┼────────────┼──────────┤
+│ game-chain   │ my-rollup  │ GAME     │ 777777     │ Running  │
+│ defi-app     │ fast-rollup│ DEFI     │ 888888     │ Running  │
+│ nft-market   │ my-rollup  │ NFT      │ 999999     │ Created  │
+└──────────────┴────────────┴──────────┴────────────┴──────────┘
+```
+
+### lux l3 describe
+
+Show detailed information about an L3 chain.
+
+```bash
+lux l3 describe [name] [flags]
+```
+
+**Flags:**
+- `--genesis` - Show genesis configuration
+- `--bridge` - Show bridge configuration
+- `--metrics` - Show performance metrics
+
+### lux l3 bridge
+
+Manage L3 bridge operations.
+
+```bash
+lux l3 bridge [action] [name] [flags]
+```
+
+**Actions:**
+- `deposit` - Deposit assets from L2 to L3
+- `withdraw` - Withdraw assets from L3 to L2
+- `status` - Check bridge status
+- `config` - Configure bridge parameters
+
+**Examples:**
+
+```bash
+# Deposit tokens to L3
+lux l3 bridge deposit game-chain \
+  --amount 1000 \
+  --token 0x1234...
+
+# Withdraw to L2
+lux l3 bridge withdraw game-chain \
+  --amount 500 \
+  --to 0x5678...
+
+# Check bridge status
+lux l3 bridge status game-chain
+```
+
+### lux l3 delete
+
+Delete an L3 chain configuration.
+
+```bash
+lux l3 delete [name] [flags]
+```
+
+**Flags:**
+- `--force` - Skip confirmation
+- `--keep-data` - Preserve chain data
+
+## Use Cases
+
+### Gaming Chains
+
+Optimized for game logic:
+
+```bash
+lux l3 create game-world \
+  --l2 lux-rollup \
+  --token-symbol "GOLD" \
+  --evm-chain-id 1337001
+
+# Custom gas token for in-game currency
+lux l3 create arena \
+  --l2 lux-rollup \
+  --gas-token 0xGOLD...
+```
+
+### DeFi Applications
+
+Dedicated execution for DeFi:
+
+```bash
+lux l3 create amm-chain \
+  --l2 secure-rollup \
+  --token-name "AMM Token" \
+  --token-symbol "AMM"
+```
+
+### NFT Marketplaces
+
+High-throughput NFT operations:
+
+```bash
+lux l3 create nft-market \
+  --l2 fast-rollup \
+  --token-symbol "NFT"
+```
+
+### Social Applications
+
+Low-cost social interactions:
+
+```bash
+lux l3 create social-app \
+  --l2 lux-rollup \
+  --token-symbol "SOC"
+```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────┐
+│                L1 (Lux)                │
+│    Security & Settlement Layer          │
+└─────────────────┬───────────────────────┘
+                  │
+┌─────────────────▼───────────────────────┐
+│               L2 Rollup                 │
+│     Sequencing & Data Availability      │
+└─────────────────┬───────────────────────┘
+                  │
+┌─────────────────▼───────────────────────┐
+│              L3 App Chain               │
+│     Application-Specific Execution      │
+└─────────────────────────────────────────┘
+```
+
+## Configuration
+
+L3 configurations stored in `~/.lux-cli/l3s/[name]/`.
+
+### Genesis Configuration
+
+```json
+{
+  "config": {
+    "chainId": 777777,
+    "parentL2": "my-rollup",
+    "bridgeContract": "0x...",
+    "gasToken": {
+      "address": "0x...",
+      "name": "Game Token",
+      "symbol": "GAME",
+      "decimals": 18
+    }
+  },
+  "alloc": {
+    "0x...": {
+      "balance": "1000000000000000000000"
+    }
+  }
+}
+```
+
+### Bridge Configuration
+
+```json
+{
+  "l2Contract": "0x...",
+  "l3Contract": "0x...",
+  "supportedTokens": [
+    {
+      "l2Address": "0x...",
+      "l3Address": "0x...",
+      "symbol": "USDC"
+    }
+  ],
+  "confirmationBlocks": 1,
+  "maxDeposit": "1000000000000000000000"
+}
+```
+
+## Best Practices
+
+1. **Parent L2 Selection**:
+   - Choose L2 with appropriate security model
+   - Consider sequencer latency requirements
+   - Evaluate data availability costs
+
+2. **Gas Token Design**:
+   - Use native token for simple apps
+   - Custom gas tokens for gaming/social
+   - Consider user onboarding
+
+3. **Bridge Security**:
+   - Set appropriate confirmation blocks
+   - Configure deposit/withdrawal limits
+   - Monitor bridge operations
+
+4. **Performance**:
+   - Optimize for specific use case
+   - Monitor transaction throughput
+   - Tune gas parameters
+
+## Troubleshooting
+
+### Common Issues
+
+**L3 won't deploy**
+- Verify parent L2 is running
+- Check bridge contract deployment
+- Ensure sufficient L2 balance
+
+**Bridge failures**
+- Verify token allowances
+- Check bridge contract state
+- Monitor L2 confirmation times
+
+**High latency**
+- Check parent L2 health
+- Review sequencer configuration
+- Optimize batch sizes
+
+## Related Commands
+
+- [`lux l2`](/docs/commands/l2) - Parent L2 management
+- [`lux l1`](/docs/commands/l1) - Sovereign L1 operations
+- [`lux warp`](/docs/commands/warp) - Cross-chain messaging
+- [`lux contract`](/docs/commands/contract) - Contract deployment

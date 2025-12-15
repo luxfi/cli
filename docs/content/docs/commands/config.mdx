@@ -1,0 +1,420 @@
+---
+title: Config Commands
+description: CLI configuration management
+---
+
+# Config Commands
+
+The config command suite provides tools for managing CLI configuration, preferences, and settings.
+
+## Overview
+
+Configuration operations include:
+- **View and Set**: Get and set configuration values
+- **Metrics**: Manage telemetry preferences
+- **Migrate**: Update configuration formats
+- **Snapshots**: Configure automatic snapshots
+- **Authorize**: Manage cloud authorizations
+
+## Commands
+
+### lux config set
+
+Set a configuration value.
+
+```bash
+lux config set [key] [value] [flags]
+```
+
+**Common Keys:**
+- `network` - Default network (local, testnet, mainnet)
+- `log-level` - Logging level (ERROR, INFO, DEBUG)
+- `output-format` - Output format (text, json)
+- `default-key` - Default signing key
+- `rpc-endpoint` - Default RPC endpoint
+- `metrics-enabled` - Enable/disable telemetry
+
+**Examples:**
+
+```bash
+# Set default network
+lux config set network testnet
+
+# Set logging level
+lux config set log-level DEBUG
+
+# Set output format
+lux config set output-format json
+
+# Set default key
+lux config set default-key my-validator
+```
+
+### lux config get
+
+Get a configuration value.
+
+```bash
+lux config get [key] [flags]
+```
+
+**Examples:**
+
+```bash
+# Get specific value
+lux config get network
+
+# Get all configuration
+lux config get --all
+
+# Output:
+# Configuration:
+# ┌─────────────────┬─────────────┐
+# │ Key             │ Value       │
+# ├─────────────────┼─────────────┤
+# │ network         │ testnet     │
+# │ log-level       │ INFO        │
+# │ output-format   │ text        │
+# │ default-key     │ my-validator│
+# │ metrics-enabled │ true        │
+# └─────────────────┴─────────────┘
+```
+
+### lux config list
+
+List all configuration settings.
+
+```bash
+lux config list [flags]
+```
+
+**Flags:**
+- `--category <name>` - Filter by category
+- `--format <type>` - Output format (table, json, yaml)
+
+**Examples:**
+
+```bash
+# List all config
+lux config list
+
+# List network config
+lux config list --category network
+
+# Output as JSON
+lux config list --format json
+```
+
+### lux config reset
+
+Reset configuration to defaults.
+
+```bash
+lux config reset [key] [flags]
+```
+
+**Flags:**
+- `--all` - Reset all configuration
+- `--force` - Skip confirmation
+
+**Examples:**
+
+```bash
+# Reset specific key
+lux config reset log-level
+
+# Reset all configuration
+lux config reset --all --force
+```
+
+### lux config metrics
+
+Manage telemetry and metrics preferences.
+
+```bash
+lux config metrics [action] [flags]
+```
+
+**Actions:**
+- `enable` - Enable metrics collection
+- `disable` - Disable metrics collection
+- `status` - Show current status
+
+**Examples:**
+
+```bash
+# Enable metrics
+lux config metrics enable
+
+# Disable metrics
+lux config metrics disable
+
+# Check status
+lux config metrics status
+
+# Output:
+# Metrics: Disabled
+# Last updated: 2024-01-15
+```
+
+### lux config authorize
+
+Manage cloud and service authorizations.
+
+```bash
+lux config authorize [service] [flags]
+```
+
+**Services:**
+- `cloud` - Lux Cloud authorization
+- `aws` - AWS credentials
+- `gcp` - Google Cloud credentials
+
+**Examples:**
+
+```bash
+# Authorize Lux Cloud
+lux config authorize cloud
+
+# Authorize AWS
+lux config authorize aws \
+  --access-key-id AKIA... \
+  --secret-access-key ...
+
+# Check authorization status
+lux config authorize --status
+```
+
+### lux config snapshots-auto-save
+
+Configure automatic snapshot settings.
+
+```bash
+lux config snapshots-auto-save [action] [flags]
+```
+
+**Actions:**
+- `enable` - Enable auto-save
+- `disable` - Disable auto-save
+- `configure` - Set auto-save options
+
+**Flags:**
+- `--interval <duration>` - Snapshot interval
+- `--keep <int>` - Number of snapshots to keep
+- `--path <dir>` - Snapshot storage path
+
+**Examples:**
+
+```bash
+# Enable auto-save
+lux config snapshots-auto-save enable
+
+# Configure auto-save
+lux config snapshots-auto-save configure \
+  --interval 1h \
+  --keep 24 \
+  --path ~/.lux-cli/snapshots
+
+# Disable auto-save
+lux config snapshots-auto-save disable
+```
+
+### lux config migrate
+
+Migrate configuration to new format.
+
+```bash
+lux config migrate [flags]
+```
+
+**Flags:**
+- `--from <version>` - Source config version
+- `--dry-run` - Show changes without applying
+- `--backup` - Create backup before migrating
+
+**Examples:**
+
+```bash
+# Migrate configuration
+lux config migrate
+
+# Dry run migration
+lux config migrate --dry-run
+
+# Migrate with backup
+lux config migrate --backup
+```
+
+### lux config update
+
+Update CLI configuration interactively.
+
+```bash
+lux config update [flags]
+```
+
+**Flags:**
+- `--wizard` - Run configuration wizard
+- `--category <name>` - Update specific category
+
+**Examples:**
+
+```bash
+# Interactive update
+lux config update --wizard
+
+# Update network settings
+lux config update --category network
+```
+
+## Configuration Files
+
+### Main Configuration
+
+Location: `~/.lux-cli/config.json`
+
+```json
+{
+  "version": "2.0",
+  "network": "testnet",
+  "logLevel": "INFO",
+  "outputFormat": "text",
+  "defaultKey": "my-validator",
+  "metrics": {
+    "enabled": true,
+    "endpoint": "https://metrics.lux.network"
+  },
+  "snapshots": {
+    "autoSave": true,
+    "interval": "1h",
+    "keep": 24,
+    "path": "~/.lux-cli/snapshots"
+  },
+  "rpc": {
+    "local": "http://127.0.0.1:9650",
+    "testnet": "https://testnet.lux.network",
+    "mainnet": "https://api.lux.network"
+  }
+}
+```
+
+### Network Configuration
+
+Location: `~/.lux-cli/networks/[name].json`
+
+```json
+{
+  "name": "my-network",
+  "chainId": 12345,
+  "rpcEndpoint": "https://rpc.my-network.com",
+  "wsEndpoint": "wss://ws.my-network.com",
+  "explorer": "https://explorer.my-network.com",
+  "faucet": "https://faucet.my-network.com"
+}
+```
+
+### Key Configuration
+
+Location: `~/.lux-cli/keys/[name]/config.json`
+
+```json
+{
+  "name": "my-validator",
+  "types": ["ec", "bls", "rt", "mldsa"],
+  "created": "2024-01-15T00:00:00Z",
+  "network": "mainnet"
+}
+```
+
+## Environment Variables
+
+Configuration can also be set via environment variables:
+
+```bash
+# Network
+export LUX_NETWORK=testnet
+
+# Logging
+export LUX_LOG_LEVEL=DEBUG
+
+# Default key
+export LUX_DEFAULT_KEY=my-validator
+
+# Metrics
+export LUX_METRICS_ENABLED=true
+
+# RPC endpoints
+export LUX_RPC_ENDPOINT=https://custom.rpc.com
+```
+
+## Configuration Hierarchy
+
+Configuration is loaded in order (later overrides earlier):
+1. Built-in defaults
+2. System configuration (`/etc/lux-cli/config.json`)
+3. User configuration (`~/.lux-cli/config.json`)
+4. Environment variables
+5. Command-line flags
+
+## Best Practices
+
+1. **Security**:
+   - Never store secrets in configuration
+   - Use environment variables for sensitive data
+   - Protect configuration file permissions
+
+2. **Organization**:
+   - Use consistent naming for keys
+   - Document custom configurations
+   - Keep backups of configuration
+
+3. **Debugging**:
+   - Enable DEBUG logging when troubleshooting
+   - Review effective configuration with `config list`
+   - Check environment variable overrides
+
+4. **Updates**:
+   - Migrate configuration after CLI updates
+   - Review changelog for config changes
+   - Test configuration changes on testnet
+
+## Troubleshooting
+
+### Common Issues
+
+**Configuration not loading**
+- Check file permissions
+- Verify JSON syntax
+- Review file path
+
+**Environment override not working**
+- Check variable name format
+- Verify shell exports
+- Restart terminal session
+
+**Migration failed**
+- Backup configuration first
+- Check source version compatibility
+- Review migration logs
+
+### Debug Commands
+
+```bash
+# Show effective configuration
+lux config debug
+
+# Validate configuration file
+lux config validate
+
+# Show configuration file path
+lux config path
+
+# Export configuration
+lux config export --output config-backup.json
+```
+
+## Related Commands
+
+- [`lux key`](/docs/commands/key) - Key management
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux update`](/docs/commands/update) - CLI updates
