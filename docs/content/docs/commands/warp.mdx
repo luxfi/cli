@@ -1,0 +1,402 @@
+---
+title: Warp Commands
+description: Cross-chain messaging with Warp/ICM
+---
+
+# Warp Commands
+
+Warp (Interchain Messaging/ICM) enables secure cross-chain communication between Lux networks. Send messages, transfer assets, and invoke contracts across L1, L2, and L3 chains.
+
+## Overview
+
+Warp messaging provides:
+- **Secure Messaging**: BLS-signed cross-chain messages
+- **Asset Transfers**: Native token and ERC20 bridging
+- **Contract Calls**: Cross-chain smart contract invocation
+- **Teleport**: Fast finality cross-chain transfers
+
+## Commands
+
+### lux warp enable
+
+Enable Warp messaging on a chain.
+
+```bash
+lux warp enable [chain-name] [flags]
+```
+
+**Flags:**
+- `--protocol <type>` - Protocol type: warp, ibc, teleport
+- `--relayer-config <file>` - Relayer configuration file
+- `--force` - Overwrite existing configuration
+
+**Examples:**
+
+```bash
+# Enable Warp on L1
+lux warp enable my-sovereign-l1
+
+# Enable IBC protocol
+lux warp enable my-rollup --protocol ibc
+
+# Enable Teleport for fast transfers
+lux warp enable fast-chain --protocol teleport
+```
+
+### lux warp message
+
+Send and manage cross-chain messages.
+
+```bash
+lux warp message [action] [flags]
+```
+
+**Actions:**
+- `send` - Send a cross-chain message
+- `status` - Check message status
+- `history` - View message history
+
+**Send Flags:**
+- `--source <chain>` - Source chain name
+- `--dest <chain>` - Destination chain name
+- `--message <data>` - Message payload (hex or string)
+- `--contract <address>` - Target contract address
+- `--method <signature>` - Contract method to call
+- `--args <json>` - Method arguments
+
+**Examples:**
+
+```bash
+# Send simple message
+lux warp message send \
+  --source my-l1 \
+  --dest my-l2 \
+  --message "Hello from L1"
+
+# Cross-chain contract call
+lux warp message send \
+  --source my-l1 \
+  --dest my-l2 \
+  --contract 0x1234... \
+  --method "updatePrice(uint256)" \
+  --args '{"price": 1000}'
+
+# Check message status
+lux warp message status \
+  --message-id 0xabcd...
+
+# View message history
+lux warp message history \
+  --source my-l1 \
+  --limit 10
+```
+
+### lux warp transfer
+
+Transfer assets between chains.
+
+```bash
+lux warp transfer [flags]
+```
+
+**Flags:**
+- `--source <chain>` - Source chain name
+- `--dest <chain>` - Destination chain name
+- `--token <address>` - Token address (native if omitted)
+- `--amount <uint>` - Amount to transfer
+- `--to <address>` - Recipient address
+- `--fee-token <address>` - Token for relayer fees
+
+**Examples:**
+
+```bash
+# Transfer native tokens
+lux warp transfer \
+  --source my-l1 \
+  --dest my-l2 \
+  --amount 1000000000000000000 \
+  --to 0x5678...
+
+# Transfer ERC20 tokens
+lux warp transfer \
+  --source my-l1 \
+  --dest my-l2 \
+  --token 0xUSDC... \
+  --amount 1000000 \
+  --to 0x5678...
+
+# Teleport (fast finality)
+lux warp transfer \
+  --source my-l1 \
+  --dest my-l2 \
+  --amount 100 \
+  --protocol teleport
+```
+
+### lux warp channel
+
+Manage cross-chain channels.
+
+```bash
+lux warp channel [action] [flags]
+```
+
+**Actions:**
+- `create` - Create new channel
+- `close` - Close a channel
+- `list` - List all channels
+- `info` - Show channel details
+
+**Examples:**
+
+```bash
+# Create channel between chains
+lux warp channel create \
+  --source my-l1 \
+  --dest other-l1 \
+  --port transfer
+
+# List all channels
+lux warp channel list --chain my-l1
+
+# Get channel info
+lux warp channel info \
+  --chain my-l1 \
+  --channel-id channel-0
+```
+
+### lux warp relayer
+
+Manage Warp relayers.
+
+```bash
+lux warp relayer [action] [flags]
+```
+
+**Actions:**
+- `start` - Start a relayer
+- `stop` - Stop a relayer
+- `status` - Check relayer status
+- `config` - Configure relayer
+
+**Examples:**
+
+```bash
+# Start relayer for a chain
+lux warp relayer start \
+  --chain my-l1 \
+  --config ./relayer.json
+
+# Check relayer status
+lux warp relayer status --chain my-l1
+
+# Stop relayer
+lux warp relayer stop --chain my-l1
+```
+
+### lux warp info
+
+Display Warp configuration and status.
+
+```bash
+lux warp info [chain-name] [flags]
+```
+
+**Flags:**
+- `--channels` - Show channel information
+- `--pending` - Show pending messages
+- `--stats` - Show messaging statistics
+
+## Message Flow
+
+```
+┌─────────────────┐         ┌─────────────────┐
+│   Source Chain  │         │    Dest Chain   │
+│                 │         │                 │
+│ ┌─────────────┐ │ Warp    │ ┌─────────────┐ │
+│ │ User/       │ │ Message │ │ Receiving   │ │
+│ │ Contract    │─┼────────►│ │ Contract    │ │
+│ └─────────────┘ │         │ └─────────────┘ │
+│       │         │         │       ▲         │
+│       ▼         │         │       │         │
+│ ┌─────────────┐ │         │ ┌─────────────┐ │
+│ │ Warp       │ │ BLS     │ │ Warp        │ │
+│ │ Precompile │─┼─ Sig ──►│ │ Precompile  │ │
+│ └─────────────┘ │         │ └─────────────┘ │
+└─────────────────┘         └─────────────────┘
+         │                          ▲
+         └──────── Relayer ─────────┘
+```
+
+## Security Model
+
+### BLS Signature Aggregation
+
+Messages are signed by validators using BLS signatures:
+
+```bash
+# Verify message signature
+lux warp message verify \
+  --message-id 0xabcd... \
+  --signature 0x1234...
+```
+
+### Threshold Signatures
+
+Configure threshold for message acceptance:
+
+```bash
+lux warp config \
+  --chain my-l1 \
+  --threshold 67  # 67% of validators must sign
+```
+
+## Teleport Protocol
+
+Fast finality transfers with pre-confirmation:
+
+```bash
+# Enable Teleport
+lux warp enable my-chain --protocol teleport
+
+# Teleport transfer (sub-second confirmation)
+lux warp transfer \
+  --source my-l1 \
+  --dest my-l2 \
+  --amount 1000 \
+  --protocol teleport
+```
+
+## IBC Integration
+
+For IBC-compatible cross-chain:
+
+```bash
+# Enable IBC
+lux warp enable my-chain --protocol ibc
+
+# Create IBC channel
+lux warp channel create \
+  --source my-l1 \
+  --dest cosmos-chain \
+  --port transfer \
+  --protocol ibc
+
+# IBC transfer
+lux warp transfer \
+  --source my-l1 \
+  --dest cosmos-chain \
+  --token 0xATOM... \
+  --amount 1000000 \
+  --protocol ibc
+```
+
+## Configuration
+
+### Warp Configuration
+
+```json
+{
+  "enabled": true,
+  "protocol": "warp",
+  "threshold": 67,
+  "relayerEndpoints": [
+    "https://relayer1.example.com",
+    "https://relayer2.example.com"
+  ],
+  "supportedChains": [
+    {
+      "chainId": "my-l2",
+      "endpoint": "https://rpc.my-l2.example.com"
+    }
+  ]
+}
+```
+
+### Relayer Configuration
+
+```json
+{
+  "chains": {
+    "my-l1": {
+      "rpcEndpoint": "https://rpc.my-l1.example.com",
+      "wsEndpoint": "wss://ws.my-l1.example.com",
+      "privateKey": "${RELAYER_KEY}"
+    },
+    "my-l2": {
+      "rpcEndpoint": "https://rpc.my-l2.example.com",
+      "wsEndpoint": "wss://ws.my-l2.example.com",
+      "privateKey": "${RELAYER_KEY}"
+    }
+  },
+  "gasLimit": 500000,
+  "retryAttempts": 3,
+  "retryDelay": 5000
+}
+```
+
+## Best Practices
+
+1. **Message Design**:
+   - Keep payloads minimal
+   - Use structured data formats
+   - Handle failures gracefully
+
+2. **Security**:
+   - Use appropriate threshold
+   - Monitor relayer health
+   - Implement replay protection
+
+3. **Performance**:
+   - Batch messages when possible
+   - Use Teleport for time-sensitive transfers
+   - Monitor gas costs
+
+4. **Reliability**:
+   - Run multiple relayers
+   - Implement message tracking
+   - Set up alerting
+
+## Troubleshooting
+
+### Common Issues
+
+**Message not delivered**
+- Check relayer status
+- Verify threshold reached
+- Review destination chain state
+
+**Transfer failed**
+- Verify token allowances
+- Check bridge contract state
+- Confirm sufficient balance
+
+**Relayer errors**
+- Check RPC connectivity
+- Verify private key configuration
+- Review gas settings
+
+### Debug Commands
+
+```bash
+# Debug message
+lux warp message debug \
+  --message-id 0xabcd...
+
+# Check relayer logs
+lux warp relayer logs \
+  --chain my-l1 \
+  --tail 100
+
+# Verify chain connectivity
+lux warp ping \
+  --source my-l1 \
+  --dest my-l2
+```
+
+## Related Commands
+
+- [`lux l1`](/docs/commands/l1) - L1 management
+- [`lux l2`](/docs/commands/l2) - L2 management
+- [`lux contract`](/docs/commands/contract) - Contract deployment
+- [`lux transaction`](/docs/commands/transaction) - Transaction management
