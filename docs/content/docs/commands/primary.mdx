@@ -1,0 +1,369 @@
+---
+title: Primary Commands
+description: Primary network operations
+---
+
+# Primary Commands
+
+The primary command suite provides tools for interacting with the Lux Primary Network, including validator management and network operations.
+
+## Overview
+
+Primary network operations include:
+- **Validator Management**: Add validators to the primary network
+- **Network Information**: Query primary network state
+- **Staking Operations**: Manage staking on the primary network
+
+## Commands
+
+### lux primary describe
+
+Show detailed information about the Primary Network.
+
+```bash
+lux primary describe [flags]
+```
+
+**Flags:**
+- `--network <name>` - Target network (local, testnet, mainnet)
+- `--validators` - Include validator list
+- `--metrics` - Include performance metrics
+- `--format <type>` - Output format (text, json)
+
+**Examples:**
+
+```bash
+# Describe primary network on testnet
+lux primary describe --network testnet
+
+# Include validators
+lux primary describe \
+  --network mainnet \
+  --validators
+
+# Output:
+# Primary Network Information
+# ──────────────────────────
+# Network:     Mainnet
+# Chain ID:    96369
+# Validators:  1,200
+# Total Stake: 250,000,000 LUX
+#
+# P-Chain:
+#   Height:    12,345,678
+#   Finalized: 12,345,670
+#
+# X-Chain:
+#   Height:    8,765,432
+#   Finalized: 8,765,425
+#
+# C-Chain:
+#   Height:    45,678,901
+#   Gas Price: 25 gwei
+```
+
+### lux primary addValidator
+
+Add a validator to the Primary Network.
+
+```bash
+lux primary addValidator [flags]
+```
+
+**Flags:**
+- `--network <name>` - Target network
+- `--node-id <string>` - Validator node ID
+- `--stake-amount <uint>` - Amount to stake
+- `--start-time <timestamp>` - Validation start time
+- `--end-time <timestamp>` - Validation end time
+- `--delegation-fee <uint>` - Delegation fee percentage (in basis points)
+- `--key <name>` - Key for signing transaction
+- `--bls-key <path>` - BLS public key file
+- `--bls-proof <path>` - BLS proof of possession
+
+**Examples:**
+
+```bash
+# Add validator to testnet
+lux primary addValidator \
+  --network testnet \
+  --node-id NodeID-xxx \
+  --stake-amount 2000000000000 \
+  --start-time "$(date -u -d '+1 hour' +%s)" \
+  --end-time "$(date -u -d '+365 days' +%s)" \
+  --delegation-fee 200 \
+  --key my-validator
+
+# Add validator with BLS keys
+lux primary addValidator \
+  --network mainnet \
+  --node-id NodeID-xxx \
+  --stake-amount 2000000000000 \
+  --start-time "$(date -u -d '+1 hour' +%s)" \
+  --end-time "$(date -u -d '+2 years' +%s)" \
+  --delegation-fee 100 \
+  --key my-validator \
+  --bls-key ./validator.bls.pub \
+  --bls-proof ./validator.bls.proof
+```
+
+### lux primary validators
+
+List validators on the Primary Network.
+
+```bash
+lux primary validators [flags]
+```
+
+**Flags:**
+- `--network <name>` - Target network
+- `--node-id <string>` - Filter by specific node ID
+- `--status <type>` - Filter by status (active, pending, expired)
+- `--sort <field>` - Sort by field (stake, uptime, start)
+- `--limit <int>` - Limit results
+- `--format <type>` - Output format
+
+**Examples:**
+
+```bash
+# List all active validators
+lux primary validators \
+  --network mainnet \
+  --status active
+
+# List by stake
+lux primary validators \
+  --network mainnet \
+  --sort stake \
+  --limit 100
+
+# Output:
+# Primary Network Validators
+# ┌─────────────────────┬────────────────┬─────────┬───────────────┐
+# │ Node ID             │ Stake          │ Uptime  │ Delegation Fee│
+# ├─────────────────────┼────────────────┼─────────┼───────────────┤
+# │ NodeID-xxx1         │ 5,000,000 LUX  │ 99.9%   │ 2%            │
+# │ NodeID-xxx2         │ 3,500,000 LUX  │ 99.8%   │ 5%            │
+# │ NodeID-xxx3         │ 2,000,000 LUX  │ 99.5%   │ 10%           │
+# └─────────────────────┴────────────────┴─────────┴───────────────┘
+```
+
+### lux primary delegate
+
+Delegate stake to a validator.
+
+```bash
+lux primary delegate [flags]
+```
+
+**Flags:**
+- `--network <name>` - Target network
+- `--node-id <string>` - Validator to delegate to
+- `--amount <uint>` - Amount to delegate
+- `--start-time <timestamp>` - Delegation start time
+- `--end-time <timestamp>` - Delegation end time
+- `--key <name>` - Key for signing
+
+**Examples:**
+
+```bash
+# Delegate to validator
+lux primary delegate \
+  --network mainnet \
+  --node-id NodeID-xxx \
+  --amount 500000000000 \
+  --start-time "$(date -u -d '+1 hour' +%s)" \
+  --end-time "$(date -u -d '+180 days' +%s)" \
+  --key my-delegator
+```
+
+### lux primary stake
+
+Manage staking operations.
+
+```bash
+lux primary stake [action] [flags]
+```
+
+**Actions:**
+- `info` - Show staking information
+- `rewards` - Show pending rewards
+- `history` - Show staking history
+
+**Examples:**
+
+```bash
+# Get staking info
+lux primary stake info \
+  --network mainnet \
+  --address P-lux1xxx...
+
+# Check pending rewards
+lux primary stake rewards \
+  --network mainnet \
+  --address P-lux1xxx...
+
+# View staking history
+lux primary stake history \
+  --network mainnet \
+  --address P-lux1xxx...
+```
+
+## Validator Requirements
+
+### Minimum Stake
+
+| Network  | Validator Min | Delegator Min |
+|----------|---------------|---------------|
+| Mainnet  | 2,000 LUX     | 25 LUX        |
+| Testnet  | 1 LUX         | 1 LUX         |
+| Local    | 1 LUX         | 1 LUX         |
+
+### Duration Limits
+
+| Network  | Min Duration | Max Duration |
+|----------|--------------|--------------|
+| Mainnet  | 2 weeks      | 1 year       |
+| Testnet  | 24 hours     | 1 year       |
+| Local    | 1 minute     | 1 year       |
+
+### Delegation Fee
+
+- Minimum: 2% (200 basis points)
+- Maximum: 100% (10000 basis points)
+- Recommended: 10-20%
+
+## Validation Workflow
+
+### 1. Prepare Node
+
+```bash
+# Generate node ID
+luxd --data-dir ~/.luxd init
+
+# Get node ID
+lux key show node-id
+```
+
+### 2. Fund Wallet
+
+```bash
+# Create or import key
+lux key create validator-wallet
+
+# Check balance (need stake + fees)
+lux key show validator-wallet --balance
+```
+
+### 3. Add Validator
+
+```bash
+# Add to primary network
+lux primary addValidator \
+  --network mainnet \
+  --node-id $(cat ~/.luxd/node.id) \
+  --stake-amount 2000000000000 \
+  --start-time "$(date -u -d '+1 hour' +%s)" \
+  --end-time "$(date -u -d '+365 days' +%s)" \
+  --delegation-fee 200 \
+  --key validator-wallet
+```
+
+### 4. Verify Status
+
+```bash
+# Check validator status
+lux primary validators \
+  --network mainnet \
+  --node-id $(cat ~/.luxd/node.id)
+```
+
+## Staking Rewards
+
+### Reward Calculation
+
+Rewards are calculated based on:
+- Stake amount
+- Validation duration
+- Uptime (must exceed 80%)
+- Network participation
+
+### Reward Distribution
+
+```bash
+# Check pending rewards
+lux primary stake rewards \
+  --network mainnet \
+  --address P-lux1xxx...
+
+# Output:
+# Pending Rewards: 125.5 LUX
+# Potential Rewards: 250.0 LUX
+# Uptime: 99.8%
+# Status: Active
+```
+
+## Best Practices
+
+1. **Hardware Requirements**:
+   - 8+ CPU cores
+   - 16+ GB RAM
+   - 1 TB SSD
+   - 100 Mbps connection
+
+2. **Uptime**:
+   - Maintain 99%+ uptime
+   - Use reliable hosting
+   - Implement monitoring
+
+3. **Security**:
+   - Secure key storage
+   - Firewall configuration
+   - Regular updates
+
+4. **Staking Strategy**:
+   - Set competitive delegation fee
+   - Choose appropriate duration
+   - Monitor performance
+
+## Troubleshooting
+
+### Common Issues
+
+**Validator not showing**
+- Wait for start time to pass
+- Verify transaction confirmed
+- Check node connectivity
+
+**Low uptime**
+- Check network connectivity
+- Review node logs
+- Verify system resources
+
+**Rewards not received**
+- Uptime must exceed 80%
+- Wait for validation end
+- Check reward address
+
+### Debug Commands
+
+```bash
+# Check node status
+lux node info --network mainnet
+
+# Verify validator registration
+lux primary validators \
+  --network mainnet \
+  --node-id NodeID-xxx
+
+# Check P-Chain transaction
+lux transaction status TX_ID \
+  --chain P
+```
+
+## Related Commands
+
+- [`lux validator`](/docs/commands/validator) - L1/L2 validator management
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux key`](/docs/commands/key) - Key management
+- [`lux l1`](/docs/commands/l1) - L1 operations

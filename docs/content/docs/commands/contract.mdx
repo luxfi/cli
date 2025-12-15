@@ -1,0 +1,503 @@
+---
+title: Contract Commands
+description: Deploy and manage smart contracts
+---
+
+# Contract Commands
+
+The contract command suite provides tools for deploying and interacting with smart contracts on Lux networks.
+
+## Overview
+
+Contract operations include:
+- **Deploy**: Deploy compiled contracts
+- **Verify**: Verify contract source code
+- **Initialize**: Initialize proxy contracts and validator managers
+- **Interact**: Call and send to deployed contracts
+
+## Commands
+
+### lux contract deploy
+
+Deploy a smart contract to a network.
+
+```bash
+lux contract deploy [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--bytecode <file>` - Compiled bytecode file
+- `--abi <file>` - Contract ABI file
+- `--key <name>` - Key to use for deployment
+- `--args <json>` - Constructor arguments
+- `--value <amount>` - Value to send with deployment
+- `--gas-limit <uint>` - Gas limit
+- `--verify` - Verify after deployment
+- `--wait` - Wait for deployment confirmation
+
+**Examples:**
+
+```bash
+# Deploy simple contract
+lux contract deploy \
+  --chain my-l1 \
+  --bytecode ./MyContract.bin \
+  --abi ./MyContract.abi \
+  --key deployer \
+  --wait
+
+# Deploy with constructor args
+lux contract deploy \
+  --chain my-l1 \
+  --bytecode ./Token.bin \
+  --abi ./Token.abi \
+  --key deployer \
+  --args '["My Token", "MTK", 18, "1000000000000000000000000"]'
+
+# Deploy and verify
+lux contract deploy \
+  --chain my-l1 \
+  --bytecode ./Contract.bin \
+  --key deployer \
+  --verify \
+  --wait
+
+# Output:
+# Contract deployed!
+# Address: 0x1234567890abcdef...
+# Transaction: 0xabc123...
+# Block: 12345
+# Gas used: 1,234,567
+```
+
+### lux contract deployERC20
+
+Deploy a standard ERC20 token contract.
+
+```bash
+lux contract deployERC20 [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--key <name>` - Key to use
+- `--name <string>` - Token name
+- `--symbol <string>` - Token symbol
+- `--decimals <uint>` - Token decimals (default: 18)
+- `--initial-supply <uint>` - Initial token supply
+- `--mintable` - Enable minting
+- `--burnable` - Enable burning
+- `--pausable` - Enable pausing
+
+**Examples:**
+
+```bash
+# Deploy basic ERC20
+lux contract deployERC20 \
+  --chain my-l1 \
+  --key deployer \
+  --name "My Token" \
+  --symbol "MTK" \
+  --initial-supply 1000000000000000000000000
+
+# Deploy with features
+lux contract deployERC20 \
+  --chain my-l1 \
+  --key deployer \
+  --name "Governance Token" \
+  --symbol "GOV" \
+  --decimals 18 \
+  --initial-supply 100000000000000000000000000 \
+  --mintable \
+  --burnable \
+  --pausable
+```
+
+### lux contract initValidatorManager
+
+Initialize a validator manager contract for L1/L2.
+
+```bash
+lux contract initValidatorManager [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--key <name>` - Key to use
+- `--manager <address>` - Validator manager contract address
+- `--initial-validators <file>` - JSON file with initial validators
+- `--poa` - Initialize as Proof of Authority
+- `--pos` - Initialize as Proof of Stake
+- `--min-stake <uint>` - Minimum stake amount (PoS)
+- `--delegation-fee <uint>` - Delegation fee percentage (PoS)
+
+**Examples:**
+
+```bash
+# Initialize PoA validator manager
+lux contract initValidatorManager \
+  --chain my-l1 \
+  --key admin \
+  --manager 0xManager... \
+  --poa \
+  --initial-validators ./validators.json
+
+# Initialize PoS validator manager
+lux contract initValidatorManager \
+  --chain my-l1 \
+  --key admin \
+  --manager 0xManager... \
+  --pos \
+  --min-stake 1000000000000000000 \
+  --delegation-fee 10
+
+# validators.json format:
+# [
+#   {
+#     "nodeId": "NodeID-xxx",
+#     "weight": 100,
+#     "publicKey": "0x..."
+#   }
+# ]
+```
+
+### lux contract verify
+
+Verify contract source code on block explorer.
+
+```bash
+lux contract verify [address] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--source <dir>` - Source code directory
+- `--compiler <version>` - Solidity compiler version
+- `--optimization <runs>` - Optimizer runs
+- `--constructor-args <hex>` - Constructor arguments (encoded)
+
+**Examples:**
+
+```bash
+# Verify contract
+lux contract verify 0x1234... \
+  --chain my-l1 \
+  --source ./contracts \
+  --compiler 0.8.20 \
+  --optimization 200
+```
+
+### lux contract call
+
+Call a contract method (read-only).
+
+```bash
+lux contract call [address] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--abi <file>` - Contract ABI
+- `--method <signature>` - Method to call
+- `--args <json>` - Method arguments
+- `--from <address>` - Caller address (for view context)
+- `--block <number>` - Block number (default: latest)
+
+**Examples:**
+
+```bash
+# Call balanceOf
+lux contract call 0xToken... \
+  --chain my-l1 \
+  --abi ./Token.abi \
+  --method "balanceOf(address)" \
+  --args '["0x1234..."]'
+
+# Output: 1000000000000000000000
+
+# Call with multiple returns
+lux contract call 0xPair... \
+  --chain my-l1 \
+  --abi ./Pair.abi \
+  --method "getReserves()"
+
+# Output:
+# reserve0: 1000000000000000000000
+# reserve1: 5000000000000
+# blockTimestampLast: 1702345678
+```
+
+### lux contract send
+
+Send a transaction to a contract (state-changing).
+
+```bash
+lux contract send [address] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--key <name>` - Key to use
+- `--abi <file>` - Contract ABI
+- `--method <signature>` - Method to call
+- `--args <json>` - Method arguments
+- `--value <amount>` - ETH value to send
+- `--gas-limit <uint>` - Gas limit
+- `--wait` - Wait for confirmation
+
+**Examples:**
+
+```bash
+# Transfer tokens
+lux contract send 0xToken... \
+  --chain my-l1 \
+  --key my-wallet \
+  --abi ./Token.abi \
+  --method "transfer(address,uint256)" \
+  --args '["0x5678...", "1000000000000000000"]' \
+  --wait
+
+# Approve spending
+lux contract send 0xToken... \
+  --chain my-l1 \
+  --key my-wallet \
+  --abi ./Token.abi \
+  --method "approve(address,uint256)" \
+  --args '["0xSpender...", "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"]'
+
+# Call payable method
+lux contract send 0xContract... \
+  --chain my-l1 \
+  --key my-wallet \
+  --abi ./Contract.abi \
+  --method "deposit()" \
+  --value 1.0 \
+  --wait
+```
+
+### lux contract events
+
+Query contract events.
+
+```bash
+lux contract events [address] [flags]
+```
+
+**Flags:**
+- `--chain <name>` - Target chain
+- `--abi <file>` - Contract ABI
+- `--event <name>` - Event name to filter
+- `--from-block <number>` - Starting block
+- `--to-block <number>` - Ending block
+- `--topics <json>` - Topic filters
+- `--limit <int>` - Maximum events to return
+
+**Examples:**
+
+```bash
+# Get Transfer events
+lux contract events 0xToken... \
+  --chain my-l1 \
+  --abi ./Token.abi \
+  --event "Transfer" \
+  --from-block 10000 \
+  --limit 100
+
+# Filter by topic
+lux contract events 0xToken... \
+  --chain my-l1 \
+  --event "Transfer" \
+  --topics '["0x...", "0x1234..."]'
+
+# Output:
+# Transfer Events:
+# ┌────────┬────────────────┬────────────────┬─────────────────┐
+# │ Block  │ From           │ To             │ Amount          │
+# ├────────┼────────────────┼────────────────┼─────────────────┤
+# │ 10001  │ 0x1234...      │ 0x5678...      │ 1.0 MTK         │
+# │ 10005  │ 0x5678...      │ 0x9abc...      │ 0.5 MTK         │
+# └────────┴────────────────┴────────────────┴─────────────────┘
+```
+
+### lux contract encode
+
+Encode contract call data.
+
+```bash
+lux contract encode [flags]
+```
+
+**Flags:**
+- `--abi <file>` - Contract ABI
+- `--method <signature>` - Method signature
+- `--args <json>` - Method arguments
+
+**Examples:**
+
+```bash
+# Encode transfer call
+lux contract encode \
+  --abi ./Token.abi \
+  --method "transfer(address,uint256)" \
+  --args '["0x5678...", "1000000000000000000"]'
+
+# Output: 0xa9059cbb0000000000000000000000005678...
+```
+
+### lux contract decode
+
+Decode contract call or return data.
+
+```bash
+lux contract decode [flags]
+```
+
+**Flags:**
+- `--abi <file>` - Contract ABI
+- `--method <signature>` - Method for decoding
+- `--data <hex>` - Data to decode
+- `--type <call|return>` - Data type
+
+**Examples:**
+
+```bash
+# Decode call data
+lux contract decode \
+  --abi ./Token.abi \
+  --method "transfer" \
+  --data 0xa9059cbb... \
+  --type call
+
+# Output:
+# Method: transfer(address,uint256)
+# Arguments:
+#   to: 0x5678...
+#   amount: 1000000000000000000
+```
+
+## Proxy Contracts
+
+### Deploy Upgradeable Contract
+
+```bash
+# Deploy implementation
+lux contract deploy \
+  --chain my-l1 \
+  --bytecode ./Implementation.bin \
+  --key deployer
+
+# Deploy proxy
+lux contract deploy \
+  --chain my-l1 \
+  --bytecode ./TransparentProxy.bin \
+  --key deployer \
+  --args '["0xImpl...", "0xAdmin...", "0x"]'
+```
+
+### Upgrade Proxy
+
+```bash
+# Deploy new implementation
+lux contract deploy \
+  --chain my-l1 \
+  --bytecode ./ImplementationV2.bin \
+  --key deployer
+
+# Upgrade proxy
+lux contract send 0xProxy... \
+  --chain my-l1 \
+  --key admin \
+  --method "upgradeTo(address)" \
+  --args '["0xNewImpl..."]'
+```
+
+## Configuration
+
+### Contract Configuration
+
+```json
+{
+  "contracts": {
+    "compilers": {
+      "solc": "0.8.20"
+    },
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "verification": {
+      "explorer": "https://explorer.example.com/api"
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Deployment**:
+   - Always verify contracts after deployment
+   - Use deterministic deployment addresses
+   - Document constructor arguments
+
+2. **Security**:
+   - Audit contracts before mainnet deployment
+   - Use multi-sig for admin functions
+   - Implement proper access control
+
+3. **Gas Optimization**:
+   - Enable optimizer for production
+   - Batch operations when possible
+   - Monitor gas usage
+
+4. **Upgrades**:
+   - Use proxy patterns for upgradeability
+   - Test upgrades on testnet first
+   - Maintain upgrade history
+
+## Troubleshooting
+
+### Common Issues
+
+**Deployment failed**
+- Check bytecode is valid
+- Verify constructor arguments
+- Ensure sufficient balance
+
+**Verification failed**
+- Match compiler version exactly
+- Include all source files
+- Check optimizer settings
+
+**Call reverted**
+- Check method signature
+- Verify argument types
+- Review contract state
+
+### Debug Commands
+
+```bash
+# Simulate deployment
+lux contract simulate \
+  --bytecode ./Contract.bin \
+  --args '...' \
+  --chain my-l1
+
+# Debug transaction
+lux contract debug \
+  --tx-hash 0x... \
+  --chain my-l1
+
+# Get contract storage
+lux contract storage \
+  --address 0x... \
+  --slot 0 \
+  --chain my-l1
+```
+
+## Related Commands
+
+- [`lux transaction`](/docs/commands/transaction) - Transaction management
+- [`lux key`](/docs/commands/key) - Key management
+- [`lux network`](/docs/commands/network) - Network management
+- [`lux l1`](/docs/commands/l1) - L1 management
