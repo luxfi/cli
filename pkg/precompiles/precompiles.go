@@ -5,12 +5,12 @@ package precompiles
 import (
 	_ "embed"
 
-	"github.com/luxfi/crypto"
+	"github.com/luxfi/crypto/common"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/warp"
 )
 
 var (
-	NativeMinterPrecompile = crypto.BytesToAddress(nativeminter.ContractAddress.Bytes())
-	WarpPrecompile         = crypto.BytesToAddress(warp.ContractAddress.Bytes())
+	NativeMinterPrecompile = common.BytesToAddress(nativeminter.ContractAddress.Bytes())
+	WarpPrecompile         = common.BytesToAddress(warp.ContractAddress.Bytes())
 )

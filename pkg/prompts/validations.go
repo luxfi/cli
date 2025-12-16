@@ -16,9 +16,9 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/sdk/models"
 )
@@ -145,7 +145,7 @@ func validatePChainTestnetAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != lux_constants.TestnetHRP {
+	if hrp != luxconstants.TestnetHRP {
 		return errors.New("this is not a testnet address")
 	}
 	return nil
@@ -156,7 +156,7 @@ func validatePChainMainAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != lux_constants.MainnetHRP {
+	if hrp != luxconstants.MainnetHRP {
 		return errors.New("this is not a mainnet address")
 	}
 	return nil
@@ -169,7 +169,7 @@ func validatePChainLocalAddress(input string) error {
 	}
 	// ANR uses the `custom` HRP for local networks,
 	// but the `local` HRP also exists...
-	if hrp != lux_constants.LocalHRP && hrp != lux_constants.FallbackHRP {
+	if hrp != luxconstants.LocalHRP && hrp != luxconstants.FallbackHRP {
 		return errors.New("this is not a local nor custom address")
 	}
 	return nil
@@ -209,7 +209,7 @@ func validateXChainTestnetAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != lux_constants.TestnetHRP {
+	if hrp != luxconstants.TestnetHRP {
 		return errors.New("this is not a testnet address")
 	}
 	return nil
@@ -221,7 +221,7 @@ func validateXChainMainAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != lux_constants.MainnetHRP {
+	if hrp != luxconstants.MainnetHRP {
 		return errors.New("this is not a mainnet address")
 	}
 	return nil
@@ -235,7 +235,7 @@ func validateXChainLocalAddress(input string) error {
 	}
 	// ANR uses the `custom` HRP for local networks,
 	// but the `local` HRP also exists...
-	if hrp != lux_constants.LocalHRP && hrp != lux_constants.FallbackHRP {
+	if hrp != luxconstants.LocalHRP && hrp != luxconstants.FallbackHRP {
 		return errors.New("this is not a local nor custom address")
 	}
 	return nil
