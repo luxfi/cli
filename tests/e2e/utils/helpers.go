@@ -28,10 +28,10 @@ import (
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
+	luxconstants "github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/node/api/info"
-	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	ledger "github.com/luxfi/node/utils/crypto/ledger"
 	"github.com/luxfi/node/vms/components/lux"
@@ -758,7 +758,7 @@ func FundLedgerAddress(amount uint64) error {
 		},
 	}
 	outputs := []*lux.TransferableOutput{output}
-	if _, err := wallet.X().IssueExportTx(lux_constants.PlatformChainID, outputs); err != nil {
+	if _, err := wallet.X().IssueExportTx(luxconstants.PlatformChainID, outputs); err != nil {
 		return err
 	}
 
@@ -973,7 +973,7 @@ func FundAddress(addr ids.ShortID, amount uint64) error {
 	outputs := []*lux.TransferableOutput{output}
 
 	// Export from X-Chain to P-Chain
-	_, err = wallet.X().IssueExportTx(lux_constants.PlatformChainID, outputs)
+	_, err = wallet.X().IssueExportTx(luxconstants.PlatformChainID, outputs)
 	if err != nil {
 		return err
 	}

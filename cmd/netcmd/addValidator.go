@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
@@ -254,7 +254,7 @@ func getMaxValidationTime(network models.Network, nodeID ids.NodeID, startTime t
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, constants.RequestTimeout)
 	platformCli := platformvm.NewClient(uri)
-	vs, err := platformCli.GetCurrentValidators(ctx, lux_constants.PrimaryNetworkID, nil)
+	vs, err := platformCli.GetCurrentValidators(ctx, luxconstants.PrimaryNetworkID, nil)
 	cancel()
 	if err != nil {
 		return 0, err

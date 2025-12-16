@@ -14,9 +14,9 @@ import (
 	"path/filepath"
 	"time"
 
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/node/wallet/net/primary"
 )
@@ -134,7 +134,7 @@ func main() {
 
 	// Step 2: Create blockchain on the subnet
 	// Use the Subnet EVM VM ID
-	vmID := constants.EVMID
+	vmID := luxconstants.EVMID
 	log.Printf("Creating chain with VM ID: %s", vmID)
 
 	log.Printf("Creating blockchain '%s' on subnet %s...", *name, netID)

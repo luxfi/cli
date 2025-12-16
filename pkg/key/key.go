@@ -9,8 +9,8 @@ import (
 	"errors"
 	"sort"
 
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
@@ -82,14 +82,14 @@ func WithFeeDeduct(fee uint64) OpOption {
 
 func GetHRP(networkID uint32) string {
 	switch networkID {
-	case constants.LocalID:
-		return constants.LocalHRP
-	case constants.TestnetID, constants.LuxTestnetID:
-		return constants.TestnetHRP
-	case constants.MainnetID, constants.LuxMainnetID:
-		return constants.MainnetHRP
+	case luxconstants.LocalID:
+		return luxconstants.LocalHRP
+	case luxconstants.TestnetID, luxconstants.LuxTestnetID:
+		return luxconstants.TestnetHRP
+	case luxconstants.MainnetID, luxconstants.LuxMainnetID:
+		return luxconstants.MainnetHRP
 	default:
-		return constants.FallbackHRP
+		return luxconstants.FallbackHRP
 	}
 }
 

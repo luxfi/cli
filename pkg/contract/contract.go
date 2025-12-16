@@ -13,6 +13,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
+	luxcommon "github.com/luxfi/crypto/common"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
@@ -289,7 +290,7 @@ func ParseSpec(
 }
 
 func idempotentSigner(
-	_ crypto.Address,
+	_ luxcommon.Address,
 	tx *types.Transaction,
 ) (*types.Transaction, error) {
 	return tx, nil
@@ -301,16 +302,16 @@ func idempotentSigner(
 func TxToMethod(
 	rpcURL string,
 	generateRawTxOnly bool,
-	from crypto.Address,
+	from luxcommon.Address,
 	privateKey string,
-	contractAddress crypto.Address,
+	contractAddress luxcommon.Address,
 	payment *big.Int,
 	description string,
 	errorSignatureToError map[string]error,
 	methodSpec string,
 	params ...interface{},
 ) (*types.Transaction, *types.Receipt, error) {
-	if privateKey == "" && from == (crypto.Address{}) {
+	if privateKey == "" && from == (luxcommon.Address{}) {
 		return nil, nil, fmt.Errorf("from address and private key can't be both empty at TxToMethod")
 	}
 	if !generateRawTxOnly && privateKey == "" {
@@ -332,17 +333,17 @@ func TxToMethod(
 		return nil, nil, err
 	}
 	defer client.Close()
-	// Convert crypto.Address to geth common.Address
+	// Convert luxcommon.Address to geth common.Address
 	gethContractAddr := common.BytesToAddress(contractAddress.Bytes())
 	contract := bind.NewBoundContract(gethContractAddr, *abi, client.EthClient, client.EthClient, client.EthClient)
 	var txOpts *bind.TransactOpts
 	if generateRawTxOnly {
-		// Convert crypto.Address to geth common.Address
+		// Convert luxcommon.Address to geth common.Address
 		gethFrom := common.BytesToAddress(from.Bytes())
 		// Convert signer function signature
 		gethSigner := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			// Convert back to crypto.Address for the original signer
-			cryptoAddr := crypto.BytesToAddress(address.Bytes())
+			// Convert back to luxcommon.Address for the original signer
+			cryptoAddr := luxcommon.BytesToAddress(address.Bytes())
 			return idempotentSigner(cryptoAddr, tx)
 		}
 		txOpts = &bind.TransactOpts{
@@ -408,9 +409,9 @@ func TxToMethod(
 func TxToMethodWithWarpMessage(
 	rpcURL string,
 	generateRawTxOnly bool,
-	from crypto.Address,
+	from luxcommon.Address,
 	privateKey string,
-	contractAddress crypto.Address,
+	contractAddress luxcommon.Address,
 	warpMessage *luxWarp.Message,
 	payment *big.Int,
 	description string,
@@ -418,7 +419,7 @@ func TxToMethodWithWarpMessage(
 	methodSpec string,
 	params ...interface{},
 ) (*types.Transaction, *types.Receipt, error) {
-	if privateKey == "" && from == (crypto.Address{}) {
+	if privateKey == "" && from == (luxcommon.Address{}) {
 		return nil, nil, fmt.Errorf("from address and private key can't be both empty at TxToMethodWithWarpMessage")
 	}
 	if !generateRawTxOnly && privateKey == "" {
@@ -519,9 +520,9 @@ func handleFailedReceiptStatus(
 
 func DebugTraceCall(
 	rpcURL string,
-	from crypto.Address,
+	from luxcommon.Address,
 	privateKey string,
-	contractAddress crypto.Address,
+	contractAddress luxcommon.Address,
 	payment *big.Int,
 	methodSpec string,
 	params ...interface{},
@@ -546,7 +547,7 @@ func DebugTraceCall(
 		return nil, err
 	}
 	defer client.Close()
-	if from == (crypto.Address{}) {
+	if from == (luxcommon.Address{}) {
 		pk, err := crypto.HexToECDSA(privateKey)
 		if err != nil {
 			return nil, err
@@ -567,7 +568,7 @@ func DebugTraceCall(
 
 func CallToMethod(
 	rpcURL string,
-	contractAddress crypto.Address,
+	contractAddress luxcommon.Address,
 	methodSpec string,
 	params ...interface{},
 ) ([]interface{}, error) {
@@ -587,7 +588,7 @@ func CallToMethod(
 		return nil, err
 	}
 	defer client.Close()
-	// Convert crypto.Address to geth common.Address
+	// Convert luxcommon.Address to geth common.Address
 	gethContractAddr := common.BytesToAddress(contractAddress.Bytes())
 	contract := bind.NewBoundContract(gethContractAddr, *abi, client.EthClient, client.EthClient, client.EthClient)
 	var out []interface{}
@@ -619,10 +620,10 @@ func DeployContract(
 	binBytes []byte,
 	methodSpec string,
 	params ...interface{},
-) (crypto.Address, error) {
+) (luxcommon.Address, error) {
 	_, methodABI, err := ParseSpec(methodSpec, nil, true, false, false, false, params...)
 	if err != nil {
-		return crypto.Address{}, err
+		return luxcommon.Address{}, err
 	}
 	metadata := &bind.MetaData{
 		ABI: methodABI,
@@ -630,32 +631,32 @@ func DeployContract(
 	}
 	abi, err := metadata.GetAbi()
 	if err != nil {
-		return crypto.Address{}, err
+		return luxcommon.Address{}, err
 	}
 	bin := common.FromHex(metadata.Bin)
 	if len(bin) == 0 {
-		return crypto.Address{}, fmt.Errorf("failure on given binary for smart contract: zero len")
+		return luxcommon.Address{}, fmt.Errorf("failure on given binary for smart contract: zero len")
 	}
 	client, err := evm.GetClient(rpcURL)
 	if err != nil {
-		return crypto.Address{}, err
+		return luxcommon.Address{}, err
 	}
 	defer client.Close()
 	txOpts, err := client.GetTxOptsWithSigner(privateKey)
 	if err != nil {
-		return crypto.Address{}, err
+		return luxcommon.Address{}, err
 	}
 	address, tx, _, err := bind.DeployContract(txOpts, *abi, bin, client.EthClient, params...)
 	if err != nil {
-		return crypto.Address{}, err
+		return luxcommon.Address{}, err
 	}
 	if _, success, err := client.WaitForTransaction(tx); err != nil {
-		return crypto.Address{}, err
+		return luxcommon.Address{}, err
 	} else if !success {
-		return crypto.Address{}, ErrFailedReceiptStatus
+		return luxcommon.Address{}, ErrFailedReceiptStatus
 	}
-	// Convert geth common.Address to crypto.Address
-	return crypto.BytesToAddress(address.Bytes()), nil
+	// Convert geth common.Address to luxcommon.Address
+	return luxcommon.BytesToAddress(address.Bytes()), nil
 }
 
 func UnpackLog(

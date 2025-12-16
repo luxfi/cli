@@ -17,7 +17,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/crypto"
+	"github.com/luxfi/crypto/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
 	"github.com/manifoldco/promptui"
@@ -94,7 +94,7 @@ func (comparator *Comparator) Validate(val uint64) error {
 
 type Prompter interface {
 	CapturePositiveBigInt(promptStr string) (*big.Int, error)
-	CaptureAddress(promptStr string) (crypto.Address, error)
+	CaptureAddress(promptStr string) (common.Address, error)
 	CaptureNewFilepath(promptStr string) (string, error)
 	CaptureExistingFilepath(promptStr string) (string, error)
 	CaptureYesNo(promptStr string) (bool, error)
@@ -121,7 +121,7 @@ type Prompter interface {
 	CaptureValidatorBalance(promptStr string, availableBalance float64, minBalance float64) (float64, error)
 	CaptureListWithSize(prompt string, options []string, size int) ([]string, error)
 	CaptureFloat(promptStr string, validator func(float64) error) (float64, error)
-	CaptureAddresses(promptStr string) ([]crypto.Address, error)
+	CaptureAddresses(promptStr string) ([]common.Address, error)
 	CaptureXChainAddress(promptStr string, network models.Network) (string, error)
 	CaptureValidatedString(promptStr string, validator func(string) error) (string, error)
 	CaptureRepoBranch(promptStr string, repo string) (string, error)
@@ -389,7 +389,7 @@ func (*realPrompter) CapturePChainAddress(promptStr string, network models.Netwo
 	return promptUIRunner(prompt)
 }
 
-func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
+func (*realPrompter) CaptureAddress(promptStr string) (common.Address, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
 		Validate: validateAddress,
@@ -397,7 +397,7 @@ func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
 
 	addressStr, err := promptUIRunner(prompt)
 	if err != nil {
-		return crypto.Address{}, err
+		return common.Address{}, err
 	}
 
 	// Remove 0x prefix if present
@@ -406,7 +406,7 @@ func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
 		addr = addressStr[2:]
 	}
 	b, _ := hex.DecodeString(addr)
-	addressHex := crypto.BytesToAddress(b)
+	addressHex := common.BytesToAddress(b)
 	return addressHex, nil
 }
 
@@ -1063,7 +1063,7 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 }
 
 // CaptureAddresses prompts for multiple addresses
-func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error) {
+func (*realPrompter) CaptureAddresses(promptStr string) ([]common.Address, error) {
 	for {
 		result, err := utilsReadLongString(promptui.IconGood + " " + promptStr + " ")
 		if err != nil {
@@ -1078,10 +1078,10 @@ func (*realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error
 
 		// Parse and return valid addresses
 		parts := strings.Split(result, ",")
-		addresses := make([]crypto.Address, 0, len(parts))
+		addresses := make([]common.Address, 0, len(parts))
 		for _, part := range parts {
 			addr := strings.TrimSpace(part)
-			addresses = append(addresses, crypto.HexToAddress(addr))
+			addresses = append(addresses, common.HexToAddress(addr))
 		}
 
 		return addresses, nil
