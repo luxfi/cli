@@ -5,7 +5,7 @@ package precompiles
 import (
 	_ "embed"
 
-	"github.com/luxfi/crypto"
+	luxcommon "github.com/luxfi/crypto/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/contract"
 )
@@ -13,8 +13,8 @@ import (
 func WarpPrecompileGetBlockchainID(
 	rpcURL string,
 ) (ids.ID, error) {
-	// Convert geth common.Address to crypto.Address
-	warpAddr := crypto.BytesToAddress(WarpPrecompile.Bytes())
+	// Convert geth common.Address to luxcommon.Address
+	warpAddr := luxcommon.BytesToAddress(WarpPrecompile.Bytes())
 	out, err := contract.CallToMethod(
 		rpcURL,
 		warpAddr,

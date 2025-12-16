@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/constants"
-	lux_constants "github.com/luxfi/node/utils/constants"
+	luxconstants "github.com/luxfi/constants"
 )
 
 type Network int64
@@ -41,9 +41,9 @@ func (s Network) String() string {
 func (s Network) NetworkID() (uint32, error) {
 	switch s {
 	case Mainnet:
-		return lux_constants.LuxMainnetID, nil // Use 96369 for LUX mainnet
+		return luxconstants.LuxMainnetID, nil // Use 96369 for LUX mainnet
 	case Testnet:
-		return lux_constants.TestnetID, nil
+		return luxconstants.TestnetID, nil
 	case Local:
 		return constants.LocalNetworkID, nil
 	}
@@ -90,9 +90,9 @@ func NetworkFromString(s string) Network {
 
 func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
-	case lux_constants.LuxMainnetID, lux_constants.MainnetID:
+	case luxconstants.LuxMainnetID, luxconstants.MainnetID:
 		return Mainnet
-	case lux_constants.TestnetID:
+	case luxconstants.TestnetID:
 		return Testnet
 	case constants.LocalNetworkID:
 		return Local

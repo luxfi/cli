@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/cli/cmd/ammcmd"
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
@@ -112,6 +113,9 @@ Quick start:
 
 	// add dex command (decentralized exchange)
 	rootCmd.AddCommand(dexcmd.NewCmd(app))
+
+	// add amm command (Uniswap-style AMM trading)
+	rootCmd.AddCommand(ammcmd.NewCmd(app))
 
 	// add contract command
 	rootCmd.AddCommand(contractcmd.NewCmd(app))

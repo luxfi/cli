@@ -19,10 +19,10 @@ import (
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	ethcommon "github.com/luxfi/geth/common"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/utils"
-	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -762,7 +762,7 @@ func (d *PublicDeployer) IncreaseValidatorPChainBalance(
 	// Create a base transaction to transfer funds to increase validator balance
 	// Use the network's native asset ID (LUX)
 	luxAssetID := ids.Empty
-	if d.network.ID() == luxdconstants.MainnetID || d.network.ID() == luxdconstants.TestnetID {
+	if d.network.ID() == luxconstants.MainnetID || d.network.ID() == luxconstants.TestnetID {
 		luxAssetID = ids.Empty // Native asset on mainnet/testnet
 	}
 
