@@ -5,11 +5,11 @@ package constants
 import (
 	"time"
 
-	luxdconstants "github.com/luxfi/node/utils/constants"
+	luxconstants "github.com/luxfi/constants"
 )
 
 var EtnaActivationTime = map[uint32]time.Time{
-	luxdconstants.TestnetID: time.Date(2024, time.November, 25, 16, 0, 0, 0, time.UTC),
-	luxdconstants.MainnetID: time.Date(2024, time.December, 16, 17, 0, 0, 0, time.UTC),
-	LocalNetworkID:          time.Unix(0, 0), // Local networks activate immediately (Unix epoch)
+	luxconstants.TestnetID: time.Date(2024, time.November, 25, 16, 0, 0, 0, time.UTC),
+	luxconstants.MainnetID: time.Date(2024, time.December, 16, 17, 0, 0, 0, time.UTC),
+	LocalNetworkID:         time.Unix(0, 0), // Local networks activate immediately (Unix epoch)
 }
