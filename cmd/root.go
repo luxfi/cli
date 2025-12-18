@@ -57,7 +57,7 @@ func NewRootCmd() *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
 		Use: "lux",
-		Long: `Lux CLI v2 - unified toolchain for sovereign L1s, based rollups, and L3s.
+		Long: `Lux CLI - unified toolchain for sovereign L1s, based rollups, and L3s.
 
 Architecture:
 - L1: Sovereign chains with independent validation
