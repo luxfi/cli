@@ -19,8 +19,8 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/metrics"
-	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -73,7 +73,6 @@ var (
 
 	validatorManagerAddress        string
 	deployFlags                    BlockchainDeployFlags
-	allowInsecureKeys              bool
 	errMutuallyExlusiveControlKeys = errors.New("--control-keys and --same-control-key are mutually exclusive")
 	ErrMutuallyExlusiveKeyLedger   = errors.New("key source flags --key, --ledger/--ledger-addrs are mutually exclusive")
 	ErrStoredKeyOnMainnet          = errors.New("key --key is not available for mainnet operations")
@@ -131,7 +130,6 @@ so you can take your locally tested Blockchain and deploy it on Testnet or Mainn
 	cmd.Flags().Uint32Var(&mainnetChainID, "mainnet-chain-id", 0, "use different ChainID for mainnet deployment")
 	cmd.Flags().BoolVar(&subnetOnly, "subnet-only", false, "command stops after CreateSubnetTx and returns SubnetID")
 	cmd.Flags().BoolVar(&deployFlags.ConvertOnly, "convert-only", false, "avoid node track, restart and poa manager setup")
-	cmd.Flags().BoolVar(&allowInsecureKeys, "allow-insecure-keys", false, "allow stored keys on mainnet (development only, INSECURE)")
 
 	localNetworkGroup := flags.RegisterFlagGroup(cmd, "Local Network Flags", "show-local-network-flags", true, func(set *pflag.FlagSet) {
 		set.Uint32Var(&numNodes, "num-nodes", constants.LocalNetworkNumNodes, "number of nodes to be created on local network deploy")
@@ -649,8 +647,8 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 		}
 
 		// Only default to first validator key if no key source was specified
-		// This allows --key flag to work with local deploys
-		if keyName == "" && !useLedger {
+		// This allows --key flag and --local-key to work with local deploys
+		if keyName == "" && !useLedger && !useLocalKey {
 			// Default to first validator key for local network
 			keyName = "validator_000"
 		}
@@ -706,11 +704,6 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	}
 	// Add buffer for transaction fees (0.01 LUX)
 	fee += 10_000_000 // 0.01 LUX in nLUX
-
-	// Set insecure key flag for keychain
-	if allowInsecureKeys {
-		keychain.AllowInsecureKeysOnMainnet = true
-	}
 
 	kc, err := keychain.GetKeychainFromCmdLineFlags(
 		app,
@@ -1022,7 +1015,7 @@ func deployBlockchain(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertNetToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
+func setBootstrapValidatorValidationID(luxdBootstrapValidators []*txs.ConvertChainToL1Validator, bootstrapValidators []models.SubnetValidator, subnetID ids.ID) {
 	for index, luxdValidator := range luxdBootstrapValidators {
 		for bootstrapValidatorIndex, validator := range bootstrapValidators {
 			luxdValidatorNodeID, _ := ids.ToNodeID(luxdValidator.NodeID[:])
@@ -1073,8 +1066,8 @@ func getClusterBootstrapValidators(
 
 // ConvertToLuxdSubnetValidator converts subnet validators to L1 validator format
 // Deactivation owner is handled through the validator management contract
-func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertNetToL1Validator, error) {
-	bootstrapValidators := []*txs.ConvertNetToL1Validator{}
+func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]*txs.ConvertChainToL1Validator, error) {
+	bootstrapValidators := []*txs.ConvertChainToL1Validator{}
 	for _, validator := range subnetValidators {
 		nodeID, err := ids.NodeIDFromString(validator.NodeID)
 		if err != nil {
@@ -1107,7 +1100,7 @@ func ConvertToLuxdSubnetValidator(subnetValidators []models.SubnetValidator) ([]
 
 		// Use the blsInfo which contains both PublicKey and ProofOfPossession
 		// from ConvertToBLSProofOfPossession
-		bootstrapValidator := &txs.ConvertNetToL1Validator{
+		bootstrapValidator := &txs.ConvertChainToL1Validator{
 			NodeID:  types.JSONByteSlice(nodeIDBytes[:]),
 			Weight:  validator.Weight,
 			Balance: validator.Balance,

@@ -549,7 +549,7 @@ func ParsePublicDeployOutput(output string, parseType string) (string, error) {
 	}
 }
 
-func RestartNodesWithWhitelistedSubnets(whitelistedSubnets string) error {
+func RestartNodesWithWhitelistedChains(whitelistedChains string) error {
 	cli, err := binutils.NewGRPCClient()
 	if err != nil {
 		return err
@@ -563,7 +563,7 @@ func RestartNodesWithWhitelistedSubnets(whitelistedSubnets string) error {
 	}
 	for _, nodeName := range resp.ClusterInfo.NodeNames {
 		ctx, cancel := context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
-		_, err := cli.RestartNode(ctx, nodeName, client.WithWhitelistedSubnets(whitelistedSubnets))
+		_, err := cli.RestartNode(ctx, nodeName, client.WithWhitelistedChains(whitelistedChains))
 		cancel()
 		if err != nil {
 			return err
