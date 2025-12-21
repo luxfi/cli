@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/luxfi/cli/cmd/networkcmd"
+	"github.com/luxfi/cli/pkg/chainvalidators"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/tests/e2e/commands"
@@ -146,7 +146,7 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error)
 		BLSProofOfPossession: pop,
 		ChangeOwnerAddr:      ewoqPChainAddress,
 	}
-	luxdBootstrapValidators, err := networkcmd.ConvertToLuxdSubnetValidator([]models.SubnetValidator{bootstrapValidator})
+	luxdBootstrapValidators, err := chainvalidators.ToL1Validators([]models.SubnetValidator{bootstrapValidator})
 	if err != nil {
 		return nil, err
 	}

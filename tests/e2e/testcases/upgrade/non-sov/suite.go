@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/luxfi/cli/cmd/networkcmd/upgradecmd"
+	"github.com/luxfi/cli/cmd/chaincmd/upgradecmd"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	cliutils "github.com/luxfi/cli/pkg/utils"
