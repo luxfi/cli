@@ -127,7 +127,7 @@ func destroyLocalNode() {
 	}
 }
 
-func getBootstrapValidator(uri string) ([]*txs.ConvertNetToL1Validator, error) {
+func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error) {
 	infoClient := info.NewClient(uri)
 	ctx, cancel := utils.GetAPILargeContext()
 	defer cancel()

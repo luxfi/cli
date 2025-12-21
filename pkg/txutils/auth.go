@@ -19,31 +19,31 @@ import (
 //
 // expect tx.Unsigned type to be in:
 // - txs.CreateChainTx
-// - txs.AddNetValidatorTx
-// - txs.RemoveNetValidatorTx
+// - txs.AddChainValidatorTx
+// - txs.RemoveChainValidatorTx
 //
 // controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners)
 func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	unsignedTx := tx.Unsigned
-	var netAuth verify.Verifiable
+	var chainAuth verify.Verifiable
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveNetValidatorTx:
-		netAuth = unsignedTx.NetAuth
-	case *txs.AddNetValidatorTx:
-		netAuth = unsignedTx.NetAuth
+	case *txs.RemoveChainValidatorTx:
+		chainAuth = unsignedTx.ChainAuth
+	case *txs.AddChainValidatorTx:
+		chainAuth = unsignedTx.ChainAuth
 	case *txs.CreateChainTx:
-		netAuth = unsignedTx.NetAuth
-	case *txs.ConvertNetToL1Tx:
-		netAuth = unsignedTx.NetAuth
+		chainAuth = unsignedTx.ChainAuth
+	case *txs.ConvertChainToL1Tx:
+		chainAuth = unsignedTx.ChainAuth
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
-	netInput, ok := netAuth.(*secp256k1fx.Input)
+	chainInput, ok := chainAuth.(*secp256k1fx.Input)
 	if !ok {
-		return nil, fmt.Errorf("expected netAuth of type *secp256k1fx.Input, got %T", netAuth)
+		return nil, fmt.Errorf("expected chainAuth of type *secp256k1fx.Input, got %T", chainAuth)
 	}
 	authSigners := []string{}
-	for _, sigIndex := range netInput.SigIndices {
+	for _, sigIndex := range chainInput.SigIndices {
 		if sigIndex >= uint32(len(controlKeys)) {
 			return nil, fmt.Errorf("signer index %d exceeds number of control keys", sigIndex)
 		}

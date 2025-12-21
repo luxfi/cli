@@ -222,7 +222,7 @@ func IssueTransformSubnetTx(
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
-	transformSubnetTxID, err := wallet.P().IssueTransformNetTx(elasticSubnetConfig.SubnetID, subnetAssetID,
+	transformSubnetTxID, err := wallet.P().IssueTransformChainTx(elasticSubnetConfig.SubnetID, subnetAssetID,
 		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
@@ -280,14 +280,14 @@ func IssueAddPermissionlessValidatorTx(
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
 	txID, err := wallet.P().IssueAddPermissionlessValidatorTx(
-		&txs.NetValidator{
+		&txs.ChainValidator{
 			Validator: txs.Validator{
 				NodeID: nodeID,
 				Start:  startTime,
 				End:    endTime,
 				Wght:   stakeAmount,
 			},
-			Net: subnetID,
+			Chain: subnetID,
 		},
 		&signer.Empty{},
 		assetID,
@@ -419,7 +419,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 
 	numBlockchains := len(clusterInfo.CustomChains)
 
-	subnetIDs := maps.Keys(clusterInfo.Subnets)
+	subnetIDs := maps.Keys(clusterInfo.Chains)
 
 	// in order to make subnet deploy faster, a set of validated subnet IDs is preloaded
 	// in the bootstrap snapshot
@@ -460,13 +460,13 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		{
 			VmName:             chain,
 			Genesis:            genesisPath,
-			SubnetId:           &subnetIDStr,
+			ChainId:            &subnetIDStr,
 			ChainConfig:        chainConfig,
 			BlockchainAlias:    chain,
 			PerNodeChainConfig: perNodeChainConfig,
 		},
 	}
-	deployBlockchainsInfo, err := cli.CreateBlockchains(
+	deployBlockchainsInfo, err := cli.CreateChains(
 		ctx,
 		blockchainSpecs,
 	)
@@ -517,7 +517,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	var blockchainID ids.ID
 	for _, info := range clusterInfo.CustomChains {
 		if info.VmId == chainVMID.String() {
-			blockchainID, _ = ids.FromString(info.ChainId)
+			blockchainID, _ = ids.FromString(info.BlockchainId)
 		}
 	}
 	return subnetID, blockchainID, nil
@@ -813,7 +813,7 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 		return ids.Empty, err
 	}
 
-	tx, err := wallet.P().IssueRemoveNetValidatorTx(nodeID, subnetID)
+	tx, err := wallet.P().IssueRemoveChainValidatorTx(nodeID, subnetID)
 	if err != nil {
 		return ids.Empty, err
 	}
