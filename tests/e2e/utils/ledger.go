@@ -99,8 +99,8 @@ func GetTmpFilePath(prefix string) (string, error) {
 	return tmpPath, nil
 }
 
-// GetSubnetEVMMainneChainID retrieves the mainnet chain ID for a SubnetEVM
-func GetSubnetEVMMainneChainID(subnetName string) (uint, error) {
+// GetEVMMainnetChainID retrieves the mainnet chain ID for a EVM
+func GetEVMMainnetChainID(subnetName string) (uint, error) {
 	// This is a stub implementation
 	// In real implementation, this would:
 	// 1. Read the subnet configuration

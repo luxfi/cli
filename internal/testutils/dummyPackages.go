@@ -22,7 +22,6 @@ const (
 	pluginDirName = "plugins"
 	evmBin        = "evm"
 	buildDirName  = "build"
-	subnetEVMBin  = "evm"
 	readme        = "README.md"
 	license       = "LICENSE"
 
@@ -30,7 +29,7 @@ const (
 
 	luxTar       = "/tmp/lux.tar.gz"
 	luxZip       = "/tmp/lux.zip"
-	subnetEVMTar = "/tmp/subevm.tar.gz"
+	evmTar = "/tmp/subevm.tar.gz"
 )
 
 var (
@@ -97,7 +96,7 @@ func verifyEVMTarContents(require *require.Assertions, tarBytes []byte) {
 		}
 		require.NoError(err)
 		switch file.Name {
-		case subnetEVMBin:
+		case evmBin:
 			binExists = true
 		case readme:
 			readmeExists = true
@@ -214,7 +213,7 @@ func CreateDummyEVMTar(require *require.Assertions, binary []byte) []byte {
 	require.NoError(err)
 	defer os.RemoveAll(sourceDir)
 
-	binPath := filepath.Join(sourceDir, subnetEVMBin)
+	binPath := filepath.Join(sourceDir, evmBin)
 	err = os.WriteFile(binPath, binary, 0o600)
 	require.NoError(err)
 
@@ -227,9 +226,9 @@ func CreateDummyEVMTar(require *require.Assertions, binary []byte) []byte {
 	require.NoError(err)
 
 	// Put into tar
-	CreateTarGz(require, sourceDir, subnetEVMTar, false)
-	defer os.Remove(subnetEVMTar)
-	tarBytes, err := os.ReadFile(subnetEVMTar)
+	CreateTarGz(require, sourceDir, evmTar, false)
+	defer os.Remove(evmTar)
+	tarBytes, err := os.ReadFile(evmTar)
 	require.NoError(err)
 	verifyEVMTarContents(require, tarBytes)
 	return tarBytes
