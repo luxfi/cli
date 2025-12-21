@@ -48,6 +48,8 @@ Examples:
   lux key create validator1 --mnemonic   # Create from existing mnemonic
   lux key generate -n 5                  # Batch generate 5 key sets (key-0 to key-4)
   lux key generate -n 10 -p validator    # Generate validator-0 to validator-9
+  lux key derive -n 5                    # Derive 5 keys from LUX_MNEMONIC
+  lux key derive -n 5 --show             # Show derived addresses without saving
   lux key list                           # List all key sets
   lux key show validator1                # Show public keys and addresses
   lux key delete validator1              # Delete key set
@@ -71,6 +73,7 @@ Examples:
 	cmd.AddCommand(newExportCmd())
 	cmd.AddCommand(newImportCmd())
 	cmd.AddCommand(newGenerateCmd())
+	cmd.AddCommand(newDeriveCmd())
 	cmd.AddCommand(newGenesisCmd())
 
 	// Session management
