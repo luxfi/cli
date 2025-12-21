@@ -60,7 +60,7 @@ func EditConfigFile(
 			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", subnetLuxdConfigFile, err)
 		}
 		for k, v := range subnetLuxdConfig {
-			if k == "track-subnets" || k == "whitelisted-subnets" {
+			if k == "track-chains" || k == "whitelisted-subnets" {
 				ux.Logger.PrintToUser("ignoring configuration setting for %q, a blockchain luxd config file should not change it", k)
 				continue
 			}
@@ -68,8 +68,8 @@ func EditConfigFile(
 		}
 	}
 
-	// Banff.10: "track-subnets" instead of "whitelisted-subnets"
-	oldVal := luxdConfig["track-subnets"]
+	// Banff.10: "track-chains" instead of "whitelisted-subnets"
+	oldVal := luxdConfig["track-chains"]
 	if oldVal == nil {
 		// check the old key in the config file for tracked-subnets
 		oldVal = luxdConfig["whitelisted-subnets"]
@@ -102,9 +102,9 @@ func EditConfigFile(
 		newVal = subnetID
 	}
 
-	// Banf.10 changes from "whitelisted-subnets" to "track-subnets"
+	// Banf.10 changes from "whitelisted-subnets" to "track-chains"
 	delete(luxdConfig, "whitelisted-subnets")
-	luxdConfig["track-subnets"] = newVal
+	luxdConfig["track-chains"] = newVal
 	luxdConfig["network-id"] = network.NetworkIDFlagValue()
 
 	writeBytes, err := json.MarshalIndent(luxdConfig, "", "  ")

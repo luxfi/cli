@@ -76,6 +76,14 @@ func (ul *UserLog) GreenCheckmarkToUser(msg string, args ...interface{}) {
 	ul.log.Info(formattedMsg)
 }
 
+// PrintError prints a visible error message with ERROR prefix to the user
+func (ul *UserLog) PrintError(msg string, args ...interface{}) {
+	formattedMsg := fmt.Sprintf(msg, args...)
+	errorMsg := fmt.Sprintf("\nERROR: %s\n", formattedMsg)
+	fmt.Fprintln(ul.writer, errorMsg)
+	ul.log.Error(formattedMsg)
+}
+
 // PrintWait does some dot printing to entertain the user
 func PrintWait(cancel chan struct{}) {
 	for {

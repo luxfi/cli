@@ -23,12 +23,12 @@ type GithubDownloader interface {
 }
 
 type (
-	subnetEVMDownloader struct{}
-	nodeDownloader      struct{}
+	evmDownloader  struct{}
+	nodeDownloader struct{}
 )
 
 var (
-	_ GithubDownloader = (*subnetEVMDownloader)(nil)
+	_ GithubDownloader = (*evmDownloader)(nil)
 	_ GithubDownloader = (*nodeDownloader)(nil)
 )
 
@@ -90,24 +90,19 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 }
 
 func NewEVMDownloader() GithubDownloader {
-	return &subnetEVMDownloader{}
+	return &evmDownloader{}
 }
 
-// NewSubnetEVMDownloader is an alias for backward compatibility
-func NewSubnetEVMDownloader() GithubDownloader {
-	return NewEVMDownloader()
-}
-
-func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
+func (evmDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
 	// NOTE: if any of the underlying URLs change (github changes, release file names, etc.) this fails
 	goarch, goos := installer.GetArch()
 
-	var subnetEVMURL string
+	var evmURL string
 	ext := tarExtension
 
 	switch goos {
 	case linux:
-		subnetEVMURL = fmt.Sprintf(
+		evmURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_linux_%s.tar.gz",
 			constants.LuxOrg,
 			constants.EVMRepoName,
@@ -117,7 +112,7 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 			goarch,
 		)
 	case darwin:
-		subnetEVMURL = fmt.Sprintf(
+		evmURL = fmt.Sprintf(
 			"https://github.com/%s/%s/releases/download/%s/%s_%s_darwin_%s.tar.gz",
 			constants.LuxOrg,
 			constants.EVMRepoName,
@@ -130,5 +125,5 @@ func (subnetEVMDownloader) GetDownloadURL(version string, installer Installer) (
 		return "", "", fmt.Errorf("OS not supported: %s", goos)
 	}
 
-	return subnetEVMURL, ext, nil
+	return evmURL, ext, nil
 }

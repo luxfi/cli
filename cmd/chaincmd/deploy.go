@@ -5,10 +5,13 @@ package chaincmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/localnetworkinterface"
 	"github.com/luxfi/cli/pkg/chain"
+	"github.com/luxfi/cli/pkg/localnetworkinterface"
+	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
@@ -62,20 +65,26 @@ func deployChain(cmd *cobra.Command, args []string) error {
 	// Load sidecar
 	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
-		return fmt.Errorf("chain %s not found. Create it first with: lux chain create %s", chainName, chainName)
+		err = fmt.Errorf("chain %s not found. Create it first with: lux chain create %s", chainName, chainName)
+		ux.Logger.PrintError(err.Error())
+		return err
 	}
 
 	// Load genesis
 	chainGenesis, err := app.LoadRawGenesis(chainName)
 	if err != nil {
-		return fmt.Errorf("failed to load genesis: %w", err)
+		err = fmt.Errorf("failed to load genesis: %w", err)
+		ux.Logger.PrintError(err.Error())
+		return err
 	}
 
 	// Validate genesis
 	if sc.VM == models.EVM {
 		var genesis core.Genesis
 		if err := json.Unmarshal(chainGenesis, &genesis); err != nil {
-			return fmt.Errorf("invalid genesis format: %w", err)
+			err = fmt.Errorf("invalid genesis format: %w", err)
+			ux.Logger.PrintError(err.Error())
+			return err
 		}
 	}
 
@@ -95,11 +104,113 @@ func deployChain(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Deploying %s to %s", chainName, network.String())
 
 	// All deployments use the same flow - deploy to locally running network
-	return deployToNetwork(chainName, chainGenesis, &sc, network)
+	if err := deployToNetwork(chainName, chainGenesis, &sc, network); err != nil {
+		ux.Logger.PrintError(err.Error())
+		return err
+	}
+	return nil
+}
+
+// verifyVMInstalled checks that the VM plugin is installed before deployment.
+// Returns nil if VM is ready, otherwise returns an actionable error.
+func verifyVMInstalled(chainName string, sc *models.Sidecar) error {
+	// Get the actual VM name based on VM type
+	// The VMID is computed from the VM name, not the chain name
+	vmName := "Lux EVM" // Default for EVM chains
+	if sc.VM == models.CustomVM {
+		vmName = chainName // For custom VMs, use chain name
+	}
+
+	// Compute VMID from VM name
+	vmID, err := utils.VMID(vmName)
+	if err != nil {
+		return fmt.Errorf("failed to compute VMID for VM %s: %w", vmName, err)
+	}
+	vmIDStr := vmID.String()
+
+	// Get plugins directory path
+	pluginsDir := app.GetPluginsDir()
+	pluginPath := filepath.Join(pluginsDir, vmIDStr)
+
+	// Check if plugin exists
+	info, err := os.Lstat(pluginPath)
+	if os.IsNotExist(err) {
+		// Plugin does not exist - provide actionable error
+		displayName := getVMDisplayName(sc.VM)
+		return fmt.Errorf(`VM '%s' not installed (VMID: %s)
+
+To fix, run:
+  lux vm link "%s" --path ~/work/lux/evm/build/evm`,
+			displayName, vmIDStr, vmName)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to check VM plugin at %s: %w", pluginPath, err)
+	}
+
+	// Check if it's a symlink with a missing target
+	if info.Mode()&os.ModeSymlink != 0 {
+		target, err := os.Readlink(pluginPath)
+		if err != nil {
+			return fmt.Errorf("failed to read symlink %s: %w", pluginPath, err)
+		}
+
+		// Resolve target path (handle relative symlinks)
+		if !filepath.IsAbs(target) {
+			target = filepath.Join(pluginsDir, target)
+		}
+
+		if _, err := os.Stat(target); os.IsNotExist(err) {
+			vmName := getVMDisplayName(sc.VM)
+			return fmt.Errorf(`VM '%s' symlink exists but target is missing (VMID: %s)
+
+Plugin symlink: %s
+Target (missing): %s
+
+To fix, update the symlink:
+  rm %s
+  lux vm link %s --path <path-to-vm-binary>`,
+				vmName, vmIDStr,
+				pluginPath, target,
+				pluginPath, chainName)
+		}
+	}
+
+	// Verify it's executable
+	if info.Mode()&0111 == 0 {
+		return fmt.Errorf("VM plugin at %s is not executable", pluginPath)
+	}
+
+	app.Log.Debug("VM plugin verified", zap.String("vmid", vmIDStr), zap.String("path", pluginPath))
+	return nil
+}
+
+// getVMDisplayName returns a human-readable name for the VM type
+func getVMDisplayName(vm models.VMType) string {
+	switch vm {
+	case models.EVM:
+		return "Lux EVM"
+	case models.CustomVM:
+		return "Custom VM"
+	default:
+		return string(vm)
+	}
+}
+
+// getVMVersion returns the VM version or a default
+func getVMVersion(sc *models.Sidecar) string {
+	if sc.VMVersion != "" {
+		return sc.VMVersion
+	}
+	return "latest"
 }
 
 func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network) error {
 	app.Log.Debug("Deploy to network", zap.String("network", network.String()))
+
+	// Preflight check: verify VM is installed before any network operations
+	if err := verifyVMInstalled(chainName, sc); err != nil {
+		return err
+	}
 
 	// Get VM binary
 	var vmBin string
@@ -122,7 +233,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		nc := localnetworkinterface.NewStatusChecker()
 		nodeVersion, err = checkDeployCompatibility(nc, sc.RPCVersion)
 		if err != nil {
-			return err
+			return fmt.Errorf("RPC version check failed: %w", err)
 		}
 	}
 
@@ -144,7 +255,10 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	}
 
 	// Update sidecar with deployment info (using the target network)
-	return app.UpdateSidecarNetworks(sc, network, subnetID, blockchainID)
+	if err := app.UpdateSidecarNetworks(sc, network, subnetID, blockchainID); err != nil {
+		return fmt.Errorf("failed to update sidecar: %w", err)
+	}
+	return nil
 }
 
 func checkDeployCompatibility(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {

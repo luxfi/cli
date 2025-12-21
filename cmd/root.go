@@ -24,6 +24,7 @@ import (
 	"github.com/luxfi/cli/cmd/rpccmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
+	"github.com/luxfi/cli/cmd/vmcmd"
 	"github.com/luxfi/cli/cmd/warpcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/application"
@@ -120,6 +121,9 @@ Quick start:
 
 	// add key management command
 	rootCmd.AddCommand(keycmd.NewCmd(app))
+
+	// add vm management command
+	rootCmd.AddCommand(vmcmd.NewCmd(app))
 
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd())
@@ -365,8 +369,8 @@ func initConfig() {
 func Execute() {
 	app = application.New()
 	rootCmd := NewRootCmd()
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "\nERROR: %s\n", err)
 		os.Exit(1)
 	}
 }

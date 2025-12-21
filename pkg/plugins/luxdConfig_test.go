@@ -63,7 +63,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", luxConfig["track-subnets"])
+	require.Equal("subNetId000,testSubNet", luxConfig["track-chains"])
 
 	// ensure that the old setting has been deleted
 	require.Equal(nil, luxConfig["whitelisted-subnets"])
@@ -89,7 +89,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	defer os.Remove(configPath)
 
 	// testing backward compatibility
-	configBytes := []byte("{\"track-subnets\": \"subNetId000\"}")
+	configBytes := []byte("{\"track-chains\": \"subNetId000\"}")
 	err = os.MkdirAll(filepath.Dir(configPath), constants.DefaultPerms755)
 	require.NoError(err)
 	err = os.WriteFile(configPath, configBytes, 0o600)
@@ -105,7 +105,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", luxConfig["track-subnets"])
+	require.Equal("subNetId000,testSubNet", luxConfig["track-chains"])
 
 	// ensure that the old setting wont be applied at all
 	require.Equal(nil, luxConfig["whitelisted-subnets"])
@@ -146,7 +146,7 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("testSubNet", luxConfig["track-subnets"])
+	require.Equal("testSubNet", luxConfig["track-chains"])
 
 	// ensure that the old setting wont be applied at all
 	require.Equal(nil, luxConfig["whitelisted-subnets"])

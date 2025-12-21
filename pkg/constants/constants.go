@@ -170,7 +170,7 @@ const (
 	LPMPluginDir     = "lpm-plugins"
 
 	// Cloud node paths
-	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.lux/bin/subnet-evm"
+	CloudNodeEVMBinaryPath = "/home/ubuntu/.lux/bin/evm"
 
 	// File names
 	UpgradeBytesFileName         = "upgrade.json"
@@ -245,9 +245,9 @@ const (
 	LoadTestRole              = "load-test"
 	LoadTestDir               = "loadtest"
 
-	// SubnetEVM constants
-	SubnetEVMArchive    = "subnet-evm_%s_linux_amd64.tar.gz"
-	SubnetEVMReleaseURL = "https://github.com/luxfi/subnet-evm/releases/download/%s/%s"
+	// EVM constants
+	EVMArchive    = "evm_%s_linux_amd64.tar.gz"
+	EVMReleaseURL = "https://github.com/luxfi/evm/releases/download/%s/%s"
 
 	// Key names for signing
 	PlatformKeyName = "platformvm"
@@ -401,7 +401,6 @@ const (
 	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
 	CLILatestDependencyURL       = CLIMinVersionURL // Alias for backward compatibility
-	SubnetEVMRepoName            = EVMRepoName      // Alias for backward compatibility
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
