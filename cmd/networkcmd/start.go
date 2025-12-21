@@ -197,13 +197,13 @@ func StartNetwork(*cobra.Command, []string) error {
 	// Build node config with BadgerDB options
 	nodeConfig := make(map[string]interface{})
 
-	// Auto-track deployed nets - eliminates the track-subnets gotcha
+	// Auto-track deployed nets - eliminates the track-chains gotcha
 	netIDs, trackErr := chain.GetLocallyDeployedNetIDs(app)
 	if trackErr == nil && len(netIDs) > 0 {
 		trackNetsStr := strings.Join(netIDs, ",")
 		ux.Logger.PrintToUser("Auto-tracking %d deployed net(s): %s", len(netIDs), trackNetsStr)
-		// Add track-subnets to node config (luxd still uses track-subnets internally)
-		nodeConfig["track-subnets"] = trackNetsStr
+		// Add track-chains to node config (luxd still uses track-chains internally)
+		nodeConfig["track-chains"] = trackNetsStr
 	}
 
 	// Prepare canonical chain configs directory and set it for all nodes
@@ -429,6 +429,14 @@ func startPublicNetwork(cfg networkConfig) error {
 		ux.Logger.PrintToUser("Auto-tracking %d deployed subnet(s): %s", len(netIDs), trackSubnets)
 	}
 
+	// Use "all" to auto-track all chains including newly deployed ones
+	// This enables hot-loading of new chains without node restarts
+	trackChainsValue := "all"
+	if len(netIDs) > 0 {
+		// If specific chains are configured, show them but still track all
+		ux.Logger.PrintToUser("Found %d previously deployed chain(s)", len(netIDs))
+	}
+
 	globalNodeConfig := fmt.Sprintf(`{
 		"network-id": %d,
 		"db-type": "badgerdb",
@@ -438,8 +446,8 @@ func startPublicNetwork(cfg networkConfig) error {
 		"log-level": "info",
 		"http-host": "127.0.0.1",
 		"api-admin-enabled": true,
-		"track-subnets": %q
-	}`, cfg.networkID, trackSubnets)
+		"track-chains": %q
+	}`, cfg.networkID, trackChainsValue)
 
 	rootDataDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), cfg.networkName)
 	if err != nil {
