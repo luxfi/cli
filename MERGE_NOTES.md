@@ -81,7 +81,7 @@ Several packages still have build errors that need attention:
 2. **Package Structure Maintained**: All luxfi imports remain replaced with luxfi equivalents:
    - `github.com/luxfi/lux-cli` → `github.com/luxfi/cli`
    - `github.com/luxfi/luxd` → `github.com/luxfi/node`
-   - `github.com/luxfi/subnet-evm` → `github.com/luxfi/evm`
+   - `github.com/luxfi/evm` → `github.com/luxfi/evm`
    - `github.com/luxfi/coreth` → `github.com/luxfi/geth`
 
 3. **Branding**: Lux branding maintained throughout (no Lux/LUX references added)

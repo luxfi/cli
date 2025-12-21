@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	luxconfig "github.com/luxfi/config"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -77,12 +78,12 @@ func runLink(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to calculate VMID: %w", err)
 	}
 
-	// Get plugins directory
-	pluginDir := filepath.Join(app.GetBaseDir(), constants.PluginDir)
+	// Get plugins directory using unified config package
+	pluginDir := luxconfig.ResolvePluginDir()
 
 	// Ensure plugins directory exists
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
-		return fmt.Errorf("failed to create plugins directory: %w", err)
+		return fmt.Errorf("failed to create plugins directory %s: %w", pluginDir, err)
 	}
 
 	// Symlink path

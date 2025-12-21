@@ -93,7 +93,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		// subnet config
 		_ = utils.DeleteConfigs(subnetName)
-		_, luxdVersion := commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
+		_, luxdVersion := commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
 
 		// local network
 		commands.StartNetworkWithVersion(luxdVersion)
@@ -172,11 +172,11 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 	})
 
 	ginkgo.It("deploy subnet with new chain id", func() {
-		subnetMainnetChainID, err := utils.GetSubnetEVMMainneChainID(subnetName)
+		subnetMainnetChainID, err := utils.GetEVMMainnetChainID(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(subnetMainnetChainID).Should(gomega.Equal(uint(0)))
 		_ = commands.SimulateMainnetDeployNonSOV(subnetName, mainnetChainID, true)
-		subnetMainnetChainID, err = utils.GetSubnetEVMMainneChainID(subnetName)
+		subnetMainnetChainID, err = utils.GetEVMMainnetChainID(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(subnetMainnetChainID).Should(gomega.Equal(uint(mainnetChainID)))
 	})

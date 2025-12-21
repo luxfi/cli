@@ -30,14 +30,14 @@ Testnet or Mainnet.
 The L1 has to be a Proof of Authority L1.
 - [`configure`](#lux-blockchain-configure): Luxd nodes support several different configuration files.
 Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
-Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for subnet-evm options).
+Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for evm options).
 A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.
 - [`create`](#lux-blockchain-create): The blockchain create command builds a new genesis file to configure your Blockchain.
 By default, the command runs an interactive wizard. It walks you through
 all the steps you need to create your first Blockchain.
 
-The tool supports deploying Subnet-EVM, and custom VMs. You
+The tool supports deploying EVM, and custom VMs. You
 can create a custom, user-generated genesis with a custom VM by providing
 the path to your genesis and VM binaries with the --genesis and --vm flags.
 
@@ -246,7 +246,7 @@ lux blockchain changeWeight [subcommand] [flags]
 
 Luxd nodes support several different configuration files.
 Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
-Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for subnet-evm options).
+Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for evm options).
 A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.
 
@@ -275,7 +275,7 @@ The blockchain create command builds a new genesis file to configure your Blockc
 By default, the command runs an interactive wizard. It walks you through
 all the steps you need to create your first Blockchain.
 
-The tool supports deploying Subnet-EVM, and custom VMs. You
+The tool supports deploying EVM, and custom VMs. You
 can create a custom, user-generated genesis with a custom VM by providing
 the path to your genesis and VM binaries with the --genesis and --vm flags.
 
@@ -297,10 +297,10 @@ lux blockchain create [subcommand] [flags]
 --custom-vm-path string             file path of custom vm to use
 --custom-vm-repo-url string         custom vm repository url
 --debug                             enable blockchain debugging (default true)
---evm                               use the Subnet-EVM as the base template
---evm-chain-id uint                 chain ID to use with Subnet-EVM
+--evm                               use the EVM as the base template
+--evm-chain-id uint                 chain ID to use with EVM
 --evm-defaults                      deprecation notice: use '--production-defaults'
---evm-token string                  token symbol to use with Subnet-EVM
+--evm-token string                  token symbol to use with EVM
 --external-gas-token                use a gas token from another blockchain
 -f, --force                         overwrite the existing configuration if one exists
 --from-github-repo                  generate custom VM binary from github repository
@@ -308,8 +308,8 @@ lux blockchain create [subcommand] [flags]
 -h, --help                          help for create
 --warp                               interoperate with other blockchains using Warp
 --warp-registry-at-genesis           setup Warp registry smart contract on genesis [experimental]
---latest                            use latest Subnet-EVM released version, takes precedence over --vm-version
---pre-release                       use latest Subnet-EVM pre-released version, takes precedence over --vm-version
+--latest                            use latest EVM released version, takes precedence over --vm-version
+--pre-release                       use latest EVM pre-released version, takes precedence over --vm-version
 --production-defaults               use default production settings for your blockchain
 --proof-of-authority                use proof of authority(PoA) for validator management
 --proof-of-stake                    use proof of stake(PoS) for validator management
@@ -320,7 +320,7 @@ lux blockchain create [subcommand] [flags]
 --test-defaults                     use default test settings for your blockchain
 --validator-manager-owner string    EVM address that controls Validator Manager Owner
 --vm string                         file path of custom vm to use. alias to custom-vm-path
---vm-version string                 version of Subnet-EVM template to use
+--vm-version string                 version of EVM template to use
 --warp                              generate a vm with warp support (needed for Warp) (default true)
 --config string                     config file (default is $HOME/.lux-cli/config.json)
 --log-level string                  log level for the application (default "ERROR")
@@ -599,7 +599,7 @@ lux blockchain import public [subcommand] [flags]
 --custom                  use a custom VM template
 --devnet                  operate on a devnet network
 --endpoint string         use the given endpoint for network operations
---evm                     import a subnet-evm
+--evm                     import a evm
 --force                   overwrite the existing configuration if one exists
 -f, --testnet                testnet           operate on testnet (alias to testnet
 -h, --help                help for public
@@ -2501,13 +2501,13 @@ lux node devnet wiz [subcommand] [flags]
 --deploy-teleporter-messenger                          deploy Interchain Messenger (default true)
 --deploy-teleporter-registry                           deploy Interchain Registry (default true)
 --enable-monitoring                                    set up Prometheus monitoring for created nodes. Please note that this option creates a separate monitoring instance and incures additional cost
---evm-chain-id uint                                    chain ID to use with Subnet-EVM
---evm-defaults                                         use default production settings with Subnet-EVM
+--evm-chain-id uint                                    chain ID to use with EVM
+--evm-defaults                                         use default production settings with EVM
 --evm-production-defaults                              use default production settings for your blockchain
---evm-subnet                                           use Subnet-EVM as the subnet virtual machine
+--evm-subnet                                           use EVM as the subnet virtual machine
 --evm-test-defaults                                    use default test settings for your blockchain
---evm-token string                                     token name to use with Subnet-EVM
---evm-version string                                   version of Subnet-EVM to use
+--evm-token string                                     token name to use with EVM
+--evm-version string                                   version of EVM to use
 --force-subnet-create                                  overwrite the existing subnet configuration if one exists
 --gcp                                                  create node/s in GCP cloud
 --gcp-credentials string                               use given GCP credentials
@@ -2522,8 +2522,8 @@ lux node devnet wiz [subcommand] [flags]
 --warp-version string                                   warp version to deploy (default "latest")
 --latest-luxd-pre-release-version               install latest luxd pre-release version on node/s
 --latest-luxd-version                           install latest luxd release version on node/s
---latest-evm-version                                   use latest Subnet-EVM released version
---latest-pre-released-evm-version                      use latest Subnet-EVM pre-released version
+--latest-evm-version                                   use latest EVM released version
+--latest-pre-released-evm-version                      use latest EVM pre-released version
 --node-config string                                   path to luxd node configuration for subnet
 --node-type string                                     cloud instance type. Use 'default' to use recommended default instance type
 --num-apis                                             ints                                       number of API nodes(nodes without stake) to create in the new Devnet

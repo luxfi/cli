@@ -13,6 +13,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+	github.com/luxfi/config v1.0.0
 	github.com/luxfi/crypto v1.17.26
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.16.4
@@ -21,7 +22,7 @@ require (
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.19
+	github.com/luxfi/netrunner v1.14.21
 	github.com/luxfi/node v1.22.32
 	github.com/luxfi/sdk v1.16.29
 	github.com/luxfi/warp v1.16.37
@@ -253,3 +254,5 @@ replace github.com/luxfi/netrunner => ../netrunner
 replace github.com/luxfi/evm => ../evm
 
 replace github.com/luxfi/sdk => ../sdk
+
+replace github.com/luxfi/config => ../config

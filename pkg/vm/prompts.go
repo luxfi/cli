@@ -15,8 +15,8 @@ type AllocationEntry struct {
 	Balance string
 }
 
-// SubnetEVMGenesisParams contains parameters for Subnet EVM genesis
-type SubnetEVMGenesisParams struct {
+// EVMGenesisParams contains parameters for Subnet EVM genesis
+type EVMGenesisParams struct {
 	UseDefaults         bool
 	Interop             bool
 	UseWarp             bool
@@ -27,8 +27,8 @@ type SubnetEVMGenesisParams struct {
 }
 
 // PromptVMType prompts the user to select a VM type
-func PromptVMType(app *application.Lux, useSubnetEVM bool, useCustom bool) (models.VMType, error) {
-	if useSubnetEVM {
+func PromptVMType(app *application.Lux, useEVM bool, useCustom bool) (models.VMType, error) {
+	if useEVM {
 		return models.EVM, nil
 	}
 	if useCustom {
@@ -43,8 +43,8 @@ func PromptDefaults(app *application.Lux, defaultsKind DefaultsKind, vmType mode
 	return defaultsKind, nil
 }
 
-// PromptSubnetEVMVersion prompts for Subnet EVM version
-func PromptSubnetEVMVersion(app *application.Lux, vmType models.VMType, version string) (string, error) {
+// PromptEVMVersion prompts for Subnet EVM version
+func PromptEVMVersion(app *application.Lux, vmType models.VMType, version string) (string, error) {
 	if version != "" {
 		return version, nil
 	}
@@ -66,17 +66,17 @@ func PromptInterop(app *application.Lux, vmType models.VMType, version string, c
 	return interop, nil
 }
 
-// PromptSubnetEVMGenesisParams prompts for Subnet EVM genesis parameters
-func PromptSubnetEVMGenesisParams(
+// PromptEVMGenesisParams prompts for Subnet EVM genesis parameters
+func PromptEVMGenesisParams(
 	app *application.Lux,
-	params SubnetEVMGenesisParams,
+	params EVMGenesisParams,
 	vmType models.VMType,
 	version string,
 	chainID uint64,
 	symbol string,
 	interop bool,
-) (*SubnetEVMGenesisParams, error) {
-	return &SubnetEVMGenesisParams{
+) (*EVMGenesisParams, error) {
+	return &EVMGenesisParams{
 		UseDefaults: params.UseDefaults,
 		Interop:     interop,
 		ChainID:     chainID,

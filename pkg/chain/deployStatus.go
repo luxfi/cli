@@ -90,7 +90,7 @@ func GetLocallyDeployedNetIDs(app *application.Lux) ([]string, error) {
 }
 
 // CopySubnetChainConfigsToNetwork copies chain configs from ~/.lux/subnets/<name>/ to each node's
-// chainConfigs/<blockchainID>/ directory. This is necessary because subnet-evm requires genesis.json
+// chainConfigs/<blockchainID>/ directory. This is necessary because evm requires genesis.json
 // in the chain config directory for initialization.
 // The canonical source is always ~/.lux/subnets/<name>/ and this function ensures
 // the running network nodes have access to these configs.
@@ -149,7 +149,7 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 		genesisFile := filepath.Join(subnetConfigDir, constants.GenesisFileName)
 		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFileName)
 
-		// Check if genesis exists (required for subnet-evm)
+		// Check if genesis exists (required for evm)
 		if _, err := os.Stat(genesisFile); os.IsNotExist(err) {
 			continue
 		}
@@ -253,7 +253,7 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 		genesisFile := filepath.Join(subnetConfigDir, constants.GenesisFileName)
 		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFileName)
 
-		// Check if genesis exists (required for subnet-evm)
+		// Check if genesis exists (required for evm)
 		if _, err := os.Stat(genesisFile); os.IsNotExist(err) {
 			continue
 		}

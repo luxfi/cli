@@ -449,23 +449,23 @@ func GetBlockchainTx(endpoint string, blockchainID ids.ID) (*txs.CreateChainTx, 
 	return createChainTx, nil
 }
 
-func ByteSliceToSubnetEvmGenesis(bs []byte) (core.Genesis, error) {
+func ByteSliceToEVMGenesis(bs []byte) (core.Genesis, error) {
 	var gen core.Genesis
 	err := json.Unmarshal(bs, &gen)
 	return gen, err
 }
 
-func ByteSliceIsSubnetEvmGenesis(bs []byte) bool {
-	_, err := ByteSliceToSubnetEvmGenesis(bs)
+func ByteSliceIsEVMGenesis(bs []byte) bool {
+	_, err := ByteSliceToEVMGenesis(bs)
 	return err == nil
 }
 
-func FileIsSubnetEVMGenesis(genesisPath string) (bool, error) {
+func FileIsEVMGenesis(genesisPath string) (bool, error) {
 	genesisBytes, err := os.ReadFile(genesisPath)
 	if err != nil {
 		return false, err
 	}
-	return ByteSliceIsSubnetEvmGenesis(genesisBytes), nil
+	return ByteSliceIsEVMGenesis(genesisBytes), nil
 }
 
 func GetDefaultBlockchainAirdropKeyName(blockchainName string) string {

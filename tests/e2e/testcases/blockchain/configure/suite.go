@@ -35,7 +35,7 @@ const (
 // checks that the nodes given by [nodesInfo] have the [expectedRPCTxFeeCap] value set for the subnet evm L1 with ID [blockchainID]
 // if [nodesRPCTxFeeCap] is given, it uses [npdesRPCTxFeeCap[nodeID]] instead of [expectedRPCTxFeeCap], to allow checking of different
 // configs at different nodes
-// bases the check on subnet-evm log files (blockchainID.log)
+// bases the check on evm log files (blockchainID.log)
 // also checks that no other test-related rpcTxFeeCap value is present in the logs
 func AssertBlockchainConfigIsSet(
 	nodesInfo map[string]utils.NodeInfo,
@@ -105,7 +105,7 @@ func AssertNodeConfigIsSet(
 
 var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 	_ = ginkgo.BeforeEach(func() {
-		commands.CreateEtnaSubnetEvmConfig(utils.BlockchainName, utils.EwoqEVMAddress, commands.PoA)
+		commands.CreateEtnaEVMConfig(utils.BlockchainName, utils.EwoqEVMAddress, commands.PoA)
 	})
 
 	ginkgo.AfterEach(func() {
