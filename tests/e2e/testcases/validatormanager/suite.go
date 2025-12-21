@@ -38,7 +38,7 @@ const (
 
 var err error
 
-func createEtnaSubnetEvmConfig() error {
+func createEtnaEVMConfig() error {
 	// Check config does not already exist
 	_, err = utils.SubnetConfigExists(utils.BlockchainName)
 	if err != nil {
@@ -72,7 +72,7 @@ func createEtnaSubnetEvmConfig() error {
 }
 
 func createSovereignSubnet() (string, string, error) {
-	if err := createEtnaSubnetEvmConfig(); err != nil {
+	if err := createEtnaEVMConfig(); err != nil {
 		return "", "", err
 	}
 	// Deploy subnet on etna local network with local machine as bootstrap validator

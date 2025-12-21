@@ -22,7 +22,7 @@ const (
 	ewoqPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 )
 
-func createEtnaSubnetEvmConfig(poa, pos bool) string {
+func createEtnaEVMConfig(poa, pos bool) string {
 	// Check config does not already exist
 	exists, err := utils.SubnetConfigExists(utils.BlockchainName)
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -70,7 +70,7 @@ func createEtnaSubnetEvmConfig(poa, pos bool) string {
 	return mapping[utils.LatestLuxd2EVMKey]
 }
 
-func createEtnaSubnetEvmConfigWithoutProxyOwner(poa, pos bool) {
+func createEtnaEVMConfigWithoutProxyOwner(poa, pos bool) {
 	// Check config does not already exist
 	exists, err := utils.SubnetConfigExists(utils.BlockchainName)
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -110,7 +110,7 @@ func createEtnaSubnetEvmConfigWithoutProxyOwner(poa, pos bool) {
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
-func createEtnaSubnetEvmConfigValidatorManagerFlagKeyname(poa, pos bool) {
+func createEtnaEVMConfigValidatorManagerFlagKeyname(poa, pos bool) {
 	// Check config does not already exist
 	exists, err := utils.SubnetConfigExists(utils.BlockchainName)
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -152,7 +152,7 @@ func createEtnaSubnetEvmConfigValidatorManagerFlagKeyname(poa, pos bool) {
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
-func createEtnaSubnetEvmConfigValidatorManagerFlagPChain(poa, pos bool) {
+func createEtnaEVMConfigValidatorManagerFlagPChain(poa, pos bool) {
 	// Check config does not already exist
 	exists, err := utils.SubnetConfigExists(utils.BlockchainName)
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -367,25 +367,25 @@ var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 	})
 
 	ginkgo.It("Test Create Etna POA Subnet Config With Key Name for Validator Manager Flag", func() {
-		createEtnaSubnetEvmConfigValidatorManagerFlagKeyname(true, false)
+		createEtnaEVMConfigValidatorManagerFlagKeyname(true, false)
 	})
 
 	ginkgo.It("Test Create Etna POA Subnet Config Without Proxy Owner Flag", func() {
-		createEtnaSubnetEvmConfigWithoutProxyOwner(true, false)
+		createEtnaEVMConfigWithoutProxyOwner(true, false)
 	})
 
 	ginkgo.It("Create Etna POA Subnet Config & Deploy the Subnet To Etna Local Network On Local Machine", func() {
-		createEtnaSubnetEvmConfig(true, false)
+		createEtnaEVMConfig(true, false)
 		deployEtnaSubnetEtnaFlag()
 	})
 
 	ginkgo.It("Create Etna POS Subnet Config & Deploy the Subnet To Etna Local Network On Local Machine", func() {
-		createEtnaSubnetEvmConfig(false, true)
+		createEtnaEVMConfig(false, true)
 		deployEtnaSubnetEtnaFlag()
 	})
 
 	ginkgo.It("Start Local Node on Etna & Deploy the Subnet To Etna Local Network using cluster flag", func() {
-		luxdVersion = createEtnaSubnetEvmConfig(true, false)
+		luxdVersion = createEtnaEVMConfig(true, false)
 		_ = commands.StartNetworkWithVersion(luxdVersion)
 		_, err := commands.CreateLocalEtnaNode(luxdVersion, utils.TestLocalNodeName, 1)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -397,7 +397,7 @@ var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 	})
 
 	ginkgo.It("Mix and match network and cluster flags test 1", func() {
-		luxdVersion = createEtnaSubnetEvmConfig(true, false)
+		luxdVersion = createEtnaEVMConfig(true, false)
 		_ = commands.StartNetworkWithVersion(luxdVersion)
 		_, err := commands.CreateLocalEtnaNode(luxdVersion, utils.TestLocalNodeName, 1)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -408,7 +408,7 @@ var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
 	ginkgo.It("Mix and match network and cluster flags test 2", func() {
-		createEtnaSubnetEvmConfig(true, false)
+		createEtnaEVMConfig(true, false)
 		deployEtnaSubnetEtnaFlagConvertOnly()
 		_, err := commands.TrackLocalEtnaSubnet(utils.TestLocalNodeName, utils.BlockchainName)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -439,6 +439,6 @@ var _ = ginkgo.Describe("[Etna Subnet SOV With Errors]", func() {
 	})
 
 	ginkgo.It("Test Create Etna POA Subnet Config With P Chain Address for Validator Manager Flag", func() {
-		createEtnaSubnetEvmConfigValidatorManagerFlagPChain(true, false)
+		createEtnaEVMConfigValidatorManagerFlagPChain(true, false)
 	})
 })

@@ -68,7 +68,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		// subnet config
 		_ = utils.DeleteConfigs(subnetName)
-		_, luxVersion := commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		_, luxVersion := commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 
 		// local network
 		commands.StartNetworkWithVersion(luxVersion)
@@ -137,7 +137,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		gomega.Expect(output).Should(gomega.ContainSubstring("No pending validators found"))
 	})
 
-	ginkgo.It("can transform a deployed SubnetEvm subnet to elastic subnet only on testnet", func() {
+	ginkgo.It("can transform a deployed EVM subnet to elastic subnet only on testnet", func() {
 		subnetIDStr, _ := deploySubnetToTestnet()
 		subnetID, err := ids.FromString(subnetIDStr)
 		gomega.Expect(err).Should(gomega.BeNil())
