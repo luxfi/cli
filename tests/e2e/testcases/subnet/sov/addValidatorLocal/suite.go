@@ -23,7 +23,7 @@ var luxdVersion string
 
 var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 	ginkgo.It("Create Etna Subnet Config", func() {
-		_, luxdVersion = commands.CreateEtnaSubnetEvmConfig(
+		_, luxdVersion = commands.CreateEtnaEVMConfig(
 			utils.BlockchainName,
 			ewoqEVMAddress,
 			commands.PoS,

@@ -30,7 +30,7 @@ var (
 
 var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoS]", func() {
 	ginkgo.It("Create Etna Subnet Config", func() {
-		_, luxdVersion = commands.CreateEtnaSubnetEvmConfig(
+		_, luxdVersion = commands.CreateEtnaEVMConfig(
 			utils.BlockchainName,
 			ewoqEVMAddress,
 			commands.PoS,

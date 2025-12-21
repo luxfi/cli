@@ -134,14 +134,14 @@ func (*versionMapper) GetEligibleVersions(sortedVersions []string, repoName stri
 	return eligible, nil
 }
 
-// GetLatestSubnetEVMVersion returns the latest available SubnetEVM version
-func GetLatestSubnetEVMVersion() string {
+// GetLatestEVMVersion returns the latest available EVM version
+func GetLatestEVMVersion() string {
 	// This would ideally fetch from a version API, but for tests we use a known stable version
 	return "v0.7.1"
 }
 
-// GetPreviousSubnetEVMVersion returns a previous SubnetEVM version for testing
-func GetPreviousSubnetEVMVersion() string {
+// GetPreviousEVMVersion returns a previous EVM version for testing
+func GetPreviousEVMVersion() string {
 	// Return a known previous version for testing compatibility
 	return "v0.7.0"
 }
@@ -162,17 +162,17 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	if binaryToVersion != nil {
 		return binaryToVersion, nil
 	}
-	// get compatible versions for subnetEVM
-	// subnetEVMversions is a list of sorted EVM versions,
-	// subnetEVMmapping maps EVM versions to their RPC versions
-	subnetEVMversions, subnetEVMmapping, err := getVersions(mapper, models.EVM)
+	// get compatible versions for EVM
+	// evmVersions is a list of sorted EVM versions,
+	// evmMapping maps EVM versions to their RPC versions
+	evmVersions, evmMapping, err := getVersions(mapper, models.EVM)
 	if err != nil {
 		return nil, err
 	}
 
 	// evm publishes its upcoming new version in the compatibility json
 	// before the new version is actually a downloadable release
-	subnetEVMversions, err = mapper.GetEligibleVersions(subnetEVMversions, constants.EVMRepoName, mapper.GetApp())
+	evmVersions, err = mapper.GetEligibleVersions(evmVersions, constants.EVMRepoName, mapper.GetApp())
 	if err != nil {
 		return nil, err
 	}
@@ -212,11 +212,11 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 			binaryToVersion[MultiLux1Key] = versionsForRPC[0]
 			binaryToVersion[MultiLux2Key] = versionsForRPC[1]
 
-			// now iterate the subnetEVMversions and find a
+			// now iterate the evmVersions and find a
 			// evm version which is compatible with that RPC version.
 			// The above-mentioned test runs with this as well.
-			for _, evmVer := range subnetEVMversions {
-				if subnetEVMmapping[evmVer] == rpcVersion {
+			for _, evmVer := range evmVersions {
+				if evmMapping[evmVer] == rpcVersion {
 					// we know there already exists at least one such combination.
 					// unless the compatibility JSON will start to be shortened in some way,
 					// we should always be able to find a matching evm
@@ -240,18 +240,18 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 	//
 	// To avoid having to iterate again, we'll also fill the values
 	// for the **latest** compatible Lux and Lux EVM
-	for i, ver := range subnetEVMversions {
+	for i, ver := range evmVersions {
 		// safety check, should not happen, as we already know
 		// compatible versions exist
-		if i+1 == len(subnetEVMversions) {
+		if i+1 == len(evmVersions) {
 			return nil, errors.New("no compatible versions for subsequent EVM found")
 		}
 		first := ver
-		second := subnetEVMversions[i+1]
+		second := evmVersions[i+1]
 		// we should be able to safely assume that for a given evm RPC version,
 		// there exists at least one compatible Lux.
 		// This means we can in any case use this to set the **latest** compatibility
-		soloLux, err := mapper.GetLatestLuxByProtoVersion(mapper.GetApp(), subnetEVMmapping[first], mapper.GetLuxURL())
+		soloLux, err := mapper.GetLatestLuxByProtoVersion(mapper.GetApp(), evmMapping[first], mapper.GetLuxURL())
 		if err != nil {
 			return nil, err
 		}
@@ -261,7 +261,7 @@ func GetVersionMapping(mapper VersionMapper) (map[string]string, error) {
 			binaryToVersion[LatestLux2EVMKey] = soloLux
 		}
 		// first and second are compatible
-		if subnetEVMmapping[first] == subnetEVMmapping[second] {
+		if evmMapping[first] == evmMapping[second] {
 			binaryToVersion[SoloEVMKey1] = first
 			binaryToVersion[SoloEVMKey2] = second
 			binaryToVersion[SoloLuxKey] = soloLux

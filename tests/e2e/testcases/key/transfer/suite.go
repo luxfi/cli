@@ -270,7 +270,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 				amountStr,
 			}
 
-			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, false)
+			commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 
 			output, err := commands.ListKeys("local", true, "c,"+subnetName, "")
@@ -298,7 +298,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		})
 
 		ginkgo.It("can transfer from C-Chain to Subnet with ewoq key and local key", func() {
-			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, true)
+			commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, true)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 			_, err := commands.SendWarpMessage([]string{"cchain", subnetName, "hello world"}, utils.TestFlags{"key": ewoqKeyName})
 			gomega.Expect(err).Should(gomega.BeNil())
@@ -365,7 +365,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		})
 
 		ginkgo.It("can transfer from Subnet to C-chain with ewoq key and local key", func() {
-			commands.CreateSubnetEvmConfigNonSOV(subnetName, utils.SubnetEvmGenesisPath, true)
+			commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, true)
 			commands.DeploySubnetLocallyNonSOV(subnetName)
 			// commands.SendWarpMessage("--local", "cchain", subnetName, "hello world", ewoqKeyName)
 			output := commands.DeployERC20Contract("--local", ewoqKeyName, "TEST", "100000", ewoqEVMAddress, subnetName)

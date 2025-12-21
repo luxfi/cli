@@ -22,8 +22,8 @@ var (
 	testLuxdCompat5 = []byte("{\"39\": [\"v1.12.2\", \"v1.20.3\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
 	testLuxdCompat6 = []byte("{\"39\": [\"v1.12.2\", \"v1.20.3\", \"v1.20.4\"],\"38\": [\"v1.11.13\", \"v1.12.0\", \"v1.12.1\"]}")
 	testLuxdCompat7 = []byte("{\"40\": [\"v1.20.5\"],\"39\": [\"v1.12.2\", \"v1.20.3\", \"v1.20.4\"]}")
-	testCLICompat   = []byte(`{"subnetevm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3"},"Devnet":{"latest-version":"v1.20.3"},"Testnet":{"latest-version":"v1.20.3"},"Mainnet":{"latest-version":"v1.20.3"}}}`)
-	testCLICompat2  = []byte(`{"subnetevm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3"},"Devnet":{"latest-version":"v1.20.3"},"Testnet":{"latest-version":"v1.20.3-testnet"},"Mainnet":{"latest-version":"v1.20.3"}}}`)
+	testCLICompat   = []byte(`{"evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3"},"Devnet":{"latest-version":"v1.20.3"},"Testnet":{"latest-version":"v1.20.3"},"Mainnet":{"latest-version":"v1.20.3"}}}`)
+	testCLICompat2  = []byte(`{"evm":"v0.7.3","rpc":39,"luxd":{"Local Network":{"latest-version":"v1.20.3"},"Devnet":{"latest-version":"v1.20.3"},"Testnet":{"latest-version":"v1.20.3-testnet"},"Mainnet":{"latest-version":"v1.20.3"}}}`)
 )
 
 func TestGetLatestLuxdByProtocolVersion(t *testing.T) {
@@ -179,16 +179,16 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			expectedResult:    "v1.20.3-testnet",
 		},
 		{
-			name:              "subnet-evm dependency, where cli latest.json doesn't support newest subnet evm version yet",
-			dependency:        constants.SubnetEVMRepoName,
+			name:              "evm dependency, where cli latest.json doesn't support newest subnet evm version yet",
+			dependency:        constants.EVMRepoName,
 			cliDependencyData: testCLICompat,
 			expectedError:     false,
 			expectedResult:    "v0.7.3",
 			latestVersion:     "v0.7.4",
 		},
 		{
-			name:              "subnet-evm dependency, where cli supports newest subnet evm version",
-			dependency:        constants.SubnetEVMRepoName,
+			name:              "evm dependency, where cli supports newest subnet evm version",
+			dependency:        constants.EVMRepoName,
 			cliDependencyData: testCLICompat,
 			expectedError:     false,
 			expectedResult:    "v0.7.3",
@@ -264,8 +264,8 @@ func TestGetLatestCLISupportedDependencyVersionWithLowerRPC(t *testing.T) {
 			latestVersion:     "v1.20.5",
 		},
 		{
-			name:              "subnet-evm dependency, where cli supports newest subnet evm version",
-			dependency:        constants.SubnetEVMRepoName,
+			name:              "evm dependency, where cli supports newest subnet evm version",
+			dependency:        constants.EVMRepoName,
 			cliDependencyData: testCLICompat,
 			expectedError:     false,
 			expectedResult:    "v0.7.3",

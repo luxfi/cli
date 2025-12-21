@@ -20,17 +20,17 @@ import (
 )
 
 /* #nosec G204 */
-func CreateSubnetEvmConfig(subnetName string, genesisPath string) (string, string) {
+func CreateEVMConfig(subnetName string, genesisPath string) (string, string) {
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// let's use a EVM version which has a guaranteed compatible lux
-	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, mapping[utils.LatestEVM2LuxKey])
+	CreateEVMConfigWithVersion(subnetName, genesisPath, mapping[utils.LatestEVM2LuxKey])
 	return mapping[utils.LatestEVM2LuxKey], mapping[utils.LatestLux2EVMKey]
 }
 
 /* #nosec G204 */
-func CreateSubnetEvmConfigWithVersion(subnetName string, genesisPath string, version string) {
+func CreateEVMConfigWithVersion(subnetName string, genesisPath string, version string) {
 	// Check config does not already exist
 	exists, err := utils.SubnetConfigExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -959,20 +959,20 @@ func ListValidators(subnetName string, network string) (string, error) {
 	return string(out), err
 }
 
-// CreateSubnetEvmConfigNonSOV creates a non-sovereign subnet EVM config
+// CreateEVMConfigNonSOV creates a non-sovereign subnet EVM config
 /* #nosec G204 */
-func CreateSubnetEvmConfigNonSOV(subnetName string, genesisPath string, bootstrapped bool) (string, string) {
-	// For now, just call the regular CreateSubnetEvmConfig
+func CreateEVMConfigNonSOV(subnetName string, genesisPath string, bootstrapped bool) (string, string) {
+	// For now, just call the regular CreateEVMConfig
 	// The bootstrapped parameter is ignored in the base implementation
-	return CreateSubnetEvmConfig(subnetName, genesisPath)
+	return CreateEVMConfig(subnetName, genesisPath)
 }
 
-// CreateSubnetEvmConfigSOV creates a sovereign subnet EVM config
+// CreateEVMConfigSOV creates a sovereign subnet EVM config
 /* #nosec G204 */
-func CreateSubnetEvmConfigSOV(subnetName string, genesisPath string) (string, string) {
-	// For now, just call the regular CreateSubnetEvmConfig
+func CreateEVMConfigSOV(subnetName string, genesisPath string) (string, string) {
+	// For now, just call the regular CreateEVMConfig
 	// SOV-specific functionality would be added here
-	return CreateSubnetEvmConfig(subnetName, genesisPath)
+	return CreateEVMConfig(subnetName, genesisPath)
 }
 
 // CreateCustomVMConfigNonSOV creates a non-sovereign custom VM config
@@ -1051,12 +1051,12 @@ func DeploySubnetLocallyWithArgsAndOutputSOV(subnetName string, version string, 
 	return DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
 }
 
-// CreateSubnetEvmConfigWithVersionSOV creates a sovereign subnet EVM config with specific version
+// CreateEVMConfigWithVersionSOV creates a sovereign subnet EVM config with specific version
 /* #nosec G204 */
-func CreateSubnetEvmConfigWithVersionSOV(subnetName string, genesisPath string, version string) {
+func CreateEVMConfigWithVersionSOV(subnetName string, genesisPath string, version string) {
 	// Call the existing function with version
 	// SOV-specific functionality would be added here
-	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, version)
+	CreateEVMConfigWithVersion(subnetName, genesisPath, version)
 }
 
 // DeploySubnetLocallyExpectErrorSOV deploys a sovereign subnet locally expecting an error
@@ -1074,12 +1074,12 @@ func DeploySubnetLocallyWithArgsAndOutputNonSOV(subnetName string, version strin
 	return DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
 }
 
-// CreateSubnetEvmConfigWithVersionNonSOV creates a non-sovereign subnet EVM config with specific version
+// CreateEVMConfigWithVersionNonSOV creates a non-sovereign subnet EVM config with specific version
 /* #nosec G204 */
-func CreateSubnetEvmConfigWithVersionNonSOV(subnetName string, genesisPath string, version string, bootstrapped bool) {
+func CreateEVMConfigWithVersionNonSOV(subnetName string, genesisPath string, version string, bootstrapped bool) {
 	// Call the existing function with version
 	// The bootstrapped parameter is ignored in the base implementation for now
-	CreateSubnetEvmConfigWithVersion(subnetName, genesisPath, version)
+	CreateEVMConfigWithVersion(subnetName, genesisPath, version)
 }
 
 // DeploySubnetLocallyExpectErrorNonSOV deploys a non-sovereign subnet locally expecting an error

@@ -105,7 +105,7 @@ func askForVMVersion(
 	return version, statemachine.Forward, nil
 }
 
-func getDescriptors(app *application.Lux, subnetEVMVersion string) (
+func getDescriptors(app *application.Lux, evmVersion string) (
 	*big.Int,
 	string,
 	string,
@@ -122,10 +122,10 @@ func getDescriptors(app *application.Lux, subnetEVMVersion string) (
 		return nil, "", "", statemachine.Stop, err
 	}
 
-	subnetEVMVersion, err = getVMVersion(app, "Lux EVM", constants.EVMRepoName, subnetEVMVersion, false)
+	evmVersion, err = getVMVersion(app, "Lux EVM", constants.EVMRepoName, evmVersion, false)
 	if err != nil {
 		return nil, "", "", statemachine.Stop, err
 	}
 
-	return chainID, tokenName, subnetEVMVersion, statemachine.Forward, nil
+	return chainID, tokenName, evmVersion, statemachine.Forward, nil
 }

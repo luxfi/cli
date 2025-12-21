@@ -125,7 +125,7 @@ func upgradeVM(_ *cobra.Command, args []string) error {
 	}
 
 	vmType := sc.VM
-	if vmType == models.SubnetEvm {
+	if vmType == models.EVM {
 		return selectUpdateOption(vmType, sc, networkToUpgrade)
 	}
 
@@ -319,7 +319,7 @@ func updateExistingLocalVM(sc models.Sidecar, targetVersion string) error {
 	var vmBin string
 	switch sc.VM {
 	// download the binary and prepare to copy it
-	case models.SubnetEvm:
+	case models.EVM:
 		vmBin, err = binutils.SetupEVM(app, targetVersion)
 		if err != nil {
 			return fmt.Errorf("failed to install evm: %w", err)

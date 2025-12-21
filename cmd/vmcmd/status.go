@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/constants"
+	luxconfig "github.com/luxfi/config"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -47,11 +47,12 @@ Examples:
 }
 
 func runStatus(_ *cobra.Command, _ []string) error {
-	pluginDir := filepath.Join(app.GetBaseDir(), constants.PluginDir)
+	pluginDir := luxconfig.ResolvePluginDir()
 
 	// Check if plugins directory exists
 	if _, err := os.Stat(pluginDir); os.IsNotExist(err) {
 		ux.Logger.PrintToUser("No plugins directory found at %s", pluginDir)
+		ux.Logger.PrintToUser("Use 'lux vm link <vm-name> --path <path>' to link a VM.")
 		return nil
 	}
 

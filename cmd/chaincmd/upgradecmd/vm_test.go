@@ -291,7 +291,7 @@ func TestUpdateToCustomBin(t *testing.T) {
 	blockchainName := "testSubnet"
 	sc := models.Sidecar{
 		Name:       blockchainName,
-		VM:         models.SubnetEvm,
+		VM:         models.EVM,
 		VMVersion:  "v3.0.0",
 		RPCVersion: 20,
 		Subnet:     blockchainName,

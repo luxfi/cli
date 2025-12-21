@@ -14,7 +14,7 @@ These commands enable runtime RPC-based blockchain migration without database fi
 Export all blocks, transactions, and state from the source blockchain:
 
 ```bash
-# Export from SubnetEVM or any EVM chain
+# Export from EVM or any EVM chain
 ./bin/lux export \
   --rpc http://source-node:9640/ext/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc \
   --output subnet-export.json \
@@ -79,7 +79,7 @@ Import the exported data into the destination chain:
 ## Example: Complete Regenesis
 
 ```bash
-# 1. Start source node (SubnetEVM with existing data)
+# 1. Start source node (EVM with existing data)
 ./bin/lux node dev --http-port 9640 --data-dir /path/to/subnet-data
 
 # 2. Start destination node (C-Chain or new EVM)

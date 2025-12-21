@@ -24,7 +24,7 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can stop and restart a deployed subnet", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -80,7 +80,7 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("clean hard deletes plugin binaries", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {

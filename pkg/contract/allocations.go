@@ -46,7 +46,7 @@ func GetBlockchainAirdropKeyInfo(
 	blockchainName string,
 	genesisData []byte,
 ) (string, string, string, error) {
-	genesis, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
+	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -121,7 +121,7 @@ func GetEVMSubnetPrefundedKey(
 	if err != nil {
 		return "", "", err
 	}
-	if !utils.ByteSliceIsSubnetEvmGenesis(genesisData) {
+	if !utils.ByteSliceIsEVMGenesis(genesisData) {
 		return "", "", fmt.Errorf("search for prefunded key is only supported on EVM based vms")
 	}
 	_, genesisAddress, genesisPrivateKey, err := GetBlockchainAirdropKeyInfo(
@@ -157,7 +157,7 @@ func sumGenesisSupply(
 	genesisData []byte,
 ) (*big.Int, error) {
 	sum := new(big.Int)
-	genesis, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
+	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return sum, err
 	}
@@ -180,7 +180,7 @@ func GetEVMSubnetGenesisSupply(
 	if err != nil {
 		return nil, err
 	}
-	if !utils.ByteSliceIsSubnetEvmGenesis(genesisData) {
+	if !utils.ByteSliceIsEVMGenesis(genesisData) {
 		return nil, fmt.Errorf("genesis supply calculation is only supported on EVM based vms")
 	}
 	return sumGenesisSupply(genesisData)
@@ -191,7 +191,7 @@ func getGenesisNativeMinterAdmin(
 	network models.Network,
 	genesisData []byte,
 ) (bool, bool, string, string, string, error) {
-	_, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
+	_, err := utils.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return false, false, "", "", "", err
 	}
@@ -224,7 +224,7 @@ func getGenesisNativeMinterManager(
 	network models.Network,
 	genesisData []byte,
 ) (bool, bool, string, string, string, error) {
-	_, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
+	_, err := utils.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return false, false, "", "", "", err
 	}
@@ -265,7 +265,7 @@ func GetEVMSubnetGenesisNativeMinterAdmin(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	if !utils.ByteSliceIsSubnetEvmGenesis(genesisData) {
+	if !utils.ByteSliceIsEVMGenesis(genesisData) {
 		return false, false, "", "", "", fmt.Errorf("genesis native minter admin query is only supported on EVM based vms")
 	}
 	return getGenesisNativeMinterAdmin(app, network, genesisData)
@@ -284,7 +284,7 @@ func GetEVMSubnetGenesisNativeMinterManager(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	if !utils.ByteSliceIsSubnetEvmGenesis(genesisData) {
+	if !utils.ByteSliceIsEVMGenesis(genesisData) {
 		return false, false, "", "", "", fmt.Errorf("genesis native minter manager query is only supported on EVM based vms")
 	}
 	return getGenesisNativeMinterManager(app, network, genesisData)
@@ -294,7 +294,7 @@ func ContractAddressIsInGenesisData(
 	genesisData []byte,
 	contractAddress crypto.Address,
 ) (bool, error) {
-	genesis, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
+	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return false, err
 	}

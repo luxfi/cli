@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	subnetevmutils "github.com/luxfi/evm/utils"
+	evmutils "github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	goethereummath "github.com/luxfi/geth/common/math"
 	luxlog "github.com/luxfi/log"
@@ -104,7 +104,7 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 			"However, we suggest to only configure one per upgrade."))
 	fmt.Println()
 
-	// use the correct data types from subnet-evm right away
+	// use the correct data types from evm right away
 	precompiles := extras.UpgradeConfig{
 		PrecompileUpgrades: make([]extras.PrecompileUpgrade, 0),
 	}
@@ -295,7 +295,7 @@ func promptNativeMintParams(
 		}
 	}
 	config := nativeminter.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())),
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -322,7 +322,7 @@ func promptRewardManagerParams(
 		return false, err
 	}
 	config := rewardmanager.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())),
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -401,7 +401,7 @@ func promptFeeManagerParams(
 		)
 	}
 	config := feemanager.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())),
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -546,7 +546,7 @@ func promptContractAllowListParams(
 		return cancelled, err
 	}
 	config := deployerallowlist.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())),
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -568,7 +568,7 @@ func promptTxAllowListParams(
 		return cancelled, err
 	}
 	config := txallowlist.NewConfig(
-		subnetevmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())),
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,

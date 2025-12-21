@@ -44,7 +44,7 @@ import (
 const (
 	expectedRPCComponentsLen = 7
 	blockchainIDPos          = 5
-	subnetEVMName            = "evm"
+	evmName            = "evm"
 )
 
 var defaultLocalNetworkNodeIDs = []string{
@@ -483,19 +483,19 @@ func CheckLuxExists(version string) bool {
 }
 
 // Currently downloads evm, but that suffices to test the custom vm functionality
-func DownloadCustomVMBin(subnetEVMversion string) (string, error) {
+func DownloadCustomVMBin(evmVersion string) (string, error) {
 	targetDir := os.TempDir()
-	subnetEVMDir, err := binutils.DownloadReleaseVersion(luxlog.NewNoOpLogger(), subnetEVMName, subnetEVMversion, targetDir)
+	evmDir, err := binutils.DownloadReleaseVersion(luxlog.NewNoOpLogger(), evmName, evmVersion, targetDir)
 	if err != nil {
 		return "", err
 	}
-	subnetEVMBin := path.Join(subnetEVMDir, subnetEVMName)
-	if _, err := os.Stat(subnetEVMBin); errors.Is(err, os.ErrNotExist) {
+	evmBin := path.Join(evmDir, evmName)
+	if _, err := os.Stat(evmBin); errors.Is(err, os.ErrNotExist) {
 		return "", errors.New("subnet evm bin file was not created")
 	} else if err != nil {
 		return "", err
 	}
-	return subnetEVMBin, nil
+	return evmBin, nil
 }
 
 func ParsePublicDeployOutput(output string, parseType string) (string, error) {

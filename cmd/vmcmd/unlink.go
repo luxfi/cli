@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/cli/pkg/constants"
+	luxconfig "github.com/luxfi/config"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
@@ -42,8 +42,8 @@ func runUnlink(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to calculate VMID: %w", err)
 	}
 
-	// Get plugins directory
-	pluginDir := filepath.Join(app.GetBaseDir(), constants.PluginDir)
+	// Get plugins directory using unified config
+	pluginDir := luxconfig.ResolvePluginDir()
 
 	// Symlink path
 	symlinkPath := filepath.Join(pluginDir, vmID.String())
