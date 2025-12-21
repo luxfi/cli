@@ -14,86 +14,88 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
 var (
-	importChain    string
-	importFilePath string
-	importRPC      string
+	importRPC string
 )
 
 func newImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "import",
+		Use:   "import <chain> <path>",
 		Short: "Import blocks from RLP file to a running chain",
 		Long: `Import blocks from an RLP-encoded file to a running chain.
 
 This command uses the admin_importChain RPC endpoint to import blocks.
-The admin API endpoint is on port 9630 (NOT 9650) at /ext/bc/<chain>/admin.
+The network must be running and admin API must be enabled (default).
 
-Supported chains:
-  - C-Chain (coreth): Use --chain=c or --chain=C
-  - Subnet EVMs: Use --chain=<blockchain-id> (e.g., ZOO subnet)
+Chain names:
+  c, C     - C-Chain (Coreth EVM)
+  zoo      - Zoo subnet (will look up blockchain ID)
+  <id>     - Any blockchain ID directly
 
 Examples:
-  # Import to C-Chain on running local network
-  lux chain import --chain=c --path=/tmp/lux-mainnet-96369.rlp
+  # Import to C-Chain
+  lux chain import c /path/to/blocks.rlp
+
+  # Import to Zoo subnet
+  lux chain import zoo ~/work/lux/state/rlp/zoo-mainnet/zoo-mainnet-200200.rlp
+
+  # Import to subnet by blockchain ID
+  lux chain import UNFEYEGJz3m1u5bYQw9BCgk6nqTTLqAL7a4Qi59VcD5tV5CCp /path/to/blocks.rlp
 
   # Import with custom RPC endpoint
-  lux chain import --path=/tmp/blocks.rlp --rpc=http://localhost:9630/ext/bc/C/admin
-
-  # Import to Zoo subnet EVM
-  lux chain import --chain=bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM --path=/tmp/zoo.rlp
+  lux chain import c /path/to/blocks.rlp --rpc=http://localhost:9630/ext/bc/C/rpc
 
 Requirements:
   - Network must be running (lux network start)
   - Admin API must be enabled (default when started via CLI)
   - RLP file path must be accessible from the node filesystem`,
+		Args: cobra.ExactArgs(2),
 		RunE: runChainImport,
 	}
 
-	cmd.Flags().StringVar(&importChain, "chain", "c", "Chain to import to (c for C-Chain, or blockchain ID for subnets)")
-	cmd.Flags().StringVar(&importFilePath, "path", "", "Path to RLP file (required)")
-	cmd.Flags().StringVar(&importRPC, "rpc", "", "Admin RPC endpoint (default: http://localhost:9630/ext/bc/C/admin)")
-
-	cmd.MarkFlagRequired("path")
+	cmd.Flags().StringVar(&importRPC, "rpc", "", "Custom RPC endpoint (default: auto-detected)")
 
 	return cmd
 }
 
-func runChainImport(_ *cobra.Command, _ []string) error {
+func runChainImport(_ *cobra.Command, args []string) error {
+	chainArg := args[0]
+	filePath := args[1]
+
 	// Validate file exists
-	if _, err := os.Stat(importFilePath); os.IsNotExist(err) {
-		return fmt.Errorf("RLP file not found: %s", importFilePath)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return fmt.Errorf("RLP file not found: %s", filePath)
 	}
 
 	// Get absolute path for the file
-	absFilePath, err := filepath.Abs(importFilePath)
+	absFilePath, err := filepath.Abs(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	// Determine admin RPC endpoint
-	adminEndpoint := importRPC
-	if adminEndpoint == "" {
-		// Build default endpoint based on chain
-		chainPath := getChainPath(importChain)
-		adminEndpoint = fmt.Sprintf("http://localhost:9630/ext/bc/%s/admin", chainPath)
-	}
+	// Resolve chain name to blockchain ID/path
+	chainPath, chainDisplay := resolveChain(chainArg)
 
-	// Get chain display name
-	chainDisplay := importChain
-	if strings.ToLower(importChain) == "c" {
-		chainDisplay = "C-Chain"
+	// Determine endpoints - eth RPC and admin are different
+	baseURL := "http://localhost:9630"
+	if importRPC != "" {
+		baseURL = strings.TrimSuffix(importRPC, "/ext/bc/"+chainPath+"/rpc")
+		baseURL = strings.TrimSuffix(baseURL, "/ext/bc/"+chainPath+"/admin")
+		baseURL = strings.TrimSuffix(baseURL, "/")
 	}
+	rpcEndpoint := fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, chainPath)
+	adminEndpoint := fmt.Sprintf("%s/ext/bc/%s/admin", baseURL, chainPath)
 
 	ux.Logger.PrintToUser("Importing blocks to %s...", chainDisplay)
 	ux.Logger.PrintToUser("  RLP file: %s", absFilePath)
+	ux.Logger.PrintToUser("  RPC endpoint: %s", rpcEndpoint)
 	ux.Logger.PrintToUser("  Admin endpoint: %s", adminEndpoint)
 
-	// Get current block height before import (use RPC endpoint for eth calls)
-	rpcEndpoint := strings.Replace(adminEndpoint, "/admin", "/rpc", 1)
+	// Get current block height before import
 	beforeHeight, err := getBlockHeight(rpcEndpoint)
 	if err != nil {
 		ux.Logger.PrintToUser("  Warning: Could not get current block height: %v", err)
@@ -103,7 +105,7 @@ func runChainImport(_ *cobra.Command, _ []string) error {
 
 	startTime := time.Now()
 
-	// Call admin_importChain RPC
+	// Call admin_importChain on the admin endpoint, not rpc
 	success, err := callAdminImportChain(adminEndpoint, absFilePath)
 	if err != nil {
 		return fmt.Errorf("import failed: %w", err)
@@ -138,12 +140,41 @@ func runChainImport(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-// getChainPath returns the chain path for use in URLs
-func getChainPath(chain string) string {
-	if strings.ToLower(chain) == "c" {
-		return "C"
+// resolveChain resolves a chain name to blockchain path and display name
+func resolveChain(chain string) (path, display string) {
+	lower := strings.ToLower(chain)
+
+	// C-Chain
+	if lower == "c" {
+		return "C", "C-Chain"
 	}
-	return chain
+
+	// Known chain names - try to look up blockchain ID
+	if lower == "zoo" {
+		if blockchainID := lookupBlockchainID("zoo"); blockchainID != "" {
+			return blockchainID, "Zoo Chain"
+		}
+		return chain, "Zoo Chain (not deployed)"
+	}
+
+	// Assume it's a blockchain ID
+	return chain, fmt.Sprintf("Chain %s", chain[:min(len(chain), 12)])
+}
+
+// lookupBlockchainID looks up a chain's blockchain ID from sidecar
+func lookupBlockchainID(chainName string) string {
+	// Try to load sidecar for the chain
+	sc, err := app.LoadSidecar(chainName)
+	if err != nil {
+		return ""
+	}
+
+	// Check Local Network deployment
+	if network, ok := sc.Networks[models.Local.String()]; ok {
+		return network.BlockchainID.String()
+	}
+
+	return ""
 }
 
 func getBlockHeight(rpcEndpoint string) (uint64, error) {
@@ -185,7 +216,7 @@ func getBlockHeight(rpcEndpoint string) (uint64, error) {
 	return height, nil
 }
 
-func callAdminImportChain(adminEndpoint, filePath string) (bool, error) {
+func callAdminImportChain(rpcEndpoint, filePath string) (bool, error) {
 	// admin_importChain takes a single string parameter: the file path
 	req := map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -206,7 +237,7 @@ func callAdminImportChain(adminEndpoint, filePath string) (bool, error) {
 
 	ux.Logger.PrintToUser("Calling admin_importChain (this may take a while for large files)...")
 
-	resp, err := client.Post(adminEndpoint, "application/json", bytes.NewBuffer(data))
+	resp, err := client.Post(rpcEndpoint, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return false, fmt.Errorf("HTTP request failed: %w", err)
 	}

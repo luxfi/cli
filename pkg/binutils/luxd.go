@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	luxdBinPrefix = "luxd"
+	luxdBinPrefix = "luxd-"
 )
 
 func SetupLuxgo(app *application.Lux, luxdVersion string) (string, error) {

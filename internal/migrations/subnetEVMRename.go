@@ -15,7 +15,7 @@ import (
 const oldEVM = "EVM"
 
 func migrateEVMNames(app *application.Lux, runner *migrationRunner) error {
-	subnetDir := app.GetSubnetDir()
+	subnetDir := app.GetChainsDir()
 	subnets, err := os.ReadDir(subnetDir)
 	if err != nil {
 		return err

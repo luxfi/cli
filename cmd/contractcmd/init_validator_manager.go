@@ -8,6 +8,7 @@ import (
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/cmd/networkcmd"
+	"github.com/luxfi/cli/pkg/chainvalidators"
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -142,7 +143,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	// Get bootstrap validators from the blockchain configuration
 	// Note: Using empty validator list as NetworkData doesn't have validators
 	var bootstrapValidators []models.SubnetValidator
-	luxdBootstrapValidators, err := networkcmd.ConvertToLuxdSubnetValidator(bootstrapValidators)
+	luxdBootstrapValidators, err := chainvalidators.ToL1Validators(bootstrapValidators)
 	if err != nil {
 		return err
 	}

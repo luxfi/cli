@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/localnetworkinterface"
-	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
@@ -94,16 +94,12 @@ func deployChain(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("Deploying %s to %s", chainName, network.String())
 
-	if network == models.Local {
-		return deployToLocal(chainName, chainGenesis, &sc)
-	}
-
-	// For testnet/mainnet, use public deployer
-	return fmt.Errorf("testnet/mainnet deployment not yet implemented in unified chain command")
+	// All deployments use the same flow - deploy to locally running network
+	return deployToNetwork(chainName, chainGenesis, &sc, network)
 }
 
-func deployToLocal(chainName string, chainGenesis []byte, sc *models.Sidecar) error {
-	app.Log.Debug("Deploy local")
+func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network) error {
+	app.Log.Debug("Deploy to network", zap.String("network", network.String()))
 
 	// Get VM binary
 	var vmBin string
@@ -131,12 +127,12 @@ func deployToLocal(chainName string, chainGenesis []byte, sc *models.Sidecar) er
 	}
 
 	// Create deployer
-	deployer := net.NewLocalDeployer(app, nodeVersion, vmBin)
+	deployer := chain.NewLocalDeployer(app, nodeVersion, vmBin)
 
 	// Get genesis path
 	genesisPath := app.GetGenesisPath(chainName)
 
-	// Deploy
+	// Deploy to locally-running network (works for local, testnet, mainnet started via CLI)
 	subnetID, blockchainID, err := deployer.DeployToLocalNetwork(chainName, chainGenesis, genesisPath)
 	if err != nil {
 		if deployer.BackendStartedHere() {
@@ -147,8 +143,8 @@ func deployToLocal(chainName string, chainGenesis []byte, sc *models.Sidecar) er
 		return fmt.Errorf("deployment failed: %w", err)
 	}
 
-	// Update sidecar with deployment info
-	return app.UpdateSidecarNetworks(sc, models.Local, subnetID, blockchainID)
+	// Update sidecar with deployment info (using the target network)
+	return app.UpdateSidecarNetworks(sc, network, subnetID, blockchainID)
 }
 
 func checkDeployCompatibility(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {

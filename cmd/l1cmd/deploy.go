@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
@@ -178,7 +178,7 @@ func deployL1Testnet(l1Name string, sc *models.Sidecar) error {
 	ux.Logger.PrintToUser("\n🚀 Deploying to testnet...")
 
 	// Use the blockchain deployment logic from blockchaincmd
-	deployer := net.NewLocalDeployer(app, "", "")
+	deployer := chain.NewLocalDeployer(app, "", "")
 
 	// Deploy to testnet
 	genesis, err := app.LoadRawGenesis(l1Name)
@@ -207,7 +207,7 @@ func deployL1Mainnet(l1Name string, sc *models.Sidecar) error {
 	ux.Logger.PrintToUser("   - Security audit completed")
 
 	// Use the blockchain deployment logic from blockchaincmd
-	deployer := net.NewLocalDeployer(app, "", "")
+	deployer := chain.NewLocalDeployer(app, "", "")
 
 	// Deploy to mainnet with additional confirmations
 	genesis, err := app.LoadRawGenesis(l1Name)

@@ -24,7 +24,9 @@ All deployed Subnets shutdown gracefully and save their state. If you provide th
 --snapshot-name flag, the network saves its state under this named snapshot. You can
 reload this snapshot with network start --snapshot-name <snapshotName>. Otherwise, the
 network saves to the default snapshot, overwriting any existing state. You can reload the
-default snapshot with network start.`,
+default snapshot with network start.
+
+Use 'network clean' to stop and remove all network data for a fresh start.`,
 
 		RunE:         StopNetwork,
 		Args:         cobra.ExactArgs(0),
@@ -37,9 +39,9 @@ default snapshot with network start.`,
 func StopNetwork(*cobra.Command, []string) error {
 	err := saveNetwork()
 
-	if err := binutils.KillgRPCServerProcess(app); err != nil {
-		app.Log.Warn("failed killing server process", zap.Error(err))
-		fmt.Println(err)
+	if killErr := binutils.KillgRPCServerProcess(app); killErr != nil {
+		app.Log.Warn("failed killing server process", zap.Error(killErr))
+		ux.Logger.PrintToUser("Warning: failed to shutdown server gracefully: %v", killErr)
 	} else {
 		ux.Logger.PrintToUser("Server shutdown gracefully")
 	}
@@ -52,6 +54,7 @@ func saveNetwork() error {
 	if err != nil {
 		return err
 	}
+	defer cli.Close()
 
 	ctx := binutils.GetAsyncContext()
 

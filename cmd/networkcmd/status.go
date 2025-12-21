@@ -27,7 +27,7 @@ network is running and some basic stats about the network.`,
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
+	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show detailed cluster info including raw protobuf response")
 
 	return cmd
 }
@@ -39,6 +39,7 @@ func networkStatus(*cobra.Command, []string) error {
 	if err != nil {
 		return err
 	}
+	defer cli.Close()
 
 	ctx := binutils.GetAsyncContext()
 	status, err := cli.Status(ctx)

@@ -22,7 +22,6 @@ import (
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
-	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
 	"github.com/luxfi/cli/cmd/warpcmd"
@@ -97,7 +96,6 @@ Quick start:
 	rootCmd.AddCommand(chaincmd.NewCmd(app)) // unified chain command (l1/l2/l3)
 
 	// add transaction command
-	rootCmd.AddCommand(transactioncmd.NewCmd(app))
 
 	// add config command
 	rootCmd.AddCommand(configcmd.NewCmd(app))
@@ -128,9 +126,6 @@ Quick start:
 
 	// add hidden backend command
 	rootCmd.AddCommand(backendcmd.NewCmd(app))
-
-	// add chain command for chain-level operations (import, export)
-	rootCmd.AddCommand(chaincmd.NewCmd(app))
 
 	return rootCmd
 }
@@ -288,7 +283,7 @@ func setupEnv() (string, error) {
 	}
 
 	// Create subnet dir if it doesn't exist
-	subnetDir := filepath.Join(baseDir, constants.NetDir)
+	subnetDir := filepath.Join(baseDir, constants.ChainsDir)
 	if err = os.MkdirAll(subnetDir, os.ModePerm); err != nil {
 		fmt.Printf("failed creating the subnet dir %s: %s\n", subnetDir, err)
 		os.Exit(1)

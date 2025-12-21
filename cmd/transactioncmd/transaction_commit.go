@@ -3,9 +3,8 @@
 package transactioncmd
 
 import (
-	"github.com/luxfi/cli/cmd/netcmd"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
-	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -68,7 +67,11 @@ func commitTx(_ *cobra.Command, args []string) error {
 	if len(remainingSubnetAuthKeys) != 0 {
 		signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
 		ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(subnetAuthKeys))
-		netcmd.PrintRemainingToSignMsg(subnetName, remainingSubnetAuthKeys, inputTxPath)
+		ux.Logger.PrintToUser("Remaining signers for %s:", subnetName)
+		for _, addr := range remainingSubnetAuthKeys {
+			ux.Logger.PrintToUser("  - %s", addr)
+		}
+		ux.Logger.PrintToUser("Transaction file: %s", inputTxPath)
 		return nil
 	}
 
@@ -81,16 +84,16 @@ func commitTx(_ *cobra.Command, args []string) error {
 	// Wrap the secp256k1fx keychain to implement node keychain interface
 	kc := keychainpkg.WrapSecp256k1fxKeychain(secpKC)
 
-	deployer := net.NewPublicDeployer(app, false, kc, network)
+	deployer := chain.NewPublicDeployer(app, false, kc, network)
 	txID, err := deployer.Commit(tx)
 	if err != nil {
 		return err
 	}
 
 	if txutils.IsCreateChainTx(tx) {
-		if err := netcmd.PrintDeployResults(subnetName, subnetID, txID); err != nil {
-			return err
-		}
+		ux.Logger.PrintToUser("Blockchain %s deployed successfully", subnetName)
+		ux.Logger.PrintToUser("Chain ID: %s", subnetID)
+		ux.Logger.PrintToUser("Blockchain ID: %s", txID)
 		return app.UpdateSidecarNetworks(&sc, network, subnetID, txID)
 	}
 	ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", txID)

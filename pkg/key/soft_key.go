@@ -16,6 +16,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/crypto/secp256k1"
+	"github.com/luxfi/go-bip32"
+	"github.com/luxfi/go-bip39"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/cb58"
 	"github.com/luxfi/node/utils/formatting/address"
@@ -33,6 +35,57 @@ var (
 	ErrInvalidPrivateKeyEnding   = errors.New("invalid private key ending")
 	ErrInvalidPrivateKeyEncoding = errors.New("invalid private key encoding")
 )
+
+// LUXCoinType is the BIP-44 coin type for LUX (9000')
+const LUXCoinType = 9000
+
+// deriveMnemonicKey derives a private key from a BIP-39 mnemonic using BIP-44 path.
+// Path: m/44'/9000'/0'/0/{accountIndex}
+func deriveMnemonicKey(mnemonic string, accountIndex uint32) ([]byte, error) {
+	if !bip39.IsMnemonicValid(mnemonic) {
+		return nil, fmt.Errorf("invalid mnemonic phrase")
+	}
+	seed := bip39.NewSeed(mnemonic, "")
+
+	// Create master key from seed
+	masterKey, err := bip32.NewMasterKey(seed)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create master key: %w", err)
+	}
+
+	// BIP-44 path: m/44'/9000'/0'/0/{accountIndex}
+	// m/44' (purpose)
+	key, err := masterKey.NewChildKey(bip32.FirstHardenedChild + 44)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive purpose: %w", err)
+	}
+
+	// m/44'/9000' (coin type for LUX)
+	key, err = key.NewChildKey(bip32.FirstHardenedChild + LUXCoinType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive coin type: %w", err)
+	}
+
+	// m/44'/9000'/0' (account)
+	key, err = key.NewChildKey(bip32.FirstHardenedChild + 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive account: %w", err)
+	}
+
+	// m/44'/9000'/0'/0 (change)
+	key, err = key.NewChildKey(0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive change: %w", err)
+	}
+
+	// m/44'/9000'/0'/0/{accountIndex} (address index)
+	key, err = key.NewChildKey(accountIndex)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive address index: %w", err)
+	}
+
+	return key.Key, nil
+}
 
 var _ Key = &SoftKey{}
 
@@ -59,6 +112,20 @@ const (
 	// - EnvMnemonic (LUX_MNEMONIC) - BIP39 mnemonic phrase for deterministic key generation
 	// - EnvPrivateKey (LUX_PRIVATE_KEY) - CB58 encoded private key (PrivateKey-xxx format)
 )
+
+// GetMnemonicFromEnv returns the mnemonic from LUX_MNEMONIC environment variable.
+// Returns empty string if not set or invalid.
+func GetMnemonicFromEnv() string {
+	mnemonic := os.Getenv(EnvMnemonic)
+	if mnemonic == "" {
+		return ""
+	}
+	// Validate the mnemonic
+	if !bip39.IsMnemonicValid(mnemonic) {
+		return ""
+	}
+	return mnemonic
+}
 
 type SOp struct {
 	privKey        *secp256k1.PrivateKey
@@ -455,9 +522,32 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 // NewSoftFromMnemonic creates a SoftKey from a BIP39 mnemonic phrase.
 // Uses standard BIP44 derivation path: m/44'/9000'/0'/0/0
 func NewSoftFromMnemonic(networkID uint32, mnemonic string) (*SoftKey, error) {
-	// For now, return an error as mnemonic support requires additional dependencies
-	// This can be implemented later with BIP39/BIP44 libraries
-	return nil, fmt.Errorf("mnemonic support not yet implemented - use LUX_PRIVATE_KEY instead")
+	return NewSoftFromMnemonicWithAccount(networkID, mnemonic, 0)
+}
+
+// NewSoftFromBytes creates a SoftKey from raw private key bytes.
+func NewSoftFromBytes(networkID uint32, privKeyBytes []byte) (*SoftKey, error) {
+	privKey, err := secp256k1.ToPrivateKey(privKeyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create private key from bytes: %w", err)
+	}
+	return NewSoft(networkID, WithPrivateKey(privKey))
+}
+
+// NewSoftFromMnemonicWithAccount creates a SoftKey from a BIP39 mnemonic with specific account index.
+// Uses standard BIP44 derivation path: m/44'/9000'/0'/0/{accountIndex}
+func NewSoftFromMnemonicWithAccount(networkID uint32, mnemonic string, accountIndex uint32) (*SoftKey, error) {
+	keyBytes, err := deriveMnemonicKey(mnemonic, accountIndex)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive key from mnemonic: %w", err)
+	}
+
+	privKey, err := secp256k1.ToPrivateKey(keyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create private key: %w", err)
+	}
+
+	return NewSoft(networkID, WithPrivateKey(privKey))
 }
 
 // GetLocalPrivateKey returns the secp256k1 private key for local development.

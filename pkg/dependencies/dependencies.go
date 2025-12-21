@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/ux"
 
 	"golang.org/x/mod/semver"
@@ -272,7 +272,7 @@ func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, 
 			if err != nil {
 				return LuxdVersionSettings{}, err
 			}
-			err = net.ValidateSubnetNameAndGetChains(useLuxgoVersionFromSubnet)
+			err = chain.ValidateSubnetNameAndGetChains(useLuxgoVersionFromSubnet)
 			if err == nil {
 				break
 			}

@@ -95,7 +95,7 @@ func TestEVMRenameMigration_EmptyDir(t *testing.T) {
 
 	emptySubnetName := "emptySubnet"
 
-	subnetDir := filepath.Join(app.GetSubnetDir(), emptySubnetName)
+	subnetDir := filepath.Join(app.GetChainsDir(), emptySubnetName)
 	err := os.MkdirAll(subnetDir, constants.DefaultPerms755)
 	require.NoError(err)
 
