@@ -15,7 +15,7 @@ import (
 func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
 	// Setup EVM for L1 or L2 chains
 	binDir := filepath.Join(app.GetBaseDir(), constants.EVMInstallDir)
-	subDir := filepath.Join(binDir, subnetEVMBinPrefix+evmVersion)
+	subDir := filepath.Join(binDir, evmBinPrefix+evmVersion)
 
 	installer := NewInstaller()
 	downloader := NewEVMDownloader()
@@ -24,7 +24,7 @@ func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
 		evmVersion,
 		binDir,
 		subDir,
-		subnetEVMBinPrefix,
+		evmBinPrefix,
 		constants.LuxOrg,
 		constants.EVMRepoName,
 		downloader,
@@ -49,14 +49,4 @@ func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
 	}
 
 	return binaryPath, nil
-}
-
-// SetupSubnetEVM is an alias for SetupEVM for backward compatibility
-func SetupSubnetEVM(app *application.Lux, evmVersion string) (string, string, error) {
-	binaryPath, err := SetupEVM(app, evmVersion)
-	if err != nil {
-		return "", "", err
-	}
-	// Return empty string for first param, binary path for second param
-	return "", binaryPath, nil
 }

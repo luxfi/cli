@@ -639,7 +639,7 @@ func RunSSHRenderLuxNodeConfig(
 // RunSSHCreatePlugin runs script to create plugin
 func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 	// Note: vmID can be retrieved if needed in the future via sc.GetVMID()
-	subnetVMBinaryPath := constants.CloudNodeSubnetEvmBinaryPath
+	evmBinaryPath := constants.CloudNodeEVMBinaryPath
 	hostInstaller := NewHostInstaller(host)
 	tmpDir, err := host.CreateTempDir()
 	if err != nil {
@@ -650,7 +650,7 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 	}(host)
 	switch {
 	case sc.VM == models.CustomVM:
-		ux.Logger.Info("Building Custom VM for %s to %s", host.NodeID, subnetVMBinaryPath)
+		ux.Logger.Info("Building Custom VM for %s to %s", host.NodeID, evmBinaryPath)
 		ux.Logger.Info("Custom VM Params: repo %s branch %s via %s", sc.CustomVMRepoURL, sc.CustomVMBranch, sc.CustomVMBuildScript)
 		if err := RunOverSSH(
 			"Build CustomVM",
@@ -662,7 +662,7 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 				CustomVMRepoURL:     sc.CustomVMRepoURL,
 				CustomVMBranch:      sc.CustomVMBranch,
 				CustomVMBuildScript: sc.CustomVMBuildScript,
-				VMBinaryPath:        subnetVMBinaryPath,
+				VMBinaryPath:        evmBinaryPath,
 				GoVersion:           constants.BuildEnvGolangVersion,
 			},
 		); err != nil {
@@ -670,17 +670,17 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 		}
 
 	case sc.VM == models.SubnetEvm:
-		ux.Logger.Info("Installing Subnet EVM for %s", host.NodeID)
-		dl := binutils.NewSubnetEVMDownloader()
+		ux.Logger.Info("Installing EVM for %s", host.NodeID)
+		dl := binutils.NewEVMDownloader()
 		installURL, _, err := dl.GetDownloadURL(sc.VMVersion, hostInstaller) // extension is tar.gz
 		if err != nil {
 			return err
 		}
 
-		archiveName := "subnet-evm.tar.gz"
+		archiveName := "evm.tar.gz"
 		archiveFullPath := filepath.Join(tmpDir, archiveName)
 
-		// download and install subnet evm
+		// download and install evm
 		if _, err := host.Command(fmt.Sprintf("%s %s -O %s", "busybox wget", installURL, archiveFullPath), nil, constants.SSHLongRunningScriptTimeout); err != nil {
 			return err
 		}
@@ -688,7 +688,7 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 			return err
 		}
 
-		if _, err := host.Command(fmt.Sprintf("mv -f %s/subnet-evm %s", tmpDir, subnetVMBinaryPath), nil, constants.SSHLongRunningScriptTimeout); err != nil {
+		if _, err := host.Command(fmt.Sprintf("mv -f %s/evm %s", tmpDir, evmBinaryPath), nil, constants.SSHLongRunningScriptTimeout); err != nil {
 			return err
 		}
 	default:

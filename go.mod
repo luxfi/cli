@@ -15,7 +15,7 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.17.26
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.16.10
+	github.com/luxfi/evm v0.16.4
 	github.com/luxfi/geth v1.16.57
 	github.com/luxfi/ids v1.2.4
 	github.com/luxfi/ledger-lux-go v1.0.0
@@ -43,8 +43,8 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.46.0
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
-	golang.org/x/mod v0.30.0
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/mod v0.31.0
+	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.32.0 // indirect
 	golang.org/x/sync v0.19.0
 	golang.org/x/text v0.32.0
@@ -83,7 +83,7 @@ require (
 	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251211224604-2e727cd2e6fe // indirect
+	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251221085550-b8e13ca38217 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/VictoriaMetrics/fastcache v1.13.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.63 // indirect
@@ -239,7 +239,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
-	golang.org/x/tools v0.39.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
 	gonum.org/v1/gonum v0.16.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250811230008-5f3141c8851a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
@@ -247,3 +247,9 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+replace github.com/luxfi/netrunner => ../netrunner
+
+replace github.com/luxfi/evm => ../evm
+
+replace github.com/luxfi/sdk => ../sdk
