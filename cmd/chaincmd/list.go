@@ -25,7 +25,7 @@ func newListCmd() *cobra.Command {
 }
 
 func listChains(cmd *cobra.Command, args []string) error {
-	subnetDir := app.GetSubnetDir()
+	subnetDir := app.GetChainsDir()
 	entries, err := os.ReadDir(subnetDir)
 	if err != nil {
 		if os.IsNotExist(err) {

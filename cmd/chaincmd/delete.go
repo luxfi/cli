@@ -43,7 +43,7 @@ func deleteChain(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	chainDir := filepath.Join(app.GetSubnetDir(), chainName)
+	chainDir := filepath.Join(app.GetChainsDir(), chainName)
 	if err := os.RemoveAll(chainDir); err != nil {
 		return fmt.Errorf("failed to delete chain: %w", err)
 	}

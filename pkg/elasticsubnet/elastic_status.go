@@ -12,7 +12,7 @@ import (
 )
 
 func GetLocalElasticSubnetsFromFile(app *application.Lux) ([]string, error) {
-	allSubnetDirs, err := os.ReadDir(app.GetSubnetDir())
+	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		return nil, err
 	}

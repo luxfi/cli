@@ -6,6 +6,7 @@
 package key
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
@@ -91,8 +92,13 @@ func ValidateMnemonic(mnemonic string) bool {
 	return bip39.IsMnemonicValid(mnemonic)
 }
 
-// DeriveAllKeys derives all key types from a mnemonic phrase
+// DeriveAllKeys derives all key types from a mnemonic phrase using account index 0
 func DeriveAllKeys(name, mnemonic string) (*HDKeySet, error) {
+	return DeriveAllKeysWithAccount(name, mnemonic, 0)
+}
+
+// DeriveAllKeysWithAccount derives all key types from a mnemonic phrase with a specific account index
+func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKeySet, error) {
 	if !ValidateMnemonic(mnemonic) {
 		return nil, errors.New("invalid mnemonic phrase")
 	}
@@ -107,16 +113,16 @@ func DeriveAllKeys(name, mnemonic string) (*HDKeySet, error) {
 
 	var err error
 
-	// Derive EC (secp256k1) key
-	keySet.ECPrivateKey, err = deriveKeyFromSeed(seed, DomainEC, 32)
+	// Derive EC (secp256k1) key with account index
+	keySet.ECPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainEC, 32, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive EC key: %w", err)
 	}
 	keySet.ECPublicKey = deriveECPublicKey(keySet.ECPrivateKey)
 	keySet.ECAddress = deriveECAddress(keySet.ECPublicKey)
 
-	// Derive BLS key
-	keySet.BLSPrivateKey, err = deriveKeyFromSeed(seed, DomainBLS, 32)
+	// Derive BLS key with account index
+	keySet.BLSPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainBLS, 32, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive BLS key: %w", err)
 	}
@@ -125,8 +131,13 @@ func DeriveAllKeys(name, mnemonic string) (*HDKeySet, error) {
 		return nil, fmt.Errorf("failed to derive BLS public key: %w", err)
 	}
 
-	// Derive Ringtail key
-	keySet.RingtailPrivateKey, err = deriveKeyFromSeed(seed, DomainRingtail, 32)
+	// Derive NodeID from BLS public key
+	// NodeID is a 20-byte identifier, we use first 20 bytes of SHA256(BLS public key)
+	nodeIDHash := sha256.Sum256(keySet.BLSPublicKey)
+	keySet.NodeID = fmt.Sprintf("NodeID-%s", hex.EncodeToString(nodeIDHash[:20]))
+
+	// Derive Ringtail key with account index
+	keySet.RingtailPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainRingtail, 32, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive Ringtail key: %w", err)
 	}
@@ -135,8 +146,8 @@ func DeriveAllKeys(name, mnemonic string) (*HDKeySet, error) {
 		return nil, fmt.Errorf("failed to derive Ringtail public key: %w", err)
 	}
 
-	// Derive ML-DSA key (needs more entropy - 32 bytes seed for deterministic generation)
-	mldsaSeed, err := deriveKeyFromSeed(seed, DomainMLDSA, 32)
+	// Derive ML-DSA key with account index (needs more entropy - 32 bytes seed for deterministic generation)
+	mldsaSeed, err := deriveKeyFromSeedWithAccount(seed, DomainMLDSA, 32, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive ML-DSA seed: %w", err)
 	}
@@ -148,10 +159,17 @@ func DeriveAllKeys(name, mnemonic string) (*HDKeySet, error) {
 	return keySet, nil
 }
 
-// deriveKeyFromSeed uses HKDF to derive a key from a seed with domain separation
+// deriveKeyFromSeed uses HKDF to derive a key from a seed with domain separation (account 0)
 func deriveKeyFromSeed(seed []byte, domain string, keyLen int) ([]byte, error) {
+	return deriveKeyFromSeedWithAccount(seed, domain, keyLen, 0)
+}
+
+// deriveKeyFromSeedWithAccount uses HKDF to derive a key from a seed with domain separation and account index
+func deriveKeyFromSeedWithAccount(seed []byte, domain string, keyLen int, accountIndex uint32) ([]byte, error) {
 	salt := sha256.Sum256([]byte("lux-hd-key-derivation"))
-	reader := hkdf.New(sha512.New, seed, salt[:], []byte(domain))
+	// Include account index in the info/domain string for unique derivation per account
+	info := fmt.Sprintf("%s/account/%d", domain, accountIndex)
+	reader := hkdf.New(sha512.New, seed, salt[:], []byte(info))
 
 	key := make([]byte, keyLen)
 	if _, err := reader.Read(key); err != nil {
@@ -241,9 +259,32 @@ func GetKeysDir() (string, error) {
 	return filepath.Join(home, constants.BaseDirName, constants.KeyDir), nil
 }
 
-// SaveKeySet saves all keys to the filesystem in organized subdirectories
-// Structure: ~/.lux/keys/<name>/{ec,bls,rt,mldsa}/{private.key,public.key}
+// SaveKeySet saves key set through the encrypted backend - never stores plaintext secrets
+// Deprecated: Use the backend system directly instead
 func SaveKeySet(keySet *HDKeySet) error {
+	// Get default backend (Keychain on macOS, encrypted file on other platforms)
+	backend, err := GetDefaultBackend()
+	if err != nil {
+		return fmt.Errorf("failed to get key backend: %w", err)
+	}
+
+	// Initialize backend
+	if err := backend.Initialize(context.Background()); err != nil {
+		return fmt.Errorf("failed to initialize backend: %w", err)
+	}
+
+	// Save through encrypted backend - password from env if needed
+	password := GetPasswordFromEnv()
+	if err := backend.SaveKey(context.Background(), keySet, password); err != nil {
+		return fmt.Errorf("failed to save key securely: %w", err)
+	}
+
+	// Also save public info for reference (no secrets!)
+	return savePublicKeyInfo(keySet)
+}
+
+// savePublicKeyInfo saves only public key information (no secrets)
+func savePublicKeyInfo(keySet *HDKeySet) error {
 	keysDir, err := GetKeysDir()
 	if err != nil {
 		return err
@@ -254,31 +295,19 @@ func SaveKeySet(keySet *HDKeySet) error {
 		return fmt.Errorf("failed to create base directory: %w", err)
 	}
 
-	// Save mnemonic (encrypted in production - plain text for now)
-	mnemonicPath := filepath.Join(baseDir, MnemonicFile)
-	if err := os.WriteFile(mnemonicPath, []byte(keySet.Mnemonic), 0600); err != nil {
-		return fmt.Errorf("failed to save mnemonic: %w", err)
-	}
-
-	// Save EC keys
+	// Only save PUBLIC keys - never private keys or mnemonic
 	ecDir := filepath.Join(baseDir, ECKeyDir)
 	if err := os.MkdirAll(ecDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create EC directory: %w", err)
-	}
-	if err := os.WriteFile(filepath.Join(ecDir, PrivateKeyFile), []byte(hex.EncodeToString(keySet.ECPrivateKey)), 0600); err != nil {
-		return fmt.Errorf("failed to save EC private key: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(ecDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.ECPublicKey)), 0644); err != nil {
 		return fmt.Errorf("failed to save EC public key: %w", err)
 	}
 
-	// Save BLS keys
+	// Save BLS public key and PoP (PoP is public, used for verification)
 	blsDir := filepath.Join(baseDir, BLSKeyDir)
 	if err := os.MkdirAll(blsDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create BLS directory: %w", err)
-	}
-	if err := os.WriteFile(filepath.Join(blsDir, PrivateKeyFile), keySet.BLSPrivateKey, 0600); err != nil {
-		return fmt.Errorf("failed to save BLS private key: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(blsDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.BLSPublicKey)), 0644); err != nil {
 		return fmt.Errorf("failed to save BLS public key: %w", err)
@@ -287,25 +316,19 @@ func SaveKeySet(keySet *HDKeySet) error {
 		return fmt.Errorf("failed to save BLS proof of possession: %w", err)
 	}
 
-	// Save Ringtail keys
+	// Save Ringtail public key
 	rtDir := filepath.Join(baseDir, RingtailKeyDir)
 	if err := os.MkdirAll(rtDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create Ringtail directory: %w", err)
-	}
-	if err := os.WriteFile(filepath.Join(rtDir, PrivateKeyFile), []byte(hex.EncodeToString(keySet.RingtailPrivateKey)), 0600); err != nil {
-		return fmt.Errorf("failed to save Ringtail private key: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingtailPublicKey)), 0644); err != nil {
 		return fmt.Errorf("failed to save Ringtail public key: %w", err)
 	}
 
-	// Save ML-DSA keys
+	// Save ML-DSA public key
 	mldsaDir := filepath.Join(baseDir, MLDSAKeyDir)
 	if err := os.MkdirAll(mldsaDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create ML-DSA directory: %w", err)
-	}
-	if err := os.WriteFile(filepath.Join(mldsaDir, PrivateKeyFile), []byte(hex.EncodeToString(keySet.MLDSAPrivateKey)), 0600); err != nil {
-		return fmt.Errorf("failed to save ML-DSA private key: %w", err)
 	}
 	if err := os.WriteFile(filepath.Join(mldsaDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.MLDSAPublicKey)), 0644); err != nil {
 		return fmt.Errorf("failed to save ML-DSA public key: %w", err)
@@ -314,8 +337,27 @@ func SaveKeySet(keySet *HDKeySet) error {
 	return nil
 }
 
-// LoadKeySet loads all keys from the filesystem
+// LoadKeySet loads keys through the encrypted backend
+// Deprecated: Use the backend system directly instead
 func LoadKeySet(name string) (*HDKeySet, error) {
+	// Get default backend (Keychain on macOS, encrypted file on other platforms)
+	backend, err := GetDefaultBackend()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get key backend: %w", err)
+	}
+
+	// Initialize backend
+	if err := backend.Initialize(context.Background()); err != nil {
+		return nil, fmt.Errorf("failed to initialize backend: %w", err)
+	}
+
+	// Load through encrypted backend - password from env if needed
+	password := GetPasswordFromEnv()
+	return backend.LoadKey(context.Background(), name, password)
+}
+
+// LoadKeySetPublicOnly loads only public key information (no password needed)
+func LoadKeySetPublicOnly(name string) (*HDKeySet, error) {
 	keysDir, err := GetKeysDir()
 	if err != nil {
 		return nil, err
@@ -324,23 +366,8 @@ func LoadKeySet(name string) (*HDKeySet, error) {
 	baseDir := filepath.Join(keysDir, name)
 	keySet := &HDKeySet{Name: name}
 
-	// Load mnemonic
-	mnemonicBytes, err := os.ReadFile(filepath.Join(baseDir, MnemonicFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load mnemonic: %w", err)
-	}
-	keySet.Mnemonic = string(mnemonicBytes)
-
-	// Load EC keys
+	// Load EC public key only
 	ecDir := filepath.Join(baseDir, ECKeyDir)
-	ecPrivHex, err := os.ReadFile(filepath.Join(ecDir, PrivateKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load EC private key: %w", err)
-	}
-	keySet.ECPrivateKey, err = hex.DecodeString(string(ecPrivHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode EC private key: %w", err)
-	}
 	ecPubHex, err := os.ReadFile(filepath.Join(ecDir, PublicKeyFile))
 	if err != nil {
 		return nil, fmt.Errorf("failed to load EC public key: %w", err)
@@ -352,65 +379,29 @@ func LoadKeySet(name string) (*HDKeySet, error) {
 	// Derive address from public key
 	keySet.ECAddress = deriveECAddress(keySet.ECPublicKey)
 
-	// Load BLS keys
+	// Load BLS public key and PoP (public only)
 	blsDir := filepath.Join(baseDir, BLSKeyDir)
-	keySet.BLSPrivateKey, err = os.ReadFile(filepath.Join(blsDir, PrivateKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load BLS private key: %w", err)
-	}
 	blsPubHex, err := os.ReadFile(filepath.Join(blsDir, PublicKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load BLS public key: %w", err)
-	}
-	keySet.BLSPublicKey, err = hex.DecodeString(string(blsPubHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode BLS public key: %w", err)
+	if err == nil {
+		keySet.BLSPublicKey, _ = hex.DecodeString(string(blsPubHex))
 	}
 	blsPoPHex, err := os.ReadFile(filepath.Join(blsDir, "pop.key"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load BLS proof of possession: %w", err)
-	}
-	keySet.BLSPoP, err = hex.DecodeString(string(blsPoPHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode BLS PoP: %w", err)
+	if err == nil {
+		keySet.BLSPoP, _ = hex.DecodeString(string(blsPoPHex))
 	}
 
-	// Load Ringtail keys
+	// Load Ringtail public key
 	rtDir := filepath.Join(baseDir, RingtailKeyDir)
-	rtPrivHex, err := os.ReadFile(filepath.Join(rtDir, PrivateKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load Ringtail private key: %w", err)
-	}
-	keySet.RingtailPrivateKey, err = hex.DecodeString(string(rtPrivHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode Ringtail private key: %w", err)
-	}
 	rtPubHex, err := os.ReadFile(filepath.Join(rtDir, PublicKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load Ringtail public key: %w", err)
-	}
-	keySet.RingtailPublicKey, err = hex.DecodeString(string(rtPubHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode Ringtail public key: %w", err)
+	if err == nil {
+		keySet.RingtailPublicKey, _ = hex.DecodeString(string(rtPubHex))
 	}
 
-	// Load ML-DSA keys
+	// Load ML-DSA public key
 	mldsaDir := filepath.Join(baseDir, MLDSAKeyDir)
-	mldsaPrivHex, err := os.ReadFile(filepath.Join(mldsaDir, PrivateKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load ML-DSA private key: %w", err)
-	}
-	keySet.MLDSAPrivateKey, err = hex.DecodeString(string(mldsaPrivHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode ML-DSA private key: %w", err)
-	}
 	mldsaPubHex, err := os.ReadFile(filepath.Join(mldsaDir, PublicKeyFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load ML-DSA public key: %w", err)
-	}
-	keySet.MLDSAPublicKey, err = hex.DecodeString(string(mldsaPubHex))
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode ML-DSA public key: %w", err)
+	if err == nil {
+		keySet.MLDSAPublicKey, _ = hex.DecodeString(string(mldsaPubHex))
 	}
 
 	return keySet, nil

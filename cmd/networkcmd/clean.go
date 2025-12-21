@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/localnet"
-	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/warp/relayer"
 	"github.com/luxfi/cli/pkg/warp/signatureaggregator"
@@ -86,7 +86,7 @@ func clean(*cobra.Command, []string) error {
 
 func removeLocalDeployInfoFromSidecars() error {
 	// Remove all local deployment info from sidecar files
-	deployedSubnets, err := net.GetLocallyDeployedSubnetsFromFile(app)
+	deployedSubnets, err := chain.GetLocallyDeployedSubnetsFromFile(app)
 	if err != nil {
 		return err
 	}
@@ -103,12 +103,4 @@ func removeLocalDeployInfoFromSidecars() error {
 		}
 	}
 	return nil
-}
-
-func cleanBins(dir string) {
-	if err := os.RemoveAll(dir); err != nil {
-		ux.Logger.PrintToUser("Removal failed: %s", err)
-	} else {
-		ux.Logger.PrintToUser("All existing binaries removed.")
-	}
 }

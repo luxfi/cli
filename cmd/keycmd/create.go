@@ -15,6 +15,7 @@ import (
 var (
 	useMnemonic    bool
 	mnemonicPhrase string
+	accountIndex   uint32
 )
 
 func newCreateCmd() *cobra.Command {
@@ -32,15 +33,17 @@ Generates a BIP39 mnemonic phrase and derives:
 Keys are stored in ~/.lux/keys/<name>/
 
 Examples:
-  lux key create validator1                     # Generate new mnemonic
-  lux key create validator1 --mnemonic          # Prompt for existing mnemonic
-  lux key create validator1 -m "word1 word2..." # Use provided mnemonic`,
+  lux key create validator1                           # Generate new mnemonic
+  lux key create validator1 --mnemonic                # Prompt for existing mnemonic
+  lux key create validator1 --phrase "word1 word2..." # Use provided mnemonic
+  lux key create mainnet-key-01 --phrase "$LUX_MNEMONIC" --account 1  # Derive account 1`,
 		Args: cobra.ExactArgs(1),
 		RunE: runCreate,
 	}
 
 	cmd.Flags().BoolVarP(&useMnemonic, "mnemonic", "m", false, "Import from existing mnemonic (prompts for input)")
-	cmd.Flags().StringVar(&mnemonicPhrase, "phrase", "", "Mnemonic phrase to import (24 words)")
+	cmd.Flags().StringVar(&mnemonicPhrase, "phrase", "", "Mnemonic phrase to import (12 or 24 words)")
+	cmd.Flags().Uint32Var(&accountIndex, "account", 0, "Account index for HD derivation (0-based)")
 
 	return cmd
 }
@@ -98,10 +101,14 @@ func runCreate(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("")
 	}
 
-	// Derive all keys from mnemonic
-	ux.Logger.PrintToUser("Deriving keys from mnemonic...")
+	// Derive all keys from mnemonic with account index
+	if accountIndex > 0 {
+		ux.Logger.PrintToUser("Deriving keys from mnemonic (account %d)...", accountIndex)
+	} else {
+		ux.Logger.PrintToUser("Deriving keys from mnemonic...")
+	}
 
-	keySet, err := key.DeriveAllKeys(name, mnemonic)
+	keySet, err := key.DeriveAllKeysWithAccount(name, mnemonic, accountIndex)
 	if err != nil {
 		return fmt.Errorf("failed to derive keys: %w", err)
 	}
