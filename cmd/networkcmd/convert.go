@@ -256,7 +256,7 @@ func InitializeValidatorManager(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	network models.Network,
-	luxdBootstrapValidators []*txs.ConvertNetToL1Validator,
+	luxdBootstrapValidators []*txs.ConvertChainToL1Validator,
 	pos bool,
 	managerAddress string,
 	proxyContractOwner string,
@@ -482,7 +482,7 @@ func convertSubnetToL1(
 	subnetAuthKeysList []string,
 	validatorManagerAddressStr string,
 	doStrongInputsCheck bool,
-) ([]*txs.ConvertNetToL1Validator, bool, bool, error) {
+) ([]*txs.ConvertChainToL1Validator, bool, bool, error) {
 	if subnetID == ids.Empty {
 		return nil, false, false, constants.ErrNoSubnetID
 	}
