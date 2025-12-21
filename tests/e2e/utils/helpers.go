@@ -639,7 +639,7 @@ func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	if err := json.Unmarshal(fileBytes, &luxConfig); err != nil {
 		return "", fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
-	whitelistedSubnetsIntf := luxConfig["track-subnets"]
+	whitelistedSubnetsIntf := luxConfig["track-chains"]
 	whitelistedSubnets, ok := whitelistedSubnetsIntf.(string)
 	if !ok {
 		return "", fmt.Errorf("expected a string value, but got %T", whitelistedSubnetsIntf)

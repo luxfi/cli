@@ -40,7 +40,7 @@ var DefaultCLIDependencyMap = models.CLIDependencyMap{
 			MinimumVersion: "v1.20.0",
 		},
 	},
-	SubnetEVM: "v0.8.13",
+	EVM: "v0.8.13",
 }
 
 func GetLatestLuxdByProtocolVersion(app *application.Lux, rpcVersion int) (string, error) {
@@ -89,8 +89,8 @@ func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName
 			)
 		}
 		return parsedDependency.Luxd[network.Name()].LatestVersion, nil
-	case constants.SubnetEVMRepoName:
-		return parsedDependency.SubnetEVM, nil
+	case constants.EVMRepoName:
+		return parsedDependency.EVM, nil
 	default:
 		return "", fmt.Errorf("unsupported dependency: %s", dependencyName)
 	}
