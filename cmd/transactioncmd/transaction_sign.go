@@ -5,8 +5,8 @@ package transactioncmd
 import (
 	"errors"
 
-	"github.com/luxfi/cli/cmd/netcmd"
-	"github.com/luxfi/cli/pkg/net"
+	"github.com/luxfi/cli/pkg/chain"
+	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
@@ -23,7 +23,9 @@ var (
 	useLedger       bool
 	ledgerAddresses []string
 
-	errNoSubnetID = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
+	errNoSubnetID               = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
+	errMutuallyExclusiveKeyLedger = errors.New("--key and --ledger/--ledger-addrs are mutually exclusive")
+	errStoredKeyOnMainnet         = errors.New("--key is not available for mainnet operations")
 )
 
 // lux transaction sign
@@ -62,7 +64,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	}
 
 	if useLedger && keyName != "" {
-		return netcmd.ErrMutuallyExlusiveKeyLedger
+		return errMutuallyExclusiveKeyLedger
 	}
 
 	// we need network to decide if ledger is forced (mainnet)
@@ -81,7 +83,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	case models.Mainnet:
 		useLedger = true
 		if keyName != "" {
-			return netcmd.ErrStoredKeyOnMainnet
+			return errStoredKeyOnMainnet
 		}
 	default:
 		return errors.New("unsupported network")
@@ -110,19 +112,20 @@ func signTx(_ *cobra.Command, args []string) error {
 	}
 
 	if len(remainingSubnetAuthKeys) == 0 {
-		netcmd.PrintReadyToSignMsg(subnetName, inputTxPath)
+		ux.Logger.PrintToUser("Transaction for %s is ready to commit", subnetName)
+		ux.Logger.PrintToUser("Run: lux transaction commit %s --input-tx-filepath %s", subnetName, inputTxPath)
 		return nil
 	}
 
 	// get keychain accessor
-	kc, err := netcmd.GetKeychain(useLedger, ledgerAddresses, keyName, network)
+	kc, err := keychainpkg.GetKeychain(app, keyName != "", useLedger, ledgerAddresses, keyName, network, 0)
 	if err != nil {
 		return err
 	}
 
-	deployer := net.NewPublicDeployer(app, useLedger, kc, network)
+	deployer := chain.NewPublicDeployer(app, useLedger, kc.Keychain, network)
 	if err := deployer.Sign(tx, remainingSubnetAuthKeys, subnetID); err != nil {
-		if errors.Is(err, net.ErrNoSubnetAuthKeysInWallet) {
+		if errors.Is(err, chain.ErrNoSubnetAuthKeysInWallet) {
 			ux.Logger.PrintToUser("There are no required subnet auth keys present in the wallet")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("Expected one of:")
@@ -140,16 +143,20 @@ func signTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := netcmd.SaveNotFullySignedTx(
-		"Tx",
-		tx,
-		subnetName,
-		subnetAuthKeys,
-		remainingSubnetAuthKeys,
-		inputTxPath,
-		true,
-	); err != nil {
+	// Save the transaction to disk
+	if err := txutils.SaveToDisk(tx, inputTxPath, true); err != nil {
 		return err
+	}
+
+	signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
+	ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(subnetAuthKeys))
+	if len(remainingSubnetAuthKeys) > 0 {
+		ux.Logger.PrintToUser("Remaining signers:")
+		for _, addr := range remainingSubnetAuthKeys {
+			ux.Logger.PrintToUser("  - %s", addr)
+		}
+	} else {
+		ux.Logger.PrintToUser("Transaction is fully signed and ready to commit.")
 	}
 
 	return nil
