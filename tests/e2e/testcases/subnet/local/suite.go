@@ -62,7 +62,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	ginkgo.It("can deploy a custom vm subnet to local", func() {
 		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
-		commands.CreateCustomVMConfig(subnetName, utils.SubnetEvmGenesisPath, customVMPath)
+		commands.CreateCustomVMConfig(subnetName, utils.EVMGenesisPath, customVMPath)
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, mapping[utils.SoloLuxKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -81,8 +81,8 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("can deploy a SubnetEvm subnet to local", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+	ginkgo.It("can deploy a EVM subnet to local", func() {
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -101,8 +101,8 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		commands.DeleteSubnetConfig(subnetName)
 	})
 
-	ginkgo.It("can transform a deployed SubnetEvm subnet to elastic subnet only once", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+	ginkgo.It("can transform a deployed EVM subnet to elastic subnet only once", func() {
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -140,7 +140,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can transform subnet to elastic subnet and automatically transform validators to permissionless", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		_, err = utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -171,7 +171,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can add permissionless validator to elastic subnet", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		_, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -217,7 +217,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can load viper config and setup node properties for local deploy", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocallyWithViperConf(subnetName, confPath)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -232,7 +232,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can't deploy the same subnet twice to local", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
@@ -253,8 +253,8 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can deploy multiple subnets to local", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
-		commands.CreateSubnetEvmConfig(secondSubnetName, utils.SubnetEvmGenesis2Path)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
+		commands.CreateEVMConfig(secondSubnetName, utils.EVMGenesis2Path)
 
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
@@ -289,7 +289,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can deploy custom chain config", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmAllowFeeRecpPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMAllowFeeRecpPath)
 
 		addr := "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
 
@@ -331,7 +331,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.It("can deploy with custom per chain config node", func() {
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 
 		// create per node chain config
 		nodesRPCTxFeeCap := map[string]string{
@@ -398,7 +398,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 			"NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
 		}
 
-		commands.CreateSubnetEvmConfig(subnetName, utils.SubnetEvmGenesisPath)
+		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		_, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -432,9 +432,9 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 	})
 
 	ginkgo.It("can deploy a evm with specific version", func() {
-		subnetEVMVersion := "v0.7.9"
+		evmVersion := "v0.7.9"
 
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion)
+		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, evmVersion)
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -455,11 +455,11 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 
 	ginkgo.It("can't deploy conflicting vm versions", func() {
 		// Using versions with different RPC protocols
-		subnetEVMVersion1 := "v0.7.9" // RPC 42
-		subnetEVMVersion2 := "v0.7.5" // RPC 41
+		evmVersion1 := "v0.7.9" // RPC 42
+		evmVersion2 := "v0.7.5" // RPC 41
 
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, subnetEVMVersion1)
-		commands.CreateSubnetEvmConfigWithVersion(secondSubnetName, utils.SubnetEvmGenesis2Path, subnetEVMVersion2)
+		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, evmVersion1)
+		commands.CreateEVMConfigWithVersion(secondSubnetName, utils.EVMGenesis2Path, evmVersion2)
 
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)

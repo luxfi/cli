@@ -206,7 +206,7 @@ func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
 	// if the user had requested to skipCheck less than 24 hrs ago, we skip in any case
 	if lastActs.LastSkipCheck != (time.Time{}) &&
 		time.Now().Before(lastActs.LastSkipCheck.Add(24*time.Hour)) {
-		app.Log.Debug("last checked %s, so less than 24 hrs earlier. Skipping to check for updates.",
+		app.Log.Debug("skipping update check, last checked less than 24 hrs ago",
 			zap.Time("lastSkipCheck", lastActs.LastSkipCheck))
 		return nil
 	}
@@ -358,10 +358,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		app.Log.Info("Using config file", zap.String("config-file", viper.ConfigFileUsed()))
-	} else {
-		app.Log.Info("No log file found")
+		app.Log.Debug("using config file", zap.String("config-file", viper.ConfigFileUsed()))
 	}
+	// No config file is normal - most users don't have one, so we silently continue
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

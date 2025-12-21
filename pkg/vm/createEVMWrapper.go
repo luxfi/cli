@@ -18,7 +18,7 @@ import (
 // CreateEVMGenesisWithParams creates EVM genesis with extended parameters
 func CreateEVMGenesisWithParams(
 	app *application.Lux,
-	params SubnetEVMGenesisParams,
+	params EVMGenesisParams,
 	warpInfo *warp.WarpInfo,
 	addWarpRegistryToGenesis bool,
 	proxyContractOwner string,
