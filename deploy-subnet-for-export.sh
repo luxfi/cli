@@ -106,7 +106,7 @@ cat > $DATA_DIR/config.json <<EOF
   "db-type": "pebbledb",
   "http-allowed-origins": "*",
   "http-allowed-hosts": "*",
-  "track-subnets": "$SUBNET_ID"
+  "track-chains": "$SUBNET_ID"
 }
 EOF
 
