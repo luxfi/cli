@@ -13,18 +13,18 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/luxfi/crypto v1.17.22
+	github.com/luxfi/crypto v1.17.26
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.8.10
-	github.com/luxfi/geth v1.16.52
+	github.com/luxfi/evm v0.16.4
+	github.com/luxfi/geth v1.16.56
 	github.com/luxfi/ids v1.2.4
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.10
-	github.com/luxfi/node v1.22.13
-	github.com/luxfi/sdk v1.16.25
-	github.com/luxfi/warp v1.16.36
+	github.com/luxfi/netrunner v1.14.19
+	github.com/luxfi/node v1.22.23
+	github.com/luxfi/sdk v1.16.29
+	github.com/luxfi/warp v1.16.37
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
@@ -60,13 +60,16 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
 
 require (
+	github.com/btcsuite/btcd v0.24.2
+	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/cockroachdb/pebble v1.1.5
 	github.com/dgraph-io/badger/v3 v3.2103.5
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/constants v1.2.3
-	github.com/luxfi/genesis v1.5.1
+	github.com/luxfi/genesis v1.5.7
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/math v1.0.1
-	github.com/luxfi/migrate v1.2.7
+	github.com/luxfi/math v1.1.0
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.38.0
@@ -99,7 +102,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.5 // indirect
-	github.com/btcsuite/btcd/btcutil v1.1.6 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
@@ -156,7 +159,6 @@ require (
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/rpc v1.2.1 // indirect
-	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
@@ -170,18 +172,19 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/cache v1.0.0 // indirect
+	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.0.4 // indirect
-	github.com/luxfi/consensus v1.22.26 // indirect
-	github.com/luxfi/database v1.2.11 // indirect
+	github.com/luxfi/consensus v1.22.33 // indirect
+	github.com/luxfi/database v1.2.12 // indirect
 	github.com/luxfi/go-bip32 v1.0.1 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
-	github.com/luxfi/p2p v1.4.6 // indirect
+	github.com/luxfi/p2p v1.4.7 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
 	github.com/luxfi/upgrade v1.0.0 // indirect
-	github.com/luxfi/utils v1.0.0 // indirect
+	github.com/luxfi/utils v1.1.0 // indirect
+	github.com/luxfi/vm v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -248,9 +251,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-replace github.com/luxfi/sdk => /Users/z/work/lux/sdk
-
-replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
-
-replace github.com/luxfi/migrate => /Users/z/work/lux/migrate

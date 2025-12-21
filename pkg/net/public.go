@@ -76,17 +76,17 @@ func (d *PublicDeployer) AddValidator(
 	if err != nil {
 		return false, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
 	}
-	validator := &txs.NetValidator{
+	validator := &txs.ChainValidator{
 		Validator: txs.Validator{
 			NodeID: nodeID,
 			Start:  uint64(startTime.Unix()),
 			End:    uint64(startTime.Add(duration).Unix()),
 			Wght:   weight,
 		},
-		Net: subnetID,
+		Chain: subnetID,
 	}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign NetValidator transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign ChainValidator transaction on the ledger device *** ")
 	}
 
 	tx, err := d.createAddSubnetValidatorTx(subnetAuthKeys, validator, wallet)
@@ -511,12 +511,12 @@ func (d *PublicDeployer) createBlockchainTx(
 
 func (d *PublicDeployer) createAddSubnetValidatorTx(
 	subnetAuthKeys []ids.ShortID,
-	validator *txs.NetValidator,
+	validator *txs.ChainValidator,
 	wallet primary.Wallet,
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewAddNetValidatorTx(validator, options...)
+	unsignedTx, err := wallet.P().Builder().NewAddChainValidatorTx(validator, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -536,7 +536,7 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewRemoveNetValidatorTx(nodeID, subnetID, options...)
+	unsignedTx, err := wallet.P().Builder().NewRemoveChainValidatorTx(nodeID, subnetID, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -556,7 +556,7 @@ func (d *PublicDeployer) createTransformSubnetTX(
 ) (*txs.Tx, error) {
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewTransformNetTx(elasticSubnetConfig.SubnetID, assetID,
+	unsignedTx, err := wallet.P().Builder().NewTransformChainTx(elasticSubnetConfig.SubnetID, assetID,
 		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
 		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
@@ -579,9 +579,9 @@ func (d *PublicDeployer) ConvertL1(
 	subnetID ids.ID,
 	blockchainID ids.ID,
 	managerAddress ethcommon.Address,
-	validators []interface{}, // []*txs.ConvertNetToL1Validator
+	validators []interface{}, // []*txs.ConvertChainToL1Validator
 ) (bool, ids.ID, *txs.Tx, []string, error) {
-	ux.Logger.PrintToUser("Now calling ConvertNetToL1Tx...")
+	ux.Logger.PrintToUser("Now calling ConvertChainToL1Tx...")
 
 	// Get wallet
 	wallet, err := d.loadWallet(subnetID)
@@ -594,20 +594,20 @@ func (d *PublicDeployer) ConvertL1(
 		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing auth keys: %w", err)
 	}
 
-	// Convert []interface{} to []*txs.ConvertNetToL1Validator
-	convertValidators := make([]*txs.ConvertNetToL1Validator, 0, len(validators))
+	// Convert []interface{} to []*txs.ConvertChainToL1Validator
+	convertValidators := make([]*txs.ConvertChainToL1Validator, 0, len(validators))
 	for _, v := range validators {
-		if validator, ok := v.(*txs.ConvertNetToL1Validator); ok {
+		if validator, ok := v.(*txs.ConvertChainToL1Validator); ok {
 			convertValidators = append(convertValidators, validator)
 		} else {
-			return false, ids.Empty, nil, nil, fmt.Errorf("invalid validator type: expected *txs.ConvertNetToL1Validator, got %T", v)
+			return false, ids.Empty, nil, nil, fmt.Errorf("invalid validator type: expected *txs.ConvertChainToL1Validator, got %T", v)
 		}
 	}
 
-	// Build ConvertNetToL1Tx using the wallet builder
+	// Build ConvertChainToL1Tx using the wallet builder
 	options := d.getMultisigTxOptions(subnetAuthKeys)
 
-	unsignedTx, err := wallet.P().Builder().NewConvertNetToL1Tx(
+	unsignedTx, err := wallet.P().Builder().NewConvertChainToL1Tx(
 		subnetID,
 		blockchainID,
 		managerAddress.Bytes(),
@@ -615,7 +615,7 @@ func (d *PublicDeployer) ConvertL1(
 		options...,
 	)
 	if err != nil {
-		return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertNetToL1Tx: %w", err)
+		return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertChainToL1Tx: %w", err)
 	}
 
 	tx := txs.Tx{Unsigned: unsignedTx}
@@ -652,12 +652,12 @@ func (*PublicDeployer) signTx(
 }
 
 func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
-	ux.Logger.PrintToUser("createNetTx: starting with control keys: %v", controlKeys)
+	ux.Logger.PrintToUser("createSubnetTx: starting with control keys: %v", controlKeys)
 	addrs, err := address.ParseToIDs(controlKeys)
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failure parsing control keys: %w", err)
 	}
-	ux.Logger.PrintToUser("createNetTx: parsed addresses: %v", addrs)
+	ux.Logger.PrintToUser("createSubnetTx: parsed addresses: %v", addrs)
 	owners := &secp256k1fx.OutputOwners{
 		Addrs:     addrs,
 		Threshold: threshold,
@@ -665,15 +665,15 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 	}
 	opts := []common.Option{}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign CreateNet transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
 	}
-	ux.Logger.PrintToUser("createNetTx: calling IssueCreateNetTx...")
-	tx, err := wallet.P().IssueCreateNetTx(owners, opts...)
+	ux.Logger.PrintToUser("createSubnetTx: calling IssueCreateSubnetTx...")
+	tx, err := wallet.P().IssueCreateSubnetTx(owners, opts...)
 	if err != nil {
-		ux.Logger.PrintToUser("createNetTx: IssueCreateNetTx error: %v", err)
+		ux.Logger.PrintToUser("createSubnetTx: IssueCreateSubnetTx error: %v", err)
 		return ids.Empty, err
 	}
-	ux.Logger.PrintToUser("createNetTx: tx issued successfully with ID: %s", tx.ID().String())
+	ux.Logger.PrintToUser("createSubnetTx: tx issued successfully with ID: %s", tx.ID().String())
 	return tx.ID(), nil
 }
 

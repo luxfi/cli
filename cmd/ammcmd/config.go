@@ -26,7 +26,7 @@ var (
 	// Lux Mainnet (C-Chain)
 	LuxMainnet = NetworkConfig{
 		ChainID:     96369,
-		RPC:         "http://localhost:8546",
+		RPC:         "http://localhost:8545",
 		Name:        "Lux Mainnet",
 		V2Factory:   common.HexToAddress("0xD173926A10A0C4eCd3A51B1422270b65Df0551c1"),
 		V2Router:    common.HexToAddress("0xAe2cf1E403aAFE6C05A5b8Ef63EB19ba591d8511"),
@@ -42,7 +42,7 @@ var (
 	// Zoo Mainnet
 	ZooMainnet = NetworkConfig{
 		ChainID:     200200,
-		RPC:         "http://localhost:8545",
+		RPC:         "http://localhost:8546",
 		Name:        "Zoo Mainnet",
 		V2Factory:   common.HexToAddress("0xD173926A10A0C4eCd3A51B1422270b65Df0551c1"),
 		V2Router:    common.HexToAddress("0xAe2cf1E403aAFE6C05A5b8Ef63EB19ba591d8511"),
@@ -69,6 +69,16 @@ var (
 		WETH:        common.HexToAddress("0x4888E4a2Ee0F03051c72D2BD3ACf755eD3498B3E"), // WLUX
 		NFTPosition: common.HexToAddress("0x7a4C48B9dae0b7c396569b34042fcA604150Ee28"),
 		TickLens:    common.HexToAddress("0x57A22965AdA0e52D785A9Aa155beF423D573b879"),
+	}
+
+	// Lux Local (Anvil dev network)
+	LuxLocal = NetworkConfig{
+		ChainID:   96369,
+		RPC:       "http://localhost:8545",
+		Name:      "Lux Local",
+		V2Factory: common.HexToAddress("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"),
+		V2Router:  common.HexToAddress("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"),
+		WETH:      common.HexToAddress("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"), // WLUX
 	}
 
 	// Zoo chain tokens (chainId 200200)
@@ -113,6 +123,8 @@ var (
 		"zoo-mainnet": &ZooMainnet,
 		"lux-testnet": &LuxTestnet,
 		"testnet":     &LuxTestnet,
+		"local":       &LuxLocal,
+		"lux-local":   &LuxLocal,
 	}
 )
 

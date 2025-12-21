@@ -17,15 +17,15 @@ func marketListCmd(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Spot Markets:")
 	ux.Logger.PrintToUser("  Symbol      Last Price    24h Volume    24h Change")
-	ux.Logger.PrintToUser("  LUX/USDT    $12.50        $1.2M         +5.2%")
-	ux.Logger.PrintToUser("  BTC/USDT    $67,500.00    $45.3M        +2.1%")
-	ux.Logger.PrintToUser("  ETH/USDT    $3,450.00     $23.1M        +3.8%")
+	ux.Logger.PrintToUser("  LUX/USDT    $12.50        $1.2M         +5.2%%")
+	ux.Logger.PrintToUser("  BTC/USDT    $67,500.00    $45.3M        +2.1%%")
+	ux.Logger.PrintToUser("  ETH/USDT    $3,450.00     $23.1M        +3.8%%")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Perpetual Markets:")
 	ux.Logger.PrintToUser("  Symbol      Mark Price    Funding Rate  Open Interest")
-	ux.Logger.PrintToUser("  BTC-PERP    $67,502.50    +0.0012%      $125M")
-	ux.Logger.PrintToUser("  ETH-PERP    $3,451.20     +0.0008%      $67M")
-	ux.Logger.PrintToUser("  LUX-PERP    $12.51        +0.0015%      $8.5M")
+	ux.Logger.PrintToUser("  BTC-PERP    $67,502.50    +0.0012%%     $125M")
+	ux.Logger.PrintToUser("  ETH-PERP    $3,451.20     +0.0008%%     $67M")
+	ux.Logger.PrintToUser("  LUX-PERP    $12.51        +0.0015%%     $8.5M")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Use 'lux dex market info [symbol]' for detailed market information")
 	return nil
@@ -49,7 +49,7 @@ func marketInfoCmd(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("  $12.46  320.1 LUX        $12.54  200.0 LUX")
 	ux.Logger.PrintToUser("  $12.45  150.0 LUX        $12.55  175.5 LUX")
 	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser("Spread: $0.02 (0.16%)")
+	ux.Logger.PrintToUser("Spread: $0.02 (0.16%%)")
 	return nil
 }
 

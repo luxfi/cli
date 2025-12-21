@@ -172,8 +172,8 @@ func importRunningSubnet(*cobra.Command, []string) error {
 	}
 
 	vmID = createChainTx.VMID
-	subnetID = createChainTx.NetID
-	subnetName = createChainTx.ChainName
+	subnetID = createChainTx.ChainID
+	subnetName = createChainTx.BlockchainName
 
 	ux.Logger.PrintToUser("Retrieved information. BlockchainID: %s, SubnetID: %s, Name: %s, VMID: %s",
 		blockchainID.String(),

@@ -136,12 +136,12 @@ func TestValidateMainnetStakingDuration(t *testing.T) {
 		},
 		{
 			name:    "minimum duration",
-			input:   genesis.MainnetParams.MinStakeDuration.String(),
+			input:   (time.Duration(genesis.MainnetParams.MinStakeDuration) * time.Second).String(),
 			wantErr: false,
 		},
 		{
 			name:    "maximum duration",
-			input:   genesis.MainnetParams.MaxStakeDuration.String(),
+			input:   (time.Duration(genesis.MainnetParams.MaxStakeDuration) * time.Second).String(),
 			wantErr: false,
 		},
 		{
@@ -196,7 +196,7 @@ func TestValidateMainnetL1StakingDuration(t *testing.T) {
 		},
 		{
 			name:    "maximum duration",
-			input:   genesis.MainnetParams.MaxStakeDuration.String(),
+			input:   (time.Duration(genesis.MainnetParams.MaxStakeDuration) * time.Second).String(),
 			wantErr: false,
 		},
 		{
@@ -241,12 +241,12 @@ func TestValidateTestnetStakingDuration(t *testing.T) {
 		},
 		{
 			name:    "minimum duration",
-			input:   genesis.TestnetParams.MinStakeDuration.String(),
+			input:   (time.Duration(genesis.TestnetParams.MinStakeDuration) * time.Second).String(),
 			wantErr: false,
 		},
 		{
 			name:    "maximum duration",
-			input:   genesis.TestnetParams.MaxStakeDuration.String(),
+			input:   (time.Duration(genesis.TestnetParams.MaxStakeDuration) * time.Second).String(),
 			wantErr: false,
 		},
 		{

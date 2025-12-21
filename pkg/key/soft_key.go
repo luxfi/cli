@@ -55,11 +55,9 @@ const (
 	// LocalKeyPath is the path where the local key is stored
 	LocalKeyPath = "~/.lux/keys/" + LocalKeyName + ".pk"
 
-	// Environment variables for key configuration (no hardcoded keys!)
-	// LUX_MNEMONIC - BIP39 mnemonic phrase for deterministic key generation
-	// LUX_PRIVATE_KEY - CB58 encoded private key (PrivateKey-xxx format)
-	EnvMnemonic    = "LUX_MNEMONIC"
-	EnvPrivateKey  = "LUX_PRIVATE_KEY"
+	// Environment variables for key configuration are defined in backend_env.go:
+	// - EnvMnemonic (LUX_MNEMONIC) - BIP39 mnemonic phrase for deterministic key generation
+	// - EnvPrivateKey (LUX_PRIVATE_KEY) - CB58 encoded private key (PrivateKey-xxx format)
 )
 
 type SOp struct {

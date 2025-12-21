@@ -53,13 +53,13 @@ var (
 			},
 			CustomChains: map[string]*rpcpb.CustomChainInfo{
 				"bchain1": {
-					ChainId: testBlockChainID1,
+					BlockchainId: testBlockChainID1,
 				},
 				"bchain2": {
-					ChainId: testBlockChainID2,
+					BlockchainId: testBlockChainID2,
 				},
 			},
-			Subnets: map[string]*rpcpb.SubnetInfo{
+			Chains: map[string]*rpcpb.ChainInfo{
 				testSubnetID1: {},
 				testSubnetID2: {},
 			},

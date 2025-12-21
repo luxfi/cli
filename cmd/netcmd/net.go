@@ -70,8 +70,6 @@ To get started, use 'lux l2 create' to configure your L2.`,
 	cmd.AddCommand(newConfigureCmd())
 	// subnet import-running
 	cmd.AddCommand(newImportFromNetworkCmd())
-	// subnet import-historic
-	cmd.AddCommand(newImportHistoricCmd())
 	// subnet VMID
 	cmd.AddCommand(vmidCmd())
 	// subnet removeValidator

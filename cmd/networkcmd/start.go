@@ -30,11 +30,16 @@ var (
 	testnet                bool
 	numValidators          int
 	nodePath               string // Path to custom luxd binary
+	portBase               int    // Base port for nodes (each node uses 2 ports)
 	// BadgerDB flags
 	dbEngine      string
 	archiveDir    string
 	archiveShared bool
 	genesisImport string
+	// C-Chain import
+	cchainImportPath string
+	// Replay mode - preserves original genesis for block import
+	replayMode bool
 )
 
 // StartFlags contains configuration for starting a network
@@ -116,11 +121,14 @@ already running.`,
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 5 validators")
 	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 5 validators")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
+	cmd.Flags().IntVar(&portBase, "port-base", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
 	// BadgerDB flags
 	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
 	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
 	cmd.Flags().BoolVar(&archiveShared, "archive-shared", false, "enable shared read-only access to archive database")
 	cmd.Flags().StringVar(&genesisImport, "genesis-path", "", "path to genesis database to import (PebbleDB or LevelDB)")
+	cmd.Flags().StringVar(&cchainImportPath, "cchain-import", "", "path to RLP file for C-Chain block import")
+	cmd.Flags().BoolVar(&replayMode, "replay", false, "replay mode: preserve original genesis for historical block import (required for proper consensus verification)")
 
 	// Add state loading flags
 	AddStateFlags(cmd)
@@ -226,11 +234,8 @@ func StartNetwork(*cobra.Command, []string) error {
 		nodeConfig["archive-dir"] = archiveDir
 		nodeConfig["archive-shared"] = archiveShared
 	}
-	if genesisImport != "" {
-		nodeConfig["genesis-import"] = genesisImport
-		nodeConfig["genesis-replay"] = true
-		nodeConfig["genesis-verify"] = true
-	}
+	// NOTE: genesis-import, genesis-replay, genesis-verify flags were removed
+	// as they don't exist in luxd. The --genesis-path flag is no longer functional.
 
 	// Convert back to JSON
 	if len(nodeConfig) > 0 {
@@ -424,16 +429,49 @@ func StartMainnet() error {
 	// This triggers local.NewMainnetConfig() in netrunner which uses configs.GetGenesis(96369)
 	// Note: staking is enabled by default in luxd, no flag needed
 	// http-host is required for RPC to be accessible
-	globalNodeConfig := `{
-		"network-id": 96369,
-		"db-type": "badgerdb",
-		"sybil-protection-enabled": true,
-		"network-allow-private-ips": true,
-		"health-check-frequency": "30s",
-		"log-level": "info",
-		"http-host": "127.0.0.1",
-		"api-admin-enabled": true
-	}`
+	//
+	// Replay mode preserves the EXACT original genesis for proper block import verification:
+	// - Original initialStakers are kept (they signed historical blocks)
+	// - Our local nodes run as non-validators that verify signatures
+	// - Required for importing blocks with full consensus verification
+
+	// Auto-detect deployed subnets for tracking
+	trackSubnets := ""
+	netIDs, trackErr := net.GetLocallyDeployedNetIDs(app)
+	if trackErr == nil && len(netIDs) > 0 {
+		trackSubnets = strings.Join(netIDs, ",")
+		ux.Logger.PrintToUser("Auto-tracking %d deployed subnet(s): %s", len(netIDs), trackSubnets)
+	}
+
+	var globalNodeConfig string
+	if replayMode {
+		ux.Logger.PrintToUser("Replay mode enabled - preserving original genesis for block import")
+		globalNodeConfig = fmt.Sprintf(`{
+			"network-id": 96369,
+			"replay-mode": true,
+			"db-type": "badgerdb",
+			"sybil-protection-enabled": false,
+			"network-allow-private-ips": true,
+			"health-check-frequency": "30s",
+			"log-level": "info",
+			"http-host": "127.0.0.1",
+			"api-admin-enabled": true,
+			"track-subnets": %q
+		}`, trackSubnets)
+	} else {
+		// Auto-track deployed subnets for RPC access
+		globalNodeConfig = fmt.Sprintf(`{
+			"network-id": 96369,
+			"db-type": "badgerdb",
+			"sybil-protection-enabled": true,
+			"network-allow-private-ips": true,
+			"health-check-frequency": "30s",
+			"log-level": "info",
+			"http-host": "127.0.0.1",
+			"api-admin-enabled": true,
+			"track-subnets": %q
+		}`, trackSubnets)
+	}
 
 	// Use stable directory path for persistence across restarts
 	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
@@ -470,6 +508,19 @@ func StartMainnet() error {
 		client.WithRootDataDir(rootDataDir),
 		client.WithReassignPortsIfUsed(true),
 		client.WithDynamicPorts(false), // Use fixed ports starting from 9630
+	}
+
+	// Add C-Chain import config if specified
+	if cchainImportPath != "" {
+		ux.Logger.PrintToUser("C-Chain import enabled from: %s", cchainImportPath)
+		cchainConfig := fmt.Sprintf(`{
+			"import-chain-data": %q,
+			"geth-admin-api-enabled": true,
+			"log-level": "debug"
+		}`, cchainImportPath)
+		opts = append(opts, client.WithChainConfigs(map[string]string{
+			"C": cchainConfig,
+		}))
 	}
 
 	// Add plugin directory if it exists
@@ -516,7 +567,7 @@ func StartMainnet() error {
 	}
 
 	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
-	ux.Logger.PrintToUser("C-Chain RPC: http://localhost:9630/ext/bc/C/rpc")
+	ux.Logger.PrintToUser("C-Chain RPC: http://localhost:%d/ext/bc/C/rpc", portBase)
 	ux.Logger.PrintToUser("Network is ready for use!")
 
 	return nil

@@ -66,6 +66,11 @@ type HDKeySet struct {
 	// ML-DSA keys
 	MLDSAPrivateKey []byte
 	MLDSAPublicKey  []byte
+
+	// Node identity
+	NodeID         string // Node ID derived from staking key
+	StakingKeyPEM  []byte // TLS private key for node staking
+	StakingCertPEM []byte // TLS certificate for node staking
 }
 
 // GenerateMnemonic generates a new BIP39 mnemonic phrase

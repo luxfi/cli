@@ -3,11 +3,12 @@
 package networkcmd
 
 import (
-	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
@@ -22,104 +23,108 @@ var (
 	exportOut   string
 )
 
-// lux blockchain export
+// lux network export
 func newExportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export",
-		Short: "Export blockchain data via RPC",
-		Long: `Export blockchain blocks from a running node via RPC to JSONL format.
+		Short: "Export blockchain data via admin RPC",
+		Long: `Export blockchain blocks from a running node using admin_exportChain RPC.
 
-Each block is written as a single JSON line for efficient streaming and processing.
+Exports blocks in native RLP format which can be directly imported using admin_importChain.
 
 Example:
-  lux blockchain export --id=dnmzhuf6... --output=blocks.jsonl
-
-For exporting from a database file directly (no running node):
-  lux network export db /path/to/pebbledb`,
+  lux network export --id=C --output=blocks.rlp
+  lux network export --id=zoo --output=zoo-blocks.rlp
+  lux network export --id=C --start-block=0 --end-block=1000 -o blocks.rlp`,
 		RunE: exportFunc,
 	}
 
-	cmd.Flags().StringVar(&exportID, "id", "", "Blockchain ID (required)")
+	cmd.Flags().StringVar(&exportID, "id", "", "Blockchain ID (C, zoo, or full ID)")
 	cmd.Flags().StringVar(&exportRPC, "rpc", "", "RPC endpoint (auto-discovered from ID)")
 	cmd.Flags().Uint64Var(&exportStart, "start-block", 0, "Start block")
 	cmd.Flags().Uint64Var(&exportEnd, "end-block", 0, "End block (0=current)")
-	cmd.Flags().StringVarP(&exportOut, "output", "o", "blocks.jsonl", "Output file (JSONL format)")
+	cmd.Flags().StringVarP(&exportOut, "output", "o", "blocks.rlp", "Output file")
 
 	_ = cmd.MarkFlagRequired("id")
-
-	// Add subcommand for database export
-	cmd.AddCommand(newExportDBCmd())
 
 	return cmd
 }
 
 func exportFunc(cmd *cobra.Command, args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Minute)
 	defer cancel()
 
-	// Discover RPC if not provided
-	if exportRPC == "" {
-		exportRPC = discoverRPC(exportID)
-		ux.Logger.PrintToUser("🔍 RPC: %s", exportRPC)
+	// Discover admin RPC endpoint
+	adminRPC := exportRPC
+	if adminRPC == "" {
+		adminRPC = discoverAdminRPC(exportID)
+		ux.Logger.PrintToUser("Admin RPC: %s", adminRPC)
 	}
 
-	// Get current block if end not specified
-	if exportEnd == 0 {
-		current, err := getCurrentBlock(ctx, exportRPC)
-		if err != nil {
-			return fmt.Errorf("failed to get current block: %w", err)
+	return exportRLP(ctx, adminRPC)
+}
+
+// exportRLP exports blocks using admin_exportChain (native geth RLP format)
+func exportRLP(ctx context.Context, adminRPC string) error {
+	ux.Logger.PrintToUser("Exporting blocks to %s (RLP format via admin_exportChain)", exportOut)
+
+	// Build admin_exportChain request
+	params := []interface{}{exportOut}
+	if exportStart > 0 || exportEnd > 0 {
+		params = append(params, exportStart)
+		if exportEnd > 0 {
+			params = append(params, exportEnd)
 		}
-		exportEnd = current
 	}
 
-	ux.Logger.PrintToUser("📤 Exporting blocks %d-%d to %s", exportStart, exportEnd, exportOut)
+	reqData := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "admin_exportChain",
+		"params":  params,
+		"id":      1,
+	}
 
-	// Open output file
-	f, err := os.Create(exportOut)
+	jsonData, _ := json.Marshal(reqData)
+	req, err := http.NewRequestWithContext(ctx, "POST", adminRPC, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return fmt.Errorf("failed to create output file: %w", err)
+		return fmt.Errorf("failed to create request: %w", err)
 	}
-	defer f.Close()
+	req.Header.Set("Content-Type", "application/json")
 
-	writer := bufio.NewWriter(f)
-	defer writer.Flush()
+	client := &http.Client{Timeout: 60 * time.Minute}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to call admin_exportChain: %w", err)
+	}
+	defer resp.Body.Close()
 
-	// Export in batches, write as JSONL
-	batchSize := uint64(100)
-	exported := 0
-
-	for start := exportStart; start <= exportEnd; start += batchSize {
-		end := start + batchSize - 1
-		if end > exportEnd {
-			end = exportEnd
-		}
-
-		ux.Logger.PrintToUser("  Blocks %d-%d...", start, end)
-		blocks, err := getBlocks(ctx, exportRPC, start, end)
-		if err != nil {
-			return fmt.Errorf("failed to get blocks: %w", err)
-		}
-
-		// Write each block as a JSON line
-		for _, block := range blocks {
-			data, err := json.Marshal(block)
-			if err != nil {
-				return fmt.Errorf("failed to marshal block: %w", err)
-			}
-			if _, err := writer.Write(data); err != nil {
-				return fmt.Errorf("failed to write block: %w", err)
-			}
-			if _, err := writer.WriteString("\n"); err != nil {
-				return fmt.Errorf("failed to write newline: %w", err)
-			}
-			exported++
-		}
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	if err := writer.Flush(); err != nil {
-		return fmt.Errorf("failed to flush output: %w", err)
+	if result["error"] != nil {
+		return fmt.Errorf("admin_exportChain error: %v", result["error"])
 	}
 
-	ux.Logger.PrintToUser("✅ Exported %d blocks to %s", exported, exportOut)
+	success, ok := result["result"].(bool)
+	if !ok || !success {
+		return fmt.Errorf("admin_exportChain failed: %v", result["result"])
+	}
+
+	ux.Logger.PrintToUser("Exported blocks to %s", exportOut)
 	return nil
+}
+
+// discoverAdminRPC returns the admin RPC endpoint for a blockchain ID
+func discoverAdminRPC(blockchainID string) string {
+	// Handle well-known chain IDs
+	switch strings.ToLower(blockchainID) {
+	case "c", "c-chain", "cchain":
+		return "http://127.0.0.1:9630/ext/bc/C/admin"
+	case "zoo":
+		return "http://127.0.0.1:9630/ext/bc/zoo/admin"
+	default:
+		return fmt.Sprintf("http://127.0.0.1:9630/ext/bc/%s/admin", blockchainID)
+	}
 }

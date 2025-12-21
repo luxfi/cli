@@ -69,7 +69,6 @@ Use 'lux network', 'lux blockchain', or 'lux net' interchangeably.`,
 	cmd.AddCommand(newStopCmd())
 	cmd.AddCommand(newCleanCmd())
 	cmd.AddCommand(newStatusCmd())
-	cmd.AddCommand(newQuickstartCmd())
 
 	return cmd
 }
