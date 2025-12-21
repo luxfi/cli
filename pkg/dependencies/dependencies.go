@@ -40,7 +40,7 @@ var DefaultCLIDependencyMap = models.CLIDependencyMap{
 			MinimumVersion: "v1.20.0",
 		},
 	},
-	SubnetEVM: "v0.6.12",
+	SubnetEVM: "v0.8.13",
 }
 
 func GetLatestLuxdByProtocolVersion(app *application.Lux, rpcVersion int) (string, error) {

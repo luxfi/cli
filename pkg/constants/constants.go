@@ -290,7 +290,7 @@ const (
 	DefaultNodeRunURL = "http://127.0.0.1:9630"
 
 	// Latest EVM version
-	LatestEVMVersion = "v0.7.7"
+	LatestEVMVersion = "v0.8.13"
 
 	LPMDir = ".lpm"
 
