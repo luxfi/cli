@@ -172,11 +172,17 @@ func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 	fakeSaveSnapshotResponse := &rpcpb.SaveSnapshotResponse{}
 	fakeRemoveSnapshotResponse := &rpcpb.RemoveSnapshotResponse{}
 	fakeCreateBlockchainsResponse := &rpcpb.CreateBlockchainsResponse{}
+	fakeHealthResponse := &rpcpb.HealthResponse{
+		ClusterInfo: fakeWaitForHealthyResponse.ClusterInfo,
+	}
 	c.On("LoadSnapshot", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fakeLoadSnapshotResponse, nil)
 	c.On("SaveSnapshot", mock.Anything, mock.Anything).Return(fakeSaveSnapshotResponse, nil)
 	c.On("RemoveSnapshot", mock.Anything, mock.Anything).Return(fakeRemoveSnapshotResponse, nil)
-	c.On("CreateBlockchains", mock.Anything, mock.Anything, mock.Anything).Return(fakeCreateBlockchainsResponse, nil)
+	// CreateChains takes context and blockchain specs (2 args)
+	c.On("CreateChains", mock.Anything, mock.Anything).Return(fakeCreateBlockchainsResponse, nil)
 	c.On("URIs", mock.Anything).Return([]string{"fakeUri"}, nil)
+	// Health is called by formatChainHealthError for diagnostics
+	c.On("Health", mock.Anything).Return(fakeHealthResponse, nil)
 	// When fake deploying, the first response needs to have a bogus subnet ID, because
 	// otherwise the doDeploy function "aborts" when checking if the subnet had already been deployed.
 	// Afterwards, we can set the actual VM ID so that the test returns an expected subnet ID...
