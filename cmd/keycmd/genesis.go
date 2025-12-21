@@ -363,7 +363,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		ripemdHasher := ripemd160.New()
 		ripemdHasher.Write(sha256Hash[:])
 		shortID := ripemdHasher.Sum(nil)
-		luxAddr, err := formatBech32("P-"+config.HRP, shortID)
+		luxAddr, err := formatLuxAddress("P", config.HRP, shortID)
 		if err != nil {
 			return fmt.Errorf("failed to format P-Chain address for %s: %w", keyName, err)
 		}
@@ -432,7 +432,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		ripemdHasherX := ripemd160.New()
 		ripemdHasherX.Write(sha256HashX[:])
 		shortID := ripemdHasherX.Sum(nil)
-		luxAddr, err := formatBech32("X-"+config.HRP, shortID)
+		luxAddr, err := formatLuxAddress("X", config.HRP, shortID)
 		if err != nil {
 			return fmt.Errorf("failed to format X-Chain address for %s: %w", keyName, err)
 		}
@@ -576,6 +576,30 @@ func createVestingAllocation(ethAddr, luxAddr string, totalAmount uint64, years 
 		InitialAmount:  totalAmount,
 		UnlockSchedule: schedule,
 	}
+}
+
+// formatLuxAddress creates a Lux address with proper bech32 encoding
+// chainPrefix: "P", "X", "C", etc.
+// hrp: "lux", "test", "local" - the bech32 Human Readable Part
+// data: 20-byte address (RIPEMD-160 hash of SHA256 of public key)
+//
+// The result is: chainPrefix-hrp1<bech32data>
+// Example: P-lux1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq8qwm4a
+//
+// IMPORTANT: The bech32 checksum is computed using ONLY the hrp ("lux"),
+// NOT the chain prefix ("P-"). This matches the node's address.Format().
+func formatLuxAddress(chainPrefix, hrp string, data []byte) (string, error) {
+	converted, err := bech32ConvertBits(data, 8, 5, true)
+	if err != nil {
+		return "", err
+	}
+	// Compute bech32 with just the HRP (lux, test, local)
+	bech32Addr, err := bech32Encode(hrp, converted)
+	if err != nil {
+		return "", err
+	}
+	// Prepend chain prefix: P-lux1..., X-lux1..., etc.
+	return chainPrefix + "-" + bech32Addr, nil
 }
 
 func formatBech32(hrp string, data []byte) (string, error) {
