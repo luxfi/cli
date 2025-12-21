@@ -59,7 +59,7 @@ func Test_writeGenesisFile_success(t *testing.T) {
 	require.NoError(err)
 
 	// Check file exists
-	createdPath := filepath.Join(ap.GetSubnetDir(), subnetName1, genesisFile)
+	createdPath := filepath.Join(ap.GetChainsDir(), subnetName1, genesisFile)
 	_, err = os.Stat(createdPath)
 	require.NoError(err)
 

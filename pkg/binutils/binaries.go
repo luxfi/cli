@@ -211,9 +211,10 @@ func (pbd *pluginBinaryDownloader) InstallVM(vmID, vmBin string) error {
 	// target of VM install
 	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
 
-	// check if binary is already present, this should never happen
+	// check if binary is already present - skip install if it exists
 	if _, err := os.Stat(binaryPath); err == nil {
-		return errors.New("vm binary already exists, invariant broken")
+		// Binary already exists, skip installation (idempotent)
+		return nil
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
