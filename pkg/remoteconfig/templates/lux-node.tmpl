@@ -23,7 +23,7 @@
     "public-ip-resolution-service": "opendns",
 {{- end }}
 {{- if .TrackSubnets }}
-	"track-subnets": "{{ .TrackSubnets }}",
+	"track-chains": "{{ .TrackSubnets }}",
 {{- end }}
 	"db-dir": "{{.DBDir}}",
 	"log-dir": "{{.LogDir}}"

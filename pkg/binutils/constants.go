@@ -11,6 +11,6 @@ const (
 	gRPCDialTimeout     = 10 * time.Second
 
 	nodeBinPrefix      = "node-"
-	subnetEVMBinPrefix = "evm-"
+	evmBinPrefix = "evm-"
 	maxCopy            = 2147483648 // 2 GB
 )
