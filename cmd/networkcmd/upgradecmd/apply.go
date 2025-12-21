@@ -159,9 +159,9 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 
 	// confirm in the status that the subnet actually is deployed and running
 	deployed := false
-	subnets := status.ClusterInfo.GetSubnets()
-	for s := range subnets {
-		if s == sc.Networks[networkKey].SubnetID.String() {
+	customChains := status.ClusterInfo.GetCustomChains()
+	for _, chainInfo := range customChains {
+		if chainInfo.GetPchainId() == sc.Networks[networkKey].SubnetID.String() {
 			deployed = true
 			break
 		}
