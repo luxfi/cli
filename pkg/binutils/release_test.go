@@ -157,11 +157,11 @@ func Test_installEVMWithVersion(t *testing.T) {
 	mockAppDownloader.On("Download", mock.Anything).Return(tarBytes, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
+	expectedDir := filepath.Join(app.GetEVMBinDir(), evmBinPrefix+version1)
 
-	subDir := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
+	subDir := filepath.Join(app.GetEVMBinDir(), evmBinPrefix+version1)
 
-	binDir, err := installBinaryWithVersion(app, version1, subDir, subnetEVMBinPrefix, downloader, mockInstaller)
+	binDir, err := installBinaryWithVersion(app, version1, subDir, evmBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir, binDir)
 	require.NoError(err)
 
@@ -192,17 +192,17 @@ func Test_installEVMWithVersion_MultipleCoinstalls(t *testing.T) {
 	mockAppDownloader.On("Download", url2).Return(tarBytes2, nil)
 	app.Downloader = &mockAppDownloader
 
-	expectedDir1 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
-	expectedDir2 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version2)
+	expectedDir1 := filepath.Join(app.GetEVMBinDir(), evmBinPrefix+version1)
+	expectedDir2 := filepath.Join(app.GetEVMBinDir(), evmBinPrefix+version2)
 
-	subDir1 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version1)
-	subDir2 := filepath.Join(app.GetEVMBinDir(), subnetEVMBinPrefix+version2)
+	subDir1 := filepath.Join(app.GetEVMBinDir(), evmBinPrefix+version1)
+	subDir2 := filepath.Join(app.GetEVMBinDir(), evmBinPrefix+version2)
 
-	binDir1, err := installBinaryWithVersion(app, version1, subDir1, subnetEVMBinPrefix, downloader, mockInstaller)
+	binDir1, err := installBinaryWithVersion(app, version1, subDir1, evmBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir1, binDir1)
 	require.NoError(err)
 
-	binDir2, err := installBinaryWithVersion(app, version2, subDir2, subnetEVMBinPrefix, downloader, mockInstaller)
+	binDir2, err := installBinaryWithVersion(app, version2, subDir2, evmBinPrefix, downloader, mockInstaller)
 	require.Equal(expectedDir2, binDir2)
 	require.NoError(err)
 

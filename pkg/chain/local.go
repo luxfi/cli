@@ -53,6 +53,8 @@ import (
 
 const (
 	WriteReadReadPerms = 0o644
+	// ChainHealthTimeout is the maximum time to wait for a newly deployed chain to become healthy
+	ChainHealthTimeout = 30 * time.Second
 )
 
 // emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
@@ -95,13 +97,25 @@ type getGRPCClientFunc func(...binutils.GRPCClientOpOption) (client.Client, erro
 
 type setDefaultSnapshotFunc func(string, bool) error
 
-// DeployToLocalNetwork does the heavy lifting:
-// * it checks the gRPC is running, if not, it starts it
-// * kicks off the actual deployment
+// DeployToLocalNetwork deploys to an already running network.
+// It does NOT start the network - use 'lux network start' first.
 func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
-	if err := d.StartServer(); err != nil {
-		return ids.Empty, ids.Empty, err
+	// Connect to existing gRPC server - do NOT start one
+	cli, err := d.getClientFunc()
+	if err != nil {
+		return ids.Empty, ids.Empty, fmt.Errorf("failed to connect to network. Is it running? Start with: lux network start --mainnet\nError: %w", err)
 	}
+	defer cli.Close()
+
+	ctx := binutils.GetAsyncContext()
+	_, err = WaitForHealthy(ctx, cli)
+	if err != nil {
+		if server.IsServerError(err, server.ErrNotBootstrapped) {
+			return ids.Empty, ids.Empty, fmt.Errorf("network is not running. Start it first with: lux network start --mainnet")
+		}
+		return ids.Empty, ids.Empty, fmt.Errorf("network is unhealthy: %w", err)
+	}
+
 	return d.doDeploy(chain, chainGenesis, genesisPath)
 }
 
@@ -338,16 +352,12 @@ func (d *LocalDeployer) DeployBlockchain(chain string, chainGenesis []byte) (ids
 	return d.DeployToLocalNetwork(chain, chainGenesis, "")
 }
 
-// doDeploy the actual deployment to the network runner
+// doDeploy deploys a blockchain to an already running network.
+// Network must already be running - this function only deploys.
 // steps:
-//   - checks if the network has been started
-//   - install all needed plugin binaries, for the the new VM, and the already deployed VMs
-//   - either starts a network from the default snapshot if not started,
-//     or restarts the already available network while preserving state
-//   - waits completion of operation
-//   - get from the network an available subnet ID to be used in blockchain creation
-//   - deploy a new blockchain for the given VM ID, genesis, and available subnet ID
-//   - waits completion of operation
+//   - install VM plugin binary
+//   - deploy blockchain to network
+//   - wait for completion
 //   - show status
 func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
 	backendLogFile, err := binutils.GetBackendLogFile(d.app)
@@ -362,7 +372,6 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	}
 	defer cli.Close()
 
-	runDir := d.app.GetRunDir()
 	ctx := binutils.GetAsyncContext()
 
 	// loading sidecar before it's needed so we catch any error early
@@ -371,50 +380,27 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to load sidecar: %w", err)
 	}
 
-	// Check for network status FIRST before downloading binaries
-	networkBooted := true
-	var rootDir string
+	// Get the actual VM name based on VM type
+	// The VMID is computed from the VM name, not the chain name
+	// For EVM chains, we use "Lux EVM" as the VM name
+	// For custom VMs, we use the chain name
+	vmName := "Lux EVM" // Default for EVM chains
+	if sc.VM == models.CustomVM {
+		vmName = chain // For custom VMs, use chain name
+	}
+
+	// Network must already be running - get cluster info
 	clusterInfo, err := WaitForHealthy(ctx, cli)
 	if err != nil {
-		if !server.IsServerError(err, server.ErrNotBootstrapped) {
-			return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
-		}
-		networkBooted = false
-	} else {
-		rootDir = clusterInfo.GetRootDataDir()
+		return ids.Empty, ids.Empty, fmt.Errorf("network is not healthy: %w", err)
 	}
+	rootDir := clusterInfo.GetRootDataDir()
 
-	chainVMID, err := anrutils.VMID(chain)
+	chainVMID, err := anrutils.VMID(vmName)
 	if err != nil {
-		return ids.Empty, ids.Empty, fmt.Errorf("failed to create VM ID from %s: %w", chain, err)
+		return ids.Empty, ids.Empty, fmt.Errorf("failed to create VM ID from %s: %w", vmName, err)
 	}
-	d.app.Log.Debug("this VM will get ID", zap.String("vm-id", chainVMID.String()))
-
-	// Only download binaries if network isn't running
-	var nodeBinPath string
-	if !networkBooted {
-		nodeBinPath, err = d.SetupLocalEnv()
-		if err != nil {
-			return ids.Empty, ids.Empty, err
-		}
-		if err := d.startNetwork(ctx, cli, nodeBinPath, runDir); err != nil {
-			// Bug fix: rootDir may be empty here, use runDir as fallback
-			if rootDir != "" {
-				utils.FindErrorLogs(rootDir, backendLogDir)
-			} else if runDir != "" {
-				utils.FindErrorLogs(runDir, backendLogDir)
-			}
-			return ids.Empty, ids.Empty, err
-		}
-	}
-
-	// get VM info
-	clusterInfo, err = WaitForHealthy(ctx, cli)
-	if err != nil {
-		utils.FindErrorLogs(clusterInfo.GetRootDataDir(), backendLogDir)
-		return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
-	}
-	rootDir = clusterInfo.GetRootDataDir()
+	d.app.Log.Debug("this VM will get ID", zap.String("vm-id", chainVMID.String()), zap.String("vm-name", vmName))
 
 	if alreadyDeployed(chainVMID, clusterInfo) {
 		ux.Logger.PrintToUser("Net %s has already been deployed", chain)
@@ -462,8 +448,10 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	ux.Logger.PrintToUser("VMs ready.")
 
 	// Create a new blockchain on the running network
+	// VmName must be the actual VM name (e.g., "Lux EVM") not the chain name
+	// This is used by netrunner to compute the VMID
 	spec := &rpcpb.BlockchainSpec{
-		VmName:             chain,
+		VmName:             vmName,
 		Genesis:            genesisPath,
 		ChainConfig:        chainConfig,
 		BlockchainAlias:    chain,
@@ -491,16 +479,17 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	d.app.Log.Debug(deployBlockchainsInfo.String())
 
 	fmt.Println()
-	ux.Logger.PrintToUser("Blockchain has been deployed. Wait until network acknowledges...")
+	ux.Logger.PrintToUser("Blockchain has been deployed. Waiting for chain to become healthy (timeout: %s)...", ChainHealthTimeout)
 
-	clusterInfo, err = WaitForHealthy(ctx, cli)
+	// Use timeout-based health check for chain deployment
+	// This will fail fast if the chain doesn't become healthy within the timeout
+	clusterInfo, err = WaitForChainHealthyWithTimeout(cli, chain, ChainHealthTimeout, rootDir, backendLogDir)
 	if err != nil {
-		utils.FindErrorLogs(rootDir, backendLogDir)
 		pluginRemoveErr := d.removeInstalledPlugin(chainVMID)
 		if pluginRemoveErr != nil {
 			ux.Logger.PrintToUser("Failed to remove plugin binary: %s", pluginRemoveErr)
 		}
-		return ids.Empty, ids.Empty, fmt.Errorf("failed to query network health: %w", err)
+		return ids.Empty, ids.Empty, err
 	}
 
 	endpoint := GetFirstEndpoint(clusterInfo, chain)
@@ -511,7 +500,12 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	fmt.Println()
 
 	ux.Logger.PrintToUser("Browser Extension connection details (any node URL from above works):")
-	ux.Logger.PrintToUser("RPC URL:          %s", endpoint[strings.LastIndex(endpoint, "http"):])
+	if endpoint != "" {
+		httpIdx := strings.LastIndex(endpoint, "http")
+		if httpIdx >= 0 {
+			ux.Logger.PrintToUser("RPC URL:          %s", endpoint[httpIdx:])
+		}
+	}
 
 	if sc.VM == models.EVM {
 		if err := d.printExtraEvmInfo(chain, chainGenesis); err != nil {
@@ -603,6 +597,94 @@ func WaitForHealthy(
 		return nil, err
 	}
 	return resp.ClusterInfo, nil
+}
+
+// WaitForChainHealthyWithTimeout waits for a chain to become healthy with a specific timeout.
+// Returns an error with helpful diagnostics if the chain fails to become healthy.
+func WaitForChainHealthyWithTimeout(
+	cli client.Client,
+	chainName string,
+	timeout time.Duration,
+	rootDir string,
+	backendLogDir string,
+) (*rpcpb.ClusterInfo, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	cancelPrint := make(chan struct{})
+	defer close(cancelPrint)
+	go ux.PrintWait(cancelPrint)
+
+	resp, err := cli.WaitForHealthy(ctx)
+	if err != nil {
+		// Check if it's a timeout
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, formatChainHealthError(cli, chainName, timeout, rootDir, backendLogDir)
+		}
+		// For other errors, still try to get diagnostic info
+		if resp != nil && resp.ClusterInfo != nil {
+			return resp.ClusterInfo, formatChainHealthError(cli, chainName, timeout, rootDir, backendLogDir)
+		}
+		return nil, fmt.Errorf("chain health check failed: %w", err)
+	}
+
+	// Even if WaitForHealthy returns without error, verify the chain is actually healthy
+	if resp.ClusterInfo != nil && !resp.ClusterInfo.CustomChainsHealthy {
+		return resp.ClusterInfo, formatChainHealthError(cli, chainName, timeout, rootDir, backendLogDir)
+	}
+
+	return resp.ClusterInfo, nil
+}
+
+// formatChainHealthError creates a detailed error message when a chain fails to become healthy
+func formatChainHealthError(
+	cli client.Client,
+	chainName string,
+	timeout time.Duration,
+	rootDir string,
+	backendLogDir string,
+) error {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("\n\nERROR: Chain '%s' failed to become healthy within %s\n\n", chainName, timeout))
+
+	// Try to get current health status for more info
+	healthCtx, healthCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer healthCancel()
+	healthResp, healthErr := cli.Health(healthCtx)
+	if healthErr == nil && healthResp != nil && healthResp.ClusterInfo != nil {
+		sb.WriteString("Node health check shows:\n")
+		if !healthResp.ClusterInfo.Healthy {
+			sb.WriteString("  - Network is not healthy\n")
+		}
+		if !healthResp.ClusterInfo.CustomChainsHealthy {
+			sb.WriteString("  - Custom chains are not healthy\n")
+		}
+		// Show info about any custom chains that were being deployed
+		for chainID, chainInfo := range healthResp.ClusterInfo.CustomChains {
+			sb.WriteString(fmt.Sprintf("  - Chain %s (VM: %s): %s\n", chainID, chainInfo.VmId, chainInfo.ChainName))
+		}
+	}
+
+	sb.WriteString("\nThe VM likely crashed during initialization. Common causes:\n")
+	sb.WriteString("  - Invalid genesis configuration\n")
+	sb.WriteString("  - VM binary incompatibility\n")
+	sb.WriteString("  - Missing or incorrect chain configuration\n")
+
+	sb.WriteString("\nTo debug:\n")
+	if rootDir != "" {
+		sb.WriteString(fmt.Sprintf("  tail -f %s/node1/logs/*.log\n", rootDir))
+	}
+	if backendLogDir != "" {
+		sb.WriteString(fmt.Sprintf("  tail -f %s/*.log\n", backendLogDir))
+	}
+	sb.WriteString("  lux network status\n")
+
+	// Try to find and print relevant error logs
+	if rootDir != "" || backendLogDir != "" {
+		utils.FindErrorLogs(rootDir, backendLogDir)
+	}
+
+	return errors.New(sb.String())
 }
 
 // GetFirstEndpoint get a human readable endpoint for the given chain
