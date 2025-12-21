@@ -42,8 +42,8 @@ type scriptInputs struct {
 	IsE2E                   bool
 	NetworkFlag             string
 	VMBinaryPath            string
-	SubnetEVMReleaseURL     string
-	SubnetEVMArchive        string
+	EVMReleaseURL     string
+	EVMArchive        string
 	MonitoringDashboardPath string
 	LoadTestRepoDir         string
 	LoadTestRepo            string
@@ -442,14 +442,14 @@ func RunSSHUploadNodeWarpRelayerConfig(host *models.Host, nodeInstanceDirPath st
 	)
 }
 
-// RunSSHGetNewSubnetEVMRelease runs script to download new subnet evm
-func RunSSHGetNewSubnetEVMRelease(host *models.Host, subnetEVMReleaseURL, subnetEVMArchive string) error {
+// RunSSHGetNewEVMRelease runs script to download new subnet evm
+func RunSSHGetNewEVMRelease(host *models.Host, evmReleaseURL, evmArchive string) error {
 	return RunOverSSH(
 		"Get Subnet EVM Release",
 		host,
 		constants.SSHScriptTimeout,
-		"shell/getNewSubnetEVMRelease.sh",
-		scriptInputs{SubnetEVMReleaseURL: subnetEVMReleaseURL, SubnetEVMArchive: subnetEVMArchive},
+		"shell/getNewEVMRelease.sh",
+		scriptInputs{EVMReleaseURL: evmReleaseURL, EVMArchive: evmArchive},
 	)
 }
 
@@ -669,7 +669,7 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 			return err
 		}
 
-	case sc.VM == models.SubnetEvm:
+	case sc.VM == models.EVM:
 		ux.Logger.Info("Installing EVM for %s", host.NodeID)
 		dl := binutils.NewEVMDownloader()
 		installURL, _, err := dl.GetDownloadURL(sc.VMVersion, hostInstaller) // extension is tar.gz
