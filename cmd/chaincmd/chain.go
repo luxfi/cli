@@ -3,6 +3,7 @@
 package chaincmd
 
 import (
+	"github.com/luxfi/cli/cmd/chaincmd/upgradecmd"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/spf13/cobra"
@@ -66,7 +67,7 @@ Examples:
 	cmd.AddCommand(newRemoveValidatorCmd())
 
 	// Upgrade and migration
-	cmd.AddCommand(newUpgradeCmd())
+	cmd.AddCommand(upgradecmd.NewCmd(app))
 	cmd.AddCommand(newMigrateCmd())
 
 	return cmd
