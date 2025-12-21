@@ -15,20 +15,17 @@ import (
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
+	"github.com/luxfi/cli/cmd/chaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/keycmd"
-	"github.com/luxfi/cli/cmd/warpcmd"
-	"github.com/luxfi/cli/cmd/l1cmd"
-	"github.com/luxfi/cli/cmd/l3cmd"
-	"github.com/luxfi/cli/cmd/localcmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
-	"github.com/luxfi/cli/cmd/netcmd"
 	"github.com/luxfi/cli/cmd/transactioncmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
+	"github.com/luxfi/cli/cmd/warpcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
@@ -77,9 +74,11 @@ Features:
 - Ringtail post-quantum signatures
 
 Quick start:
-  lux l1 create sovereign       # Sovereign L1
-  lux l2 create rollup          # L2 (based rollup)
-  lux l3 create app --l2 rollup # L3 (app chain)`,
+  lux chain create sovereign --type=l1   # Sovereign L1
+  lux chain create rollup --type=l2      # L2 (based rollup)
+  lux chain create app --type=l3         # L3 (app chain)
+  lux chain deploy mychain               # Deploy to local network
+  lux chain list                         # List all chains`,
 		PersistentPreRunE: createApp,
 		Version:           Version,
 		PersistentPostRun: handleTracking,
@@ -93,11 +92,9 @@ Quick start:
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
 	// add sub commands
-	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (alias: blockchain, net)
+	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (local network management)
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
-	rootCmd.AddCommand(l1cmd.NewCmd(app))
-	rootCmd.AddCommand(netcmd.NewCmd(app)) // l2 with subnet alias
-	rootCmd.AddCommand(l3cmd.NewCmd(app))
+	rootCmd.AddCommand(chaincmd.NewCmd(app)) // unified chain command (l1/l2/l3)
 
 	// add transaction command
 	rootCmd.AddCommand(transactioncmd.NewCmd(app))
@@ -126,14 +123,15 @@ Quick start:
 	// add key management command
 	rootCmd.AddCommand(keycmd.NewCmd(app))
 
-	// add migrate command
-	rootCmd.AddCommand(localcmd.NewCmd(app))
-
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd())
 
 	// add hidden backend command
 	rootCmd.AddCommand(backendcmd.NewCmd(app))
+
+	// add chain command for chain-level operations (import, export)
+	rootCmd.AddCommand(chaincmd.NewCmd(app))
+
 	return rootCmd
 }
 
