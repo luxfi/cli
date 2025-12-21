@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/cli/pkg/net"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/netrunner/client"
@@ -35,11 +35,6 @@ var (
 	dbEngine      string
 	archiveDir    string
 	archiveShared bool
-	genesisImport string
-	// C-Chain import
-	cchainImportPath string
-	// Replay mode - preserves original genesis for block import
-	replayMode bool
 )
 
 // StartFlags contains configuration for starting a network
@@ -115,7 +110,7 @@ already running.`,
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", latest, "use this version of node (ex: v1.17.12)")
+	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&nodePath, "node-path", "", "path to local luxd binary (overrides --node-version)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 5 validators")
@@ -126,9 +121,6 @@ already running.`,
 	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
 	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
 	cmd.Flags().BoolVar(&archiveShared, "archive-shared", false, "enable shared read-only access to archive database")
-	cmd.Flags().StringVar(&genesisImport, "genesis-path", "", "path to genesis database to import (PebbleDB or LevelDB)")
-	cmd.Flags().StringVar(&cchainImportPath, "cchain-import", "", "path to RLP file for C-Chain block import")
-	cmd.Flags().BoolVar(&replayMode, "replay", false, "replay mode: preserve original genesis for historical block import (required for proper consensus verification)")
 
 	// Add state loading flags
 	AddStateFlags(cmd)
@@ -154,7 +146,7 @@ func StartNetwork(*cobra.Command, []string) error {
 		return err
 	}
 
-	sd := net.NewLocalDeployer(app, luxVersion, "")
+	sd := chain.NewLocalDeployer(app, luxVersion, "")
 
 	if err := sd.StartServer(); err != nil {
 		return err
@@ -169,6 +161,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	if err != nil {
 		return err
 	}
+	defer cli.Close()
 
 	var startMsg string
 	if snapshotName == constants.DefaultSnapshotName {
@@ -178,12 +171,13 @@ func StartNetwork(*cobra.Command, []string) error {
 	}
 	ux.Logger.PrintToUser("%s", startMsg)
 
-	// Use stable directory path for persistence across restarts
+	// Use stable directory with current symlink for persistence across restarts
 	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
-	outputDir := path.Join(app.GetRunDir(), "local_network")
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
+	outputDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), "local")
+	if err != nil {
+		return fmt.Errorf("failed to ensure run directory: %w", err)
 	}
+	ux.Logger.PrintToUser("Using run directory: %s", outputDir)
 
 	pluginDir := app.GetPluginsDir()
 
@@ -204,7 +198,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	nodeConfig := make(map[string]interface{})
 
 	// Auto-track deployed nets - eliminates the track-subnets gotcha
-	netIDs, trackErr := net.GetLocallyDeployedNetIDs(app)
+	netIDs, trackErr := chain.GetLocallyDeployedNetIDs(app)
 	if trackErr == nil && len(netIDs) > 0 {
 		trackNetsStr := strings.Join(netIDs, ",")
 		ux.Logger.PrintToUser("Auto-tracking %d deployed net(s): %s", len(netIDs), trackNetsStr)
@@ -214,7 +208,7 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	// Prepare canonical chain configs directory and set it for all nodes
 	// This must happen BEFORE nodes start so VMs can initialize with genesis configs
-	chainConfigDir, chainConfigErr := net.PrepareCanonicalChainConfigs(app)
+	chainConfigDir, chainConfigErr := chain.PrepareCanonicalChainConfigs(app)
 	if chainConfigErr != nil {
 		ux.Logger.PrintToUser("Warning: failed to prepare chain configs: %v", chainConfigErr)
 	} else if chainConfigDir != "" {
@@ -324,13 +318,13 @@ func StartNetwork(*cobra.Command, []string) error {
 		}
 	}
 
-	clusterInfo, err := net.WaitForHealthy(ctx, cli)
+	clusterInfo, err := chain.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
 
 	fmt.Println()
-	if net.HasEndpoints(clusterInfo) {
+	if chain.HasEndpoints(clusterInfo) {
 		ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
 		ux.PrintTableEndpoints(clusterInfo)
 	}
@@ -340,26 +334,26 @@ func StartNetwork(*cobra.Command, []string) error {
 
 func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 	// a specific user provided version should override this calculation, so just return
-	if userProvidedLuxVersion != latest {
+	if userProvidedLuxVersion != "latest" {
 		return userProvidedLuxVersion, nil
 	}
 
-	// Need to determine which subnets have been deployed
-	locallyDeployedSubnets, err := net.GetLocallyDeployedSubnetsFromFile(app)
+	// Need to determine which chains have been deployed
+	locallyDeployedChains, err := chain.GetLocallyDeployedSubnetsFromFile(app)
 	if err != nil {
 		return "", err
 	}
 
-	// if no subnets have been deployed, use latest
-	if len(locallyDeployedSubnets) == 0 {
-		return latest, nil
+	// if no chains have been deployed, use latest
+	if len(locallyDeployedChains) == 0 {
+		return "latest", nil
 	}
 
 	currentRPCVersion := -1
 
-	// For each deployed subnet, check RPC versions
-	for _, deployedSubnet := range locallyDeployedSubnets {
-		sc, err := app.LoadSidecar(deployedSubnet)
+	// For each deployed chain, check RPC versions
+	for _, deployedChain := range locallyDeployedChains {
+		sc, err := app.LoadSidecar(deployedChain)
 		if err != nil {
 			return "", err
 		}
@@ -376,7 +370,7 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 
 		if sc.Networks[models.Local.String()].RPCVersion != currentRPCVersion {
 			return "", fmt.Errorf(
-				"RPC version mismatch. Expected %d, got %d for Subnet %s. Upgrade all subnets to the same RPC version to launch the network",
+				"RPC version mismatch. Expected %d, got %d for chain %s. Upgrade all chains to the same RPC version to launch the network",
 				currentRPCVersion,
 				sc.RPCVersion,
 				sc.Name,
@@ -384,10 +378,10 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 		}
 	}
 
-	// If currentRPCVersion == -1, then only custom subnets have been deployed, the user must provide the version explicitly if not latest
+	// If currentRPCVersion == -1, then only custom chains have been deployed, the user must provide the version explicitly if not latest
 	if currentRPCVersion == -1 {
-		ux.Logger.PrintToUser("No Subnet RPC version found. Using latest Lux version")
-		return latest, nil
+		ux.Logger.PrintToUser("No chain RPC version found. Using latest Lux version")
+		return "latest", nil
 	}
 
 	return vm.GetLatestLuxByProtocolVersion(
@@ -397,133 +391,97 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 	)
 }
 
-// StartMainnet starts a mainnet network with configurable validator nodes
-// Uses netrunner internally with genesis configuration from luxfi/genesis package
-func StartMainnet() error {
+// networkConfig holds configuration for starting a public network
+type networkConfig struct {
+	networkID   uint32
+	networkName string // "mainnet" or "testnet"
+}
+
+// startPublicNetwork handles the common logic for starting mainnet/testnet
+func startPublicNetwork(cfg networkConfig) error {
 	if numValidators < 1 {
 		numValidators = constants.LocalNetworkNumNodes
 	}
-	ux.Logger.PrintToUser("Starting Lux mainnet with %d validator nodes...", numValidators)
-	ux.Logger.PrintToUser("Network ID: 96369")
+	ux.Logger.PrintToUser("Starting Lux %s with %d validator nodes...", cfg.networkName, numValidators)
+	ux.Logger.PrintToUser("Network ID: %d", cfg.networkID)
 
 	localNodePath, err := findNodeBinary()
 	if err != nil {
 		return err
 	}
 
-	// Use local binary instead of downloading
-	sd := net.NewLocalDeployer(app, "", "")
-
-	// Start netrunner server
+	sd := chain.NewLocalDeployer(app, "", "")
 	if err := sd.StartServer(); err != nil {
 		return err
 	}
 
-	// Get gRPC client
 	cli, err := binutils.NewGRPCClient()
 	if err != nil {
 		return err
 	}
+	defer cli.Close()
 
-	// Build mainnet configuration - netrunner will use luxfi/genesis for network ID 96369
-	// This triggers local.NewMainnetConfig() in netrunner which uses configs.GetGenesis(96369)
-	// Note: staking is enabled by default in luxd, no flag needed
-	// http-host is required for RPC to be accessible
-	//
-	// Replay mode preserves the EXACT original genesis for proper block import verification:
-	// - Original initialStakers are kept (they signed historical blocks)
-	// - Our local nodes run as non-validators that verify signatures
-	// - Required for importing blocks with full consensus verification
-
-	// Auto-detect deployed subnets for tracking
+	// Build node config - auto-detect deployed subnets for tracking
 	trackSubnets := ""
-	netIDs, trackErr := net.GetLocallyDeployedNetIDs(app)
+	netIDs, trackErr := chain.GetLocallyDeployedNetIDs(app)
 	if trackErr == nil && len(netIDs) > 0 {
 		trackSubnets = strings.Join(netIDs, ",")
 		ux.Logger.PrintToUser("Auto-tracking %d deployed subnet(s): %s", len(netIDs), trackSubnets)
 	}
 
-	var globalNodeConfig string
-	if replayMode {
-		ux.Logger.PrintToUser("Replay mode enabled - preserving original genesis for block import")
-		globalNodeConfig = fmt.Sprintf(`{
-			"network-id": 96369,
-			"replay-mode": true,
-			"db-type": "badgerdb",
-			"sybil-protection-enabled": false,
-			"network-allow-private-ips": true,
-			"health-check-frequency": "30s",
-			"log-level": "info",
-			"http-host": "127.0.0.1",
-			"api-admin-enabled": true,
-			"track-subnets": %q
-		}`, trackSubnets)
-	} else {
-		// Auto-track deployed subnets for RPC access
-		globalNodeConfig = fmt.Sprintf(`{
-			"network-id": 96369,
-			"db-type": "badgerdb",
-			"sybil-protection-enabled": true,
-			"network-allow-private-ips": true,
-			"health-check-frequency": "30s",
-			"log-level": "info",
-			"http-host": "127.0.0.1",
-			"api-admin-enabled": true,
-			"track-subnets": %q
-		}`, trackSubnets)
+	globalNodeConfig := fmt.Sprintf(`{
+		"network-id": %d,
+		"db-type": "badgerdb",
+		"sybil-protection-enabled": true,
+		"network-allow-private-ips": true,
+		"health-check-frequency": "30s",
+		"log-level": "info",
+		"http-host": "127.0.0.1",
+		"api-admin-enabled": true,
+		"track-subnets": %q
+	}`, cfg.networkID, trackSubnets)
+
+	rootDataDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), cfg.networkName)
+	if err != nil {
+		return fmt.Errorf("failed to ensure %s run directory: %w", cfg.networkName, err)
 	}
 
-	// Use stable directory path for persistence across restarts
-	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
-	// Check for existing mainnet run to resume from
-	rootDataDir := path.Join(app.GetRunDir(), "mainnet")
-
-	// Check if --state-path was provided (user wants to resume from specific state)
+	// Check for existing data or user-provided state
 	if statePath != "" {
 		ux.Logger.PrintToUser("Resuming from user-provided state: %s", statePath)
 	} else {
-		// Check for existing mainnet data to resume from
-		if fi, err := os.Stat(rootDataDir); err == nil && fi.IsDir() {
-			// Check if there's actually node data in there
-			entries, _ := os.ReadDir(rootDataDir)
-			for _, e := range entries {
-				if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
-					ux.Logger.PrintToUser("Found existing mainnet data, resuming from: %s", rootDataDir)
-					break
-				}
+		entries, _ := os.ReadDir(rootDataDir)
+		for _, e := range entries {
+			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
+				ux.Logger.PrintToUser("Resuming from existing %s data: %s", cfg.networkName, rootDataDir)
+				break
 			}
 		}
 	}
-
-	if err := os.MkdirAll(rootDataDir, 0755); err != nil {
-		return fmt.Errorf("failed to create mainnet directory: %w", err)
-	}
-
-	// Don't pass networkID to netrunner - let --dev flag handle the genesis internally
-	// The --dev flag creates a proper single-node development network
 
 	opts := []client.OpOption{
 		client.WithNumNodes(uint32(numValidators)),
 		client.WithGlobalNodeConfig(globalNodeConfig),
 		client.WithRootDataDir(rootDataDir),
 		client.WithReassignPortsIfUsed(true),
-		client.WithDynamicPorts(false), // Use fixed ports starting from 9630
+		client.WithDynamicPorts(false),
 	}
 
-	// Add C-Chain import config if specified
-	if cchainImportPath != "" {
-		ux.Logger.PrintToUser("C-Chain import enabled from: %s", cchainImportPath)
-		cchainConfig := fmt.Sprintf(`{
-			"import-chain-data": %q,
-			"geth-admin-api-enabled": true,
-			"log-level": "debug"
-		}`, cchainImportPath)
-		opts = append(opts, client.WithChainConfigs(map[string]string{
-			"C": cchainConfig,
-		}))
+	// Build chain configs (mainnet-specific feature, but harmless for testnet)
+	cfgMgr := chain.NewManager(app)
+	if err := cfgMgr.LoadDeployedChains(); err != nil {
+		ux.Logger.PrintToUser("Warning: failed to load deployed chains: %v", err)
 	}
+	cfgMgr.EnableAdminAll()
 
-	// Add plugin directory if it exists
+	for chainID, cfg := range cfgMgr.ToNetrunnerMap() {
+		if chainID != "C" {
+			ux.Logger.PrintToUser("Configured chain: %s (admin API enabled)", chainID[:min(len(chainID), 12)])
+			_ = cfg
+		}
+	}
+	opts = append(opts, client.WithChainConfigs(cfgMgr.ToNetrunnerMap()))
+
 	pluginDir := app.GetPluginsDir()
 	if _, err := os.Stat(pluginDir); err == nil {
 		opts = append(opts, client.WithPluginDir(pluginDir))
@@ -535,22 +493,20 @@ func StartMainnet() error {
 	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
 	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
 
-	// Start the network - netrunner handles genesis via luxfi/genesis
-	// First arg is exec path (luxd binary), not log path
 	startResp, err := cli.Start(ctx, localNodePath, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to start network: %w", err)
 	}
 
-	// Wait for healthy network
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
-	clusterInfo, err := net.WaitForHealthy(ctx, cli)
+	clusterInfo, err := chain.WaitForHealthy(ctx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
 
-	// Display endpoints
-	ux.Logger.PrintToUser("\nMainnet started successfully with %d validators!", numValidators)
+	// Capitalize first letter of network name
+	displayName := strings.ToUpper(cfg.networkName[:1]) + cfg.networkName[1:]
+	ux.Logger.PrintToUser("\n%s started successfully with %d validators!", displayName, numValidators)
 	ux.Logger.PrintToUser("\nRPC Endpoints:")
 
 	if startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {
@@ -561,8 +517,7 @@ func StartMainnet() error {
 		}
 	}
 
-	// Show table of endpoints
-	if net.HasEndpoints(clusterInfo) {
+	if chain.HasEndpoints(clusterInfo) {
 		ux.PrintTableEndpoints(clusterInfo)
 	}
 
@@ -573,121 +528,18 @@ func StartMainnet() error {
 	return nil
 }
 
+// StartMainnet starts a mainnet network with configurable validator nodes
+func StartMainnet() error {
+	return startPublicNetwork(networkConfig{
+		networkID:   96369,
+		networkName: "mainnet",
+	})
+}
+
 // StartTestnet starts a testnet network with configurable validator nodes
-// Uses netrunner internally with genesis configuration from luxfi/genesis package
 func StartTestnet() error {
-	if numValidators < 1 {
-		numValidators = constants.LocalNetworkNumNodes
-	}
-	ux.Logger.PrintToUser("Starting Lux testnet with %d validator nodes...", numValidators)
-	ux.Logger.PrintToUser("Network ID: 96368")
-
-	localNodePath, err := findNodeBinary()
-	if err != nil {
-		return err
-	}
-
-	// Use local binary instead of downloading
-	sd := net.NewLocalDeployer(app, "", "")
-
-	// Start netrunner server
-	if err := sd.StartServer(); err != nil {
-		return err
-	}
-
-	// Get gRPC client
-	cli, err := binutils.NewGRPCClient()
-	if err != nil {
-		return err
-	}
-
-	// Build testnet configuration - netrunner will use luxfi/genesis for network ID 96368
-	// This triggers local.NewTestnetConfig() in netrunner which uses configs.GetGenesis(96368)
-	// Note: staking is enabled by default in luxd, no flag needed
-	// http-host is required for RPC to be accessible
-	globalNodeConfig := `{
-		"network-id": 96368,
-		"db-type": "badgerdb",
-		"sybil-protection-enabled": true,
-		"health-check-frequency": "30s",
-		"log-level": "info",
-		"http-host": "127.0.0.1",
-		"api-admin-enabled": true
-	}`
-
-	// Use stable directory path for persistence across restarts
-	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
-	rootDataDir := path.Join(app.GetRunDir(), "testnet")
-
-	// Check for existing testnet data to resume from
-	if fi, err := os.Stat(rootDataDir); err == nil && fi.IsDir() {
-		entries, _ := os.ReadDir(rootDataDir)
-		for _, e := range entries {
-			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
-				ux.Logger.PrintToUser("Found existing testnet data, resuming from: %s", rootDataDir)
-				break
-			}
-		}
-	}
-
-	if err := os.MkdirAll(rootDataDir, 0755); err != nil {
-		return fmt.Errorf("failed to create testnet directory: %w", err)
-	}
-
-	opts := []client.OpOption{
-		client.WithNumNodes(uint32(numValidators)),
-		client.WithGlobalNodeConfig(globalNodeConfig),
-		client.WithRootDataDir(rootDataDir),
-		client.WithReassignPortsIfUsed(true),
-		client.WithDynamicPorts(false), // Use fixed ports starting from 9630
-	}
-
-	// Add plugin directory if it exists
-	pluginDir := app.GetPluginsDir()
-	if _, err := os.Stat(pluginDir); err == nil {
-		opts = append(opts, client.WithPluginDir(pluginDir))
-	}
-
-	ctx := binutils.GetAsyncContext()
-
-	ux.Logger.PrintToUser("Starting network with genesis from luxfi/genesis package...")
-	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
-	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
-
-	// Start the network - netrunner handles genesis via luxfi/genesis
-	// First arg is exec path (luxd binary), not log path
-	startResp, err := cli.Start(ctx, localNodePath, opts...)
-	if err != nil {
-		return fmt.Errorf("failed to start network: %w", err)
-	}
-
-	// Wait for healthy network
-	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
-	clusterInfo, err := net.WaitForHealthy(ctx, cli)
-	if err != nil {
-		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
-	}
-
-	// Display endpoints
-	ux.Logger.PrintToUser("\nTestnet started successfully with %d validators!", numValidators)
-	ux.Logger.PrintToUser("\nRPC Endpoints:")
-
-	if startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {
-		for i, nodeName := range startResp.ClusterInfo.NodeNames {
-			if nodeInfo, ok := startResp.ClusterInfo.NodeInfos[nodeName]; ok && nodeInfo != nil && nodeInfo.Uri != "" {
-				ux.Logger.PrintToUser("  Validator %d: %s", i+1, nodeInfo.Uri)
-			}
-		}
-	}
-
-	// Show table of endpoints
-	if net.HasEndpoints(clusterInfo) {
-		ux.PrintTableEndpoints(clusterInfo)
-	}
-
-	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
-	ux.Logger.PrintToUser("C-Chain RPC: http://localhost:9630/ext/bc/C/rpc")
-	ux.Logger.PrintToUser("Network is ready for use!")
-
-	return nil
+	return startPublicNetwork(networkConfig{
+		networkID:   96368,
+		networkName: "testnet",
+	})
 }

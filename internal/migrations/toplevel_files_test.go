@@ -71,24 +71,24 @@ func TestTopLevelFilesMigration(t *testing.T) {
 	require.NoError(err)
 
 	// make sure all the new files have been created and the old ones don't exist anymore
-	d, err := os.Stat(filepath.Join(app.GetBaseDir(), constants.NetDir))
+	d, err := os.Stat(filepath.Join(app.GetBaseDir(), constants.ChainsDir))
 	require.NoError(err)
 	require.True(d.IsDir())
 	for _, c := range cars {
-		d, err = os.Stat(filepath.Join(app.GetBaseDir(), constants.NetDir, c.Name))
+		d, err = os.Stat(filepath.Join(app.GetBaseDir(), constants.ChainsDir, c.Name))
 		require.NoError(err)
 		require.True(d.IsDir())
 		oldSCFileName := filepath.Join(app.GetBaseDir(), c.Name+constants.SidecarSuffix)
 		_, err = os.Stat(oldSCFileName)
 		require.Error(err)
-		newFile := filepath.Join(app.GetSubnetDir(), c.Name, constants.SidecarFileName)
+		newFile := filepath.Join(app.GetChainsDir(), c.Name, constants.SidecarFileName)
 		_, err = os.Stat(newFile)
 		require.NoError(err)
 	}
 	oldGenesis := filepath.Join(app.GetBaseDir(), testSC2.Name+constants.GenesisSuffix)
 	_, err = os.Stat(oldGenesis)
 	require.Error(err)
-	newFile := filepath.Join(app.GetSubnetDir(), testSC2.Name, constants.GenesisFileName)
+	newFile := filepath.Join(app.GetChainsDir(), testSC2.Name, constants.GenesisFileName)
 	_, err = os.Stat(newFile)
 	require.NoError(err)
 }

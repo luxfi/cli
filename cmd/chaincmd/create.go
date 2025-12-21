@@ -172,7 +172,7 @@ func createChain(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create chain directory
-	chainDir := filepath.Join(app.GetSubnetDir(), chainName)
+	chainDir := filepath.Join(app.GetChainsDir(), chainName)
 	if err := os.MkdirAll(chainDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create chain directory: %w", err)
 	}
