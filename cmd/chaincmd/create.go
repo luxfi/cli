@@ -232,7 +232,7 @@ func generateDefaultGenesis(chainName, chainType string) ([]byte, error) {
 			"petersburgBlock":     0,
 			"istanbulBlock":       0,
 			"muirGlacierBlock":    0,
-			"subnetEVMTimestamp":  0,
+			"evmTimestamp":  0,
 			"feeConfig": map[string]interface{}{
 				"gasLimit":                 8000000,
 				"targetBlockRate":          2,

@@ -46,7 +46,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey1])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeFalse())
 
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloEVMKey1])
+		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1])
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.SoloLuxKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -74,8 +74,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey1])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey2])).Should(gomega.BeFalse())
 
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.SoloEVMKey1])
-		commands.CreateSubnetEvmConfigWithVersion(secondSubnetName, utils.SubnetEvmGenesis2Path, binaryToVersion[utils.SoloEVMKey2])
+		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1])
+		commands.CreateEVMConfigWithVersion(secondSubnetName, utils.EVMGenesis2Path, binaryToVersion[utils.SoloEVMKey2])
 
 		deployOutput := commands.DeploySubnetLocally(subnetName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
@@ -118,7 +118,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
 
-		commands.CreateSubnetEvmConfigWithVersion(subnetName, utils.SubnetEvmGenesisPath, binaryToVersion[utils.MultiLuxEVMKey])
+		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.MultiLuxEVMKey])
 		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLux1Key])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {

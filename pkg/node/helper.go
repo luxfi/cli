@@ -131,12 +131,12 @@ func CheckHostsAreRPCCompatible(app *application.Lux, hosts []*models.Host, subn
 		ux.Logger.PrintToUser("Either modify your Lux Go version or modify your VM version")
 		ux.Logger.PrintToUser("To modify your Lux Go version: https://docs.lux.network/nodes/maintain/upgrade-your-luxd-node")
 		switch sc.VM {
-		case models.SubnetEvm:
-			ux.Logger.PrintToUser("To modify your Subnet-EVM version: https://docs.lux.network/build/subnet/upgrade/upgrade-subnet-vm")
+		case models.EVM:
+			ux.Logger.PrintToUser("To modify your EVM version: https://docs.lux.network/build/subnet/upgrade/upgrade-subnet-vm")
 		case models.CustomVM:
 			ux.Logger.PrintToUser("To modify your Custom VM binary: lux blockchain upgrade vm %s --config", subnetName)
 		}
-		ux.Logger.PrintToUser("Yoy can use \"lux node upgrade\" to upgrade Lux Go and/or Subnet-EVM to their latest versions")
+		ux.Logger.PrintToUser("Yoy can use \"lux node upgrade\" to upgrade Lux Go and/or EVM to their latest versions")
 		return fmt.Errorf("the Lux Go version of node(s) %s is incompatible with VM RPC version of %s", incompatibleNodes, subnetName)
 	}
 	return nil

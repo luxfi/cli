@@ -243,8 +243,8 @@ func (app *Lux) ClusterExists(clusterName string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-// HasSubnetEVMGenesis checks if the blockchain has a Subnet-EVM genesis
-func (app *Lux) HasSubnetEVMGenesis(blockchainName string) (bool, string, error) {
+// HasEVMGenesis checks if the blockchain has a EVM genesis
+func (app *Lux) HasEVMGenesis(blockchainName string) (bool, string, error) {
 	genesisPath := app.GetGenesisPath(blockchainName)
 	genesisBytes, err := os.ReadFile(genesisPath)
 	if err != nil {
@@ -254,13 +254,13 @@ func (app *Lux) HasSubnetEVMGenesis(blockchainName string) (bool, string, error)
 		return false, "", err
 	}
 
-	// Check if it's a Subnet-EVM genesis by looking for key fields
+	// Check if it's a EVM genesis by looking for key fields
 	var genesis map[string]interface{}
 	if err := json.Unmarshal(genesisBytes, &genesis); err != nil {
-		return false, "", nil // Not JSON, so not Subnet-EVM
+		return false, "", nil // Not JSON, so not EVM
 	}
 
-	// Subnet-EVM genesis should have "alloc" and "config" fields
+	// EVM genesis should have "alloc" and "config" fields
 	_, hasAlloc := genesis["alloc"]
 	_, hasConfig := genesis["config"]
 
