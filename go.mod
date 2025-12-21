@@ -67,6 +67,7 @@ require (
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/constants v1.2.3
 	github.com/luxfi/genesis v1.5.7
+	github.com/luxfi/go-bip32 v1.0.1
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.1.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
@@ -176,7 +177,6 @@ require (
 	github.com/luxfi/codec v1.0.4 // indirect
 	github.com/luxfi/consensus v1.22.33 // indirect
 	github.com/luxfi/database v1.2.12 // indirect
-	github.com/luxfi/go-bip32 v1.0.1 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.4.7 // indirect
