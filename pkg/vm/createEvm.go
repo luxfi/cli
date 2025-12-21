@@ -72,7 +72,7 @@ func createEvmGenesis(
 	ux.Logger.PrintToUser("creating net %s", subnetName)
 
 	genesis := core.Genesis{}
-	conf := params.SubnetEVMDefaultChainConfig
+	conf := params.EVMDefaultChainConfig
 
 	const (
 		descriptorsState = "descriptors"
@@ -90,14 +90,14 @@ func createEvmGenesis(
 		err        error
 	)
 
-	subnetEvmState, err := statemachine.NewStateMachine(
+	evmState, err := statemachine.NewStateMachine(
 		[]string{descriptorsState, feeState, airdropState, precompilesState},
 	)
 	if err != nil {
 		return nil, nil, err
 	}
-	for subnetEvmState.Running() {
-		switch subnetEvmState.CurrentState() {
+	for evmState.Running() {
+		switch evmState.CurrentState() {
 		case descriptorsState:
 			chainID, tokenName, vmVersion, direction, err = getDescriptors(app, evmVersion)
 		case feeState:
@@ -112,7 +112,7 @@ func createEvmGenesis(
 		if err != nil {
 			return nil, nil, err
 		}
-		subnetEvmState.NextState(direction)
+		evmState.NextState(direction)
 	}
 
 	// Check for txallowlist in extras config
