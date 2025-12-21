@@ -48,7 +48,7 @@ func deploySubnetToTestnet() (string, map[string]utils.NodeInfo) {
 		gomega.Expect(whitelistedSubnetsSlice).Should(gomega.ContainElement(subnetID))
 	}
 	// update nodes whitelisted subnets
-	err = utils.RestartNodesWithWhitelistedSubnets(whitelistedSubnets)
+	err = utils.RestartNodesWithWhitelistedChains(whitelistedSubnets)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// wait for subnet walidators to be up
 	err = utils.WaitSubnetValidators(subnetID, nodeInfos)
@@ -120,7 +120,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 			gomega.Expect(whitelistedSubnetsSlice).Should(gomega.ContainElement(subnetID))
 		}
 		// update nodes whitelisted subnets
-		err = utils.RestartNodesWithWhitelistedSubnets(whitelistedSubnets)
+		err = utils.RestartNodesWithWhitelistedChains(whitelistedSubnets)
 		gomega.Expect(err).Should(gomega.BeNil())
 		// wait for subnet walidators to be up
 		err = utils.WaitSubnetValidators(subnetID, nodeInfos)

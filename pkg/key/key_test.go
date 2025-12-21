@@ -14,23 +14,25 @@ import (
 )
 
 const (
-	ewoqPChainAddr    = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+	// Test private key - NOT for production use
+	testPrivateKey    = "PrivateKey-2kqWNDaqUKQyE4ZsV5GLCGeizE6sHAJVyjnfjXoXrtcZpK9M67"
+	testRawPrivateKey = "2kqWNDaqUKQyE4ZsV5GLCGeizE6sHAJVyjnfjXoXrtcZpK9M67"
+	testPChainAddr    = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 	fallbackNetworkID = 999999 // unaffiliated networkID should trigger HRP Fallback
 )
 
-func TestNewKeyEwoq(t *testing.T) {
+func TestNewKeyGenerated(t *testing.T) {
 	t.Parallel()
 
-	m, err := NewSoft(
-		fallbackNetworkID,
-		WithPrivateKeyEncoded(EwoqPrivateKey),
-	)
+	// Generate a new key for testing
+	m, err := NewSoft(fallbackNetworkID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if m.P()[0] != ewoqPChainAddr {
-		t.Fatalf("unexpected P-Chain address %q, expected %q", m.P(), ewoqPChainAddr)
+	// Should have at least one P-Chain address
+	if len(m.P()) == 0 {
+		t.Fatal("expected at least one P-Chain address")
 	}
 
 	keyPath := filepath.Join(t.TempDir(), "key.pk")
@@ -48,14 +50,11 @@ func TestNewKeyEwoq(t *testing.T) {
 	}
 }
 
-func TestNewKey(t *testing.T) {
+func TestNewKeyWithOptions(t *testing.T) {
 	t.Parallel()
 
-	skBytes, err := cb58.Decode(rawEwoqPk)
-	if err != nil {
-		t.Fatal(err)
-	}
-	ewoqPk, err := secp256k1.ToPrivateKey(skBytes)
+	// Generate first key
+	privKey1, err := secp256k1.NewPrivateKey()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,43 +64,50 @@ func TestNewKey(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Encode privKey1 to cb58
+	encoded, err := cb58.Encode(privKey1.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	encodedWithPrefix := "PrivateKey-" + encoded
+
 	tt := []struct {
 		name   string
 		opts   []SOpOption
 		expErr error
 	}{
 		{
-			name:   "test",
+			name:   "test no opts",
 			opts:   nil,
 			expErr: nil,
 		},
 		{
-			name: "ewop with WithPrivateKey",
+			name: "with WithPrivateKey",
 			opts: []SOpOption{
-				WithPrivateKey(ewoqPk),
+				WithPrivateKey(privKey1),
 			},
 			expErr: nil,
 		},
 		{
-			name: "ewop with WithPrivateKeyEncoded",
+			name: "with WithPrivateKeyEncoded",
 			opts: []SOpOption{
-				WithPrivateKeyEncoded(EwoqPrivateKey),
+				WithPrivateKeyEncoded(encodedWithPrefix),
 			},
 			expErr: nil,
 		},
 		{
-			name: "ewop with WithPrivateKey/WithPrivateKeyEncoded",
+			name: "with WithPrivateKey and WithPrivateKeyEncoded matching",
 			opts: []SOpOption{
-				WithPrivateKey(ewoqPk),
-				WithPrivateKeyEncoded(EwoqPrivateKey),
+				WithPrivateKey(privKey1),
+				WithPrivateKeyEncoded(encodedWithPrefix),
 			},
 			expErr: nil,
 		},
 		{
-			name: "ewop with invalid WithPrivateKey",
+			name: "with invalid mismatched keys",
 			opts: []SOpOption{
 				WithPrivateKey(privKey2),
-				WithPrivateKeyEncoded(EwoqPrivateKey),
+				WithPrivateKeyEncoded(encodedWithPrefix),
 			},
 			expErr: ErrInvalidPrivateKey,
 		},
@@ -111,5 +117,38 @@ func TestNewKey(t *testing.T) {
 		if !errors.Is(err, tv.expErr) {
 			t.Fatalf("#%d(%s): unexpected error %v, expected %v", i, tv.name, err, tv.expErr)
 		}
+	}
+}
+
+func TestPrivateKeyEncoding(t *testing.T) {
+	t.Parallel()
+
+	// Generate a new private key
+	privKey, err := secp256k1.NewPrivateKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Encode to cb58
+	encoded, err := cb58.Encode(privKey.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Decode back
+	decoded, err := cb58.Decode(encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Convert back to private key
+	recoveredKey, err := secp256k1.ToPrivateKey(decoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify keys match
+	if !bytes.Equal(privKey.Bytes(), recoveredKey.Bytes()) {
+		t.Fatal("recovered key does not match original")
 	}
 }

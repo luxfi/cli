@@ -45,6 +45,13 @@ func runShow(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Key Set: %s", name)
 	ux.Logger.PrintToUser("")
 
+	// Staking/Node identity (most important for validators)
+	if keySet.NodeID != "" {
+		ux.Logger.PrintToUser("Staking - Node Identity:")
+		ux.Logger.PrintToUser("  NodeID:     %s", keySet.NodeID)
+		ux.Logger.PrintToUser("")
+	}
+
 	// EC key info
 	ux.Logger.PrintToUser("EC (secp256k1) - Transaction Signing:")
 	ux.Logger.PrintToUser("  Address:    %s", keySet.ECAddress)

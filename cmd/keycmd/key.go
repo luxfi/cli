@@ -21,6 +21,10 @@ var app *application.Lux
 //   - lux key delete <name>     - Delete a key set
 //   - lux key export <name>     - Export key set (mnemonic or individual keys)
 //   - lux key import <name>     - Import key set from mnemonic
+//   - lux key lock [name]       - Lock a key (clear from memory)
+//   - lux key unlock <name>     - Unlock a key for use
+//   - lux key backend           - Manage key storage backends
+//   - lux key kchain            - K-Chain distributed key management
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
@@ -47,7 +51,15 @@ Examples:
   lux key list                           # List all key sets
   lux key show validator1                # Show public keys and addresses
   lux key delete validator1              # Delete key set
-  lux key export validator1              # Export mnemonic (DANGER!)`,
+  lux key export validator1              # Export mnemonic (DANGER!)
+  lux key lock validator1                # Lock key (clear from memory)
+  lux key lock --all                     # Lock all keys
+  lux key unlock validator1              # Unlock key for use
+  lux key backend list                   # List available backends
+  lux key backend set keychain           # Set default backend
+  lux key kchain status                  # Check K-Chain service
+  lux key kchain create mykey            # Create distributed key
+  lux key kchain sign mykey "data"       # Threshold sign data`,
 		RunE: cobrautils.CommandSuiteUsage,
 	}
 
@@ -60,6 +72,19 @@ Examples:
 	cmd.AddCommand(newImportCmd())
 	cmd.AddCommand(newGenerateCmd())
 	cmd.AddCommand(newGenesisCmd())
+
+	// Session management
+	cmd.AddCommand(newLockCmd())
+	cmd.AddCommand(newUnlockCmd())
+
+	// Backend management
+	cmd.AddCommand(newBackendCmd())
+
+	// K-Chain distributed key management
+	cmd.AddCommand(newKChainCmd())
+
+	// Ring signatures for anonymous signing
+	cmd.AddCommand(newRingCmd())
 
 	return cmd
 }
