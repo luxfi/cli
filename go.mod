@@ -15,14 +15,14 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/crypto v1.17.26
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.16.4
-	github.com/luxfi/geth v1.16.56
+	github.com/luxfi/evm v0.16.10
+	github.com/luxfi/geth v1.16.57
 	github.com/luxfi/ids v1.2.4
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.14.19
-	github.com/luxfi/node v1.22.23
+	github.com/luxfi/node v1.22.32
 	github.com/luxfi/sdk v1.16.29
 	github.com/luxfi/warp v1.16.37
 	github.com/manifoldco/promptui v0.9.0
@@ -62,8 +62,6 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 require (
 	github.com/btcsuite/btcd v0.24.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
-	github.com/cockroachdb/pebble v1.1.5
-	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/constants v1.2.3
 	github.com/luxfi/genesis v1.5.7
@@ -71,7 +69,6 @@ require (
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.1.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.38.0
 )
@@ -106,13 +103,13 @@ require (
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.6.2-0.20251204010831-23491bd573cf // indirect
 	github.com/cockroachdb/errors v1.12.0 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
+	github.com/cockroachdb/pebble v1.1.5 // indirect
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20250429170803-42689b6311bb // indirect
 	github.com/consensys/gnark-crypto v0.19.2 // indirect
@@ -123,7 +120,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
-	github.com/dgraph-io/ristretto v0.2.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.9.0 // indirect
@@ -175,7 +171,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.0.4 // indirect
-	github.com/luxfi/consensus v1.22.33 // indirect
+	github.com/luxfi/consensus v1.22.35 // indirect
 	github.com/luxfi/database v1.2.12 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
@@ -219,6 +215,7 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/supranational/blst v0.3.16 // indirect
+	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
@@ -226,7 +223,6 @@ require (
 	github.com/zondax/golem v0.27.0 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
 	github.com/zondax/ledger-go v1.0.1 // indirect
-	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
