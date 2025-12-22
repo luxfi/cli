@@ -23,9 +23,9 @@ require (
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.14.26
-	github.com/luxfi/node v1.22.40
+	github.com/luxfi/node v1.22.44
 	github.com/luxfi/sdk v1.16.31
-	github.com/luxfi/warp v1.16.38
+	github.com/luxfi/warp v1.16.39
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
@@ -66,7 +66,7 @@ require (
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/constants v1.2.4
 	github.com/luxfi/genesis v1.5.9
-	github.com/luxfi/go-bip32 v1.0.1
+	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.1.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
@@ -80,8 +80,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.8.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
-	github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e // indirect
-	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251221085550-b8e13ca38217 // indirect
