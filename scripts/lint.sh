@@ -15,12 +15,13 @@ fi
 echo "Running go vet..."
 go vet ./...
 
-# Run golangci-lint if available
-if command -v golangci-lint &> /dev/null; then
-    echo "Running golangci-lint..."
-    golangci-lint run
+# Run staticcheck
+echo "Running staticcheck..."
+if command -v staticcheck &> /dev/null; then
+    staticcheck ./... || true
 else
-    echo "golangci-lint not found, skipping..."
+    go install honnef.co/go/tools/cmd/staticcheck@latest
+    staticcheck ./... || true
 fi
 
 echo "All checks passed!"

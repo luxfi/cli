@@ -122,9 +122,9 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		err = utils.GetCurrentSupply(subnetName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 
-		_, err = commands.TransformElasticSubnetLocally(subnetName)
+		_, err = commands.TransformElasticChainLocally(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		exists, err := utils.ElasticSubnetConfigExists(subnetName)
+		exists, err := utils.ElasticChainConfigExists(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -132,11 +132,11 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		err = utils.GetCurrentSupply(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.TransformElasticSubnetLocally(subnetName)
+		_, err = commands.TransformElasticChainLocally(subnetName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 
 		commands.DeleteSubnetConfig(subnetName)
-		commands.DeleteElasticSubnetConfig(subnetName)
+		commands.DeleteElasticChainConfig(subnetName)
 	})
 
 	ginkgo.It("can transform subnet to elastic subnet and automatically transform validators to permissionless", func() {
@@ -148,7 +148,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.TransformElasticSubnetLocallyandTransformValidators(subnetName, stakeAmount)
+		_, err = commands.TransformElasticChainLocallyandTransformValidators(subnetName, stakeAmount)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// GetCurrentSupply will return result if queried for elastic subnet
@@ -167,7 +167,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		gomega.Expect(exists).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
-		commands.DeleteElasticSubnetConfig(subnetName)
+		commands.DeleteElasticChainConfig(subnetName)
 	})
 
 	ginkgo.It("can add permissionless validator to elastic subnet", func() {
@@ -179,7 +179,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.TransformElasticSubnetLocally(subnetName)
+		_, err = commands.TransformElasticChainLocally(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		nodeIDs, err := utils.GetValidators(subnetName)
@@ -213,7 +213,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		gomega.Expect(isPendingValidator).Should(gomega.BeTrue())
 
 		commands.DeleteSubnetConfig(subnetName)
-		commands.DeleteElasticSubnetConfig(subnetName)
+		commands.DeleteElasticChainConfig(subnetName)
 	})
 
 	ginkgo.It("can load viper config and setup node properties for local deploy", func() {
