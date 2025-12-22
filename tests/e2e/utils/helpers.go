@@ -26,6 +26,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
+	"github.com/luxfi/cli/pkg/models"
 	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
@@ -37,7 +38,6 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/primary"
 )
 
