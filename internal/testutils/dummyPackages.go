@@ -27,8 +27,8 @@ const (
 
 	nodeBinPrefix = "node-"
 
-	luxTar       = "/tmp/lux.tar.gz"
-	luxZip       = "/tmp/lux.zip"
+	luxTar = "/tmp/lux.tar.gz"
+	luxZip = "/tmp/lux.zip"
 	evmTar = "/tmp/subevm.tar.gz"
 )
 
