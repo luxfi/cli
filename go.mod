@@ -16,15 +16,15 @@ require (
 	github.com/luxfi/config v1.0.0
 	github.com/luxfi/crypto v1.17.26
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.16.4
+	github.com/luxfi/evm v0.8.17
 	github.com/luxfi/geth v1.16.60
 	github.com/luxfi/ids v1.2.5
 	github.com/luxfi/ledger-lux-go v1.0.2
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.26
+	github.com/luxfi/netrunner v1.14.24
 	github.com/luxfi/node v1.22.44
-	github.com/luxfi/sdk v1.16.31
+	github.com/luxfi/sdk v1.16.33
 	github.com/luxfi/warp v1.16.39
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -172,7 +172,6 @@ require (
 	github.com/luxfi/codec v1.0.4 // indirect
 	github.com/luxfi/consensus v1.22.39 // indirect
 	github.com/luxfi/database v1.2.14 // indirect
-	github.com/luxfi/keys v1.0.0 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.4.9 // indirect
