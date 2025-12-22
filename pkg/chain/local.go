@@ -22,6 +22,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
 	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
+	climodels "github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/core"
@@ -183,7 +184,7 @@ func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) er
 }
 
 func IssueTransformSubnetTx(
-	elasticSubnetConfig models.ElasticChainConfig,
+	elasticSubnetConfig climodels.ElasticChainConfig,
 	kc keychain.Keychain,
 	subnetID ids.ID,
 	tokenName string,
