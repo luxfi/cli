@@ -18,15 +18,15 @@ import (
 )
 
 var (
-	chainType       string // l1, l2, l3
-	sequencerType   string // lux, ethereum, op, external
-	forceCreate     bool
-	genesisFile     string
-	customVMBin     string
-	useEVM          bool
-	useCustomVM     bool
-	vmVersion       string
-	useLatestVM     bool
+	chainType        string // l1, l2, l3
+	sequencerType    string // lux, ethereum, op, external
+	forceCreate      bool
+	genesisFile      string
+	customVMBin      string
+	useEVM           bool
+	useCustomVM      bool
+	vmVersion        string
+	useLatestVM      bool
 	enablePreconfirm bool
 )
 
@@ -232,7 +232,7 @@ func generateDefaultGenesis(chainName, chainType string) ([]byte, error) {
 			"petersburgBlock":     0,
 			"istanbulBlock":       0,
 			"muirGlacierBlock":    0,
-			"evmTimestamp":  0,
+			"evmTimestamp":        0,
 			"feeConfig": map[string]interface{}{
 				"gasLimit":                 8000000,
 				"targetBlockRate":          2,

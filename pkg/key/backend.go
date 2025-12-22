@@ -163,10 +163,10 @@ type CreateKeyOptions struct {
 
 // backendRegistry holds all registered backends
 var (
-	backendMu       sync.RWMutex
-	backends        = make(map[BackendType]KeyBackend)
-	defaultBackend  BackendType
-	activeBackends  = make(map[BackendType]KeyBackend)
+	backendMu      sync.RWMutex
+	backends       = make(map[BackendType]KeyBackend)
+	defaultBackend BackendType
+	activeBackends = make(map[BackendType]KeyBackend)
 )
 
 // RegisterBackend registers a key backend
