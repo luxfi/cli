@@ -120,8 +120,8 @@ func sidecarExists(subnetName string) (bool, error) {
 	return sidecarExists, nil
 }
 
-func ElasticSubnetConfigExists(subnetName string) (bool, error) {
-	elasticSubnetConfig := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.ElasticSubnetConfigFileName)
+func ElasticChainConfigExists(subnetName string) (bool, error) {
+	elasticSubnetConfig := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.ElasticChainConfigFileName)
 	elasticSubnetConfigExists := true
 	if _, err := os.Stat(elasticSubnetConfig); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -138,7 +138,7 @@ func PermissionlessValidatorExistsInSidecar(subnetName string, nodeID string, ne
 	if err != nil {
 		return false, err
 	}
-	elasticSubnetValidators := sc.ElasticSubnet[network].Validators
+	elasticSubnetValidators := sc.ElasticChain[network].Validators
 	_, ok := elasticSubnetValidators[nodeID]
 	return ok, nil
 }
@@ -915,7 +915,7 @@ func AllPermissionlessValidatorExistsInSidecar(subnetName string, network string
 	if err != nil {
 		return false, err
 	}
-	elasticSubnetValidators := sc.ElasticSubnet[network].Validators
+	elasticSubnetValidators := sc.ElasticChain[network].Validators
 	for _, nodeIDstr := range defaultLocalNetworkNodeIDs {
 		_, ok := elasticSubnetValidators[nodeIDstr]
 		if !ok {
