@@ -17,15 +17,15 @@ const (
 	LuxCliBinDir  = "bin"
 	RunDir        = "runs"
 
-	SuffixSeparator             = "_"
-	SidecarFileName             = "sidecar.json"
-	GenesisFileName             = "genesis.json"
+	SuffixSeparator            = "_"
+	SidecarFileName            = "sidecar.json"
+	GenesisFileName            = "genesis.json"
 	ElasticChainConfigFileName = "elastic_subnet_config.json"
-	NodeConfigJSONFile          = "node-config.json"
-	NodeConfigFileName          = "node-config.json"
-	SidecarSuffix               = SuffixSeparator + SidecarFileName
-	GenesisSuffix               = SuffixSeparator + GenesisFileName
-	NodeFileName                = "node.json"
+	NodeConfigJSONFile         = "node-config.json"
+	NodeConfigFileName         = "node-config.json"
+	SidecarSuffix              = SuffixSeparator + SidecarFileName
+	GenesisSuffix              = SuffixSeparator + GenesisFileName
+	NodeFileName               = "node.json"
 
 	SidecarVersion             = "1.4.0"
 	LatestPreReleaseVersionTag = "latest-prerelease"
