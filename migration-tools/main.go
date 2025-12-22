@@ -15,24 +15,24 @@ import (
 
 const (
 	// Database namespaces for PebbleDB
-	blockBodyPrefix   = 0x62 // 'b' - block body
+	blockBodyPrefix     = 0x62 // 'b' - block body
 	blockReceiptsPrefix = 0x72 // 'r' - block receipts
-	headerPrefix      = 0x68 // 'h' - headers
-	headerHashPrefix  = 0x48 // 'H' - header hash by number
-	txLookupPrefix    = 0x6c // 'l' - transaction lookup
+	headerPrefix        = 0x68 // 'h' - headers
+	headerHashPrefix    = 0x48 // 'H' - header hash by number
+	txLookupPrefix      = 0x6c // 'l' - transaction lookup
 
 	// Account state prefixes
-	accountPrefix     = 0x61 // 'a' - accounts
-	storagePrefix     = 0x73 // 's' - storage
-	codePrefix       = 0x63 // 'c' - code
+	accountPrefix = 0x61 // 'a' - accounts
+	storagePrefix = 0x73 // 's' - storage
+	codePrefix    = 0x63 // 'c' - code
 )
 
 type MigrationConfig struct {
-	SourceDB      string
-	TargetDB      string
-	NetworkID     uint32
+	SourceDB       string
+	TargetDB       string
+	NetworkID      uint32
 	ValidatorCount int
-	OutputDir     string
+	OutputDir      string
 }
 
 func main() {
@@ -115,7 +115,7 @@ func createLevelDB(path string) (*leveldb.DB, error) {
 	opts := &opt.Options{
 		Compression: opt.SnappyCompression,
 		WriteBuffer: 256 * 1024 * 1024, // 256MB
-		BlockSize:   32 * 1024,          // 32KB
+		BlockSize:   32 * 1024,         // 32KB
 	}
 
 	// Create directory if it doesn't exist
@@ -146,7 +146,7 @@ func migrateBlockchainData(src *pebble.DB, dst *leveldb.DB) error {
 		prefix := key[0]
 		switch prefix {
 		case blockBodyPrefix, blockReceiptsPrefix, headerPrefix,
-		     headerHashPrefix, txLookupPrefix:
+			headerHashPrefix, txLookupPrefix:
 			// Copy blockchain data - make copies of the byte slices
 			keyCopy := make([]byte, len(key))
 			copy(keyCopy, key)
@@ -231,11 +231,11 @@ func migrateStateData(src *pebble.DB, dst *leveldb.DB) error {
 
 func createGenesisConfig(config MigrationConfig) error {
 	genesis := map[string]interface{}{
-		"networkId": config.NetworkID,
-		"chainId":   config.NetworkID,
-		"validators": config.ValidatorCount,
+		"networkId":         config.NetworkID,
+		"chainId":           config.NetworkID,
+		"validators":        config.ValidatorCount,
 		"consensusProtocol": "snowman",
-		"minBlockTime": 2000000000, // 2 seconds
+		"minBlockTime":      2000000000, // 2 seconds
 	}
 
 	genesisPath := filepath.Join(config.OutputDir, "genesis.json")
@@ -259,15 +259,15 @@ func createValidatorConfigs(config MigrationConfig) error {
 
 		// Create basic node config
 		nodeConfig := map[string]interface{}{
-			"network-id": config.NetworkID,
-			"http-port": 9630 + (i-1)*10,
-			"staking-port": 9631 + (i-1)*10,
-			"db-dir": filepath.Join(validatorDir, "db"),
-			"log-dir": filepath.Join(validatorDir, "logs"),
-			"staking-enabled": false,
+			"network-id":               config.NetworkID,
+			"http-port":                9630 + (i-1)*10,
+			"staking-port":             9631 + (i-1)*10,
+			"db-dir":                   filepath.Join(validatorDir, "db"),
+			"log-dir":                  filepath.Join(validatorDir, "logs"),
+			"staking-enabled":          false,
 			"sybil-protection-enabled": false,
-			"snow-sample-size": 1,
-			"snow-quorum-size": 1,
+			"snow-sample-size":         1,
+			"snow-quorum-size":         1,
 		}
 
 		configPath := filepath.Join(validatorDir, "node.json")
