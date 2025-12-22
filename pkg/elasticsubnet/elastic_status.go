@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/models"
 )
 
 func GetLocalElasticChainsFromFile(app *application.Lux) ([]string, error) {
