@@ -28,14 +28,14 @@ const BackendKChain BackendType = "kchain"
 
 // K-Chain errors.
 var (
-	ErrKChainUnavailable     = errors.New("kchain: network unavailable")
-	ErrInvalidShareConfig    = errors.New("kchain: invalid share configuration")
-	ErrInsufficientShares    = errors.New("kchain: insufficient shares for reconstruction")
-	ErrValidatorUnreachable  = errors.New("kchain: validator unreachable")
-	ErrShareStoreFailed      = errors.New("kchain: failed to store share")
-	ErrShareRetrieveFailed   = errors.New("kchain: failed to retrieve share")
+	ErrKChainUnavailable      = errors.New("kchain: network unavailable")
+	ErrInvalidShareConfig     = errors.New("kchain: invalid share configuration")
+	ErrInsufficientShares     = errors.New("kchain: insufficient shares for reconstruction")
+	ErrValidatorUnreachable   = errors.New("kchain: validator unreachable")
+	ErrShareStoreFailed       = errors.New("kchain: failed to store share")
+	ErrShareRetrieveFailed    = errors.New("kchain: failed to retrieve share")
 	ErrThresholdSigningFailed = errors.New("kchain: threshold signing failed")
-	ErrKeyNotDistributed     = errors.New("kchain: key not distributed to validators")
+	ErrKeyNotDistributed      = errors.New("kchain: key not distributed to validators")
 )
 
 // ShareConfig configures threshold secret sharing parameters.
@@ -70,11 +70,11 @@ type EncryptedShare struct {
 
 // DistributedKeyInfo holds metadata about a distributed key.
 type DistributedKeyInfo struct {
-	Name           string    `json:"name"`
-	GroupPublicKey []byte    `json:"group_public_key"`
+	Name           string      `json:"name"`
+	GroupPublicKey []byte      `json:"group_public_key"`
 	ShareConfig    ShareConfig `json:"share_config"`
-	CreatedAt      int64     `json:"created_at"`
-	KeyType        string    `json:"key_type"` // "bls", "ec"
+	CreatedAt      int64       `json:"created_at"`
+	KeyType        string      `json:"key_type"` // "bls", "ec"
 }
 
 // KChainBackend implements distributed key storage using threshold cryptography.
@@ -85,7 +85,7 @@ type KChainBackend struct {
 	timeout         time.Duration
 	distributedKeys map[string]*DistributedKeyInfo
 	mlkemKeys       map[string]*mlkem.PrivateKey // validator ML-KEM keys
-	rpcClient       *KChainRPCClient              // RPC client for K-Chain API
+	rpcClient       *KChainRPCClient             // RPC client for K-Chain API
 }
 
 // NewKChainBackend creates a new K-Chain distributed secrets backend.

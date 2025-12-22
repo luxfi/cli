@@ -154,14 +154,14 @@ const (
 	EVMRepoName = "evm"
 
 	// Install directories
-	LuxInstallDir       = "lux"
-	LuxNodeInstallDir   = "luxd"
-	LuxGoInstallDir     = "luxd" // Deprecated: use LuxNodeInstallDir
-	EVMInstallDir       = "evm"
+	LuxInstallDir     = "lux"
+	LuxNodeInstallDir = "luxd"
+	LuxGoInstallDir   = "luxd" // Deprecated: use LuxNodeInstallDir
+	EVMInstallDir     = "evm"
 
 	// Directories
-	ChainsDir = "chains" // Canonical chain definitions (genesis, sidecar)
-	ReposDir  = "repos"
+	ChainsDir        = "chains" // Canonical chain definitions (genesis, sidecar)
+	ReposDir         = "repos"
 	SnapshotsDirName = "snapshots"
 	CustomVMDir      = "customvms"
 	PluginDir        = "plugins"

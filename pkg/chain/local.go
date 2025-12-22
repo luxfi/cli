@@ -45,9 +45,9 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	walletkeychain "github.com/luxfi/node/wallet/keychain"
-	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/chain/c"
+	"github.com/luxfi/sdk/wallet/primary"
 	"go.uber.org/zap"
 )
 

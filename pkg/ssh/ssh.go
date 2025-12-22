@@ -42,8 +42,8 @@ type scriptInputs struct {
 	IsE2E                   bool
 	NetworkFlag             string
 	VMBinaryPath            string
-	EVMReleaseURL     string
-	EVMArchive        string
+	EVMReleaseURL           string
+	EVMArchive              string
 	MonitoringDashboardPath string
 	LoadTestRepoDir         string
 	LoadTestRepo            string

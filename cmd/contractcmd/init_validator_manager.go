@@ -8,8 +8,8 @@ import (
 
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/cmd/networkcmd"
-	"github.com/luxfi/cli/pkg/chainvalidators"
 	"github.com/luxfi/cli/pkg/blockchain"
+	"github.com/luxfi/cli/pkg/chainvalidators"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/networkoptions"

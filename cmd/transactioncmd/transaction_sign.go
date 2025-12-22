@@ -23,7 +23,7 @@ var (
 	useLedger       bool
 	ledgerAddresses []string
 
-	errNoSubnetID               = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
+	errNoSubnetID                 = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
 	errMutuallyExclusiveKeyLedger = errors.New("--key and --ledger/--ledger-addrs are mutually exclusive")
 	errStoredKeyOnMainnet         = errors.New("--key is not available for mainnet operations")
 )
