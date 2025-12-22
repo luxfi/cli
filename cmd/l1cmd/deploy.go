@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/chain"
+	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
