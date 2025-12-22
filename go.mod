@@ -36,7 +36,7 @@ require (
 	github.com/posthog/posthog-go v1.6.1
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
-	github.com/spf13/afero v1.14.0
+	github.com/spf13/afero v1.15.0
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
 	github.com/spf13/viper v1.20.1
