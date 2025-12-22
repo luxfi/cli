@@ -247,7 +247,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
-
-replace github.com/luxfi/genesis => /Users/z/work/lux/genesis
