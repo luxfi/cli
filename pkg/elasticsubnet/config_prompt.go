@@ -36,12 +36,12 @@ const (
 	defaultUptimeRequirement           = 0.8
 )
 
-func GetElasticSubnetConfig(app *application.Lux, tokenSymbol string, useDefaultConfig bool) (models.ElasticSubnetConfig, error) {
+func GetElasticChainConfig(app *application.Lux, tokenSymbol string, useDefaultConfig bool) (models.ElasticChainConfig, error) {
 	const (
 		defaultConfig   = "Use default elastic subnet config"
 		customizeConfig = "Customize elastic subnet config"
 	)
-	elasticSubnetConfig := models.ElasticSubnetConfig{
+	elasticSubnetConfig := models.ElasticChainConfig{
 		InitialSupply:            defaultInitialSupply,
 		MaxSupply:                defaultMaximumSupply,
 		MinConsumptionRate:       defaultMinConsumptionRate * reward.PercentDenominator,
@@ -64,59 +64,59 @@ func GetElasticSubnetConfig(app *application.Lux, tokenSymbol string, useDefault
 		elasticSubnetConfigOptions,
 	)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 
 	if chosenConfig == defaultConfig {
 		return elasticSubnetConfig, nil
 	}
-	customElasticSubnetConfig, err := getCustomElasticSubnetConfig(app, tokenSymbol)
+	customElasticChainConfig, err := getCustomElasticChainConfig(app, tokenSymbol)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
-	return customElasticSubnetConfig, nil
+	return customElasticChainConfig, nil
 }
 
-func getCustomElasticSubnetConfig(app *application.Lux, tokenSymbol string) (models.ElasticSubnetConfig, error) {
+func getCustomElasticChainConfig(app *application.Lux, tokenSymbol string) (models.ElasticChainConfig, error) {
 	ux.Logger.PrintToUser("More info regarding elastic subnet parameters can be found at https://docs.lux.network/subnets/reference-elastic-subnets-parameters")
 	initialSupply, err := getInitialSupply(app, tokenSymbol)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	maxSupply, err := getMaximumSupply(app, tokenSymbol, initialSupply)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	minConsumptionRate, maxConsumptionRate, err := getConsumptionRate(app)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	minValidatorStake, maxValidatorStake, err := getValidatorStake(app, initialSupply, maxSupply)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	minStakeDuration, maxStakeDuration, err := getStakeDuration(app)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	minDelegationFee, err := getMinDelegationFee(app)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	minDelegatorStake, err := getMinDelegatorStake(app)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	maxValidatorWeightFactor, err := getMaxValidatorWeightFactor(app)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 	uptimeReq, err := getUptimeRequirement(app)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 
-	elasticSubnetConfig := models.ElasticSubnetConfig{
+	elasticSubnetConfig := models.ElasticChainConfig{
 		InitialSupply:            initialSupply,
 		MaxSupply:                maxSupply,
 		MinConsumptionRate:       minConsumptionRate,

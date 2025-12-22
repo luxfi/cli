@@ -199,7 +199,7 @@ func (d *PublicDeployer) ImportFromXChain(
 func (d *PublicDeployer) TransformSubnetTx(
 	controlKeys []string,
 	subnetAuthKeysStrs []string,
-	elasticSubnetConfig models.ElasticSubnetConfig,
+	elasticSubnetConfig models.ElasticChainConfig,
 	subnetID ids.ID,
 	subnetAssetID ids.ID,
 ) (bool, ids.ID, *txs.Tx, []string, error) {
@@ -550,7 +550,7 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 
 func (d *PublicDeployer) createTransformSubnetTX(
 	subnetAuthKeys []ids.ShortID,
-	elasticSubnetConfig models.ElasticSubnetConfig,
+	elasticSubnetConfig models.ElasticChainConfig,
 	wallet primary.Wallet,
 	assetID ids.ID,
 ) (*txs.Tx, error) {

@@ -148,7 +148,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 
 		_, err = commands.SimulateTestnetTransformSubnet(subnetName, keyName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		exists, err := utils.ElasticSubnetConfigExists(subnetName)
+		exists, err := utils.ElasticChainConfigExists(subnetName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -159,7 +159,7 @@ var _ = ginkgo.Describe("[Public Subnet]", func() {
 		_, err = commands.SimulateTestnetTransformSubnet(subnetName, keyName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 
-		commands.DeleteElasticSubnetConfig(subnetName)
+		commands.DeleteElasticChainConfig(subnetName)
 	})
 
 	ginkgo.It("remove validator testnet", func() {

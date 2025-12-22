@@ -12,6 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
@@ -136,7 +137,7 @@ func createChain(cmd *cobra.Command, args []string) error {
 	sc := models.Sidecar{
 		Name:              chainName,
 		VM:                vmType,
-		Subnet:            chainName,
+		Net:               chainName, // Network name (not subnet)
 		TokenName:         "TOKEN",
 		ChainID:           "",
 		Version:           "1.4.0",
@@ -144,6 +145,7 @@ func createChain(cmd *cobra.Command, args []string) error {
 		Sovereign:         chainType == "l1",
 		SequencerType:     sequencerType,
 		PreconfirmEnabled: enablePreconfirm,
+		ChainLayer:        getChainLayer(chainType),
 	}
 
 	// Set L1 block time based on sequencer
@@ -162,13 +164,16 @@ func createChain(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("Custom VM support coming soon")
 	}
 
-	// Get VM version if using EVM
+	// Get VM version and RPC version if using EVM
 	if vmType == models.EVM {
 		if vmVersion != "" {
 			sc.VMVersion = vmVersion
 		} else {
-			sc.VMVersion = "v0.7.0" // Default EVM version
+			sc.VMVersion = luxconstants.DefaultEVMVersion // Default EVM version
 		}
+		// Set correct RPC version for Lux EVM
+		// This must match the running node's EVM RPC version
+		sc.RPCVersion = luxconstants.DefaultEVMRPCVersion
 	}
 
 	// Create chain directory
@@ -216,6 +221,20 @@ func validateChainName(name string) error {
 		}
 	}
 	return nil
+}
+
+// getChainLayer returns the chain layer (1=L1, 2=L2, 3=L3)
+func getChainLayer(chainType string) int {
+	switch chainType {
+	case "l1":
+		return 1
+	case "l2":
+		return 2
+	case "l3":
+		return 3
+	default:
+		return 2 // Default to L2
+	}
 }
 
 func generateDefaultGenesis(chainName, chainType string) ([]byte, error) {

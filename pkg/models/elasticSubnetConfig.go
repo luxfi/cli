@@ -8,7 +8,7 @@ import (
 	"github.com/luxfi/ids"
 )
 
-type ElasticSubnetConfig struct {
+type ElasticChainConfig struct {
 	SubnetID                 ids.ID
 	AssetID                  ids.ID
 	InitialSupply            uint64

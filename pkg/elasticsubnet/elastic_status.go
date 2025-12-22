@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-func GetLocalElasticSubnetsFromFile(app *application.Lux) ([]string, error) {
+func GetLocalElasticChainsFromFile(app *application.Lux) ([]string, error) {
 	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func GetLocalElasticSubnetsFromFile(app *application.Lux) ([]string, error) {
 
 		// check if sidecar contains local elastic subnets info in Elastic Subnets map
 		// if so, add to list of elastic subnets
-		if _, ok := sc.ElasticSubnet[models.Local.String()]; ok {
+		if _, ok := sc.ElasticChain[models.Local.String()]; ok {
 			elasticSubnets = append(elasticSubnets, sc.Name)
 		}
 	}

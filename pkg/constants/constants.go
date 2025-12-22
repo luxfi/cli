@@ -20,7 +20,7 @@ const (
 	SuffixSeparator             = "_"
 	SidecarFileName             = "sidecar.json"
 	GenesisFileName             = "genesis.json"
-	ElasticSubnetConfigFileName = "elastic_subnet_config.json"
+	ElasticChainConfigFileName = "elastic_subnet_config.json"
 	NodeConfigJSONFile          = "node-config.json"
 	NodeConfigFileName          = "node-config.json"
 	SidecarSuffix               = SuffixSeparator + SidecarFileName

@@ -183,7 +183,7 @@ func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) er
 }
 
 func IssueTransformSubnetTx(
-	elasticSubnetConfig models.ElasticSubnetConfig,
+	elasticSubnetConfig models.ElasticChainConfig,
 	kc keychain.Keychain,
 	subnetID ids.ID,
 	tokenName string,

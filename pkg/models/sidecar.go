@@ -34,7 +34,7 @@ type MultisigTxInfo struct {
 type PermissionlessValidators struct {
 	TxID ids.ID
 }
-type ElasticSubnet struct {
+type ElasticChain struct {
 	SubnetID    ids.ID
 	AssetID     ids.ID
 	PChainTXID  ids.ID
@@ -57,7 +57,7 @@ type Sidecar struct {
 	ChainID         string
 	Version         string
 	Networks        map[string]NetworkData
-	ElasticSubnet   map[string]ElasticSubnet
+	ElasticChain   map[string]ElasticChain
 	ImportedFromLPM bool
 	ImportedVMID    string
 
