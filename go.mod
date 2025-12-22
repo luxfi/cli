@@ -17,15 +17,15 @@ require (
 	github.com/luxfi/crypto v1.17.26
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.16.4
-	github.com/luxfi/geth v1.16.57
-	github.com/luxfi/ids v1.2.4
-	github.com/luxfi/ledger-lux-go v1.0.0
+	github.com/luxfi/geth v1.16.60
+	github.com/luxfi/ids v1.2.5
+	github.com/luxfi/ledger-lux-go v1.0.2
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.21
-	github.com/luxfi/node v1.22.32
-	github.com/luxfi/sdk v1.16.29
-	github.com/luxfi/warp v1.16.37
+	github.com/luxfi/netrunner v1.14.26
+	github.com/luxfi/node v1.22.40
+	github.com/luxfi/sdk v1.16.31
+	github.com/luxfi/warp v1.16.38
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
@@ -64,11 +64,11 @@ require (
 	github.com/btcsuite/btcd v0.24.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/luxfi/constants v1.2.3
-	github.com/luxfi/genesis v1.5.7
+	github.com/luxfi/constants v1.2.4
+	github.com/luxfi/genesis v1.5.9
 	github.com/luxfi/go-bip32 v1.0.1
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/math v1.1.0
+	github.com/luxfi/math v1.1.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.38.0
@@ -172,16 +172,17 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.0.4 // indirect
-	github.com/luxfi/consensus v1.22.35 // indirect
-	github.com/luxfi/database v1.2.12 // indirect
+	github.com/luxfi/consensus v1.22.39 // indirect
+	github.com/luxfi/database v1.2.14 // indirect
+	github.com/luxfi/keys v1.0.0 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
-	github.com/luxfi/p2p v1.4.7 // indirect
+	github.com/luxfi/p2p v1.4.9 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
 	github.com/luxfi/upgrade v1.0.0 // indirect
 	github.com/luxfi/utils v1.1.0 // indirect
-	github.com/luxfi/vm v1.0.0 // indirect
+	github.com/luxfi/vm v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -248,11 +249,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-replace github.com/luxfi/netrunner => ../netrunner
-
-replace github.com/luxfi/evm => ../evm
-
-replace github.com/luxfi/sdk => ../sdk
-
-replace github.com/luxfi/config => ../config

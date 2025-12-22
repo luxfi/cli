@@ -31,6 +31,7 @@ Examples:
 		RunE: cobrautils.CommandSuiteUsage,
 	}
 
+	cmd.AddCommand(newInstallCmd())
 	cmd.AddCommand(newLinkCmd())
 	cmd.AddCommand(newStatusCmd())
 	cmd.AddCommand(newUnlinkCmd())
