@@ -22,8 +22,8 @@ require (
 	github.com/luxfi/ledger-lux-go v1.0.2
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.29
-	github.com/luxfi/node v1.22.44
+	github.com/luxfi/netrunner v1.14.30
+	github.com/luxfi/node v1.22.45
 	github.com/luxfi/sdk v1.16.33
 	github.com/luxfi/warp v1.16.39
 	github.com/manifoldco/promptui v0.9.0
@@ -172,7 +172,7 @@ require (
 	github.com/luxfi/codec v1.0.4 // indirect
 	github.com/luxfi/consensus v1.22.39 // indirect
 	github.com/luxfi/database v1.2.14 // indirect
-	github.com/luxfi/keys v1.0.2 // indirect
+	github.com/luxfi/keys v1.0.3 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.4.9 // indirect
@@ -247,3 +247,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
+
+replace github.com/luxfi/genesis => /Users/z/work/lux/genesis
