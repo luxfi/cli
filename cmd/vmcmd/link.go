@@ -4,45 +4,57 @@
 package vmcmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	luxconfig "github.com/luxfi/config"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
 
-var binaryPath string
+var linkVersion string
 
 func newLinkCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "link <vm-name>",
-		Short: "Link a VM binary to the plugins directory",
-		Long: `Link a VM binary to the plugins directory.
+		Use:   "link <org/name> <path>",
+		Short: "Link a local VM binary for development",
+		Long: `Link a local VM binary to the plugins directory for development.
 
-Creates a symlink from ~/.lux/plugins/<vmid> to the specified binary path.
-The VMID is calculated from the VM name (padded to 32 bytes, CB58 encoded).
+Creates a proper package entry and VMID symlink for a locally built VM binary.
+Use this during development to test local builds with the node.
+
+Package format: <org>/<name> (e.g., luxfi/evm, myuser/myvm)
 
 The binary must exist and be executable.
 
 Examples:
-  lux vm link lux-evm --path ~/work/lux/evm/build/evm
-  lux vm link "Lux EVM" --path /usr/local/bin/evm`,
-		Args: cobra.ExactArgs(1),
+  lux vm link luxfi/evm ~/work/lux/evm/build/evm
+  lux vm link luxfi/evm ~/work/lux/evm/build/evm --version v1.2.3-dev
+  lux vm link myuser/myvm /path/to/myvm/build/myvm`,
+		Args: cobra.ExactArgs(2),
 		RunE: runLink,
 	}
 
-	cmd.Flags().StringVarP(&binaryPath, "path", "p", "", "Path to the VM binary (required)")
-	_ = cmd.MarkFlagRequired("path")
+	cmd.Flags().StringVarP(&linkVersion, "version", "v", "", "Version label (default: v0.0.0-local)")
 
 	return cmd
 }
 
 func runLink(_ *cobra.Command, args []string) error {
-	vmName := args[0]
+	pkgRef := args[0]
+	binaryPath := args[1]
+
+	// Parse org/name
+	parts := strings.SplitN(pkgRef, "/", 2)
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid package reference: %s (expected org/name)", pkgRef)
+	}
+	org, name := parts[0], parts[1]
 
 	// Expand ~ in path
 	expandedPath := utils.GetRealFilePath(binaryPath)
@@ -62,14 +74,25 @@ func runLink(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to stat binary: %w", err)
 	}
 
-	// Check if it's a regular file (not a directory)
 	if info.IsDir() {
 		return fmt.Errorf("path is a directory, not a file: %s", absPath)
 	}
 
-	// Check if executable (user execute bit)
 	if info.Mode()&0o111 == 0 {
 		return fmt.Errorf("binary is not executable: %s", absPath)
+	}
+
+	// Determine version
+	version := linkVersion
+	if version == "" {
+		version = "v0.0.0-local"
+	}
+
+	// Determine VM name for VMID calculation
+	// Use canonical name based on common VMs, or default to package name
+	vmName := name
+	if name == "evm" && org == "luxfi" {
+		vmName = "Lux EVM" // Canonical name for Lux EVM
 	}
 
 	// Calculate VMID
@@ -78,34 +101,38 @@ func runLink(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to calculate VMID: %w", err)
 	}
 
-	// Get plugins directory using unified config package
-	pluginDir := luxconfig.ResolvePluginDir()
-
-	// Ensure plugins directory exists
-	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
-		return fmt.Errorf("failed to create plugins directory %s: %w", pluginDir, err)
+	// Create package manager
+	pm, err := luxconfig.NewPluginPackageManager("")
+	if err != nil {
+		return fmt.Errorf("failed to create package manager: %w", err)
 	}
 
-	// Symlink path
-	symlinkPath := filepath.Join(pluginDir, vmID.String())
-
-	// Atomic symlink update: remove old, create new
-	// Using os.Remove + os.Symlink pattern (ln -sfn equivalent)
-	if _, err := os.Lstat(symlinkPath); err == nil {
-		if err := os.Remove(symlinkPath); err != nil {
-			return fmt.Errorf("failed to remove existing symlink: %w", err)
-		}
+	// Create manifest (link creates a symlink, not a copy)
+	manifest := &luxconfig.PluginManifest{
+		Name:        name,
+		Org:         org,
+		Version:     version,
+		VMID:        vmID.String(),
+		VMName:      vmName,
+		Binary:      filepath.Base(absPath),
+		Description: fmt.Sprintf("%s/%s VM plugin (linked)", org, name),
+		Repository:  fmt.Sprintf("https://github.com/%s/%s", org, name),
+		InstalledAt: time.Now(),
 	}
 
-	if err := os.Symlink(absPath, symlinkPath); err != nil {
-		return fmt.Errorf("failed to create symlink: %w", err)
+	// Link (creates symlink instead of copying)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := pm.Link(ctx, manifest, absPath); err != nil {
+		return fmt.Errorf("failed to link plugin: %w", err)
 	}
 
-	ux.Logger.PrintToUser("VM linked successfully:")
-	ux.Logger.PrintToUser("  Name:   %s", vmName)
-	ux.Logger.PrintToUser("  VMID:   %s", vmID.String())
-	ux.Logger.PrintToUser("  Path:   %s", absPath)
-	ux.Logger.PrintToUser("  Plugin: %s", symlinkPath)
+	ux.Logger.PrintToUser("Plugin linked successfully:")
+	ux.Logger.PrintToUser("  Package:  %s/%s@%s", org, name, version)
+	ux.Logger.PrintToUser("  VMID:     %s", vmID.String())
+	ux.Logger.PrintToUser("  Binary:   %s", absPath)
+	ux.Logger.PrintToUser("  Active:   %s", pm.ActivePath(vmID.String()))
 
 	return nil
 }
