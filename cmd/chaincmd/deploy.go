@@ -66,7 +66,7 @@ func deployChain(cmd *cobra.Command, args []string) error {
 	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		err = fmt.Errorf("chain %s not found. Create it first with: lux chain create %s", chainName, chainName)
-		ux.Logger.PrintError(err.Error())
+		ux.Logger.PrintError("%s", err)
 		return err
 	}
 
@@ -74,7 +74,7 @@ func deployChain(cmd *cobra.Command, args []string) error {
 	chainGenesis, err := app.LoadRawGenesis(chainName)
 	if err != nil {
 		err = fmt.Errorf("failed to load genesis: %w", err)
-		ux.Logger.PrintError(err.Error())
+		ux.Logger.PrintError("%s", err)
 		return err
 	}
 
@@ -83,7 +83,7 @@ func deployChain(cmd *cobra.Command, args []string) error {
 		var genesis core.Genesis
 		if err := json.Unmarshal(chainGenesis, &genesis); err != nil {
 			err = fmt.Errorf("invalid genesis format: %w", err)
-			ux.Logger.PrintError(err.Error())
+			ux.Logger.PrintError("%s", err)
 			return err
 		}
 	}
@@ -105,7 +105,7 @@ func deployChain(cmd *cobra.Command, args []string) error {
 
 	// All deployments use the same flow - deploy to locally running network
 	if err := deployToNetwork(chainName, chainGenesis, &sc, network); err != nil {
-		ux.Logger.PrintError(err.Error())
+		ux.Logger.PrintError("%s", err)
 		return err
 	}
 	return nil
