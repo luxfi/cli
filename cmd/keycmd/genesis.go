@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ripemd160"
@@ -106,45 +107,45 @@ const (
 // Predefined network configurations
 var networkConfigs = map[string]NetworkConfig{
 	"mainnet": {
-		NetworkID:      96369,
-		ChainID:        96369,
+		NetworkID:      constants.MainnetID,      // 1 (P-Chain network identifier)
+		ChainID:        constants.MainnetChainID, // 96369 (C-Chain EVM identifier)
 		KeyPrefix:      "mainnet-key",
 		NumPChainKeys:  5,
 		NumXChainKeys:  5,
-		HRP:            "lux",
+		HRP:            constants.MainnetHRP, // "lux"
 		VestingYears:   100,
 		VestingPercent: 1.0,
 		Message:        "Lux Mainnet Genesis - Quantum-Safe BLS Signatures",
 	},
 	"testnet": {
-		NetworkID:      96368,
-		ChainID:        96368,
+		NetworkID:      constants.TestnetID,      // 2 (P-Chain network identifier)
+		ChainID:        constants.TestnetChainID, // 96368 (C-Chain EVM identifier)
 		KeyPrefix:      "testnet-key",
 		NumPChainKeys:  5,
 		NumXChainKeys:  5,
-		HRP:            "test",
+		HRP:            constants.TestnetHRP, // "test"
 		VestingYears:   1,
 		VestingPercent: 100.0, // Fully unlocked after 1 year for testing
 		Message:        "Lux Testnet Genesis",
 	},
 	"devnet": {
-		NetworkID:      1337,
-		ChainID:        1337,
+		NetworkID:      constants.DevnetID,      // 3 (P-Chain network identifier)
+		ChainID:        constants.DevnetChainID, // 96370 (C-Chain EVM identifier)
 		KeyPrefix:      "devnet-key",
 		NumPChainKeys:  3,
 		NumXChainKeys:  2,
-		HRP:            "local",
-		VestingYears:   0, // No vesting for devnet
+		HRP:            constants.DevnetHRP, // "dev"
+		VestingYears:   0,                   // No vesting for devnet
 		VestingPercent: 100.0,
 		Message:        "Lux Devnet Genesis - Development Only",
 	},
 	"local": {
-		NetworkID:      1337,
-		ChainID:        1337,
+		NetworkID:      constants.LocalID,      // 1337 (P-Chain network identifier)
+		ChainID:        constants.LocalChainID, // 1337 (C-Chain EVM identifier)
 		KeyPrefix:      "local-key",
 		NumPChainKeys:  1,
 		NumXChainKeys:  0,
-		HRP:            "local",
+		HRP:            constants.LocalHRP, // "local"
 		VestingYears:   0,
 		VestingPercent: 100.0,
 		Message:        "Lux Local Genesis - Single Node Development",
@@ -158,20 +159,20 @@ func newGenesisCmd() *cobra.Command {
 		Long: `Generate a genesis.json file with P-Chain and X-Chain allocations.
 
 Network modes:
-  --mainnet   Use mainnet configuration (Network ID: 96369)
+  --mainnet   Use mainnet configuration (Network ID: 1, Chain ID: 96369)
               - Uses mainnet-key-01 through mainnet-key-11
               - 5 P-Chain keys (first unlocked, rest 100-year vesting)
               - 5 X-Chain keys (100-year vesting)
 
-  --testnet   Use testnet configuration (Network ID: 96368)
+  --testnet   Use testnet configuration (Network ID: 2, Chain ID: 96368)
               - Uses testnet-key-01 through testnet-key-10
               - Shorter vesting for testing
 
-  --devnet    Use devnet configuration (Network ID: 1337)
+  --devnet    Use devnet configuration (Network ID: 3, Chain ID: 96370)
               - Uses devnet-key-01 through devnet-key-05
               - No vesting, fully unlocked
 
-  (no flag)   Local development (Network ID: 1337)
+  (no flag)   Local development (Network ID: 1337, Chain ID: 1337)
               - Generates new keys if needed
               - Single validator, fully unlocked
 
@@ -193,9 +194,9 @@ Examples:
 	}
 
 	// Network selection flags (mutually exclusive)
-	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "Generate mainnet genesis (Network ID: 96369)")
-	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "Generate testnet genesis (Network ID: 96368)")
-	cmd.Flags().BoolVar(&useDevnet, "devnet", false, "Generate devnet genesis (Network ID: 1337)")
+	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "Generate mainnet genesis (Network ID: 1, Chain ID: 96369)")
+	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "Generate testnet genesis (Network ID: 2, Chain ID: 96368)")
+	cmd.Flags().BoolVar(&useDevnet, "devnet", false, "Generate devnet genesis (Network ID: 3, Chain ID: 96370)")
 
 	// Key generation
 	cmd.Flags().BoolVar(&generateKeys, "generate-keys", false, "Generate new keys if they don't exist")
