@@ -10,12 +10,12 @@ import (
 
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	cliprompts "github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"

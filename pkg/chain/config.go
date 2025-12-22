@@ -43,10 +43,10 @@ type Config struct {
 	alias   string // Human-readable name like "zoo"
 
 	// Overlay layers (lowest to highest precedence)
-	defaults   map[string]interface{}
-	global     map[string]interface{}
-	runConfig  map[string]interface{}
-	cliConfig  map[string]interface{}
+	defaults  map[string]interface{}
+	global    map[string]interface{}
+	runConfig map[string]interface{}
+	cliConfig map[string]interface{}
 }
 
 // NewConfig creates a new chain config for the given chain ID

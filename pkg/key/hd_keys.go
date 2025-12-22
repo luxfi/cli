@@ -28,10 +28,10 @@ import (
 
 const (
 	// Key type subdirectories
-	ECKeyDir       = "ec"       // secp256k1 keys for transaction signing
-	BLSKeyDir      = "bls"      // BLS keys for consensus
-	RingtailKeyDir = "rt"       // Ringtail keys for ring signatures
-	MLDSAKeyDir    = "mldsa"    // ML-DSA keys for post-quantum signatures
+	ECKeyDir       = "ec"    // secp256k1 keys for transaction signing
+	BLSKeyDir      = "bls"   // BLS keys for consensus
+	RingtailKeyDir = "rt"    // Ringtail keys for ring signatures
+	MLDSAKeyDir    = "mldsa" // ML-DSA keys for post-quantum signatures
 
 	// Key file names
 	PrivateKeyFile = "private.key"

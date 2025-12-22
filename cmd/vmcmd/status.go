@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	luxconfig "github.com/luxfi/config"
 	"github.com/luxfi/cli/pkg/ux"
+	luxconfig "github.com/luxfi/config"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

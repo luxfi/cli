@@ -19,8 +19,8 @@ var app *application.Lux
 
 // Global flags
 var (
-	networkFlag   string
-	rpcFlag       string
+	networkFlag    string
+	rpcFlag        string
 	privateKeyFlag string
 )
 
