@@ -6,8 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 
+	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 )
 
@@ -31,23 +31,20 @@ enabling easy migration and state preservation across network deployments.`,
 var evmDeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy EVM L2",
-	Long: `Deploy a new EVM L2, optionally reusing an existing data directory with preserved state.
-
-If --data-dir points to an existing EVM deployment, it will reuse the existing
-PebbleDB database, including all blocks, accounts, balances, and contract data.
+	Long: `Deploy a new EVM L2, optionally reusing an existing data directory.
 
 Example:
-  lux evm deploy --data-dir /home/z/.luxd-5node-rpc/node2
-  lux evm deploy --data-dir /path/to/existing/deployment --network-id 96369
-  lux evm deploy  # Creates new deployment with timestamp-based directory`,
+  lux evm deploy                         # Uses default ~/.lux/evm/
+  lux evm deploy --network-id 2          # Deploy on testnet
+  lux evm deploy --data-dir ~/.lux/evm   # Specify data directory`,
 	RunE: deployEVM,
 }
 
 func NewEVMCmd() *cobra.Command {
 	evmCmd.AddCommand(evmDeployCmd)
 
-	evmDeployCmd.Flags().IntVar(&evmNetworkID, "network-id", 96369, "Network ID for the deployment")
-	evmDeployCmd.Flags().StringVar(&evmDataDir, "data-dir", "", "Data directory for the node (default: ~/.lux-cli/runs/evm-<timestamp>)")
+	evmDeployCmd.Flags().IntVar(&evmNetworkID, "network-id", int(constants.MainnetID), "Network ID for the deployment (1=mainnet, 2=testnet, 3=devnet)")
+	evmDeployCmd.Flags().StringVar(&evmDataDir, "data-dir", "", "Data directory for the node (default: ~/.lux/evm)")
 	evmDeployCmd.Flags().IntVar(&evmPort, "port", 9630, "Port for the node RPC")
 	evmDeployCmd.Flags().StringVar(&evmChainConfig, "chain-config", "", "Path to chain configuration JSON")
 	evmDeployCmd.Flags().BoolVar(&evmSkipBuild, "skip-build", false, "Skip building the EVM plugin")
@@ -56,10 +53,9 @@ func NewEVMCmd() *cobra.Command {
 }
 
 func deployEVM(cmd *cobra.Command, args []string) error {
-	// Set default data directory if not provided - use ~/.lux-cli/runs
+	// Set default data directory if not provided - use ~/.lux/evm
 	if evmDataDir == "" {
-		timestamp := time.Now().Format("20060102-150405")
-		evmDataDir = filepath.Join(os.Getenv("HOME"), ".lux-cli", "runs", fmt.Sprintf("evm-%s", timestamp))
+		evmDataDir = filepath.Join(os.Getenv("HOME"), ".lux", "evm")
 	}
 
 	// Check if data directory exists and has an existing database
