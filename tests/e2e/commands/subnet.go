@@ -164,9 +164,9 @@ func DeleteSubnetConfig(subnetName string) {
 	gomega.Expect(exists).Should(gomega.BeFalse())
 }
 
-func DeleteElasticSubnetConfig(subnetName string) {
+func DeleteElasticChainConfig(subnetName string) {
 	var err error
-	elasticSubnetConfig := filepath.Join(utils.GetBaseDir(), constants.ChainsDir, subnetName, constants.ElasticSubnetConfigFileName)
+	elasticSubnetConfig := filepath.Join(utils.GetBaseDir(), constants.ChainsDir, subnetName, constants.ElasticChainConfigFileName)
 	if _, err = os.Stat(elasticSubnetConfig); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
 		err = nil
@@ -823,7 +823,7 @@ func SimulateGetSubnetStatsTestnet(subnetName, subnetID string) string {
 	return string(output)
 }
 
-func TransformElasticSubnetLocally(subnetName string) (string, error) {
+func TransformElasticChainLocally(subnetName string) (string, error) {
 	// Check config exists
 	exists, err := utils.SubnetConfigExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -852,7 +852,7 @@ func TransformElasticSubnetLocally(subnetName string) (string, error) {
 	return string(output), err
 }
 
-func TransformElasticSubnetLocallyandTransformValidators(subnetName string, stakeAmount string) (string, error) {
+func TransformElasticChainLocallyandTransformValidators(subnetName string, stakeAmount string) (string, error) {
 	// Check config exists
 	exists, err := utils.SubnetConfigExists(subnetName)
 	gomega.Expect(err).Should(gomega.BeNil())
