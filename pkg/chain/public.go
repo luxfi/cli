@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
+	climodels "github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxconstants "github.com/luxfi/constants"
@@ -199,7 +200,7 @@ func (d *PublicDeployer) ImportFromXChain(
 func (d *PublicDeployer) TransformSubnetTx(
 	controlKeys []string,
 	subnetAuthKeysStrs []string,
-	elasticSubnetConfig models.ElasticChainConfig,
+	elasticSubnetConfig climodels.ElasticChainConfig,
 	subnetID ids.ID,
 	subnetAssetID ids.ID,
 ) (bool, ids.ID, *txs.Tx, []string, error) {
@@ -550,7 +551,7 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 
 func (d *PublicDeployer) createTransformSubnetTX(
 	subnetAuthKeys []ids.ShortID,
-	elasticSubnetConfig models.ElasticChainConfig,
+	elasticSubnetConfig climodels.ElasticChainConfig,
 	wallet primary.Wallet,
 	assetID ids.ID,
 ) (*txs.Tx, error) {
