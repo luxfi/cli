@@ -266,7 +266,7 @@ func (c *KChainRPCClient) DeleteKey(ctx context.Context, params DeleteKeyParams)
 // EncryptParams contains parameters for encryption.
 type EncryptParams struct {
 	KeyID     string `json:"keyId"`
-	Plaintext string `json:"plaintext"` // Base64-encoded
+	Plaintext string `json:"plaintext"`     // Base64-encoded
 	AAD       string `json:"aad,omitempty"` // Additional authenticated data
 }
 
@@ -314,8 +314,8 @@ func (c *KChainRPCClient) Decrypt(ctx context.Context, params DecryptParams) (*D
 // SignParams contains parameters for signing.
 type SignParams struct {
 	KeyID     string `json:"keyId"`
-	Message   string `json:"message"`   // Base64-encoded message or hash
-	Algorithm string `json:"algorithm"` // "bls-sig", "ecdsa", "eddsa", "ml-dsa"
+	Message   string `json:"message"`             // Base64-encoded message or hash
+	Algorithm string `json:"algorithm"`           // "bls-sig", "ecdsa", "eddsa", "ml-dsa"
 	Prehashed bool   `json:"prehashed,omitempty"` // True if message is already hashed
 }
 
@@ -390,15 +390,15 @@ func (c *KChainRPCClient) GetPublicKey(ctx context.Context, params GetPublicKeyP
 
 // AlgorithmInfo describes a supported signing algorithm.
 type AlgorithmInfo struct {
-	Name            string   `json:"name"`
-	Type            string   `json:"type"` // "signing", "encryption", "key-exchange"
-	SecurityLevel   int      `json:"securityLevel"` // bits
-	KeySize         int      `json:"keySize,omitempty"`
-	SignatureSize   int      `json:"signatureSize,omitempty"`
-	PostQuantum     bool     `json:"postQuantum"`
-	ThresholdSupport bool    `json:"thresholdSupport"`
-	Description     string   `json:"description"`
-	Standards       []string `json:"standards,omitempty"` // NIST, IETF, etc.
+	Name             string   `json:"name"`
+	Type             string   `json:"type"`          // "signing", "encryption", "key-exchange"
+	SecurityLevel    int      `json:"securityLevel"` // bits
+	KeySize          int      `json:"keySize,omitempty"`
+	SignatureSize    int      `json:"signatureSize,omitempty"`
+	PostQuantum      bool     `json:"postQuantum"`
+	ThresholdSupport bool     `json:"thresholdSupport"`
+	Description      string   `json:"description"`
+	Standards        []string `json:"standards,omitempty"` // NIST, IETF, etc.
 }
 
 // ListAlgorithmsResult contains supported algorithms.
@@ -428,9 +428,9 @@ type DistributeKeyParams struct {
 
 // DistributeKeyResult contains the result of key distribution.
 type DistributeKeyResult struct {
-	Success       bool     `json:"success"`
-	ShareIDs      []string `json:"shareIds"`
-	GroupPublicKey string  `json:"groupPublicKey,omitempty"`
+	Success        bool     `json:"success"`
+	ShareIDs       []string `json:"shareIds"`
+	GroupPublicKey string   `json:"groupPublicKey,omitempty"`
 }
 
 // DistributeKey distributes a key to validators using threshold sharing.
@@ -444,9 +444,9 @@ func (c *KChainRPCClient) DistributeKey(ctx context.Context, params DistributeKe
 
 // GatherSharesParams contains parameters for gathering shares.
 type GatherSharesParams struct {
-	KeyID      string   `json:"keyId"`
-	ShareIDs   []string `json:"shareIds,omitempty"` // Optional: specific shares to use
-	MinShares  int      `json:"minShares,omitempty"`
+	KeyID     string   `json:"keyId"`
+	ShareIDs  []string `json:"shareIds,omitempty"` // Optional: specific shares to use
+	MinShares int      `json:"minShares,omitempty"`
 }
 
 // GatherSharesResult contains gathered share information.
@@ -520,7 +520,7 @@ func (c *KChainRPCClient) ReshareKey(ctx context.Context, params ReshareKeyParam
 type StoreShareParams struct {
 	KeyID       string `json:"keyId"`
 	ShareIndex  int    `json:"shareIndex"`
-	ShareData   string `json:"shareData"`   // Encrypted share data
+	ShareData   string `json:"shareData"` // Encrypted share data
 	ValidatorID string `json:"validatorId"`
 }
 
@@ -615,11 +615,11 @@ func (c *KChainRPCClient) RequestSignatureShare(ctx context.Context, params Requ
 
 // HealthResult contains service health information.
 type HealthResult struct {
-	Healthy    bool              `json:"healthy"`
-	Version    string            `json:"version"`
-	Uptime     int64             `json:"uptime"` // seconds
-	Validators map[string]bool   `json:"validators"`
-	Latency    map[string]int64  `json:"latency"` // ms
+	Healthy    bool             `json:"healthy"`
+	Version    string           `json:"version"`
+	Uptime     int64            `json:"uptime"` // seconds
+	Validators map[string]bool  `json:"validators"`
+	Latency    map[string]int64 `json:"latency"` // ms
 }
 
 // Health checks service health.

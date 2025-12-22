@@ -37,7 +37,7 @@ const (
 	wcHeartbeatPeriod = 30 * time.Second
 
 	// Methods
-	wcMethodPersonalSign = "personal_sign"      // EIP-191
+	wcMethodPersonalSign = "personal_sign"        // EIP-191
 	wcMethodSignTypedV4  = "eth_signTypedData_v4" // EIP-712
 	wcMethodSendTx       = "eth_sendTransaction"
 	wcMethodSignTx       = "eth_signTransaction"
@@ -66,15 +66,15 @@ type WalletConnectBackend struct {
 
 // wcSession represents an active WalletConnect pairing session
 type wcSession struct {
-	Topic       string    `json:"topic"`
-	SymKey      []byte    `json:"sym_key"`
-	PeerPubKey  string    `json:"peer_pub_key"`
-	ChainID     int       `json:"chain_id"`
-	Address     string    `json:"address"`
-	PairedAt    time.Time `json:"paired_at"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	PeerName    string    `json:"peer_name"`    // e.g. "MetaMask", "Rainbow"
-	PeerIcon    string    `json:"peer_icon"`
+	Topic      string    `json:"topic"`
+	SymKey     []byte    `json:"sym_key"`
+	PeerPubKey string    `json:"peer_pub_key"`
+	ChainID    int       `json:"chain_id"`
+	Address    string    `json:"address"`
+	PairedAt   time.Time `json:"paired_at"`
+	ExpiresAt  time.Time `json:"expires_at"`
+	PeerName   string    `json:"peer_name"` // e.g. "MetaMask", "Rainbow"
+	PeerIcon   string    `json:"peer_icon"`
 }
 
 // wcRequest represents a JSON-RPC request to the wallet
@@ -101,10 +101,10 @@ type wcError struct {
 
 // wcPairingURI represents the WalletConnect pairing URI
 type wcPairingURI struct {
-	Topic       string
-	SymKey      string
-	Relay       string
-	Methods     []string
+	Topic   string
+	SymKey  string
+	Relay   string
+	Methods []string
 }
 
 // NewWalletConnectBackend creates a new WalletConnect backend
@@ -597,7 +597,7 @@ func (b *WalletConnectBackend) sendRequest(ctx context.Context, session *wcSessi
 		"params": map[string]interface{}{
 			"topic":   session.Topic,
 			"message": hex.EncodeToString(reqData),
-			"ttl":     300, // 5 minutes
+			"ttl":     300,  // 5 minutes
 			"tag":     1100, // session request tag
 		},
 	}

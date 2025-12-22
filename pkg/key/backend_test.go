@@ -20,14 +20,14 @@ type mockBackend struct {
 	available   bool
 }
 
-func (m *mockBackend) Type() BackendType                 { return m.backendType }
-func (m *mockBackend) Name() string                      { return m.name }
-func (m *mockBackend) Available() bool                   { return m.available }
-func (m *mockBackend) RequiresPassword() bool            { return true }
-func (m *mockBackend) RequiresHardware() bool            { return false }
-func (m *mockBackend) SupportsRemoteSigning() bool       { return false }
+func (m *mockBackend) Type() BackendType                    { return m.backendType }
+func (m *mockBackend) Name() string                         { return m.name }
+func (m *mockBackend) Available() bool                      { return m.available }
+func (m *mockBackend) RequiresPassword() bool               { return true }
+func (m *mockBackend) RequiresHardware() bool               { return false }
+func (m *mockBackend) SupportsRemoteSigning() bool          { return false }
 func (m *mockBackend) Initialize(ctx context.Context) error { return nil }
-func (m *mockBackend) Close() error                      { return nil }
+func (m *mockBackend) Close() error                         { return nil }
 func (m *mockBackend) CreateKey(ctx context.Context, name string, opts CreateKeyOptions) (*HDKeySet, error) {
 	return nil, nil
 }
