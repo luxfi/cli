@@ -128,9 +128,9 @@ func verifyVMInstalled(chainName string, sc *models.Sidecar) error {
 	}
 	vmIDStr := vmID.String()
 
-	// Get plugins directory path
+	// Get plugins directory path - plugins are stored in active/ subdirectory
 	pluginsDir := app.GetPluginsDir()
-	pluginPath := filepath.Join(pluginsDir, vmIDStr)
+	pluginPath := filepath.Join(pluginsDir, "active", vmIDStr)
 
 	// Check if plugin exists
 	info, err := os.Lstat(pluginPath)
@@ -212,15 +212,32 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		return err
 	}
 
-	// Get VM binary
+	// Get VM binary - prefer linked plugin over downloaded
 	var vmBin string
 	var err error
 
+	// Compute VMID for plugin lookup
+	vmName := "Lux EVM"
+	if sc.VM == models.CustomVM {
+		vmName = chainName
+	}
+	vmID, _ := utils.VMID(vmName)
+	vmIDStr := vmID.String()
+
 	switch sc.VM {
 	case models.EVM:
-		vmBin, err = binutils.SetupEVM(app, sc.VMVersion)
-		if err != nil {
-			return fmt.Errorf("failed to setup EVM: %w", err)
+		// First check if EVM is already linked as a plugin
+		linkedPath := filepath.Join(app.GetPluginsDir(), "active", vmIDStr)
+		if info, linkErr := os.Lstat(linkedPath); linkErr == nil && info.Mode()&os.ModeSymlink != 0 {
+			// Plugin is linked, use it directly
+			vmBin = linkedPath
+			app.Log.Debug("Using linked EVM plugin", zap.String("path", vmBin))
+		} else {
+			// Fall back to downloading
+			vmBin, err = binutils.SetupEVM(app, sc.VMVersion)
+			if err != nil {
+				return fmt.Errorf("failed to setup EVM: %w", err)
+			}
 		}
 	case models.CustomVM:
 		vmBin = binutils.SetupCustomBin(app, chainName)
