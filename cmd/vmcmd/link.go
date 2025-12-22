@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	luxconfig "github.com/luxfi/config"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	luxconfig "github.com/luxfi/config"
 	"github.com/spf13/cobra"
 )
 

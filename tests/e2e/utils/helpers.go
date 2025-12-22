@@ -26,9 +26,9 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
-	luxconstants "github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/node/api/info"
@@ -37,14 +37,14 @@ import (
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/wallet/primary"
 )
 
 const (
 	expectedRPCComponentsLen = 7
 	blockchainIDPos          = 5
-	evmName            = "evm"
+	evmName                  = "evm"
 )
 
 var defaultLocalNetworkNodeIDs = []string{

@@ -10,7 +10,7 @@ const (
 	gRPCGatewayEndpoint = ":8098"
 	gRPCDialTimeout     = 10 * time.Second
 
-	nodeBinPrefix      = "node-"
-	evmBinPrefix = "evm-"
-	maxCopy            = 2147483648 // 2 GB
+	nodeBinPrefix = "node-"
+	evmBinPrefix  = "evm-"
+	maxCopy       = 2147483648 // 2 GB
 )

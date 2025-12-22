@@ -7,10 +7,10 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/plugins"
-	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
