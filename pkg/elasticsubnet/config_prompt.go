@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/node/vms/platformvm/reward"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 )
 
