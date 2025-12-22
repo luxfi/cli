@@ -22,7 +22,7 @@ require (
 	github.com/luxfi/ledger-lux-go v1.0.2
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.24
+	github.com/luxfi/netrunner v1.14.27
 	github.com/luxfi/node v1.22.44
 	github.com/luxfi/sdk v1.16.33
 	github.com/luxfi/warp v1.16.39
@@ -65,7 +65,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/constants v1.2.5
-	github.com/luxfi/genesis v1.5.9
+	github.com/luxfi/genesis v1.5.10
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.1.1
@@ -172,6 +172,7 @@ require (
 	github.com/luxfi/codec v1.0.4 // indirect
 	github.com/luxfi/consensus v1.22.39 // indirect
 	github.com/luxfi/database v1.2.14 // indirect
+	github.com/luxfi/keys v1.0.0 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.4.9 // indirect
