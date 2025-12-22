@@ -57,7 +57,7 @@ type Sidecar struct {
 	ChainID         string
 	Version         string
 	Networks        map[string]NetworkData
-	ElasticChain   map[string]ElasticChain
+	ElasticChain    map[string]ElasticChain
 	ImportedFromLPM bool
 	ImportedVMID    string
 
