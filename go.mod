@@ -22,7 +22,7 @@ require (
 	github.com/luxfi/ledger-lux-go v1.0.2
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.31
+	github.com/luxfi/netrunner v1.14.32
 	github.com/luxfi/node v1.22.45
 	github.com/luxfi/sdk v1.16.34
 	github.com/luxfi/warp v1.16.39
