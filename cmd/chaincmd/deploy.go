@@ -4,6 +4,7 @@ package chaincmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -128,9 +129,8 @@ func verifyVMInstalled(chainName string, sc *models.Sidecar) error {
 	}
 	vmIDStr := vmID.String()
 
-	// Get plugins directory path - plugins are stored in active/ subdirectory
-	pluginsDir := app.GetPluginsDir()
-	pluginPath := filepath.Join(pluginsDir, "active", vmIDStr)
+	// Get plugins directory path - plugins/current is the active plugins directory
+	pluginPath := filepath.Join(app.GetCurrentPluginsDir(), vmIDStr)
 
 	// Check if plugin exists
 	info, err := os.Lstat(pluginPath)
@@ -156,7 +156,7 @@ To fix, run:
 
 		// Resolve target path (handle relative symlinks)
 		if !filepath.IsAbs(target) {
-			target = filepath.Join(pluginsDir, target)
+			target = filepath.Join(app.GetCurrentPluginsDir(), target)
 		}
 
 		if _, err := os.Stat(target); os.IsNotExist(err) {
@@ -207,6 +207,38 @@ func getVMVersion(sc *models.Sidecar) string {
 func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network) error {
 	app.Log.Debug("Deploy to network", zap.String("network", network.String()))
 
+	// Map deploy target to network type
+	targetType := "local"
+	switch network {
+	case models.Testnet:
+		targetType = "testnet"
+	case models.Mainnet:
+		targetType = "mainnet"
+	case models.Local:
+		targetType = "local"
+	}
+
+	// Load network state to get gRPC port for correct network
+	networkState, stateErr := app.LoadNetworkState()
+	if stateErr != nil {
+		return fmt.Errorf("failed to load network state: %w\nIs the network running? Start with: lux network start --%s", stateErr, targetType)
+	}
+	if networkState == nil || !networkState.Running {
+		return fmt.Errorf("no network running. Start the network first with: lux network start --%s", targetType)
+	}
+
+	// Verify that the running network matches the requested target
+	if networkState.NetworkType != targetType {
+		return fmt.Errorf(
+			"network mismatch: trying to deploy to %s but %s is running. "+
+				"Either stop the current network with 'lux network stop' and start the correct one, "+
+				"or use the correct --testnet/--mainnet/--local flag",
+			targetType, networkState.NetworkType)
+	}
+
+	// Log gRPC port being used
+	app.Log.Debug("Using gRPC port from network state", zap.Int("port", networkState.GRPCPort), zap.String("network", networkState.NetworkType))
+
 	// Preflight check: verify VM is installed before any network operations
 	if err := verifyVMInstalled(chainName, sc); err != nil {
 		return err
@@ -226,12 +258,12 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 
 	switch sc.VM {
 	case models.EVM:
-		// First check if EVM is already linked as a plugin
-		linkedPath := filepath.Join(app.GetPluginsDir(), "active", vmIDStr)
-		if info, linkErr := os.Lstat(linkedPath); linkErr == nil && info.Mode()&os.ModeSymlink != 0 {
-			// Plugin is linked, use it directly
-			vmBin = linkedPath
-			app.Log.Debug("Using linked EVM plugin", zap.String("path", vmBin))
+		// First check if EVM plugin already exists (linked or copied)
+		pluginPath := filepath.Join(app.GetCurrentPluginsDir(), vmIDStr)
+		if info, pluginErr := os.Stat(pluginPath); pluginErr == nil && info.Mode().IsRegular() && info.Mode()&0111 != 0 {
+			// Plugin exists and is executable, use it directly
+			vmBin = pluginPath
+			app.Log.Debug("Using existing EVM plugin", zap.String("path", vmBin))
 		} else {
 			// Fall back to downloading
 			vmBin, err = binutils.SetupEVM(app, sc.VMVersion)
@@ -247,15 +279,17 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 
 	// Check RPC version compatibility
 	if sc.VM != models.CustomVM {
-		nc := localnetworkinterface.NewStatusChecker()
+		// Use app-aware status checker to detect the correct running network endpoint
+		nc := localnetworkinterface.NewStatusCheckerWithApp(app)
 		nodeVersion, err = checkDeployCompatibility(nc, sc.RPCVersion)
 		if err != nil {
 			return fmt.Errorf("RPC version check failed: %w", err)
 		}
 	}
 
-	// Create deployer
-	deployer := chain.NewLocalDeployer(app, nodeVersion, vmBin)
+	// Create deployer with network-aware gRPC client
+	// This ensures we connect to the correct gRPC server for the running network
+	deployer := chain.NewLocalDeployerForNetwork(app, nodeVersion, vmBin, networkState.NetworkType)
 
 	// Get genesis path
 	genesisPath := app.GetGenesisPath(chainName)
@@ -263,8 +297,26 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	// Deploy to locally-running network (works for local, testnet, mainnet started via CLI)
 	subnetID, blockchainID, err := deployer.DeployToLocalNetwork(chainName, chainGenesis, genesisPath)
 	if err != nil {
+		// Check if this is a DeploymentError (chain-specific failure)
+		var deployErr *chain.DeploymentError
+		if errors.As(err, &deployErr) {
+			// Deployment failed but we can provide useful feedback
+			ux.Logger.PrintError("\nChain deployment failed: %s", deployErr.Cause)
+			if deployErr.NetworkHealthy {
+				ux.Logger.PrintToUser("\nThe primary network is still running. You can:")
+				ux.Logger.PrintToUser("  1. Fix the issue and retry: lux chain deploy %s", chainName)
+				ux.Logger.PrintToUser("  2. Check logs: lux network status")
+				ux.Logger.PrintToUser("  3. Stop the network: lux network stop")
+			} else {
+				ux.Logger.PrintError("\nThe network may have crashed. Check logs and restart:")
+				ux.Logger.PrintToUser("  1. lux network stop")
+				ux.Logger.PrintToUser("  2. lux network start --%s", network.String())
+			}
+			return err
+		}
+		// Non-deployment error (gRPC connection issue, etc)
 		if deployer.BackendStartedHere() {
-			if innerErr := binutils.KillgRPCServerProcess(app); innerErr != nil {
+			if innerErr := binutils.KillgRPCServerProcessForNetwork(app, networkState.NetworkType); innerErr != nil {
 				app.Log.Warn("failed to kill gRPC server", zap.Error(innerErr))
 			}
 		}

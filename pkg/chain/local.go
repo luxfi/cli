@@ -58,6 +58,46 @@ const (
 	ChainHealthTimeout = 30 * time.Second
 )
 
+// DeploymentError represents a chain deployment failure that does NOT crash the network.
+// The network remains running and can accept new deployments.
+type DeploymentError struct {
+	ChainName string
+	Cause     error
+	// NetworkHealthy indicates if the primary network is still running after the failure
+	NetworkHealthy bool
+	// Recoverable indicates if the error can be fixed and retried
+	Recoverable bool
+	// Suggestion provides actionable guidance to fix the issue
+	Suggestion string
+}
+
+func (e *DeploymentError) Error() string {
+	status := "network crashed"
+	if e.NetworkHealthy {
+		status = "network still running"
+	}
+	msg := fmt.Sprintf("chain '%s' deployment failed (%s): %v", e.ChainName, status, e.Cause)
+	if e.Suggestion != "" {
+		msg += "\n\nTo fix: " + e.Suggestion
+	}
+	return msg
+}
+
+func (e *DeploymentError) Unwrap() error {
+	return e.Cause
+}
+
+// NewRecoverableDeploymentError creates a deployment error that can be retried
+func NewRecoverableDeploymentError(chainName string, cause error, suggestion string) *DeploymentError {
+	return &DeploymentError{
+		ChainName:      chainName,
+		Cause:          cause,
+		NetworkHealthy: true, // Recoverable errors shouldn't crash the network
+		Recoverable:    true,
+		Suggestion:     suggestion,
+	}
+}
+
 // emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
 type emptyEthKeychain struct{}
 
@@ -79,6 +119,7 @@ type LocalDeployer struct {
 	setDefaultSnapshot setDefaultSnapshotFunc
 	luxVersion         string
 	vmBin              string
+	networkType        string // "mainnet", "testnet", or "local"
 }
 
 func NewLocalDeployer(app *application.Lux, luxVersion string, vmBin string) *LocalDeployer {
@@ -91,7 +132,20 @@ func NewLocalDeployer(app *application.Lux, luxVersion string, vmBin string) *Lo
 		setDefaultSnapshot: SetDefaultSnapshot,
 		luxVersion:         luxVersion,
 		vmBin:              vmBin,
+		networkType:        "", // Auto-detect from network state
 	}
+}
+
+// NewLocalDeployerForNetwork creates a deployer for a specific network type
+func NewLocalDeployerForNetwork(app *application.Lux, luxVersion, vmBin, networkType string) *LocalDeployer {
+	d := NewLocalDeployer(app, luxVersion, vmBin)
+	d.networkType = networkType
+	// Use network-aware gRPC client
+	d.getClientFunc = func(opts ...binutils.GRPCClientOpOption) (client.Client, error) {
+		opts = append(opts, binutils.WithNetworkType(networkType))
+		return binutils.NewGRPCClient(opts...)
+	}
+	return d
 }
 
 type getGRPCClientFunc func(...binutils.GRPCClientOpOption) (client.Client, error)
@@ -317,15 +371,26 @@ func IssueAddPermissionlessValidatorTx(
 	return txID.ID(), err
 }
 
+// StartServer starts the gRPC server for the deployer's network type.
+// If no network type is set, defaults to mainnet for backward compatibility.
 func (d *LocalDeployer) StartServer() error {
-	isRunning, err := d.procChecker.IsServerProcessRunning(d.app)
+	networkType := d.networkType
+	if networkType == "" {
+		networkType = "mainnet" // Default for backward compatibility
+	}
+	return d.StartServerForNetwork(networkType)
+}
+
+// StartServerForNetwork starts the gRPC server for a specific network type.
+func (d *LocalDeployer) StartServerForNetwork(networkType string) error {
+	isRunning, err := binutils.IsServerProcessRunningForNetwork(d.app, networkType)
 	if err != nil {
 		return fmt.Errorf("failed querying if server process is running: %w", err)
 	}
 	if !isRunning {
-		d.app.Log.Debug("gRPC server is not running")
-		if err := binutils.StartServerProcess(d.app); err != nil {
-			return fmt.Errorf("failed starting gRPC server process: %w", err)
+		d.app.Log.Debug("gRPC server is not running", zap.String("network", networkType))
+		if err := binutils.StartServerProcessForNetwork(d.app, networkType); err != nil {
+			return fmt.Errorf("failed starting gRPC server for %s: %w", networkType, err)
 		}
 		d.backendStartedHere = true
 	}
@@ -355,11 +420,15 @@ func (d *LocalDeployer) DeployBlockchain(chain string, chainGenesis []byte) (ids
 
 // doDeploy deploys a blockchain to an already running network.
 // Network must already be running - this function only deploys.
-// steps:
-//   - install VM plugin binary
-//   - deploy blockchain to network
-//   - wait for completion
-//   - show status
+// IMPORTANT: This function is designed to NEVER crash the primary network.
+// If deployment fails, it returns a DeploymentError but the network continues running.
+//
+// Steps:
+//  1. Preflight validation (VM binary, genesis, config)
+//  2. Install VM plugin binary
+//  3. Deploy blockchain to network
+//  4. Wait for chain health
+//  5. Show status
 func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
 	backendLogFile, err := binutils.GetBackendLogFile(d.app)
 	var backendLogDir string
@@ -429,7 +498,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	// if a chainConfig has been configured
 	var (
 		chainConfig            string
-		chainConfigFile        = filepath.Join(d.app.GetChainsDir(), chain, constants.ChainConfigFileName)
+		chainConfigFile        = filepath.Join(d.app.GetChainsDir(), chain, constants.ChainConfigFile)
 		perNodeChainConfig     string
 		perNodeChainConfigFile = filepath.Join(d.app.GetChainsDir(), chain, constants.PerNodeChainConfigFileName)
 	)
@@ -441,9 +510,25 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		perNodeChainConfig = perNodeChainConfigFile
 	}
 
+	// === PREFLIGHT VALIDATION ===
+	// Validate VM binary BEFORE installing to catch issues early.
+	// This prevents deploying a broken VM that would crash nodes.
+	ux.Logger.PrintToUser("Validating VM binary...")
+	if err := d.validateVMBinary(d.vmBin, chainVMID); err != nil {
+		return ids.Empty, ids.Empty, NewRecoverableDeploymentError(
+			chain,
+			fmt.Errorf("VM preflight validation failed: %w", err),
+			"Rebuild the VM binary or check the VM path",
+		)
+	}
+
 	// install the plugin binary for the new VM
 	if err := d.installPlugin(chainVMID, d.vmBin); err != nil {
-		return ids.Empty, ids.Empty, err
+		return ids.Empty, ids.Empty, NewRecoverableDeploymentError(
+			chain,
+			fmt.Errorf("failed to install VM plugin: %w", err),
+			"Check plugin directory permissions and disk space",
+		)
 	}
 
 	ux.Logger.PrintToUser("VMs ready.")
@@ -469,11 +554,13 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	)
 	if err != nil {
 		utils.FindErrorLogs(rootDir, backendLogDir)
-		pluginRemoveErr := d.removeInstalledPlugin(chainVMID)
-		if pluginRemoveErr != nil {
-			ux.Logger.PrintToUser("Failed to remove plugin binary: %s", pluginRemoveErr)
+		// Check if the network is still healthy after the failure
+		networkHealthy := d.checkNetworkHealthQuick(cli)
+		return ids.Empty, ids.Empty, &DeploymentError{
+			ChainName:      chain,
+			Cause:          fmt.Errorf("failed to deploy blockchain: %w", err),
+			NetworkHealthy: networkHealthy,
 		}
-		return ids.Empty, ids.Empty, fmt.Errorf("failed to deploy blockchain: %w", err)
 	}
 	rootDir = clusterInfo.GetRootDataDir()
 
@@ -486,11 +573,13 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	// This will fail fast if the chain doesn't become healthy within the timeout
 	clusterInfo, err = WaitForChainHealthyWithTimeout(cli, chain, ChainHealthTimeout, rootDir, backendLogDir)
 	if err != nil {
-		pluginRemoveErr := d.removeInstalledPlugin(chainVMID)
-		if pluginRemoveErr != nil {
-			ux.Logger.PrintToUser("Failed to remove plugin binary: %s", pluginRemoveErr)
+		// Check if the network is still healthy after the failure
+		networkHealthy := d.checkNetworkHealthQuick(cli)
+		return ids.Empty, ids.Empty, &DeploymentError{
+			ChainName:      chain,
+			Cause:          fmt.Errorf("chain failed to become healthy: %w", err),
+			NetworkHealthy: networkHealthy,
 		}
-		return ids.Empty, ids.Empty, err
 	}
 
 	endpoint := GetFirstEndpoint(clusterInfo, chain)
@@ -558,7 +647,7 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 		return "", fmt.Errorf("failed setting up local environment: %w", err)
 	}
 
-	pluginDir := d.app.GetPluginsDir()
+	pluginDir := d.app.GetCurrentPluginsDir()
 	nodeBinPath := filepath.Join(luxDir, "luxd")
 
 	if err := os.MkdirAll(pluginDir, constants.DefaultPerms755); err != nil {
@@ -726,6 +815,69 @@ func (d *LocalDeployer) installPlugin(
 	return d.binaryDownloader.InstallVM(vmID.String(), vmBin)
 }
 
+// checkNetworkHealthQuick performs a fast health check to see if the network is still running.
+// This is used after deployment failures to determine if the network crashed.
+// Returns true if network appears healthy, false otherwise.
+func (d *LocalDeployer) checkNetworkHealthQuick(cli client.Client) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	resp, err := cli.Health(ctx)
+	if err != nil {
+		d.app.Log.Debug("quick health check failed", zap.Error(err))
+		return false
+	}
+	if resp == nil || resp.ClusterInfo == nil {
+		return false
+	}
+	return resp.ClusterInfo.Healthy
+}
+
+// validateVMBinary performs preflight checks on a VM binary before deployment.
+// This catches common issues that would crash nodes when loading the VM.
+// Returns nil if validation passes, error with actionable message otherwise.
+func (d *LocalDeployer) validateVMBinary(vmBin string, vmID ids.ID) error {
+	// Check binary exists
+	info, err := os.Stat(vmBin)
+	if os.IsNotExist(err) {
+		return fmt.Errorf("VM binary not found: %s\n\nTo fix: build or download the VM binary first", vmBin)
+	}
+	if err != nil {
+		return fmt.Errorf("cannot access VM binary %s: %w", vmBin, err)
+	}
+
+	// Check it's a regular file (not directory, symlink, etc)
+	if !info.Mode().IsRegular() {
+		// If symlink, check target exists
+		if info.Mode()&os.ModeSymlink != 0 {
+			target, err := os.Readlink(vmBin)
+			if err != nil {
+				return fmt.Errorf("VM binary %s is a symlink but cannot read target: %w", vmBin, err)
+			}
+			if _, err := os.Stat(target); os.IsNotExist(err) {
+				return fmt.Errorf("VM binary symlink %s points to missing target: %s\n\nTo fix: rebuild the VM or update the symlink", vmBin, target)
+			}
+		}
+	}
+
+	// Check executable permissions
+	if info.Mode()&0111 == 0 {
+		return fmt.Errorf("VM binary %s is not executable\n\nTo fix: chmod +x %s", vmBin, vmBin)
+	}
+
+	// Check minimum file size (VM binaries should be at least a few KB)
+	const minVMSize = 1024 // 1KB minimum
+	if info.Size() < minVMSize {
+		return fmt.Errorf("VM binary %s is too small (%d bytes) - may be corrupted\n\nTo fix: rebuild the VM", vmBin, info.Size())
+	}
+
+	d.app.Log.Debug("VM binary validation passed",
+		zap.String("binary", vmBin),
+		zap.String("vmid", vmID.String()),
+		zap.Int64("size", info.Size()),
+	)
+	return nil
+}
+
 // get list of all needed plugins and install them
 func (d *LocalDeployer) removeInstalledPlugin(
 	vmID ids.ID,
@@ -805,7 +957,7 @@ func (d *LocalDeployer) startNetwork(
 		client.WithExecPath(nodeBinPath),
 		client.WithRootDataDir(runDir),
 		client.WithReassignPortsIfUsed(true),
-		client.WithPluginDir(d.app.GetPluginsDir()),
+		client.WithPluginDir(filepath.Join(d.app.GetPluginsDir(), "current")),
 	}
 
 	// load global node configs if they exist
