@@ -29,6 +29,7 @@ var (
 	snapshotName           string
 	mainnet                bool
 	testnet                bool
+	localNetwork           bool // Synonym for custom/default network (--local flag)
 	numValidators          int
 	nodePath               string // Path to custom luxd binary
 	portBase               int    // Base port for nodes (each node uses 2 ports)
@@ -116,6 +117,7 @@ already running.`,
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 5 validators")
 	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 5 validators")
+	cmd.Flags().BoolVar(&localNetwork, "local", false, "start a local dev network (synonym for default/custom)")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
 	cmd.Flags().IntVar(&portBase, "port-base", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
 	// BadgerDB flags
@@ -131,8 +133,18 @@ already running.`,
 
 func StartNetwork(*cobra.Command, []string) error {
 	// Check for conflicting flags
-	if mainnet && testnet {
-		return fmt.Errorf("cannot use both --mainnet and --testnet flags")
+	flagCount := 0
+	if mainnet {
+		flagCount++
+	}
+	if testnet {
+		flagCount++
+	}
+	if localNetwork {
+		flagCount++
+	}
+	if flagCount > 1 {
+		return fmt.Errorf("cannot use multiple network flags (--mainnet, --testnet, --local) together")
 	}
 
 	// If mainnet or testnet flag is set, delegate to the appropriate function
@@ -142,6 +154,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	if testnet {
 		return StartTestnet()
 	}
+	// --local flag just runs the default local network (same as no flag)
 	luxVersion, err := determineLuxVersion(userProvidedLuxVersion)
 	if err != nil {
 		return err
