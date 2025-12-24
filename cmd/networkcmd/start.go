@@ -154,17 +154,17 @@ func StartNetwork(*cobra.Command, []string) error {
 	if testnet {
 		return StartTestnet()
 	}
-	// --local flag just runs the default local network (same as no flag)
+	// --local flag just runs the default custom network (same as no flag)
 	luxVersion, err := determineLuxVersion(userProvidedLuxVersion)
 	if err != nil {
 		return err
 	}
 
-	// Create deployer for local network
-	sd := chain.NewLocalDeployerForNetwork(app, luxVersion, "", "local")
+	// Create deployer for custom network
+	sd := chain.NewLocalDeployerForNetwork(app, luxVersion, "", "custom")
 
-	// Start gRPC server for local network on port 8099
-	if err := sd.StartServerForNetwork("local"); err != nil {
+	// Start gRPC server for custom network
+	if err := sd.StartServerForNetwork("custom"); err != nil {
 		return err
 	}
 
@@ -173,8 +173,8 @@ func StartNetwork(*cobra.Command, []string) error {
 		return err
 	}
 
-	// Connect to local network's gRPC server
-	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType("local"))
+	// Connect to custom network's gRPC server
+	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType("custom"))
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ func StartNetwork(*cobra.Command, []string) error {
 
 	// Use stable directory with current symlink for persistence across restarts
 	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
-	outputDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), "local")
+	outputDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), "custom")
 	if err != nil {
 		return fmt.Errorf("failed to ensure run directory: %w", err)
 	}
@@ -347,9 +347,9 @@ func StartNetwork(*cobra.Command, []string) error {
 	}
 
 	// Save network state for deploy commands to find the running network
-	// Local network uses default port 9630, network ID 1337, and local gRPC ports
-	grpcPorts := binutils.GetGRPCPorts("local")
-	networkState := application.CreateNetworkStateWithGRPC("local", constants.LocalNetworkID, 9630, grpcPorts.Server, grpcPorts.Gateway)
+	// Custom network uses default port 9660, network ID 1337, and custom gRPC ports
+	grpcPorts := binutils.GetGRPCPorts("custom")
+	networkState := application.CreateNetworkStateWithGRPC("custom", constants.LocalNetworkID, 9660, grpcPorts.Server, grpcPorts.Gateway)
 	if err := app.SaveNetworkState(networkState); err != nil {
 		ux.Logger.PrintToUser("Warning: failed to save network state: %v", err)
 	}
@@ -549,7 +549,13 @@ func startPublicNetwork(cfg networkConfig) error {
 
 	startResp, err := cli.Start(ctx, localNodePath, opts...)
 	if err != nil {
-		return fmt.Errorf("failed to start network: %w", err)
+		// Check if network is already bootstrapped (backend was started previously)
+		errStr := err.Error()
+		if server.IsServerError(err, server.ErrAlreadyBootstrapped) || strings.Contains(errStr, "already bootstrapped") {
+			ux.Logger.PrintToUser("Network has already been started. Continuing with existing network...")
+		} else {
+			return fmt.Errorf("failed to start network: %w", err)
+		}
 	}
 
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
@@ -563,7 +569,7 @@ func startPublicNetwork(cfg networkConfig) error {
 	ux.Logger.PrintToUser("\n%s started successfully with %d validators!", displayName, numValidators)
 	ux.Logger.PrintToUser("\nRPC Endpoints:")
 
-	if startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {
+	if startResp != nil && startResp.ClusterInfo != nil && len(startResp.ClusterInfo.NodeNames) > 0 {
 		for i, nodeName := range startResp.ClusterInfo.NodeNames {
 			if nodeInfo, ok := startResp.ClusterInfo.NodeInfos[nodeName]; ok && nodeInfo != nil && nodeInfo.Uri != "" {
 				ux.Logger.PrintToUser("  Validator %d: %s", i+1, nodeInfo.Uri)
