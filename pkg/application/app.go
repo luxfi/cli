@@ -433,14 +433,45 @@ type NetworkState struct {
 	Running     bool   `json:"running"`
 }
 
-// GetNetworkStateFile returns the path to the network state file
+// GetNetworkStateFile returns the path to the default network state file
+// For network-specific state files, use GetNetworkStateFileForType
 func (app *Lux) GetNetworkStateFile() string {
 	return filepath.Join(app.GetBaseDir(), constants.LocalNetworkMetaFile)
 }
 
+// GetNetworkStateFileForType returns the path to the network state file for a specific network type
+// Each network type has its own state file to allow multiple networks to run concurrently:
+// - mainnet_network_state.json
+// - testnet_network_state.json
+// - devnet_network_state.json
+// - custom_network_state.json
+func (app *Lux) GetNetworkStateFileForType(networkType string) string {
+	var fileName string
+	switch networkType {
+	case "mainnet":
+		fileName = "mainnet_network_state.json"
+	case "testnet":
+		fileName = "testnet_network_state.json"
+	case "devnet":
+		fileName = "devnet_network_state.json"
+	case "custom", "local": // "local" is deprecated, use "custom"
+		fileName = "custom_network_state.json"
+	default:
+		fileName = networkType + "_network_state.json"
+	}
+	return filepath.Join(app.GetBaseDir(), fileName)
+}
+
 // SaveNetworkState saves the current network state to disk
+// Uses the network-specific state file based on state.NetworkType
 func (app *Lux) SaveNetworkState(state *NetworkState) error {
-	statePath := app.GetNetworkStateFile()
+	// Use network-specific state file if NetworkType is set
+	var statePath string
+	if state.NetworkType != "" {
+		statePath = app.GetNetworkStateFileForType(state.NetworkType)
+	} else {
+		statePath = app.GetNetworkStateFile()
+	}
 	data, err := json.MarshalIndent(state, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal network state: %w", err)
@@ -451,7 +482,21 @@ func (app *Lux) SaveNetworkState(state *NetworkState) error {
 	return nil
 }
 
-// LoadNetworkState loads the network state from disk
+// SaveNetworkStateForType saves network state to the network-specific state file
+func (app *Lux) SaveNetworkStateForType(networkType string, state *NetworkState) error {
+	statePath := app.GetNetworkStateFileForType(networkType)
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal network state: %w", err)
+	}
+	if err := os.WriteFile(statePath, data, WriteReadReadPerms); err != nil {
+		return fmt.Errorf("failed to write network state: %w", err)
+	}
+	return nil
+}
+
+// LoadNetworkState loads the network state from the default state file
+// For network-specific state, use LoadNetworkStateForType
 func (app *Lux) LoadNetworkState() (*NetworkState, error) {
 	statePath := app.GetNetworkStateFile()
 	data, err := os.ReadFile(statePath)
@@ -469,9 +514,37 @@ func (app *Lux) LoadNetworkState() (*NetworkState, error) {
 	return &state, nil
 }
 
-// ClearNetworkState removes the network state file
+// LoadNetworkStateForType loads the network state from the network-specific state file
+func (app *Lux) LoadNetworkStateForType(networkType string) (*NetworkState, error) {
+	statePath := app.GetNetworkStateFileForType(networkType)
+	data, err := os.ReadFile(statePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil // No state file = no running network of this type
+		}
+		return nil, fmt.Errorf("failed to read network state: %w", err)
+	}
+
+	var state NetworkState
+	if err := json.Unmarshal(data, &state); err != nil {
+		return nil, fmt.Errorf("failed to parse network state: %w", err)
+	}
+	return &state, nil
+}
+
+// ClearNetworkState removes the default network state file
+// For network-specific state, use ClearNetworkStateForType
 func (app *Lux) ClearNetworkState() error {
 	statePath := app.GetNetworkStateFile()
+	if err := os.Remove(statePath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove network state: %w", err)
+	}
+	return nil
+}
+
+// ClearNetworkStateForType removes the network-specific state file
+func (app *Lux) ClearNetworkStateForType(networkType string) error {
+	statePath := app.GetNetworkStateFileForType(networkType)
 	if err := os.Remove(statePath); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to remove network state: %w", err)
 	}
@@ -498,13 +571,34 @@ func (app *Lux) GetRunningNetworkType() string {
 	return state.NetworkType
 }
 
-// IsNetworkRunning checks if a network is currently running
+// IsNetworkRunning checks if a network is currently running (uses default state file)
 func (app *Lux) IsNetworkRunning() bool {
 	state, err := app.LoadNetworkState()
 	if err != nil || state == nil {
 		return false
 	}
 	return state.Running
+}
+
+// IsNetworkTypeRunning checks if a specific network type is currently running
+func (app *Lux) IsNetworkTypeRunning(networkType string) bool {
+	state, err := app.LoadNetworkStateForType(networkType)
+	if err != nil || state == nil {
+		return false
+	}
+	return state.Running
+}
+
+// GetAllRunningNetworks returns all currently running network types
+func (app *Lux) GetAllRunningNetworks() []string {
+	networkTypes := []string{"mainnet", "testnet", "devnet", "custom"}
+	var running []string
+	for _, netType := range networkTypes {
+		if app.IsNetworkTypeRunning(netType) {
+			running = append(running, netType)
+		}
+	}
+	return running
 }
 
 // CreateNetworkState creates a new network state for the given parameters
