@@ -208,32 +208,31 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	app.Log.Debug("Deploy to network", zap.String("network", network.String()))
 
 	// Map deploy target to network type
-	targetType := "local"
+	// Default is "custom" (not "local" which is ambiguous - any network can run locally)
+	targetType := "custom"
 	switch network {
 	case models.Testnet:
 		targetType = "testnet"
 	case models.Mainnet:
 		targetType = "mainnet"
 	case models.Local:
-		targetType = "local"
+		targetType = "custom"
 	}
 
-	// Load network state to get gRPC port for correct network
-	networkState, stateErr := app.LoadNetworkState()
+	// Load network state for the specific target network type
+	// Each network type (custom, testnet, mainnet) has its own state file
+	networkState, stateErr := app.LoadNetworkStateForType(targetType)
 	if stateErr != nil {
-		return fmt.Errorf("failed to load network state: %w\nIs the network running? Start with: lux network start --%s", stateErr, targetType)
+		return fmt.Errorf("failed to load network state: %w\nIs the network running? Start with: lux network start", stateErr)
 	}
 	if networkState == nil || !networkState.Running {
-		return fmt.Errorf("no network running. Start the network first with: lux network start --%s", targetType)
-	}
-
-	// Verify that the running network matches the requested target
-	if networkState.NetworkType != targetType {
-		return fmt.Errorf(
-			"network mismatch: trying to deploy to %s but %s is running. "+
-				"Either stop the current network with 'lux network stop' and start the correct one, "+
-				"or use the correct --testnet/--mainnet/--local flag",
-			targetType, networkState.NetworkType)
+		startHint := "lux network start"
+		if targetType == "testnet" {
+			startHint = "lux network start --testnet"
+		} else if targetType == "mainnet" {
+			startHint = "lux network start --mainnet"
+		}
+		return fmt.Errorf("no %s network running. Start the network first with: %s", targetType, startHint)
 	}
 
 	// Log gRPC port being used

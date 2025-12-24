@@ -19,40 +19,38 @@ const (
 	NetworkTestnet NetworkTarget = "testnet"
 	NetworkDevnet  NetworkTarget = "devnet"
 	NetworkCustom  NetworkTarget = "custom"
-	NetworkLocal   NetworkTarget = "local" // Alias for custom
 )
 
-// Shared network target flags for all chain commands
+// Network target flags
 var (
-	globalMainnet bool
-	globalTestnet bool
-	globalDevnet  bool
-	globalCustom  bool
+	mainnet bool
+	testnet bool
+	devnet  bool
+	custom  bool
 )
 
 // GetNetworkTarget returns the selected network target based on flags
 func GetNetworkTarget() NetworkTarget {
 	switch {
-	case globalMainnet:
+	case mainnet:
 		return NetworkMainnet
-	case globalTestnet:
+	case testnet:
 		return NetworkTestnet
-	case globalDevnet:
+	case devnet:
 		return NetworkDevnet
-	case globalCustom:
+	case custom:
 		return NetworkCustom
 	default:
-		return NetworkCustom // Default to custom/local
+		return NetworkCustom
 	}
 }
 
 // addNetworkFlags adds network target flags to a command
 func addNetworkFlags(cmd *cobra.Command) {
-	cmd.Flags().BoolVarP(&globalMainnet, "mainnet", "m", false, "Target mainnet")
-	cmd.Flags().BoolVarP(&globalTestnet, "testnet", "t", false, "Target testnet")
-	cmd.Flags().BoolVar(&globalDevnet, "devnet", false, "Target devnet")
-	cmd.Flags().BoolVar(&globalCustom, "custom", false, "Target custom/local network")
-	cmd.Flags().BoolVarP(&globalCustom, "local", "l", false, "Target local network (alias for --custom)")
+	cmd.Flags().BoolVarP(&mainnet, "mainnet", "m", false, "Target mainnet")
+	cmd.Flags().BoolVarP(&testnet, "testnet", "t", false, "Target testnet")
+	cmd.Flags().BoolVarP(&devnet, "devnet", "d", false, "Target devnet")
+	cmd.Flags().BoolVar(&custom, "custom", false, "Target custom network")
 }
 
 // NewCmd creates the unified chain command suite for all blockchain operations
