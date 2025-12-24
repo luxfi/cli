@@ -21,6 +21,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
+	anrutils "github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -109,6 +110,13 @@ func TestDeployToLocal(t *testing.T) {
 		_ = f.Close()
 	}()
 
+	// Create a dummy VM binary that passes validation
+	// Must be executable and at least 1KB to pass preflight checks
+	vmBinPath := filepath.Join(testDir, "test-vm-binary")
+	dummyVMContent := make([]byte, 2048) // 2KB of zeros
+	err = os.WriteFile(vmBinPath, dummyVMContent, 0755)
+	require.NoError(err)
+
 	binChecker.On("ExistsWithLatestVersion", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(true, tmpDir, nil)
 
 	binDownloader := &mocks.PluginBinaryDownloader{}
@@ -123,6 +131,7 @@ func TestDeployToLocal(t *testing.T) {
 		app:                app,
 		setDefaultSnapshot: fakeSetDefaultSnapshot,
 		luxVersion:         luxVersion,
+		vmBin:              vmBinPath, // Set the VM binary path for preflight validation
 	}
 
 	// create a simple genesis for the test
@@ -201,4 +210,88 @@ func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 
 func fakeSetDefaultSnapshot(string, bool) error {
 	return nil
+}
+
+func TestValidateVMBinary(t *testing.T) {
+	require := setupTest(t)
+
+	tmpDir, err := os.MkdirTemp("", "vm-validate-test")
+	require.NoError(err)
+	defer os.RemoveAll(tmpDir)
+
+	app := application.New()
+	app.Setup(tmpDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
+
+	deployer := &LocalDeployer{app: app}
+
+	t.Run("valid binary passes", func(t *testing.T) {
+		// Create a valid VM binary (executable, >1KB)
+		vmPath := filepath.Join(tmpDir, "valid-vm")
+		err := os.WriteFile(vmPath, make([]byte, 2048), 0755)
+		require.NoError(err)
+
+		vmID, _ := anrutils.VMID("test")
+		err = deployer.validateVMBinary(vmPath, vmID)
+		require.NoError(err)
+	})
+
+	t.Run("missing binary fails", func(t *testing.T) {
+		vmID, _ := anrutils.VMID("test")
+		err := deployer.validateVMBinary("/nonexistent/path", vmID)
+		require.Error(err)
+		require.Contains(err.Error(), "not found")
+	})
+
+	t.Run("non-executable binary fails", func(t *testing.T) {
+		vmPath := filepath.Join(tmpDir, "nonexec-vm")
+		err := os.WriteFile(vmPath, make([]byte, 2048), 0644) // no exec perms
+		require.NoError(err)
+
+		vmID, _ := anrutils.VMID("test")
+		err = deployer.validateVMBinary(vmPath, vmID)
+		require.Error(err)
+		require.Contains(err.Error(), "not executable")
+	})
+
+	t.Run("too small binary fails", func(t *testing.T) {
+		vmPath := filepath.Join(tmpDir, "small-vm")
+		err := os.WriteFile(vmPath, make([]byte, 100), 0755) // too small
+		require.NoError(err)
+
+		vmID, _ := anrutils.VMID("test")
+		err = deployer.validateVMBinary(vmPath, vmID)
+		require.Error(err)
+		require.Contains(err.Error(), "too small")
+	})
+}
+
+func TestDeploymentError(t *testing.T) {
+	require := setupTest(t)
+
+	t.Run("error with healthy network", func(t *testing.T) {
+		err := &DeploymentError{
+			ChainName:      "mychain",
+			Cause:          fmt.Errorf("VM failed to load"),
+			NetworkHealthy: true,
+		}
+		require.Contains(err.Error(), "mychain")
+		require.Contains(err.Error(), "network still running")
+		require.Contains(err.Error(), "VM failed to load")
+	})
+
+	t.Run("error with crashed network", func(t *testing.T) {
+		err := &DeploymentError{
+			ChainName:      "mychain",
+			Cause:          fmt.Errorf("node stopped unexpectedly"),
+			NetworkHealthy: false,
+		}
+		require.Contains(err.Error(), "mychain")
+		require.Contains(err.Error(), "network crashed")
+	})
+
+	t.Run("unwrap returns cause", func(t *testing.T) {
+		cause := fmt.Errorf("root cause")
+		err := &DeploymentError{ChainName: "test", Cause: cause}
+		require.Equal(cause, err.Unwrap())
+	})
 }

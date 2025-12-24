@@ -20,7 +20,7 @@ const (
 	SuffixSeparator            = "_"
 	SidecarFileName            = "sidecar.json"
 	GenesisFileName            = "genesis.json"
-	ElasticChainConfigFileName = "elastic_subnet_config.json"
+	ElasticChainConfigFileName = "elastic_chain_config.json"
 	NodeConfigJSONFile         = "node-config.json"
 	NodeConfigFileName         = "node-config.json"
 	SidecarSuffix              = SuffixSeparator + SidecarFileName
@@ -168,6 +168,20 @@ const (
 	ConfigDir        = "config"
 	KeyDir           = "keys"
 	LPMPluginDir     = "lpm-plugins"
+
+	// Unified Chain Config Directories
+	// All nodes share these directories for consistent chain configuration
+	NetworksDir      = "networks"      // ~/.lux/networks/ - persistent network state
+	CurrentPluginDir = "plugins/current" // Active plugins symlinked here
+
+	// Unified chain config file names (used in ~/.lux/chains/<chainName>/)
+	ChainConfigFile = "config.json" // Chain-specific config (eth-apis, etc.)
+	UnifiedChainGenesisFile = "genesis.json" // Chain genesis
+	UnifiedChainUpgradeFile = "upgrade.json" // Chain upgrades
+
+	// Network structure: ~/.lux/networks/<networkName>/runs/<runID>/
+	// This keeps network state persistent across runs
+	NetworkRunsDir = "runs"
 
 	// Cloud node paths
 	CloudNodeEVMBinaryPath = "/home/ubuntu/.lux/bin/evm"
@@ -344,7 +358,7 @@ const (
 	MetricsAWSVolumeSize       = "aws_volume_size"
 	MetricsEnableMonitoring    = "enable_monitoring"
 	MetricsCalledFromWiz       = "called_from_wizard"
-	MetricsSubnetVM            = "subnet_vm"
+	MetricsChainVM             = "chain_vm"
 	MetricsCustomVMRepoURL     = "custom_vm_repo_url"
 	MetricsCustomVMBranch      = "custom_vm_branch"
 	MetricsCustomVMBuildScript = "custom_vm_build_script"
@@ -378,9 +392,8 @@ const (
 	VMDir          = "vms"
 	ChainConfigDir = "chains"
 
-	SubnetType                 = "subnet type"
-	SubnetConfigFileName       = "subnet.json"
-	ChainConfigFileName        = "chain.json"
+	ChainType                  = "chain type"
+	ChainSubnetConfigFile      = "subnet.json" // Subnet/validator config for the chain
 	PerNodeChainConfigFileName = "per-node-chain.json"
 	CustomAirdrop              = "customAirdrop"
 	PrecompileType             = "precompileType"
@@ -393,7 +406,37 @@ const (
 
 	UpgradeBytesLockExtension = ".lock"
 	NotAvailableLabel         = "Not available"
-	BackendCmd                = "cli-backend"
+	// LuxServerCmd is the base command name for the gRPC backend server
+	// Network-specific variants: lux-mainnet-grpc, lux-testnet-grpc, etc.
+	LuxServerCmd = "lux-server"
+	// BackendCmd is deprecated, use LuxServerCmd instead
+	BackendCmd = LuxServerCmd
+
+	// Network-specific gRPC server command names
+	// These allow easy identification and management of network-specific servers
+	LuxMainnetGRPCCmd = "lux-mainnet-grpc"
+	LuxTestnetGRPCCmd = "lux-testnet-grpc"
+	LuxDevnetGRPCCmd  = "lux-devnet-grpc"
+	LuxCustomGRPCCmd  = "lux-custom-grpc"
+)
+
+// GetServerCmdForNetwork returns the network-specific gRPC server command name
+func GetServerCmdForNetwork(networkType string) string {
+	switch networkType {
+	case "mainnet":
+		return LuxMainnetGRPCCmd
+	case "testnet":
+		return LuxTestnetGRPCCmd
+	case "devnet":
+		return LuxDevnetGRPCCmd
+	case "local", "custom":
+		return LuxCustomGRPCCmd
+	default:
+		return LuxServerCmd // Fallback to base command
+	}
+}
+
+const (
 
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
@@ -411,7 +454,7 @@ const (
 	// C-Chain Warp Registry Addresses
 	MainnetCChainWarpRegistryAddress = "0x0000000000000000000000000000000000000006"
 
-	SubnetIDLabel     = "SubnetID: "
+	ChainIDLabel      = "ChainID: "
 	BlockchainIDLabel = "BlockchainID: "
 
 	Network        = "network"

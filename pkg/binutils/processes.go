@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/docker/docker/pkg/reexec"
@@ -46,6 +47,7 @@ func NewProcessChecker() ProcessChecker {
 
 type GRPCClientOp struct {
 	avoidRPCVersionCheck bool
+	endpoint             string // Custom endpoint, overrides default
 }
 
 type GRPCClientOpOption func(*GRPCClientOp)
@@ -59,6 +61,21 @@ func (op *GRPCClientOp) applyOpts(opts []GRPCClientOpOption) {
 func WithAvoidRPCVersionCheck(avoidRPCVersionCheck bool) GRPCClientOpOption {
 	return func(op *GRPCClientOp) {
 		op.avoidRPCVersionCheck = avoidRPCVersionCheck
+	}
+}
+
+// WithEndpoint sets a custom gRPC endpoint for the client
+func WithEndpoint(endpoint string) GRPCClientOpOption {
+	return func(op *GRPCClientOp) {
+		op.endpoint = endpoint
+	}
+}
+
+// WithNetworkType configures the client to use the gRPC port for a specific network type
+func WithNetworkType(networkType string) GRPCClientOpOption {
+	return func(op *GRPCClientOp) {
+		ports := GetGRPCPorts(networkType)
+		op.endpoint = fmt.Sprintf(":%d", ports.Server)
 	}
 }
 
@@ -80,8 +97,15 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	}
 	// Adapt the logger to the interface expected by netrunner
 	adaptedLog := NewLoggerAdapter(log)
+
+	// Use custom endpoint if provided, otherwise default
+	endpoint := gRPCServerEndpoint
+	if op.endpoint != "" {
+		endpoint = op.endpoint
+	}
+
 	client, err := client.New(client.Config{
-		Endpoint:    gRPCServerEndpoint,
+		Endpoint:    endpoint,
 		DialTimeout: gRPCDialTimeout,
 	}, adaptedLog)
 	if errors.Is(err, context.DeadlineExceeded) {
@@ -106,8 +130,13 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	return client, err
 }
 
-// NewGRPCClient hides away the details (params) of creating a gRPC server
+// NewGRPCServer creates a gRPC server with default ports (for backward compatibility)
 func NewGRPCServer(snapshotsDir string) (server.Server, error) {
+	return NewGRPCServerForNetwork(snapshotsDir, "mainnet")
+}
+
+// NewGRPCServerForNetwork creates a gRPC server with network-specific ports
+func NewGRPCServerForNetwork(snapshotsDir, networkType string) (server.Server, error) {
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
 		DisplayLevel: level.Info,
 		LogLevel:     level.Fatal,
@@ -118,9 +147,13 @@ func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 	}
 	// Adapt the logger to the interface expected by netrunner
 	adaptedLog := NewLoggerAdapter(log)
+
+	// Get network-specific ports
+	ports := GetGRPCPorts(networkType)
+
 	return server.New(server.Config{
-		Port:                gRPCServerEndpoint,
-		GwPort:              gRPCGatewayEndpoint,
+		Port:                fmt.Sprintf(":%d", ports.Server),
+		GwPort:              fmt.Sprintf(":%d", ports.Gateway),
 		DialTimeout:         gRPCDialTimeout,
 		SnapshotsDir:        snapshotsDir,
 		RedirectNodesOutput: true,
@@ -157,6 +190,9 @@ func (*realProcessRunner) IsServerProcessRunning(app *application.Lux) (bool, er
 type runFile struct {
 	Pid                int    `json:"pid"`
 	GRPCserverFileName string `json:"gRPCserverFileName"`
+	NetworkType        string `json:"networkType,omitempty"` // "mainnet", "testnet", "local"
+	GRPCPort           int    `json:"grpcPort,omitempty"`
+	GatewayPort        int    `json:"gatewayPort,omitempty"`
 }
 
 func GetBackendLogFile(app *application.Lux) (string, error) {
@@ -191,23 +227,36 @@ func GetServerPID(app *application.Lux) (int, error) {
 }
 
 // StartServerProcess starts the gRPC server as a reentrant process of this binary
-// it just executes `cli backend start`
+// for the default network type (mainnet).
+// Deprecated: Use StartServerProcessForNetwork instead.
 func StartServerProcess(app *application.Lux) error {
+	return StartServerProcessForNetwork(app, "mainnet")
+}
+
+// StartServerProcessForNetwork starts a network-specific gRPC server.
+// Each network type (mainnet, testnet, local) gets its own server on a dedicated port.
+// This allows running multiple networks simultaneously.
+// The server process is named based on network type (e.g., lux-mainnet-grpc, lux-testnet-grpc)
+// for easy identification with ps/top commands.
+func StartServerProcessForNetwork(app *application.Lux, networkType string) error {
 	thisBin := reexec.Self()
 
-	args := []string{constants.BackendCmd}
+	// Use network-specific command name for easy process identification
+	// This allows running multiple network servers and identifying them in process lists
+	serverCmd := constants.GetServerCmdForNetwork(networkType)
+	args := []string{serverCmd}
 	cmd := exec.Command(thisBin, args...)
 	// Inherit environment variables from the parent process
 	// This is important for passing DISABLE_MIGRATION_DETECTION and other env vars to the backend
-	cmd.Env = os.Environ()
+	cmd.Env = append(os.Environ(), fmt.Sprintf("LUX_NETWORK_TYPE=%s", networkType))
 
-	outputDirPrefix := path.Join(app.GetRunDir(), "server")
+	outputDirPrefix := path.Join(app.GetRunDir(), "server", networkType)
 	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)
 	if err != nil {
 		return err
 	}
 
-	outputFile, err := os.Create(path.Join(outputDir, "cli-backend.log"))
+	outputFile, err := os.Create(path.Join(outputDir, "lux-server.log"))
 	if err != nil {
 		return err
 	}
@@ -220,11 +269,16 @@ func StartServerProcess(app *application.Lux) error {
 		return err
 	}
 
-	ux.Logger.PrintToUser("Backend controller started, pid: %d, output at: %s", cmd.Process.Pid, outputFile.Name())
+	ports := GetGRPCPorts(networkType)
+	ux.Logger.PrintToUser("Backend controller (%s) started, pid: %d, grpc: %d, output: %s",
+		networkType, cmd.Process.Pid, ports.Server, outputFile.Name())
 
 	rf := runFile{
 		Pid:                cmd.Process.Pid,
 		GRPCserverFileName: outputFile.Name(),
+		NetworkType:        networkType,
+		GRPCPort:           ports.Server,
+		GatewayPort:        ports.Gateway,
 	}
 
 	rfBytes, err := json.Marshal(&rf)
@@ -232,7 +286,9 @@ func StartServerProcess(app *application.Lux) error {
 		return err
 	}
 
-	if err := os.WriteFile(app.GetRunFile(), rfBytes, perms.ReadWrite); err != nil {
+	// Use network-specific run file
+	runFilePath := app.GetRunFileForNetwork(networkType)
+	if err := os.WriteFile(runFilePath, rfBytes, perms.ReadWrite); err != nil {
 		app.Log.Warn("could not write gRPC process info to file", zap.Error(err))
 	}
 	return nil
@@ -251,8 +307,15 @@ func GetAsyncContext() context.Context {
 	return ctx
 }
 
+// KillgRPCServerProcess kills the default (mainnet) gRPC server.
+// Deprecated: Use KillgRPCServerProcessForNetwork instead.
 func KillgRPCServerProcess(app *application.Lux) error {
-	cli, err := NewGRPCClient(WithAvoidRPCVersionCheck(true))
+	return KillgRPCServerProcessForNetwork(app, "mainnet")
+}
+
+// KillgRPCServerProcessForNetwork kills a network-specific gRPC server.
+func KillgRPCServerProcessForNetwork(app *application.Lux, networkType string) error {
+	cli, err := NewGRPCClient(WithAvoidRPCVersionCheck(true), WithNetworkType(networkType))
 	if err != nil {
 		return err
 	}
@@ -267,7 +330,7 @@ func KillgRPCServerProcess(app *application.Lux) error {
 		}
 	}
 
-	pid, err := GetServerPID(app)
+	pid, err := GetServerPIDForNetwork(app, networkType)
 	if err != nil {
 		return fmt.Errorf("failed getting PID from run file: %w", err)
 	}
@@ -279,11 +342,54 @@ func KillgRPCServerProcess(app *application.Lux) error {
 		return fmt.Errorf("failed killing process with pid %d: %w", pid, err)
 	}
 
-	serverRunFilePath := app.GetRunFile()
+	serverRunFilePath := app.GetRunFileForNetwork(networkType)
 	if err := os.Remove(serverRunFilePath); err != nil {
 		return fmt.Errorf("failed removing run file %s: %w", serverRunFilePath, err)
 	}
 	return nil
+}
+
+// GetServerPIDForNetwork returns the server PID for a specific network type.
+func GetServerPIDForNetwork(app *application.Lux, networkType string) (int, error) {
+	var rf runFile
+	serverRunFilePath := app.GetRunFileForNetwork(networkType)
+	run, err := os.ReadFile(serverRunFilePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed reading process info file at %s: %w", serverRunFilePath, err)
+	}
+	if err := json.Unmarshal(run, &rf); err != nil {
+		return 0, fmt.Errorf("failed unmarshalling server run file at %s: %w", serverRunFilePath, err)
+	}
+
+	if rf.Pid == 0 {
+		return 0, fmt.Errorf("failed reading pid from info file at %s: %w", serverRunFilePath, err)
+	}
+	return rf.Pid, nil
+}
+
+// IsServerProcessRunningForNetwork checks if a network-specific gRPC server is running.
+func IsServerProcessRunningForNetwork(app *application.Lux, networkType string) (bool, error) {
+	pid, err := GetServerPIDForNetwork(app, networkType)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) || strings.Contains(err.Error(), "no such file") {
+			return false, nil
+		}
+		return false, err
+	}
+
+	// get OS process list
+	procs, err := process.Processes()
+	if err != nil {
+		return false, err
+	}
+
+	p32 := int32(pid)
+	for _, p := range procs {
+		if p.Pid == p32 {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func WatchServerProcess(serverCancel context.CancelFunc, errc chan error, logger luxlog.Logger) {

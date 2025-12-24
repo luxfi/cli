@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
-	luxconstants "github.com/luxfi/constants"
+	cliconstants "github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constants"
 )
 
 type Network int64
@@ -41,11 +41,11 @@ func (s Network) String() string {
 func (s Network) NetworkID() (uint32, error) {
 	switch s {
 	case Mainnet:
-		return luxconstants.LuxMainnetID, nil // Use 96369 for LUX mainnet
+		return constants.MainnetID, nil
 	case Testnet:
-		return luxconstants.TestnetID, nil
+		return constants.TestnetID, nil
 	case Local:
-		return constants.LocalNetworkID, nil
+		return cliconstants.LocalNetworkID, nil
 	}
 	return 0, fmt.Errorf("unsupported network")
 }
@@ -90,11 +90,11 @@ func NetworkFromString(s string) Network {
 
 func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
-	case luxconstants.LuxMainnetID, luxconstants.MainnetID:
+	case constants.MainnetID:
 		return Mainnet
-	case luxconstants.TestnetID:
+	case constants.TestnetID:
 		return Testnet
-	case constants.LocalNetworkID:
+	case cliconstants.LocalNetworkID:
 		return Local
 	}
 	return Undefined
@@ -130,15 +130,15 @@ func (s Network) BootstrappingContext() (context.Context, func()) {
 func (s Network) Endpoint() string {
 	switch s {
 	case Mainnet:
-		return constants.MainnetAPIEndpoint
+		return cliconstants.MainnetAPIEndpoint
 	case Testnet:
-		return constants.TestnetAPIEndpoint
+		return cliconstants.TestnetAPIEndpoint
 	case Local:
-		return constants.LocalAPIEndpoint
+		return cliconstants.LocalAPIEndpoint
 	case Devnet:
-		return constants.DevnetAPIEndpoint
+		return cliconstants.DevnetAPIEndpoint
 	default:
-		return constants.LocalAPIEndpoint
+		return cliconstants.LocalAPIEndpoint
 	}
 }
 
@@ -156,15 +156,15 @@ func (s Network) ClusterName() string {
 func (s Network) WSEndpoints() []string {
 	switch s {
 	case Mainnet:
-		return []string{constants.MainnetWSEndpoint}
+		return []string{cliconstants.MainnetWSEndpoint}
 	case Testnet:
-		return []string{constants.TestnetWSEndpoint}
+		return []string{cliconstants.TestnetWSEndpoint}
 	case Local:
-		return []string{constants.LocalWSEndpoint}
+		return []string{cliconstants.LocalWSEndpoint}
 	case Devnet:
-		return []string{constants.DevnetWSEndpoint}
+		return []string{cliconstants.DevnetWSEndpoint}
 	default:
-		return []string{constants.LocalWSEndpoint}
+		return []string{cliconstants.LocalWSEndpoint}
 	}
 }
 
