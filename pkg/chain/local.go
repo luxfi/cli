@@ -12,11 +12,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/maps"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
@@ -472,28 +469,19 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	}
 	d.app.Log.Debug("this VM will get ID", zap.String("vm-id", chainVMID.String()), zap.String("vm-name", vmName))
 
-	if alreadyDeployed(chainVMID, clusterInfo) {
+	// Check if this specific chain is already deployed (by chain name, not VM ID)
+	// Multiple chains can use the same VM (e.g., multiple EVM chains using Lux EVM)
+	if alreadyDeployedByName(chain, clusterInfo) {
 		ux.Logger.PrintToUser("Net %s has already been deployed", chain)
 		return ids.Empty, ids.Empty, nil
 	}
 
-	numBlockchains := len(clusterInfo.CustomChains)
-
-	// Get existing chain parent IDs from the network
-	chainParentIDs := maps.Keys(clusterInfo.Chains)
-	sort.Strings(chainParentIDs)
-
+	// Each blockchain gets its own subnet unless explicitly configured to share one.
+	// The netrunner will create a new subnet for this chain.
+	// NOTE: Removed the round-robin logic that incorrectly assigned new chains to existing subnets.
+	// Each chain is independent and needs its own subnet for proper isolation.
 	var chainParentID string
-	if len(chainParentIDs) > 0 {
-		// Select an existing chain parent for the new blockchain
-		// Use round-robin to distribute across available parents
-		chainParentID = chainParentIDs[numBlockchains%len(chainParentIDs)]
-		d.app.Log.Debug("using existing chain parent", zap.String("parent-id", chainParentID))
-	} else {
-		// No chain parents exist - netrunner will create one deterministically
-		// This happens on first deploy to a fresh network
-		d.app.Log.Debug("no existing chain parents, netrunner will create one")
-	}
+	d.app.Log.Debug("no chain parent specified, netrunner will create a new subnet for this chain")
 
 	// if a chainConfig has been configured
 	var (
@@ -567,19 +555,13 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	d.app.Log.Debug(deployBlockchainsInfo.String())
 
 	fmt.Println()
-	ux.Logger.PrintToUser("Blockchain has been deployed. Waiting for chain to become healthy (timeout: %s)...", ChainHealthTimeout)
+	ux.Logger.PrintToUser("Blockchain deployed successfully.")
 
-	// Use timeout-based health check for chain deployment
-	// This will fail fast if the chain doesn't become healthy within the timeout
-	clusterInfo, err = WaitForChainHealthyWithTimeout(cli, chain, ChainHealthTimeout, rootDir, backendLogDir)
-	if err != nil {
-		// Check if the network is still healthy after the failure
-		networkHealthy := d.checkNetworkHealthQuick(cli)
-		return ids.Empty, ids.Empty, &DeploymentError{
-			ChainName:      chain,
-			Cause:          fmt.Errorf("chain failed to become healthy: %w", err),
-			NetworkHealthy: networkHealthy,
-		}
+	// Quick status check - don't wait for health, just get current state
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if statusResp, err := cli.Status(ctx); err == nil && statusResp.ClusterInfo != nil {
+		clusterInfo = statusResp.ClusterInfo
 	}
 
 	endpoint := GetFirstEndpoint(clusterInfo, chain)
@@ -604,15 +586,15 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		}
 	}
 
-	// Parse the chain parent ID
-	parentID, _ := ids.FromString(chainParentID)
-	var blockchainID ids.ID
+	// Find the blockchain and subnet IDs from the cluster info
+	var subnetID, blockchainID ids.ID
 	for _, info := range clusterInfo.CustomChains {
 		if info.VmId == chainVMID.String() {
 			blockchainID, _ = ids.FromString(info.BlockchainId)
+			subnetID, _ = ids.FromString(info.PchainId)
 		}
 	}
-	return parentID, blockchainID, nil
+	return subnetID, blockchainID, nil
 }
 
 func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) error {
@@ -795,11 +777,24 @@ func HasEndpoints(clusterInfo *rpcpb.ClusterInfo) bool {
 	return len(clusterInfo.CustomChains) > 0
 }
 
-// return true if vm has already been deployed
+// return true if vm has already been deployed (deprecated - use alreadyDeployedByName)
 func alreadyDeployed(chainVMID ids.ID, clusterInfo *rpcpb.ClusterInfo) bool {
 	if clusterInfo != nil {
 		for _, chainInfo := range clusterInfo.CustomChains {
 			if chainInfo.VmId == chainVMID.String() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// alreadyDeployedByName returns true if a chain with the given name is already deployed
+// This is the correct check for multi-chain deployments using the same VM (e.g., multiple EVM subnets)
+func alreadyDeployedByName(chainName string, clusterInfo *rpcpb.ClusterInfo) bool {
+	if clusterInfo != nil {
+		for _, chainInfo := range clusterInfo.CustomChains {
+			if chainInfo.ChainName == chainName {
 				return true
 			}
 		}
