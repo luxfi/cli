@@ -80,8 +80,21 @@ func runChainImport(_ *cobra.Command, args []string) error {
 	// Resolve chain name to blockchain ID/path
 	chainPath, chainDisplay := resolveChain(chainArg)
 
-	// Determine endpoints - eth RPC and admin are different
-	baseURL := "http://localhost:9630"
+	// Determine base URL based on network target
+	// Port mapping: mainnet=9630, testnet=9640, devnet=9650, custom=9660
+	baseURL := "http://localhost:9660" // Default for custom
+	target := GetNetworkTarget()
+	switch target {
+	case NetworkMainnet:
+		baseURL = "http://localhost:9630" // Mainnet ports
+	case NetworkTestnet:
+		baseURL = "http://localhost:9640" // Testnet ports
+	case NetworkDevnet:
+		baseURL = "http://localhost:9650" // Devnet ports
+	case NetworkCustom:
+		baseURL = "http://localhost:9660" // Custom network ports
+	}
+
 	if importRPC != "" {
 		baseURL = strings.TrimSuffix(importRPC, "/ext/bc/"+chainPath+"/rpc")
 		baseURL = strings.TrimSuffix(baseURL, "/ext/bc/"+chainPath+"/admin")
@@ -256,6 +269,18 @@ func callAdminImportChain(rpcEndpoint, filePath string) (bool, error) {
 	}
 
 	if errObj, ok := result["error"]; ok {
+		errMap, _ := errObj.(map[string]interface{})
+		if msg, ok := errMap["message"].(string); ok && strings.Contains(msg, "timed out") {
+			// The RPC timed out but the import continues in background
+			ux.Logger.PrintToUser("")
+			ux.Logger.PrintToUser("Note: RPC response timed out, but import is running in background.")
+			ux.Logger.PrintToUser("The node is processing blocks asynchronously.")
+			ux.Logger.PrintToUser("")
+			ux.Logger.PrintToUser("Check status with:")
+			ux.Logger.PrintToUser("  lux chain import-status c --mainnet")
+			ux.Logger.PrintToUser("  # or check node logs")
+			return true, nil // Don't error out - import is running
+		}
 		return false, fmt.Errorf("RPC error: %v", errObj)
 	}
 

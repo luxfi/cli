@@ -14,6 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var stopNetworkType string
+
 func newStopCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stop",
@@ -26,6 +28,10 @@ reload this snapshot with network start --snapshot-name <snapshotName>. Otherwis
 network saves to the default snapshot, overwriting any existing state. You can reload the
 default snapshot with network start.
 
+Use --network-type to specify which network to stop (mainnet, testnet, devnet, custom).
+If not specified, the command will attempt to stop based on the saved network state,
+or default to 'mainnet'.
+
 Use 'network clean' to stop and remove all network data for a fresh start.`,
 
 		RunE:         StopNetwork,
@@ -33,16 +39,37 @@ Use 'network clean' to stop and remove all network data for a fresh start.`,
 		SilenceUsage: true,
 	}
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to save network state into")
+	cmd.Flags().StringVar(&stopNetworkType, "network-type", "", "network type to stop (mainnet, testnet, devnet, custom)")
 	return cmd
 }
 
 func StopNetwork(*cobra.Command, []string) error {
-	// Determine which network to stop from saved state
-	networkType := "mainnet" // Default
-	state, stateErr := app.LoadNetworkState()
-	if stateErr == nil && state != nil && state.Running {
-		networkType = state.NetworkType
+	// Determine which network to stop
+	networkType := stopNetworkType
+
+	// If network type not specified via flag, try to determine from state
+	if networkType == "" {
+		// First check if there's a running network - prioritize custom over others
+		// This ensures "lux network stop" without flags targets custom network by default
+		for _, netType := range []string{"custom", "devnet", "testnet", "mainnet"} {
+			state, err := app.LoadNetworkStateForType(netType)
+			if err == nil && state != nil && state.Running {
+				networkType = netType
+				break
+			}
+		}
+		// Fallback to custom if no running network found (not mainnet - user must explicitly specify)
+		if networkType == "" {
+			networkType = "custom"
+		}
 	}
+
+	// Normalize "local" to "custom"
+	if networkType == "local" {
+		networkType = "custom"
+	}
+
+	ux.Logger.PrintToUser("Stopping network: %s", networkType)
 
 	err := saveNetworkForType(networkType)
 
@@ -53,8 +80,8 @@ func StopNetwork(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("Server (%s) shutdown gracefully", networkType)
 	}
 
-	// Clear network state when stopping
-	if clearErr := app.ClearNetworkState(); clearErr != nil {
+	// Clear network-specific state when stopping
+	if clearErr := app.ClearNetworkStateForType(networkType); clearErr != nil {
 		app.Log.Warn("failed to clear network state", zap.Error(clearErr))
 	}
 

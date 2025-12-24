@@ -37,8 +37,8 @@ func networkStatus(*cobra.Command, []string) error {
 
 	// Determine the network type from running network state
 	networkType := app.GetRunningNetworkType()
-	if networkType == "" {
-		networkType = "local" // Default fallback
+	if networkType == "" || networkType == "local" {
+		networkType = "custom" // Default fallback ("local" is deprecated)
 	}
 
 	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType(networkType))
