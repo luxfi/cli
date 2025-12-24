@@ -296,7 +296,7 @@ var _ = ginkgo.Describe("[Local Subnet]", ginkgo.Ordered, func() {
 		chainConfig := "{\"feeRecipient\": \"" + addr + "\"}"
 
 		// create a chain config in tmp
-		file, err := os.CreateTemp("", constants.ChainConfigFileName+"*")
+		file, err := os.CreateTemp("", constants.ChainConfigFile+"*")
 		gomega.Expect(err).Should(gomega.BeNil())
 		err = os.WriteFile(file.Name(), []byte(chainConfig), constants.DefaultPerms755)
 		gomega.Expect(err).Should(gomega.BeNil())

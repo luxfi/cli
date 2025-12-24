@@ -37,20 +37,36 @@ Use 'network clean' to stop and remove all network data for a fresh start.`,
 }
 
 func StopNetwork(*cobra.Command, []string) error {
-	err := saveNetwork()
+	// Determine which network to stop from saved state
+	networkType := "mainnet" // Default
+	state, stateErr := app.LoadNetworkState()
+	if stateErr == nil && state != nil && state.Running {
+		networkType = state.NetworkType
+	}
 
-	if killErr := binutils.KillgRPCServerProcess(app); killErr != nil {
+	err := saveNetworkForType(networkType)
+
+	if killErr := binutils.KillgRPCServerProcessForNetwork(app, networkType); killErr != nil {
 		app.Log.Warn("failed killing server process", zap.Error(killErr))
 		ux.Logger.PrintToUser("Warning: failed to shutdown server gracefully: %v", killErr)
 	} else {
-		ux.Logger.PrintToUser("Server shutdown gracefully")
+		ux.Logger.PrintToUser("Server (%s) shutdown gracefully", networkType)
+	}
+
+	// Clear network state when stopping
+	if clearErr := app.ClearNetworkState(); clearErr != nil {
+		app.Log.Warn("failed to clear network state", zap.Error(clearErr))
 	}
 
 	return err
 }
 
 func saveNetwork() error {
-	cli, err := binutils.NewGRPCClient(binutils.WithAvoidRPCVersionCheck(true))
+	return saveNetworkForType("mainnet")
+}
+
+func saveNetworkForType(networkType string) error {
+	cli, err := binutils.NewGRPCClient(binutils.WithAvoidRPCVersionCheck(true), binutils.WithNetworkType(networkType))
 	if err != nil {
 		return err
 	}
