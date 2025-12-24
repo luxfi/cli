@@ -11,10 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
@@ -146,9 +147,11 @@ func StartNetwork(*cobra.Command, []string) error {
 		return err
 	}
 
-	sd := chain.NewLocalDeployer(app, luxVersion, "")
+	// Create deployer for local network
+	sd := chain.NewLocalDeployerForNetwork(app, luxVersion, "", "local")
 
-	if err := sd.StartServer(); err != nil {
+	// Start gRPC server for local network on port 8099
+	if err := sd.StartServerForNetwork("local"); err != nil {
 		return err
 	}
 
@@ -157,7 +160,8 @@ func StartNetwork(*cobra.Command, []string) error {
 		return err
 	}
 
-	cli, err := binutils.NewGRPCClient()
+	// Connect to local network's gRPC server
+	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType("local"))
 	if err != nil {
 		return err
 	}
@@ -179,7 +183,7 @@ func StartNetwork(*cobra.Command, []string) error {
 	}
 	ux.Logger.PrintToUser("Using run directory: %s", outputDir)
 
-	pluginDir := app.GetPluginsDir()
+	pluginDir := filepath.Join(app.GetPluginsDir(), "current")
 
 	loadSnapshotOpts := []client.OpOption{
 		client.WithExecPath(nodeBinPath),
@@ -329,6 +333,14 @@ func StartNetwork(*cobra.Command, []string) error {
 		ux.PrintTableEndpoints(clusterInfo)
 	}
 
+	// Save network state for deploy commands to find the running network
+	// Local network uses default port 9630, network ID 1337, and local gRPC ports
+	grpcPorts := binutils.GetGRPCPorts("local")
+	networkState := application.CreateNetworkStateWithGRPC("local", constants.LocalNetworkID, 9630, grpcPorts.Server, grpcPorts.Gateway)
+	if err := app.SaveNetworkState(networkState); err != nil {
+		ux.Logger.PrintToUser("Warning: failed to save network state: %v", err)
+	}
+
 	return nil
 }
 
@@ -395,6 +407,7 @@ func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
 type networkConfig struct {
 	networkID   uint32
 	networkName string // "mainnet" or "testnet"
+	portBase    int    // Base port for APIs (defaults to 9630 for mainnet, 9640 for testnet)
 }
 
 // startPublicNetwork handles the common logic for starting mainnet/testnet
@@ -410,12 +423,14 @@ func startPublicNetwork(cfg networkConfig) error {
 		return err
 	}
 
-	sd := chain.NewLocalDeployer(app, "", "")
-	if err := sd.StartServer(); err != nil {
+	// Create deployer for the specific network type
+	sd := chain.NewLocalDeployerForNetwork(app, "", "", cfg.networkName)
+	if err := sd.StartServerForNetwork(cfg.networkName); err != nil {
 		return err
 	}
 
-	cli, err := binutils.NewGRPCClient()
+	// Connect to this network's gRPC server
+	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType(cfg.networkName))
 	if err != nil {
 		return err
 	}
@@ -437,6 +452,12 @@ func startPublicNetwork(cfg networkConfig) error {
 		ux.Logger.PrintToUser("Found %d previously deployed chain(s)", len(netIDs))
 	}
 
+	// Use port base from config, default 9630 for mainnet, 9640 for testnet
+	effectivePortBase := cfg.portBase
+	if effectivePortBase == 0 {
+		effectivePortBase = 9630
+	}
+
 	globalNodeConfig := fmt.Sprintf(`{
 		"network-id": %d,
 		"db-type": "badgerdb",
@@ -448,6 +469,15 @@ func startPublicNetwork(cfg networkConfig) error {
 		"api-admin-enabled": true,
 		"track-chains": %q
 	}`, cfg.networkID, trackChainsValue)
+
+	// Build per-node configs with explicit ports to avoid conflicts
+	customNodeConfigs := make(map[string]string)
+	for i := 0; i < numValidators; i++ {
+		nodeName := fmt.Sprintf("node%d", i+1)
+		httpPort := effectivePortBase + (i * 2)
+		stakingPort := httpPort + 1
+		customNodeConfigs[nodeName] = fmt.Sprintf(`{"http-port": %d, "staking-port": %d}`, httpPort, stakingPort)
+	}
 
 	rootDataDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), cfg.networkName)
 	if err != nil {
@@ -473,6 +503,7 @@ func startPublicNetwork(cfg networkConfig) error {
 		client.WithRootDataDir(rootDataDir),
 		client.WithReassignPortsIfUsed(true),
 		client.WithDynamicPorts(false),
+		client.WithCustomNodeConfigs(customNodeConfigs),
 	}
 
 	// Build chain configs (mainnet-specific feature, but harmless for testnet)
@@ -490,10 +521,12 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 	opts = append(opts, client.WithChainConfigs(cfgMgr.ToNetrunnerMap()))
 
-	pluginDir := app.GetPluginsDir()
-	if _, err := os.Stat(pluginDir); err == nil {
-		opts = append(opts, client.WithPluginDir(pluginDir))
+	pluginDir := filepath.Join(app.GetPluginsDir(), "current")
+	// Always ensure plugin dir exists and pass it to nodes
+	if err := os.MkdirAll(pluginDir, 0755); err != nil {
+		return fmt.Errorf("failed to create plugin directory %s: %w", pluginDir, err)
 	}
+	opts = append(opts, client.WithPluginDir(pluginDir))
 
 	ctx := binutils.GetAsyncContext()
 
@@ -530,24 +563,50 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 
 	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
-	ux.Logger.PrintToUser("C-Chain RPC: http://localhost:%d/ext/bc/C/rpc", portBase)
+	ux.Logger.PrintToUser("C-Chain RPC: http://localhost:%d/ext/bc/C/rpc", effectivePortBase)
 	ux.Logger.PrintToUser("Network is ready for use!")
+
+	// Save network state for deploy commands to find the running network
+	grpcPorts := binutils.GetGRPCPorts(cfg.networkName)
+	networkState := application.CreateNetworkStateWithGRPC(cfg.networkName, cfg.networkID, effectivePortBase, grpcPorts.Server, grpcPorts.Gateway)
+	if err := app.SaveNetworkState(networkState); err != nil {
+		ux.Logger.PrintToUser("Warning: failed to save network state: %v", err)
+	}
+	ux.Logger.PrintToUser("gRPC server: localhost:%d", grpcPorts.Server)
 
 	return nil
 }
 
 // StartMainnet starts a mainnet network with configurable validator nodes
 func StartMainnet() error {
+	// Use --port-base flag if provided, otherwise default to 9630
+	pb := portBase
+	if pb == 9630 && !isPortBaseFlagSet() {
+		pb = 9630 // mainnet default
+	}
 	return startPublicNetwork(networkConfig{
-		networkID:   96369,
+		networkID:   constants.MainnetID, // P-Chain network ID (1)
 		networkName: "mainnet",
+		portBase:    pb,
 	})
 }
 
 // StartTestnet starts a testnet network with configurable validator nodes
 func StartTestnet() error {
+	// Use --port-base flag if provided, otherwise default to 9640
+	pb := portBase
+	if pb == 9630 && !isPortBaseFlagSet() {
+		pb = 9640 // testnet default (separate from mainnet)
+	}
 	return startPublicNetwork(networkConfig{
-		networkID:   96368,
+		networkID:   constants.TestnetID, // P-Chain network ID (2)
 		networkName: "testnet",
+		portBase:    pb,
 	})
+}
+
+// isPortBaseFlagSet checks if --port-base was explicitly set by user
+func isPortBaseFlagSet() bool {
+	// If portBase != default, it was explicitly set
+	return portBase != 9630
 }

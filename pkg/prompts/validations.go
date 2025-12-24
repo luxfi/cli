@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
+	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	luxconstants "github.com/luxfi/constants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
@@ -59,22 +59,22 @@ func validateStakingDuration(input string) error {
 	if err != nil {
 		return err
 	}
-	if d > constants.MaxStakeDuration {
-		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(constants.MaxStakeDuration))
+	if d > cliconstants.MaxStakeDuration {
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(cliconstants.MaxStakeDuration))
 	}
-	if d < constants.MinStakeDuration {
-		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(constants.MinStakeDuration))
+	if d < cliconstants.MinStakeDuration {
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(cliconstants.MinStakeDuration))
 	}
 	return nil
 }
 
 func validateTime(input string) error {
-	t, err := time.Parse(constants.TimeParseLayout, input)
+	t, err := time.Parse(cliconstants.TimeParseLayout, input)
 	if err != nil {
 		return err
 	}
-	if t.Before(time.Now().Add(constants.StakingStartLeadTime)) {
-		return fmt.Errorf("time should be at least start from now + %s", constants.StakingStartLeadTime)
+	if t.Before(time.Now().Add(cliconstants.StakingStartLeadTime)) {
+		return fmt.Errorf("time should be at least start from now + %s", cliconstants.StakingStartLeadTime)
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func validateWeight(input string) error {
 	if err != nil {
 		return err
 	}
-	if val < constants.MinStakeWeight {
+	if val < cliconstants.MinStakeWeight {
 		return errors.New("the weight must be an integer between 1 and 100")
 	}
 	return nil
@@ -145,7 +145,7 @@ func validatePChainTestnetAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != luxconstants.TestnetHRP {
+	if hrp != constants.TestnetHRP {
 		return errors.New("this is not a testnet address")
 	}
 	return nil
@@ -156,7 +156,7 @@ func validatePChainMainAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != luxconstants.MainnetHRP {
+	if hrp != constants.MainnetHRP {
 		return errors.New("this is not a mainnet address")
 	}
 	return nil
@@ -167,10 +167,8 @@ func validatePChainLocalAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	// ANR uses the `custom` HRP for local networks,
-	// but the `local` HRP also exists...
-	if hrp != luxconstants.LocalHRP && hrp != luxconstants.FallbackHRP {
-		return errors.New("this is not a local nor custom address")
+	if hrp != constants.CustomHRP {
+		return errors.New("this is not a custom address")
 	}
 	return nil
 }
@@ -209,7 +207,7 @@ func validateXChainTestnetAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != luxconstants.TestnetHRP {
+	if hrp != constants.TestnetHRP {
 		return errors.New("this is not a testnet address")
 	}
 	return nil
@@ -221,7 +219,7 @@ func validateXChainMainAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	if hrp != luxconstants.MainnetHRP {
+	if hrp != constants.MainnetHRP {
 		return errors.New("this is not a mainnet address")
 	}
 	return nil
@@ -233,10 +231,8 @@ func validateXChainLocalAddress(input string) error {
 	if err != nil {
 		return err
 	}
-	// ANR uses the `custom` HRP for local networks,
-	// but the `local` HRP also exists...
-	if hrp != luxconstants.LocalHRP && hrp != luxconstants.FallbackHRP {
-		return errors.New("this is not a local nor custom address")
+	if hrp != constants.CustomHRP {
+		return errors.New("this is not a custom address")
 	}
 	return nil
 }

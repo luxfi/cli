@@ -35,7 +35,13 @@ network is running and some basic stats about the network.`,
 func networkStatus(*cobra.Command, []string) error {
 	ux.Logger.PrintToUser("Requesting network status...")
 
-	cli, err := binutils.NewGRPCClient()
+	// Determine the network type from running network state
+	networkType := app.GetRunningNetworkType()
+	if networkType == "" {
+		networkType = "local" // Default fallback
+	}
+
+	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType(networkType))
 	if err != nil {
 		return err
 	}

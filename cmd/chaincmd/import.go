@@ -105,8 +105,9 @@ func runChainImport(_ *cobra.Command, args []string) error {
 
 	startTime := time.Now()
 
-	// Call admin_importChain on the admin endpoint, not rpc
-	success, err := callAdminImportChain(adminEndpoint, absFilePath)
+	// Call admin_importChain on the RPC endpoint (Coreth/geth-style API)
+	// The admin API is exposed on the main RPC endpoint, not a separate admin endpoint
+	success, err := callAdminImportChain(rpcEndpoint, absFilePath)
 	if err != nil {
 		return fmt.Errorf("import failed: %w", err)
 	}
@@ -217,11 +218,12 @@ func getBlockHeight(rpcEndpoint string) (uint64, error) {
 }
 
 func callAdminImportChain(rpcEndpoint, filePath string) (bool, error) {
-	// admin_importChain takes a single string parameter: the file path
+	// Coreth/geth-style RPC uses underscore method format: admin_importChain
+	// The file path is passed as a single string parameter (not a struct)
 	req := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"method":  "admin_importChain",
-		"params":  []interface{}{filePath},
+		"params":  []string{filePath},
 		"id":      1,
 	}
 

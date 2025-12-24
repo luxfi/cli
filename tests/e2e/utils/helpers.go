@@ -69,7 +69,7 @@ func GetLPMDir() string {
 }
 
 func ChainConfigExists(subnetName string) (bool, error) {
-	cfgPath := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.ChainConfigFileName)
+	cfgPath := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.ChainConfigFile)
 	cfgExists := true
 	if _, err := os.Stat(cfgPath); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist

@@ -139,16 +139,16 @@ var networkConfigs = map[string]NetworkConfig{
 		VestingPercent: 100.0,
 		Message:        "Lux Devnet Genesis - Development Only",
 	},
-	"local": {
-		NetworkID:      constants.LocalID,      // 1337 (P-Chain network identifier)
-		ChainID:        constants.LocalChainID, // 1337 (C-Chain EVM identifier)
-		KeyPrefix:      "local-key",
+	"custom": {
+		NetworkID:      constants.CustomID,      // 1337 (P-Chain network identifier)
+		ChainID:        constants.CustomChainID, // 1337 (C-Chain EVM identifier)
+		KeyPrefix:      "custom-key",
 		NumPChainKeys:  1,
 		NumXChainKeys:  0,
-		HRP:            constants.LocalHRP, // "local"
+		HRP:            constants.CustomHRP, // "custom"
 		VestingYears:   0,
 		VestingPercent: 100.0,
-		Message:        "Lux Local Genesis - Single Node Development",
+		Message:        "Lux Custom Genesis - Single Node Development",
 	},
 }
 

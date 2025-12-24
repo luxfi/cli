@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/node/api/info"
 )
@@ -16,15 +17,34 @@ type StatusChecker interface {
 	GetCurrentNetworkVersion() (string, int, bool, error)
 }
 
-type networkStatusChecker struct{}
-
-func NewStatusChecker() StatusChecker {
-	return networkStatusChecker{}
+// networkStatusChecker checks the status of the running network
+// It uses the network state file to determine the correct API endpoint
+type networkStatusChecker struct {
+	app *application.Lux
 }
 
-func (networkStatusChecker) GetCurrentNetworkVersion() (string, int, bool, error) {
+// NewStatusChecker creates a new status checker
+// If app is nil, it uses the default LocalAPIEndpoint
+func NewStatusChecker() StatusChecker {
+	return &networkStatusChecker{app: nil}
+}
+
+// NewStatusCheckerWithApp creates a new status checker with app context
+// This allows it to read the network state and use the correct endpoint
+func NewStatusCheckerWithApp(app *application.Lux) StatusChecker {
+	return &networkStatusChecker{app: app}
+}
+
+func (n *networkStatusChecker) GetCurrentNetworkVersion() (string, int, bool, error) {
 	ctx := context.Background()
-	infoClient := info.NewClient(constants.LocalAPIEndpoint)
+
+	// Use dynamic endpoint if app is available
+	endpoint := constants.LocalAPIEndpoint
+	if n.app != nil {
+		endpoint = n.app.GetRunningNetworkEndpoint()
+	}
+
+	infoClient := info.NewClient(endpoint)
 	versionResponse, err := infoClient.GetNodeVersion(ctx)
 	if err != nil {
 		// not actually an error, network just not running

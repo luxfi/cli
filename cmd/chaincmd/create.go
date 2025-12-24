@@ -71,7 +71,7 @@ Examples:
 	cmd.Flags().StringVar(&genesisFile, "genesis", "", "Path to custom genesis file")
 	cmd.Flags().StringVar(&customVMBin, "vm", "", "Path to custom VM binary")
 	cmd.Flags().BoolVar(&useEVM, "evm", false, "Use Lux EVM")
-	cmd.Flags().BoolVar(&useCustomVM, "custom", false, "Use custom VM")
+	cmd.Flags().BoolVar(&useCustomVM, "custom-vm", false, "Use custom VM")
 	cmd.Flags().StringVar(&vmVersion, "vm-version", "", "VM version to use")
 	cmd.Flags().BoolVar(&useLatestVM, "latest", false, "Use latest VM version")
 	cmd.Flags().BoolVar(&enablePreconfirm, "enable-preconfirm", false, "Enable pre-confirmations")

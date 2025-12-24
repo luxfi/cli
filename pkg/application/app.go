@@ -421,3 +421,128 @@ func (app *Lux) GetClusterYAMLFilePath(clusterName string) string {
 
 // All the SDK methods are now provided by embedded type
 // These duplicate SDK functionality and should be removed
+
+// NetworkState tracks the state of a running local network
+type NetworkState struct {
+	NetworkType string `json:"network_type"` // "local", "testnet", "mainnet"
+	NetworkID   uint32 `json:"network_id"`
+	PortBase    int    `json:"port_base"`
+	GRPCPort    int    `json:"grpc_port"`    // gRPC server port for this network
+	GatewayPort int    `json:"gateway_port"` // gRPC gateway port for this network
+	APIEndpoint string `json:"api_endpoint"`
+	Running     bool   `json:"running"`
+}
+
+// GetNetworkStateFile returns the path to the network state file
+func (app *Lux) GetNetworkStateFile() string {
+	return filepath.Join(app.GetBaseDir(), constants.LocalNetworkMetaFile)
+}
+
+// SaveNetworkState saves the current network state to disk
+func (app *Lux) SaveNetworkState(state *NetworkState) error {
+	statePath := app.GetNetworkStateFile()
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal network state: %w", err)
+	}
+	if err := os.WriteFile(statePath, data, WriteReadReadPerms); err != nil {
+		return fmt.Errorf("failed to write network state: %w", err)
+	}
+	return nil
+}
+
+// LoadNetworkState loads the network state from disk
+func (app *Lux) LoadNetworkState() (*NetworkState, error) {
+	statePath := app.GetNetworkStateFile()
+	data, err := os.ReadFile(statePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil // No state file = no running network
+		}
+		return nil, fmt.Errorf("failed to read network state: %w", err)
+	}
+
+	var state NetworkState
+	if err := json.Unmarshal(data, &state); err != nil {
+		return nil, fmt.Errorf("failed to parse network state: %w", err)
+	}
+	return &state, nil
+}
+
+// ClearNetworkState removes the network state file
+func (app *Lux) ClearNetworkState() error {
+	statePath := app.GetNetworkStateFile()
+	if err := os.Remove(statePath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove network state: %w", err)
+	}
+	return nil
+}
+
+// GetRunningNetworkEndpoint returns the API endpoint of the running network
+// Returns the default LocalAPIEndpoint if no network state is found
+func (app *Lux) GetRunningNetworkEndpoint() string {
+	state, err := app.LoadNetworkState()
+	if err != nil || state == nil || !state.Running {
+		return constants.LocalAPIEndpoint
+	}
+	return state.APIEndpoint
+}
+
+// GetRunningNetworkType returns the type of the running network
+// Returns "" if no network is running
+func (app *Lux) GetRunningNetworkType() string {
+	state, err := app.LoadNetworkState()
+	if err != nil || state == nil || !state.Running {
+		return ""
+	}
+	return state.NetworkType
+}
+
+// IsNetworkRunning checks if a network is currently running
+func (app *Lux) IsNetworkRunning() bool {
+	state, err := app.LoadNetworkState()
+	if err != nil || state == nil {
+		return false
+	}
+	return state.Running
+}
+
+// CreateNetworkState creates a new network state for the given parameters
+func CreateNetworkState(netType string, networkID uint32, portBase int) *NetworkState {
+	return &NetworkState{
+		NetworkType: netType,
+		NetworkID:   networkID,
+		PortBase:    portBase,
+		APIEndpoint: fmt.Sprintf("http://127.0.0.1:%d", portBase),
+		Running:     true,
+	}
+}
+
+// CreateNetworkStateWithGRPC creates a new network state with gRPC port configuration
+func CreateNetworkStateWithGRPC(netType string, networkID uint32, portBase, grpcPort, gatewayPort int) *NetworkState {
+	return &NetworkState{
+		NetworkType: netType,
+		NetworkID:   networkID,
+		PortBase:    portBase,
+		GRPCPort:    grpcPort,
+		GatewayPort: gatewayPort,
+		APIEndpoint: fmt.Sprintf("http://127.0.0.1:%d", portBase),
+		Running:     true,
+	}
+}
+
+// GetGRPCEndpoint returns the gRPC endpoint for connecting to this network's server
+func (s *NetworkState) GetGRPCEndpoint() string {
+	if s.GRPCPort > 0 {
+		return fmt.Sprintf(":%d", s.GRPCPort)
+	}
+	// Fallback for legacy state files without gRPC port
+	return ":8097"
+}
+
+// GetRunFileForNetwork returns the path to the run file for a specific network type.
+// Each network type (mainnet, testnet, local) has its own run file to allow
+// running multiple networks simultaneously.
+func (app *Lux) GetRunFileForNetwork(networkType string) string {
+	return filepath.Join(app.GetRunDir(), fmt.Sprintf("gRPCserver-%s.run", networkType))
+}

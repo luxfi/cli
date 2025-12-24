@@ -128,8 +128,13 @@ Quick start:
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd())
 
-	// add hidden backend command
+	// add hidden backend command (base)
 	rootCmd.AddCommand(backendcmd.NewCmd(app))
+
+	// add network-specific backend commands (lux-mainnet-grpc, lux-testnet-grpc, etc.)
+	for _, cmd := range backendcmd.NewAllNetworkCmds(app) {
+		rootCmd.AddCommand(cmd)
+	}
 
 	return rootCmd
 }
@@ -181,6 +186,11 @@ func createApp(cmd *cobra.Command, _ []string) error {
 // checkForUpdates evaluates first if the user is maybe wanting to skip the update check
 // if there's no skip, it runs the update check
 func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
+	// If skip-update-check is enabled (via flag or config), skip silently
+	if skipCheck {
+		return nil
+	}
+
 	var (
 		lastActs *application.LastActions
 		err      error
@@ -188,37 +198,15 @@ func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
 	// we store a timestamp of the last skip check in a file
 	lastActs, err = app.ReadLastActionsFile()
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			// if the file does not exist AND the user is requesting to skipCheck,
-			// we write the new file
-			if skipCheck {
-				lastActs := &application.LastActions{
-					LastSkipCheck: time.Now(),
-				}
-				app.WriteLastActionsFile(lastActs)
-				return nil
-			}
+		if !errors.Is(err, os.ErrNotExist) {
+			app.Log.Warn("failed to read last-actions file! This is non-critical but is logged", zap.Error(err))
 		}
-		app.Log.Warn("failed to read last-actions file! This is non-critical but is logged", zap.Error(err))
 		lastActs = &application.LastActions{}
 	}
 
-	// if the user had requested to skipCheck less than 24 hrs ago, we skip in any case
+	// if the user had requested to skipCheck less than 24 hrs ago via flag, we skip
 	if lastActs.LastSkipCheck != (time.Time{}) &&
 		time.Now().Before(lastActs.LastSkipCheck.Add(24*time.Hour)) {
-		app.Log.Debug("skipping update check, last checked less than 24 hrs ago",
-			zap.Time("lastSkipCheck", lastActs.LastSkipCheck))
-		return nil
-	}
-
-	// more than 24hrs ago or the user never asked to skip before
-	// we update the timestamp and write the file again
-	if skipCheck {
-		if lastActs == nil {
-			lastActs = &application.LastActions{}
-		}
-		lastActs.LastSkipCheck = time.Now()
-		app.WriteLastActionsFile(lastActs)
 		return nil
 	}
 
@@ -359,6 +347,11 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		app.Log.Debug("using config file", zap.String("config-file", viper.ConfigFileUsed()))
+
+		// Read skip-update-check from config file if not already set by flag
+		if !skipCheck && viper.IsSet(constants.SkipUpdateFlag) {
+			skipCheck = viper.GetBool(constants.SkipUpdateFlag)
+		}
 	}
 	// No config file is normal - most users don't have one, so we silently continue
 }
