@@ -142,7 +142,8 @@ func TestDeployToLocal(t *testing.T) {
 	err = os.WriteFile(testGenesis.Name(), []byte(genesis), constants.DefaultPerms755)
 	require.NoError(err)
 	// create dummy sidecar file, also checked by deploy
-	sidecar := `{"VM": "EVM"}`
+	// Use Custom VM so chainName "test" is used for VM ID computation (matches testVMID)
+	sidecar := `{"VM": "Custom"}`
 	testSubnetDir := filepath.Join(testDir, constants.ChainsDir, testChainName)
 	err = os.MkdirAll(testSubnetDir, constants.DefaultPerms755)
 	require.NoError(err)
@@ -202,8 +203,14 @@ func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 	alteredFakeResponse := proto.Clone(fakeWaitForHealthyResponse).(*rpcpb.WaitForHealthyResponse) // new(rpcpb.WaitForHealthyResponse)
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].VmId = testVMID
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].ChainName = testChainName
+	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].PchainId = testSubnetID2 // Set the subnet ID
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain1"].ChainName = "bchain1"
 	c.On("WaitForHealthy", mock.Anything).Return(alteredFakeResponse, nil)
+	// Status is called for quick status checks - uses the altered response with VmId set
+	fakeStatusResponse := &rpcpb.StatusResponse{
+		ClusterInfo: alteredFakeResponse.ClusterInfo,
+	}
+	c.On("Status", mock.Anything).Return(fakeStatusResponse, nil)
 	c.On("Close").Return(nil)
 	return c, nil
 }
