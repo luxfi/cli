@@ -147,7 +147,7 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 		// Source files from canonical location
 		subnetConfigDir := filepath.Join(app.GetChainsDir(), subnetName)
 		genesisFile := filepath.Join(subnetConfigDir, constants.GenesisFileName)
-		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFileName)
+		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFile)
 
 		// Check if genesis exists (required for evm)
 		if _, err := os.Stat(genesisFile); os.IsNotExist(err) {
@@ -251,7 +251,7 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 		// Source files from canonical subnet location
 		subnetConfigDir := filepath.Join(app.GetChainsDir(), subnetName)
 		genesisFile := filepath.Join(subnetConfigDir, constants.GenesisFileName)
-		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFileName)
+		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFile)
 
 		// Check if genesis exists (required for evm)
 		if _, err := os.Stat(genesisFile); os.IsNotExist(err) {

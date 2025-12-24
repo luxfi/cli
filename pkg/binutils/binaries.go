@@ -208,8 +208,8 @@ func (*binaryChecker) ExistsWithVersion(binDir, binPrefix, version string) (bool
 }
 
 func (pbd *pluginBinaryDownloader) InstallVM(vmID, vmBin string) error {
-	// target of VM install
-	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
+	// target of VM install - plugins go in current/ subdirectory
+	binaryPath := filepath.Join(pbd.app.GetCurrentPluginsDir(), vmID)
 
 	// check if binary is already present - skip install if it exists
 	if _, err := os.Stat(binaryPath); err == nil {
@@ -226,8 +226,8 @@ func (pbd *pluginBinaryDownloader) InstallVM(vmID, vmBin string) error {
 }
 
 func (pbd *pluginBinaryDownloader) UpgradeVM(vmID, vmBin string) error {
-	// target of VM install
-	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
+	// target of VM install - plugins go in current/ subdirectory
+	binaryPath := filepath.Join(pbd.app.GetCurrentPluginsDir(), vmID)
 
 	// check if binary is already present, it should already exist
 	if _, err := os.Stat(binaryPath); errors.Is(err, os.ErrNotExist) {
@@ -242,14 +242,21 @@ func (pbd *pluginBinaryDownloader) UpgradeVM(vmID, vmBin string) error {
 }
 
 func (pbd *pluginBinaryDownloader) RemoveVM(vmID string) error {
-	// target of VM install
-	binaryPath := filepath.Join(pbd.app.GetPluginsDir(), vmID)
+	// target of VM install - plugins are in current/ subdirectory
+	binaryPath := filepath.Join(pbd.app.GetCurrentPluginsDir(), vmID)
 
-	// check if binary is already present, this should never happen
-	if _, err := os.Stat(binaryPath); errors.Is(err, os.ErrNotExist) {
+	// check if binary is already present
+	info, err := os.Lstat(binaryPath)
+	if errors.Is(err, os.ErrNotExist) {
 		return errors.New("vm binary does not exist")
 	} else if err != nil {
 		return err
+	}
+
+	// Don't remove symlinks - these are user-linked plugins that should persist
+	// Only remove actual binary files that were downloaded/installed
+	if info.Mode()&os.ModeSymlink != 0 {
+		return nil // Skip removal of symlinks (user-created links via 'lux vm link')
 	}
 
 	if err := os.Remove(binaryPath); err != nil {

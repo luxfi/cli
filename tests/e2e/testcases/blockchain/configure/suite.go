@@ -204,7 +204,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 		ginkgo.It("set blockchain config", func() {
 			// set blockchain config before deploy
 			chainConfig := getBlockchainConfig(newRPCTxFeeCap1)
-			chainConfigPath, err := utils.CreateTmpFile(constants.ChainConfigFileName, []byte(chainConfig))
+			chainConfigPath, err := utils.CreateTmpFile(constants.ChainConfigFile, []byte(chainConfig))
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, err = commands.ConfigureBlockchain(
 				utils.BlockchainName,
@@ -237,7 +237,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 			utils.CleanupLogs(nodesInfo, blockchainID)
 			// change blockchain config
 			chainConfig = getBlockchainConfig(newRPCTxFeeCap2)
-			chainConfigPath, err = utils.CreateTmpFile(constants.ChainConfigFileName, []byte(chainConfig))
+			chainConfigPath, err = utils.CreateTmpFile(constants.ChainConfigFile, []byte(chainConfig))
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, err = commands.ConfigureBlockchain(
 				utils.BlockchainName,
@@ -320,7 +320,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 		ginkgo.It("set subnet config", func() {
 			// set subnet config before deploy
 			subnetConfig := getSubnetConfig(node1ID)
-			subnetConfigPath, err := utils.CreateTmpFile(constants.SubnetConfigFileName, []byte(subnetConfig))
+			subnetConfigPath, err := utils.CreateTmpFile(constants.ChainSubnetConfigFile, []byte(subnetConfig))
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, err = commands.ConfigureBlockchain(
 				utils.BlockchainName,
@@ -353,7 +353,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 			utils.CleanupLogs(nodesInfo, blockchainID)
 			// change subnet config
 			subnetConfig = getSubnetConfig(node2ID)
-			subnetConfigPath, err = utils.CreateTmpFile(constants.SubnetConfigFileName, []byte(subnetConfig))
+			subnetConfigPath, err = utils.CreateTmpFile(constants.ChainSubnetConfigFile, []byte(subnetConfig))
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, err = commands.ConfigureBlockchain(
 				utils.BlockchainName,

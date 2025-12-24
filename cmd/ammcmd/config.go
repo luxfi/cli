@@ -71,6 +71,22 @@ var (
 		TickLens:    common.HexToAddress("0x57A22965AdA0e52D785A9Aa155beF423D573b879"),
 	}
 
+	// Zoo Testnet (local testnet deployment)
+	ZooTestnet = NetworkConfig{
+		ChainID:     200201,
+		RPC:         "http://localhost:9640/ext/bc/zoo-testnet/rpc",
+		Name:        "Zoo Testnet",
+		V2Factory:   common.HexToAddress("0xD173926A10A0C4eCd3A51B1422270b65Df0551c1"),
+		V2Router:    common.HexToAddress("0xAe2cf1E403aAFE6C05A5b8Ef63EB19ba591d8511"),
+		V3Factory:   common.HexToAddress("0x80bBc7C4C7a59C899D1B37BC14539A22D5830a84"),
+		V3Router:    common.HexToAddress("0x939bC0Bca6F9B9c52E6e3AD8A3C590b5d9B9D10E"),
+		Multicall:   common.HexToAddress("0xd25F88CBdAe3c2CCA3Bb75FC4E723b44C0Ea362F"),
+		Quoter:      common.HexToAddress("0x12e2B76FaF4dDA5a173a4532916bb6Bfa3645275"),
+		WETH:        common.HexToAddress("0x4888E4a2Ee0F03051c72D2BD3ACf755eD3498B3E"), // WZOO
+		NFTPosition: common.HexToAddress("0x7a4C48B9dae0b7c396569b34042fcA604150Ee28"),
+		TickLens:    common.HexToAddress("0x57A22965AdA0e52D785A9Aa155beF423D573b879"),
+	}
+
 	// Lux Local (Anvil dev network)
 	LuxLocal = NetworkConfig{
 		ChainID:   96369,
@@ -112,6 +128,7 @@ var (
 	Networks = map[int64]*NetworkConfig{
 		96369:  &LuxMainnet,
 		200200: &ZooMainnet,
+		200201: &ZooTestnet,
 		96368:  &LuxTestnet,
 	}
 
@@ -121,6 +138,7 @@ var (
 		"lux-mainnet": &LuxMainnet,
 		"zoo":         &ZooMainnet,
 		"zoo-mainnet": &ZooMainnet,
+		"zoo-testnet": &ZooTestnet,
 		"lux-testnet": &LuxTestnet,
 		"testnet":     &LuxTestnet,
 		"local":       &LuxLocal,
