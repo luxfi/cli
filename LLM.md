@@ -1,6 +1,6 @@
 # Lux CLI - AI Assistant Knowledge Base
 
-**Last Updated**: 2024-12-20
+**Last Updated**: 2025-12-25
 **Version**: 1.21.24
 **Organization**: Lux Industries
 
@@ -30,9 +30,12 @@ lux l2 describe mychain        # Show L2 details
 lux l1 create mychain          # Create sovereign L1
 lux l1 deploy mychain          # Deploy L1
 
-# AMM Trading
+# AMM Trading (LUX_MNEMONIC supported)
 lux amm balance                # Check token balances
-lux amm swap --from LUX --to USDC --amount 100  # Swap tokens
+lux amm status                 # Show AMM contract status
+lux amm pools                  # List liquidity pools
+lux amm swap --from 0x... --to 0x... --amount 100  # Swap tokens
+lux amm quote --from 0x... --to 0x... --amount 100 # Get swap quote
 ```
 
 ## Command Architecture
@@ -55,23 +58,61 @@ The CLI is organized into these main command groups:
 
 ## Chain Import
 
-Import RLP-encoded blockchain data to a running chain:
+Import RLP-encoded blockchain data to a running chain.
+
+### Admin API Differences: Coreth vs EVM
+
+**IMPORTANT**: The C-Chain (Coreth) and Subnets (EVM) have DIFFERENT admin API implementations:
+
+| Chain Type | Endpoint | Method Format | Parameters |
+|------------|----------|---------------|------------|
+| C-Chain (Coreth) | `/ext/bc/C/rpc` | `admin_importChain` | Array: `["/path/to/file.rlp"]` |
+| Subnets (EVM) | `/ext/bc/<id>/admin` | `admin.importChain` | Object: `{"file":"/path/to/file.rlp"}` |
+
+### C-Chain Import (Coreth)
 
 ```bash
-# Import to C-Chain (default)
-lux chain import --chain=c --path=/Users/z/work/lux/state/rlp/lux-mainnet-96369.rlp
-
-# Import to ZOO subnet (use blockchain ID)
-lux chain import --chain=bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM \
-  --path=/Users/z/work/lux/state/rlp/zoo-mainnet/zoo-mainnet-200200.rlp
-
-# Custom RPC endpoint (port 9630, NOT 9650)
-lux chain import --path=/tmp/blocks.rlp --rpc=http://localhost:9630/ext/bc/C/admin
+# Via direct curl
+curl -X POST "http://127.0.0.1:9630/ext/bc/C/rpc" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"admin_importChain","params":["/path/to/blocks.rlp"],"id":1}'
 ```
 
-**RPC Endpoints** (internal port 9630):
-- C-Chain admin: `http://localhost:9630/ext/bc/C/admin`
-- Subnet admin: `http://localhost:9630/ext/bc/<blockchain-id>/admin`
+### Subnet Import (EVM Plugin)
+
+```bash
+# Via direct curl (use blockchain ID from deploy output)
+curl -X POST "http://127.0.0.1:9630/ext/bc/<blockchain-id>/admin" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"admin.importChain","params":{"file":"/path/to/blocks.rlp"},"id":1}'
+```
+
+### CLI Import (Planned)
+
+```bash
+# Import to C-Chain
+lux chain import --chain=c --path=/path/to/blocks.rlp
+
+# Import to subnet
+lux chain import --chain=<blockchain-id> --path=/path/to/blocks.rlp
+```
+
+### Block Import Results (2025-12-25)
+
+Successfully imported blocks to local networks:
+
+| Network | Chain | Blocks | Genesis Hash |
+|---------|-------|--------|--------------|
+| Mainnet | C-Chain (96369) | ~1,082,780 | `0x3f4fa...` |
+| Mainnet | Zoo (200200) | 799 | `0x7c548...` |
+| Testnet | C-Chain (96368) | 218 | `0x1c5fe...` |
+| Testnet | Zootest (200201) | 84 | `0x0652f...` |
+
+**RPC Endpoints** (internal port 9630/9640):
+- Mainnet C-Chain: `http://127.0.0.1:9630/ext/bc/C/rpc`
+- Mainnet Zoo: `http://127.0.0.1:9630/ext/bc/<zoo-id>/rpc`
+- Testnet C-Chain: `http://127.0.0.1:9640/ext/bc/C/rpc`
+- Testnet Zootest: `http://127.0.0.1:9640/ext/bc/<zootest-id>/rpc`
 
 ## Network Start Options
 
@@ -111,11 +152,36 @@ lux network start --snapshot=mybackup
 ~/.lux/
 ├── chains/                       # Chain configurations
 │   └── zoo/
-│       └── genesis.json
-├── plugins/                      # VM plugins
-│   └── <vmid>                    # EVM plugin binary
-└── runs/                         # Network runs
-    └── local_network/            # Current local network
+│       ├── genesis.json
+│       └── sidecar.json          # VM metadata
+├── chain-configs/                # Chain-specific configs
+│   └── C/
+│       └── config.json           # C-Chain config (admin API, pruning)
+├── plugins/
+│   └── current/                  # Active plugins
+│       └── <vmid>                # EVM plugin binary
+├── runs/                         # Network runs
+│   ├── mainnet/
+│   │   └── run_YYYYMMDD_HHMMSS/  # Mainnet network data
+│   └── testnet/
+│       └── run_YYYYMMDD_HHMMSS/  # Testnet network data
+└── snapshots/                    # Network snapshots
+    └── testnet_complete_*.tar.gz # Saved state with imported blocks
+```
+
+## Network Snapshots
+
+Save and restore network state:
+
+```bash
+# Stop network with snapshot
+lux network stop --snapshot-name=my_snapshot
+
+# Start from snapshot
+lux network start --snapshot=my_snapshot
+
+# Manual snapshot (while network running)
+tar -czf ~/.lux/snapshots/backup.tar.gz -C ~/.lux/runs/mainnet run_*
 ```
 
 ## Development
@@ -154,9 +220,90 @@ The subnet is not tracked or deployed. Ensure:
 ### "ErrPrunedAncestor" during import
 The genesis state is not accessible. This is a known issue with fresh subnet deployments. The genesis state trie must be properly committed before imports can work.
 
+### "invalid gas limit" during import
+If you see `invalid gas limit: have 12000000, want 10000000`, the Fortuna upgrade is activated prematurely.
+
+**Fix**: Set far-future timestamps for Fortuna and related upgrades in genesis:
+
+```json
+{
+  "config": {
+    "etnaTimestamp": 253399622400,
+    "fortunaTimestamp": 253399622400,
+    "graniteTimestamp": 253399622400
+  }
+}
+```
+
+The value `253399622400` is year 9999, effectively disabling these upgrades.
+
 ### Port 9650 vs 9630
 - **9650**: Public API port (external)
 - **9630**: Internal admin API port (use this for admin_importChain)
+
+### Import hangs or timeouts
+The `admin_importChain` RPC may timeout for large imports (>10k blocks), but the import continues in the background. Monitor progress via logs:
+
+```bash
+# Check import progress
+tail -f ~/.lux/runs/mainnet/current/node1/db/mainnet/main.log | grep "Inserted new block"
+```
+
+## AMM Trading
+
+The AMM CLI supports Uniswap V2/V3 style DEX trading on Lux and Zoo networks.
+
+### Wallet Access (Priority Order)
+
+1. `--private-key` flag (hex private key)
+2. `LUX_PRIVATE_KEY` environment variable
+3. `LUX_MNEMONIC` environment variable (BIP39 mnemonic)
+
+```bash
+# Using mnemonic
+export LUX_MNEMONIC="word1 word2 ... word12"
+lux amm balance --network lux-testnet
+
+# Using private key
+export LUX_PRIVATE_KEY="0x..."
+lux amm balance --network zoo
+```
+
+### Network Configuration
+
+| Network | Flag | Chain ID | Default RPC |
+|---------|------|----------|-------------|
+| Lux Mainnet | `--network lux` | 96369 | localhost:8545 |
+| Zoo Mainnet | `--network zoo` | 200200 | localhost:8546 |
+| Lux Testnet | `--network lux-testnet` | 96368 | localhost:8547 |
+| Zoo Testnet | `--network zoo-testnet` | 200201 | localhost:9640 |
+
+Override RPC with `--rpc` flag:
+```bash
+lux amm status --network lux-testnet --rpc "http://127.0.0.1:9642/ext/bc/C/rpc"
+```
+
+### AMM Contract Addresses
+
+All networks use the same contract addresses (CREATE2 deployed):
+
+| Contract | Address |
+|----------|---------|
+| V2 Factory | `0xD173926A10A0C4eCd3A51B1422270b65Df0551c1` |
+| V2 Router | `0xAe2cf1E403aAFE6C05A5b8Ef63EB19ba591d8511` |
+| V3 Factory | `0x80bBc7C4C7a59C899D1B37BC14539A22D5830a84` |
+| V3 Router | `0x939bC0Bca6F9B9c52E6e3AD8A3C590b5d9B9D10E` |
+| Multicall | `0xd25F88CBdAe3c2CCA3Bb75FC4E723b44C0Ea362F` |
+| Quoter | `0x12e2B76FaF4dDA5a173a4532916bb6Bfa3645275` |
+
+### Key Derivation
+
+Mnemonics are derived using BIP44 path `m/44'/60'/0'/0/0`:
+- BIP39 mnemonic → seed
+- BIP32 derivation → private key
+- ECDSA → Ethereum address
+
+Treasury address `0x9011E888251AB053B7bD1cdB598Db4f9DEd94714` is derived from the production mnemonic.
 
 ## Token Denominations
 
