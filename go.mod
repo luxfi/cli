@@ -29,8 +29,8 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
-	github.com/onsi/ginkgo/v2 v2.25.1
-	github.com/onsi/gomega v1.38.0
+	github.com/onsi/ginkgo/v2 v2.25.3
+	github.com/onsi/gomega v1.38.3
 	github.com/otiai10/copy v1.14.1 // indirect
 	github.com/pborman/ansi v1.0.0
 	github.com/posthog/posthog-go v1.6.1
