@@ -68,7 +68,7 @@ require (
 	github.com/luxfi/genesis v1.5.10
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/math v1.1.1
+	github.com/luxfi/math v1.2.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.38.0
@@ -176,6 +176,7 @@ require (
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.4.9 // indirect
+	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
 	github.com/luxfi/upgrade v1.0.0 // indirect
