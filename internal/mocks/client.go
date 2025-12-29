@@ -568,6 +568,36 @@ func (_m *Client) SaveSnapshot(ctx context.Context, snapshotName string) (*rpcpb
 	return r0, r1
 }
 
+// SaveHotSnapshot provides a mock function with given fields: ctx, snapshotName
+func (_m *Client) SaveHotSnapshot(ctx context.Context, snapshotName string) (*rpcpb.SaveSnapshotResponse, error) {
+	ret := _m.Called(ctx, snapshotName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveHotSnapshot")
+	}
+
+	var r0 *rpcpb.SaveSnapshotResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*rpcpb.SaveSnapshotResponse, error)); ok {
+		return rf(ctx, snapshotName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *rpcpb.SaveSnapshotResponse); ok {
+		r0 = rf(ctx, snapshotName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*rpcpb.SaveSnapshotResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, snapshotName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SendOutboundMessage provides a mock function with given fields: ctx, nodeName, peerID, op, msgBody
 func (_m *Client) SendOutboundMessage(ctx context.Context, nodeName string, peerID string, op uint32, msgBody []byte) (*rpcpb.SendOutboundMessageResponse, error) {
 	ret := _m.Called(ctx, nodeName, peerID, op, msgBody)
