@@ -4,8 +4,8 @@ package keychain
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/math/set"
 	"github.com/luxfi/keychain"
+	"github.com/luxfi/math/set"
 	wallkeychain "github.com/luxfi/node/wallet/keychain"
 )
 
