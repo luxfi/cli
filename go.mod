@@ -9,7 +9,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.10
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.200.0
 	github.com/chelnak/ysmrr v0.6.0
-	github.com/docker/docker v28.3.2+incompatible
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
@@ -65,7 +64,7 @@ require (
 	github.com/btcsuite/btcd v0.24.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/luxfi/constants v1.3.2
+	github.com/luxfi/const v1.4.0
 	github.com/luxfi/genesis v1.5.16
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
@@ -173,6 +172,7 @@ require (
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.1.0 // indirect
 	github.com/luxfi/consensus v1.22.46 // indirect
+	github.com/luxfi/constants v1.3.1 // indirect
 	github.com/luxfi/database v1.2.17 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.3 // indirect
@@ -193,7 +193,6 @@ require (
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/moby/sys/reexec v0.1.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/olekukonko/errors v1.1.0 // indirect
@@ -254,3 +253,6 @@ require (
 
 // Unify HID libraries to avoid duplicate CGO symbols
 replace github.com/zondax/hid => github.com/luxfi/hid v0.9.3
+
+// Module was renamed from constants to const
+replace github.com/luxfi/constants => github.com/luxfi/const v1.4.0
