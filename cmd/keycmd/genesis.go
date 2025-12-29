@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constants"
+	"github.com/luxfi/const"
 	"github.com/luxfi/crypto"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ripemd160"

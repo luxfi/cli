@@ -27,7 +27,7 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/models"
-	luxconstants "github.com/luxfi/constants"
+	luxconstants "github.com/luxfi/const"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
