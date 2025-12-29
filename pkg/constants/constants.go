@@ -150,8 +150,8 @@ const (
 	LuxOrg = "luxfi"
 
 	// Repo names
-	LuxRepoName      = "node"
-	EVMRepoName      = "evm"
+	LuxRepoName       = "node"
+	EVMRepoName       = "evm"
 	NetrunnerRepoName = "netrunner"
 
 	// Install directories
@@ -172,11 +172,11 @@ const (
 
 	// Unified Chain Config Directories
 	// All nodes share these directories for consistent chain configuration
-	NetworksDir      = "networks"      // ~/.lux/networks/ - persistent network state
+	NetworksDir      = "networks"        // ~/.lux/networks/ - persistent network state
 	CurrentPluginDir = "plugins/current" // Active plugins symlinked here
 
 	// Unified chain config file names (used in ~/.lux/chains/<chainName>/)
-	ChainConfigFile = "config.json" // Chain-specific config (eth-apis, etc.)
+	ChainConfigFile         = "config.json"  // Chain-specific config (eth-apis, etc.)
 	UnifiedChainGenesisFile = "genesis.json" // Chain genesis
 	UnifiedChainUpgradeFile = "upgrade.json" // Chain upgrades
 
@@ -295,7 +295,7 @@ const (
 	StakingMinimumLeadTime     = 25 * time.Second
 	DevnetStakingStartLeadTime = 30 * time.Second
 
-	DefaultConfigFileName = "cli"       // ~/.lux/cli.json
+	DefaultConfigFileName = "cli" // ~/.lux/cli.json
 	DefaultConfigFileType = "json"
 
 	// Config keys for external binary paths
@@ -450,7 +450,6 @@ func GetServerCmdForNetwork(networkType string) string {
 }
 
 const (
-
 	LuxCompatibilityVersionAdded = "v1.9.2"
 	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
 	LuxdCompatibilityURL         = LuxCompatibilityURL // Alias for backward compatibility
