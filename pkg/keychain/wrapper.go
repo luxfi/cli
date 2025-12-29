@@ -4,9 +4,8 @@ package keychain
 
 import (
 	"github.com/luxfi/ids"
-	ledgerkeychain "github.com/luxfi/ledger-lux-go/keychain"
 	"github.com/luxfi/math/set"
-	nodekeychain "github.com/luxfi/node/utils/crypto/keychain"
+	nodekeychain "github.com/luxfi/keychain"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	walletkeychain "github.com/luxfi/node/wallet/keychain"
 )
@@ -22,12 +21,11 @@ func WrapNodeKeychain(nodeKC nodekeychain.Keychain) *NodeToLedgerWrapper {
 }
 
 // Get returns the signer for the given address
-func (w *NodeToLedgerWrapper) Get(addr ids.ShortID) (ledgerkeychain.Signer, bool) {
+func (w *NodeToLedgerWrapper) Get(addr ids.ShortID) (nodekeychain.Signer, bool) {
 	signer, ok := w.nodeKC.Get(addr)
 	if !ok {
 		return nil, false
 	}
-	// The node signer already implements the ledger signer interface
 	return signer, true
 }
 
