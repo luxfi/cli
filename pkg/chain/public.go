@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/keychain"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"

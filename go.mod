@@ -14,18 +14,19 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.0.0
-	github.com/luxfi/crypto v1.17.26
+	github.com/luxfi/crypto v1.17.27
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.8.17
-	github.com/luxfi/geth v1.16.60
+	github.com/luxfi/evm v0.8.21
+	github.com/luxfi/geth v1.16.65
 	github.com/luxfi/ids v1.2.5
-	github.com/luxfi/ledger-lux-go v1.0.2
+	github.com/luxfi/keychain v1.0.1
+	github.com/luxfi/ledger v1.1.5
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.33
-	github.com/luxfi/node v1.22.45
-	github.com/luxfi/sdk v1.16.34
-	github.com/luxfi/warp v1.16.39
+	github.com/luxfi/netrunner v1.14.34
+	github.com/luxfi/node v1.22.72
+	github.com/luxfi/sdk v1.16.36
+	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
@@ -64,11 +65,11 @@ require (
 	github.com/btcsuite/btcd v0.24.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/luxfi/constants v1.2.6
-	github.com/luxfi/genesis v1.5.10
+	github.com/luxfi/constants v1.3.1
+	github.com/luxfi/genesis v1.5.16
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/math v1.1.1
+	github.com/luxfi/math v1.2.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/term v0.38.0
@@ -100,6 +101,7 @@ require (
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.5 // indirect
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
+	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -142,7 +144,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/mock v1.7.0-rc.1 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
@@ -168,14 +169,19 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/luxfi/address v1.0.0 // indirect
 	github.com/luxfi/cache v1.1.0 // indirect
-	github.com/luxfi/codec v1.0.4 // indirect
-	github.com/luxfi/consensus v1.22.39 // indirect
-	github.com/luxfi/database v1.2.14 // indirect
+	github.com/luxfi/codec v1.1.0 // indirect
+	github.com/luxfi/consensus v1.22.46 // indirect
+	github.com/luxfi/database v1.2.17 // indirect
+	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.3 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
-	github.com/luxfi/p2p v1.4.9 // indirect
+	github.com/luxfi/p2p v1.18.2 // indirect
+	github.com/luxfi/precompiles v0.1.10 // indirect
+	github.com/luxfi/sampler v1.0.0 // indirect
+	github.com/luxfi/staking v1.0.0 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
 	github.com/luxfi/upgrade v1.0.0 // indirect
@@ -220,9 +226,6 @@ require (
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	github.com/zondax/golem v0.27.0 // indirect
-	github.com/zondax/hid v0.9.2 // indirect
-	github.com/zondax/ledger-go v1.0.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
@@ -248,3 +251,6 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+// Unify HID libraries to avoid duplicate CGO symbols
+replace github.com/zondax/hid => github.com/luxfi/hid v0.9.3
