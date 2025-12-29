@@ -19,7 +19,7 @@ import (
 	climodels "github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
-	luxconstants "github.com/luxfi/constants"
+	luxconstants "github.com/luxfi/const"
 	ethcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
