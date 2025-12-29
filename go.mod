@@ -15,15 +15,15 @@ require (
 	github.com/luxfi/config v1.0.0
 	github.com/luxfi/crypto v1.17.27
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.8.21
+	github.com/luxfi/evm v0.8.24
 	github.com/luxfi/geth v1.16.65
 	github.com/luxfi/ids v1.2.5
 	github.com/luxfi/keychain v1.0.1
 	github.com/luxfi/ledger v1.1.5
 	github.com/luxfi/log v1.2.0
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.14.34
-	github.com/luxfi/node v1.22.72
+	github.com/luxfi/netrunner v1.14.35
+	github.com/luxfi/node v1.22.73
 	github.com/luxfi/sdk v1.16.37
 	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
@@ -65,7 +65,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/const v1.4.0
-	github.com/luxfi/genesis v1.5.16
+	github.com/luxfi/genesis v1.5.17
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.2.0
@@ -255,4 +255,11 @@ require (
 replace github.com/zondax/hid => github.com/luxfi/hid v0.9.3
 
 // Module was renamed from constants to const
-replace github.com/luxfi/constants => github.com/luxfi/const v1.4.0
+
+replace github.com/luxfi/genesis => /Users/z/work/lux/genesis
+
+replace github.com/luxfi/node => /Users/z/work/lux/node
+
+replace github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
+
+replace github.com/luxfi/keys => /Users/z/work/lux/keys
