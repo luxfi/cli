@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var resetPlugins bool
+
 func newCleanCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "clean",
@@ -29,6 +31,7 @@ configuration.`,
 		RunE: clean,
 		Args: cobrautils.ExactArgs(0),
 	}
+	cmd.Flags().BoolVar(&resetPlugins, "reset-plugins", false, "also reset the plugins directory (removes user-installed VMs)")
 
 	return cmd
 }
@@ -59,8 +62,10 @@ func clean(*cobra.Command, []string) error {
 		return err
 	}
 
-	if err := app.ResetPluginsDir(); err != nil {
-		return err
+	if resetPlugins {
+		if err := app.ResetPluginsDir(); err != nil {
+			return err
+		}
 	}
 
 	if err := removeLocalDeployInfoFromSidecars(); err != nil {
