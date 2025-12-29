@@ -25,7 +25,7 @@ require (
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.14.34
 	github.com/luxfi/node v1.22.72
-	github.com/luxfi/sdk v1.16.36
+	github.com/luxfi/sdk v1.16.37
 	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
