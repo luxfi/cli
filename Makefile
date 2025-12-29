@@ -13,12 +13,12 @@ LDFLAGS = -X 'github.com/luxfi/cli/cmd.Version=$(VERSION)'
 .PHONY: all
 all: build
 
-# Build the CLI binary
+# Build the CLI binary (CGO disabled to avoid HID symbol conflicts)
 .PHONY: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p bin
-	GOSUMDB=off GOPROXY=direct go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) main.go
+	CGO_ENABLED=0 GOSUMDB=off GOPROXY=direct go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY_NAME) main.go
 	@echo "Build complete: ./bin/$(BINARY_NAME)"
 
 # Install the binary to GOBIN

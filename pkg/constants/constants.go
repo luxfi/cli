@@ -294,8 +294,20 @@ const (
 	StakingMinimumLeadTime     = 25 * time.Second
 	DevnetStakingStartLeadTime = 30 * time.Second
 
-	DefaultConfigFileName = ".lux"
+	DefaultConfigFileName = "cli"       // ~/.lux/cli.json
 	DefaultConfigFileType = "json"
+
+	// Config keys for external binary paths
+	ConfigNodePath      = "node-path"
+	ConfigNetrunnerPath = "netrunner-path"
+	ConfigEVMPath       = "evm-path"
+	ConfigPluginsDir    = "plugins-dir"
+
+	// Environment variable names for binary paths
+	EnvNodePath      = "LUX_NODE_PATH"
+	EnvNetrunnerPath = "LUX_NETRUNNER_PATH"
+	EnvEVMPath       = "LUX_EVM_PATH"
+	EnvPluginsDir    = "LUX_PLUGINS_DIR"
 
 	CliRepoName = "cli"
 
