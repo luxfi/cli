@@ -11,18 +11,18 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"strings"
 	"syscall"
 
-	"github.com/docker/docker/pkg/reexec"
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/binpaths"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
-	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"
@@ -233,43 +233,59 @@ func StartServerProcess(app *application.Lux) error {
 	return StartServerProcessForNetwork(app, "mainnet")
 }
 
-// StartServerProcessForNetwork starts a network-specific gRPC server.
-// Each network type (mainnet, testnet, local) gets its own server on a dedicated port.
-// This allows running multiple networks simultaneously.
-// The server process is named based on network type (e.g., lux-mainnet-grpc, lux-testnet-grpc)
-// for easy identification with ps/top commands.
+// StartServerProcessForNetwork starts a network-specific gRPC server using the
+// external netrunner binary. Each network type (mainnet, testnet, local) gets its
+// own server on a dedicated port. This allows running multiple networks simultaneously.
 func StartServerProcessForNetwork(app *application.Lux, networkType string) error {
-	thisBin := reexec.Self()
+	// Get netrunner binary path, download if necessary
+	netrunnerPath := binpaths.GetNetrunnerPath()
+	if !binpaths.Exists(netrunnerPath) {
+		var err error
+		netrunnerPath, err = EnsureNetrunnerBinary(app, "latest")
+		if err != nil {
+			return fmt.Errorf("failed to get netrunner binary: %w", err)
+		}
+	}
 
-	// Use network-specific command name for easy process identification
-	// This allows running multiple network servers and identifying them in process lists
-	serverCmd := constants.GetServerCmdForNetwork(networkType)
-	args := []string{serverCmd}
-	cmd := exec.Command(thisBin, args...)
-	// Inherit environment variables from the parent process
-	// This is important for passing DISABLE_MIGRATION_DETECTION and other env vars to the backend
-	cmd.Env = append(os.Environ(), fmt.Sprintf("LUX_NETWORK_TYPE=%s", networkType))
+	// Get network-specific ports
+	ports := GetGRPCPorts(networkType)
 
+	// Create output directory for logs
 	outputDirPrefix := path.Join(app.GetRunDir(), "server", networkType)
-	outputDir, err := utils.MkDirWithTimestamp(outputDirPrefix)
-	if err != nil {
-		return err
+	if err := os.MkdirAll(outputDirPrefix, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	outputFile, err := os.Create(path.Join(outputDir, "lux-server.log"))
-	if err != nil {
-		return err
+	// Create timestamped directory
+	timestamp := fmt.Sprintf("%d", os.Getpid())
+	outputDir := filepath.Join(outputDirPrefix, timestamp)
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create timestamped output directory: %w", err)
 	}
-	// Direct output to dedicated backend log file for easier debugging
-	// This keeps backend logs separate from main application logs
+
+	outputFile, err := os.Create(path.Join(outputDir, "netrunner-server.log"))
+	if err != nil {
+		return fmt.Errorf("failed to create log file: %w", err)
+	}
+
+	// Build command args for netrunner server
+	args := []string{
+		"server",
+		"--port", fmt.Sprintf(":%d", ports.Server),
+		"--grpc-gateway-port", fmt.Sprintf(":%d", ports.Gateway),
+		"--log-dir", outputDir,
+		"--snapshots-dir", app.GetSnapshotsDir(),
+	}
+
+	cmd := exec.Command(netrunnerPath, args...)
+	cmd.Env = append(os.Environ(), fmt.Sprintf("LUX_NETWORK_TYPE=%s", networkType))
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 
 	if err := cmd.Start(); err != nil {
-		return err
+		return fmt.Errorf("failed to start netrunner server: %w", err)
 	}
 
-	ports := GetGRPCPorts(networkType)
 	ux.Logger.PrintToUser("Backend controller (%s) started, pid: %d, grpc: %d, output: %s",
 		networkType, cmd.Process.Pid, ports.Server, outputFile.Name())
 

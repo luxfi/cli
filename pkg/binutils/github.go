@@ -23,13 +23,15 @@ type GithubDownloader interface {
 }
 
 type (
-	evmDownloader  struct{}
-	nodeDownloader struct{}
+	evmDownloader       struct{}
+	nodeDownloader      struct{}
+	netrunnerDownloader struct{}
 )
 
 var (
 	_ GithubDownloader = (*evmDownloader)(nil)
 	_ GithubDownloader = (*nodeDownloader)(nil)
+	_ GithubDownloader = (*netrunnerDownloader)(nil)
 )
 
 func GetGithubLatestReleaseURL(org, repo string) string {
@@ -126,4 +128,43 @@ func (evmDownloader) GetDownloadURL(version string, installer Installer) (string
 	}
 
 	return evmURL, ext, nil
+}
+
+// NewNetrunnerDownloader creates a new downloader for netrunner binaries
+func NewNetrunnerDownloader() GithubDownloader {
+	return &netrunnerDownloader{}
+}
+
+func (netrunnerDownloader) GetDownloadURL(version string, installer Installer) (string, string, error) {
+	goarch, goos := installer.GetArch()
+
+	var netrunnerURL string
+	ext := tarExtension
+
+	switch goos {
+	case linux:
+		netrunnerURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/%s_%s_%s.tar.gz",
+			constants.LuxOrg,
+			constants.NetrunnerRepoName,
+			version,
+			constants.NetrunnerRepoName,
+			goos,
+			goarch,
+		)
+	case darwin:
+		netrunnerURL = fmt.Sprintf(
+			"https://github.com/%s/%s/releases/download/%s/%s_%s_%s.tar.gz",
+			constants.LuxOrg,
+			constants.NetrunnerRepoName,
+			version,
+			constants.NetrunnerRepoName,
+			goos,
+			goarch,
+		)
+	default:
+		return "", "", fmt.Errorf("OS not supported: %s", goos)
+	}
+
+	return netrunnerURL, ext, nil
 }
