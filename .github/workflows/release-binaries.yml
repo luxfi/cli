@@ -84,7 +84,7 @@ jobs:
 
   release-darwin-amd64:
     needs: create-release
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -106,7 +106,7 @@ jobs:
 
   release-darwin-arm64:
     needs: create-release
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
