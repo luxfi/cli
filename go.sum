@@ -396,8 +396,8 @@ github.com/luxfi/precompiles v0.1.10 h1:M90JTzW+je/uaCBSE2BvoONamBTbuUDskh4fxua6
 github.com/luxfi/precompiles v0.1.10/go.mod h1:s4054PbUgIZ/CezXT3BSNGbUqimgzK7LABP0wMhNG/Y=
 github.com/luxfi/sampler v1.0.0 h1:k8Sf6otW83w4pQp0jXLA+g3J/joB7w7SqXQsWmNTOV0=
 github.com/luxfi/sampler v1.0.0/go.mod h1:f96/ozlj9vFfZj+akLtrHn4VpulQahwB+MQQhpeIekk=
-github.com/luxfi/sdk v1.16.36 h1:VIhmyFoRinP58lcnK3bAWyyNqh5lnHWo1mgybTjsGGk=
-github.com/luxfi/sdk v1.16.36/go.mod h1:sOVpb9ry36ZO6ur1s2/iKz73EMkdukokqVPHXI9sgb4=
+github.com/luxfi/sdk v1.16.37 h1:423awn5f2Al/Z7BGXlk05yilDi8rlf7EgBGD2StbGxE=
+github.com/luxfi/sdk v1.16.37/go.mod h1:sOVpb9ry36ZO6ur1s2/iKz73EMkdukokqVPHXI9sgb4=
 github.com/luxfi/staking v1.0.0 h1:pYI7XMGGb/zK2ATfTIkush/7HPWE7IS2yfmJqj4nzes=
 github.com/luxfi/staking v1.0.0/go.mod h1:E+fm3upfQTOu0fLCr3Uo4xYgAm7r/vEzgcUpNAhJuSE=
 github.com/luxfi/timer v1.0.1 h1:3lRf3j0L/fA3Ud0j67cm/BW2In1kz+jxd1HqgKyglYY=
