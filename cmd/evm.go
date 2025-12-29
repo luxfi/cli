@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/luxfi/constants"
+	"github.com/luxfi/const"
 	"github.com/spf13/cobra"
 )
 

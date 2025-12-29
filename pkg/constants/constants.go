@@ -5,7 +5,7 @@ package constants
 import (
 	"time"
 
-	sharedconst "github.com/luxfi/constants"
+	sharedconst "github.com/luxfi/const"
 )
 
 // Re-export shared constants for backward compatibility
