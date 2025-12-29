@@ -4,18 +4,51 @@ package constants
 
 import (
 	"time"
+
+	sharedconst "github.com/luxfi/constants"
 )
 
+// Re-export shared constants for backward compatibility
 const (
-	DefaultPerms755    = 0o755
-	WriteReadReadPerms = 0o644
+	// From sharedconst.paths
+	DefaultPerms755    = sharedconst.DefaultPerms755
+	WriteReadReadPerms = sharedconst.WriteReadReadPerms
+	BaseDirName        = sharedconst.BaseDirName
+	LogDir             = sharedconst.LogDir
+	LuxCliBinDir       = sharedconst.LuxCliBinDir
+	RunDir             = sharedconst.RunDir
+	PluginDir          = sharedconst.PluginDir
+	SnapshotsDirName   = sharedconst.SnapshotsDirName
+	ChainsDir          = sharedconst.ChainsDir
+	ConfigDir          = sharedconst.ConfigDir
+	KeyDir             = sharedconst.KeyDir
+	NetworksDir        = sharedconst.NetworksDir
+	CustomVMDir        = sharedconst.CustomVMDir
+	ReposDir           = sharedconst.ReposDir
+	LPMDir             = sharedconst.LPMDir
 
-	BaseDirName = ".lux"
-	LogDir      = "logs"
+	// From sharedconst.repos
+	LuxOrg            = sharedconst.LuxOrg
+	LuxRepoName       = sharedconst.NodeRepoName
+	EVMRepoName       = sharedconst.EVMRepoName
+	NetrunnerRepoName = sharedconst.NetrunnerRepoName
+	EVMBin            = sharedconst.EVMBinaryName
 
+	// Environment and config keys from sharedconst.repos
+	EnvNodePath      = sharedconst.EnvNodePath
+	EnvNetrunnerPath = sharedconst.EnvNetrunnerPath
+	EnvEVMPath       = sharedconst.EnvEVMPath
+	EnvPluginsDir    = sharedconst.EnvPluginsDir
+
+	ConfigNodePath      = sharedconst.ConfigNodePath
+	ConfigNetrunnerPath = sharedconst.ConfigNetrunnerPath
+	ConfigEVMPath       = sharedconst.ConfigEVMPath
+	ConfigPluginsDir    = sharedconst.ConfigPluginsDir
+)
+
+// CLI-specific constants
+const (
 	ServerRunFile = "gRPCserver.run"
-	LuxCliBinDir  = "bin"
-	RunDir        = "runs"
 
 	SuffixSeparator            = "_"
 	SidecarFileName            = "sidecar.json"
@@ -142,17 +175,9 @@ const (
 	BuildEnvGolangVersion = "1.24.5"
 
 	// Docker images and repos
-	LuxdDockerImage = "luxfi/luxd"
-	LuxdGitRepo     = "https://github.com/luxfi/node"
-	LuxdRepoName    = "node"
-
-	// Organizations
-	LuxOrg = "luxfi"
-
-	// Repo names
-	LuxRepoName       = "node"
-	EVMRepoName       = "evm"
-	NetrunnerRepoName = "netrunner"
+	LuxdDockerImage = sharedconst.NodeDockerImage
+	LuxdGitRepo     = sharedconst.NodeGitURL
+	LuxdRepoName    = sharedconst.NodeRepoName
 
 	// Install directories
 	LuxInstallDir     = "lux"
@@ -160,19 +185,8 @@ const (
 	LuxGoInstallDir   = "luxd" // Deprecated: use LuxNodeInstallDir
 	EVMInstallDir     = "evm"
 
-	// Directories
-	ChainsDir        = "chains" // Canonical chain definitions (genesis, sidecar)
-	ReposDir         = "repos"
-	SnapshotsDirName = "snapshots"
-	CustomVMDir      = "customvms"
-	PluginDir        = "plugins"
-	ConfigDir        = "config"
-	KeyDir           = "keys"
-	LPMPluginDir     = "lpm-plugins"
-
-	// Unified Chain Config Directories
-	// All nodes share these directories for consistent chain configuration
-	NetworksDir      = "networks"        // ~/.lux/networks/ - persistent network state
+	// CLI-specific directories (not in shared constants)
+	LPMPluginDir     = sharedconst.LPMPluginDir
 	CurrentPluginDir = "plugins/current" // Active plugins symlinked here
 
 	// Unified chain config file names (used in ~/.lux/chains/<chainName>/)
@@ -298,28 +312,12 @@ const (
 	DefaultConfigFileName = "cli" // ~/.lux/cli.json
 	DefaultConfigFileType = "json"
 
-	// Config keys for external binary paths
-	ConfigNodePath      = "node-path"
-	ConfigNetrunnerPath = "netrunner-path"
-	ConfigEVMPath       = "evm-path"
-	ConfigPluginsDir    = "plugins-dir"
-
-	// Environment variable names for binary paths
-	EnvNodePath      = "LUX_NODE_PATH"
-	EnvNetrunnerPath = "LUX_NETRUNNER_PATH"
-	EnvEVMPath       = "LUX_EVM_PATH"
-	EnvPluginsDir    = "LUX_PLUGINS_DIR"
-
-	CliRepoName = "cli"
-
-	EVMBin = "evm"
+	CliRepoName = sharedconst.CLIRepoName
 
 	DefaultNodeRunURL = "http://127.0.0.1:9630"
 
 	// Latest EVM version
 	LatestEVMVersion = "v0.8.13"
-
-	LPMDir = ".lpm"
 
 	// Network ports
 	SSHTCPPort      = 22
