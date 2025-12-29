@@ -23,8 +23,8 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 
 	// Create base command
 	baseCmd := &cobra.Command{
-		Use:    constants.LuxServerCmd,
-		Short:  "Run the Lux gRPC server",
+		Use:   constants.LuxServerCmd,
+		Short: "Run the Lux gRPC server",
 		Long: `The Lux gRPC server manages local network nodes.
 
 This command is normally invoked automatically by 'lux network start'.
@@ -49,9 +49,9 @@ func NewNetworkCmd(injectedApp *application.Lux, networkType string) *cobra.Comm
 	cmdName := constants.GetServerCmdForNetwork(networkType)
 
 	return &cobra.Command{
-		Use:    cmdName,
-		Short:  fmt.Sprintf("Run the Lux gRPC server for %s", networkType),
-		Long:   fmt.Sprintf("The Lux gRPC server for %s network. Invoked automatically by 'lux network start'.", networkType),
+		Use:   cmdName,
+		Short: fmt.Sprintf("Run the Lux gRPC server for %s", networkType),
+		Long:  fmt.Sprintf("The Lux gRPC server for %s network. Invoked automatically by 'lux network start'.", networkType),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Override the environment variable with the command's network type
 			os.Setenv("LUX_NETWORK_TYPE", networkType)

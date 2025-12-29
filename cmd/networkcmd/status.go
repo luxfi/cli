@@ -15,11 +15,11 @@ import (
 )
 
 var (
-	verbose        bool
-	statusMainnet  bool
-	statusTestnet  bool
-	statusDevnet   bool
-	statusAll      bool
+	verbose       bool
+	statusMainnet bool
+	statusTestnet bool
+	statusDevnet  bool
+	statusAll     bool
 )
 
 func newStatusCmd() *cobra.Command {
