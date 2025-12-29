@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	luxconstants "github.com/luxfi/constants"
+	luxconstants "github.com/luxfi/const"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
