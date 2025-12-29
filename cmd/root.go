@@ -329,18 +329,27 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 }
 
 // initConfig reads in config file and ENV variables if set.
+// Priority: flags > env vars > config file > defaults
 func initConfig() {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Search for default config.
+		// Search for config in ~/.lux/ directory
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
-		viper.AddConfigPath(home)
+		luxDir := filepath.Join(home, constants.BaseDirName) // ~/.lux/
+		viper.AddConfigPath(luxDir)
 		viper.SetConfigType(constants.DefaultConfigFileType)
-		viper.SetConfigName(constants.DefaultConfigFileName)
+		viper.SetConfigName(constants.DefaultConfigFileName) // cli.json
 	}
+
+	// Bind environment variables for binary paths
+	// LUX_NODE_PATH -> node-path, etc.
+	viper.BindEnv(constants.ConfigNodePath, constants.EnvNodePath)
+	viper.BindEnv(constants.ConfigNetrunnerPath, constants.EnvNetrunnerPath)
+	viper.BindEnv(constants.ConfigEVMPath, constants.EnvEVMPath)
+	viper.BindEnv(constants.ConfigPluginsDir, constants.EnvPluginsDir)
 
 	viper.AutomaticEnv() // read in environment variables that match
 

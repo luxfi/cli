@@ -14,14 +14,16 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
+	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constants"
 	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -56,8 +58,10 @@ const nodeBinaryName = "luxd"
 
 // findNodeBinary locates the node binary using the following priority:
 // 1. User-provided --node-path flag
-// 2. Node binary in PATH
-// 3. Relative to CLI binary: ../node/build/<nodeBinaryName>
+// 2. LUX_NODE_PATH environment variable
+// 3. Config file node-path setting (~/.lux/cli.json)
+// 4. Node binary in PATH
+// 5. Relative to CLI binary: ../node/build/<nodeBinaryName>
 func findNodeBinary() (string, error) {
 	// Priority 1: User-provided path via --node-path flag
 	if nodePath != "" {
@@ -67,12 +71,27 @@ func findNodeBinary() (string, error) {
 		return nodePath, nil
 	}
 
-	// Priority 2: Check if node binary is in PATH
+	// Priority 2 & 3: Check viper (handles both env var and config file)
+	// viper automatically checks LUX_NODE_PATH env var first, then config file
+	if configPath := viper.GetString(cliconstants.ConfigNodePath); configPath != "" {
+		// Expand ~ to home directory
+		if strings.HasPrefix(configPath, "~") {
+			home, _ := os.UserHomeDir()
+			configPath = filepath.Join(home, configPath[1:])
+		}
+		if _, err := os.Stat(configPath); err == nil {
+			return configPath, nil
+		}
+		// Config path is set but invalid - warn but continue searching
+		ux.Logger.PrintToUser("Warning: node-path (%s) not found, searching alternatives...", configPath)
+	}
+
+	// Priority 4: Check if node binary is in PATH
 	if binaryPath, err := exec.LookPath(nodeBinaryName); err == nil {
 		return binaryPath, nil
 	}
 
-	// Priority 3: Look relative to CLI binary location
+	// Priority 5: Look relative to CLI binary location
 	// Get the path of the current executable
 	execPath, err := os.Executable()
 	if err == nil {
@@ -91,10 +110,12 @@ func findNodeBinary() (string, error) {
 	}
 
 	return "", fmt.Errorf("%s binary not found. Please either:\n"+
-		"  1. Use --node-path to specify the path to %s\n"+
-		"  2. Add %s to your PATH\n"+
-		"  3. Build %s in the sibling node directory (../node/build/%s)",
-		nodeBinaryName, nodeBinaryName, nodeBinaryName, nodeBinaryName, nodeBinaryName)
+		"  1. Use --node-path flag to specify the path\n"+
+		"  2. Set LUX_NODE_PATH environment variable\n"+
+		"  3. Set node-path in ~/.lux/cli.json config file\n"+
+		"  4. Add %s to your PATH\n"+
+		"  5. Build %s in the sibling node directory (../node/build/%s)",
+		nodeBinaryName, nodeBinaryName, nodeBinaryName, nodeBinaryName)
 }
 
 func newStartCmd() *cobra.Command {

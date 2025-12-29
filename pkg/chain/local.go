@@ -32,7 +32,7 @@ import (
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/keychain"
 	"github.com/luxfi/node/utils/storage"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
