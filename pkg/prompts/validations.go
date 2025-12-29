@@ -16,7 +16,7 @@ import (
 
 	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constants"
+	"github.com/luxfi/const"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
