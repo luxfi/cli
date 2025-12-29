@@ -150,8 +150,9 @@ const (
 	LuxOrg = "luxfi"
 
 	// Repo names
-	LuxRepoName = "node"
-	EVMRepoName = "evm"
+	LuxRepoName      = "node"
+	EVMRepoName      = "evm"
+	NetrunnerRepoName = "netrunner"
 
 	// Install directories
 	LuxInstallDir     = "lux"
