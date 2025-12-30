@@ -7,7 +7,7 @@ go 1.25.5
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.6
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.200.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.279.0
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
