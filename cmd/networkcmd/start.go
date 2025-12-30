@@ -3,11 +3,9 @@
 package networkcmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -19,7 +17,6 @@ import (
 	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/const"
 	"github.com/luxfi/netrunner/client"
-	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
@@ -31,7 +28,6 @@ var (
 	snapshotName           string
 	mainnet                bool
 	testnet                bool
-	localNetwork           bool // Synonym for custom/default network (--local flag)
 	numValidators          int
 	nodePath               string // Path to custom luxd binary
 	portBase               int    // Base port for nodes (each node uses 2 ports)
@@ -138,7 +134,6 @@ already running.`,
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
 	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 5 validators")
 	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 5 validators")
-	cmd.Flags().BoolVar(&localNetwork, "local", false, "start a local dev network (synonym for default/custom)")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
 	cmd.Flags().IntVar(&portBase, "port-base", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
 	// BadgerDB flags
@@ -154,18 +149,8 @@ already running.`,
 
 func StartNetwork(*cobra.Command, []string) error {
 	// Check for conflicting flags
-	flagCount := 0
-	if mainnet {
-		flagCount++
-	}
-	if testnet {
-		flagCount++
-	}
-	if localNetwork {
-		flagCount++
-	}
-	if flagCount > 1 {
-		return fmt.Errorf("cannot use multiple network flags (--mainnet, --testnet, --local) together")
+	if mainnet && testnet {
+		return fmt.Errorf("cannot use both --mainnet and --testnet flags together")
 	}
 
 	// If mainnet or testnet flag is set, delegate to the appropriate function
@@ -175,207 +160,8 @@ func StartNetwork(*cobra.Command, []string) error {
 	if testnet {
 		return StartTestnet()
 	}
-	// --local flag just runs the default custom network (same as no flag)
-	luxVersion, err := determineLuxVersion(userProvidedLuxVersion)
-	if err != nil {
-		return err
-	}
-
-	// Create deployer for custom network
-	sd := chain.NewLocalDeployerForNetwork(app, luxVersion, "", "custom")
-
-	// Start gRPC server for custom network
-	if err := sd.StartServerForNetwork("custom"); err != nil {
-		return err
-	}
-
-	nodeBinPath, err := sd.SetupLocalEnv()
-	if err != nil {
-		return err
-	}
-
-	// Connect to custom network's gRPC server
-	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType("custom"))
-	if err != nil {
-		return err
-	}
-	defer cli.Close()
-
-	var startMsg string
-	if snapshotName == constants.DefaultSnapshotName {
-		startMsg = "Starting previously deployed and stopped snapshot"
-	} else {
-		startMsg = fmt.Sprintf("Starting previously deployed and stopped snapshot %s...", snapshotName)
-	}
-	ux.Logger.PrintToUser("%s", startMsg)
-
-	// Use stable directory with current symlink for persistence across restarts
-	// This eliminates the gotcha where state is lost because each restart creates a new timestamped dir
-	outputDir, err := chain.EnsureNetworkRunDir(app.GetRunDir(), "custom")
-	if err != nil {
-		return fmt.Errorf("failed to ensure run directory: %w", err)
-	}
-	ux.Logger.PrintToUser("Using run directory: %s", outputDir)
-
-	pluginDir := filepath.Join(app.GetPluginsDir(), "current")
-
-	loadSnapshotOpts := []client.OpOption{
-		client.WithExecPath(nodeBinPath),
-		client.WithRootDataDir(outputDir),
-		client.WithReassignPortsIfUsed(true),
-		client.WithPluginDir(pluginDir),
-	}
-
-	// load global node configs if they exist
-	configStr, err := app.Conf.LoadNodeConfig()
-	if err != nil {
-		return err
-	}
-
-	// Build node config with BadgerDB options
-	nodeConfig := make(map[string]interface{})
-
-	// Auto-track deployed nets - eliminates the track-chains gotcha
-	netIDs, trackErr := chain.GetLocallyDeployedNetIDs(app)
-	if trackErr == nil && len(netIDs) > 0 {
-		trackNetsStr := strings.Join(netIDs, ",")
-		ux.Logger.PrintToUser("Auto-tracking %d deployed net(s): %s", len(netIDs), trackNetsStr)
-		// Add track-chains to node config (luxd still uses track-chains internally)
-		nodeConfig["track-chains"] = trackNetsStr
-	}
-
-	// Prepare canonical chain configs directory and set it for all nodes
-	// This must happen BEFORE nodes start so VMs can initialize with genesis configs
-	chainConfigDir, chainConfigErr := chain.PrepareCanonicalChainConfigs(app)
-	if chainConfigErr != nil {
-		ux.Logger.PrintToUser("Warning: failed to prepare chain configs: %v", chainConfigErr)
-	} else if chainConfigDir != "" {
-		nodeConfig["chain-config-dir"] = chainConfigDir
-	}
-	if configStr != "" {
-		if err := json.Unmarshal([]byte(configStr), &nodeConfig); err != nil {
-			return fmt.Errorf("invalid node config: %w", err)
-		}
-	}
-
-	// Add BadgerDB configuration if specified
-	if dbEngine != "" {
-		nodeConfig["db-type"] = dbEngine
-	}
-	if archiveDir != "" {
-		nodeConfig["archive-dir"] = archiveDir
-		nodeConfig["archive-shared"] = archiveShared
-	}
-	// NOTE: genesis-import, genesis-replay, genesis-verify flags were removed
-	// as they don't exist in luxd. The --genesis-path flag is no longer functional.
-
-	// Convert back to JSON
-	if len(nodeConfig) > 0 {
-		updatedConfigBytes, err := json.Marshal(nodeConfig)
-		if err != nil {
-			return fmt.Errorf("failed to marshal node config: %w", err)
-		}
-		loadSnapshotOpts = append(loadSnapshotOpts, client.WithGlobalNodeConfig(string(updatedConfigBytes)))
-	}
-
-	ctx := binutils.GetAsyncContext()
-
-	// Check if we have a valid snapshot with nodes (db directory with node subdirs)
-	snapshotPath := path.Join(app.GetSnapshotsDir(), "anr-snapshot-"+snapshotName)
-	dbPath := path.Join(snapshotPath, "db")
-	hasValidSnapshot := false
-
-	if fi, dbErr := os.Stat(dbPath); dbErr == nil && fi.IsDir() {
-		entries, _ := os.ReadDir(dbPath)
-		for _, e := range entries {
-			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
-				hasValidSnapshot = true
-				break
-			}
-		}
-	}
-
-	var pp *rpcpb.LoadSnapshotResponse
-	var loadErr error
-
-	if hasValidSnapshot {
-		// Load from existing snapshot
-		pp, loadErr = cli.LoadSnapshot(
-			ctx,
-			snapshotName,
-			loadSnapshotOpts...,
-		)
-
-		if loadErr != nil {
-			if !server.IsServerError(loadErr, server.ErrAlreadyBootstrapped) {
-				return fmt.Errorf("failed to start network with the persisted snapshot: %w", loadErr)
-			}
-			ux.Logger.PrintToUser("Network has already been booted. Wait until healthy...")
-		} else {
-			ux.Logger.PrintToUser("Booting Network. Wait until healthy...")
-			ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
-
-			// Load existing subnet state if provided
-			if err := LoadExistingSubnetState(outputDir); err != nil {
-				ux.Logger.PrintToUser("Warning: Failed to load existing subnet state: %v", err)
-				// Continue without the state - don't fail the entire network start
-			}
-		}
-	} else {
-		// Start fresh network - no valid snapshot with nodes exists
-		ux.Logger.PrintToUser("No valid snapshot found, starting fresh local network...")
-
-		startOpts := []client.OpOption{
-			client.WithExecPath(nodeBinPath),
-			client.WithNumNodes(uint32(numValidators)),
-			client.WithRootDataDir(outputDir),
-			client.WithReassignPortsIfUsed(true),
-			client.WithPluginDir(pluginDir),
-		}
-
-		// Add global node config if present
-		if len(nodeConfig) > 0 {
-			updatedConfigBytes, marshalErr := json.Marshal(nodeConfig)
-			if marshalErr != nil {
-				return fmt.Errorf("failed to marshal node config: %w", marshalErr)
-			}
-			startOpts = append(startOpts, client.WithGlobalNodeConfig(string(updatedConfigBytes)))
-		}
-
-		startResp, startErr := cli.Start(ctx, nodeBinPath, startOpts...)
-		if startErr != nil {
-			// Check if network is already bootstrapped (started via `network start --mainnet/--testnet`)
-			if server.IsServerError(startErr, server.ErrAlreadyBootstrapped) {
-				ux.Logger.PrintToUser("Network has already been started. Continuing with existing network...")
-			} else {
-				return fmt.Errorf("failed to start fresh network: %w", startErr)
-			}
-		} else {
-			ux.Logger.PrintToUser("Fresh network started. Wait until healthy...")
-			ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", startResp.ClusterInfo.RootDataDir)
-		}
-	}
-
-	clusterInfo, err := chain.WaitForHealthy(ctx, cli)
-	if err != nil {
-		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
-	}
-
-	fmt.Println()
-	if chain.HasEndpoints(clusterInfo) {
-		ux.Logger.PrintToUser("Network ready to use. Local network node endpoints:")
-		ux.PrintTableEndpoints(clusterInfo)
-	}
-
-	// Save network state for deploy commands to find the running network
-	// Custom network uses default port 9660, network ID 1337, and custom gRPC ports
-	grpcPorts := binutils.GetGRPCPorts("custom")
-	networkState := application.CreateNetworkStateWithGRPC("custom", constants.LocalNetworkID, 9660, grpcPorts.Server, grpcPorts.Gateway)
-	if err := app.SaveNetworkState(networkState); err != nil {
-		ux.Logger.PrintToUser("Warning: failed to save network state: %v", err)
-	}
-
-	return nil
+	// No network flag specified - require explicit --mainnet or --testnet
+	return fmt.Errorf("please specify --mainnet or --testnet")
 }
 
 func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
