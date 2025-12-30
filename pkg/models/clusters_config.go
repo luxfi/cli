@@ -3,7 +3,7 @@
 package models
 
 import (
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"github.com/luxfi/cli/pkg/constants"
 )
