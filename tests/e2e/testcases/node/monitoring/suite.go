@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"slices"
+
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ssh"
@@ -18,7 +20,6 @@ import (
 	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
-	"golang.org/x/exp/slices"
 )
 
 const (

@@ -2,7 +2,10 @@
 // See the file LICENSE for licensing terms.
 package models
 
-import "golang.org/x/exp/maps"
+import (
+	"maps"
+	"slices"
+)
 
 type RegionConfig struct {
 	InstanceIDs       []string
@@ -23,7 +26,7 @@ type CloudConfig map[string]RegionConfig
 
 // GetRegions returns a slice of strings representing the regions of the RegionConfig.
 func (ccm *CloudConfig) GetRegions() []string {
-	return maps.Keys(*ccm)
+	return slices.Collect(maps.Keys(*ccm))
 }
 
 // GetAllInstanceIDs returns all instance IDs

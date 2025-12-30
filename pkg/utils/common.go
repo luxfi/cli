@@ -33,8 +33,9 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/utils"
 
+	"slices"
+
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"golang.org/x/exp/slices"
 	"golang.org/x/mod/semver"
 )
 

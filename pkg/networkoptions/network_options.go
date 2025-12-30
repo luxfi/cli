@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/luxfi/cli/cmd/flags"
@@ -19,9 +21,6 @@ import (
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"
-
-	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
 )
 
 type NetworkOption int64

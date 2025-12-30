@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand/v2"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,8 +18,6 @@ import (
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"
 
-	"golang.org/x/exp/rand"
-	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/compute/v1"
 )
@@ -488,7 +488,6 @@ func (c *GcpCloud) ListZonesInRegion(region string) ([]string, error) {
 
 // GetRandomZone returns a random zone in the specified region.
 func (c *GcpCloud) GetRandomZone(region string) (string, error) {
-	rand.Seed(uint64(time.Now().UnixNano()))
 	zones, err := c.ListZonesInRegion(region)
 	if err != nil {
 		return "", fmt.Errorf("error listing zones: %w", err)
@@ -496,7 +495,7 @@ func (c *GcpCloud) GetRandomZone(region string) (string, error) {
 	if len(zones) == 0 {
 		return "", fmt.Errorf("no zones found in region %s", region)
 	}
-	return zones[rand.Intn(len(zones))], nil
+	return zones[rand.IntN(len(zones))], nil
 }
 
 // zoneToRegion returns region from zone
