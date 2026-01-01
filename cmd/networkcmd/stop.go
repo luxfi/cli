@@ -19,20 +19,50 @@ var stopNetworkType string
 func newStopCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stop",
-		Short: "Stop the running local network and preserve state",
-		Long: `The network stop command shuts down your local, multi-node network.
+		Short: "Stop the running network and save a snapshot",
+		Long: `The network stop command gracefully shuts down the running network and saves state.
 
-All deployed Subnets shutdown gracefully and save their state. If you provide the
---snapshot-name flag, the network saves its state under this named snapshot. You can
-reload this snapshot with network start --snapshot-name <snapshotName>. Otherwise, the
-network saves to the default snapshot, overwriting any existing state. You can reload the
-default snapshot with network start.
+SNAPSHOT BEHAVIOR:
 
-Use --network-type to specify which network to stop (mainnet, testnet, devnet, custom).
-If not specified, the command will attempt to stop based on the saved network state,
-or default to 'mainnet'.
+  By default, the network saves its state to a snapshot when stopping. This includes:
+  - Blockchain state (C-Chain, P-Chain, X-Chain, deployed chains)
+  - Validator state
+  - Database contents
 
-Use 'network clean' to stop and remove all network data for a fresh start.`,
+  The snapshot allows you to resume exactly where you left off with:
+    lux network start --<type> --snapshot-name <name>
+
+OPTIONS:
+
+  --snapshot-name     Name for the snapshot (default: default-snapshot)
+  --network-type      Network to stop (mainnet/testnet/devnet/custom)
+                      If not specified, auto-detects the running network
+
+EXAMPLES:
+
+  # Stop the running network (auto-detect type)
+  lux network stop
+
+  # Stop with named snapshot
+  lux network stop --snapshot-name my-snapshot
+
+  # Stop specific network type
+  lux network stop --network-type devnet
+
+  # Resume from snapshot later
+  lux network start --devnet --snapshot-name my-snapshot
+
+NOTES:
+
+  - Snapshots preserve ALL network state including deployed chains
+  - Chain configurations (in ~/.lux/chains/) are NOT affected
+  - Use 'lux network clean' to wipe runtime data completely
+  - Only the specified network type is stopped (others remain stopped)
+
+SNAPSHOT vs CLEAN:
+
+  lux network stop    - Saves state for resuming later
+  lux network clean   - Deletes runtime data, preserves chain configs`,
 
 		RunE:         StopNetwork,
 		Args:         cobra.ExactArgs(0),

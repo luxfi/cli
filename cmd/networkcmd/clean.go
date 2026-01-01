@@ -4,7 +4,6 @@ package networkcmd
 
 import (
 	"errors"
-	"os"
 
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
@@ -24,10 +23,63 @@ var resetPlugins bool
 func newCleanCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "clean",
-		Short: "Stop the running local network and delete state",
-		Long: `The network clean command shuts down your local, multi-node network. All deployed Subnets
-shutdown and delete their state. You can restart the network by deploying a new Subnet
-configuration.`,
+		Short: "Stop network and delete runtime data (preserves chain configs)",
+		Long: `The network clean command stops the network and deletes runtime data.
+
+⚠️  IMPORTANT - WHAT GETS DELETED:
+
+  Runtime Data (DELETED):
+  - Network snapshots (blockchain state, databases)
+  - Validator state
+  - Log files
+  - Running processes
+
+  Chain Configs (PRESERVED):
+  - Chain configurations in ~/.lux/chains/
+  - Genesis files
+  - Sidecar metadata
+
+BEHAVIOR:
+
+  1. Stops the running network gracefully
+  2. Deletes network runtime data and snapshots
+  3. Removes local deployment info from sidecars
+  4. Preserves chain configurations for redeployment
+
+  After cleaning, you can redeploy your chains to a fresh network:
+    lux network start --devnet
+    lux chain deploy mychain
+
+OPTIONS:
+
+  --reset-plugins    Also delete the plugins directory (removes user-installed VMs)
+
+EXAMPLES:
+
+  # Clean network runtime (most common)
+  lux network clean
+
+  # Clean and also remove custom VM plugins
+  lux network clean --reset-plugins
+
+WHEN TO USE:
+
+  ✓ Network state is corrupted
+  ✓ Want to start fresh but keep chain configs
+  ✓ Testing deployment from scratch
+  ✓ Cleaning up after development session
+
+  ✗ Just want to stop the network (use 'lux network stop')
+  ✗ Want to delete a specific chain (use 'lux chain delete <name>')
+
+CLEAN vs STOP:
+
+  lux network stop     - Saves state for resuming later
+  lux network clean    - Deletes runtime data, preserves chain configs
+  lux chain delete     - Deletes a specific chain configuration
+
+NOTE: Chain configurations are explicitly preserved. To delete a chain
+configuration, use: lux chain delete <chainName>`,
 		RunE: clean,
 		Args: cobrautils.ExactArgs(0),
 	}
@@ -72,9 +124,12 @@ func clean(*cobra.Command, []string) error {
 		return err
 	}
 
+	// SAFETY: Use SafeRemoveAll to prevent accidental deletion of protected directories
+	// Only delete the snapshot, NOT the chains directory
 	snapshotPath := app.GetSnapshotPath(constants.DefaultSnapshotName)
-	if err := os.RemoveAll(snapshotPath); err != nil {
-		return err
+	if err := app.SafeRemoveAll(snapshotPath); err != nil {
+		// Log warning but don't fail - the snapshot may not exist
+		ux.Logger.PrintToUser("Warning: could not clean snapshot: %v", err)
 	}
 
 	clusterNames, err := localnet.GetRunningLocalClustersConnectedToLocalNetwork(app)
@@ -86,6 +141,10 @@ func clean(*cobra.Command, []string) error {
 			return err
 		}
 	}
+
+	// Explicitly note that chain configs are preserved
+	ux.Logger.PrintToUser("Note: Chain configurations in %s are preserved. Use 'lux chain delete <name>' to remove individual chains.", app.GetChainsDir())
+
 	return nil
 }
 

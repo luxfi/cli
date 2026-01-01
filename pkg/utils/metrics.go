@@ -59,11 +59,31 @@ func saveMetricsConfig(writer types.ConfigWriter, metricsEnabled bool) {
 	_ = writer.WriteConfigFile(jsonBytes)
 }
 
+// isInteractiveTerminal returns true if stdin is a terminal (not piped/redirected)
+func isInteractiveTerminal() bool {
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+	// Check if stdin is a character device (terminal)
+	return (fi.Mode() & os.ModeCharDevice) != 0
+}
+
 func HandleUserMetricsPreference(app interface{}) error {
 	writer, ok := app.(types.ConfigWriter)
 	if !ok {
 		return fmt.Errorf("app does not implement ConfigWriter")
 	}
+
+	// In non-interactive mode (CI, scripts, piped input), default to opt-out
+	// and skip the prompt entirely to avoid blocking
+	if !isInteractiveTerminal() {
+		ux.Logger.PrintToUser("Non-interactive mode detected - metrics collection disabled by default")
+		ux.Logger.PrintToUser("Run 'lux config metrics enable' to opt-in")
+		saveMetricsConfig(writer, false)
+		return nil
+	}
+
 	prompter, ok := app.(types.PrompterInterface)
 	if !ok {
 		return fmt.Errorf("app does not implement PrompterInterface")

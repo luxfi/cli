@@ -123,7 +123,11 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 		if err := startLocalNetwork(); err != nil {
 			return fmt.Errorf("failed to start local network: %w", err)
 		}
-		time.Sleep(5 * time.Second)
+		// Wait for network with timeout
+		networkReadyTimeout := 30 * time.Second
+		if err := waitForLocalNetworkReady(networkReadyTimeout); err != nil {
+			return fmt.Errorf("local network failed to start: %w", err)
+		}
 	}
 
 	// Deploy L1
@@ -245,4 +249,21 @@ func startLocalNetwork() error {
 
 	ux.Logger.PrintToUser("Local network started successfully")
 	return nil
+}
+
+// waitForLocalNetworkReady waits for the local network to be ready with a timeout
+func waitForLocalNetworkReady(timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		if time.Now().After(deadline) {
+			return fmt.Errorf("timeout after %s waiting for local network to become ready", timeout)
+		}
+		if app.IsLocalNetworkRunning() {
+			return nil
+		}
+		<-ticker.C
+	}
 }
