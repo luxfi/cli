@@ -294,6 +294,12 @@ func (*Lux) GetLuxCompatibilityURL() string {
 // All the above methods are provided by embedded SDK type
 // No need to duplicate them here
 
+// GetConfigPath returns the CLI config file path (~/.lux/cli.json)
+// This overrides the SDK's GetConfigPath which returns ~/.lux/config
+func (app *Lux) GetConfigPath() string {
+	return filepath.Join(app.GetBaseDir(), "cli.json")
+}
+
 // CLI-specific config methods
 func (app *Lux) WriteConfigFile(data []byte) error {
 	configPath := app.GetConfigPath()

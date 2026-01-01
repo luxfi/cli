@@ -25,15 +25,67 @@ var (
 func newStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
-		Short: "Prints the status of the local network",
-		Long: `The network status command prints whether or not a local Lux
-network is running and some basic stats about the network.
+		Short: "Show network status and endpoints",
+		Long: `The network status command shows detailed information about running networks.
 
-By default, it auto-detects the running network. Use flags to specify a network:
-  --mainnet   Check mainnet status (gRPC port 8369)
-  --testnet   Check testnet status (gRPC port 8368)
-  --devnet    Check devnet status (gRPC port 8370)
-  --all       Check all networks`,
+OVERVIEW:
+
+  Displays network health, validator nodes, endpoints, and custom chains.
+  By default, auto-detects and shows the currently running network.
+
+NETWORK FLAGS:
+
+  --mainnet, -m    Check mainnet status (port 9630, gRPC 8369)
+  --testnet, -t    Check testnet status (port 9640, gRPC 8368)
+  --devnet, -d     Check devnet status (port 9650, gRPC 8370)
+  --all            Check all network types
+
+  If no flag is provided, auto-detects the running network.
+
+OPTIONS:
+
+  --verbose, -v    Show detailed cluster info including raw protobuf response
+
+OUTPUT INCLUDES:
+
+  - Network health status
+  - Number of validator nodes
+  - Node endpoints (RPC, staking)
+  - Custom chain endpoints (deployed chains)
+  - gRPC server information
+
+EXAMPLES:
+
+  # Check auto-detected running network
+  lux network status
+
+  # Check specific network type
+  lux network status --devnet
+  lux network status -d
+
+  # Check all networks
+  lux network status --all
+
+  # Verbose output with full cluster details
+  lux network status --verbose
+
+TYPICAL OUTPUT:
+
+  Devnet Network is Up (gRPC port: 8370)
+  ============================================
+  Healthy: true
+  Number of nodes: 5
+  Number of custom VMs: 1
+  -------- Node information --------
+  node1 has ID NodeID-xxx and endpoint http://127.0.0.1:9650
+  ...
+
+NOTES:
+
+  - Only running networks will show status
+  - Use after 'lux network start' to verify successful startup
+  - Endpoints shown are for connecting dapps and tools
+  - Custom VMs section shows deployed chains`,
 
 		RunE:         networkStatus,
 		Args:         cobra.ExactArgs(0),
@@ -41,9 +93,9 @@ By default, it auto-detects the running network. Use flags to specify a network:
 	}
 
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show detailed cluster info including raw protobuf response")
-	cmd.Flags().BoolVar(&statusMainnet, "mainnet", false, "check mainnet network status")
-	cmd.Flags().BoolVar(&statusTestnet, "testnet", false, "check testnet network status")
-	cmd.Flags().BoolVar(&statusDevnet, "devnet", false, "check devnet network status")
+	cmd.Flags().BoolVarP(&statusMainnet, "mainnet", "m", false, "check mainnet network status")
+	cmd.Flags().BoolVarP(&statusTestnet, "testnet", "t", false, "check testnet network status")
+	cmd.Flags().BoolVarP(&statusDevnet, "devnet", "d", false, "check devnet network status")
 	cmd.Flags().BoolVar(&statusAll, "all", false, "check status of all networks")
 
 	return cmd
