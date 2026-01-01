@@ -7,6 +7,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/networkoptions"
+	cliprompts "github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
@@ -34,19 +35,35 @@ func newDeployERC20Cmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "erc20",
 		Short: "Deploy an ERC20 token into a given Network and Blockchain",
-		Long:  "Deploy an ERC20 token into a given Network and Blockchain",
-		RunE:  deployERC20,
-		Args:  cobrautils.ExactArgs(0),
+		Long: `Deploy an ERC20 token into a given Network and Blockchain.
+
+The command deploys a standard ERC20 token contract with the specified
+symbol, initial supply, and recipient address for the minted tokens.
+
+Examples:
+  # Interactive mode (prompts for missing values)
+  lux contract deploy erc20
+
+  # Non-interactive mode (all flags required)
+  lux contract deploy erc20 --symbol USDC --supply 1000000 \
+    --funded 0x1234...abcd --private-key-file ./key.txt \
+    --c-chain --mainnet
+
+  # Deploy to a specific blockchain
+  lux contract deploy erc20 --symbol LUX --supply 100000000 \
+    --funded 0xYourAddress --blockchain-id <ID> --testnet`,
+		RunE: deployERC20,
+		Args: cobrautils.ExactArgs(0),
 	}
 	// Network flags handled globally to avoid conflicts
 	deployERC20Flags.PrivateKeyFlags.AddToCmd(cmd, "as contract deployer")
 	// enabling blockchain names, C-Chain and blockchain IDs
 	deployERC20Flags.chainFlags.SetEnabled(true, true, false, false, true)
 	deployERC20Flags.chainFlags.AddToCmd(cmd, "deploy the ERC20 contract into %s")
-	cmd.Flags().StringVar(&deployERC20Flags.symbol, "symbol", "", "set the token symbol")
-	cmd.Flags().Uint64Var(&deployERC20Flags.supply, "supply", 0, "set the token supply")
-	cmd.Flags().StringVar(&deployERC20Flags.funded, "funded", "", "set the funded address")
-	cmd.Flags().StringVar(&deployERC20Flags.rpcEndpoint, "rpc", "", "deploy the contract into the given rpc endpoint")
+	cmd.Flags().StringVar(&deployERC20Flags.symbol, "symbol", "", "token symbol (e.g., USDC, LUX)")
+	cmd.Flags().Uint64Var(&deployERC20Flags.supply, "supply", 0, "total token supply to mint")
+	cmd.Flags().StringVar(&deployERC20Flags.funded, "funded", "", "address to receive the initial token supply (0x...)")
+	cmd.Flags().StringVar(&deployERC20Flags.rpcEndpoint, "rpc", "", "RPC endpoint URL (auto-detected if not specified)")
 	return cmd
 }
 
@@ -115,6 +132,36 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 			return err
 		}
 	}
+	// Collect all missing required options
+	var missing []cliprompts.MissingOpt
+	if deployERC20Flags.symbol == "" {
+		missing = append(missing, cliprompts.MissingOpt{
+			Flag:   "--symbol",
+			Prompt: "Token symbol",
+			Note:   "e.g., USDC, LUX",
+		})
+	}
+	if deployERC20Flags.supply == 0 {
+		missing = append(missing, cliprompts.MissingOpt{
+			Flag:   "--supply",
+			Prompt: "Token supply",
+			Note:   "total tokens to mint",
+		})
+	}
+	if deployERC20Flags.funded == "" {
+		missing = append(missing, cliprompts.MissingOpt{
+			Flag:   "--funded",
+			Prompt: "Funded address",
+			Note:   "address to receive initial supply (0x...)",
+		})
+	}
+
+	// In non-interactive mode, fail with all missing options listed
+	if len(missing) > 0 && !cliprompts.IsInteractive() {
+		return cliprompts.MissingError("lux contract deploy erc20", missing)
+	}
+
+	// Interactive mode: prompt for missing values
 	if deployERC20Flags.symbol == "" {
 		ux.Logger.PrintToUser("Which is the token symbol?")
 		deployERC20Flags.symbol, err = app.Prompt.CaptureString("Token symbol")
@@ -122,6 +169,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 			return err
 		}
 	}
+
 	supply := new(big.Int).SetUint64(deployERC20Flags.supply)
 	if deployERC20Flags.supply == 0 {
 		ux.Logger.PrintToUser("Which is the total token supply?")
@@ -130,6 +178,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 			return err
 		}
 	}
+
 	if deployERC20Flags.funded == "" {
 		ux.Logger.PrintToUser("Which address should receive the supply?")
 		deployERC20Flags.funded, err = prompts.PromptAddress(

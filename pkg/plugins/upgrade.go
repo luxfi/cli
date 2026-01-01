@@ -4,7 +4,10 @@
 package plugins
 
 import (
+	"fmt"
+
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"
@@ -34,17 +37,25 @@ func AutomatedUpgrade(app *application.Lux, sc models.Sidecar, targetVersion str
 		}
 		if pluginDir != "" {
 			ux.Logger.PrintToUser(luxlog.Bold.Wrap(luxlog.Green.Wrap("Found the VM plugin directory at %s")), pluginDir)
-			yes, err := app.Prompt.CaptureYesNo("Is this where we should upgrade the VM?")
-			if err != nil {
-				return err
-			}
-			if yes {
-				ux.Logger.PrintToUser("Will use plugin directory at %s to upgrade the VM", pluginDir)
+			if !prompts.IsInteractive() {
+				// In non-interactive mode, use the found directory
+				ux.Logger.PrintToUser("Using found plugin directory (use --plugin-dir to specify a different path)")
 			} else {
-				pluginDir = ""
+				yes, err := app.Prompt.CaptureYesNo("Is this where we should upgrade the VM?")
+				if err != nil {
+					return err
+				}
+				if yes {
+					ux.Logger.PrintToUser("Will use plugin directory at %s to upgrade the VM", pluginDir)
+				} else {
+					pluginDir = ""
+				}
 			}
 		}
 		if pluginDir == "" {
+			if !prompts.IsInteractive() {
+				return fmt.Errorf("--plugin-dir is required when plugin directory cannot be auto-detected in non-interactive mode")
+			}
 			pluginDir, err = app.Prompt.CaptureString("Path to your node plugin dir (likely ~/.luxd/plugins)")
 			if err != nil {
 				return err

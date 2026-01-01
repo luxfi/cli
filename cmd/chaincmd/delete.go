@@ -4,9 +4,10 @@ package chaincmd
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
+	"github.com/luxfi/cli/pkg/prompts"
+	"github.com/luxfi/cli/pkg/safety"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -21,18 +22,27 @@ func newDeleteCmd() *cobra.Command {
 		RunE:  deleteChain,
 	}
 
-	cmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "Skip confirmation")
+	cmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "Skip confirmation prompt (required in non-interactive mode)")
 	return cmd
 }
 
 func deleteChain(cmd *cobra.Command, args []string) error {
 	chainName := args[0]
 
+	// Basic validation (detailed validation in safety package)
+	if chainName == "" || filepath.Base(chainName) != chainName {
+		return fmt.Errorf("invalid chain name: %s", chainName)
+	}
+
 	if !app.ChainConfigExists(chainName) {
 		return fmt.Errorf("chain %s not found", chainName)
 	}
 
 	if !forceDelete {
+		// In non-interactive mode, require --force flag
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("confirmation required: use --force to delete without confirmation")
+		}
 		confirm, err := app.Prompt.CaptureYesNo(fmt.Sprintf("Delete chain %s?", chainName))
 		if err != nil {
 			return err
@@ -43,8 +53,8 @@ func deleteChain(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	chainDir := filepath.Join(app.GetChainsDir(), chainName)
-	if err := os.RemoveAll(chainDir); err != nil {
+	// Use safety package for protected path deletion
+	if err := safety.RemoveChainConfig(app.GetBaseDir(), chainName); err != nil {
 		return fmt.Errorf("failed to delete chain: %w", err)
 	}
 
