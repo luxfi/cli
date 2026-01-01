@@ -263,19 +263,29 @@ func (c *AwsCloud) WaitForEC2Instances(nodeIDs []string, state types.InstanceSta
 	instanceInput := &ec2.DescribeInstancesInput{
 		InstanceIds: nodeIDs,
 	}
-	// Custom waiter loop
-	maxAttempts := 100
+	// Custom waiter loop with explicit timeout
+	timeout := 100 * time.Second
 	delay := 1 * time.Second
+	deadline := time.Now().Add(timeout)
+	var lastErr error
+	consecutiveErrors := 0
+	const maxConsecutiveErrors = 5
 
-	for attempt := 0; attempt < maxAttempts; attempt++ {
+	for time.Now().Before(deadline) {
 		// Describe instances to check their states
 		result, err := c.ec2Client.DescribeInstances(c.ctx, instanceInput)
 		if err != nil {
+			lastErr = err
+			consecutiveErrors++
+			if consecutiveErrors >= maxConsecutiveErrors {
+				return fmt.Errorf("failed to describe instances after %d consecutive errors: %w", consecutiveErrors, lastErr)
+			}
 			time.Sleep(delay)
 			continue
 		}
+		consecutiveErrors = 0 // Reset on success
 
-		// Check if all instances are in the 'running' state
+		// Check if all instances are in the desired state
 		allInDesiredState := true
 		for _, reservation := range result.Reservations {
 			for _, instance := range reservation.Instances {
@@ -288,10 +298,13 @@ func (c *AwsCloud) WaitForEC2Instances(nodeIDs []string, state types.InstanceSta
 		if allInDesiredState {
 			return nil
 		}
-		// If not all instances are running, wait and retry
+		// If not all instances are in desired state, wait and retry
 		time.Sleep(delay)
 	}
-	return fmt.Errorf("timeout waiting for instances to be in %s state", state)
+	if lastErr != nil {
+		return fmt.Errorf("timeout waiting for instances to be in %s state (last error: %w)", state, lastErr)
+	}
+	return fmt.Errorf("timeout waiting for instances to be in %s state after %s", state, timeout)
 }
 
 // GetInstancePublicIPs returns a map from instance ID to public IP
