@@ -52,7 +52,14 @@ import (
 const (
 	WriteReadReadPerms = 0o644
 	// ChainHealthTimeout is the maximum time to wait for a newly deployed chain to become healthy
-	ChainHealthTimeout = 30 * time.Second
+	// For local networks (5 nodes on localhost), chains should be healthy in <10s
+	ChainHealthTimeout = 10 * time.Second
+	// LocalNetworkHealthTimeout is for checking if the network itself is running
+	LocalNetworkHealthTimeout = 5 * time.Second
+	// BlockchainCreationTimeout is the maximum time to wait for CreateChains RPC call
+	// This involves a P-chain transaction, subnet creation, and chain creation
+	// On a fresh network, this can take up to 30s for consensus to be reached
+	BlockchainCreationTimeout = 30 * time.Second
 )
 
 // DeploymentError represents a chain deployment failure that does NOT crash the network.
@@ -152,21 +159,34 @@ type setDefaultSnapshotFunc func(string, bool) error
 // DeployToLocalNetwork deploys to an already running network.
 // It does NOT start the network - use 'lux network start' first.
 func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
+	// Create step tracker that warns after 5 seconds
+	tracker := ux.NewStepTracker(ux.Logger, 5*time.Second)
+
 	// Connect to existing gRPC server - do NOT start one
+	tracker.Start("Connecting to network")
 	cli, err := d.getClientFunc()
 	if err != nil {
+		tracker.Failed("connection failed")
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to connect to network. Is it running? Start with: lux network start --mainnet\nError: %w", err)
 	}
 	defer cli.Close()
+	tracker.Complete("")
 
-	ctx := binutils.GetAsyncContext()
+	// Quick health check with short timeout for local network (5s max)
+	ctx, cancel := context.WithTimeout(context.Background(), LocalNetworkHealthTimeout)
+	defer cancel()
+
+	tracker.Start("Checking network health")
 	_, err = WaitForHealthy(ctx, cli)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {
+			tracker.Failed("network not running")
 			return ids.Empty, ids.Empty, fmt.Errorf("network is not running. Start it first with: lux network start --mainnet")
 		}
+		tracker.Failed(err.Error())
 		return ids.Empty, ids.Empty, fmt.Errorf("network is unhealthy: %w", err)
 	}
+	tracker.CompleteSuccess()
 
 	return d.doDeploy(chain, chainGenesis, genesisPath)
 }
@@ -427,25 +447,32 @@ func (d *LocalDeployer) DeployBlockchain(chain string, chainGenesis []byte) (ids
 //  4. Wait for chain health
 //  5. Show status
 func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath string) (ids.ID, ids.ID, error) {
+	// Create step tracker that warns after 5 seconds
+	tracker := ux.NewStepTracker(ux.Logger, 5*time.Second)
+
 	backendLogFile, err := binutils.GetBackendLogFile(d.app)
 	var backendLogDir string
 	if err == nil {
 		backendLogDir = filepath.Dir(backendLogFile)
 	}
 
+	tracker.Start("Connecting to gRPC server")
 	cli, err := d.getClientFunc()
 	if err != nil {
+		tracker.Failed("connection failed")
 		return ids.Empty, ids.Empty, fmt.Errorf("error creating gRPC Client: %w", err)
 	}
 	defer cli.Close()
-
-	ctx := binutils.GetAsyncContext()
+	tracker.Complete("")
 
 	// loading sidecar before it's needed so we catch any error early
+	tracker.Start("Loading chain configuration")
 	sc, err := d.app.LoadSidecar(chain)
 	if err != nil {
+		tracker.Failed("config not found")
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to load sidecar: %w", err)
 	}
+	tracker.Complete("")
 
 	// Get the actual VM name based on VM type
 	// The VMID is computed from the VM name, not the chain name
@@ -457,10 +484,17 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	}
 
 	// Network must already be running - get cluster info
-	clusterInfo, err := WaitForHealthy(ctx, cli)
+	// Use short timeout for local network health check
+	healthCtx, healthCancel := context.WithTimeout(context.Background(), LocalNetworkHealthTimeout)
+	defer healthCancel()
+
+	tracker.Start("Verifying network is ready")
+	clusterInfo, err := WaitForHealthy(healthCtx, cli)
 	if err != nil {
+		tracker.Failed("network unhealthy")
 		return ids.Empty, ids.Empty, fmt.Errorf("network is not healthy: %w", err)
 	}
+	tracker.CompleteSuccess()
 	rootDir := clusterInfo.GetRootDataDir()
 
 	chainVMID, err := anrutils.VMID(vmName)
@@ -472,7 +506,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	// Check if this specific chain is already deployed (by chain name, not VM ID)
 	// Multiple chains can use the same VM (e.g., multiple EVM chains using Lux EVM)
 	if alreadyDeployedByName(chain, clusterInfo) {
-		ux.Logger.PrintToUser("Net %s has already been deployed", chain)
+		ux.Logger.GreenCheckmarkToUser("Chain %s already deployed", chain)
 		return ids.Empty, ids.Empty, nil
 	}
 
@@ -501,29 +535,33 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	// === PREFLIGHT VALIDATION ===
 	// Validate VM binary BEFORE installing to catch issues early.
 	// This prevents deploying a broken VM that would crash nodes.
-	ux.Logger.PrintToUser("Validating VM binary...")
+	tracker.Start("Validating VM binary")
 	if err := d.validateVMBinary(d.vmBin, chainVMID); err != nil {
+		tracker.Failed("validation failed")
 		return ids.Empty, ids.Empty, NewRecoverableDeploymentError(
 			chain,
 			fmt.Errorf("VM preflight validation failed: %w", err),
 			"Rebuild the VM binary or check the VM path",
 		)
 	}
+	tracker.CompleteSuccess()
 
 	// install the plugin binary for the new VM
+	tracker.Start("Installing VM plugin")
 	if err := d.installPlugin(chainVMID, d.vmBin); err != nil {
+		tracker.Failed("installation failed")
 		return ids.Empty, ids.Empty, NewRecoverableDeploymentError(
 			chain,
 			fmt.Errorf("failed to install VM plugin: %w", err),
 			"Check plugin directory permissions and disk space",
 		)
 	}
-
-	ux.Logger.PrintToUser("VMs ready.")
+	tracker.CompleteSuccess()
 
 	// Create a new blockchain on the running network
 	// VmName must be the actual VM name (e.g., "Lux EVM") not the chain name
 	// This is used by netrunner to compute the VMID
+	tracker.Start(fmt.Sprintf("Creating blockchain '%s' on P-chain", chain))
 	spec := &rpcpb.BlockchainSpec{
 		VmName:             vmName,
 		Genesis:            genesisPath,
@@ -536,33 +574,87 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		spec.ChainId = &chainParentID
 	}
 	blockchainSpecs := []*rpcpb.BlockchainSpec{spec}
+
+	// Use short timeout for blockchain creation - should complete in <15s on local network
+	// If it takes longer, the network or VM has a problem
+	createCtx, createCancel := context.WithTimeout(context.Background(), BlockchainCreationTimeout)
+	defer createCancel()
+
+	// Start a goroutine to check for warnings during long operations
+	done := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				tracker.CheckWarn()
+			}
+		}
+	}()
+
 	deployBlockchainsInfo, err := cli.CreateChains(
-		ctx,
+		createCtx,
 		blockchainSpecs,
 	)
+	close(done) // Stop the warning checker
+
 	if err != nil {
+		tracker.Failed(err.Error())
 		utils.FindErrorLogs(rootDir, backendLogDir)
 		// Check if the network is still healthy after the failure
 		networkHealthy := d.checkNetworkHealthQuick(cli)
+
+		// Provide specific error message based on failure type
+		var errMsg string
+		if errors.Is(err, context.DeadlineExceeded) {
+			errMsg = fmt.Sprintf("blockchain creation timed out after %s (limit: %s)", tracker.Elapsed().Round(time.Millisecond), BlockchainCreationTimeout)
+		} else {
+			errMsg = fmt.Sprintf("blockchain creation failed after %s: %v", tracker.Elapsed().Round(time.Millisecond), err)
+		}
+
 		return ids.Empty, ids.Empty, &DeploymentError{
 			ChainName:      chain,
-			Cause:          fmt.Errorf("failed to deploy blockchain: %w", err),
+			Cause:          errors.New(errMsg),
 			NetworkHealthy: networkHealthy,
 		}
 	}
-	rootDir = clusterInfo.GetRootDataDir()
+	tracker.CompleteSuccess()
 
+	// Wait for validators to track the chain
+	tracker.Start("Waiting for validators to track chain")
+	// Start warning checker for health wait
+	healthDone := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-healthDone:
+				return
+			case <-ticker.C:
+				tracker.CheckWarn()
+			}
+		}
+	}()
+
+	// Quick status check to verify chain is tracked
+	statusCtx, statusCancel := context.WithTimeout(context.Background(), ChainHealthTimeout)
+	defer statusCancel()
+	if statusResp, statusErr := cli.Status(statusCtx); statusErr == nil && statusResp.ClusterInfo != nil {
+		clusterInfo = statusResp.ClusterInfo
+	}
+	close(healthDone)
+	tracker.CompleteSuccess()
+
+	rootDir = clusterInfo.GetRootDataDir()
 	d.app.Log.Debug(deployBlockchainsInfo.String())
 
 	fmt.Println()
-	ux.Logger.PrintToUser("Blockchain deployed successfully.")
-
-	// Quick status check - don't wait for health, just get current state
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if statusResp, err := cli.Status(ctx); err == nil && statusResp.ClusterInfo != nil {
-		clusterInfo = statusResp.ClusterInfo
-	}
+	ux.Logger.GreenCheckmarkToUser("Blockchain deployed successfully")
+	ux.Logger.PrintToUser("Chain is now available - nodes will sync in background.")
 
 	endpoint := GetFirstEndpoint(clusterInfo, chain)
 

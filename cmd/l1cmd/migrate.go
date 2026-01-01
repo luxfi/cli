@@ -6,15 +6,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
 var (
-	skipValidatorCheck bool
-	rentalPlan         string
-	preserveState      bool
+	skipValidatorCheck    bool
+	rentalPlan            string
+	preserveState         bool
+	migrateValidatorMgmt  string
+	migrateConfirm        bool
 )
 
 func newMigrateCmd() *cobra.Command {
@@ -30,7 +33,16 @@ This is a one-time permanent migration that:
 - Enables independent validator management
 - Activates L1 sovereignty features
 
-After migration, validators no longer need to stake on the primary network.`,
+After migration, validators no longer need to stake on the primary network.
+
+NON-INTERACTIVE MODE:
+  Use flags to provide all parameters:
+  --rental-plan           Rental plan (monthly, annual, perpetual)
+  --validator-management  Validator management type (poa, pos, hybrid)
+  --yes                   Confirm migration without prompting
+
+EXAMPLES:
+  lux l1 migrate mysubnet --rental-plan perpetual --validator-management poa --yes`,
 		Args: cobra.ExactArgs(1),
 		RunE: migrateSubnetToL1,
 	}
@@ -38,6 +50,8 @@ After migration, validators no longer need to stake on the primary network.`,
 	cmd.Flags().BoolVar(&skipValidatorCheck, "skip-validator-check", false, "Skip validator readiness check")
 	cmd.Flags().StringVar(&rentalPlan, "rental-plan", "", "L1 rental plan (monthly, annual, perpetual)")
 	cmd.Flags().BoolVar(&preserveState, "preserve-state", true, "Preserve all blockchain state during migration")
+	cmd.Flags().StringVar(&migrateValidatorMgmt, "validator-management", "", "Validator management type (poa, pos, hybrid)")
+	cmd.Flags().BoolVarP(&migrateConfirm, "yes", "y", false, "Confirm migration without prompting")
 
 	return cmd
 }
@@ -89,6 +103,9 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 
 	// Rental plan selection
 	if rentalPlan == "" {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--rental-plan is required in non-interactive mode (monthly, annual, perpetual)")
+		}
 		plans := []string{
 			"Monthly (100 LUX/month)",
 			"Annual (1,000 LUX/year - save 200 LUX)",
@@ -111,6 +128,14 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 		case "Perpetual (10,000 LUX - one-time)":
 			rentalPlan = "perpetual"
 		}
+	} else {
+		// Validate the provided rental plan
+		switch rentalPlan {
+		case "monthly", "annual", "perpetual":
+			// valid
+		default:
+			return fmt.Errorf("invalid rental plan: %s (valid: monthly, annual, perpetual)", rentalPlan)
+		}
 	}
 
 	ux.Logger.PrintToUser("💰 Selected rental plan: %s", rentalPlan)
@@ -127,33 +152,56 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("")
 
 	// Validator management choice
-	validatorOptions := []string{
-		"Keep current validators (PoA)",
-		"Enable permissionless staking (PoS)",
-		"Hybrid (start PoA, transition to PoS)",
-	}
-
-	validatorChoice, err := app.Prompt.CaptureList(
-		"Choose validator management after migration",
-		validatorOptions,
-	)
-	if err != nil {
-		return err
-	}
-
 	validatorManagement := "proof-of-authority"
-	if validatorChoice == "Enable permissionless staking (PoS)" {
-		validatorManagement = "proof-of-stake"
+	if migrateValidatorMgmt != "" {
+		switch migrateValidatorMgmt {
+		case "poa":
+			validatorManagement = "proof-of-authority"
+		case "pos":
+			validatorManagement = "proof-of-stake"
+		case "hybrid":
+			validatorManagement = "hybrid"
+		default:
+			return fmt.Errorf("invalid validator management: %s (valid: poa, pos, hybrid)", migrateValidatorMgmt)
+		}
+	} else {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--validator-management is required in non-interactive mode (poa, pos, hybrid)")
+		}
+		validatorOptions := []string{
+			"Keep current validators (PoA)",
+			"Enable permissionless staking (PoS)",
+			"Hybrid (start PoA, transition to PoS)",
+		}
+
+		validatorChoice, err := app.Prompt.CaptureList(
+			"Choose validator management after migration",
+			validatorOptions,
+		)
+		if err != nil {
+			return err
+		}
+
+		if validatorChoice == "Enable permissionless staking (PoS)" {
+			validatorManagement = "proof-of-stake"
+		} else if validatorChoice == "Hybrid (start PoA, transition to PoS)" {
+			validatorManagement = "hybrid"
+		}
 	}
 
 	// Confirm migration
-	ux.Logger.PrintToUser("\n⚠️  IMPORTANT: This migration is PERMANENT")
+	ux.Logger.PrintToUser("\nIMPORTANT: This migration is PERMANENT")
 	ux.Logger.PrintToUser("Once migrated to L1, the subnet cannot be reverted.")
 	ux.Logger.PrintToUser("")
 
-	confirm, err := app.Prompt.CaptureYesNo("Proceed with migration?")
-	if err != nil || !confirm {
-		return fmt.Errorf("migration cancelled")
+	if !migrateConfirm {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("confirmation required: use --yes/-y to confirm migration in non-interactive mode")
+		}
+		confirm, err := app.Prompt.CaptureYesNo("Proceed with migration?")
+		if err != nil || !confirm {
+			return fmt.Errorf("migration cancelled")
+		}
 	}
 
 	// Perform migration
@@ -161,17 +209,23 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 
 	// Step 1: Create migration transaction
 	ux.Logger.PrintToUser("1️⃣ Creating migration transaction...")
-	_ = createMigrationTransaction(&sc, validatorManagement, rentalPlan)
+	migrationTx := createMigrationTransaction(&sc, validatorManagement, rentalPlan)
+	if migrationTx == nil {
+		return fmt.Errorf("failed to create migration transaction")
+	}
 
 	// Step 2: Notify validators
 	ux.Logger.PrintToUser("2️⃣ Notifying validators of migration...")
 	if err := notifyValidators(&sc); err != nil {
-		ux.Logger.PrintToUser("   ⚠️  Some validators may need manual notification")
+		ux.Logger.PrintToUser("   ⚠️  Some validators may need manual notification: %v", err)
 	}
 
-	// Step 3: Execute migration
+	// Step 3: Execute migration with timeout
 	ux.Logger.PrintToUser("3️⃣ Executing migration...")
-	time.Sleep(2 * time.Second) // Simulate migration
+	migrationTimeout := 30 * time.Second
+	if err := executeMigrationWithTimeout(migrationTimeout); err != nil {
+		return fmt.Errorf("migration failed: %w", err)
+	}
 
 	// Step 4: Update configuration
 	sc.Sovereign = true
@@ -231,4 +285,23 @@ func notifyValidators(sc *models.Sidecar) error {
 	// This would send messages to all current validators
 	ux.Logger.PrintToUser("   Notified %d validators", 5) // Placeholder
 	return nil
+}
+
+// executeMigrationWithTimeout executes the migration with a timeout
+func executeMigrationWithTimeout(timeout time.Duration) error {
+	// TODO: Replace with actual migration logic
+	// For now, simulate with a short delay but respect the timeout
+	done := make(chan struct{})
+	go func() {
+		// Simulated migration work
+		time.Sleep(2 * time.Second)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		return nil
+	case <-time.After(timeout):
+		return fmt.Errorf("timeout after %s waiting for migration to complete", timeout)
+	}
 }

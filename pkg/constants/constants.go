@@ -68,13 +68,12 @@ const (
 	MaxNumOfLogFiles = 5
 	RetainOldFiles   = 0 // retain all old log files
 
-	// RequestTimeout increased from 3 to 10 minutes to match netrunner's
-	// waitForHealthyTimeout for proper mainnet validator bootstrapping
-	RequestTimeout         = 10 * time.Minute
+	// RequestTimeout - 15s for fast local deployments (chain deploy is just a P-chain tx)
+	RequestTimeout         = 15 * time.Second
 	E2ERequestTimeout      = 30 * time.Second
-	ANRRequestTimeout      = 10 * time.Minute
-	APIRequestTimeout      = 30 * time.Second
-	APIRequestLargeTimeout = 2 * time.Minute
+	ANRRequestTimeout      = 15 * time.Second
+	APIRequestTimeout      = 10 * time.Second
+	APIRequestLargeTimeout = 30 * time.Second
 
 	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
 	TestnetAPIEndpoint    = "https://api.lux-test.network"

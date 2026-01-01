@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +39,9 @@ func upgradeImportCmd(_ *cobra.Command, args []string) error {
 	}
 
 	if upgradeBytesFilePath == "" {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--%s is required in non-interactive mode", upgradeBytesFilePathKey)
+		}
 		var err error
 		upgradeBytesFilePath, err = app.Prompt.CaptureExistingFilepath("Provide the path to the upgrade file to import")
 		if err != nil {

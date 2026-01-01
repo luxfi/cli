@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -84,9 +85,21 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 		return nil
 	}
 
-	// flag not provided
+	// If not user-called (e.g., background check), just log and return - never prompt
+	if !isUserCalled {
+		app.Log.Debug("New version available but skipping prompt (not user-called)",
+			zap.String("current", thisVFmt),
+			zap.String("latest", latest))
+		return nil
+	}
+
+	// flag not provided - prompt user or fail in non-interactive mode
 	if !yes {
 		ux.Logger.PrintToUser("We found a new version of Lux CLI %s upstream. You are running %s", latest, thisVFmt)
+		if !prompts.IsInteractive() {
+			ux.Logger.PrintToUser("Use --confirm/-c to auto-confirm update in non-interactive mode")
+			return ErrUserAbortedInstallation
+		}
 		y, err := app.Prompt.CaptureYesNo("Do you want to update?")
 		if err != nil {
 			return nil

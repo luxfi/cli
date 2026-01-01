@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -45,6 +46,10 @@ func runDelete(_ *cobra.Command, args []string) error {
 	}
 
 	if !forceDelete {
+		// Require confirmation or --force in non-interactive mode
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("confirmation required: use --force/-f to skip confirmation in non-interactive mode")
+		}
 		ux.Logger.PrintToUser("WARNING: This will permanently delete all keys for '%s'!", name)
 		ux.Logger.PrintToUser("Make sure you have backed up the mnemonic phrase.")
 		ux.Logger.PrintToUser("")

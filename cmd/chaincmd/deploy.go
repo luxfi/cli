@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
@@ -20,11 +21,22 @@ import (
 	"go.uber.org/zap"
 )
 
+// Default timeouts for chain deployment
+const (
+	// DefaultDeployTimeout is the maximum time to wait for chain deployment to complete.
+	// For local networks, this should be fast (<30s). Longer means something is wrong.
+	DefaultDeployTimeout = 30 * time.Second
+	// MaxConsecutiveHealthFailures is the number of consecutive health check failures before failing fast
+	MaxConsecutiveHealthFailures = 10
+)
+
 var (
 	deployLocal   bool
 	deployTestnet bool
 	deployMainnet bool
+	deployDevnet  bool
 	nodeVersion   string
+	deployTimeout time.Duration
 )
 
 func newDeployCmd() *cobra.Command {
@@ -33,29 +45,99 @@ func newDeployCmd() *cobra.Command {
 		Short: "Deploy a blockchain to local network, testnet, or mainnet",
 		Long: `Deploy a configured blockchain to the network.
 
-Networks:
-  --local     Deploy to local 5-node network (default)
-  --testnet   Deploy to Lux testnet
-  --mainnet   Deploy to Lux mainnet
+OVERVIEW:
 
-The local network must be running before deployment.
-Start it with: lux network start --mainnet
+  Deploys a blockchain configuration to a running network. The blockchain
+  must be created first with 'lux chain create'. The target network must
+  be running before deployment.
 
-Examples:
-  # Deploy to local network
-  lux chain deploy mychain --local
+NETWORK FLAGS (choose one):
+
+  --mainnet, -m    Deploy to mainnet (port 9630, Network ID 1)
+  --testnet, -t    Deploy to testnet (port 9640, Network ID 2)
+  --devnet, -d     Deploy to devnet (port 9650, Network ID 3)
+  --local, -l      Deploy to local/custom network
+
+  Default: --local (deploys to custom/local network)
+
+PREREQUISITES:
+
+  1. Chain must be created:
+     lux chain create mychain
+
+  2. Network must be running:
+     lux network start --devnet
+
+  3. VM must be installed (for custom VMs):
+     lux vm link "Lux EVM" --path ~/work/lux/evm/build/evm
+
+OPTIONS:
+
+  --node-version   Specific luxd version to use (default: latest)
+
+EXAMPLES:
+
+  # Deploy to local devnet (most common)
+  lux chain deploy mychain --devnet
+  lux chain deploy mychain -d
 
   # Deploy to testnet
-  lux chain deploy mychain --testnet`,
+  lux chain deploy mychain --testnet
+  lux chain deploy mychain -t
+
+  # Deploy to mainnet
+  lux chain deploy mychain --mainnet
+  lux chain deploy mychain -m
+
+  # Deploy with specific node version
+  lux chain deploy mychain --devnet --node-version v1.11.0
+
+DEPLOYMENT PROCESS:
+
+  1. Validates chain configuration exists
+  2. Verifies network is running
+  3. Checks VM plugin is installed
+  4. Creates blockchain on the network
+  5. Updates sidecar with deployment info (subnet ID, blockchain ID)
+  6. Returns endpoints for the deployed chain
+
+OUTPUT:
+
+  On success, displays:
+  - Blockchain ID
+  - Subnet ID
+  - RPC endpoints for each validator node
+
+TROUBLESHOOTING:
+
+  "Network not running" → Start network first:
+    lux network start --devnet
+
+  "Chain mychain not found" → Create chain first:
+    lux chain create mychain
+
+  "VM not installed" → Link VM binary:
+    lux vm link "Lux EVM" --path ~/path/to/evm
+
+  "RPC version mismatch" → Chain VM version incompatible with running node
+
+NOTES:
+
+  - Deployment info is saved to the chain's sidecar.json
+  - Same chain can be deployed to multiple networks
+  - Each deployment gets unique blockchain ID
+  - Use 'lux network status' to see deployed chain endpoints`,
 		SilenceUsage: true,
 		Args:         cobra.ExactArgs(1),
 		RunE:         deployChain,
 	}
 
-	cmd.Flags().BoolVarP(&deployLocal, "local", "l", false, "Deploy to local network")
+	cmd.Flags().BoolVarP(&deployLocal, "local", "l", false, "Deploy to local/custom network")
 	cmd.Flags().BoolVarP(&deployTestnet, "testnet", "t", false, "Deploy to testnet")
 	cmd.Flags().BoolVarP(&deployMainnet, "mainnet", "m", false, "Deploy to mainnet")
+	cmd.Flags().BoolVarP(&deployDevnet, "devnet", "d", false, "Deploy to devnet")
 	cmd.Flags().StringVar(&nodeVersion, "node-version", "latest", "Node version to use")
+	cmd.Flags().DurationVar(&deployTimeout, "timeout", DefaultDeployTimeout, "Maximum time to wait for chain deployment (e.g., 60s, 2m)")
 
 	return cmd
 }
@@ -96,6 +178,8 @@ func deployChain(cmd *cobra.Command, args []string) error {
 		network = models.Mainnet
 	case deployTestnet:
 		network = models.Testnet
+	case deployDevnet:
+		network = models.Devnet
 	case deployLocal:
 		network = models.Local
 	default:

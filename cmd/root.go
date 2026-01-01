@@ -17,6 +17,7 @@ import (
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/chaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
+	"github.com/luxfi/cli/cmd/devcmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
@@ -44,41 +45,66 @@ import (
 var (
 	app *application.Lux
 
-	logLevel  string
-	Version   = "1.21.24"
-	cfgFile   string
-	skipCheck bool
+	logLevel       string
+	Version        = "1.22.5"
+	cfgFile        string
+	skipCheck      bool
+	nonInteractive bool
 )
 
 func NewRootCmd() *cobra.Command {
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
 		Use: "lux",
-		Long: `Lux CLI - unified toolchain for sovereign L1s, based rollups, and L3s.
+		Long: `Lux CLI - Developer toolchain for blockchain development and deployment.
 
-Architecture:
-- L1: Sovereign chains with independent validation
-- L2: Based rollups or OP Stack compatible (formerly subnets)
-- L3: App-specific chains on L2s
+The Lux CLI provides a complete toolkit for creating, testing, and deploying
+blockchains on the Lux network. It supports local development, testnet
+deployment, and mainnet operations with a unified command structure.
 
-Sequencing options:
-- Lux: 100ms blocks, lowest cost (default)
-- Ethereum: 12s blocks, highest security
-- Lux: 2s blocks, fast finality
-- OP: Optimism ecosystem compatible
+COMMAND OVERVIEW:
 
-Features:
-- EIP-4844 blob support
-- Pre-confirmations (<100ms ack)
-- IBC/Teleport cross-chain messaging
-- Ringtail post-quantum signatures
+  network     Manage local network runtime (start/stop/status/clean)
+  chain       Blockchain lifecycle (create/deploy/import/export)
+  key         Key and wallet management
+  validator   Validator operations
+  config      CLI configuration
 
-Quick start:
-  lux chain create sovereign --type=l1   # Sovereign L1
-  lux chain create rollup --type=l2      # L2 (based rollup)
-  lux chain create app --type=l3         # L3 (app chain)
-  lux chain deploy mychain               # Deploy to local network
-  lux chain list                         # List all chains`,
+ARCHITECTURE:
+
+  L1 (Sovereign)  - Independent validator set, own tokenomics
+  L2 (Rollup)     - Based on L1 sequencing (Lux, Ethereum, etc.)
+  L3 (App Chain)  - Built on L2 for application-specific use
+
+SEQUENCING OPTIONS:
+
+  lux       100ms blocks, lowest cost (default)
+  ethereum  12s blocks, highest security
+  op        OP Stack compatible
+
+NETWORK TYPES:
+
+  --mainnet   Production network (5 validators, port 9630)
+  --testnet   Test network (5 validators, port 9640)
+  --devnet    Development network (5 validators, port 9650)
+  --dev       Single-node dev mode with K=1 consensus
+
+QUICK START:
+
+  # Start a local development network
+  lux network start --devnet
+
+  # Create a new blockchain
+  lux chain create mychain
+
+  # Deploy to local network
+  lux chain deploy mychain
+
+  # Check status
+  lux network status
+  lux chain list
+
+For detailed command help, use: lux <command> --help`,
 		PersistentPreRunE: createApp,
 		Version:           Version,
 		PersistentPostRun: handleTracking,
@@ -90,8 +116,11 @@ Quick start:
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli.json)")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "ERROR", "log level for the application")
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
+	rootCmd.PersistentFlags().BoolVar(&nonInteractive, "non-interactive", false,
+		"Disable prompts; fail if required values are missing (also enabled when stdin is not a TTY or CI=1)")
 
 	// add sub commands
+	rootCmd.AddCommand(devcmd.NewCmd(app))     // dev (local dev environment)
 	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (local network management)
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(chaincmd.NewCmd(app)) // unified chain command (l1/l2/l3)
@@ -149,7 +178,17 @@ func createApp(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	cf := config.New()
-	app.Setup(baseDir, log, cf, prompts.NewPrompter(), application.NewDownloader())
+
+	// If --non-interactive flag is set, propagate to env so IsInteractive() sees it
+	// This allows TTY detection to work automatically while still respecting the flag
+	if nonInteractive {
+		os.Setenv(prompts.EnvNonInteractive, "1")
+	}
+
+	// Interactive by default on TTY, non-interactive when:
+	// LUX_NON_INTERACTIVE=1, CI=1, --non-interactive flag, or stdin is piped
+	prompter := prompts.NewPrompterForMode(nonInteractive)
+	app.Setup(baseDir, log, cf, prompter, application.NewDownloader())
 
 	// Setup LPM, skip if running a hidden command
 	if !cmd.Hidden {
@@ -170,7 +209,8 @@ func createApp(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if os.Getenv("RUN_E2E") == "" && !app.ConfigFileExists() {
+	// Skip metrics prompt in non-interactive mode, E2E tests, or if config exists
+	if os.Getenv("RUN_E2E") == "" && prompts.IsInteractive() && !app.ConfigFileExists() {
 		err = utils.HandleUserMetricsPreference(app)
 		if err != nil {
 			return err
@@ -316,6 +356,9 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 	config.MaxSize = constants.MaxLogFileSize
 	config.MaxFiles = constants.MaxNumOfLogFiles
 	config.MaxAge = constants.RetainOldFiles
+
+	// Register ux package as internal so caller tracking shows actual source, not the wrapper
+	luxlog.RegisterInternalPackages("github.com/luxfi/cli/pkg/ux")
 
 	factory := luxlog.NewFactoryWithConfig(config)
 	log, err := factory.Make("lux")

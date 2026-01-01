@@ -24,6 +24,7 @@ var (
 		tokenSymbol         string
 		validatorManagement string
 		force               bool
+		nonInteractive      bool
 	}
 )
 
@@ -37,17 +38,41 @@ This command creates a sovereign L1 blockchain that can use either:
 - Proof of Authority (PoA): Validators managed by an owner address
 - Proof of Stake (PoS): Validators stake tokens to participate
 
-The L1 will have its own token, consensus rules, and validator set.`,
+The L1 will have its own token, consensus rules, and validator set.
+
+NON-INTERACTIVE MODE:
+
+  Use --non-interactive to skip all prompts and use provided flags or defaults.
+  If a required value cannot be determined, the command fails with a clear error
+  showing which flag to use.
+
+  Required for non-interactive mode (if not provided, uses defaults):
+    --proof-of-authority OR --proof-of-stake  (default: proof-of-authority)
+    --evm-chain-id                            (default: 200200)
+    --token-name                              (default: TOKEN)
+    --token-symbol                            (default: TKN)
+
+EXAMPLES:
+
+  # Interactive mode (prompts for missing values)
+  lux l1 create mychain
+
+  # Fully non-interactive with defaults
+  lux l1 create mychain --non-interactive
+
+  # Non-interactive with custom values
+  lux l1 create mychain --non-interactive --proof-of-stake --evm-chain-id=12345 --token-name=MYTOKEN --token-symbol=MTK`,
 		Args: cobra.ExactArgs(1),
 		RunE: createL1,
 	}
 
 	cmd.Flags().BoolVar(&createFlags.usePoA, "proof-of-authority", false, "Use Proof of Authority validator management")
 	cmd.Flags().BoolVar(&createFlags.usePoS, "proof-of-stake", false, "Use Proof of Stake validator management")
-	cmd.Flags().Uint64Var(&createFlags.evmChainID, "evm-chain-id", 0, "EVM chain ID for the L1")
-	cmd.Flags().StringVar(&createFlags.tokenName, "token-name", "", "Native token name")
-	cmd.Flags().StringVar(&createFlags.tokenSymbol, "token-symbol", "", "Native token symbol")
+	cmd.Flags().Uint64Var(&createFlags.evmChainID, "evm-chain-id", 0, "EVM chain ID for the L1 (default: 200200)")
+	cmd.Flags().StringVar(&createFlags.tokenName, "token-name", "", "Native token name (default: TOKEN)")
+	cmd.Flags().StringVar(&createFlags.tokenSymbol, "token-symbol", "", "Native token symbol (default: TKN)")
 	cmd.Flags().BoolVarP(&createFlags.force, "force", "f", false, "Overwrite existing configuration")
+	cmd.Flags().BoolVar(&createFlags.nonInteractive, "non-interactive", false, "Skip all prompts, use flags or defaults")
 
 	return cmd
 }
@@ -70,6 +95,10 @@ func createL1(cmd *cobra.Command, args []string) error {
 		validatorManagement = "proof-of-authority"
 	} else if createFlags.usePoS {
 		validatorManagement = "proof-of-stake"
+	} else if createFlags.nonInteractive {
+		// Default to PoA in non-interactive mode
+		validatorManagement = "proof-of-authority"
+		ux.Logger.PrintToUser("Using default: proof-of-authority (use --proof-of-stake to change)")
 	} else {
 		// Interactive prompt
 		validatorManagementOptions := []string{"Proof of Authority", "Proof of Stake"}
@@ -90,25 +119,39 @@ func createL1(cmd *cobra.Command, args []string) error {
 	// Get chain ID
 	chainID := createFlags.evmChainID
 	if chainID == 0 {
-		chainIDStr, err := app.Prompt.CaptureString("Enter EVM chain ID")
-		if err != nil {
-			return err
-		}
-		chainID, err = strconv.ParseUint(chainIDStr, 10, 64)
-		if err != nil {
-			return fmt.Errorf("invalid chain ID: %w", err)
+		if createFlags.nonInteractive {
+			// Default chain ID in non-interactive mode
+			chainID = 200200
+			ux.Logger.PrintToUser("Using default chain ID: %d (use --evm-chain-id to change)", chainID)
+		} else {
+			chainIDStr, err := app.Prompt.CaptureString("Enter EVM chain ID")
+			if err != nil {
+				return err
+			}
+			chainID, err = strconv.ParseUint(chainIDStr, 10, 64)
+			if err != nil {
+				return fmt.Errorf("invalid chain ID: %w", err)
+			}
 		}
 	}
 
 	// Get token info
 	tokenName := createFlags.tokenName
 	if tokenName == "" {
-		tokenName, _ = app.Prompt.CaptureString("Enter native token name")
+		if createFlags.nonInteractive {
+			tokenName = "TOKEN"
+		} else {
+			tokenName, _ = app.Prompt.CaptureString("Enter native token name")
+		}
 	}
 
 	tokenSymbol := createFlags.tokenSymbol
 	if tokenSymbol == "" {
-		tokenSymbol, _ = app.Prompt.CaptureString("Enter native token symbol")
+		if createFlags.nonInteractive {
+			tokenSymbol = "TKN"
+		} else {
+			tokenSymbol, _ = app.Prompt.CaptureString("Enter native token symbol")
+		}
 	}
 
 	// Create L1 configuration

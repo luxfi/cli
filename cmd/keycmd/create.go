@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -72,7 +73,10 @@ func runCreate(_ *cobra.Command, args []string) error {
 		}
 		ux.Logger.PrintToUser("Using provided mnemonic phrase")
 	} else if useMnemonic {
-		// Prompt for mnemonic
+		// Prompt for mnemonic - requires interactive mode
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--mnemonic requires interactive mode; use --phrase to provide mnemonic directly")
+		}
 		ux.Logger.PrintToUser("Enter your 24-word mnemonic phrase:")
 		var err error
 		mnemonic, err = app.Prompt.CaptureString("Mnemonic")

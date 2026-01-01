@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -78,7 +79,10 @@ func runUnlock(_ *cobra.Command, args []string) error {
 		password = key.GetPasswordFromEnv()
 	}
 	if password == "" {
-		// Prompt for password
+		// Prompt for password - requires interactive mode
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("password required: use --password or set LUX_KEY_PASSWORD environment variable")
+		}
 		var err error
 		password, err = app.Prompt.CaptureString("Password")
 		if err != nil {

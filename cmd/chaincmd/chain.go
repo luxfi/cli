@@ -59,36 +59,84 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "chain",
 		Short: "Manage blockchain lifecycle - create, deploy, import, export, validate",
-		Long: `The chain command provides unified operations for all blockchain types.
+		Long: `The chain command provides unified operations for blockchain management.
 
-Chain Types:
+OVERVIEW:
+
+  The chain command suite handles the complete blockchain lifecycle from
+  configuration creation through deployment and operation. It works with
+  chain configurations stored in ~/.lux/chains/.
+
+CHAIN TYPES:
+
   L1 (Sovereign)  - Independent validator set, own tokenomics
   L2 (Rollup)     - Based on L1 sequencing (Lux, Ethereum, etc.)
   L3 (App Chain)  - Built on L2 for application-specific use
 
-Common Operations:
-  create    Create a new blockchain configuration
-  deploy    Deploy to local network, testnet, or mainnet
-  list      List all configured blockchains
-  describe  Show detailed blockchain information
-  import    Import blocks from RLP file
-  export    Export blocks to RLP file
+CORE COMMANDS:
 
-Examples:
-  # Create a new L2 based rollup
-  lux chain create mychain --type=l2 --sequencer=lux
+  create       Create a new blockchain configuration
+  deploy       Deploy to local network, testnet, or mainnet
+  list         List all configured blockchains
+  describe     Show detailed blockchain information
+  delete       Delete a blockchain configuration
+
+DATA OPERATIONS:
+
+  import       Import blocks from RLP file to running chain
+  export       Export blocks from running chain to RLP file
+
+VALIDATOR OPERATIONS:
+
+  validators   List validators for a blockchain
+  add-validator    Add a validator to the chain
+  remove-validator Remove a validator from the chain
+
+NETWORK FLAGS (for deployment):
+
+  --mainnet, -m    Deploy to mainnet (port 9630)
+  --testnet, -t    Deploy to testnet (port 9640)
+  --devnet, -d     Deploy to devnet (port 9650)
+  --custom         Deploy to custom network
+
+EXAMPLES:
+
+  # Create a new L2 blockchain
+  lux chain create mychain
 
   # Create a sovereign L1
   lux chain create mychain --type=l1
 
-  # Deploy to local network
-  lux chain deploy mychain --local
+  # Deploy to local devnet
+  lux chain deploy mychain --devnet
+
+  # Deploy to testnet
+  lux chain deploy mychain --testnet
+
+  # List all configured chains
+  lux chain list
 
   # Import historical blocks
-  lux chain import --chain=mychain --path=/tmp/blocks.rlp
+  lux chain import c ~/work/lux/state/rlp/mainnet.rlp --mainnet
 
-  # List all chains
-  lux chain list`,
+  # Delete a chain configuration
+  lux chain delete mychain
+
+TYPICAL WORKFLOW:
+
+  1. Create configuration:  lux chain create mychain
+  2. Start network:         lux network start --devnet
+  3. Deploy chain:          lux chain deploy mychain --devnet
+  4. Verify deployment:     lux chain list
+  5. Check endpoints:       lux network status
+
+NOTES:
+
+  - Chain configurations are stored in ~/.lux/chains/<name>/
+  - Each chain has a genesis.json and sidecar.json
+  - Chains can be deployed to multiple networks (local, testnet, mainnet)
+  - Use 'lux chain delete' to remove configurations
+  - Network must be running before deployment`,
 		RunE: cobrautils.CommandSuiteUsage,
 	}
 
