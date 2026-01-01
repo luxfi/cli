@@ -11,6 +11,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/plugins"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -178,6 +179,11 @@ func selectNetworkToUpgrade(sc models.Sidecar, upgradeOptions []string) (string,
 		return "", errors.New("no deployment target available")
 	}
 
+	if !prompts.IsInteractive() {
+		// In non-interactive mode, use the first available option or require explicit flag
+		return "", fmt.Errorf("network selection required: use --config, --local, --testnet, or --mainnet")
+	}
+
 	selectedDeployment, err := app.Prompt.CaptureList(updatePrompt, upgradeOptions)
 	if err != nil {
 		return "", err
@@ -193,6 +199,11 @@ func selectUpdateOption(vmType models.VMType, sc models.Sidecar, networkToUpgrad
 		return updateToSpecificVersion(sc, networkToUpgrade)
 	case binaryPathArg != "":
 		return updateToCustomBin(sc, networkToUpgrade, binaryPathArg, true)
+	}
+
+	// In non-interactive mode, require explicit version flag
+	if !prompts.IsInteractive() {
+		return fmt.Errorf("version selection required: use --latest, --version, or --binary")
 	}
 
 	latestVersionUpdate := "Update to latest version"
@@ -246,6 +257,9 @@ func updateToSpecificVersion(sc models.Sidecar, networkToUpgrade string) error {
 	// Get version to update to
 	var err error
 	if targetVersion == "" {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--version is required in non-interactive mode")
+		}
 		targetVersion, err = app.Prompt.CaptureVersion("Enter version")
 		if err != nil {
 			return err
@@ -279,6 +293,9 @@ func updateVMByNetwork(sc models.Sidecar, targetVersion string, networkToUpgrade
 func updateToCustomBin(sc models.Sidecar, networkToUpgrade, binaryPath string, updateVMBinaryProtocolVersion bool) error {
 	var err error
 	if binaryPath == "" {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--binary is required in non-interactive mode")
+		}
 		binaryPath, err = app.Prompt.CaptureExistingFilepath("Enter path to custom binary")
 		if err != nil {
 			return err
@@ -358,6 +375,11 @@ func chooseManualOrAutomatic(sc models.Sidecar, targetVersion string) error {
 		return plugins.ManualUpgrade(app, sc, targetVersion)
 	case pluginDir != "":
 		return plugins.AutomatedUpgrade(app, sc, targetVersion, pluginDir)
+	}
+
+	// In non-interactive mode, require explicit choice
+	if !prompts.IsInteractive() {
+		return fmt.Errorf("upgrade method required: use --print for manual or --plugin-dir for automatic")
 	}
 
 	const (

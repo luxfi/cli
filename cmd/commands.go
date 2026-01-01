@@ -61,4 +61,7 @@ const (
 
 	// DexCmd is the dex command name (for decentralized exchange)
 	DexCmd = "dex"
+
+	// DevCmd is the dev command name (for local development)
+	DevCmd = "dev"
 )

@@ -1,7 +1,7 @@
 # Lux CLI - AI Assistant Knowledge Base
 
-**Last Updated**: 2025-12-25
-**Version**: 1.21.24
+**Last Updated**: 2025-12-31
+**Version**: 1.22.5
 **Organization**: Lux Industries
 
 ## Quick Reference
@@ -16,19 +16,21 @@ lux network stop               # Stop local network
 lux network status             # Check network status
 lux network clean              # Remove all network data
 
-# Chain Operations
+# Chain Operations (unified command - supports L1/L2/L3)
+lux chain create mychain                      # Create L2 configuration (default)
+lux chain create mychain --type=l1            # Create sovereign L1
+lux chain create mychain --type=l3            # Create app-specific L3
+lux chain deploy mychain --devnet             # Deploy to local network
+lux chain list                                # List configured chains
+lux chain describe mychain                    # Show chain details
+
+# Chain creation with custom values
+lux chain create mychain --evm-chain-id=12345
+lux chain create mychain --token-name=MYTOKEN --token-symbol=MTK
+
+# Import/Export
 lux chain import --chain=c --path=/path/to/blocks.rlp  # Import RLP blocks to C-Chain
 lux chain import --chain=zoo --path=/path/to/zoo.rlp   # Import to subnet
-
-# L2/Subnet Management (alias: lux l2, lux subnet)
-lux l2 create mychain          # Create L2 configuration
-lux l2 deploy mychain --local  # Deploy to local network
-lux l2 list                    # List configured L2s
-lux l2 describe mychain        # Show L2 details
-
-# L1 Sovereign Chain
-lux l1 create mychain          # Create sovereign L1
-lux l1 deploy mychain          # Deploy L1
 
 # AMM Trading (LUX_MNEMONIC supported)
 lux amm balance                # Check token balances
@@ -45,16 +47,52 @@ The CLI is organized into these main command groups:
 | Command | Purpose | Notes |
 |---------|---------|-------|
 | `lux network` | Local 5-node network management | start, stop, status, clean |
-| `lux chain` | Chain-level data operations | import, export |
-| `lux l1` | Sovereign L1 chains | create, deploy, describe |
-| `lux l2` | L2s/Subnets (alias: `subnet`) | create, deploy, validators |
-| `lux l3` | App-specific L3 chains | create, deploy |
+| `lux chain` | Unified chain lifecycle | create, deploy, import, export, list |
 | `lux key` | Key management | create, list, export |
 | `lux validator` | P-Chain validator balance | |
 | `lux amm` | AMM/DEX trading | swap, balance, add-liquidity |
 | `lux warp` | Cross-chain messaging | |
 | `lux contract` | Smart contract tools | deploy, verify |
 | `lux config` | CLI configuration | |
+
+## Interactive Mode (UNIX Standard)
+
+The CLI follows standard UNIX conventions for interactive behavior:
+
+### Mode Detection
+
+| Condition | Mode | Behavior |
+|-----------|------|----------|
+| stdin is TTY | Interactive | Prompts for missing values |
+| stdin is piped | Non-interactive | Uses defaults or fails |
+| LUX_NON_INTERACTIVE=1 | Non-interactive | Never prompts |
+| CI=1 or CI=true | Non-interactive | Never prompts |
+
+### Option Precedence
+
+Values are resolved in order: Flags → Env vars → Config → Defaults → Prompts
+
+### Examples
+
+```bash
+# On a TTY - prompts for missing values
+lux chain create mychain
+
+# Piped input - never prompts, uses defaults or fails
+echo "" | lux chain create mychain
+
+# CI environment - automatically non-interactive
+CI=true lux chain create mychain
+```
+
+### Defaults (Non-Interactive)
+
+When non-interactive, sensible defaults are used:
+- Chain ID: 200200
+- Token: TOKEN (TKN)
+- Sequencer: lux (100ms blocks)
+- Type: l2 (rollup)
+- Airdrop: 500M tokens to test account
 
 ## Chain Import
 

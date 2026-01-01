@@ -8,16 +8,19 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 )
 
 var (
-	l2Base     string
-	vmType     string
-	preconfirm bool
-	daLayer    string
+	l2Base      string
+	vmType      string
+	preconfirm  bool
+	daLayer     string
+	tokenName   string
+	tokenSymbol string
 )
 
 func newCreateCmd() *cobra.Command {
@@ -33,15 +36,27 @@ Common use cases:
 - Gaming chains with custom state transitions
 - DeFi pools with app-specific optimizations
 - Privacy-focused applications
-- High-frequency trading environments`,
+- High-frequency trading environments
+
+NON-INTERACTIVE MODE:
+  Use flags to provide all parameters:
+  --l2               Base L2 to deploy on (required)
+  --vm               VM type (evm, custom, wasm, move)
+  --token-name       Native token name
+  --token-symbol     Native token symbol
+
+EXAMPLES:
+  lux l3 create mygame --l2 mychain --vm evm --token-name GameToken --token-symbol GAME`,
 		Args: cobra.ExactArgs(1),
 		RunE: createL3,
 	}
 
 	cmd.Flags().StringVar(&l2Base, "l2", "", "Base L2 to deploy on")
-	cmd.Flags().StringVar(&vmType, "vm", "evm", "VM type (evm, custom, wasm)")
+	cmd.Flags().StringVar(&vmType, "vm", "evm", "VM type (evm, custom, wasm, move)")
 	cmd.Flags().BoolVar(&preconfirm, "preconfirm", true, "Enable pre-confirmations")
 	cmd.Flags().StringVar(&daLayer, "da", "inherit", "Data availability (inherit, blob, custom)")
+	cmd.Flags().StringVar(&tokenName, "token-name", "", "Native token name")
+	cmd.Flags().StringVar(&tokenSymbol, "token-symbol", "", "Native token symbol")
 
 	return cmd
 }
@@ -55,6 +70,9 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 	// Select base L2
 	if l2Base == "" {
+		if !prompts.IsInteractive() {
+			return fmt.Errorf("--l2 is required in non-interactive mode")
+		}
 		// List available L2s from sidecar files
 		l2s, err := getAvailableL2s()
 		if err != nil {
@@ -74,33 +92,43 @@ func createL3(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// VM type selection
-	if vmType == "" {
-		vmOptions := []string{
-			"EVM (Ethereum compatible)",
-			"Custom VM (Maximum flexibility)",
-			"WASM (WebAssembly runtime)",
-			"Move VM (Move language)",
-		}
+	// VM type selection - already has default "evm" from flag, only prompt if explicitly empty
+	// Validate the vm type
+	switch vmType {
+	case "evm", "custom", "wasm", "move":
+		// valid
+	case "":
+		if !prompts.IsInteractive() {
+			vmType = "evm" // default
+		} else {
+			vmOptions := []string{
+				"EVM (Ethereum compatible)",
+				"Custom VM (Maximum flexibility)",
+				"WASM (WebAssembly runtime)",
+				"Move VM (Move language)",
+			}
 
-		choice, err := app.Prompt.CaptureList(
-			"Select VM type for your L3",
-			vmOptions,
-		)
-		if err != nil {
-			return err
-		}
+			choice, err := app.Prompt.CaptureList(
+				"Select VM type for your L3",
+				vmOptions,
+			)
+			if err != nil {
+				return err
+			}
 
-		switch choice {
-		case "EVM (Ethereum compatible)":
-			vmType = "evm"
-		case "Custom VM (Maximum flexibility)":
-			vmType = "custom"
-		case "WASM (WebAssembly runtime)":
-			vmType = "wasm"
-		case "Move VM (Move language)":
-			vmType = "move"
+			switch choice {
+			case "EVM (Ethereum compatible)":
+				vmType = "evm"
+			case "Custom VM (Maximum flexibility)":
+				vmType = "custom"
+			case "WASM (WebAssembly runtime)":
+				vmType = "wasm"
+			case "Move VM (Move language)":
+				vmType = "move"
+			}
 		}
+	default:
+		return fmt.Errorf("invalid VM type: %s (valid: evm, custom, wasm, move)", vmType)
 	}
 
 	// Create L3 configuration
@@ -119,13 +147,27 @@ func createL3(cmd *cobra.Command, args []string) error {
 	}
 
 	// Token configuration
-	ux.Logger.PrintToUser("\n💰 Token Configuration")
-	tokenName, _ := app.Prompt.CaptureString("Token name")
-	tokenSymbol, _ := app.Prompt.CaptureString("Token symbol")
+	ux.Logger.PrintToUser("\nToken Configuration")
+	tkName := tokenName
+	tkSymbol := tokenSymbol
+	if tkName == "" {
+		if !prompts.IsInteractive() {
+			tkName = "Token" // default
+		} else {
+			tkName, _ = app.Prompt.CaptureString("Token name")
+		}
+	}
+	if tkSymbol == "" {
+		if !prompts.IsInteractive() {
+			tkSymbol = "TKN" // default
+		} else {
+			tkSymbol, _ = app.Prompt.CaptureString("Token symbol")
+		}
+	}
 
 	sc.TokenInfo = models.TokenInfo{
-		Name:     tokenName,
-		Symbol:   tokenSymbol,
+		Name:     tkName,
+		Symbol:   tkSymbol,
 		Decimals: 18,
 		Supply:   "0",
 	}
@@ -142,7 +184,7 @@ func createL3(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   Name: %s", l3Name)
 	ux.Logger.PrintToUser("   Base L2: %s", l2Base)
 	ux.Logger.PrintToUser("   VM Type: %s", vmType)
-	ux.Logger.PrintToUser("   Token: %s (%s)", tokenName, tokenSymbol)
+	ux.Logger.PrintToUser("   Token: %s (%s)", tkName, tkSymbol)
 	ux.Logger.PrintToUser("   Pre-confirmations: %v", preconfirm)
 
 	ux.Logger.PrintToUser("")

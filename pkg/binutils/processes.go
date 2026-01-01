@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binpaths"
@@ -311,6 +312,7 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 }
 
 // GetAsyncContext returns a timeout context with the cancel function suppressed
+// For local networks, this uses a short timeout (15s) since operations should complete quickly
 func GetAsyncContext() context.Context {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.RequestTimeout)
 	// don't call since "start" is async
@@ -320,6 +322,17 @@ func GetAsyncContext() context.Context {
 	// when the deadline is reached
 	_ = cancel
 
+	return ctx
+}
+
+// GetDeployContext returns a timeout context for chain deployment operations.
+// For local networks, deployment should complete in <30s:
+//   - Blockchain creation: ~5-10s (P-chain tx)
+//   - Chain health: ~5-10s (node sync)
+// If deployment takes longer, something is wrong and we fail fast.
+func GetDeployContext() context.Context {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	_ = cancel
 	return ctx
 }
 

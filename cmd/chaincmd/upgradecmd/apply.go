@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/localnet"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/params/extras"
@@ -71,18 +72,32 @@ to upgrade your node manually.
 
 After you update your validator's configuration, you need to restart your validator manually.
 If you provide the --luxd-chain-config-dir flag, this command attempts to write the upgrade file at that path.
-Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs for related documentation.`,
+Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs for related documentation.
+
+In non-interactive mode (CI/scripts), use --force to skip confirmation prompts for
+timestamps in the past. The --luxd-chain-config-dir defaults to ~/.luxd/chains and
+will be used without confirmation prompts.
+
+Examples:
+  # Interactive mode
+  lux blockchain upgrade apply mychain --local
+
+  # Non-interactive mode with custom config directory
+  lux blockchain upgrade apply mychain --testnet --luxd-chain-config-dir /path/to/chains --force
+
+  # Print manual instructions (non-interactive friendly)
+  lux blockchain upgrade apply mychain --mainnet --print`,
 		RunE: applyCmd,
 		Args: cobrautils.ExactArgs(1),
 	}
 
-	cmd.Flags().BoolVar(&useConfig, "config", false, "create upgrade config for future subnet deployments (same as generate)")
-	cmd.Flags().BoolVar(&useLocal, "local", false, "apply upgrade existing `local` deployment")
-	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "apply upgrade existing `testnet` deployment")
-	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "apply upgrade existing `mainnet` deployment")
-	cmd.Flags().BoolVar(&print, "print", false, "if true, print the manual config without prompting (for public networks only)")
-	cmd.Flags().BoolVar(&force, "force", false, "If true, don't prompt for confirmation of timestamps in the past")
-	cmd.Flags().StringVar(&luxdChainConfigDir, luxdChainConfigFlag, os.ExpandEnv(luxdChainConfigDirDefault), "luxd's chain config file directory")
+	cmd.Flags().BoolVar(&useConfig, "config", false, "Create upgrade config for future subnet deployments (same as generate)")
+	cmd.Flags().BoolVar(&useLocal, "local", false, "Apply upgrade to existing local deployment")
+	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "Apply upgrade to existing testnet deployment")
+	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "Apply upgrade to existing mainnet deployment")
+	cmd.Flags().BoolVar(&print, "print", false, "Print manual config instructions (for public networks only, non-interactive friendly)")
+	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation prompts (e.g., for timestamps in the past)")
+	cmd.Flags().StringVar(&luxdChainConfigDir, luxdChainConfigFlag, os.ExpandEnv(luxdChainConfigDirDefault), "Luxd chain config directory (e.g., ~/.luxd/chains)")
 
 	return cmd
 }
@@ -288,16 +303,21 @@ func applyPublicNetworkUpgrade(blockchainName, networkKey string, sc *models.Sid
 
 	ux.Logger.PrintToUser("The chain config dir luxd uses is set at %s", luxdChainConfigDir)
 	// give the user the chance to check if they indeed want to use the default
-	if luxdChainConfigDir == luxdChainConfigDirDefault {
-		useDefault, err := app.Prompt.CaptureYesNo("It is set to the default. Is that correct?")
-		if err != nil {
-			return err
-		}
-		if !useDefault {
-			luxdChainConfigDir, err = app.Prompt.CaptureExistingFilepath(
-				"Enter the path to your custom chain config dir (*without* the blockchain ID, e.g /my/configs/dir)")
+	if luxdChainConfigDir == os.ExpandEnv(luxdChainConfigDirDefault) {
+		if !prompts.IsInteractive() {
+			// In non-interactive mode, use the default without prompting
+			ux.Logger.PrintToUser("Using default chain config dir (use --%s to specify a custom path)", luxdChainConfigFlag)
+		} else {
+			useDefault, err := app.Prompt.CaptureYesNo("It is set to the default. Is that correct?")
 			if err != nil {
 				return err
+			}
+			if !useDefault {
+				luxdChainConfigDir, err = app.Prompt.CaptureExistingFilepath(
+					"Enter the path to your custom chain config dir (*without* the blockchain ID, e.g /my/configs/dir)")
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -431,6 +451,9 @@ func validateUpgradeBytes(file, lockFile []byte, skipPrompting bool) ([]extras.P
 					"If this is a new upgrade, this configuration could cause unpredictable behavior and irrecoverable damage to your Suchain.")
 				ux.Logger.PrintToUser(
 					"The config MUST be removed. Use caution before proceeding")
+				if !prompts.IsInteractive() {
+					return nil, fmt.Errorf("upgrade timestamp is in the past; use --force to skip this check")
+				}
 				yes, err := app.Prompt.CaptureYesNo("Do you want to continue (use --force to skip prompting)?")
 				if err != nil {
 					return nil, err

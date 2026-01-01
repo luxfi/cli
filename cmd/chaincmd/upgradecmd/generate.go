@@ -12,6 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/constants"
+	cliprompts "github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
@@ -46,16 +47,35 @@ const (
 	RewardManager     = "Customize Fees Distribution"
 )
 
+var generateConfirm bool
+
 // lux blockchain upgrade generate
 func newUpgradeGenerateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate [blockchainName]",
 		Short: "Generate the configuration file to upgrade blockchain nodes",
-		Long: `The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain. It
-guides the user through the process using an interactive wizard.`,
+		Long: `The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain.
+It guides the user through the process using an interactive wizard.
+
+IMPORTANT: This command requires interactive mode (TTY) due to the complexity of precompile
+configuration. For non-interactive/CI environments, create the upgrade.json file manually
+or use 'lux blockchain upgrade import' to import a pre-created configuration.
+
+Use --yes/-y to skip the initial warning confirmation when running interactively.
+
+Examples:
+  # Interactive mode (wizard)
+  lux blockchain upgrade generate mychain
+
+  # Skip initial warning
+  lux blockchain upgrade generate mychain --yes
+
+  # For CI/non-interactive: import a pre-created upgrade file instead
+  lux blockchain upgrade import mychain --upgrade-filepath ./upgrade.json`,
 		RunE: upgradeGenerateCmd,
 		Args: cobrautils.ExactArgs(1),
 	}
+	cmd.Flags().BoolVarP(&generateConfirm, "yes", "y", false, "Skip initial warning confirmation prompt")
 	return cmd
 }
 
@@ -65,6 +85,14 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("The provided blockchain name %q does not exist", blockchainName)
 		return nil
 	}
+
+	// This command requires interactive mode for the wizard
+	if !cliprompts.IsInteractive() {
+		return fmt.Errorf("this command requires interactive mode (TTY)\n" +
+			"For non-interactive/CI environments, create upgrade.json manually or use:\n" +
+			"  lux blockchain upgrade import %s --upgrade-filepath ./upgrade.json", blockchainName)
+	}
+
 	// print some warning/info message
 	ux.Logger.PrintToUser("%s", luxlog.Bold.Wrap(luxlog.Yellow.Wrap(
 		"Performing a network upgrade requires coordinating the upgrade network-wide.")))
@@ -80,14 +108,16 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 			"https://docs.lux.network/lux-l1s/upgrade/customize-lux-l1#network-upgrades-enabledisable-precompiles ")+
 			luxlog.Reset.Wrap("for more information")))
 
-	txt := "Press [Enter] to continue, or abort by choosing 'no'"
-	yes, err := app.Prompt.CaptureYesNo(txt)
-	if err != nil {
-		return err
-	}
-	if !yes {
-		ux.Logger.PrintToUser("Aborted by user")
-		return nil
+	if !generateConfirm {
+		txt := "Press [Enter] to continue, or abort by choosing 'no'"
+		yes, err := app.Prompt.CaptureYesNo(txt)
+		if err != nil {
+			return err
+		}
+		if !yes {
+			ux.Logger.PrintToUser("Aborted by user")
+			return nil
+		}
 	}
 
 	allPreComps := []string{
