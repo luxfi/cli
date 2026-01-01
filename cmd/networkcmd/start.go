@@ -3,11 +3,14 @@
 package networkcmd
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
@@ -28,6 +31,8 @@ var (
 	snapshotName           string
 	mainnet                bool
 	testnet                bool
+	devnet                 bool // Multi-validator devnet (port 9650)
+	devMode                bool // Single-node dev mode with K=1 consensus
 	numValidators          int
 	nodePath               string // Path to custom luxd binary
 	portBase               int    // Base port for nodes (each node uses 2 ports)
@@ -118,11 +123,72 @@ func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Starts a local network",
-		Long: `The network start command starts a local, multi-node Lux network on your machine.
+		Long: `The network start command starts a local, multi-node Lux network.
 
-By default, the command loads the default snapshot. If you provide the --snapshot-name
-flag, the network loads that snapshot instead. The command fails if the local network is
-already running.`,
+NETWORK TYPES (choose one, required):
+
+  --mainnet, -m    Production mainnet with 5 validators (port 9630)
+                   - Network ID: 1
+                   - HTTP API: ports 9630-9638
+                   - Use for mainnet testing and development
+
+  --testnet, -t    Test network with 5 validators (port 9640)
+                   - Network ID: 2
+                   - HTTP API: ports 9640-9648
+                   - Use for testnet deployment testing
+
+  --devnet, -d     Development network with 5 validators (port 9650)
+                   - Network ID: 3
+                   - HTTP API: ports 9650-9658
+                   - Use for rapid local development
+
+  --dev            Single-node dev mode with K=1 consensus
+                   - Instant block finality
+                   - No validator sampling
+                   - All chains enabled (C/P/X, DEX, G-Chain)
+                   - Ideal for unit testing and rapid iteration
+
+OPTIONS:
+
+  --num-validators    Number of validator nodes (default: 5)
+  --node-path         Path to custom luxd binary
+  --node-version      luxd version to use (default: latest)
+  --snapshot-name     Resume from named snapshot
+  --port              Base port for APIs (overrides defaults)
+
+EXAMPLES:
+
+  # Start mainnet (5 validators, port 9630)
+  lux network start --mainnet
+  lux network start -m
+
+  # Start testnet with custom validator count
+  lux network start --testnet --num-validators 3
+
+  # Start devnet (most common for development)
+  lux network start --devnet
+
+  # Start single-node dev mode for rapid testing
+  lux network start --dev
+
+  # Use custom luxd binary
+  lux network start --devnet --node-path ~/work/lux/node/build/luxd
+
+NOTES:
+
+  - Only one network type can run at a time
+  - Each network type uses different ports to avoid conflicts
+  - Network data is stored in ~/.lux/networks/<type>
+  - Use 'lux network status' to verify the network is running
+  - Use 'lux network stop' to stop and save a snapshot
+  - Admin APIs are enabled by default for chain deployment
+
+TYPICAL WORKFLOW:
+
+  1. Start network:    lux network start --devnet
+  2. Deploy chain:     lux chain deploy mychain
+  3. Test your dapp:   (connect to http://localhost:9650/ext/bc/C/rpc)
+  4. Stop network:     lux network stop`,
 
 		RunE:         StartNetwork,
 		Args:         cobra.ExactArgs(0),
@@ -132,10 +198,12 @@ already running.`,
 	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&nodePath, "node-path", "", "path to local luxd binary (overrides --node-version)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
-	cmd.Flags().BoolVar(&mainnet, "mainnet", false, "start a mainnet node with 5 validators")
-	cmd.Flags().BoolVar(&testnet, "testnet", false, "start a testnet node with 5 validators")
+	cmd.Flags().BoolVarP(&mainnet, "mainnet", "m", false, "start mainnet with 5 validators (port 9630)")
+	cmd.Flags().BoolVarP(&testnet, "testnet", "t", false, "start testnet with 5 validators (port 9640)")
+	cmd.Flags().BoolVarP(&devnet, "devnet", "d", false, "start devnet with 5 validators (port 9650)")
+	cmd.Flags().BoolVar(&devMode, "dev", false, "single-node dev mode with K=1 consensus")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
-	cmd.Flags().IntVar(&portBase, "port-base", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
+	cmd.Flags().IntVar(&portBase, "port", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
 	// BadgerDB flags
 	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
 	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
@@ -149,19 +217,40 @@ already running.`,
 
 func StartNetwork(*cobra.Command, []string) error {
 	// Check for conflicting flags
-	if mainnet && testnet {
-		return fmt.Errorf("cannot use both --mainnet and --testnet flags together")
+	flagCount := 0
+	if mainnet {
+		flagCount++
+	}
+	if testnet {
+		flagCount++
+	}
+	if devnet {
+		flagCount++
+	}
+	if devMode {
+		flagCount++
+	}
+	if flagCount > 1 {
+		return fmt.Errorf("cannot use multiple network flags together (--mainnet, --testnet, --devnet, --dev)")
 	}
 
-	// If mainnet or testnet flag is set, delegate to the appropriate function
+	// Dev mode - single node with K=1 consensus and all chains
+	if devMode {
+		return StartDevMode()
+	}
+
+	// If mainnet, testnet, or devnet flag is set, delegate to the appropriate function
 	if mainnet {
 		return StartMainnet()
 	}
 	if testnet {
 		return StartTestnet()
 	}
-	// No network flag specified - require explicit --mainnet or --testnet
-	return fmt.Errorf("please specify --mainnet or --testnet")
+	if devnet {
+		return StartDevnet()
+	}
+	// No network flag specified - require explicit network type
+	return fmt.Errorf("please specify --mainnet, --testnet, --devnet, or --dev")
 }
 
 func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
@@ -348,13 +437,16 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 	opts = append(opts, client.WithPluginDir(pluginDir))
 
-	ctx := binutils.GetAsyncContext()
+	// Use a longer timeout for network start (nodes need time to bootstrap)
+	// 2 minutes is enough for 5 nodes on local machine
+	startCtx, startCancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer startCancel()
 
 	ux.Logger.PrintToUser("Starting network with genesis from luxfi/genesis package...")
 	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
 	ux.Logger.PrintToUser("Root data directory: %s", rootDataDir)
 
-	startResp, err := cli.Start(ctx, localNodePath, opts...)
+	startResp, err := cli.Start(startCtx, localNodePath, opts...)
 	if err != nil {
 		// Check if network is already bootstrapped (backend was started previously)
 		errStr := err.Error()
@@ -366,7 +458,7 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
-	clusterInfo, err := chain.WaitForHealthy(ctx, cli)
+	clusterInfo, err := chain.WaitForHealthy(startCtx, cli)
 	if err != nil {
 		return fmt.Errorf("failed waiting for network to become healthy: %w", err)
 	}
@@ -429,6 +521,141 @@ func StartTestnet() error {
 		networkName: "testnet",
 		portBase:    pb,
 	})
+}
+
+// StartDevnet starts a devnet network with configurable validator nodes
+func StartDevnet() error {
+	// Use --port-base flag if provided, otherwise default to 9650
+	pb := portBase
+	if pb == 9630 && !isPortBaseFlagSet() {
+		pb = 9650 // devnet default (separate from mainnet/testnet)
+	}
+	return startPublicNetwork(networkConfig{
+		networkID:   constants.DevnetID, // P-Chain network ID (3)
+		networkName: "devnet",
+		portBase:    pb,
+	})
+}
+
+// StartDevMode starts a single-node development network with K=1 consensus
+// This runs luxd directly (not through netrunner) for maximum simplicity
+// luxd's built-in --dev flag enables: single-node consensus, no sybil protection, instant blocks
+func StartDevMode() error {
+	ux.Logger.PrintToUser("Starting Lux dev mode (single node, K=1 consensus)...")
+	ux.Logger.PrintToUser("All chains enabled: C-Chain, P-Chain, X-Chain")
+
+	localNodePath, err := findNodeBinary()
+	if err != nil {
+		return err
+	}
+
+	// Dev mode uses port 9650 by default (standard devnet port)
+	effectivePortBase := portBase
+	if effectivePortBase == 9630 && !isPortBaseFlagSet() {
+		effectivePortBase = 9650 // devnet default
+	}
+
+	// Set up data directory
+	dataDir := filepath.Join(os.Getenv("HOME"), ".lux", "devnet")
+	dbDir := filepath.Join(dataDir, "db")
+	logDir := filepath.Join(dataDir, "logs")
+
+	// Clean up stale database to prevent genesis hash mismatch
+	if _, err := os.Stat(dbDir); err == nil {
+		ux.Logger.PrintToUser("Cleaning stale dev database...")
+		if err := os.RemoveAll(dbDir); err != nil {
+			ux.Logger.PrintToUser("Warning: failed to clean dev database: %v", err)
+		}
+	}
+
+	// Ensure directories exist
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		return fmt.Errorf("failed to create log directory: %w", err)
+	}
+
+	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
+	ux.Logger.PrintToUser("Data directory: %s", dataDir)
+
+	// Build luxd command with --dev flag
+	// The --dev flag automatically configures:
+	// - consensus-sample-size=1 and consensus-quorum-size=1
+	// - poa-single-node-mode=true
+	// - skip-bootstrap=true
+	// - sybil-protection-enabled=false
+	// - enable-automining=true
+	// - ephemeral staking certs
+	args := []string{
+		"--dev",
+		fmt.Sprintf("--network-id=%d", 1337),
+		fmt.Sprintf("--http-host=%s", "0.0.0.0"),
+		fmt.Sprintf("--http-port=%d", effectivePortBase),
+		fmt.Sprintf("--staking-port=%d", effectivePortBase+1),
+		fmt.Sprintf("--data-dir=%s", dataDir),
+		fmt.Sprintf("--log-dir=%s", logDir),
+		"--log-level=info",
+		"--api-admin-enabled=true",
+		"--api-keystore-enabled=true",
+		"--index-enabled=true",
+	}
+
+	cmd := exec.Command(localNodePath, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	// Start the node in the background
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start luxd: %w", err)
+	}
+
+	ux.Logger.PrintToUser("luxd started (PID: %d)", cmd.Process.Pid)
+	ux.Logger.PrintToUser("Waiting for node to become healthy...")
+
+	// Wait for health endpoint to respond with explicit timeout
+	healthURL := fmt.Sprintf("http://localhost:%d/ext/health", effectivePortBase)
+	healthTimeout := 30 * time.Second
+	healthCtx, healthCancel := context.WithTimeout(context.Background(), healthTimeout)
+	defer healthCancel()
+
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-healthCtx.Done():
+			return fmt.Errorf("timeout waiting for node to become healthy after %s: %w", healthTimeout, healthCtx.Err())
+		case <-ticker.C:
+			resp, err := http.Get(healthURL)
+			if err != nil {
+				continue // Network not ready yet
+			}
+			resp.Body.Close()
+			if resp.StatusCode == 200 {
+				goto healthy
+			}
+		}
+	}
+healthy:
+
+	ux.Logger.PrintToUser("\n🚀 Dev mode started successfully!")
+	ux.Logger.PrintToUser("\n📡 Chain Endpoints:")
+	ux.Logger.PrintToUser("  C-Chain RPC:    http://localhost:%d/ext/bc/C/rpc", effectivePortBase)
+	ux.Logger.PrintToUser("  C-Chain WS:     ws://localhost:%d/ext/bc/C/ws", effectivePortBase)
+	ux.Logger.PrintToUser("  P-Chain RPC:    http://localhost:%d/ext/bc/P", effectivePortBase)
+	ux.Logger.PrintToUser("  X-Chain RPC:    http://localhost:%d/ext/bc/X", effectivePortBase)
+	ux.Logger.PrintToUser("  Health:         http://localhost:%d/ext/health", effectivePortBase)
+	ux.Logger.PrintToUser("\n⚡ Features:")
+	ux.Logger.PrintToUser("  • K=1 consensus (instant blocks)")
+	ux.Logger.PrintToUser("  • POA single-node mode")
+	ux.Logger.PrintToUser("  • No validator sampling")
+	ux.Logger.PrintToUser("  • Auto-mining enabled")
+	ux.Logger.PrintToUser("  • Full API access (admin, IPC, index)")
+	ux.Logger.PrintToUser("\nData directory: %s", dataDir)
+	ux.Logger.PrintToUser("Logs: %s", logDir)
+	ux.Logger.PrintToUser("\nDev network is ready for use!")
+	ux.Logger.PrintToUser("To stop: pkill luxd")
+
+	// Wait for the node process to keep running
+	return cmd.Wait()
 }
 
 // isPortBaseFlagSet checks if --port-base was explicitly set by user

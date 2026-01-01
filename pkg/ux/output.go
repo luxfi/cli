@@ -96,6 +96,72 @@ func PrintWait(cancel chan struct{}) {
 	}
 }
 
+// StepTracker tracks progress of multi-step operations with elapsed time
+type StepTracker struct {
+	stepStart    time.Time
+	warnAfter    time.Duration
+	warningShown bool
+	stepName     string
+	ul           *UserLog
+}
+
+// NewStepTracker creates a tracker that warns if a step takes longer than warnAfter
+func NewStepTracker(ul *UserLog, warnAfter time.Duration) *StepTracker {
+	return &StepTracker{
+		ul:        ul,
+		warnAfter: warnAfter,
+	}
+}
+
+// Start begins tracking a new step
+func (st *StepTracker) Start(stepName string) {
+	st.stepStart = time.Now()
+	st.stepName = stepName
+	st.warningShown = false
+	st.ul.PrintToUser("%s...", stepName)
+}
+
+// Elapsed returns the elapsed time for the current step
+func (st *StepTracker) Elapsed() time.Duration {
+	return time.Since(st.stepStart)
+}
+
+// CheckWarn prints a warning if the step has taken longer than the threshold
+// Returns true if warning was printed
+func (st *StepTracker) CheckWarn() bool {
+	if st.warningShown {
+		return false
+	}
+	elapsed := st.Elapsed()
+	if elapsed > st.warnAfter {
+		st.ul.PrintToUser("Warning: %s taking longer than expected (%.1fs)...", st.stepName, elapsed.Seconds())
+		st.warningShown = true
+		return true
+	}
+	return false
+}
+
+// Complete marks the step as done with success
+func (st *StepTracker) Complete(suffix string) {
+	elapsed := st.Elapsed()
+	if suffix != "" {
+		st.ul.GreenCheckmarkToUser("%s (%.1fs) - %s", st.stepName, elapsed.Seconds(), suffix)
+	} else {
+		st.ul.GreenCheckmarkToUser("%s (%.1fs)", st.stepName, elapsed.Seconds())
+	}
+}
+
+// CompleteSuccess is shorthand for Complete with "Success" suffix
+func (st *StepTracker) CompleteSuccess() {
+	st.Complete("Success")
+}
+
+// Failed marks the step as failed with an error
+func (st *StepTracker) Failed(reason string) {
+	elapsed := st.Elapsed()
+	st.ul.RedXToUser("%s (%.1fs) - FAILED: %s", st.stepName, elapsed.Seconds(), reason)
+}
+
 // PrintTableEndpoints prints the endpoints coming from the healthy call
 func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	table := tablewriter.NewWriter(os.Stdout)
