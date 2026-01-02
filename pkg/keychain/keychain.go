@@ -125,8 +125,8 @@ func GetKeychainFromCmdLineFlags(
 	if !flags.EnsureMutuallyExclusive([]bool{useLedger, useLocalKey, keyName != ""}) {
 		return nil, ErrMutuallyExlusiveKeySource
 	}
-	switch {
-	case network == models.Local:
+	switch network {
+	case models.Local:
 		// prompt the user if no key source was provided
 		if !useLocalKey && !useLedger && keyName == "" {
 			var err error
@@ -135,7 +135,7 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network == models.Devnet:
+	case models.Devnet:
 		// prompt the user if no key source was provided
 		if !useLocalKey && !useLedger && keyName == "" {
 			var err error
@@ -144,7 +144,7 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network == models.Testnet:
+	case models.Testnet:
 		// prompt the user if no key source was provided
 		if !useLedger && keyName == "" {
 			var err error
@@ -153,7 +153,7 @@ func GetKeychainFromCmdLineFlags(
 				return nil, err
 			}
 		}
-	case network == models.Mainnet:
+	case models.Mainnet:
 		if keyName == "" && !useLocalKey {
 			useLedger = true
 		} else {

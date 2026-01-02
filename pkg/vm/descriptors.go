@@ -37,7 +37,8 @@ func getVMVersion(
 	addGoBackOption bool,
 ) (string, error) {
 	var err error
-	if vmVersion == "latest" {
+	switch vmVersion {
+	case "latest":
 		vmVersion, err = app.Downloader.GetLatestReleaseVersion(binutils.GetGithubLatestReleaseURL(
 			constants.LuxOrg,
 			repoName,
@@ -45,7 +46,7 @@ func getVMVersion(
 		if err != nil {
 			return "", err
 		}
-	} else if vmVersion == "" {
+	case "":
 		vmVersion, _, err = askForVMVersion(app, vmName, repoName, addGoBackOption)
 		if err != nil {
 			return "", err

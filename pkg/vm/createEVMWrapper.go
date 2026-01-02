@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/warp"
-	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 // CreateEVMGenesisWithParams creates EVM genesis with extended parameters
@@ -29,7 +29,7 @@ func CreateEVMGenesisWithParams(
 	chainIDBig := new(big.Int).SetUint64(params.ChainID)
 
 	// Create allocations with prefunded addresses
-	allocations := make(core.GenesisAlloc)
+	allocations := make(types.GenesisAlloc)
 
 	// Add allocation for any prefunded addresses from params
 	for _, alloc := range params.Allocations {
@@ -43,7 +43,7 @@ func CreateEVMGenesisWithParams(
 				balance = new(big.Int).SetUint64(0)
 			}
 		}
-		allocations[addr] = core.GenesisAccount{
+		allocations[addr] = types.Account{
 			Balance: balance,
 		}
 	}
@@ -57,7 +57,7 @@ func CreateEVMGenesisWithParams(
 			localAddr := common.HexToAddress(localKey.C())
 			balance := new(big.Int)
 			balance.SetString("1000000000000000000000000000", 10) // 1 billion with 18 decimals
-			allocations[localAddr] = core.GenesisAccount{
+			allocations[localAddr] = types.Account{
 				Balance: balance,
 			}
 		}
@@ -67,7 +67,7 @@ func CreateEVMGenesisWithParams(
 	if warpInfo != nil && warpInfo.FundedAddress != "" {
 		warpAddr := common.HexToAddress(warpInfo.FundedAddress)
 		if warpInfo.FundedBalance != nil {
-			allocations[warpAddr] = core.GenesisAccount{
+			allocations[warpAddr] = types.Account{
 				Balance: warpInfo.FundedBalance,
 			}
 		}

@@ -9,8 +9,8 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 const (
@@ -24,8 +24,8 @@ func getAllocation(
 	defaultAirdropAmount string,
 	multiplier *big.Int,
 	captureAmountLabel string,
-) (core.GenesisAlloc, statemachine.StateDirection, error) {
-	allocation := core.GenesisAlloc{}
+) (types.GenesisAlloc, statemachine.StateDirection, error) {
+	allocation := types.GenesisAlloc{}
 
 	var addressHex crypto.Address
 	var err error
@@ -43,7 +43,7 @@ func getAllocation(
 
 		amount = amount.Mul(amount, multiplier)
 
-		account := core.GenesisAccount{
+		account := types.Account{
 			Balance: amount,
 		}
 

@@ -248,7 +248,7 @@ func ValidateHexa(s string) error {
 		return errors.New("hexadecimal string must have at least one character after 0x")
 	}
 	for _, c := range s[2:] {
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+		if (c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
 			return errors.New("invalid hexadecimal character")
 		}
 	}
