@@ -8,7 +8,7 @@ if ! [[ "$0" =~ scripts/build.sh ]]; then
 fi
 
 if [ $# -eq 0 ] ; then
-    VERSION=`cat VERSION`
+    VERSION=$(cat VERSION)
 else
     VERSION=$1
 fi
