@@ -226,21 +226,21 @@ func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 func SaveQuantumKeys(nodeDir string, keys *QuantumKeys) error {
 	// Save BLS key
 	blsPath := filepath.Join(nodeDir, constants.BLSKeyFileName)
-	if err := os.WriteFile(blsPath, keys.BLSSecretKey, 0600); err != nil {
+	if err := os.WriteFile(blsPath, keys.BLSSecretKey, 0o600); err != nil {
 		return fmt.Errorf("failed to save BLS key: %w", err)
 	}
 
 	// Save Corona key (hex encoded)
 	coronaPath := filepath.Join(nodeDir, constants.CoronaKeyFileName)
 	coronaHex := hex.EncodeToString(keys.CoronaSecretKey)
-	if err := os.WriteFile(coronaPath, []byte(coronaHex), 0600); err != nil {
+	if err := os.WriteFile(coronaPath, []byte(coronaHex), 0o600); err != nil {
 		return fmt.Errorf("failed to save Corona key: %w", err)
 	}
 
 	// Save ML-DSA key (hex encoded)
 	mldsaPath := filepath.Join(nodeDir, constants.MLDSAKeyFileName)
 	mldsaHex := hex.EncodeToString(keys.MLDSASecretKey)
-	if err := os.WriteFile(mldsaPath, []byte(mldsaHex), 0600); err != nil {
+	if err := os.WriteFile(mldsaPath, []byte(mldsaHex), 0o600); err != nil {
 		return fmt.Errorf("failed to save ML-DSA key: %w", err)
 	}
 

@@ -93,8 +93,6 @@ func NetworkOptionFromString(s string) NetworkOption {
 		return Mainnet
 	case s == "Testnet":
 		return Testnet
-	case s == "Testnet":
-		return Testnet
 	case s == "Local Network":
 		return Local
 	case s == "Devnet" || strings.Contains(s, "Devnet"):

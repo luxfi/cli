@@ -69,14 +69,14 @@ func list(_ *cobra.Command, args []string) error {
 		[]string{"Node ID", "Validation ID", "Weight", "Remaining Balance (LUX)"},
 	)
 	for _, validator := range validators {
-		t.Append([]string{
+		_ = t.Append([]string{
 			validator.NodeID.String(),
 			validator.ValidationID.String(),
 			fmt.Sprintf("%d", validator.Weight),
 			fmt.Sprintf("%.5f", float64(validator.Balance)/float64(units.Lux)),
 		})
 	}
-	t.Render()
+	_ = t.Render()
 
 	return nil
 }

@@ -145,13 +145,13 @@ func CleanupLogs(nodesInfo map[string]NodeInfo, blockchainID string) {
 	for _, nodeInfo := range nodesInfo {
 		// Remove blockchain-specific log file
 		blockchainLogFile := filepath.Join(nodeInfo.LogDir, blockchainID+".log")
-		os.Remove(blockchainLogFile)
+		_ = os.Remove(blockchainLogFile)
 
 		// Also try to clear main.log if it exists (for subnet configs)
 		mainLogFile := filepath.Join(nodeInfo.LogDir, "main.log")
 		if _, err := os.Stat(mainLogFile); err == nil {
 			// Truncate the file instead of deleting it to avoid issues with open file handles
-			os.Truncate(mainLogFile, 0)
+			_ = os.Truncate(mainLogFile, 0)
 		}
 	}
 }

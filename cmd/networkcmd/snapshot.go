@@ -13,9 +13,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	snapshotNetworkType string
-)
+const networkTypeCustom = "custom"
+
+var snapshotNetworkType string
 
 func newSnapshotCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -132,13 +132,13 @@ func determineNetworkType() string {
 	if snapshotNetworkType != "" {
 		// Normalize "local" to "custom"
 		if snapshotNetworkType == "local" {
-			return "custom"
+			return networkTypeCustom
 		}
 		return snapshotNetworkType
 	}
 
 	// Check for running networks in priority order
-	for _, netType := range []string{"custom", "devnet", "testnet", "mainnet"} {
+	for _, netType := range []string{networkTypeCustom, "devnet", "testnet", "mainnet"} {
 		state, err := app.LoadNetworkStateForType(netType)
 		if err == nil && state != nil && state.Running {
 			return netType
@@ -146,7 +146,7 @@ func determineNetworkType() string {
 	}
 
 	// Default to custom
-	return "custom"
+	return networkTypeCustom
 }
 
 func saveSnapshot(cmd *cobra.Command, args []string) error {
@@ -177,7 +177,7 @@ func saveSnapshot(cmd *cobra.Command, args []string) error {
 
 	// Get snapshots directory
 	snapshotsDir := app.GetSnapshotsDir()
-	if err := os.MkdirAll(snapshotsDir, 0755); err != nil {
+	if err := os.MkdirAll(snapshotsDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create snapshots directory: %w", err)
 	}
 
@@ -211,7 +211,7 @@ func saveSnapshot(cmd *cobra.Command, args []string) error {
 		metadata["created_at"],
 		metadata["source"])
 
-	if err := os.WriteFile(metadataPath, []byte(metadataContent), 0644); err != nil {
+	if err := os.WriteFile(metadataPath, []byte(metadataContent), 0o644); err != nil {
 		ux.Logger.PrintToUser("Warning: failed to save metadata: %v", err)
 	}
 
@@ -269,7 +269,7 @@ func loadSnapshot(cmd *cobra.Command, args []string) error {
 
 	// Remove metadata file from destination (it's not part of the network data)
 	metadataPath := filepath.Join(destDir, "snapshot_metadata.txt")
-	os.Remove(metadataPath)
+	_ = os.Remove(metadataPath)
 
 	ux.Logger.PrintToUser("✓ Snapshot '%s' loaded successfully", snapshotName)
 	ux.Logger.PrintToUser("\nTo start the network, run:")

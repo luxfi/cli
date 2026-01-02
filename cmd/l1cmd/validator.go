@@ -71,7 +71,7 @@ The validator can be added to:
 				return fmt.Errorf("failed to load L1 %s: %w", l1Name, err)
 			}
 
-			if sc.ValidatorManagement == "proof-of-authority" {
+			if sc.ValidatorManagement == ValidatorManagementPoA {
 				ux.Logger.PrintToUser("Using Proof of Authority validator management")
 				// PoA flow - only owner can add validators
 			} else {

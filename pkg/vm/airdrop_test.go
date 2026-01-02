@@ -15,8 +15,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var testAirdropAddress = common.HexToAddress("0x098B69E43b1720Bd12378225519d74e5F3aD0eA5")
-var testAirdropCryptoAddress = crypto.HexToAddress("0x098B69E43b1720Bd12378225519d74e5F3aD0eA5")
+var (
+	testAirdropAddress       = common.HexToAddress("0x098B69E43b1720Bd12378225519d74e5F3aD0eA5")
+	testAirdropCryptoAddress = crypto.HexToAddress("0x098B69E43b1720Bd12378225519d74e5F3aD0eA5")
+)
 
 func TestGetAllocationCustomUnits(t *testing.T) {
 	require := setupTest(t)

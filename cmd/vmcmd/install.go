@@ -5,6 +5,7 @@ package vmcmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,6 +20,11 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	luxconfig "github.com/luxfi/config"
 	"github.com/spf13/cobra"
+)
+
+const (
+	vmNameEVM = "evm"
+	orgLuxfi  = "luxfi"
 )
 
 var installVersion string
@@ -73,7 +79,7 @@ func runInstall(_ *cobra.Command, args []string) error {
 
 	// Determine VM name for VMID calculation
 	vmName := name
-	if name == "evm" && org == "luxfi" {
+	if name == vmNameEVM && org == orgLuxfi {
 		vmName = "Lux EVM" // Canonical name for Lux EVM
 	}
 
@@ -102,10 +108,7 @@ func runInstall(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Installing %s/%s@%s...", org, name, version)
 
 	// Build download URL based on platform
-	downloadURL, ext, err := getDownloadURL(org, name, version)
-	if err != nil {
-		return fmt.Errorf("failed to build download URL: %w", err)
-	}
+	downloadURL, ext := getDownloadURL(org, name, version)
 
 	ux.Logger.PrintToUser("Downloading from %s...", downloadURL)
 
@@ -120,7 +123,7 @@ func runInstall(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create temp directory: %w", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Extract archive
 	if err := binutils.InstallArchive(ext, archive, tmpDir); err != nil {
@@ -170,7 +173,7 @@ func runInstall(_ *cobra.Command, args []string) error {
 }
 
 // getDownloadURL builds the download URL for a package
-func getDownloadURL(org, name, version string) (string, string, error) {
+func getDownloadURL(org, name, version string) (string, string) {
 	goarch := runtime.GOARCH
 	goos := runtime.GOOS
 
@@ -178,7 +181,7 @@ func getDownloadURL(org, name, version string) (string, string, error) {
 	ext := "tar.gz"
 
 	// Handle known packages with specific naming conventions
-	if org == "luxfi" && name == "evm" {
+	if org == orgLuxfi && name == vmNameEVM {
 		// Lux EVM has specific naming: evm_<version>_<os>_<arch>.tar.gz
 		versionWithoutV := strings.TrimPrefix(version, "v")
 		url = fmt.Sprintf(
@@ -206,7 +209,7 @@ func getDownloadURL(org, name, version string) (string, string, error) {
 		)
 	}
 
-	return url, ext, nil
+	return url, ext
 }
 
 // findBinary locates the VM binary in the extracted archive
@@ -215,7 +218,7 @@ func findBinary(dir string, name string) (string, error) {
 	searchNames := []string{
 		name,
 		strings.TrimSuffix(name, "-vm"),
-		"evm", // For Lux EVM
+		vmNameEVM, // For Lux EVM
 	}
 
 	var foundPath string
@@ -244,7 +247,7 @@ func findBinary(dir string, name string) (string, error) {
 		return nil
 	})
 
-	if err != nil && err != filepath.SkipAll {
+	if err != nil && !errors.Is(err, filepath.SkipAll) {
 		return "", err
 	}
 
@@ -263,7 +266,7 @@ func findBinary(dir string, name string) (string, error) {
 			}
 			return nil
 		})
-		if err != nil && err != filepath.SkipAll {
+		if err != nil && !errors.Is(err, filepath.SkipAll) {
 			return "", err
 		}
 	}

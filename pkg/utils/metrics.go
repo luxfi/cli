@@ -140,7 +140,7 @@ func TrackMetrics(command *cobra.Command, flags map[string]string) {
 
 	client, _ := posthog.NewWithConfig(telemetryToken, posthog.Config{Endpoint: telemetryInstance})
 
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	usr, _ := user.Current() // use empty string if err
 	hash := sha256.Sum256([]byte(fmt.Sprintf("%s%s", usr.Username, usr.Uid)))
