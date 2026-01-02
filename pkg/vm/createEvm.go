@@ -231,10 +231,8 @@ func CreateEVMGenesis(chainID *big.Int, allocations core.GenesisAlloc, timestamp
 	}
 
 	// Apply custom timestamps if provided
-	if timestamps != nil {
-		for key, value := range timestamps {
-			config[key] = fmt.Sprintf("0x%x", value)
-		}
+	for key, value := range timestamps {
+		config[key] = fmt.Sprintf("0x%x", value)
 	}
 
 	return config

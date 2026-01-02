@@ -187,8 +187,6 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	network.HandlePublicNetworkSimulation()
-
 	// For primary network validators, we don't need proof of possession for now
 	// but keeping the prompt for future compatibility
 	_, err = promptProofOfPossession()
