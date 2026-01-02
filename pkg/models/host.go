@@ -148,7 +148,7 @@ func (h *Host) Download(remoteFile string, localFile string, timeout time.Durati
 			return err
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(localFile), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Dir(localFile), 0o750); err != nil { //nolint:gosec // G301: Using 0750 for directory
 		return err
 	}
 	_, err := timedFunction(

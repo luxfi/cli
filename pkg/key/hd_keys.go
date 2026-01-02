@@ -296,7 +296,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(ecDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create EC directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(ecDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.ECPublicKey)), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(ecDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.ECPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
 		return fmt.Errorf("failed to save EC public key: %w", err)
 	}
 
@@ -305,10 +305,10 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(blsDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create BLS directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(blsDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.BLSPublicKey)), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(blsDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.BLSPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
 		return fmt.Errorf("failed to save BLS public key: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(blsDir, "pop.key"), []byte(hex.EncodeToString(keySet.BLSPoP)), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(blsDir, "pop.key"), []byte(hex.EncodeToString(keySet.BLSPoP)), 0o644); err != nil { //nolint:gosec // G306: PoP file needs to be readable
 		return fmt.Errorf("failed to save BLS proof of possession: %w", err)
 	}
 
@@ -317,7 +317,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(rtDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create Ringtail directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingtailPublicKey)), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingtailPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
 		return fmt.Errorf("failed to save Ringtail public key: %w", err)
 	}
 
@@ -326,7 +326,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(mldsaDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create ML-DSA directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(mldsaDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.MLDSAPublicKey)), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(mldsaDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.MLDSAPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
 		return fmt.Errorf("failed to save ML-DSA public key: %w", err)
 	}
 
@@ -364,7 +364,7 @@ func LoadKeySetPublicOnly(name string) (*HDKeySet, error) {
 
 	// Load EC public key only
 	ecDir := filepath.Join(baseDir, ECKeyDir)
-	ecPubHex, err := os.ReadFile(filepath.Join(ecDir, PublicKeyFile))
+	ecPubHex, err := os.ReadFile(filepath.Join(ecDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err != nil {
 		return nil, fmt.Errorf("failed to load EC public key: %w", err)
 	}
@@ -377,25 +377,25 @@ func LoadKeySetPublicOnly(name string) (*HDKeySet, error) {
 
 	// Load BLS public key and PoP (public only)
 	blsDir := filepath.Join(baseDir, BLSKeyDir)
-	blsPubHex, err := os.ReadFile(filepath.Join(blsDir, PublicKeyFile))
+	blsPubHex, err := os.ReadFile(filepath.Join(blsDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
 		keySet.BLSPublicKey, _ = hex.DecodeString(string(blsPubHex))
 	}
-	blsPoPHex, err := os.ReadFile(filepath.Join(blsDir, "pop.key"))
+	blsPoPHex, err := os.ReadFile(filepath.Join(blsDir, "pop.key")) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
 		keySet.BLSPoP, _ = hex.DecodeString(string(blsPoPHex))
 	}
 
 	// Load Ringtail public key
 	rtDir := filepath.Join(baseDir, RingtailKeyDir)
-	rtPubHex, err := os.ReadFile(filepath.Join(rtDir, PublicKeyFile))
+	rtPubHex, err := os.ReadFile(filepath.Join(rtDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
 		keySet.RingtailPublicKey, _ = hex.DecodeString(string(rtPubHex))
 	}
 
 	// Load ML-DSA public key
 	mldsaDir := filepath.Join(baseDir, MLDSAKeyDir)
-	mldsaPubHex, err := os.ReadFile(filepath.Join(mldsaDir, PublicKeyFile))
+	mldsaPubHex, err := os.ReadFile(filepath.Join(mldsaDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
 		keySet.MLDSAPublicKey, _ = hex.DecodeString(string(mldsaPubHex))
 	}

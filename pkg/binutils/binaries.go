@@ -107,7 +107,7 @@ func installZipArchive(zipfile []byte, binDir string) error {
 			if err := os.MkdirAll(filepath.Dir(path), f.Mode()); err != nil {
 				return fmt.Errorf("failed creating file from zip entry: %w", err)
 			}
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode()) //nolint:gosec // G304: Extracting zip file
 			if err != nil {
 				return fmt.Errorf("failed opening file from zip entry: %w", err)
 			}
@@ -181,7 +181,7 @@ func installTarGzArchive(targz []byte, binDir string) error {
 			if err := os.MkdirAll(containingDir, constants.DefaultPerms755); err != nil {
 				return fmt.Errorf("failed creating directory from tar entry %w", err)
 			}
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode)) //nolint:gosec // G304: Extracting tar file
 			if err != nil {
 				return fmt.Errorf("failed opening new file from tar entry %w", err)
 			}

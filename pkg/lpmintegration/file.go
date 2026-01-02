@@ -93,7 +93,7 @@ func LoadSubnetFile(app *application.Lux, subnetKey string) (Subnet, error) {
 	subnetYamlPath := filepath.Join(app.LpmDir, "repositories", repoAlias, "subnets", subnetName+".yaml")
 	var subnetWrapper SubnetWrapper
 
-	subnetYamlBytes, err := os.ReadFile(subnetYamlPath)
+	subnetYamlBytes, err := os.ReadFile(subnetYamlPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return Subnet{}, err
 	}
@@ -119,7 +119,7 @@ func LoadVMFile(app *application.Lux, repo, vm string) (VM, error) {
 	vmYamlPath := filepath.Join(app.LpmDir, "repositories", repo, "vms", vm+".yaml")
 	var vmWrapper VMWrapper
 
-	vmYamlBytes, err := os.ReadFile(vmYamlPath)
+	vmYamlBytes, err := os.ReadFile(vmYamlPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return VM{}, err
 	}

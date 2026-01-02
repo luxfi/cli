@@ -122,17 +122,17 @@ func TestFindDefaultFiles(t *testing.T) {
 	require.NoError(err)
 
 	for _, d := range scanDirs[:3] {
-		_, err = os.Create(filepath.Join(d, "config.json"))
+		_, err = os.Create(filepath.Join(d, "config.json")) //nolint:gosec // G304: Test utility
 		require.NoError(err)
 	}
-	_, err = os.Create(filepath.Join(existingDataDir, "config.json"))
+	_, err = os.Create(filepath.Join(existingDataDir, "config.json")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
 
 	// also create a non-matching file name, should fail
 	err = os.MkdirAll(noConfigFileDir, constants.DefaultPerms755)
 	require.NoError(err)
 
-	_, err = os.Create(filepath.Join(noConfigFileDir, "cnf.json"))
+	_, err = os.Create(filepath.Join(noConfigFileDir, "cnf.json")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
 
 	var path string
