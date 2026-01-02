@@ -21,9 +21,9 @@ import (
 
 // Ring signature scheme names
 const (
-	schemeLSAG       = "lsag"
-	schemeLattice    = "lattice"
-	schemeLatticePQ  = "pq"          // alias for lattice-lsag
+	schemeLSAG        = "lsag"
+	schemeLattice     = "lattice"
+	schemeLatticePQ   = "pq"           // alias for lattice-lsag
 	schemeLatticeFull = "lattice-lsag" // full name for lattice scheme
 )
 

@@ -17,7 +17,7 @@ import (
 	constants "github.com/luxfi/const"
 	"github.com/luxfi/crypto"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ripemd160"
+	"golang.org/x/crypto/ripemd160" //nolint:gosec // G507: Required for legacy address derivation
 )
 
 // Genesis types for genesis.json
