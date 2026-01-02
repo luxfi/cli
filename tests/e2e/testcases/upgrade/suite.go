@@ -127,7 +127,7 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 		// in the system
 		nodeConfigDir, err := os.MkdirTemp("", "cli-tmp-lux-conf-dir")
 		gomega.Expect(err).Should(gomega.BeNil())
-		defer os.RemoveAll(nodeConfigDir)
+		defer func() { _ = os.RemoveAll(nodeConfigDir) }()
 
 		// now we try to apply
 		_, err = commands.ApplyUpgradeToPublicNode(subnetName, nodeConfigDir)
@@ -288,7 +288,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		gomega.Expect(version).Should(gomega.Equal(evmVersion1))
 
 		// stop network
-		commands.StopNetwork()
+		_ = commands.StopNetwork()
 
 		// upgrade
 		commands.UpgradeVMLocal(subnetName, evmVersion2)
@@ -331,7 +331,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		gomega.Expect(version).Should(gomega.Equal(evmVersion1))
 
 		// stop network
-		commands.StopNetwork()
+		_ = commands.StopNetwork()
 
 		// upgrade
 		commands.UpgradeCustomVMLocal(subnetName, customVMPath2)
@@ -427,7 +427,7 @@ var _ = ginkgo.Describe("[Upgrade local network]", ginkgo.Ordered, func() {
 		}
 
 		// stop network
-		commands.StopNetwork()
+		_ = commands.StopNetwork()
 
 		for _, nodeInfo := range nodeInfos {
 			_, err := commands.UpgradeVMPublic(subnetName, binaryToVersion[utils.SoloEVMKey2], nodeInfo.PluginDir)

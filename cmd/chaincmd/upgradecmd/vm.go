@@ -402,7 +402,7 @@ func chooseManualOrAutomatic(sc models.Sidecar, targetVersion string) error {
 
 func isServerRunning() (bool, error) {
 	cli, err := binutils.NewGRPCClient()
-	if err == binutils.ErrGRPCTimeout {
+	if errors.Is(err, binutils.ErrGRPCTimeout) {
 		return false, nil
 	} else if err != nil {
 		return false, err

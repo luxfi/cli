@@ -91,7 +91,7 @@ func runLink(_ *cobra.Command, args []string) error {
 	// Determine VM name for VMID calculation
 	// Use canonical name based on common VMs, or default to package name
 	vmName := name
-	if name == "evm" && org == "luxfi" {
+	if name == vmNameEVM && org == orgLuxfi {
 		vmName = "Lux EVM" // Canonical name for Lux EVM
 	}
 

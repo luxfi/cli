@@ -65,14 +65,15 @@ func runCreate(_ *cobra.Command, args []string) error {
 
 	var mnemonic string
 
-	if mnemonicPhrase != "" {
+	switch {
+	case mnemonicPhrase != "":
 		// Use provided mnemonic
 		mnemonic = strings.TrimSpace(mnemonicPhrase)
 		if !key.ValidateMnemonic(mnemonic) {
 			return fmt.Errorf("invalid mnemonic phrase")
 		}
 		ux.Logger.PrintToUser("Using provided mnemonic phrase")
-	} else if useMnemonic {
+	case useMnemonic:
 		// Prompt for mnemonic - requires interactive mode
 		if !prompts.IsInteractive() {
 			return fmt.Errorf("--mnemonic requires interactive mode; use --phrase to provide mnemonic directly")
@@ -87,7 +88,7 @@ func runCreate(_ *cobra.Command, args []string) error {
 		if !key.ValidateMnemonic(mnemonic) {
 			return fmt.Errorf("invalid mnemonic phrase")
 		}
-	} else {
+	default:
 		// Generate new mnemonic
 		var err error
 		mnemonic, err = key.GenerateMnemonic()

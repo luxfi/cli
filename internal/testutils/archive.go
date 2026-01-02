@@ -21,10 +21,10 @@ import (
 func CreateZip(require *require.Assertions, src string, dest string) {
 	zipf, err := os.Create(dest)
 	require.NoError(err)
-	defer zipf.Close()
+	defer func() { _ = zipf.Close() }()
 
 	zipWriter := zip.NewWriter(zipf)
-	defer zipWriter.Close()
+	defer func() { _ = zipWriter.Close() }()
 
 	// 2. Go through all the files of the source
 	err = filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
@@ -64,7 +64,7 @@ func CreateZip(require *require.Assertions, src string, dest string) {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		_, err = io.Copy(headerWriter, f)
 		return err
@@ -76,13 +76,13 @@ func CreateZip(require *require.Assertions, src string, dest string) {
 func CreateTarGz(require *require.Assertions, src string, dest string, includeTopLevel bool) {
 	tgz, err := os.Create(dest)
 	require.NoError(err)
-	defer tgz.Close()
+	defer func() { _ = tgz.Close() }()
 
 	gw := gzip.NewWriter(tgz)
-	defer gw.Close()
+	defer func() { _ = gw.Close() }()
 
 	tarball := tar.NewWriter(gw)
-	defer tarball.Close()
+	defer func() { _ = tarball.Close() }()
 
 	info, err := os.Stat(src)
 	require.NoError(err)

@@ -29,7 +29,7 @@ func GenerateDockerHostIDs(nodeCount int) ([]string, error) {
 
 // SaveDockerComposeFile saves Docker Compose configuration to a file
 func SaveDockerComposeFile(content []byte, path string) error {
-	return os.WriteFile(path, content, 0644)
+	return os.WriteFile(path, content, 0o644)
 }
 
 // StartDockerCompose starts Docker Compose with the given configuration file

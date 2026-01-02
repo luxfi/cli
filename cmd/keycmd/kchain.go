@@ -18,6 +18,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Post-quantum indicator suffix
+const pqSuffix = " [PQ]"
+
 var (
 	kchainEndpoint    string
 	kchainThreshold   int
@@ -616,7 +619,7 @@ func runKChainAlgorithms(_ *cobra.Command, _ []string) error {
 		for _, alg := range signing {
 			pq := ""
 			if alg.PostQuantum {
-				pq = " [PQ]"
+				pq = pqSuffix
 			}
 			th := ""
 			if alg.ThresholdSupport {
@@ -632,7 +635,7 @@ func runKChainAlgorithms(_ *cobra.Command, _ []string) error {
 		for _, alg := range encryption {
 			pq := ""
 			if alg.PostQuantum {
-				pq = " [PQ]"
+				pq = pqSuffix
 			}
 			ux.Logger.PrintToUser("  - %-20s %s%s", alg.Name, alg.Description, pq)
 		}
@@ -644,7 +647,7 @@ func runKChainAlgorithms(_ *cobra.Command, _ []string) error {
 		for _, alg := range keyExchange {
 			pq := ""
 			if alg.PostQuantum {
-				pq = " [PQ]"
+				pq = pqSuffix
 			}
 			ux.Logger.PrintToUser("  - %-20s %s%s", alg.Name, alg.Description, pq)
 		}

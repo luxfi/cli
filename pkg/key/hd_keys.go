@@ -114,7 +114,7 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	var err error
 
 	// Derive EC (secp256k1) key with account index
-	keySet.ECPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainEC, 32, accountIndex)
+	keySet.ECPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainEC, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive EC key: %w", err)
 	}
@@ -122,7 +122,7 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	keySet.ECAddress = deriveECAddress(keySet.ECPublicKey)
 
 	// Derive BLS key with account index
-	keySet.BLSPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainBLS, 32, accountIndex)
+	keySet.BLSPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainBLS, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive BLS key: %w", err)
 	}
@@ -137,7 +137,7 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	keySet.NodeID = fmt.Sprintf("NodeID-%s", hex.EncodeToString(nodeIDHash[:20]))
 
 	// Derive Ringtail key with account index
-	keySet.RingtailPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainRingtail, 32, accountIndex)
+	keySet.RingtailPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainRingtail, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive Ringtail key: %w", err)
 	}
@@ -147,7 +147,7 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	}
 
 	// Derive ML-DSA key with account index (needs more entropy - 32 bytes seed for deterministic generation)
-	mldsaSeed, err := deriveKeyFromSeedWithAccount(seed, DomainMLDSA, 32, accountIndex)
+	mldsaSeed, err := deriveKeyFromSeedWithAccount(seed, DomainMLDSA, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive ML-DSA seed: %w", err)
 	}
@@ -159,13 +159,9 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	return keySet, nil
 }
 
-// deriveKeyFromSeed uses HKDF to derive a key from a seed with domain separation (account 0)
-func deriveKeyFromSeed(seed []byte, domain string, keyLen int) ([]byte, error) {
-	return deriveKeyFromSeedWithAccount(seed, domain, keyLen, 0)
-}
-
-// deriveKeyFromSeedWithAccount uses HKDF to derive a key from a seed with domain separation and account index
-func deriveKeyFromSeedWithAccount(seed []byte, domain string, keyLen int, accountIndex uint32) ([]byte, error) {
+// deriveKeyFromSeedWithAccount uses HKDF to derive a 32-byte key from a seed with domain separation and account index
+func deriveKeyFromSeedWithAccount(seed []byte, domain string, accountIndex uint32) ([]byte, error) {
+	const keyLen = 32
 	salt := sha256.Sum256([]byte("lux-hd-key-derivation"))
 	// Include account index in the info/domain string for unique derivation per account
 	info := fmt.Sprintf("%s/account/%d", domain, accountIndex)
@@ -300,7 +296,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(ecDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create EC directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(ecDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.ECPublicKey)), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(ecDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.ECPublicKey)), 0o644); err != nil {
 		return fmt.Errorf("failed to save EC public key: %w", err)
 	}
 
@@ -309,10 +305,10 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(blsDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create BLS directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(blsDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.BLSPublicKey)), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(blsDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.BLSPublicKey)), 0o644); err != nil {
 		return fmt.Errorf("failed to save BLS public key: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(blsDir, "pop.key"), []byte(hex.EncodeToString(keySet.BLSPoP)), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(blsDir, "pop.key"), []byte(hex.EncodeToString(keySet.BLSPoP)), 0o644); err != nil {
 		return fmt.Errorf("failed to save BLS proof of possession: %w", err)
 	}
 
@@ -321,7 +317,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(rtDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create Ringtail directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingtailPublicKey)), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingtailPublicKey)), 0o644); err != nil {
 		return fmt.Errorf("failed to save Ringtail public key: %w", err)
 	}
 
@@ -330,7 +326,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(mldsaDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create ML-DSA directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(mldsaDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.MLDSAPublicKey)), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(mldsaDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.MLDSAPublicKey)), 0o644); err != nil {
 		return fmt.Errorf("failed to save ML-DSA public key: %w", err)
 	}
 

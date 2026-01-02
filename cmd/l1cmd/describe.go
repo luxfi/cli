@@ -47,7 +47,7 @@ func newDescribeCmd() *cobra.Command {
 			// Validator info
 			ux.Logger.PrintToUser("🔐 Validator Management:")
 			ux.Logger.PrintToUser("   Type: %s", sc.ValidatorManagement)
-			if sc.ValidatorManagement == "proof-of-authority" {
+			if sc.ValidatorManagement == ValidatorManagementPoA {
 				ux.Logger.PrintToUser("   - Owner controlled validator set")
 				ux.Logger.PrintToUser("   - Instant finality")
 				ux.Logger.PrintToUser("   - No token staking required")

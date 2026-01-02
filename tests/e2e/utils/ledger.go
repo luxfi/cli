@@ -94,7 +94,7 @@ func GetTmpFilePath(prefix string) (string, error) {
 
 	// Close the file but keep the path
 	tmpPath := tmpFile.Name()
-	tmpFile.Close()
+	_ = tmpFile.Close()
 
 	return tmpPath, nil
 }

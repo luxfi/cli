@@ -98,7 +98,7 @@ var _ = ginkgo.Describe("[Node create]", func() {
 		for time.Now().Before(deadline) {
 			conn, err := net.DialTimeout("tcp", address, 1*time.Second)
 			if err == nil {
-				conn.Close()
+				_ = conn.Close()
 				break
 			}
 			time.Sleep(2 * time.Second)

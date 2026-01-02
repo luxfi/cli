@@ -133,7 +133,7 @@ func startDevNode(*cobra.Command, []string) error {
 	}
 
 	// Ensure directories exist
-	if err := os.MkdirAll(logDir, 0755); err != nil {
+	if err := os.MkdirAll(logDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create log directory: %w", err)
 	}
 
@@ -191,7 +191,7 @@ func startDevNode(*cobra.Command, []string) error {
 
 	// Save PID file for later use by 'lux dev stop' and network detection
 	pidFile := filepath.Join(dataDir, "luxd.pid")
-	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0644); err != nil {
+	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0o644); err != nil {
 		ux.Logger.PrintToUser("Warning: failed to save PID file: %v", err)
 	}
 
@@ -215,7 +215,7 @@ func startDevNode(*cobra.Command, []string) error {
 			if err != nil {
 				continue // Network not ready yet
 			}
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			if resp.StatusCode != 200 {
 				continue
 			}
@@ -226,7 +226,7 @@ func startDevNode(*cobra.Command, []string) error {
 			if cErr != nil {
 				continue
 			}
-			cResp.Body.Close()
+			_ = cResp.Body.Close()
 			if cResp.StatusCode == 200 {
 				goto healthy
 			}

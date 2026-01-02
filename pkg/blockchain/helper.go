@@ -54,16 +54,14 @@ func GetAggregatorNetworkUris(app *application.Lux, clusterName string) ([]strin
 				return nil, fmt.Errorf("cluster %s not found", clusterName)
 			}
 			// Parse cluster config to extract node endpoints
-			if err := parseClusterConfig(clusterData, &aggregatorExtraPeerEndpointsUris); err != nil {
-				return nil, fmt.Errorf("failed to parse cluster config: %w", err)
-			}
+			parseClusterConfig(clusterData, &aggregatorExtraPeerEndpointsUris)
 		}
 	}
 	return aggregatorExtraPeerEndpointsUris, nil
 }
 
 // parseClusterConfig extracts node endpoints from cluster configuration
-func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string) error {
+func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string) {
 	// Extract nodes field
 	if nodes, ok := clusterData["Nodes"].([]interface{}); ok {
 		for _, node := range nodes {
@@ -91,8 +89,6 @@ func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string)
 			*endpoints = append(*endpoints, endpoint)
 		}
 	}
-
-	return nil
 }
 
 func UrisToPeers(uris []string) ([]info.Peer, error) {

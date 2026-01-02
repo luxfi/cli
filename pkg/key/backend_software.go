@@ -85,7 +85,7 @@ func (b *SoftwareBackend) Initialize(ctx context.Context) error {
 		}
 		b.dataDir = keysDir
 	}
-	return os.MkdirAll(b.dataDir, 0700)
+	return os.MkdirAll(b.dataDir, 0o700)
 }
 
 func (b *SoftwareBackend) Close() error {
@@ -194,7 +194,7 @@ func (b *SoftwareBackend) SaveKey(ctx context.Context, keySet *HDKeySet, passwor
 	}
 
 	keyDir := filepath.Join(b.dataDir, keySet.Name)
-	if err := os.MkdirAll(keyDir, 0700); err != nil {
+	if err := os.MkdirAll(keyDir, 0o700); err != nil {
 		return fmt.Errorf("failed to create key directory: %w", err)
 	}
 
@@ -244,7 +244,7 @@ func (b *SoftwareBackend) SaveKey(ctx context.Context, keySet *HDKeySet, passwor
 
 	// Write encrypted keystore
 	encPath := filepath.Join(keyDir, "keystore.enc")
-	if err := os.WriteFile(encPath, storeData, 0600); err != nil {
+	if err := os.WriteFile(encPath, storeData, 0o600); err != nil {
 		return fmt.Errorf("failed to write keystore: %w", err)
 	}
 
@@ -257,7 +257,7 @@ func (b *SoftwareBackend) SaveKey(ctx context.Context, keySet *HDKeySet, passwor
 		"backend":    string(BackendSoftware),
 	}
 	pubData, _ := json.MarshalIndent(pubInfo, "", "  ")
-	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0644)
+	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0o644)
 
 	return nil
 }

@@ -113,7 +113,7 @@ func mergeComposeFiles(host *models.Host, currentComposeFile string, newComposeF
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	if _, err := tmpFile.Write(output); err != nil {
 		return err
 	}
@@ -215,7 +215,7 @@ func ComposeOverSSH(
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	composeData, err := renderComposeFile(composePath, composeDesc, composeVars)
 	if err != nil {
 		return err
@@ -257,7 +257,7 @@ func GetRemoteComposeContent(host *models.Host, composeFile string, timeout time
 	if err != nil {
 		return "", err
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	if err := host.Download(composeFile, tmpFile.Name(), timeout); err != nil {
 		return "", err
 	}

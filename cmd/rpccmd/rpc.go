@@ -92,7 +92,7 @@ func newCallCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to make request: %w", err)
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			// Read response
 			body, err := io.ReadAll(resp.Body)

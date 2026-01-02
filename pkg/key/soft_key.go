@@ -311,7 +311,7 @@ func decodePrivateKey(enc string) (*secp256k1.PrivateKey, error) {
 func (m *SoftKey) C() string {
 	// Convert private key bytes to ECDSA format
 	privKeyBytes := m.privKey.Bytes()
-	ecdsaPrv, err := eth_crypto.ToECDSA(privKeyBytes[:])
+	ecdsaPrv, err := eth_crypto.ToECDSA(privKeyBytes)
 	if err != nil {
 		return ""
 	}
@@ -496,7 +496,7 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 
 	// Create the keys directory if it doesn't exist
 	keyDir := filepath.Dir(keyPath)
-	if err := os.MkdirAll(keyDir, 0700); err != nil {
+	if err := os.MkdirAll(keyDir, 0o700); err != nil {
 		return nil, fmt.Errorf("failed to create key directory: %w", err)
 	}
 

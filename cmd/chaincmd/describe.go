@@ -63,7 +63,7 @@ func describeChain(cmd *cobra.Command, args []string) error {
 		var prettyGenesis map[string]interface{}
 		if err := json.Unmarshal(genesis, &prettyGenesis); err == nil {
 			prettyBytes, _ := json.MarshalIndent(prettyGenesis, "", "  ")
-			fmt.Fprintln(os.Stdout, string(prettyBytes))
+			_, _ = fmt.Fprintln(os.Stdout, string(prettyBytes))
 		}
 	}
 
