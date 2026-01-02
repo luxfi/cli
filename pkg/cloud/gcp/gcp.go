@@ -80,12 +80,12 @@ func (c *GcpCloud) waitForOperation(operation *compute.Operation) error {
 		var err error
 		// Check if the operation is a zone or region specific or global operation
 		scope, location := getOperationScope(operation)
-		switch {
-		case scope == opScopeZone:
+		switch scope {
+		case opScopeZone:
 			getOperation, err = c.gcpClient.ZoneOperations.Get(c.projectID, location, operation.Name).Do()
-		case scope == opScopeRegion:
+		case opScopeRegion:
 			getOperation, err = c.gcpClient.RegionOperations.Get(c.projectID, location, operation.Name).Do()
-		case scope == opScopeGlobal:
+		case opScopeGlobal:
 			getOperation, err = c.gcpClient.GlobalOperations.Get(c.projectID, operation.Name).Do()
 		default:
 			return fmt.Errorf("unknown operation scope: %s", scope)
