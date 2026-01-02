@@ -1194,7 +1194,7 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 	if err != nil {
 		return 0, err
 	}
-	return uint8(val), nil
+	return uint8(val), nil //nolint:gosec // G115: Value validated to be within uint8 range
 }
 
 // CaptureFujiDuration prompts for a staking duration on Fuji testnet

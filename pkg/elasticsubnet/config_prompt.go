@@ -292,7 +292,7 @@ func getStakeDuration(app *application.Lux) (time.Duration, time.Duration, error
 		return 0, 0, err
 	}
 
-	return time.Duration(minStakeDuration) * time.Hour, time.Duration(maxStakeDuration) * time.Hour, nil
+	return time.Duration(minStakeDuration) * time.Hour, time.Duration(maxStakeDuration) * time.Hour, nil //nolint:gosec // G115: Stake durations are bounded
 }
 
 func getMinDelegationFee(app *application.Lux) (uint32, error) {
