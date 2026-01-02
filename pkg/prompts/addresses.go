@@ -55,7 +55,7 @@ func PromptPrivateKey(prompter Prompter, prompt string) (string, error) {
 	}
 	// Validate hex
 	for _, c := range key {
-		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+		if (c < '0' || c > '9') && (c < 'a' || c > 'f') && (c < 'A' || c > 'F') {
 			return "", fmt.Errorf("invalid private key: contains non-hex characters")
 		}
 	}
