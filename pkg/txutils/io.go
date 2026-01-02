@@ -27,7 +27,7 @@ func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
 	if _, err := os.Stat(txPath); err == nil && !forceOverwrite {
 		return fmt.Errorf("couldn't create file to write tx to: file exists")
 	}
-	f, err := os.Create(txPath)
+	f, err := os.Create(txPath) //nolint:gosec // G304: Writing to user-specified path
 	if err != nil {
 		return fmt.Errorf("couldn't create file to write tx to: %w", err)
 	}
@@ -41,7 +41,7 @@ func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
 
 // loads a tx from [txPath]
 func LoadFromDisk(txPath string) (*txs.Tx, error) {
-	txEncodedBytes, err := os.ReadFile(txPath)
+	txEncodedBytes, err := os.ReadFile(txPath) //nolint:gosec // G304: Reading from user-specified path
 	if err != nil {
 		return nil, err
 	}

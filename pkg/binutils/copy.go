@@ -11,12 +11,12 @@ import (
 )
 
 func CopyFile(src, dest string) error {
-	in, err := os.Open(src)
+	in, err := os.Open(src) //nolint:gosec // G304: Copying from known source
 	if err != nil {
 		return err
 	}
 	defer func() { _ = in.Close() }()
-	out, err := os.Create(dest)
+	out, err := os.Create(dest) //nolint:gosec // G304: Copying to known destination
 	if err != nil {
 		return err
 	}

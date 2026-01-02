@@ -55,7 +55,7 @@ func deployL3(cmd *cobra.Command, args []string) error {
 	if sc.BasedRollup {
 		ux.Logger.PrintToUser("  • Deploying inbox contract...")
 		// Inbox contract would handle L3 transaction batching
-		sc.InboxContract = "0x" + fmt.Sprintf("%040x", uint64(time.Now().Unix()))
+		sc.InboxContract = "0x" + fmt.Sprintf("%040x", uint64(time.Now().Unix())) //nolint:gosec // G115: Timestamp value is always positive
 		ux.Logger.PrintToUser("  • Inbox contract deployed at: %s", sc.InboxContract)
 	}
 

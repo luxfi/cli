@@ -9,12 +9,14 @@ import (
 	"github.com/luxfi/sdk/prompts"
 )
 
+// PromptValidatorBalance prompts the user to enter a validator balance amount.
 func PromptValidatorBalance(app *application.Lux, availableBalance float64, prompt string) (float64, error) {
 	ux.Logger.PrintToUser("Validator's balance is used to pay for continuous fee to the P-Chain")
 	ux.Logger.PrintToUser("When this Balance reaches 0, the validator will be considered inactive and will no longer participate in validating the L1")
 	return app.Prompt.CaptureValidatorBalance(prompt, availableBalance, 0)
 }
 
+// GetKeyForChangeOwner prompts for and returns a key address for change ownership.
 func GetKeyForChangeOwner(app *application.Lux, network models.Network) (string, error) {
 	changeAddrPrompt := "Which key would you like to set as change owner for leftover LUX if the node is removed from validator set?"
 

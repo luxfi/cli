@@ -246,7 +246,7 @@ func (app *Lux) ClusterExists(clusterName string) (bool, error) {
 // HasEVMGenesis checks if the blockchain has a EVM genesis
 func (app *Lux) HasEVMGenesis(blockchainName string) (bool, string, error) {
 	genesisPath := app.GetGenesisPath(blockchainName)
-	genesisBytes, err := os.ReadFile(genesisPath)
+	genesisBytes, err := os.ReadFile(genesisPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false, "", nil
@@ -274,7 +274,7 @@ func (app *Lux) HasEVMGenesis(blockchainName string) (bool, string, error) {
 // LoadEvmGenesis loads EVM genesis for a blockchain
 func (app *Lux) LoadEvmGenesis(blockchainName string) (*types.EvmGenesis, error) {
 	genesisPath := app.GetGenesisPath(blockchainName)
-	genesisBytes, err := os.ReadFile(genesisPath)
+	genesisBytes, err := os.ReadFile(genesisPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +312,7 @@ func (app *Lux) WriteConfigFile(data []byte) error {
 
 func (app *Lux) LoadConfig() (types.Config, error) {
 	configPath := app.GetConfigPath()
-	jsonBytes, err := os.ReadFile(configPath)
+	jsonBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return types.Config{}, err
 	}
@@ -324,7 +324,7 @@ func (app *Lux) LoadConfig() (types.Config, error) {
 
 func (app *Lux) ConfigFileExists() bool {
 	configPath := app.GetConfigPath()
-	_, err := os.ReadFile(configPath)
+	_, err := os.ReadFile(configPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -341,7 +341,7 @@ func (app *Lux) GetBasePath() string {
 // GetClusterConfig loads cluster configuration from disk
 func (app *Lux) GetClusterConfig(clusterName string) (map[string]interface{}, error) {
 	clusterConfigPath := filepath.Join(app.GetBaseDir(), "clusters", clusterName, "config.json")
-	data, err := os.ReadFile(clusterConfigPath)
+	data, err := os.ReadFile(clusterConfigPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return nil, err
 	}
@@ -385,7 +385,7 @@ func (app *Lux) SaveClustersConfig(config map[string]interface{}) error {
 // LoadClusterNodeConfig loads node configuration for a cluster
 func (app *Lux) LoadClusterNodeConfig(clusterName string, nodeName string) (map[string]interface{}, error) {
 	nodeConfigPath := filepath.Join(app.GetBaseDir(), "clusters", clusterName, "nodes", nodeName, "config.json")
-	data, err := os.ReadFile(nodeConfigPath)
+	data, err := os.ReadFile(nodeConfigPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return nil, err
 	}
@@ -505,7 +505,7 @@ func (app *Lux) SaveNetworkStateForType(networkType string, state *NetworkState)
 // For network-specific state, use LoadNetworkStateForType
 func (app *Lux) LoadNetworkState() (*NetworkState, error) {
 	statePath := app.GetNetworkStateFile()
-	data, err := os.ReadFile(statePath)
+	data, err := os.ReadFile(statePath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil // No state file = no running network
@@ -523,7 +523,7 @@ func (app *Lux) LoadNetworkState() (*NetworkState, error) {
 // LoadNetworkStateForType loads the network state from the network-specific state file
 func (app *Lux) LoadNetworkStateForType(networkType string) (*NetworkState, error) {
 	statePath := app.GetNetworkStateFileForType(networkType)
-	data, err := os.ReadFile(statePath)
+	data, err := os.ReadFile(statePath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil // No state file = no running network of this type

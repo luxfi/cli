@@ -71,11 +71,11 @@ func (c *Client) JoinSubnet(alias string) error {
 // Placeholder methods to maintain compatibility with existing LPM interface
 
 // GetVM is a placeholder to maintain compatibility
-func (c *Client) GetVM(alias string, version string) (*VMUpload, error) {
+func (c *Client) GetVM(_ string, _ string) (*VMUpload, error) {
 	return nil, fmt.Errorf("GetVM not implemented in LPM - use Install instead")
 }
 
 // AddVM is a placeholder to maintain compatibility
-func (c *Client) AddVM(vm *VMUpload) error {
+func (c *Client) AddVM(_ *VMUpload) error {
 	return fmt.Errorf("AddVM not implemented in LPM - use repository-based installation")
 }

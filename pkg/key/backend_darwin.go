@@ -189,7 +189,7 @@ func (b *KeychainBackend) SaveKey(ctx context.Context, keySet *HDKeySet, passwor
 		"backend":    string(BackendKeychain),
 	}
 	pubData, _ := json.MarshalIndent(pubInfo, "", "  ")
-	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0o644)
+	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0o644) //nolint:gosec // G306: Public info file needs to be readable
 
 	return nil
 }
@@ -244,7 +244,7 @@ func (b *KeychainBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 
 		// Check if stored in keychain
 		pubPath := filepath.Join(keyDir, "info.json")
-		if data, err := os.ReadFile(pubPath); err == nil {
+		if data, err := os.ReadFile(pubPath); err == nil { //nolint:gosec // G304: Reading from user's key directory
 			var pubInfo struct {
 				ECAddress string `json:"ec_address"`
 				NodeID    string `json:"node_id"`
@@ -332,7 +332,7 @@ func (b *KeychainBackend) writeToKeychain(name string, data []byte) error {
 	// Add new item with access control for biometrics
 	// -T "" allows access without app confirmation
 	// -w stores the data as password
-	cmd := exec.Command("security", "add-generic-password",
+	cmd := exec.Command("security", "add-generic-password", //nolint:gosec // G204: Intentional keychain command
 		"-a", account,
 		"-s", keychainService,
 		"-l", fmt.Sprintf("%s: %s", keychainAccess, name),
@@ -351,7 +351,7 @@ func (b *KeychainBackend) writeToKeychain(name string, data []byte) error {
 func (b *KeychainBackend) readFromKeychain(name string) ([]byte, error) {
 	account := fmt.Sprintf("lux-key-%s", name)
 
-	cmd := exec.Command("security", "find-generic-password",
+	cmd := exec.Command("security", "find-generic-password", //nolint:gosec // G204: Intentional keychain command
 		"-a", account,
 		"-s", keychainService,
 		"-w", // Output password only
@@ -370,7 +370,7 @@ func (b *KeychainBackend) readFromKeychain(name string) ([]byte, error) {
 func (b *KeychainBackend) deleteFromKeychain(name string) error {
 	account := fmt.Sprintf("lux-key-%s", name)
 
-	cmd := exec.Command("security", "delete-generic-password",
+	cmd := exec.Command("security", "delete-generic-password", //nolint:gosec // G204: Intentional keychain command
 		"-a", account,
 		"-s", keychainService,
 	)

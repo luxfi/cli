@@ -38,7 +38,7 @@ func EditConfigFile(
 			return nil
 		}
 	}
-	fileBytes, err := os.ReadFile(configFile)
+	fileBytes, err := os.ReadFile(configFile) //nolint:gosec // G304: Reading config from known location
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("failed to load luxd config file %s: %w", configFile, err)
 	}
@@ -51,7 +51,7 @@ func EditConfigFile(
 	}
 
 	if subnetLuxdConfigFile != "" {
-		subnetLuxdConfigFileBytes, err := os.ReadFile(subnetLuxdConfigFile)
+		subnetLuxdConfigFileBytes, err := os.ReadFile(subnetLuxdConfigFile) //nolint:gosec // G304: Reading config from known location
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("failed to load extra flags from blockchain luxd config file %s: %w", subnetLuxdConfigFile, err)
 		}

@@ -584,7 +584,7 @@ func TestCapturePositiveIntWithMonkeyPatch(t *testing.T) {
 		return Comparator{
 			Label: fmt.Sprintf("min_%d", minVal),
 			Type:  MoreThanEq,
-			Value: uint64(minVal),
+			Value: uint64(minVal), //nolint:gosec // G115: Test value, safe conversion
 		}
 	}
 

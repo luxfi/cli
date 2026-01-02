@@ -495,7 +495,7 @@ func (c *GcpCloud) GetRandomZone(region string) (string, error) {
 	if len(zones) == 0 {
 		return "", fmt.Errorf("no zones found in region %s", region)
 	}
-	return zones[rand.IntN(len(zones))], nil
+	return zones[rand.IntN(len(zones))], nil //nolint:gosec // G404: Non-security random for zone selection
 }
 
 // zoneToRegion returns region from zone

@@ -34,13 +34,14 @@ func DeployBlockchain(blockchainName string, flags utils.TestFlags) (string, err
 	args := []string{"blockchain", "deploy", blockchainName}
 	for flag, value := range flags {
 		strValue := fmt.Sprintf("%v", value)
-		if flag == "local" && strValue == strTrue {
+		switch {
+		case flag == "local" && strValue == strTrue:
 			args = append(args, "--local")
-		} else if flag == "skip-warp-deploy" && strValue == strTrue {
+		case flag == "skip-warp-deploy" && strValue == strTrue:
 			args = append(args, "--skip-warp-deploy")
-		} else if flag == "skip-update-check" && strValue == strTrue {
+		case flag == "skip-update-check" && strValue == strTrue:
 			args = append(args, "--skip-update-check")
-		} else {
+		default:
 			args = append(args, "--"+flag, strValue)
 		}
 	}

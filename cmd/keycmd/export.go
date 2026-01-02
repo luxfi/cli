@@ -60,7 +60,7 @@ func runExport(_ *cobra.Command, args []string) error {
 			return fmt.Errorf("failed to get keys directory: %w", err)
 		}
 		mnemonicPath := filepath.Join(keysDir, name, key.MnemonicFile)
-		data, err := os.ReadFile(mnemonicPath)
+		data, err := os.ReadFile(mnemonicPath) //nolint:gosec // G304: Reading from user's key directory
 		if err != nil {
 			return fmt.Errorf("failed to read mnemonic: %w", err)
 		}

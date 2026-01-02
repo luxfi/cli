@@ -39,7 +39,6 @@ import (
 	"github.com/luxfi/node/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 var (
@@ -239,7 +238,7 @@ func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
 	lastActs, err = app.ReadLastActionsFile()
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
-			app.Log.Warn("failed to read last-actions file! This is non-critical but is logged", zap.Error(err))
+			app.Log.Warn("failed to read last-actions file! This is non-critical but is logged", "error", err)
 		}
 		lastActs = &application.LastActions{}
 	}
@@ -398,7 +397,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		app.Log.Debug("using config file", zap.String("config-file", viper.ConfigFileUsed()))
+		app.Log.Debug("using config file", "config-file", viper.ConfigFileUsed())
 
 		// Read skip-update-check from config file if not already set by flag
 		if !skipCheck && viper.IsSet(constants.SkipUpdateFlag) {

@@ -15,7 +15,6 @@ import (
 	"github.com/luxfi/netrunner/local"
 	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 const networkTypeLocal = "local"
@@ -171,7 +170,7 @@ func StopNetwork(*cobra.Command, []string) error {
 	err := saveNetworkForType(stopNetworkType)
 
 	if killErr := binutils.KillgRPCServerProcessForNetwork(app, stopNetworkType); killErr != nil {
-		app.Log.Warn("failed killing server process", zap.Error(killErr))
+		app.Log.Warn("failed killing server process", "error", killErr)
 		ux.Logger.PrintToUser("Warning: failed to shutdown server gracefully: %v", killErr)
 	} else {
 		ux.Logger.PrintToUser("Server (%s) shutdown gracefully", stopNetworkType)
@@ -179,7 +178,7 @@ func StopNetwork(*cobra.Command, []string) error {
 
 	// Clear network-specific state when stopping
 	if clearErr := app.ClearNetworkStateForType(stopNetworkType); clearErr != nil {
-		app.Log.Warn("failed to clear network state", zap.Error(clearErr))
+		app.Log.Warn("failed to clear network state", "error", clearErr)
 	}
 
 	return err

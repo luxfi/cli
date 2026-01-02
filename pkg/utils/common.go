@@ -461,7 +461,7 @@ func ByteSliceIsEVMGenesis(bs []byte) bool {
 }
 
 func FileIsEVMGenesis(genesisPath string) (bool, error) {
-	genesisBytes, err := os.ReadFile(genesisPath)
+	genesisBytes, err := os.ReadFile(genesisPath) //nolint:gosec // G304: Reading user-specified genesis file
 	if err != nil {
 		return false, err
 	}
@@ -500,7 +500,7 @@ func ExtractPlaceholderValue(pattern, text string) (string, error) {
 func Command(cmdLine string, params ...string) *exec.Cmd {
 	cmd := strings.Split(cmdLine, " ")
 	cmd = append(cmd, params...)
-	c := exec.Command(cmd[0], cmd[1:]...)
+	c := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec // G204: Command from internal CLI code
 	c.Env = os.Environ()
 	return c
 }
@@ -623,7 +623,7 @@ func MkDirWithTimestamp(dirPrefix string) (string, error) {
 	const dirTimestampFormat = "20060102_150405"
 	currentTime := time.Now().Format(dirTimestampFormat)
 	dirName := dirPrefix + "_" + currentTime
-	return dirName, os.MkdirAll(dirName, os.ModePerm)
+	return dirName, os.MkdirAll(dirName, 0o750) //nolint:gosec // G301: Using 0750 for directory
 }
 
 func PointersSlice[T any](input []T) []*T {

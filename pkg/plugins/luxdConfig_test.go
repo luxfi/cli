@@ -56,7 +56,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
-	fileBytes, err := os.ReadFile(configPath)
+	fileBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Test utility
 	require.NoError(err)
 
 	var luxConfig map[string]interface{}
@@ -98,7 +98,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
-	fileBytes, err := os.ReadFile(configPath)
+	fileBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Test utility
 	require.NoError(err)
 
 	var luxConfig map[string]interface{}
@@ -139,7 +139,7 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
-	fileBytes, err := os.ReadFile(configPath)
+	fileBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Test utility
 	require.NoError(err)
 
 	var luxConfig map[string]interface{}

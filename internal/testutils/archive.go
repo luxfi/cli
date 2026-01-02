@@ -19,7 +19,7 @@ import (
 )
 
 func CreateZip(require *require.Assertions, src string, dest string) {
-	zipf, err := os.Create(dest)
+	zipf, err := os.Create(dest) //nolint:gosec // G304: Test utility for creating archives
 	require.NoError(err)
 	defer func() { _ = zipf.Close() }()
 
@@ -60,7 +60,7 @@ func CreateZip(require *require.Assertions, src string, dest string) {
 			return nil
 		}
 
-		f, err := os.Open(path)
+		f, err := os.Open(path) //nolint:gosec // G304: Test utility, path from internal walk
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func CreateZip(require *require.Assertions, src string, dest string) {
 }
 
 func CreateTarGz(require *require.Assertions, src string, dest string, includeTopLevel bool) {
-	tgz, err := os.Create(dest)
+	tgz, err := os.Create(dest) //nolint:gosec // G304: Test utility for creating archives
 	require.NoError(err)
 	defer func() { _ = tgz.Close() }()
 
@@ -120,7 +120,7 @@ func CreateTarGz(require *require.Assertions, src string, dest string, includeTo
 				return nil
 			}
 
-			file, err := os.Open(path)
+			file, err := os.Open(path) //nolint:gosec // G304: Test utility, path from internal walk
 			if err != nil {
 				return err
 			}
@@ -148,15 +148,15 @@ func CreateTestArchivePath(t *testing.T, require *require.Assertions) (string, f
 	require.NoError(err)
 
 	// create some (empty) files
-	_, err = os.Create(filepath.Join(dir1, "gzipTest11"))
+	_, err = os.Create(filepath.Join(dir1, "gzipTest11")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
-	_, err = os.Create(filepath.Join(dir1, "gzipTest12"))
+	_, err = os.Create(filepath.Join(dir1, "gzipTest12")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
-	_, err = os.Create(filepath.Join(dir1, "gzipTest13"))
+	_, err = os.Create(filepath.Join(dir1, "gzipTest13")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
-	_, err = os.Create(filepath.Join(dir2, "gzipTest21"))
+	_, err = os.Create(filepath.Join(dir2, "gzipTest21")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
-	_, err = os.Create(filepath.Join(testDir, "gzipTest0"))
+	_, err = os.Create(filepath.Join(testDir, "gzipTest0")) //nolint:gosec // G304: Test utility
 	require.NoError(err)
 
 	// also create a binary file
@@ -176,7 +176,7 @@ func CreateTestArchivePath(t *testing.T, require *require.Assertions) (string, f
 		require.FileExists(filepath.Join(controlDir, "dir1", "gzipTest13"))
 		require.FileExists(filepath.Join(controlDir, "dir2", "gzipTest21"))
 		require.FileExists(filepath.Join(controlDir, "gzipTest0"))
-		checkBin, err := os.ReadFile(binFile)
+		checkBin, err := os.ReadFile(binFile) //nolint:gosec // G304: Test utility
 		require.NoError(err)
 		require.Equal(checkBin, buf)
 	}
