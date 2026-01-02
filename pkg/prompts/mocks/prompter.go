@@ -1,5 +1,6 @@
 // Code generated manually for testing. Update as needed.
-
+//
+//nolint:revive // Mock methods don't need doc comments
 package mocks
 
 import (

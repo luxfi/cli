@@ -199,7 +199,7 @@ type runFile struct {
 func GetBackendLogFile(app *application.Lux) (string, error) {
 	var rf runFile
 	serverRunFilePath := app.GetRunFile()
-	run, err := os.ReadFile(serverRunFilePath)
+	run, err := os.ReadFile(serverRunFilePath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return "", fmt.Errorf("failed reading process info file at %s: %w", serverRunFilePath, err)
 	}
@@ -213,7 +213,7 @@ func GetBackendLogFile(app *application.Lux) (string, error) {
 func GetServerPID(app *application.Lux) (int, error) {
 	var rf runFile
 	serverRunFilePath := app.GetRunFile()
-	run, err := os.ReadFile(serverRunFilePath)
+	run, err := os.ReadFile(serverRunFilePath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return 0, fmt.Errorf("failed reading process info file at %s: %w", serverRunFilePath, err)
 	}
@@ -253,18 +253,18 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 
 	// Create output directory for logs
 	outputDirPrefix := path.Join(app.GetRunDir(), "server", networkType)
-	if err := os.MkdirAll(outputDirPrefix, 0o755); err != nil {
+	if err := os.MkdirAll(outputDirPrefix, 0o750); err != nil { //nolint:gosec // G301: Using 0750 for directory
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	// Create timestamped directory
 	timestamp := fmt.Sprintf("%d", os.Getpid())
 	outputDir := filepath.Join(outputDirPrefix, timestamp)
-	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+	if err := os.MkdirAll(outputDir, 0o750); err != nil { //nolint:gosec // G301: Using 0750 for directory
 		return fmt.Errorf("failed to create timestamped output directory: %w", err)
 	}
 
-	outputFile, err := os.Create(path.Join(outputDir, "netrunner-server.log"))
+	outputFile, err := os.Create(path.Join(outputDir, "netrunner-server.log")) //nolint:gosec // G304: Creating log file in app's directory
 	if err != nil {
 		return fmt.Errorf("failed to create log file: %w", err)
 	}
@@ -383,7 +383,7 @@ func KillgRPCServerProcessForNetwork(app *application.Lux, networkType string) e
 func GetServerPIDForNetwork(app *application.Lux, networkType string) (int, error) {
 	var rf runFile
 	serverRunFilePath := app.GetRunFileForNetwork(networkType)
-	run, err := os.ReadFile(serverRunFilePath)
+	run, err := os.ReadFile(serverRunFilePath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		return 0, fmt.Errorf("failed reading process info file at %s: %w", serverRunFilePath, err)
 	}

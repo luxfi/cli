@@ -133,7 +133,7 @@ func startDevNode(*cobra.Command, []string) error {
 	}
 
 	// Ensure directories exist
-	if err := os.MkdirAll(logDir, 0o755); err != nil {
+	if err := os.MkdirAll(logDir, 0o750); err != nil { //nolint:gosec // G301: Using 0750 for log directory
 		return fmt.Errorf("failed to create log directory: %w", err)
 	}
 
@@ -181,7 +181,7 @@ func startDevNode(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("Automine: instant (as blocks arrive)")
 	}
 
-	cmd := exec.Command(localNodePath, args...)
+	cmd := exec.Command(localNodePath, args...) //nolint:gosec // G204: Running our own node binary
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -191,7 +191,7 @@ func startDevNode(*cobra.Command, []string) error {
 
 	// Save PID file for later use by 'lux dev stop' and network detection
 	pidFile := filepath.Join(dataDir, "luxd.pid")
-	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0o644); err != nil {
+	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0o644); err != nil { //nolint:gosec // G306: PID file needs to be readable
 		ux.Logger.PrintToUser("Warning: failed to save PID file: %v", err)
 	}
 
@@ -211,7 +211,7 @@ func startDevNode(*cobra.Command, []string) error {
 		case <-healthCtx.Done():
 			return fmt.Errorf("timeout waiting for node to become healthy after %s: %w", healthTimeout, healthCtx.Err())
 		case <-ticker.C:
-			resp, err := http.Get(healthURL)
+			resp, err := http.Get(healthURL) //nolint:gosec // G107: Health check URL is local
 			if err != nil {
 				continue // Network not ready yet
 			}
@@ -221,7 +221,7 @@ func startDevNode(*cobra.Command, []string) error {
 			}
 			// Additional check: verify C-Chain is responding
 			cchainURL := fmt.Sprintf("http://localhost:%d/ext/bc/C/rpc", port)
-			cResp, cErr := http.Post(cchainURL, "application/json",
+			cResp, cErr := http.Post(cchainURL, "application/json", //nolint:gosec // G107: C-chain URL is local
 				strings.NewReader(`{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}`))
 			if cErr != nil {
 				continue

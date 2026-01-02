@@ -156,7 +156,7 @@ func (b *SoftwareBackend) LoadKey(ctx context.Context, name, password string) (*
 	keyDir := filepath.Join(b.dataDir, name)
 	encPath := filepath.Join(keyDir, "keystore.enc")
 
-	data, err := os.ReadFile(encPath)
+	data, err := os.ReadFile(encPath) //nolint:gosec // G304: Reading from user's key directory
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, ErrKeyNotFound
@@ -257,7 +257,7 @@ func (b *SoftwareBackend) SaveKey(ctx context.Context, keySet *HDKeySet, passwor
 		"backend":    string(BackendSoftware),
 	}
 	pubData, _ := json.MarshalIndent(pubInfo, "", "  ")
-	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0o644)
+	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0o644) //nolint:gosec // G306: Public info file needs to be readable
 
 	return nil
 }
@@ -304,7 +304,7 @@ func (b *SoftwareBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 
 		// Read public info
 		pubPath := filepath.Join(keyDir, "info.json")
-		if data, err := os.ReadFile(pubPath); err == nil {
+		if data, err := os.ReadFile(pubPath); err == nil { //nolint:gosec // G304: Reading from user's key directory
 			var pubInfo struct {
 				ECAddress string `json:"ec_address"`
 				NodeID    string `json:"node_id"`
@@ -407,7 +407,7 @@ func (b *SoftwareBackend) loadWithKey(name string, encKey []byte) (*HDKeySet, er
 	keyDir := filepath.Join(b.dataDir, name)
 	encPath := filepath.Join(keyDir, "keystore.enc")
 
-	data, err := os.ReadFile(encPath)
+	data, err := os.ReadFile(encPath) //nolint:gosec // G304: Reading from user's key directory
 	if err != nil {
 		return nil, fmt.Errorf("failed to read keystore: %w", err)
 	}

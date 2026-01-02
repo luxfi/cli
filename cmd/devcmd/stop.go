@@ -34,7 +34,7 @@ func stopDevNode(*cobra.Command, []string) error {
 
 	// Try to find PID file first
 	pidFile := filepath.Join(os.Getenv("HOME"), ".lux", "dev", "luxd.pid")
-	if pidData, err := os.ReadFile(pidFile); err == nil {
+	if pidData, err := os.ReadFile(pidFile); err == nil { //nolint:gosec // G304: Reading from app's data directory
 		pid, err := strconv.Atoi(strings.TrimSpace(string(pidData)))
 		if err == nil {
 			process, err := os.FindProcess(pid)
