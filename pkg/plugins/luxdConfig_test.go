@@ -44,7 +44,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	// Create ConfigFile
 	tmpDir := os.TempDir()
 	configPath := filepath.Join(tmpDir, configFile)
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// testing backward compatibility
 	configBytes := []byte("{\"whitelisted-subnets\": \"subNetId000\"}")
@@ -86,7 +86,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	// Create ConfigFile
 	tmpDir := os.TempDir()
 	configPath := filepath.Join(tmpDir, configFile)
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// testing backward compatibility
 	configBytes := []byte("{\"track-chains\": \"subNetId000\"}")
@@ -127,7 +127,7 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	// Create ConfigFile
 	tmpDir := os.TempDir()
 	configPath := filepath.Join(tmpDir, configFile)
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// testing when no setting for tracked subnets exists
 	configBytes := []byte("{\"networkId\": \"5\"}")

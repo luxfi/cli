@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/luxfi/const"
+	constants "github.com/luxfi/const"
 	"github.com/spf13/cobra"
 )
 
@@ -99,7 +99,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
@@ -129,7 +129,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 		if err := copyCmd.Run(); err != nil {
 			return fmt.Errorf("failed to copy EVM plugin: %w", err)
 		}
-		os.Chmod(pluginDst, 0755)
+		_ = os.Chmod(pluginDst, 0o755)
 		fmt.Println("✅ EVM plugin installed")
 	}
 
@@ -156,14 +156,14 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	copyCmd := exec.Command("cp",
 		filepath.Join(stakingDir, "staker.key"),
 		filepath.Join(stakingDir, "signer.key"))
-	copyCmd.Run()
+	_ = copyCmd.Run()
 
 	// Create chain configuration if provided
 	if evmChainConfig != "" {
 		chainConfigDst := filepath.Join(evmDataDir, "configs", "chains",
 			"2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB", "config.json")
 
-		os.MkdirAll(filepath.Dir(chainConfigDst), 0755)
+		_ = os.MkdirAll(filepath.Dir(chainConfigDst), 0o755)
 		copyCmd := exec.Command("cp", evmChainConfig, chainConfigDst)
 		if err := copyCmd.Run(); err != nil {
 			fmt.Printf("Warning: Could not copy chain config: %v\n", err)
@@ -201,7 +201,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
 	}
-	defer configFile.Close()
+	defer func() { _ = configFile.Close() }()
 
 	encoder := json.NewEncoder(configFile)
 	encoder.SetIndent("", "  ")
@@ -220,7 +220,7 @@ echo ""
 exec /home/z/work/lux/node/build/luxd --config-file=%s
 `, evmDataDir, evmPort, configPath)
 
-	if err := os.WriteFile(launchScript, []byte(script), 0755); err != nil {
+	if err := os.WriteFile(launchScript, []byte(script), 0o755); err != nil {
 		return fmt.Errorf("failed to create launch script: %w", err)
 	}
 

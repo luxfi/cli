@@ -197,12 +197,8 @@ func createChain(cmd *cobra.Command, args []string) error {
 	case useCustomVM:
 		vmType = models.CustomVM
 	default:
-		// Default to EVM for l2/l3, prompt for l1
-		if chainType == "l1" {
-			vmType = models.EVM // Default to EVM for now
-		} else {
-			vmType = models.EVM
-		}
+		// Default to EVM for all chain types
+		vmType = models.EVM
 	}
 
 	// Handle genesis

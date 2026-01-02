@@ -7,9 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math/big"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -169,7 +167,7 @@ func (d *LocalDeployer) DeployToLocalNetwork(chain string, chainGenesis []byte, 
 		tracker.Failed("connection failed")
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to connect to network. Is it running? Start with: lux network start --mainnet\nError: %w", err)
 	}
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 	tracker.Complete("")
 
 	// Quick health check with short timeout for local network (5s max)
@@ -307,7 +305,7 @@ func IssueTransformSubnetTx(
 		return ids.Empty, ids.Empty, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
+	_, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
 	transformSubnetTxID, err := wallet.P().IssueTransformChainTx(elasticSubnetConfig.SubnetID, subnetAssetID,
 		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
 		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
@@ -364,7 +362,7 @@ func IssueAddPermissionlessValidatorTx(
 			ownerAddr,
 		},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
+	_, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
 	txID, err := wallet.P().IssueAddPermissionlessValidatorTx(
 		&txs.ChainValidator{
 			Validator: txs.Validator{
@@ -462,7 +460,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		tracker.Failed("connection failed")
 		return ids.Empty, ids.Empty, fmt.Errorf("error creating gRPC Client: %w", err)
 	}
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 	tracker.Complete("")
 
 	// loading sidecar before it's needed so we catch any error early
@@ -649,7 +647,6 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	close(healthDone)
 	tracker.CompleteSuccess()
 
-	rootDir = clusterInfo.GetRootDataDir()
 	d.app.Log.Debug(deployBlockchainsInfo.String())
 
 	fmt.Println()
@@ -869,18 +866,6 @@ func HasEndpoints(clusterInfo *rpcpb.ClusterInfo) bool {
 	return len(clusterInfo.CustomChains) > 0
 }
 
-// return true if vm has already been deployed (deprecated - use alreadyDeployedByName)
-func alreadyDeployed(chainVMID ids.ID, clusterInfo *rpcpb.ClusterInfo) bool {
-	if clusterInfo != nil {
-		for _, chainInfo := range clusterInfo.CustomChains {
-			if chainInfo.VmId == chainVMID.String() {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 // alreadyDeployedByName returns true if a chain with the given name is already deployed
 // This is the correct check for multi-chain deployments using the same VM (e.g., multiple EVM subnets)
 func alreadyDeployedByName(chainName string, clusterInfo *rpcpb.ClusterInfo) bool {
@@ -947,7 +932,7 @@ func (d *LocalDeployer) validateVMBinary(vmBin string, vmID ids.ID) error {
 	}
 
 	// Check executable permissions
-	if info.Mode()&0111 == 0 {
+	if info.Mode()&0o111 == 0 {
 		return fmt.Errorf("VM binary %s is not executable\n\nTo fix: chmod +x %s", vmBin, vmBin)
 	}
 
@@ -963,33 +948,6 @@ func (d *LocalDeployer) validateVMBinary(vmBin string, vmID ids.ID) error {
 		zap.Int64("size", info.Size()),
 	)
 	return nil
-}
-
-// get list of all needed plugins and install them
-func (d *LocalDeployer) removeInstalledPlugin(
-	vmID ids.ID,
-) error {
-	return d.binaryDownloader.RemoveVM(vmID.String())
-}
-
-func getExpectedDefaultSnapshotSHA256Sum() (string, error) {
-	resp, err := http.Get(constants.BootstrapSnapshotSHA256URL)
-	if err != nil {
-		return "", fmt.Errorf("failed downloading sha256 sums: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed downloading sha256 sums: unexpected http status code: %d", resp.StatusCode)
-	}
-	defer resp.Body.Close()
-	sha256FileBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed downloading sha256 sums: %w", err)
-	}
-	expectedSum, err := utils.SearchSHA256File(sha256FileBytes, constants.BootstrapSnapshotLocalPath)
-	if err != nil {
-		return "", fmt.Errorf("failed obtaining snapshot sha256 sum: %w", err)
-	}
-	return expectedSum, nil
 }
 
 // Initialize default snapshot with bootstrap snapshot archive
@@ -1030,71 +988,6 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 		}
 		ux.Logger.PrintToUser("Created fresh snapshot with embedded genesis")
 	}
-	return nil
-}
-
-// start the network
-func (d *LocalDeployer) startNetwork(
-	ctx context.Context,
-	cli client.Client,
-	nodeBinPath string,
-	runDir string,
-) error {
-	opts := []client.OpOption{
-		client.WithExecPath(nodeBinPath),
-		client.WithRootDataDir(runDir),
-		client.WithReassignPortsIfUsed(true),
-		client.WithPluginDir(filepath.Join(d.app.GetPluginsDir(), "current")),
-	}
-
-	// load global node configs if they exist
-	configStr, err := d.app.Conf.LoadNodeConfig()
-	if err != nil {
-		return nil
-	}
-	if configStr != "" {
-		opts = append(opts, client.WithGlobalNodeConfig(configStr))
-	}
-
-	// Try to load from snapshot first, if it has valid nodes
-	snapshotPath := filepath.Join(d.app.GetSnapshotsDir(), "anr-snapshot-"+constants.DefaultSnapshotName)
-	dbPath := filepath.Join(snapshotPath, "db")
-
-	// Check if we have a valid snapshot with nodes (db directory with node subdirs)
-	if fi, dbErr := os.Stat(dbPath); dbErr == nil && fi.IsDir() {
-		// Check if there's at least one node directory
-		entries, _ := os.ReadDir(dbPath)
-		hasNodes := false
-		for _, e := range entries {
-			if e.IsDir() && strings.HasPrefix(e.Name(), "node") {
-				hasNodes = true
-				break
-			}
-		}
-		if hasNodes {
-			pp, err := cli.LoadSnapshot(
-				ctx,
-				constants.DefaultSnapshotName,
-				opts...,
-			)
-			if err == nil {
-				ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
-				ux.Logger.PrintToUser("Starting network from snapshot...")
-				return nil
-			}
-			// If LoadSnapshot fails, fall through to Start
-			ux.Logger.PrintToUser("Snapshot load failed, starting fresh network: %s", err)
-		}
-	}
-
-	// Start a fresh network using netrunner's embedded genesis
-	ux.Logger.PrintToUser("Starting fresh local network...")
-	pp, err := cli.Start(ctx, nodeBinPath, opts...)
-	if err != nil {
-		return fmt.Errorf("failed to start network: %w", err)
-	}
-	ux.Logger.PrintToUser("Node log path: %s/node<i>/logs", pp.ClusterInfo.RootDataDir)
-	ux.Logger.PrintToUser("Network started successfully")
 	return nil
 }
 

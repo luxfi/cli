@@ -17,13 +17,13 @@ func TestSessionTimeout(t *testing.T) {
 
 func TestGetPasswordFromEnv(t *testing.T) {
 	t.Run("returns empty when not set", func(t *testing.T) {
-		os.Unsetenv(EnvKeyPassword)
+		_ = os.Unsetenv(EnvKeyPassword)
 		assert.Empty(t, GetPasswordFromEnv())
 	})
 
 	t.Run("returns value when set", func(t *testing.T) {
-		os.Setenv(EnvKeyPassword, "testpassword")
-		defer os.Unsetenv(EnvKeyPassword)
+		_ = os.Setenv(EnvKeyPassword, "testpassword")
+		defer func() { _ = os.Unsetenv(EnvKeyPassword) }()
 
 		assert.Equal(t, "testpassword", GetPasswordFromEnv())
 	})

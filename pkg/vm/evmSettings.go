@@ -17,10 +17,6 @@ const (
 var (
 	Difficulty = big.NewInt(0)
 
-	slowTarget   = big.NewInt(15_000_000)
-	mediumTarget = big.NewInt(20_000_000)
-	fastTarget   = big.NewInt(50_000_000)
-
 	// This is the current c-chain gas config
 	StarterFeeConfig = fees.DefaultFeeConfig
 
