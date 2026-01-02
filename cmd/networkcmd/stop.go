@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -203,10 +202,10 @@ func isDevModeRunning() bool {
 		return false
 	}
 
-	// Check if process exists by sending signal 0
-	// On Unix, this doesn't send a signal but checks if we can signal the process
-	err = syscall.Kill(pid, 0)
-	return err == nil
+	// Check if process exists using os.FindProcess
+	// Note: On Unix, FindProcess always succeeds, but we verify by checking /proc
+	// On Windows, we check if we can open the process
+	return isProcessRunning(pid)
 }
 
 func saveNetwork() error {
