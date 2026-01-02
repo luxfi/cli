@@ -227,7 +227,7 @@ func (b *KeychainBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 		return nil, err
 	}
 
-	var keys []KeyInfo
+	keys := make([]KeyInfo, 0, len(entries))
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
