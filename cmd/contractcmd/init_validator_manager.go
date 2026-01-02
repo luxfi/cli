@@ -21,7 +21,6 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/sdk/validatormanager"
 	validatormanagerSDK "github.com/luxfi/sdk/validatormanager"
 
 	"github.com/luxfi/geth/common"
@@ -206,7 +205,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	switch {
 	case sc.ValidatorManagement == "proof-of-authority": // PoA
 		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("Initializing Proof of Authority Validator Manager contract on blockchain %s"), blockchainName)
-		if err := validatormanager.SetupPoA(
+		if err := validatormanagerSDK.SetupPoA(
 			aggregatorLogger, // Use aggregatorLogger instead of app.Log
 			netSDK,
 			network,
@@ -220,7 +219,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		}
 		ux.Logger.GreenCheckmarkToUser("Proof of Authority Validator Manager contract successfully initialized on blockchain %s", blockchainName)
 	case sc.PoS: // PoS
-		deployed, err := validatormanager.ValidatorProxyHasImplementationSet(initValidatorManagerFlags.RPC)
+		deployed, err := validatormanagerSDK.ValidatorProxyHasImplementationSet(initValidatorManagerFlags.RPC)
 		if err != nil {
 			return err
 		}
@@ -237,7 +236,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 				return err
 			}
 			if sc.UseACP99 {
-				_, err := validatormanager.DeployAndRegisterValidatorManagerV2_0_0Contract(
+				_, err := validatormanagerSDK.DeployAndRegisterValidatorManagerV2_0_0Contract(
 					initValidatorManagerFlags.RPC,
 					genesisPrivateKey,
 					proxyOwnerPrivateKey,
@@ -245,7 +244,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 				if err != nil {
 					return err
 				}
-				_, err = validatormanager.DeployAndRegisterPoSValidatorManagerV2_0_0Contract(
+				_, err = validatormanagerSDK.DeployAndRegisterPoSValidatorManagerV2_0_0Contract(
 					initValidatorManagerFlags.RPC,
 					genesisPrivateKey,
 					proxyOwnerPrivateKey,
@@ -254,7 +253,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 					return err
 				}
 			} else {
-				if _, err := validatormanager.DeployAndRegisterPoSValidatorManagerV1_0_0Contract(
+				if _, err := validatormanagerSDK.DeployAndRegisterPoSValidatorManagerV1_0_0Contract(
 					initValidatorManagerFlags.RPC,
 					genesisPrivateKey,
 					proxyOwnerPrivateKey,
@@ -279,7 +278,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		if !found {
 			return fmt.Errorf("could not find validator manager owner private key")
 		}
-		if err := validatormanager.SetupPoS(
+		if err := validatormanagerSDK.SetupPoS(
 			aggregatorLogger, // Use aggregatorLogger instead of app.Log
 			netSDK,
 			network,
