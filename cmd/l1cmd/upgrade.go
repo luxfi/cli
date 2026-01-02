@@ -88,11 +88,11 @@ EXAMPLES:
 }
 
 var (
-	upgradeToPoS         bool
-	upgradeMinStake      uint64
-	upgradeRewardRate    float64
-	upgradeDelegation    bool
-	upgradeNoDelegation  bool
+	upgradeToPoS        bool
+	upgradeMinStake     uint64
+	upgradeRewardRate   float64
+	upgradeDelegation   bool
+	upgradeNoDelegation bool
 )
 
 func newUpgradeValidatorCmd() *cobra.Command {

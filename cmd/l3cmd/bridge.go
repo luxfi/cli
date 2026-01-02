@@ -75,12 +75,12 @@ func newBridgeEnableCmd() *cobra.Command {
 }
 
 var (
-	bridgeSource      string
-	bridgeDest        string
-	bridgeTokenType   string
-	bridgeAmount      string
-	bridgeRecipient   string
-	bridgeConfirm     bool
+	bridgeSource    string
+	bridgeDest      string
+	bridgeTokenType string
+	bridgeAmount    string
+	bridgeRecipient string
+	bridgeConfirm   bool
 )
 
 func newBridgeTransferCmd() *cobra.Command {

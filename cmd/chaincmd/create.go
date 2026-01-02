@@ -409,9 +409,9 @@ type genesisParams struct {
 // getGenesisParams resolves genesis parameters from flags or defaults
 func getGenesisParams() genesisParams {
 	params := genesisParams{
-		chainID:        200200, // Default chain ID
+		chainID:        200200,                                     // Default chain ID
 		airdropAddress: "9011E888251AB053B7bD1cdB598Db4f9DEd94714", // Default test account
-		airdropAmount:  "0x193e5939a08ce9dbd480000000",              // ~500M tokens
+		airdropAmount:  "0x193e5939a08ce9dbd480000000",             // ~500M tokens
 	}
 
 	// Override with flags if provided
