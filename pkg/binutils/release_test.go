@@ -34,7 +34,7 @@ var (
 func setupInstallDir(require *require.Assertions) *application.Lux {
 	rootDir, err := os.MkdirTemp(os.TempDir(), "binutils-tests")
 	require.NoError(err)
-	defer os.RemoveAll(rootDir)
+	defer func() { _ = os.RemoveAll(rootDir) }()
 
 	app := application.New()
 	app.Setup(rootDir, luxlog.NewNoOpLogger(), &config.Config{}, prompts.NewPrompter(), application.NewDownloader())

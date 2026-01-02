@@ -8,7 +8,7 @@ import (
 	"time"
 
 	cliconstants "github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/const"
+	constants "github.com/luxfi/const"
 )
 
 type Network int64

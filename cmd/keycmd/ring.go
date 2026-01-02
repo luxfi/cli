@@ -19,10 +19,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Ring signature scheme names
+const (
+	schemeLSAG       = "lsag"
+	schemeLattice    = "lattice"
+	schemeLatticePQ  = "pq"          // alias for lattice-lsag
+	schemeLatticeFull = "lattice-lsag" // full name for lattice scheme
+)
+
 var (
 	ringScheme     string
 	ringSize       int
-	ringSignerIdx  int
 	ringOutputFile string
 	ringInputFile  string
 	ringRingKeys   []string
@@ -78,10 +85,10 @@ Examples:
 	}
 
 	cmd.Flags().StringSliceVar(&ringRingKeys, "ring", nil, "Ring member key names (comma-separated)")
-	cmd.Flags().StringVarP(&ringScheme, "scheme", "s", "lsag", "Signature scheme (lsag, lattice)")
+	cmd.Flags().StringVarP(&ringScheme, "scheme", "s", schemeLSAG, "Signature scheme (lsag, lattice)")
 	cmd.Flags().StringVarP(&ringInputFile, "file", "f", "", "Read message from file")
 	cmd.Flags().StringVarP(&ringOutputFile, "output", "o", "", "Write signature to file")
-	cmd.MarkFlagRequired("ring")
+	_ = cmd.MarkFlagRequired("ring")
 
 	return cmd
 }
@@ -91,27 +98,28 @@ func runRingSign(_ *cobra.Command, args []string) error {
 
 	// Get message
 	var message []byte
-	if ringInputFile != "" {
+	switch {
+	case ringInputFile != "":
 		var err error
 		message, err = os.ReadFile(ringInputFile)
 		if err != nil {
 			return fmt.Errorf("failed to read message file: %w", err)
 		}
-	} else if len(args) > 1 {
+	case len(args) > 1:
 		message = []byte(args[1])
-	} else {
+	default:
 		return fmt.Errorf("message required: provide as argument or use --file")
 	}
 
 	// Determine scheme
 	var scheme ring.Scheme
 	switch strings.ToLower(ringScheme) {
-	case "lsag", "":
+	case schemeLSAG, "":
 		scheme = ring.LSAG
-	case "lattice", "lattice-lsag", "pq":
+	case schemeLattice, schemeLatticeFull, schemeLatticePQ:
 		scheme = ring.LatticeLSAG
 	default:
-		return fmt.Errorf("unknown scheme: %s (use 'lsag' or 'lattice')", ringScheme)
+		return fmt.Errorf("unknown scheme: %s (use '%s' or '%s')", ringScheme, schemeLSAG, schemeLattice)
 	}
 
 	// Load signer's key
@@ -161,7 +169,7 @@ func runRingSign(_ *cobra.Command, args []string) error {
 	keyImageHex := hex.EncodeToString(sig.KeyImage())
 
 	if ringOutputFile != "" {
-		if err := os.WriteFile(ringOutputFile, []byte(sigHex), 0644); err != nil {
+		if err := os.WriteFile(ringOutputFile, []byte(sigHex), 0o644); err != nil {
 			return fmt.Errorf("failed to write signature file: %w", err)
 		}
 		ux.Logger.PrintToUser("")
@@ -193,12 +201,12 @@ Examples:
 		RunE: runRingVerify,
 	}
 
-	cmd.Flags().StringVar(&ringScheme, "scheme", "lsag", "Signature scheme (lsag, lattice)")
+	cmd.Flags().StringVar(&ringScheme, "scheme", schemeLSAG, "Signature scheme (lsag, lattice)")
 	cmd.Flags().StringSliceVar(&ringRingKeys, "ring", nil, "Ring member key names (comma-separated)")
 	cmd.Flags().String("signature", "", "Signature (hex-encoded)")
 	cmd.Flags().String("signature-file", "", "Read signature from file")
 	cmd.Flags().StringVarP(&ringInputFile, "file", "f", "", "Read message from file")
-	cmd.MarkFlagRequired("ring")
+	_ = cmd.MarkFlagRequired("ring")
 
 	return cmd
 }
@@ -206,15 +214,16 @@ Examples:
 func runRingVerify(cmd *cobra.Command, args []string) error {
 	// Get message
 	var message []byte
-	if ringInputFile != "" {
+	switch {
+	case ringInputFile != "":
 		var err error
 		message, err = os.ReadFile(ringInputFile)
 		if err != nil {
 			return fmt.Errorf("failed to read message file: %w", err)
 		}
-	} else if len(args) > 0 {
+	case len(args) > 0:
 		message = []byte(args[0])
-	} else {
+	default:
 		return fmt.Errorf("message required: provide as argument or use --file")
 	}
 
@@ -242,9 +251,9 @@ func runRingVerify(cmd *cobra.Command, args []string) error {
 	// Determine scheme
 	var scheme ring.Scheme
 	switch strings.ToLower(ringScheme) {
-	case "lsag", "":
+	case schemeLSAG, "":
 		scheme = ring.LSAG
-	case "lattice", "lattice-lsag", "pq":
+	case schemeLattice, schemeLatticeFull, schemeLatticePQ:
 		scheme = ring.LatticeLSAG
 	default:
 		return fmt.Errorf("unknown scheme: %s", ringScheme)
@@ -302,7 +311,7 @@ Examples:
 		RunE: runRingKeyImage,
 	}
 
-	cmd.Flags().StringVar(&ringScheme, "scheme", "lsag", "Signature scheme (lsag, lattice)")
+	cmd.Flags().StringVar(&ringScheme, "scheme", schemeLSAG, "Signature scheme (lsag, lattice)")
 
 	return cmd
 }
@@ -319,9 +328,9 @@ func runRingKeyImage(_ *cobra.Command, args []string) error {
 	// Determine scheme
 	var scheme ring.Scheme
 	switch strings.ToLower(ringScheme) {
-	case "lsag", "":
+	case schemeLSAG, "":
 		scheme = ring.LSAG
-	case "lattice", "lattice-lsag", "pq":
+	case schemeLattice, schemeLatticeFull, schemeLatticePQ:
 		scheme = ring.LatticeLSAG
 	default:
 		return fmt.Errorf("unknown scheme: %s", ringScheme)
@@ -397,7 +406,7 @@ Examples:
 	}
 
 	cmd.Flags().IntVarP(&ringSize, "size", "n", 5, "Number of keys to generate")
-	cmd.Flags().StringVar(&ringScheme, "scheme", "lsag", "Signature scheme (lsag, lattice)")
+	cmd.Flags().StringVar(&ringScheme, "scheme", schemeLSAG, "Signature scheme (lsag, lattice)")
 
 	return cmd
 }
@@ -405,9 +414,9 @@ Examples:
 func runRingGenerate(_ *cobra.Command, _ []string) error {
 	var scheme ring.Scheme
 	switch strings.ToLower(ringScheme) {
-	case "lsag", "":
+	case schemeLSAG, "":
 		scheme = ring.LSAG
-	case "lattice", "lattice-lsag", "pq":
+	case schemeLattice, schemeLatticeFull, schemeLatticePQ:
 		scheme = ring.LatticeLSAG
 	default:
 		return fmt.Errorf("unknown scheme: %s", ringScheme)

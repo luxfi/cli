@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/const"
+	constants "github.com/luxfi/const"
 )
 
 const (
@@ -25,11 +25,8 @@ var (
 	_ time.Duration = gRPCDialTimeout
 )
 
-// gRPC server and gateway endpoints using centralized constants
-var (
-	gRPCServerEndpoint  = fmt.Sprintf(":%d", constants.GRPCPortMainnet)
-	gRPCGatewayEndpoint = fmt.Sprintf(":%d", constants.GRPCGatewayPortMainnet)
-)
+// gRPC server endpoint using centralized constants
+var gRPCServerEndpoint = fmt.Sprintf(":%d", constants.GRPCPortMainnet)
 
 // Re-export port constants from centralized package
 // Port scheme: aligned with chain IDs (8368-8371 for gRPC, 8378-8381 for gateway)

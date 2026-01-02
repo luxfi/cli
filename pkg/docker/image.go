@@ -48,7 +48,7 @@ func parseRemoteGoModFile(path string, host *models.Host) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	if err := host.Download(goMod, tmpFile.Name(), constants.SSHFileOpsTimeout); err != nil {
 		return "", err
 	}

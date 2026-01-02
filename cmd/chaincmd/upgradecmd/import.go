@@ -3,6 +3,7 @@
 package upgradecmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -50,7 +51,7 @@ func upgradeImportCmd(_ *cobra.Command, args []string) error {
 	}
 
 	if _, err := os.Stat(upgradeBytesFilePath); err != nil {
-		if err == os.ErrNotExist {
+		if errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("the upgrade file specified with path %q does not exist", upgradeBytesFilePath)
 		}
 		return err

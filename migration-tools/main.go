@@ -119,7 +119,7 @@ func createLevelDB(path string) (*leveldb.DB, error) {
 	}
 
 	// Create directory if it doesn't exist
-	if err := os.MkdirAll(path, 0755); err != nil {
+	if err := os.MkdirAll(path, 0o755); err != nil {
 		return nil, err
 	}
 
@@ -253,7 +253,7 @@ func createGenesisConfig(config MigrationConfig) error {
 func createValidatorConfigs(config MigrationConfig) error {
 	for i := 1; i <= config.ValidatorCount; i++ {
 		validatorDir := filepath.Join(config.OutputDir, fmt.Sprintf("validator%d", i))
-		if err := os.MkdirAll(validatorDir, 0755); err != nil {
+		if err := os.MkdirAll(validatorDir, 0o755); err != nil {
 			return err
 		}
 

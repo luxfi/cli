@@ -21,10 +21,7 @@ var (
 	// env var for node data dir
 	defaultUnexpandedDataDir = "$" + config.LuxNodeDataDirVar
 	// expected file name for the config
-	// Support multiple config file names for flexibility
 	defaultConfigFileName = "config.json"
-	// Alternative config file names
-	alternativeConfigFileNames = []string{"conf.json", "luxd.json", "node.json"}
 	// expected name of the plugins dir
 	defaultPluginDir = "plugins"
 	// default dir where the binary is usually found

@@ -17,9 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	importAsL1 bool
-)
+var importAsL1 bool
 
 // Historic L1 configurations for LUX, ZOO, SPC
 var historicL1s = []struct {
@@ -101,7 +99,7 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 			VMVersion:           l1.VMVersion,
 			ChainID:             fmt.Sprintf("%d", l1.ChainID),
 			Sovereign:           true,
-			ValidatorManagement: "proof-of-authority", // Default to PoA for historic chains
+			ValidatorManagement: ValidatorManagementPoA, // Default to PoA for historic chains
 			TokenInfo: models.TokenInfo{
 				Name:   l1.TokenName,
 				Symbol: l1.TokenSymbol,

@@ -104,7 +104,7 @@ func Exists(path string) bool {
 
 // EnsureExecutable ensures the binary at path is executable
 func EnsureExecutable(path string) error {
-	return os.Chmod(path, 0755)
+	return os.Chmod(path, 0o755)
 }
 
 // GetBinDir returns the default binary installation directory

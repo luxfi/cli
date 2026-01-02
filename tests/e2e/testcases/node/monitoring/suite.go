@@ -10,7 +10,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
-
 	"slices"
 
 	"github.com/luxfi/cli/pkg/ansible"

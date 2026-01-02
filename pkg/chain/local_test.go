@@ -114,7 +114,7 @@ func TestDeployToLocal(t *testing.T) {
 	// Must be executable and at least 1KB to pass preflight checks
 	vmBinPath := filepath.Join(testDir, "test-vm-binary")
 	dummyVMContent := make([]byte, 2048) // 2KB of zeros
-	err = os.WriteFile(vmBinPath, dummyVMContent, 0755)
+	err = os.WriteFile(vmBinPath, dummyVMContent, 0o755)
 	require.NoError(err)
 
 	binChecker.On("ExistsWithLatestVersion", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(true, tmpDir, nil)
@@ -224,7 +224,7 @@ func TestValidateVMBinary(t *testing.T) {
 
 	tmpDir, err := os.MkdirTemp("", "vm-validate-test")
 	require.NoError(err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	app := application.New()
 	app.Setup(tmpDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
@@ -234,7 +234,7 @@ func TestValidateVMBinary(t *testing.T) {
 	t.Run("valid binary passes", func(t *testing.T) {
 		// Create a valid VM binary (executable, >1KB)
 		vmPath := filepath.Join(tmpDir, "valid-vm")
-		err := os.WriteFile(vmPath, make([]byte, 2048), 0755)
+		err := os.WriteFile(vmPath, make([]byte, 2048), 0o755)
 		require.NoError(err)
 
 		vmID, _ := anrutils.VMID("test")
@@ -251,7 +251,7 @@ func TestValidateVMBinary(t *testing.T) {
 
 	t.Run("non-executable binary fails", func(t *testing.T) {
 		vmPath := filepath.Join(tmpDir, "nonexec-vm")
-		err := os.WriteFile(vmPath, make([]byte, 2048), 0644) // no exec perms
+		err := os.WriteFile(vmPath, make([]byte, 2048), 0o644) // no exec perms
 		require.NoError(err)
 
 		vmID, _ := anrutils.VMID("test")
@@ -262,7 +262,7 @@ func TestValidateVMBinary(t *testing.T) {
 
 	t.Run("too small binary fails", func(t *testing.T) {
 		vmPath := filepath.Join(tmpDir, "small-vm")
-		err := os.WriteFile(vmPath, make([]byte, 100), 0755) // too small
+		err := os.WriteFile(vmPath, make([]byte, 100), 0o755) // too small
 		require.NoError(err)
 
 		vmID, _ := anrutils.VMID("test")

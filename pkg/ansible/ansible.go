@@ -27,7 +27,7 @@ func CreateAnsibleHostInventory(inventoryDirPath, certFilePath, cloudService str
 	if err != nil {
 		return err
 	}
-	defer inventoryFile.Close()
+	defer func() { _ = inventoryFile.Close() }()
 	if cloudConfigMap != nil {
 		for _, cloudConfig := range cloudConfigMap {
 			for _, instanceID := range cloudConfig.InstanceIDs {
@@ -77,7 +77,7 @@ func WriteNodeConfigsToAnsibleInventory(inventoryDirPath string, nc []models.Nod
 	if err != nil {
 		return err
 	}
-	defer inventoryFile.Close()
+	defer func() { _ = inventoryFile.Close() }()
 	for _, nodeConfig := range nc {
 		nodeID, err := models.HostCloudIDToAnsibleID(nodeConfig.CloudService, nodeConfig.NodeID)
 		if err != nil {
@@ -110,7 +110,7 @@ func GetInventoryFromAnsibleInventoryFile(inventoryDirPath string) ([]*models.Ho
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		// host alias is first element in each line of host inventory file

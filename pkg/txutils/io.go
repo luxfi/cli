@@ -31,7 +31,7 @@ func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
 	if err != nil {
 		return fmt.Errorf("couldn't create file to write tx to: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	_, err = f.WriteString(txStr)
 	if err != nil {
 		return fmt.Errorf("couldn't write tx into file: %w", err)

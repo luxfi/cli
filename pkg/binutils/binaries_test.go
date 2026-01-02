@@ -20,14 +20,14 @@ func TestInstallZipArchive(t *testing.T) {
 
 	tmpDir := os.TempDir()
 	zip := filepath.Join(tmpDir, "testFile.zip")
-	defer os.Remove(zip)
+	defer func() { _ = os.Remove(zip) }()
 
 	testutils.CreateZip(require, archivePath, zip)
 
 	// can't use t.TempDir here as that returns the same dir
 	installDir, err := os.MkdirTemp(tmpDir, "zip-test-dir")
 	require.NoError(err)
-	defer os.RemoveAll(installDir)
+	defer func() { _ = os.RemoveAll(installDir) }()
 
 	zipBytes, err := os.ReadFile(zip)
 	require.NoError(err)
@@ -45,14 +45,14 @@ func TestInstallGzipArchive(t *testing.T) {
 
 	tmpDir := os.TempDir()
 	tgz := filepath.Join(tmpDir, "testFile.tar.gz")
-	defer os.Remove(tgz)
+	defer func() { _ = os.Remove(tgz) }()
 
 	testutils.CreateTarGz(require, archivePath, tgz, true)
 
 	// can't use t.TempDir here as that returns the same dir
 	installDir, err := os.MkdirTemp(tmpDir, "gzip-test-dir")
 	require.NoError(err)
-	defer os.RemoveAll(installDir)
+	defer func() { _ = os.RemoveAll(installDir) }()
 
 	tgzBytes, err := os.ReadFile(tgz)
 	require.NoError(err)
@@ -71,7 +71,7 @@ func TestExistsWithVersion(t *testing.T) {
 
 	installDir, err := os.MkdirTemp(os.TempDir(), "binutils-tests")
 	require.NoError(err)
-	defer os.RemoveAll(installDir)
+	defer func() { _ = os.RemoveAll(installDir) }()
 
 	checker := NewBinaryChecker()
 
@@ -96,7 +96,7 @@ func TestExistsWithVersion_Longer(t *testing.T) {
 
 	installDir, err := os.MkdirTemp(os.TempDir(), "binutils-tests")
 	require.NoError(err)
-	defer os.RemoveAll(installDir)
+	defer func() { _ = os.RemoveAll(installDir) }()
 
 	checker := NewBinaryChecker()
 

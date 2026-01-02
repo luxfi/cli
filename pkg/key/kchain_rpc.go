@@ -93,7 +93,7 @@ func (c *KChainRPCClient) call(ctx context.Context, method string, params interf
 	if err != nil {
 		return fmt.Errorf("RPC call failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {

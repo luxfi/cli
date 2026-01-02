@@ -41,7 +41,7 @@ func stopDevNode(*cobra.Command, []string) error {
 			if err == nil {
 				if err := process.Signal(os.Interrupt); err == nil {
 					ux.Logger.PrintToUser("Sent interrupt signal to PID %d", pid)
-					os.Remove(pidFile)
+					_ = os.Remove(pidFile)
 					return nil
 				}
 			}

@@ -66,7 +66,7 @@ func (t *TableCompatWrapper) SetAlignment(align tw.Align) {
 
 // AppendCompat adds a row using string slice (old API)
 func (t *TableCompatWrapper) AppendCompat(row []string) {
-	t.Table.Append(row)
+	_ = t.Table.Append(row)
 }
 
 // CreateCompatTable creates a table with v0.0.5-like API

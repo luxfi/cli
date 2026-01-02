@@ -182,7 +182,7 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	// If --non-interactive flag is set, propagate to env so IsInteractive() sees it
 	// This allows TTY detection to work automatically while still respecting the flag
 	if nonInteractive {
-		os.Setenv(prompts.EnvNonInteractive, "1")
+		_ = os.Setenv(prompts.EnvNonInteractive, "1")
 	}
 
 	// Interactive by default on TTY, non-interactive when:
@@ -258,7 +258,7 @@ func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
 			if errors.Is(err, updatecmd.ErrUserAbortedInstallation) {
 				return nil
 			}
-			if err == updatecmd.ErrNoVersion {
+			if errors.Is(err, updatecmd.ErrNoVersion) {
 				ux.Logger.PrintToUser(
 					"Attempted to check if a new version is available, but couldn't find the currently running version information")
 				ux.Logger.PrintToUser(
@@ -389,10 +389,10 @@ func initConfig() {
 
 	// Bind environment variables for binary paths
 	// LUX_NODE_PATH -> node-path, etc.
-	viper.BindEnv(constants.ConfigNodePath, constants.EnvNodePath)
-	viper.BindEnv(constants.ConfigNetrunnerPath, constants.EnvNetrunnerPath)
-	viper.BindEnv(constants.ConfigEVMPath, constants.EnvEVMPath)
-	viper.BindEnv(constants.ConfigPluginsDir, constants.EnvPluginsDir)
+	_ = viper.BindEnv(constants.ConfigNodePath, constants.EnvNodePath)
+	_ = viper.BindEnv(constants.ConfigNetrunnerPath, constants.EnvNetrunnerPath)
+	_ = viper.BindEnv(constants.ConfigEVMPath, constants.EnvEVMPath)
+	_ = viper.BindEnv(constants.ConfigPluginsDir, constants.EnvPluginsDir)
 
 	viper.AutomaticEnv() // read in environment variables that match
 

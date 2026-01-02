@@ -1454,7 +1454,7 @@ func TestCaptureExistingFilepathWithMonkeyPatch(t *testing.T) {
 	// Create a temporary file for testing
 	tmpFile, err := os.CreateTemp("", "test_existing_*.txt")
 	require.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	err = tmpFile.Close()
 	require.NoError(t, err)
 
@@ -1555,7 +1555,7 @@ func TestCaptureNewFilepathWithMonkeyPatch(t *testing.T) {
 	// Create a temporary file that exists
 	tmpFile, err := os.CreateTemp("", "test_existing_*.txt")
 	require.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	err = tmpFile.Close()
 	require.NoError(t, err)
 

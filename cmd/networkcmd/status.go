@@ -163,7 +163,7 @@ func checkNetworkStatus(networkType string) error {
 		ux.Logger.PrintToUser("%s: Not running (failed to connect)", networkType)
 		return err
 	}
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 
 	ctx := binutils.GetAsyncContext()
 	status, err := cli.Status(ctx)

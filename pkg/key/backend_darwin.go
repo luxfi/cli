@@ -75,7 +75,7 @@ func (b *KeychainBackend) Initialize(ctx context.Context) error {
 		}
 		b.dataDir = keysDir
 	}
-	return os.MkdirAll(b.dataDir, 0700)
+	return os.MkdirAll(b.dataDir, 0o700)
 }
 
 func (b *KeychainBackend) Close() error {
@@ -165,7 +165,7 @@ func (b *KeychainBackend) LoadKey(ctx context.Context, name, password string) (*
 
 func (b *KeychainBackend) SaveKey(ctx context.Context, keySet *HDKeySet, password string) error {
 	keyDir := filepath.Join(b.dataDir, keySet.Name)
-	if err := os.MkdirAll(keyDir, 0700); err != nil {
+	if err := os.MkdirAll(keyDir, 0o700); err != nil {
 		return fmt.Errorf("failed to create key directory: %w", err)
 	}
 
@@ -189,7 +189,7 @@ func (b *KeychainBackend) SaveKey(ctx context.Context, keySet *HDKeySet, passwor
 		"backend":    string(BackendKeychain),
 	}
 	pubData, _ := json.MarshalIndent(pubInfo, "", "  ")
-	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0644)
+	_ = os.WriteFile(filepath.Join(keyDir, "info.json"), pubData, 0o644)
 
 	return nil
 }

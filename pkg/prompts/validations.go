@@ -16,7 +16,7 @@ import (
 
 	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/const"
+	constants "github.com/luxfi/const"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/formatting/address"
@@ -50,20 +50,6 @@ func validatePositiveBigInt(input string) error {
 	}
 	if n.Cmp(big.NewInt(0)) == -1 {
 		return errors.New("invalid number")
-	}
-	return nil
-}
-
-func validateStakingDuration(input string) error {
-	d, err := time.ParseDuration(input)
-	if err != nil {
-		return err
-	}
-	if d > cliconstants.MaxStakeDuration {
-		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(cliconstants.MaxStakeDuration))
-	}
-	if d < cliconstants.MinStakeDuration {
-		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(cliconstants.MinStakeDuration))
 	}
 	return nil
 }
@@ -293,7 +279,7 @@ func validateNonEmpty(input string) error {
 func validateMainnetStakingDuration(input string) error {
 	duration, err := time.ParseDuration(input)
 	if err != nil {
-		return fmt.Errorf("invalid duration format: %v", err)
+		return fmt.Errorf("invalid duration format: %w", err)
 	}
 	// Mainnet min staking duration is 2 weeks
 	if duration < 14*24*time.Hour {
@@ -310,7 +296,7 @@ func validateMainnetStakingDuration(input string) error {
 func validateMainnetL1StakingDuration(input string) error {
 	duration, err := time.ParseDuration(input)
 	if err != nil {
-		return fmt.Errorf("invalid duration format: %v", err)
+		return fmt.Errorf("invalid duration format: %w", err)
 	}
 	// L1 min staking duration is 24 hours
 	if duration < 24*time.Hour {
@@ -327,7 +313,7 @@ func validateMainnetL1StakingDuration(input string) error {
 func validateTestnetStakingDuration(input string) error {
 	duration, err := time.ParseDuration(input)
 	if err != nil {
-		return fmt.Errorf("invalid duration format: %v", err)
+		return fmt.Errorf("invalid duration format: %w", err)
 	}
 	// Testnet min staking duration is 24 hours
 	if duration < 24*time.Hour {
@@ -398,7 +384,7 @@ func RequestURL(url string) error {
 	if err != nil {
 		return fmt.Errorf("failed to reach URL: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Check for successful status codes (2xx or 3xx)
 	if resp.StatusCode >= 400 {

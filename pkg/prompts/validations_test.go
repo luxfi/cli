@@ -552,14 +552,14 @@ func TestValidateExistingFilepath(t *testing.T) {
 	// Create a temporary file for testing
 	tmpFile, err := os.CreateTemp("", "test_file_*.txt")
 	require.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	err = tmpFile.Close()
 	require.NoError(t, err)
 
 	// Create a temporary directory for testing
 	tmpDir, err := os.MkdirTemp("", "test_dir_*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	tests := []struct {
 		name    string
@@ -1456,7 +1456,7 @@ func TestValidateNewFilepath(t *testing.T) {
 	// Create a temporary file that exists
 	tmpFile, err := os.CreateTemp("", "existing_file_*.txt")
 	require.NoError(t, err)
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	err = tmpFile.Close()
 	require.NoError(t, err)
 

@@ -18,9 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	importRPC string
-)
+var importRPC string
 
 func newImportCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -277,7 +275,7 @@ func getBlockHeight(rpcEndpoint string) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -294,7 +292,7 @@ func getBlockHeight(rpcEndpoint string) (uint64, error) {
 	}
 
 	var height uint64
-	fmt.Sscanf(heightHex, "0x%x", &height)
+	_, _ = fmt.Sscanf(heightHex, "0x%x", &height)
 	return height, nil
 }
 
@@ -324,7 +322,7 @@ func callAdminImportChain(rpcEndpoint, filePath string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

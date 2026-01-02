@@ -28,6 +28,8 @@ const (
 	DefaultDeployTimeout = 30 * time.Second
 	// MaxConsecutiveHealthFailures is the number of consecutive health check failures before failing fast
 	MaxConsecutiveHealthFailures = 10
+	// LuxEVMName is the canonical name for the Lux EVM
+	LuxEVMName = "Lux EVM"
 )
 
 var (
@@ -201,7 +203,7 @@ func deployChain(cmd *cobra.Command, args []string) error {
 func verifyVMInstalled(chainName string, sc *models.Sidecar) error {
 	// Get the actual VM name based on VM type
 	// The VMID is computed from the VM name, not the chain name
-	vmName := "Lux EVM" // Default for EVM chains
+	vmName := LuxEVMName // Default for EVM chains
 	if sc.VM == models.CustomVM {
 		vmName = chainName // For custom VMs, use chain name
 	}
@@ -260,7 +262,7 @@ To fix, update the symlink:
 	}
 
 	// Verify it's executable
-	if info.Mode()&0111 == 0 {
+	if info.Mode()&0o111 == 0 {
 		return fmt.Errorf("VM plugin at %s is not executable", pluginPath)
 	}
 
@@ -272,20 +274,12 @@ To fix, update the symlink:
 func getVMDisplayName(vm models.VMType) string {
 	switch vm {
 	case models.EVM:
-		return "Lux EVM"
+		return LuxEVMName
 	case models.CustomVM:
 		return "Custom VM"
 	default:
 		return string(vm)
 	}
-}
-
-// getVMVersion returns the VM version or a default
-func getVMVersion(sc *models.Sidecar) string {
-	if sc.VMVersion != "" {
-		return sc.VMVersion
-	}
-	return "latest"
 }
 
 func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network) error {
@@ -332,7 +326,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	var err error
 
 	// Compute VMID for plugin lookup
-	vmName := "Lux EVM"
+	vmName := LuxEVMName
 	if sc.VM == models.CustomVM {
 		vmName = chainName
 	}
@@ -343,7 +337,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	case models.EVM:
 		// First check if EVM plugin already exists (linked or copied)
 		pluginPath := filepath.Join(app.GetCurrentPluginsDir(), vmIDStr)
-		if info, pluginErr := os.Stat(pluginPath); pluginErr == nil && info.Mode().IsRegular() && info.Mode()&0111 != 0 {
+		if info, pluginErr := os.Stat(pluginPath); pluginErr == nil && info.Mode().IsRegular() && info.Mode()&0o111 != 0 {
 			// Plugin exists and is executable, use it directly
 			vmBin = pluginPath
 			app.Log.Debug("Using existing EVM plugin", zap.String("path", vmBin))

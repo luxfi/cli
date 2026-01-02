@@ -54,7 +54,7 @@ func NewNetworkCmd(injectedApp *application.Lux, networkType string) *cobra.Comm
 		Long:  fmt.Sprintf("The Lux gRPC server for %s network. Invoked automatically by 'lux network start'.", networkType),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Override the environment variable with the command's network type
-			os.Setenv("LUX_NETWORK_TYPE", networkType)
+			_ = os.Setenv("LUX_NETWORK_TYPE", networkType)
 			return startBackend(cmd, args)
 		},
 		Args:   cobra.ExactArgs(0),

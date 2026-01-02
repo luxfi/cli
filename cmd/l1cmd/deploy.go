@@ -54,13 +54,14 @@ func deployL1(cmd *cobra.Command, args []string) error {
 
 	// Determine deployment target
 	network := ""
-	if deployLocal {
-		network = "local"
-	} else if deployTestnet {
-		network = "testnet"
-	} else if deployMainnet {
-		network = "mainnet"
-	} else {
+	switch {
+	case deployLocal:
+		network = NetworkLocal
+	case deployTestnet:
+		network = NetworkTestnet
+	case deployMainnet:
+		network = NetworkMainnet
+	default:
 		// Interactive selection
 		networks := []string{"Local Network", "Testnet", "Mainnet"}
 		choice, err := app.Prompt.CaptureList("Choose deployment network", networks)
@@ -69,11 +70,11 @@ func deployL1(cmd *cobra.Command, args []string) error {
 		}
 		switch choice {
 		case "Local Network":
-			network = "local"
+			network = NetworkLocal
 		case "Testnet":
-			network = "testnet"
+			network = NetworkTestnet
 		case "Mainnet":
-			network = "mainnet"
+			network = NetworkMainnet
 		}
 	}
 
@@ -102,11 +103,11 @@ func deployL1(cmd *cobra.Command, args []string) error {
 
 	// Deploy based on network
 	switch network {
-	case "local":
+	case NetworkLocal:
 		return deployL1Local(l1Name, &sc)
-	case "testnet":
+	case NetworkTestnet:
 		return deployL1Testnet(l1Name, &sc)
-	case "mainnet":
+	case NetworkMainnet:
 		return deployL1Mainnet(l1Name, &sc)
 	}
 
@@ -144,7 +145,7 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 	}
 
 	// Initialize validator manager
-	if sc.ValidatorManagement == "proof-of-authority" {
+	if sc.ValidatorManagement == ValidatorManagementPoA {
 		ux.Logger.PrintToUser("Initializing PoA validator manager...")
 		// Deploy PoA validator manager contract using the SDK
 		sc.ValidatorManagerAddress = "0x0000000000000000000000000000000000001000" // Precompiled address

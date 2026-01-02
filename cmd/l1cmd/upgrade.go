@@ -126,7 +126,7 @@ EXAMPLES:
 
 			ux.Logger.PrintToUser("Current validator management: %s", sc.ValidatorManagement)
 
-			if sc.ValidatorManagement == "proof-of-authority" {
+			if sc.ValidatorManagement == ValidatorManagementPoA {
 				migrate := upgradeToPoS
 				if !migrate {
 					if !prompts.IsInteractive() {

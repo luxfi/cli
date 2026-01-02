@@ -55,7 +55,7 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.StopNetwork()
+		_ = commands.StopNetwork()
 		restartOutput := commands.StartNetwork()
 		rpcs, err = utils.ParseRPCsFromOutput(restartOutput)
 		if err != nil {

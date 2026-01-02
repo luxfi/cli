@@ -36,7 +36,7 @@ func NewUserLog(log luxlog.Logger, userwriter io.Writer) {
 // PrintToUser prints msg directly on the screen, but also to log file
 func (ul *UserLog) PrintToUser(msg string, args ...interface{}) {
 	formattedMsg := fmt.Sprintf(msg, args...)
-	fmt.Fprintln(ul.writer, formattedMsg)
+	_, _ = fmt.Fprintln(ul.writer, formattedMsg)
 	ul.log.Info(formattedMsg)
 }
 
@@ -52,7 +52,7 @@ func (ul *UserLog) PrintLineSeparator(msg ...string) {
 	if len(msg) > 0 && msg[0] != "" {
 		separator = msg[0]
 	}
-	fmt.Fprintln(ul.writer, separator)
+	_, _ = fmt.Fprintln(ul.writer, separator)
 	ul.log.Info(separator)
 }
 
@@ -65,14 +65,14 @@ func (ul *UserLog) Error(msg string, args ...interface{}) {
 // RedXToUser prints a red X error message to the user
 func (ul *UserLog) RedXToUser(msg string, args ...interface{}) {
 	formattedMsg := fmt.Sprintf("✗ %s", fmt.Sprintf(msg, args...))
-	fmt.Fprintln(ul.writer, formattedMsg)
+	_, _ = fmt.Fprintln(ul.writer, formattedMsg)
 	ul.log.Error(formattedMsg)
 }
 
 // GreenCheckmarkToUser prints a green checkmark success message to the user
 func (ul *UserLog) GreenCheckmarkToUser(msg string, args ...interface{}) {
 	formattedMsg := fmt.Sprintf("✓ %s", fmt.Sprintf(msg, args...))
-	fmt.Fprintln(ul.writer, formattedMsg)
+	_, _ = fmt.Fprintln(ul.writer, formattedMsg)
 	ul.log.Info(formattedMsg)
 }
 
@@ -80,7 +80,7 @@ func (ul *UserLog) GreenCheckmarkToUser(msg string, args ...interface{}) {
 func (ul *UserLog) PrintError(msg string, args ...interface{}) {
 	formattedMsg := fmt.Sprintf(msg, args...)
 	errorMsg := fmt.Sprintf("\nERROR: %s\n", formattedMsg)
-	fmt.Fprintln(ul.writer, errorMsg)
+	_, _ = fmt.Fprintln(ul.writer, errorMsg)
 	ul.log.Error(formattedMsg)
 }
 
@@ -174,10 +174,10 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	for _, nodeName := range clusterInfo.NodeNames {
 		nodeInfo := nodeInfos[nodeName]
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			table.Append([]string{nodeInfo.Name, chainInfo.GetChainName(), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.GetChainName())})
+			_ = table.Append([]string{nodeInfo.Name, chainInfo.GetChainName(), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.GetChainName())})
 		}
 	}
-	table.Render()
+	_ = table.Render()
 }
 
 // DefaultTable creates a default table with the given title and headers

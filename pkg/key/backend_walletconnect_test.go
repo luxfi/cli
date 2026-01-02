@@ -6,6 +6,7 @@ package key
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,8 +29,8 @@ func TestWalletConnectBackend_Type(t *testing.T) {
 func TestWalletConnectBackend_Name(t *testing.T) {
 	b := NewWalletConnectBackend()
 	name := b.Name()
-	if name != "WalletConnect (Mobile Signing)" {
-		t.Errorf("Name() = %v, want WalletConnect (Mobile Signing)", name)
+	if name != WalletConnectName {
+		t.Errorf("Name() = %v, want %s", name, WalletConnectName)
 	}
 }
 
@@ -144,7 +145,7 @@ func TestWalletConnectBackend_LoadKeyNotPaired(t *testing.T) {
 	ctx := context.Background()
 	_, err := b.LoadKey(ctx, "nonexistent", "")
 
-	if err != ErrKeyNotFound {
+	if !errors.Is(err, ErrKeyNotFound) {
 		t.Errorf("LoadKey() error = %v, want %v", err, ErrKeyNotFound)
 	}
 }
@@ -165,7 +166,7 @@ func TestWalletConnectBackend_LoadKeyExpiredSession(t *testing.T) {
 	ctx := context.Background()
 	_, err := b.LoadKey(ctx, "expired", "")
 
-	if err != ErrWCSessionExpired {
+	if !errors.Is(err, ErrWCSessionExpired) {
 		t.Errorf("LoadKey() error = %v, want %v", err, ErrWCSessionExpired)
 	}
 }
@@ -187,7 +188,6 @@ func TestWalletConnectBackend_LoadKeyValidSession(t *testing.T) {
 
 	ctx := context.Background()
 	keySet, err := b.LoadKey(ctx, "valid", "")
-
 	if err != nil {
 		t.Fatalf("LoadKey() failed: %v", err)
 	}
@@ -317,7 +317,7 @@ func TestWalletConnectBackend_UnlockNotPaired(t *testing.T) {
 	ctx := context.Background()
 	err := b.Unlock(ctx, "nonexistent", "")
 
-	if err != ErrWCNotPaired {
+	if !errors.Is(err, ErrWCNotPaired) {
 		t.Errorf("Unlock() error = %v, want %v", err, ErrWCNotPaired)
 	}
 }
@@ -378,7 +378,7 @@ func TestWalletConnectBackend_GetSessionChecksum(t *testing.T) {
 
 	// Not paired should fail
 	_, err := b.GetSessionChecksum("nonexistent")
-	if err != ErrWCNotPaired {
+	if !errors.Is(err, ErrWCNotPaired) {
 		t.Errorf("GetSessionChecksum() error = %v, want %v", err, ErrWCNotPaired)
 	}
 
@@ -454,7 +454,7 @@ func TestWalletConnectBackend_Registration(t *testing.T) {
 		t.Errorf("GetBackend() returned wrong type: %v", backend.Type())
 	}
 
-	if backend.Name() != "WalletConnect (Mobile Signing)" {
+	if backend.Name() != WalletConnectName {
 		t.Errorf("GetBackend() returned wrong name: %v", backend.Name())
 	}
 }

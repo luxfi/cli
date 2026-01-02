@@ -105,7 +105,7 @@ func runExport(_ *cobra.Command, args []string) error {
 	}
 
 	if exportOutput != "" {
-		if err := os.WriteFile(exportOutput, []byte(output), 0600); err != nil {
+		if err := os.WriteFile(exportOutput, []byte(output), 0o600); err != nil {
 			return fmt.Errorf("failed to write output file: %w", err)
 		}
 		ux.Logger.PrintToUser("Exported to %s", exportOutput)

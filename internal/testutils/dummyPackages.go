@@ -124,7 +124,7 @@ func verifyLuxZipContents(require *require.Assertions, zipFile string) {
 
 	reader, err := zip.OpenReader(zipFile)
 	require.NoError(err)
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 	for _, file := range reader.File {
 		// Zip directories end in "/" which is annoying for string matching
 		switch strings.TrimSuffix(file.Name, "/") {
@@ -149,7 +149,7 @@ func verifyLuxZipContents(require *require.Assertions, zipFile string) {
 func CreateDummyLuxZip(require *require.Assertions, binary []byte) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
-	defer os.RemoveAll(sourceDir)
+	defer func() { _ = os.RemoveAll(sourceDir) }()
 
 	topDir := filepath.Join(sourceDir, buildDirName)
 	err = os.Mkdir(topDir, 0o700)
@@ -169,7 +169,7 @@ func CreateDummyLuxZip(require *require.Assertions, binary []byte) []byte {
 
 	// Put into zip
 	CreateZip(require, topDir, luxZip)
-	defer os.Remove(luxZip)
+	defer func() { _ = os.Remove(luxZip) }()
 
 	verifyLuxZipContents(require, luxZip)
 
@@ -181,7 +181,7 @@ func CreateDummyLuxZip(require *require.Assertions, binary []byte) []byte {
 func CreateDummyLuxTar(require *require.Assertions, binary []byte, version string) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
-	defer os.RemoveAll(sourceDir)
+	defer func() { _ = os.RemoveAll(sourceDir) }()
 
 	topDir := filepath.Join(sourceDir, nodeBinPrefix+version)
 	err = os.Mkdir(topDir, 0o700)
@@ -201,7 +201,7 @@ func CreateDummyLuxTar(require *require.Assertions, binary []byte, version strin
 
 	// Put into tar
 	CreateTarGz(require, topDir, luxTar, true)
-	defer os.Remove(luxTar)
+	defer func() { _ = os.Remove(luxTar) }()
 	tarBytes, err := os.ReadFile(luxTar)
 	require.NoError(err)
 	verifyLuxTarContents(require, tarBytes, version)
@@ -211,7 +211,7 @@ func CreateDummyLuxTar(require *require.Assertions, binary []byte, version strin
 func CreateDummyEVMTar(require *require.Assertions, binary []byte) []byte {
 	sourceDir, err := os.MkdirTemp(os.TempDir(), "binutils-source")
 	require.NoError(err)
-	defer os.RemoveAll(sourceDir)
+	defer func() { _ = os.RemoveAll(sourceDir) }()
 
 	binPath := filepath.Join(sourceDir, evmBin)
 	err = os.WriteFile(binPath, binary, 0o600)
@@ -227,7 +227,7 @@ func CreateDummyEVMTar(require *require.Assertions, binary []byte) []byte {
 
 	// Put into tar
 	CreateTarGz(require, sourceDir, evmTar, false)
-	defer os.Remove(evmTar)
+	defer func() { _ = os.Remove(evmTar) }()
 	tarBytes, err := os.ReadFile(evmTar)
 	require.NoError(err)
 	verifyEVMTarContents(require, tarBytes)

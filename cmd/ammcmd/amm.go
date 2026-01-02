@@ -15,8 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var app *application.Lux
-
 // Global flags
 var (
 	networkFlag    string
@@ -25,8 +23,7 @@ var (
 )
 
 // NewCmd creates a new amm command
-func NewCmd(injectedApp *application.Lux) *cobra.Command {
-	app = injectedApp
+func NewCmd(_ *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "amm",
 		Short: "Trade on Lux/Zoo AMM (Uniswap V2/V3)",

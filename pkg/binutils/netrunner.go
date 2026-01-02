@@ -60,7 +60,7 @@ func EnsureNetrunnerBinary(app *application.Lux, version string) (string, error)
 		}
 	}
 
-	if err := os.Chmod(binaryPath, 0755); err != nil {
+	if err := os.Chmod(binaryPath, 0o755); err != nil {
 		return "", err
 	}
 

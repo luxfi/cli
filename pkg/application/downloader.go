@@ -38,7 +38,7 @@ func (downloader) Download(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected http status code: %d", resp.StatusCode)
 	}
@@ -52,7 +52,7 @@ func (downloader) DownloadWithTee(url string, filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected http status code: %d", resp.StatusCode)
 	}
@@ -64,7 +64,7 @@ func (downloader) DownloadWithTee(url string, filePath string) ([]byte, error) {
 	}
 
 	// Save to file
-	if err := os.WriteFile(filePath, content, 0644); err != nil {
+	if err := os.WriteFile(filePath, content, 0o644); err != nil {
 		return nil, err
 	}
 
@@ -78,7 +78,7 @@ func (d downloader) GetAllReleasesForRepo(org, repo string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 
 	jsonBytes, err := io.ReadAll(body)
 	if err != nil {
@@ -130,7 +130,7 @@ func (d downloader) GetLatestReleaseVersion(releaseURL string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 
 	jsonBytes, err := io.ReadAll(body)
 	if err != nil {

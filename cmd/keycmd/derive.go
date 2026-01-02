@@ -155,7 +155,7 @@ func runDerive(_ *cobra.Command, _ []string) error {
 		validatorsPath := os.ExpandEnv("$HOME/.lux/keys/mainnet_validators.json")
 		data, err := json.MarshalIndent(results, "", "  ")
 		if err == nil {
-			if err := os.WriteFile(validatorsPath, data, 0600); err != nil {
+			if err := os.WriteFile(validatorsPath, data, 0o600); err != nil {
 				ux.Logger.PrintToUser("Warning: failed to write validators file: %v", err)
 			} else {
 				ux.Logger.PrintToUser("Validator info exported to: %s", validatorsPath)

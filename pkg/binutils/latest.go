@@ -80,7 +80,7 @@ func DownloadReleaseVersion(
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("unexpected http status code: %d", resp.StatusCode)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	archive, err := io.ReadAll(resp.Body)
 	if err != nil {
