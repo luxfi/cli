@@ -85,7 +85,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 	ginkgo.BeforeEach(func() {
 		// key
 		_ = utils.DeleteKey(ewoqKey)
-		output, err := commands.CreateKeyFromPath(ewoqKey, utils.EwoqKeyPath)
+		output, err := commands.CreateKeyFromPath(ewoqKey, utils.LocalKeyPath)
 		if err != nil {
 			fmt.Println(output)
 			utils.PrintStdErr(err)
