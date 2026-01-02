@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/sdk/models"
 )
 
@@ -85,7 +86,7 @@ func createEvmGenesis(
 		chainID    *big.Int
 		tokenName  string
 		vmVersion  string
-		allocation core.GenesisAlloc
+		allocation types.GenesisAlloc
 		direction  statemachine.StateDirection
 		err        error
 	)
@@ -174,7 +175,7 @@ func createEvmGenesis(
 	return prettyJSON.Bytes(), sc, nil
 }
 
-func ensureAdminsHaveBalance(admins []crypto.Address, alloc core.GenesisAlloc) error {
+func ensureAdminsHaveBalance(admins []crypto.Address, alloc types.GenesisAlloc) error {
 	if len(admins) < 1 {
 		return nil
 	}
@@ -192,12 +193,12 @@ func ensureAdminsHaveBalance(admins []crypto.Address, alloc core.GenesisAlloc) e
 }
 
 // In own function to facilitate testing
-func getEVMAllocation(app *application.Lux) (core.GenesisAlloc, statemachine.StateDirection, error) {
+func getEVMAllocation(app *application.Lux) (types.GenesisAlloc, statemachine.StateDirection, error) {
 	return getAllocation(app, defaultEvmAirdropAmount, oneLux, "Amount to airdrop (in LUX units)")
 }
 
 // CreateEVMGenesis creates a new EVM genesis configuration
-func CreateEVMGenesis(chainID *big.Int, allocations core.GenesisAlloc, timestamps map[string]uint64) map[string]interface{} {
+func CreateEVMGenesis(chainID *big.Int, allocations types.GenesisAlloc, timestamps map[string]uint64) map[string]interface{} {
 	// Default configuration
 	config := map[string]interface{}{
 		"config": map[string]interface{}{

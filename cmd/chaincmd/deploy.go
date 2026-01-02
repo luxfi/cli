@@ -305,9 +305,10 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	}
 	if networkState == nil || !networkState.Running {
 		startHint := "lux network start"
-		if targetType == "testnet" {
+		switch targetType {
+		case "testnet":
 			startHint = "lux network start --testnet"
-		} else if targetType == "mainnet" {
+		case "mainnet":
 			startHint = "lux network start --mainnet"
 		}
 		return fmt.Errorf("no %s network running. Start the network first with: %s", targetType, startHint)
