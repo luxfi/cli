@@ -205,14 +205,14 @@ func copyFile(src, dst string) error {
 	return err
 }
 
-// PrepareCanonicalChainConfigs creates a canonical chain-configs directory at ~/.lux/chain-configs/
+// PrepareCanonicalChainConfigs creates the canonical chain configs directory at ~/.lux/chains/
 // with subdirectories for each locally deployed subnet's blockchain ID.
 // This directory can be passed to nodes via --chain-config-dir flag so all nodes share
 // the same chain configs from a single source.
 // Returns the canonical chain configs directory path.
 func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
-	// Create canonical chain-configs directory
-	chainConfigsDir := filepath.Join(app.GetBaseDir(), "chain-configs")
+	// Use ChainsDir for all chain configs - consolidating chain-configs into chains/
+	chainConfigsDir := app.GetChainConfigDir()
 	if err := os.MkdirAll(chainConfigsDir, 0755); err != nil {
 		return "", err
 	}

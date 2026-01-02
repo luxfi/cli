@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -117,8 +118,9 @@ func startDevNode(*cobra.Command, []string) error {
 		return err
 	}
 
-	// Data directories
-	dataDir := filepath.Join(os.Getenv("HOME"), ".lux", "dev")
+	// Data directories - use constants for consistent paths
+	baseDir := filepath.Join(os.Getenv("HOME"), cliconstants.BaseDirName)
+	dataDir := filepath.Join(baseDir, cliconstants.DevDir)
 	dbDir := filepath.Join(dataDir, "db")
 	logDir := filepath.Join(dataDir, "logs")
 
@@ -146,6 +148,9 @@ func startDevNode(*cobra.Command, []string) error {
 	// - skip-bootstrap=true
 	// - sybil-protection-enabled=false
 	// - ephemeral staking certs
+	// Chain config dir - luxd's --chain-config-dir points here
+	// Uses ~/.lux/chains/ for all chain configs (genesis, config.json, etc.)
+	chainConfigDir := filepath.Join(baseDir, cliconstants.ChainsDir)
 	args := []string{
 		"--dev",
 		fmt.Sprintf("--network-id=%d", 1337),
@@ -155,6 +160,7 @@ func startDevNode(*cobra.Command, []string) error {
 		fmt.Sprintf("--data-dir=%s", dataDir),
 		fmt.Sprintf("--log-dir=%s", logDir),
 		fmt.Sprintf("--log-level=%s", logLevel),
+		fmt.Sprintf("--chain-config-dir=%s", chainConfigDir), // Read chain configs (dexConfig, etc.)
 		"--api-admin-enabled=true",
 		"--api-keystore-enabled=true",
 		"--index-enabled=true",
@@ -181,6 +187,12 @@ func startDevNode(*cobra.Command, []string) error {
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start luxd: %w", err)
+	}
+
+	// Save PID file for later use by 'lux dev stop' and network detection
+	pidFile := filepath.Join(dataDir, "luxd.pid")
+	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0644); err != nil {
+		ux.Logger.PrintToUser("Warning: failed to save PID file: %v", err)
 	}
 
 	ux.Logger.PrintToUser("luxd started (PID: %d)", cmd.Process.Pid)
