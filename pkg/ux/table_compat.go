@@ -41,7 +41,7 @@ func (t *TableCompatWrapper) SetHeader(headers []string) {
 	for i, h := range headers {
 		anyHeaders[i] = h
 	}
-	t.Table.Header(anyHeaders...)
+	t.Header(anyHeaders...)
 }
 
 // SetRowLine is a no-op in v1.0.9 (row lines controlled via renderer settings)
@@ -59,14 +59,14 @@ func (t *TableCompatWrapper) SetAutoMergeCells(enable bool) {
 // SetAlignment sets the alignment for rows
 func (t *TableCompatWrapper) SetAlignment(align tw.Align) {
 	t.alignment = align
-	t.Table.Configure(func(config *tablewriter.Config) {
+	t.Configure(func(config *tablewriter.Config) {
 		config.Row.Alignment.Global = t.alignment
 	})
 }
 
 // AppendCompat adds a row using string slice (old API)
 func (t *TableCompatWrapper) AppendCompat(row []string) {
-	_ = t.Table.Append(row)
+	_ = t.Append(row)
 }
 
 // CreateCompatTable creates a table with v0.0.5-like API

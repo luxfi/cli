@@ -163,8 +163,6 @@ func GetKeychainFromCmdLineFlags(
 		}
 	}
 
-	network.HandlePublicNetworkSimulation()
-
 	// get keychain accessor
 	return GetKeychain(app, useLocalKey, useLedger, ledgerAddresses, keyName, network, requiredFunds)
 }
