@@ -12,7 +12,7 @@ fi
 description_filter=""
 if [ "$1" = "--filter" ]
 then
-    pat=$(echo $2 | tr ' ' '.')
+    pat=$(echo "$2" | tr ' ' '.')
     description_filter="--ginkgo.focus=$pat"
 fi
 
@@ -34,7 +34,7 @@ export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
 go install -v github.com/onsi/ginkgo/v2/ginkgo@v2.1.3
 ACK_GINKGO_RC=true ginkgo build ./tests/e2e
 
-./tests/e2e/e2e.test --ginkgo.v --ginkgo.label-filter=$label_filter $description_filter
+./tests/e2e/e2e.test --ginkgo.v --ginkgo.label-filter="$label_filter" "$description_filter"
 
 EXIT_CODE=$?
 

@@ -47,7 +47,7 @@ execute() {
   http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}"
   http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
   hash_sha256_verify "${tmpdir}/${TARBALL}" "${tmpdir}/${CHECKSUM}"
-  rm -rf "${tmpdir}/${NAME}"
+  rm -rf "${tmpdir:?}/${NAME}"
   (cd "${tmpdir}" && untar "${TARBALL}")
   test ! -d "${BINDIR}" && install -d "${BINDIR}"
   for binexe in $BINARIES; do
@@ -181,7 +181,7 @@ uname_arch() {
     armv6*) arch="armv6" ;;
     armv7*) arch="armv7" ;;
   esac
-  echo ${arch}
+  echo "${arch}"
 }
 uname_os_check() {
   os=$(uname_os)
@@ -377,7 +377,7 @@ execute
 sed_in_place() {
   expr=$1
   file=$2
-  if [ $(uname) = Darwin ]
+  if [ "$(uname)" = Darwin ]
   then
     sed -i "" "$expr" "$file"
   else
@@ -389,12 +389,12 @@ completions() {
   BASH_COMPLETION_MAIN=~/.bash_completion
   BASH_COMPLETION_SCRIPTS_DIR=~/.local/share/bash-completion/completions
   BASH_COMPLETION_SCRIPT_PATH=$BASH_COMPLETION_SCRIPTS_DIR/lux.sh
-  mkdir -p $BASH_COMPLETION_SCRIPTS_DIR
-  $BINDIR/$BINARY completion bash > $BASH_COMPLETION_SCRIPT_PATH
-  touch $BASH_COMPLETION_MAIN
-  sed_in_place "/.*# lux completion/d" $BASH_COMPLETION_MAIN
-  echo "source $BASH_COMPLETION_SCRIPT_PATH # lux completion" >> $BASH_COMPLETION_MAIN
-  if [ $(uname) = Darwin ]
+  mkdir -p "$BASH_COMPLETION_SCRIPTS_DIR"
+  "$BINDIR/$BINARY" completion bash > "$BASH_COMPLETION_SCRIPT_PATH"
+  touch "$BASH_COMPLETION_MAIN"
+  sed_in_place "/.*# lux completion/d" "$BASH_COMPLETION_MAIN"
+  echo "source $BASH_COMPLETION_SCRIPT_PATH # lux completion" >> "$BASH_COMPLETION_MAIN"
+  if [ "$(uname)" = Darwin ]
   then
       BREW_INSTALLED=false
       which brew >/dev/null 2>&1 && BREW_INSTALLED=true
@@ -412,12 +412,12 @@ completions() {
   ZSH_COMPLETION_MAIN=~/.zshrc
   ZSH_COMPLETION_SCRIPTS_DIR=~/.local/share/zsh-completion/completions
   ZSH_COMPLETION_SCRIPT_PATH=$ZSH_COMPLETION_SCRIPTS_DIR/_lux
-  mkdir -p $ZSH_COMPLETION_SCRIPTS_DIR
-  $BINDIR/$BINARY completion zsh > $ZSH_COMPLETION_SCRIPT_PATH
-  touch $ZSH_COMPLETION_MAIN
-  sed_in_place "/.*# lux completion/d" $ZSH_COMPLETION_MAIN
-  echo "fpath=($ZSH_COMPLETION_SCRIPTS_DIR \$fpath) # lux completion" >> $ZSH_COMPLETION_MAIN
-  echo "rm -f ~/.zcompdump; compinit # lux completion" >> $ZSH_COMPLETION_MAIN
+  mkdir -p "$ZSH_COMPLETION_SCRIPTS_DIR"
+  "$BINDIR/$BINARY" completion zsh > "$ZSH_COMPLETION_SCRIPT_PATH"
+  touch "$ZSH_COMPLETION_MAIN"
+  sed_in_place "/.*# lux completion/d" "$ZSH_COMPLETION_MAIN"
+  echo "fpath=($ZSH_COMPLETION_SCRIPTS_DIR \$fpath) # lux completion" >> "$ZSH_COMPLETION_MAIN"
+  echo "rm -f ~/.zcompdump; compinit # lux completion" >> "$ZSH_COMPLETION_MAIN"
 }
 
 if [ "$RUN_COMPLETIONS" = true ]; then
