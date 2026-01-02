@@ -348,7 +348,7 @@ var _ = ginkgo.Describe("[Etna Subnet SOV]", func() {
 	ginkgo.BeforeEach(func() {
 		// key
 		_ = utils.DeleteKey(keyName)
-		output, err := commands.CreateKeyFromPath(keyName, utils.EwoqKeyPath)
+		output, err := commands.CreateKeyFromPath(keyName, utils.LocalKeyPath)
 		if err != nil {
 			fmt.Println(output)
 			utils.PrintStdErr(err)
@@ -421,7 +421,7 @@ var _ = ginkgo.Describe("[Etna Subnet SOV With Errors]", func() {
 	ginkgo.BeforeEach(func() {
 		// key
 		_ = utils.DeleteKey(keyName)
-		output, err := commands.CreateKeyFromPath(keyName, utils.EwoqKeyPath)
+		output, err := commands.CreateKeyFromPath(keyName, utils.LocalKeyPath)
 		if err != nil {
 			fmt.Println(output)
 			utils.PrintStdErr(err)

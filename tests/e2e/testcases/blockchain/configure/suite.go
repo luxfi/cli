@@ -105,7 +105,7 @@ func AssertNodeConfigIsSet(
 
 var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 	_ = ginkgo.BeforeEach(func() {
-		commands.CreateEtnaEVMConfig(utils.BlockchainName, utils.EwoqEVMAddress, commands.PoA)
+		commands.CreateEtnaEVMConfig(utils.BlockchainName, utils.LocalTestEVMAddress, commands.PoA)
 	})
 
 	ginkgo.AfterEach(func() {
