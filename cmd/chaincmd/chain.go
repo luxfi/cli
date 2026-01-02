@@ -84,13 +84,6 @@ CORE COMMANDS:
 DATA OPERATIONS:
 
   import       Import blocks from RLP file to running chain
-  export       Export blocks from running chain to RLP file
-
-VALIDATOR OPERATIONS:
-
-  validators   List validators for a blockchain
-  add-validator    Add a validator to the chain
-  remove-validator Remove a validator from the chain
 
 NETWORK FLAGS (for deployment):
 
@@ -166,29 +159,8 @@ NOTES:
 	addNetworkFlags(importCmd)
 	cmd.AddCommand(importCmd)
 
-	exportCmd := newExportCmd()
-	addNetworkFlags(exportCmd)
-	cmd.AddCommand(exportCmd)
-
-	// Validator management
-	validatorsCmd := newValidatorsCmd()
-	addNetworkFlags(validatorsCmd)
-	cmd.AddCommand(validatorsCmd)
-
-	addValidatorCmd := newAddValidatorCmd()
-	addNetworkFlags(addValidatorCmd)
-	cmd.AddCommand(addValidatorCmd)
-
-	removeValidatorCmd := newRemoveValidatorCmd()
-	addNetworkFlags(removeValidatorCmd)
-	cmd.AddCommand(removeValidatorCmd)
-
-	// Upgrade and migration
+	// Upgrade
 	cmd.AddCommand(upgradecmd.NewCmd(app))
-
-	migrateCmd := newMigrateCmd()
-	addNetworkFlags(migrateCmd)
-	cmd.AddCommand(migrateCmd)
 
 	return cmd
 }
