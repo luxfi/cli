@@ -202,11 +202,11 @@ func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 	// Generate Corona key
 	keys.CoronaSecretKey, err = NewCoronaKeyBytes()
 	if err != nil {
-		return nil, fmt.Errorf("Corona key generation failed: %w", err)
+		return nil, fmt.Errorf("corona key generation failed: %w", err)
 	}
 	keys.CoronaPublicKey, err = ToCoronaPublicKey(keys.CoronaSecretKey)
 	if err != nil {
-		return nil, fmt.Errorf("Corona public key derivation failed: %w", err)
+		return nil, fmt.Errorf("corona public key derivation failed: %w", err)
 	}
 
 	// Generate ML-DSA key

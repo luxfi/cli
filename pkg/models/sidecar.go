@@ -117,5 +117,5 @@ type MigrationTx struct {
 
 // NetworkDataIsEmpty checks if the sidecar has no network data
 func (sc *Sidecar) NetworkDataIsEmpty() bool {
-	return sc.Networks == nil || len(sc.Networks) == 0
+	return len(sc.Networks) == 0
 }
