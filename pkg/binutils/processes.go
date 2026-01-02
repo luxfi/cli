@@ -329,6 +329,7 @@ func GetAsyncContext() context.Context {
 // For local networks, deployment should complete in <30s:
 //   - Blockchain creation: ~5-10s (P-chain tx)
 //   - Chain health: ~5-10s (node sync)
+//
 // If deployment takes longer, something is wrong and we fail fast.
 func GetDeployContext() context.Context {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
