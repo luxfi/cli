@@ -206,10 +206,11 @@ func (c *AwsCloud) CreateEC2Instances(prefix string, count int, amiID, instanceT
 		VolumeType:          volumeType,
 		DeleteOnTermination: aws.Bool(true),
 	}
-	if volumeType == types.VolumeTypeGp3 {
+	switch volumeType {
+	case types.VolumeTypeGp3:
 		ebsValue.Throughput = aws.Int32(int32(throughput))
 		ebsValue.Iops = aws.Int32(int32(iops))
-	} else if volumeType == types.VolumeTypeIo2 || volumeType == types.VolumeTypeIo1 {
+	case types.VolumeTypeIo2, types.VolumeTypeIo1:
 		ebsValue.Iops = aws.Int32(int32(iops))
 	}
 
@@ -530,8 +531,8 @@ func CheckIPInSg(sg *types.SecurityGroup, currentIP string, port int32) bool {
 	for _, ipPermission := range sg.IpPermissions {
 		for _, ipRange := range ipPermission.IpRanges {
 			cidr := *ipRange.CidrIp
-			switch {
-			case cidr == "0.0.0.0/0" || cidr == currentIP:
+			switch cidr {
+			case "0.0.0.0/0", currentIP:
 				if ipPermission.FromPort != nil && *ipPermission.FromPort == port {
 					return true
 				}
