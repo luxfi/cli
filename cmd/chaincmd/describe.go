@@ -47,7 +47,7 @@ func describeChain(cmd *cobra.Command, args []string) error {
 	}
 
 	// Show deployment info
-	if sc.Networks != nil && len(sc.Networks) > 0 {
+	if len(sc.Networks) > 0 {
 		ux.Logger.PrintToUser("\nDeployments:")
 		for network, data := range sc.Networks {
 			ux.Logger.PrintToUser("  %s:", network)

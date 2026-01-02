@@ -98,7 +98,7 @@ func listChains(cmd *cobra.Command, args []string) error {
 
 		// Determine deployment status
 		deployed := "No"
-		if sc.Networks != nil && len(sc.Networks) > 0 {
+		if len(sc.Networks) > 0 {
 			deployed = "Yes"
 		}
 

@@ -200,10 +200,10 @@ func getGenesisNativeMinterAdmin(
 	if false { // Will be enabled when extras.ChainConfig is available
 		var allowListCfg *nativeminter.Config
 		_ = allowListCfg
-		if len(allowListCfg.AllowListConfig.AdminAddresses) == 0 {
+		if len(allowListCfg.AdminAddresses) == 0 {
 			return false, false, "", "", "", nil
 		}
-		for _, admin := range allowListCfg.AllowListConfig.AdminAddresses {
+		for _, admin := range allowListCfg.AdminAddresses {
 			// Convert geth address to crypto.Address
 			cryptoAddr := crypto.Address(admin.Bytes())
 			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr)
@@ -214,7 +214,7 @@ func getGenesisNativeMinterAdmin(
 				return true, true, keyName, addressStr, privKey, nil
 			}
 		}
-		return true, false, "", allowListCfg.AllowListConfig.AdminAddresses[0].Hex(), "", nil
+		return true, false, "", allowListCfg.AdminAddresses[0].Hex(), "", nil
 	}
 	return false, false, "", "", "", nil
 }
@@ -233,10 +233,10 @@ func getGenesisNativeMinterManager(
 	if false { // Will be enabled when extras.ChainConfig is available
 		var allowListCfg *nativeminter.Config
 		_ = allowListCfg
-		if len(allowListCfg.AllowListConfig.ManagerAddresses) == 0 {
+		if len(allowListCfg.ManagerAddresses) == 0 {
 			return false, false, "", "", "", nil
 		}
-		for _, admin := range allowListCfg.AllowListConfig.ManagerAddresses {
+		for _, admin := range allowListCfg.ManagerAddresses {
 			// Convert geth address to crypto.Address
 			cryptoAddr := crypto.Address(admin.Bytes())
 			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr)
@@ -247,7 +247,7 @@ func getGenesisNativeMinterManager(
 				return true, true, keyName, addressStr, privKey, nil
 			}
 		}
-		return true, false, "", allowListCfg.AllowListConfig.ManagerAddresses[0].Hex(), "", nil
+		return true, false, "", allowListCfg.ManagerAddresses[0].Hex(), "", nil
 	}
 	return false, false, "", "", "", nil
 }

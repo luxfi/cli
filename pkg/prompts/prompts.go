@@ -628,7 +628,7 @@ func (*realPrompter) CaptureFutureDate(promptStr string, minDate time.Time) (tim
 			if err != nil {
 				return err
 			}
-			if minDate == (time.Time{}) {
+			if minDate.IsZero() {
 				minDate = time.Now()
 			}
 			if t.Before(minDate.UTC()) {
