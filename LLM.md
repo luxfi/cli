@@ -1,6 +1,6 @@
 # Lux CLI - AI Assistant Knowledge Base
 
-**Last Updated**: 2025-12-31
+**Last Updated**: 2026-01-01
 **Version**: 1.22.5
 **Organization**: Lux Industries
 
@@ -188,13 +188,19 @@ lux network start --snapshot=mybackup
     └── spc-mainnet-36911/        # SPC chaindata
 
 ~/.lux/
-├── chains/                       # Chain configurations
-│   └── zoo/
-│       ├── genesis.json
-│       └── sidecar.json          # VM metadata
-├── chain-configs/                # Chain-specific configs
-│   └── C/
-│       └── config.json           # C-Chain config (admin API, pruning)
+├── chains/                       # All chain configs (consolidated)
+│   ├── C/                        # C-Chain config
+│   │   └── config.json           # Admin API, pruning, etc.
+│   ├── zoo/                      # Chain definition + config
+│   │   ├── genesis.json
+│   │   ├── sidecar.json          # VM metadata
+│   │   └── config.json           # Runtime config (optional)
+│   └── <blockchain-id>/          # Deployed chain configs
+│       └── config.json
+├── dev/                          # Dev mode data (lux dev start)
+│   ├── db/                       # Dev chain database
+│   ├── logs/                     # Dev node logs
+│   └── luxd.pid                  # Dev node PID file
 ├── plugins/
 │   └── current/                  # Active plugins
 │       └── <vmid>                # EVM plugin binary

@@ -6,7 +6,7 @@
 // Config precedence (highest → lowest):
 //  1. CLI flags / inline JSON
 //  2. Per-run overrides (in run dir)
-//  3. User global chain configs (~/.lux/chain-configs/<chain-id>/config.json)
+//  3. User global chain configs (~/.lux/chains/<chain-id>/config.json)
 //  4. Built-in defaults
 //
 // The run directory chainConfigs are treated as rendered output, not source.
@@ -65,7 +65,7 @@ func NewConfigWithAlias(app *application.Lux, chainID, alias string) *Config {
 	return c
 }
 
-// LoadGlobal loads the global config from ~/.lux/chain-configs/<chainID>/config.json
+// LoadGlobal loads the global config from ~/.lux/chains/<chainID>/config.json
 func (c *Config) LoadGlobal() error {
 	configPath := c.globalConfigPath()
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
@@ -166,8 +166,9 @@ func (c *Config) Render(runDir string) error {
 }
 
 // globalConfigPath returns the path to the global config file
+// Uses ~/.lux/chains/<chainID>/config.json - consolidating all chain configs
 func (c *Config) globalConfigPath() string {
-	return filepath.Join(c.app.GetBaseDir(), "chain-configs", c.chainID, "config.json")
+	return filepath.Join(c.app.GetChainConfigDir(), c.chainID, "config.json")
 }
 
 // EnableAdmin ensures admin API is enabled in the config
