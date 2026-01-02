@@ -13,11 +13,11 @@ import (
 )
 
 var (
-	skipValidatorCheck    bool
-	rentalPlan            string
-	preserveState         bool
-	migrateValidatorMgmt  string
-	migrateConfirm        bool
+	skipValidatorCheck   bool
+	rentalPlan           string
+	preserveState        bool
+	migrateValidatorMgmt string
+	migrateConfirm       bool
 )
 
 func newMigrateCmd() *cobra.Command {

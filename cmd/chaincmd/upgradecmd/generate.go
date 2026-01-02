@@ -88,8 +88,8 @@ func upgradeGenerateCmd(_ *cobra.Command, args []string) error {
 
 	// This command requires interactive mode for the wizard
 	if !cliprompts.IsInteractive() {
-		return fmt.Errorf("this command requires interactive mode (TTY)\n" +
-			"For non-interactive/CI environments, create upgrade.json manually or use:\n" +
+		return fmt.Errorf("this command requires interactive mode (TTY)\n"+
+			"For non-interactive/CI environments, create upgrade.json manually or use:\n"+
 			"  lux blockchain upgrade import %s --upgrade-filepath ./upgrade.json", blockchainName)
 	}
 

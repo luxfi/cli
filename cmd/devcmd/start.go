@@ -20,11 +20,11 @@ import (
 )
 
 var (
-	port        int    // HTTP port (default 8545, Anvil-compatible)
-	automine    string // Automine delay (empty = instant, "1s" = 1 block per second, etc.)
-	nodePath    string // Path to custom luxd binary
-	logLevel    string // Log level (info, debug, warn, error)
-	cleanState  bool   // Clean state before starting
+	port       int    // HTTP port (default 8545, Anvil-compatible)
+	automine   string // Automine delay (empty = instant, "1s" = 1 block per second, etc.)
+	nodePath   string // Path to custom luxd binary
+	logLevel   string // Log level (info, debug, warn, error)
+	cleanState bool   // Clean state before starting
 )
 
 const nodeBinaryName = "luxd"

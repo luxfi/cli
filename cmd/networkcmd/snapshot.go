@@ -310,16 +310,16 @@ func listSnapshots(cmd *cobra.Command, args []string) error {
 
 	for _, name := range snapshots {
 		snapshotDir := filepath.Join(snapshotsDir, name)
-		
+
 		// Try to read metadata
 		metadataPath := filepath.Join(snapshotDir, "snapshot_metadata.txt")
 		metadataBytes, err := os.ReadFile(metadataPath)
-		
+
 		if err == nil {
 			// Print metadata
 			ux.Logger.PrintToUser("Snapshot: %s", name)
 			ux.Logger.PrintToUser("%s", string(metadataBytes))
-			
+
 			// Calculate size
 			size, _ := getDirSize(snapshotDir)
 			ux.Logger.PrintToUser("Size: %s\n", formatBytes(size))

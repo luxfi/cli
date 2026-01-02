@@ -34,11 +34,11 @@ func DefaultPolicy(baseDir string) Policy {
 			filepath.Join(baseDir, "devnet"),    // Devnet state
 		},
 		DenyPrefixes: []string{
-			filepath.Join(baseDir, "chains"),   // Chain configurations - NEVER delete automatically
-			filepath.Join(baseDir, "plugins"),  // VM plugins - NEVER delete
-			filepath.Join(baseDir, "keys"),     // User keys - NEVER delete
-			filepath.Join(baseDir, "cli.json"), // CLI config - NEVER delete
-			filepath.Join(baseDir, "sdk.json"), // SDK config - NEVER delete
+			filepath.Join(baseDir, "chains"),    // Chain configurations - NEVER delete automatically
+			filepath.Join(baseDir, "plugins"),   // VM plugins - NEVER delete
+			filepath.Join(baseDir, "keys"),      // User keys - NEVER delete
+			filepath.Join(baseDir, "cli.json"),  // CLI config - NEVER delete
+			filepath.Join(baseDir, "sdk.json"),  // SDK config - NEVER delete
 			filepath.Join(homeDir, ".cli.json"), // Legacy config - NEVER delete
 		},
 	}
