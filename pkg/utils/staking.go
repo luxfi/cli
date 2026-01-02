@@ -202,11 +202,11 @@ func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 	// Generate Ringtail key
 	keys.RingtailSecretKey, err = NewRingtailKeyBytes()
 	if err != nil {
-		return nil, fmt.Errorf("Ringtail key generation failed: %w", err)
+		return nil, fmt.Errorf("ringtail key generation failed: %w", err)
 	}
 	keys.RingtailPublicKey, err = ToRingtailPublicKey(keys.RingtailSecretKey)
 	if err != nil {
-		return nil, fmt.Errorf("Ringtail public key derivation failed: %w", err)
+		return nil, fmt.Errorf("ringtail public key derivation failed: %w", err)
 	}
 
 	// Generate ML-DSA key
