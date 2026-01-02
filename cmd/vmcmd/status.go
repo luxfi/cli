@@ -68,7 +68,7 @@ func runStatus(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	var vms []VMInfo
+	vms := make([]VMInfo, 0, len(entries))
 
 	for _, entry := range entries {
 		vmid := entry.Name()

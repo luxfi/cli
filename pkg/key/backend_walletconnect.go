@@ -231,7 +231,7 @@ func (b *WalletConnectBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) 
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
-	var keys []KeyInfo
+	keys := make([]KeyInfo, 0, len(b.sessions))
 	for name, session := range b.sessions {
 		keys = append(keys, KeyInfo{
 			Name:      name,

@@ -339,8 +339,8 @@ func (b *KChainBackend) ReconstructKey(ctx context.Context, name string) ([]byte
 	config := keyInfo.ShareConfig
 
 	// Gather shares from validators
-	var shares [][]byte
-	var indices []int
+	shares := make([][]byte, 0, config.K)
+	indices := make([]int, 0, config.K)
 
 	for i, addr := range config.ValidatorAddrs {
 		encShare, err := b.retrieveShareFromValidator(ctx, addr, name)
@@ -449,7 +449,7 @@ func (b *KChainBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 
-	var keys []KeyInfo
+	keys := make([]KeyInfo, 0, len(b.distributedKeys))
 	for name, info := range b.distributedKeys {
 		keys = append(keys, KeyInfo{
 			Name:      name,
@@ -493,7 +493,7 @@ func (b *KChainBackend) Sign(ctx context.Context, name string, request SignReque
 	config := keyInfo.ShareConfig
 
 	// Request signature shares from validators
-	var sigShares []threshold.SignatureShare
+	sigShares := make([]threshold.SignatureShare, 0, config.K)
 	scheme, err := threshold.GetScheme(threshold.SchemeBLS)
 	if err != nil {
 		return nil, err
