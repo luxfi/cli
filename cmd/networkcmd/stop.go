@@ -4,6 +4,11 @@ package networkcmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"syscall"
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/constants"
@@ -14,7 +19,10 @@ import (
 	"go.uber.org/zap"
 )
 
-var stopNetworkType string
+var (
+	stopNetworkType string
+	forceStop       bool
+)
 
 func newStopCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -36,18 +44,28 @@ OPTIONS:
 
   --snapshot-name     Name for the snapshot (default: default-snapshot)
   --network-type      Network to stop (mainnet/testnet/devnet/custom)
-                      If not specified, auto-detects the running network
+                      REQUIRED if multiple networks are running
+  --force             Force stop without confirmation (use with caution)
+
+SAFETY CHECKS:
+
+  If multiple networks are running, you MUST specify which one to stop:
+    lux network stop --network-type devnet
+    lux network stop --network-type custom
+
+  Stopping mainnet or testnet requires explicit --network-type flag.
+  This prevents accidental disruption of production deployments.
 
 EXAMPLES:
 
-  # Stop the running network (auto-detect type)
+  # Stop the running network (when only one is running)
   lux network stop
 
-  # Stop with named snapshot
-  lux network stop --snapshot-name my-snapshot
-
-  # Stop specific network type
+  # Stop specific network type (required when multiple running)
   lux network stop --network-type devnet
+
+  # Stop with named snapshot
+  lux network stop --network-type custom --snapshot-name my-snapshot
 
   # Resume from snapshot later
   lux network start --devnet --snapshot-name my-snapshot
@@ -57,7 +75,8 @@ NOTES:
   - Snapshots preserve ALL network state including deployed chains
   - Chain configurations (in ~/.lux/chains/) are NOT affected
   - Use 'lux network clean' to wipe runtime data completely
-  - Only the specified network type is stopped (others remain stopped)
+  - Only the specified network type is stopped (others remain running)
+  - Use 'lux dev stop' for the dev mode node (separate from network command)
 
 SNAPSHOT vs CLEAN:
 
@@ -69,53 +88,125 @@ SNAPSHOT vs CLEAN:
 		SilenceUsage: true,
 	}
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to save network state into")
-	cmd.Flags().StringVar(&stopNetworkType, "network-type", "", "network type to stop (mainnet, testnet, devnet, custom)")
+	cmd.Flags().StringVar(&stopNetworkType, "network-type", "", "network type to stop (mainnet, testnet, devnet, custom) - REQUIRED if multiple networks running")
+	cmd.Flags().BoolVar(&forceStop, "force", false, "force stop without confirmation (use with caution for mainnet/testnet)")
 	return cmd
 }
 
 func StopNetwork(*cobra.Command, []string) error {
-	// Determine which network to stop
-	networkType := stopNetworkType
+	// Get all running networks
+	runningNetworks := app.GetAllRunningNetworks()
+	devRunning := isDevModeRunning()
 
-	// If network type not specified via flag, try to determine from state
-	if networkType == "" {
-		// First check if there's a running network - prioritize custom over others
-		// This ensures "lux network stop" without flags targets custom network by default
-		for _, netType := range []string{"custom", "devnet", "testnet", "mainnet"} {
-			state, err := app.LoadNetworkStateForType(netType)
-			if err == nil && state != nil && state.Running {
-				networkType = netType
-				break
+	// Count total running instances (networks + dev mode)
+	totalRunning := len(runningNetworks)
+	if devRunning {
+		totalRunning++
+	}
+
+	// If network type not specified, apply safety checks
+	if stopNetworkType == "" {
+		// If multiple networks are running, require explicit --network-type
+		if len(runningNetworks) > 1 {
+			ux.Logger.PrintToUser("Multiple networks are running: %s", strings.Join(runningNetworks, ", "))
+			if devRunning {
+				ux.Logger.PrintToUser("Dev mode is also running (use 'lux dev stop' to stop it)")
 			}
+			ux.Logger.PrintToUser("")
+			ux.Logger.PrintToUser("Please specify which network to stop:")
+			for _, net := range runningNetworks {
+				ux.Logger.PrintToUser("  lux network stop --network-type %s", net)
+			}
+			return fmt.Errorf("ambiguous: multiple networks running. Use --network-type to specify which one to stop")
 		}
-		// Fallback to custom if no running network found (not mainnet - user must explicitly specify)
-		if networkType == "" {
-			networkType = "custom"
+
+		// If dev mode + one network, warn but allow stopping the network
+		if devRunning && len(runningNetworks) == 1 {
+			ux.Logger.PrintToUser("Note: Dev mode is also running. Use 'lux dev stop' to stop it separately.")
+		}
+
+		// Auto-detect the single running network
+		if len(runningNetworks) == 1 {
+			stopNetworkType = runningNetworks[0]
+		} else if len(runningNetworks) == 0 {
+			// No network running
+			if devRunning {
+				return fmt.Errorf("no network running. Dev mode is running - use 'lux dev stop' to stop it")
+			}
+			ux.Logger.PrintToUser("No network is currently running.")
+			return nil
 		}
 	}
 
 	// Normalize "local" to "custom"
-	if networkType == "local" {
-		networkType = "custom"
+	if stopNetworkType == "local" {
+		stopNetworkType = "custom"
 	}
 
-	ux.Logger.PrintToUser("Stopping network: %s", networkType)
+	// Safety check for mainnet/testnet: require explicit flag or force
+	if (stopNetworkType == "mainnet" || stopNetworkType == "testnet") && !forceStop {
+		// Check if this is a production-like network that needs protection
+		ux.Logger.PrintToUser("WARNING: You are about to stop %s network.", strings.ToUpper(stopNetworkType))
+		ux.Logger.PrintToUser("")
+		ux.Logger.PrintToUser("This could disrupt production services. Are you sure?")
+		ux.Logger.PrintToUser("")
+		ux.Logger.PrintToUser("To confirm, run:")
+		ux.Logger.PrintToUser("  lux network stop --network-type %s --force", stopNetworkType)
+		return fmt.Errorf("stopping %s requires --force flag for safety", stopNetworkType)
+	}
 
-	err := saveNetworkForType(networkType)
+	// Check if the specified network is actually running
+	isRunning := false
+	for _, net := range runningNetworks {
+		if net == stopNetworkType {
+			isRunning = true
+			break
+		}
+	}
+	if !isRunning {
+		ux.Logger.PrintToUser("Network '%s' is not currently running.", stopNetworkType)
+		if len(runningNetworks) > 0 {
+			ux.Logger.PrintToUser("Running networks: %s", strings.Join(runningNetworks, ", "))
+		}
+		return nil
+	}
 
-	if killErr := binutils.KillgRPCServerProcessForNetwork(app, networkType); killErr != nil {
+	ux.Logger.PrintToUser("Stopping network: %s", stopNetworkType)
+
+	err := saveNetworkForType(stopNetworkType)
+
+	if killErr := binutils.KillgRPCServerProcessForNetwork(app, stopNetworkType); killErr != nil {
 		app.Log.Warn("failed killing server process", zap.Error(killErr))
 		ux.Logger.PrintToUser("Warning: failed to shutdown server gracefully: %v", killErr)
 	} else {
-		ux.Logger.PrintToUser("Server (%s) shutdown gracefully", networkType)
+		ux.Logger.PrintToUser("Server (%s) shutdown gracefully", stopNetworkType)
 	}
 
 	// Clear network-specific state when stopping
-	if clearErr := app.ClearNetworkStateForType(networkType); clearErr != nil {
+	if clearErr := app.ClearNetworkStateForType(stopNetworkType); clearErr != nil {
 		app.Log.Warn("failed to clear network state", zap.Error(clearErr))
 	}
 
 	return err
+}
+
+// isDevModeRunning checks if a dev mode node is currently running
+func isDevModeRunning() bool {
+	pidFile := filepath.Join(os.Getenv("HOME"), constants.BaseDirName, constants.DevDir, "luxd.pid")
+	pidData, err := os.ReadFile(pidFile)
+	if err != nil {
+		return false
+	}
+
+	pid, err := strconv.Atoi(strings.TrimSpace(string(pidData)))
+	if err != nil {
+		return false
+	}
+
+	// Check if process exists by sending signal 0
+	// On Unix, this doesn't send a signal but checks if we can signal the process
+	err = syscall.Kill(pid, 0)
+	return err == nil
 }
 
 func saveNetwork() error {
