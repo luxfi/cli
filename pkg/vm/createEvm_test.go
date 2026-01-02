@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/cli/internal/testutils"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,14 +26,14 @@ func Test_ensureAdminsFunded(t *testing.T) {
 
 	type test struct {
 		name       string
-		alloc      core.GenesisAlloc
+		alloc      types.GenesisAlloc
 		admins     []crypto.Address
 		shouldFail bool
 	}
 	tests := []test{
 		{
 			name: "One address funded",
-			alloc: core.GenesisAlloc{
+			alloc: types.GenesisAlloc{
 				addrs[0]: {},
 				addrs[1]: {
 					Balance: big.NewInt(42),
@@ -45,7 +45,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 		},
 		{
 			name: "Two addresses funded",
-			alloc: core.GenesisAlloc{
+			alloc: types.GenesisAlloc{
 				addrs[2]: {},
 				addrs[3]: {
 					Balance: big.NewInt(42),
@@ -59,7 +59,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 		},
 		{
 			name: "Two addresses in Genesis but no funds",
-			alloc: core.GenesisAlloc{
+			alloc: types.GenesisAlloc{
 				addrs[0]: {
 					Balance: big.NewInt(0),
 				},
@@ -71,7 +71,7 @@ func Test_ensureAdminsFunded(t *testing.T) {
 		},
 		{
 			name: "No address funded",
-			alloc: core.GenesisAlloc{
+			alloc: types.GenesisAlloc{
 				addrs[0]: {},
 				addrs[1]: {},
 				addrs[2]: {},

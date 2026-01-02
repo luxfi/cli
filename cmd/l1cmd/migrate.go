@@ -19,8 +19,17 @@ const (
 	rentalPlanPerpetual = "perpetual"
 )
 
-// Validator management type for hybrid
-const validatorMgmtHybrid = "hybrid"
+// Validator choice options (display text)
+const (
+	validatorChoicePoS    = "Enable permissionless staking (PoS)"
+	validatorChoiceHybrid = "Hybrid (start PoA, transition to PoS)"
+)
+
+// Validator management types
+const (
+	validatorMgmtPoS    = "proof-of-stake"
+	validatorMgmtHybrid = "hybrid"
+)
 
 var (
 	skipValidatorCheck   bool
@@ -192,9 +201,10 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if validatorChoice == "Enable permissionless staking (PoS)" {
-			validatorManagement = "proof-of-stake"
-		} else if validatorChoice == "Hybrid (start PoA, transition to PoS)" {
+		switch validatorChoice {
+		case validatorChoicePoS:
+			validatorManagement = validatorMgmtPoS
+		case validatorChoiceHybrid:
 			validatorManagement = validatorMgmtHybrid
 		}
 	}
