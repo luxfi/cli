@@ -18,7 +18,6 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 // Default timeouts for chain deployment
@@ -266,7 +265,7 @@ To fix, update the symlink:
 		return fmt.Errorf("VM plugin at %s is not executable", pluginPath)
 	}
 
-	app.Log.Debug("VM plugin verified", zap.String("vmid", vmIDStr), zap.String("path", pluginPath))
+	app.Log.Debug("VM plugin verified", "vmid", vmIDStr, "path", pluginPath)
 	return nil
 }
 
@@ -283,7 +282,7 @@ func getVMDisplayName(vm models.VMType) string {
 }
 
 func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network) error {
-	app.Log.Debug("Deploy to network", zap.String("network", network.String()))
+	app.Log.Debug("Deploy to network", "network", network.String())
 
 	// Map deploy target to network type
 	// Default is "custom" (not "local" which is ambiguous - any network can run locally)
@@ -315,7 +314,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	}
 
 	// Log gRPC port being used
-	app.Log.Debug("Using gRPC port from network state", zap.Int("port", networkState.GRPCPort), zap.String("network", networkState.NetworkType))
+	app.Log.Debug("Using gRPC port from network state", "port", networkState.GRPCPort, "network", networkState.NetworkType)
 
 	// Preflight check: verify VM is installed before any network operations
 	if err := verifyVMInstalled(chainName, sc); err != nil {
@@ -341,7 +340,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		if info, pluginErr := os.Stat(pluginPath); pluginErr == nil && info.Mode().IsRegular() && info.Mode()&0o111 != 0 {
 			// Plugin exists and is executable, use it directly
 			vmBin = pluginPath
-			app.Log.Debug("Using existing EVM plugin", zap.String("path", vmBin))
+			app.Log.Debug("Using existing EVM plugin", "path", vmBin)
 		} else {
 			// Fall back to downloading
 			vmBin, err = binutils.SetupEVM(app, sc.VMVersion)
@@ -395,7 +394,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		// Non-deployment error (gRPC connection issue, etc)
 		if deployer.BackendStartedHere() {
 			if innerErr := binutils.KillgRPCServerProcessForNetwork(app, networkState.NetworkType); innerErr != nil {
-				app.Log.Warn("failed to kill gRPC server", zap.Error(innerErr))
+				app.Log.Warn("failed to kill gRPC server", "error", innerErr)
 			}
 		}
 		return fmt.Errorf("deployment failed: %w", err)

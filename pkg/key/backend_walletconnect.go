@@ -685,7 +685,7 @@ func (b *WalletConnectBackend) sendRequest(ctx context.Context, session *wcSessi
 func (b *WalletConnectBackend) loadSessions() error {
 	sessionsFile := filepath.Join(b.dataDir, "sessions.json")
 
-	data, err := os.ReadFile(sessionsFile)
+	data, err := os.ReadFile(sessionsFile) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
