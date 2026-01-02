@@ -4,6 +4,7 @@
 package keycmd
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -96,7 +97,7 @@ func runUnlock(_ *cobra.Command, args []string) error {
 
 	// Unlock the key
 	if err := key.UnlockKey(name, password); err != nil {
-		if err == key.ErrInvalidPassword {
+		if errors.Is(err, key.ErrInvalidPassword) {
 			return fmt.Errorf("invalid password")
 		}
 		return fmt.Errorf("failed to unlock key: %w", err)

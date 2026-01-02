@@ -3,6 +3,7 @@
 package cobrautils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -91,8 +92,8 @@ func RangeArgs(min int, max int) cobra.PositionalArgs {
 
 func HandleErrors(err error) {
 	if err != nil {
-		usageErr, ok := err.(UsageError)
-		if ok {
+		var usageErr UsageError
+		if errors.As(err, &usageErr) {
 			usageErr.cmd.Println(usageErr.cmd.UsageString())
 			usageErr.cmd.Println()
 			usageErr.cmd.Println(usageErr)

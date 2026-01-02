@@ -14,6 +14,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// VM type constants for L3 chains
+const (
+	vmTypeEVM    = "evm"
+	vmTypeCustom = "custom"
+	vmTypeWASM   = "wasm"
+	vmTypeMove   = "move"
+)
+
 var (
 	l2Base      string
 	vmType      string
@@ -52,7 +60,7 @@ EXAMPLES:
 	}
 
 	cmd.Flags().StringVar(&l2Base, "l2", "", "Base L2 to deploy on")
-	cmd.Flags().StringVar(&vmType, "vm", "evm", "VM type (evm, custom, wasm, move)")
+	cmd.Flags().StringVar(&vmType, "vm", vmTypeEVM, "VM type (evm, custom, wasm, move)")
 	cmd.Flags().BoolVar(&preconfirm, "preconfirm", true, "Enable pre-confirmations")
 	cmd.Flags().StringVar(&daLayer, "da", "inherit", "Data availability (inherit, blob, custom)")
 	cmd.Flags().StringVar(&tokenName, "token-name", "", "Native token name")
@@ -95,11 +103,11 @@ func createL3(cmd *cobra.Command, args []string) error {
 	// VM type selection - already has default "evm" from flag, only prompt if explicitly empty
 	// Validate the vm type
 	switch vmType {
-	case "evm", "custom", "wasm", "move":
+	case vmTypeEVM, vmTypeCustom, vmTypeWASM, vmTypeMove:
 		// valid
 	case "":
 		if !prompts.IsInteractive() {
-			vmType = "evm" // default
+			vmType = vmTypeEVM // default
 		} else {
 			vmOptions := []string{
 				"EVM (Ethereum compatible)",
@@ -118,13 +126,13 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 			switch choice {
 			case "EVM (Ethereum compatible)":
-				vmType = "evm"
+				vmType = vmTypeEVM
 			case "Custom VM (Maximum flexibility)":
-				vmType = "custom"
+				vmType = vmTypeCustom
 			case "WASM (WebAssembly runtime)":
-				vmType = "wasm"
+				vmType = vmTypeWASM
 			case "Move VM (Move language)":
-				vmType = "move"
+				vmType = vmTypeMove
 			}
 		}
 	default:

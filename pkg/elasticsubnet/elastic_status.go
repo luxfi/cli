@@ -4,6 +4,7 @@
 package elasticsubnet
 
 import (
+	"errors"
 	"os"
 
 	"github.com/luxfi/cli/pkg/application"
@@ -25,7 +26,7 @@ func GetLocalElasticChainsFromFile(app *application.Lux) ([]string, error) {
 		}
 		// read sidecar file
 		sc, err := app.LoadSidecar(subnetDir.Name())
-		if err == os.ErrNotExist {
+		if errors.Is(err, os.ErrNotExist) {
 			// don't fail on missing sidecar file, just warn
 			ux.Logger.PrintToUser("warning: inconsistent subnet directory. No sidecar file found for subnet %s", subnetDir.Name())
 			continue

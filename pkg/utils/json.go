@@ -63,7 +63,7 @@ func WriteJSON(path string, v interface{}) error {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
 
-	if err := os.WriteFile(path, contentBytes, 0644); err != nil {
+	if err := os.WriteFile(path, contentBytes, 0o644); err != nil {
 		return fmt.Errorf("failed to write JSON to %s: %w", path, err)
 	}
 
