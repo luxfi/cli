@@ -346,7 +346,7 @@ func (c *GcpCloud) CheckFirewallExists(firewallName string, checkMonitoring bool
 		if firewall.Name == firewallName {
 			if checkMonitoring {
 				for _, allowed := range firewall.Allowed {
-					if !(slices.Contains(allowed.Ports, strconv.Itoa(constants.LuxdGrafanaPort)) && slices.Contains(allowed.Ports, strconv.Itoa(constants.LuxdMonitoringPort)) && slices.Contains(allowed.Ports, strconv.Itoa(constants.LuxdLokiPort))) {
+					if !slices.Contains(allowed.Ports, strconv.Itoa(constants.LuxdGrafanaPort)) || !slices.Contains(allowed.Ports, strconv.Itoa(constants.LuxdMonitoringPort)) || !slices.Contains(allowed.Ports, strconv.Itoa(constants.LuxdLokiPort)) {
 						return false, nil
 					}
 				}
