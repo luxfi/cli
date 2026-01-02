@@ -154,8 +154,8 @@ func SubnetConfigExists(subnetName string) (bool, error) {
 		return false, err
 	}
 
-	// do an xor
-	if (gen || sc) && !(gen && sc) {
+	// check if only one exists (xor)
+	if gen != sc {
 		return false, errors.New("config half exists")
 	}
 	return gen && sc, nil

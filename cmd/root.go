@@ -253,7 +253,7 @@ func checkForUpdates(cmd *cobra.Command, app *application.Lux) error {
 	// at this point we want to run the check
 	isUserCalled := false
 	commandList := strings.Fields(cmd.CommandPath())
-	if !(len(commandList) > 1 && commandList[1] == "update") {
+	if len(commandList) <= 1 || commandList[1] != "update" {
 		if err := updatecmd.Update(cmd, isUserCalled, Version); err != nil {
 			if errors.Is(err, updatecmd.ErrUserAbortedInstallation) {
 				return nil

@@ -648,8 +648,8 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 	defer func(h *models.Host) {
 		_ = h.Remove(tmpDir, true)
 	}(host)
-	switch {
-	case sc.VM == models.CustomVM:
+	switch sc.VM {
+	case models.CustomVM:
 		ux.Logger.Info("Building Custom VM for %s to %s", host.NodeID, evmBinaryPath)
 		ux.Logger.Info("Custom VM Params: repo %s branch %s via %s", sc.CustomVMRepoURL, sc.CustomVMBranch, sc.CustomVMBuildScript)
 		if err := RunOverSSH(
@@ -669,7 +669,7 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 			return err
 		}
 
-	case sc.VM == models.EVM:
+	case models.EVM:
 		ux.Logger.Info("Installing EVM for %s", host.NodeID)
 		dl := binutils.NewEVMDownloader()
 		installURL, _, err := dl.GetDownloadURL(sc.VMVersion, hostInstaller) // extension is tar.gz

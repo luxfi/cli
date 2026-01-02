@@ -71,16 +71,27 @@ command line flags.`,
 }
 
 func atMostOneNetworkSelected() bool {
-	return !(useConfig && useLocal || useConfig && useTestnet || useConfig && useMainnet || useLocal && useTestnet ||
-		useLocal && useMainnet || useTestnet && useMainnet)
+	count := 0
+	for _, selected := range []bool{useConfig, useLocal, useTestnet, useMainnet} {
+		if selected {
+			count++
+		}
+	}
+	return count <= 1
 }
 
 func atMostOneVersionSelected() bool {
-	return !(useLatest && targetVersion != "" || useLatest && binaryPathArg != "" || targetVersion != "" && binaryPathArg != "")
+	count := 0
+	for _, selected := range []bool{useLatest, targetVersion != "", binaryPathArg != ""} {
+		if selected {
+			count++
+		}
+	}
+	return count <= 1
 }
 
 func atMostOneAutomationSelected() bool {
-	return !(useManual && pluginDir != "")
+	return !useManual || pluginDir == ""
 }
 
 func upgradeVM(_ *cobra.Command, args []string) error {
