@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.15.3
 	github.com/luxfi/node v1.22.77
-	github.com/luxfi/sdk v1.16.37
+	github.com/luxfi/sdk v1.16.38
 	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -64,7 +64,7 @@ require (
 	github.com/btcsuite/btcd v0.24.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/luxfi/const v1.4.0
+	github.com/luxfi/const v1.4.1
 	github.com/luxfi/genesis v1.5.18
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
@@ -175,7 +175,6 @@ require (
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.1.0 // indirect
 	github.com/luxfi/consensus v1.22.47 // indirect
-	github.com/luxfi/constants v1.3.1 // indirect
 	github.com/luxfi/database v1.2.18 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.5 // indirect
