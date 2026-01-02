@@ -218,7 +218,7 @@ func getAvailableL2s() ([]string, error) {
 			sidecarPath := filepath.Join(subnetDir, entry.Name(), "sidecar.json")
 			if _, err := os.Stat(sidecarPath); err == nil {
 				// Check if it's an L2 (has subnet configuration)
-				data, err := os.ReadFile(sidecarPath)
+				data, err := os.ReadFile(sidecarPath) //nolint:gosec // G304: Reading from app's data directory
 				if err == nil {
 					var sc models.Sidecar
 					if json.Unmarshal(data, &sc) == nil {

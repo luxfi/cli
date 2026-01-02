@@ -82,7 +82,7 @@ func loadFirstKey() (*secp256k1.PrivateKey, error) {
 		}
 
 		keyPath := filepath.Join(keysDir, name)
-		keyHex, err := os.ReadFile(keyPath)
+		keyHex, err := os.ReadFile(keyPath) //nolint:gosec // G304: Reading from keys directory
 		if err != nil {
 			continue // Try next key
 		}

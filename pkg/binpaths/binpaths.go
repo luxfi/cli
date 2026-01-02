@@ -104,7 +104,7 @@ func Exists(path string) bool {
 
 // EnsureExecutable ensures the binary at path is executable
 func EnsureExecutable(path string) error {
-	return os.Chmod(path, 0o755)
+	return os.Chmod(path, 0o755) //nolint:gosec // G302: Executables need 0755 permissions
 }
 
 // GetBinDir returns the default binary installation directory

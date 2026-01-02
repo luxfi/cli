@@ -235,7 +235,7 @@ const (
 	// Duplicate constants removed - these are already defined above
 
 	// Environment variables
-	MetricsAPITokenEnvVarName = "METRICS_API_TOKEN"
+	MetricsAPITokenEnvVarName = "METRICS_API_TOKEN" //nolint:gosec // G101: This is an env var name, not credentials
 
 	HealthCheckInterval = 100 * time.Millisecond
 

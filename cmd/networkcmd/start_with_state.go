@@ -123,7 +123,7 @@ func loadStateFromChaindata(chainDataPath string, networkDir string) error {
 func detectBlockchainID(dbPath string) string {
 	// Check if the path contains a known blockchain ID
 	knownIDs := map[string]string{
-		MainnetSubnetBlockchainID:                             "LUX Mainnet Subnet",
+		MainnetSubnetBlockchainID:                            "LUX Mainnet Subnet",
 		"2sdADEgBC3NjLM4inKc1hY1PQpCT3JVyGVJxdmcq6sqrDndjFG": "LUX Subnet",
 	}
 

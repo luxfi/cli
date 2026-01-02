@@ -216,7 +216,7 @@ func NewSoft(networkID uint32, opts ...SOpOption) (*SoftKey, error) {
 
 // LoadSoft loads the private key from disk and creates the corresponding SoftKey.
 func LoadSoft(networkID uint32, keyPath string) (*SoftKey, error) {
-	kb, err := os.ReadFile(keyPath)
+	kb, err := os.ReadFile(keyPath) //nolint:gosec // G304: Reading user-specified key file
 	if err != nil {
 		return nil, err
 	}

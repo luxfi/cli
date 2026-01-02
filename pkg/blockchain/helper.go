@@ -1,5 +1,8 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package blockchain provides helper functions for blockchain operations
+// including peer management, URI handling, and blockchain state queries.
 package blockchain
 
 import (
@@ -21,6 +24,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
+// GetAggregatorExtraPeers returns a list of peers for the aggregator from the cluster.
 func GetAggregatorExtraPeers(
 	app *application.Lux,
 	clusterName string,
@@ -34,28 +38,29 @@ func GetAggregatorExtraPeers(
 	return UrisToPeers(uris)
 }
 
+// GetAggregatorNetworkUris returns network URIs for the specified cluster.
 func GetAggregatorNetworkUris(app *application.Lux, clusterName string) ([]string, error) {
 	aggregatorExtraPeerEndpointsUris := []string{}
 	if clusterName != "" {
 		if localnet.LocalClusterExists(app, clusterName) {
 			return localnet.GetLocalClusterURIs(app, clusterName)
-		} else { // remote cluster case
-			clustersConfig, err := app.LoadClustersConfig()
-			if err != nil {
-				return nil, err
-			}
-			// Type assertions for map[string]interface{}
-			clustersMap, ok := clustersConfig["clusters"].(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("invalid clusters config format")
-			}
-			clusterData, ok := clustersMap[clusterName].(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("cluster %s not found", clusterName)
-			}
-			// Parse cluster config to extract node endpoints
-			parseClusterConfig(clusterData, &aggregatorExtraPeerEndpointsUris)
 		}
+		// remote cluster case
+		clustersConfig, err := app.LoadClustersConfig()
+		if err != nil {
+			return nil, err
+		}
+		// Type assertions for map[string]interface{}
+		clustersMap, ok := clustersConfig["clusters"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid clusters config format")
+		}
+		clusterData, ok := clustersMap[clusterName].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("cluster %s not found", clusterName)
+		}
+		// Parse cluster config to extract node endpoints
+		parseClusterConfig(clusterData, &aggregatorExtraPeerEndpointsUris)
 	}
 	return aggregatorExtraPeerEndpointsUris, nil
 }
@@ -91,6 +96,7 @@ func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string)
 	}
 }
 
+// UrisToPeers converts a list of node URIs to peer information.
 func UrisToPeers(uris []string) ([]info.Peer, error) {
 	peers := []info.Peer{}
 	ctx, cancel := utils.GetANRContext()
@@ -115,6 +121,7 @@ func UrisToPeers(uris []string) ([]info.Peer, error) {
 	return peers, nil
 }
 
+// ConvertToBLSProofOfPossession converts public key and proof of possession strings to a ProofOfPossession struct.
 func ConvertToBLSProofOfPossession(publicKey, proofOfPossesion string) (signer.ProofOfPossession, error) {
 	type jsonProofOfPossession struct {
 		PublicKey         string
@@ -136,6 +143,7 @@ func ConvertToBLSProofOfPossession(publicKey, proofOfPossesion string) (signer.P
 	return *pop, nil
 }
 
+// UpdatePChainHeight displays a progress bar while waiting for P-Chain height update.
 func UpdatePChainHeight(
 	title string,
 ) error {
@@ -151,6 +159,7 @@ func UpdatePChainHeight(
 	return nil
 }
 
+// GetBlockchainTimestamp returns the current timestamp from the blockchain.
 func GetBlockchainTimestamp(network models.Network) (time.Time, error) {
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
@@ -172,6 +181,7 @@ func GetSubnet(subnetID ids.ID, network models.Network) (interface{}, error) {
 	return validators, nil
 }
 
+// GetSubnetIDFromBlockchainID returns the subnet ID that validates the given blockchain.
 func GetSubnetIDFromBlockchainID(blockchainID ids.ID, network models.Network) (ids.ID, error) {
 	api := network.Endpoint()
 	pClient := platformvm.NewClient(api)

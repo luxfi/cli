@@ -44,7 +44,7 @@ func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	}
 	authSigners := []string{}
 	for _, sigIndex := range chainInput.SigIndices {
-		if sigIndex >= uint32(len(controlKeys)) {
+		if sigIndex >= uint32(len(controlKeys)) { //nolint:gosec // G115: Length is small, safe conversion
 			return nil, fmt.Errorf("signer index %d exceeds number of control keys", sigIndex)
 		}
 		authSigners = append(authSigners, controlKeys[sigIndex])
