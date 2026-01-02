@@ -22,6 +22,12 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
+// Well-known chain IDs
+const (
+	// PChainID is the well-known P-Chain blockchain ID (all 1s with LpoYY suffix)
+	PChainID = "11111111111111111111111111111111LpoYY"
+)
+
 // DefaultEVMConfig returns the default EVM chain configuration with admin API enabled.
 // This applies to all EVM chains including C-chain and deployed chains.
 func DefaultEVMConfig() map[string]interface{} {
@@ -137,7 +143,7 @@ func (c *Config) EffectiveJSON() (string, error) {
 // SaveGlobal saves the effective config as the global config
 func (c *Config) SaveGlobal() error {
 	configDir := filepath.Dir(c.globalConfigPath())
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
@@ -146,13 +152,13 @@ func (c *Config) SaveGlobal() error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	return os.WriteFile(c.globalConfigPath(), data, 0644)
+	return os.WriteFile(c.globalConfigPath(), data, 0o644)
 }
 
 // Render writes the config to the specified run directory's chainConfigs
 func (c *Config) Render(runDir string) error {
 	chainConfigDir := filepath.Join(runDir, "chainConfigs", c.chainID)
-	if err := os.MkdirAll(chainConfigDir, 0755); err != nil {
+	if err := os.MkdirAll(chainConfigDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create chain config dir: %w", err)
 	}
 
@@ -162,7 +168,7 @@ func (c *Config) Render(runDir string) error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	return os.WriteFile(configPath, data, 0644)
+	return os.WriteFile(configPath, data, 0o644)
 }
 
 // globalConfigPath returns the path to the global config file
@@ -250,7 +256,7 @@ func (m *Manager) LoadDeployedChains() error {
 		// Check for Local Network deployment
 		if network, ok := sc.Networks[models.Local.String()]; ok {
 			blockchainID := network.BlockchainID.String()
-			if blockchainID != "" && blockchainID != "11111111111111111111111111111111LpoYY" {
+			if blockchainID != "" && blockchainID != PChainID {
 				cfg := m.AddChainWithAlias(blockchainID, chainName)
 				_ = cfg.LoadGlobal()
 			}

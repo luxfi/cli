@@ -1,54 +1,47 @@
 # https://golangci-lint.run/usage/configuration/
-version: v2
+version: "2"
+
 run:
   timeout: 10m
-  # skip auto-generated files.
-  skip-files:
-    - ".*\\.pb\\.go$"
+
+output:
+  formats:
+    colored-line-number: {}
 
 issues:
   # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
   max-same-issues: 0
+  exclude-files:
+    - ".*\\.pb\\.go$"
 
-linters:
-  # please, do not use `enable-all`: it's deprecated and will be removed soon.
-  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
-  disable-all: true
+formatters:
   enable:
-    - asciicheck
-    - depguard
-    - errcheck
-    - errorlint
-    - exportloopref
-    - goconst
-    - gocritic
     - gofmt
     - gofumpt
     - goimports
+
+linters:
+  default: none
+  enable:
+    - asciicheck
+    # - depguard # disabled: needs v2 config migration
+    - errcheck
+    - errorlint
+    - goconst
+    - gocritic
     - revive
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
     - nakedret
     - nolintlint
     - prealloc
-    - stylecheck
     - unconvert
     - unparam
     - unused
-    - unconvert
     - whitespace
     - staticcheck
-    # - structcheck
-    # - lll
-    # - gomnd
-    # - goprintffuncname
-    # - interfacer
-    # - typecheck
-    # - goerr113
-    # - noctx
 
 linters-settings:
   errorlint:
@@ -95,7 +88,6 @@ linters-settings:
       - name: useless-break
         disabled: false
   staticcheck:
-    go: "1.18"
     # https://staticcheck.io/docs/options#checks
     checks:
       - "all"
@@ -106,8 +98,16 @@ linters-settings:
     excludes:
       - G107 # https://securego.io/docs/rules/g107.html
   depguard:
-    list-type: blacklist
-    packages-with-error-message:
-      - io/ioutil: 'io/ioutil is deprecated. Use package io or os instead.'
-      - github.com/stretchr/testify/assert: 'github.com/stretchr/testify/require should be used instead.'
-    include-go-root: true
+    rules:
+      deprecated:
+        files:
+          - "**/*.go"
+        deny:
+          - pkg: io/ioutil
+            desc: 'io/ioutil is deprecated. Use package io or os instead.'
+      test-assert:
+        files:
+          - "**/*_test.go"
+        deny:
+          - pkg: github.com/stretchr/testify/assert
+            desc: 'github.com/stretchr/testify/require should be used instead.'

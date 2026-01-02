@@ -11,6 +11,8 @@ import (
 	"github.com/onsi/gomega"
 )
 
+const strTrue = "true"
+
 // ConfigureBlockchain configures a blockchain with the given flags
 func ConfigureBlockchain(blockchainName string, flags utils.TestFlags) (string, error) {
 	// Convert flags to args
@@ -32,11 +34,11 @@ func DeployBlockchain(blockchainName string, flags utils.TestFlags) (string, err
 	args := []string{"blockchain", "deploy", blockchainName}
 	for flag, value := range flags {
 		strValue := fmt.Sprintf("%v", value)
-		if flag == "local" && strValue == "true" {
+		if flag == "local" && strValue == strTrue {
 			args = append(args, "--local")
-		} else if flag == "skip-warp-deploy" && strValue == "true" {
+		} else if flag == "skip-warp-deploy" && strValue == strTrue {
 			args = append(args, "--skip-warp-deploy")
-		} else if flag == "skip-update-check" && strValue == "true" {
+		} else if flag == "skip-update-check" && strValue == strTrue {
 			args = append(args, "--skip-update-check")
 		} else {
 			args = append(args, "--"+flag, strValue)

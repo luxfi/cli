@@ -8,11 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var app *application.Lux
-
 // NewCmd creates a new dex command
-func NewCmd(injectedApp *application.Lux) *cobra.Command {
-	app = injectedApp
+func NewCmd(_ *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "dex",
 		Short: "Manage decentralized exchange operations",

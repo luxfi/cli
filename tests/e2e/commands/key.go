@@ -65,11 +65,12 @@ func ListKeys(network string, allBalances bool, chains string, tokens string) (s
 	}
 
 	// Add network flag (local, mainnet, testnet)
-	if network == "local" {
+	switch network {
+	case "local":
 		args = append(args, "--local")
-	} else if network == "testnet" {
+	case "testnet":
 		args = append(args, "--testnet")
-	} else {
+	default:
 		args = append(args, "--mainnet")
 	}
 

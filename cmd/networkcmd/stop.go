@@ -18,6 +18,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const networkTypeLocal = "local"
+
 var (
 	stopNetworkType string
 	forceStop       bool
@@ -97,12 +99,6 @@ func StopNetwork(*cobra.Command, []string) error {
 	runningNetworks := app.GetAllRunningNetworks()
 	devRunning := isDevModeRunning()
 
-	// Count total running instances (networks + dev mode)
-	totalRunning := len(runningNetworks)
-	if devRunning {
-		totalRunning++
-	}
-
 	// If network type not specified, apply safety checks
 	if stopNetworkType == "" {
 		// If multiple networks are running, require explicit --network-type
@@ -138,8 +134,8 @@ func StopNetwork(*cobra.Command, []string) error {
 	}
 
 	// Normalize "local" to "custom"
-	if stopNetworkType == "local" {
-		stopNetworkType = "custom"
+	if stopNetworkType == networkTypeLocal {
+		stopNetworkType = networkTypeCustom
 	}
 
 	// Safety check for mainnet/testnet: require explicit flag or force
@@ -208,16 +204,12 @@ func isDevModeRunning() bool {
 	return isProcessRunning(pid)
 }
 
-func saveNetwork() error {
-	return saveNetworkForType("mainnet")
-}
-
 func saveNetworkForType(networkType string) error {
 	cli, err := binutils.NewGRPCClient(binutils.WithAvoidRPCVersionCheck(true), binutils.WithNetworkType(networkType))
 	if err != nil {
 		return err
 	}
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 
 	ctx := binutils.GetAsyncContext()
 

@@ -58,7 +58,7 @@ func TestSoftwareBackend_Initialize(t *testing.T) {
 		info, err := os.Stat(dataDir)
 		require.NoError(t, err)
 		assert.True(t, info.IsDir())
-		assert.Equal(t, os.FileMode(0700), info.Mode().Perm())
+		assert.Equal(t, os.FileMode(0o700), info.Mode().Perm())
 	})
 
 	t.Run("uses default directory when not set", func(t *testing.T) {

@@ -253,14 +253,14 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 
 	// Create output directory for logs
 	outputDirPrefix := path.Join(app.GetRunDir(), "server", networkType)
-	if err := os.MkdirAll(outputDirPrefix, 0755); err != nil {
+	if err := os.MkdirAll(outputDirPrefix, 0o755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	// Create timestamped directory
 	timestamp := fmt.Sprintf("%d", os.Getpid())
 	outputDir := filepath.Join(outputDirPrefix, timestamp)
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create timestamped output directory: %w", err)
 	}
 
@@ -349,7 +349,7 @@ func KillgRPCServerProcessForNetwork(app *application.Lux, networkType string) e
 	if err != nil {
 		return err
 	}
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 	ctx := GetAsyncContext()
 	_, err = cli.Stop(ctx)
 	if err != nil {

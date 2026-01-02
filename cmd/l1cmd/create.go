@@ -15,18 +15,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	createFlags struct {
-		usePoA              bool
-		usePoS              bool
-		evmChainID          uint64
-		tokenName           string
-		tokenSymbol         string
-		validatorManagement string
-		force               bool
-		nonInteractive      bool
-	}
+// Validator management types
+const (
+	ValidatorManagementPoA = "proof-of-authority"
+	ValidatorManagementPoS = "proof-of-stake"
 )
+
+// Network types
+const (
+	NetworkLocal   = "local"
+	NetworkTestnet = "testnet"
+	NetworkMainnet = "mainnet"
+)
+
+var createFlags struct {
+	usePoA              bool
+	usePoS              bool
+	evmChainID          uint64
+	tokenName           string
+	tokenSymbol         string
+	validatorManagement string
+	force               bool
+	nonInteractive      bool
+}
 
 func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -89,17 +100,18 @@ func createL1(cmd *cobra.Command, args []string) error {
 
 	// Determine validator management type
 	validatorManagement := ""
-	if createFlags.usePoA && createFlags.usePoS {
+	switch {
+	case createFlags.usePoA && createFlags.usePoS:
 		return fmt.Errorf("cannot use both PoA and PoS. Choose one")
-	} else if createFlags.usePoA {
-		validatorManagement = "proof-of-authority"
-	} else if createFlags.usePoS {
-		validatorManagement = "proof-of-stake"
-	} else if createFlags.nonInteractive {
+	case createFlags.usePoA:
+		validatorManagement = ValidatorManagementPoA
+	case createFlags.usePoS:
+		validatorManagement = ValidatorManagementPoS
+	case createFlags.nonInteractive:
 		// Default to PoA in non-interactive mode
-		validatorManagement = "proof-of-authority"
+		validatorManagement = ValidatorManagementPoA
 		ux.Logger.PrintToUser("Using default: proof-of-authority (use --proof-of-stake to change)")
-	} else {
+	default:
 		// Interactive prompt
 		validatorManagementOptions := []string{"Proof of Authority", "Proof of Stake"}
 		validatorManagementChoice, err := app.Prompt.CaptureList(
@@ -110,9 +122,9 @@ func createL1(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		if validatorManagementChoice == "Proof of Authority" {
-			validatorManagement = "proof-of-authority"
+			validatorManagement = ValidatorManagementPoA
 		} else {
-			validatorManagement = "proof-of-stake"
+			validatorManagement = ValidatorManagementPoS
 		}
 	}
 
@@ -177,7 +189,7 @@ func createL1(cmd *cobra.Command, args []string) error {
 	)
 
 	// Add validator manager configuration based on type
-	if validatorManagement == "proof-of-authority" {
+	if validatorManagement == ValidatorManagementPoA {
 		// PoA configuration
 		genesis["contractConfig"] = map[string]interface{}{
 			"poaValidatorManager": map[string]interface{}{

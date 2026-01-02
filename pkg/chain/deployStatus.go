@@ -5,6 +5,7 @@ package chain
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -29,7 +30,7 @@ func GetLocallyDeployedSubnetsFromFile(app *application.Lux) ([]string, error) {
 		}
 		// read sidecar file
 		sc, err := app.LoadSidecar(subnetDir.Name())
-		if err == os.ErrNotExist {
+		if errors.Is(err, os.ErrNotExist) {
 			// don't fail on missing sidecar file, just warn
 			ux.Logger.PrintToUser("warning: inconsistent subnet directory. No sidecar file found for subnet %s", subnetDir.Name())
 			continue
@@ -80,7 +81,7 @@ func GetLocallyDeployedNetIDs(app *application.Lux) ([]string, error) {
 
 		// check if sidecar contains local deployment info with a valid SubnetID
 		if network, ok := sc.Networks[models.Local.String()]; ok {
-			if network.SubnetID.String() != "" && network.SubnetID.String() != "11111111111111111111111111111111LpoYY" {
+			if network.SubnetID.String() != "" && network.SubnetID.String() != PChainID {
 				subnetIDs = append(subnetIDs, network.SubnetID.String())
 			}
 		}
@@ -157,7 +158,7 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 		// Copy to each node's chainConfigs directory
 		for _, nodeDir := range nodeDirs {
 			destDir := filepath.Join(nodeDir, "chainConfigs", blockchainID)
-			if err := os.MkdirAll(destDir, 0755); err != nil {
+			if err := os.MkdirAll(destDir, 0o755); err != nil {
 				ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", subnetName, err)
 				continue
 			}
@@ -193,13 +194,13 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer sourceFile.Close()
+	defer func() { _ = sourceFile.Close() }()
 
 	destFile, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer destFile.Close()
+	defer func() { _ = destFile.Close() }()
 
 	_, err = io.Copy(destFile, sourceFile)
 	return err
@@ -213,7 +214,7 @@ func copyFile(src, dst string) error {
 func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 	// Use ChainsDir for all chain configs - consolidating chain-configs into chains/
 	chainConfigsDir := app.GetChainConfigDir()
-	if err := os.MkdirAll(chainConfigsDir, 0755); err != nil {
+	if err := os.MkdirAll(chainConfigsDir, 0o755); err != nil {
 		return "", err
 	}
 
@@ -260,7 +261,7 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 
 		// Create blockchain ID subdirectory
 		blockchainDir := filepath.Join(chainConfigsDir, blockchainID)
-		if err := os.MkdirAll(blockchainDir, 0755); err != nil {
+		if err := os.MkdirAll(blockchainDir, 0o755); err != nil {
 			ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", subnetName, err)
 			continue
 		}
@@ -321,5 +322,5 @@ func writeSubnetConfig(srcConfig, destConfig string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(destConfig, data, 0644)
+	return os.WriteFile(destConfig, data, 0o644)
 }

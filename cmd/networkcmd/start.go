@@ -17,11 +17,9 @@ import (
 	"github.com/luxfi/cli/pkg/chain"
 	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/const"
+	constants "github.com/luxfi/const"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
-	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -253,65 +251,6 @@ func StartNetwork(*cobra.Command, []string) error {
 	return fmt.Errorf("please specify --mainnet, --testnet, --devnet, or --dev")
 }
 
-func determineLuxVersion(userProvidedLuxVersion string) (string, error) {
-	// a specific user provided version should override this calculation, so just return
-	if userProvidedLuxVersion != "latest" {
-		return userProvidedLuxVersion, nil
-	}
-
-	// Need to determine which chains have been deployed
-	locallyDeployedChains, err := chain.GetLocallyDeployedSubnetsFromFile(app)
-	if err != nil {
-		return "", err
-	}
-
-	// if no chains have been deployed, use latest
-	if len(locallyDeployedChains) == 0 {
-		return "latest", nil
-	}
-
-	currentRPCVersion := -1
-
-	// For each deployed chain, check RPC versions
-	for _, deployedChain := range locallyDeployedChains {
-		sc, err := app.LoadSidecar(deployedChain)
-		if err != nil {
-			return "", err
-		}
-
-		// if you have a custom vm, you must provide the version explicitly
-		// if you upgrade from evm to a custom vm, the RPC version will be 0
-		if sc.VM == models.CustomVM || sc.Networks[models.Local.String()].RPCVersion == 0 {
-			continue
-		}
-
-		if currentRPCVersion == -1 {
-			currentRPCVersion = sc.Networks[models.Local.String()].RPCVersion
-		}
-
-		if sc.Networks[models.Local.String()].RPCVersion != currentRPCVersion {
-			return "", fmt.Errorf(
-				"RPC version mismatch. Expected %d, got %d for chain %s. Upgrade all chains to the same RPC version to launch the network",
-				currentRPCVersion,
-				sc.RPCVersion,
-				sc.Name,
-			)
-		}
-	}
-
-	// If currentRPCVersion == -1, then only custom chains have been deployed, the user must provide the version explicitly if not latest
-	if currentRPCVersion == -1 {
-		ux.Logger.PrintToUser("No chain RPC version found. Using latest Lux version")
-		return "latest", nil
-	}
-
-	return vm.GetLatestLuxByProtocolVersion(
-		app,
-		currentRPCVersion,
-		constants.LuxCompatibilityURL,
-	)
-}
-
 // networkConfig holds configuration for starting a public network
 type networkConfig struct {
 	networkID   uint32
@@ -343,7 +282,7 @@ func startPublicNetwork(cfg networkConfig) error {
 	if err != nil {
 		return err
 	}
-	defer cli.Close()
+	defer func() { _ = cli.Close() }()
 
 	// Build node config - auto-detect deployed subnets for tracking
 	trackSubnets := ""
@@ -432,7 +371,7 @@ func startPublicNetwork(cfg networkConfig) error {
 
 	pluginDir := filepath.Join(app.GetPluginsDir(), "current")
 	// Always ensure plugin dir exists and pass it to nodes
-	if err := os.MkdirAll(pluginDir, 0755); err != nil {
+	if err := os.MkdirAll(pluginDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create plugin directory %s: %w", pluginDir, err)
 	}
 	opts = append(opts, client.WithPluginDir(pluginDir))
@@ -569,7 +508,7 @@ func StartDevMode() error {
 	}
 
 	// Ensure directories exist
-	if err := os.MkdirAll(logDir, 0755); err != nil {
+	if err := os.MkdirAll(logDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create log directory: %w", err)
 	}
 
@@ -628,7 +567,7 @@ func StartDevMode() error {
 			if err != nil {
 				continue // Network not ready yet
 			}
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			if resp.StatusCode == 200 {
 				goto healthy
 			}

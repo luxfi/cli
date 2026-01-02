@@ -91,7 +91,7 @@ func TestCommand(cmd, subCmd string, args []string, globalFlags GlobalFlags, tes
 
 	err := execCmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("command failed: %v\nstderr: %s", err, stderr.String())
+		return "", fmt.Errorf("command failed: %w\nstderr: %s", err, stderr.String())
 	}
 
 	return strings.TrimSpace(stdout.String()), nil

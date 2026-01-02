@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/const"
+	constants "github.com/luxfi/const"
 	"github.com/luxfi/crypto"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ripemd160"
@@ -274,7 +274,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	actualOutput := outputFile
 	if actualOutput == "" || saveToLux {
 		networksDir := filepath.Join(app.GetBaseDir(), "networks", networkName)
-		if err := os.MkdirAll(networksDir, 0755); err != nil {
+		if err := os.MkdirAll(networksDir, 0o755); err != nil {
 			return fmt.Errorf("failed to create networks directory: %w", err)
 		}
 		defaultOutput := filepath.Join(networksDir, "genesis.json")
@@ -309,7 +309,9 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	}
 
 	// Check if keys exist, generate if needed
-	allKeys := append(pKeys, xKeys...)
+	allKeys := make([]string, 0, len(pKeys)+len(xKeys))
+	allKeys = append(allKeys, pKeys...)
+	allKeys = append(allKeys, xKeys...)
 	missingKeys := []string{}
 	for _, keyName := range allKeys {
 		keyDir := filepath.Join(keysDir, keyName)
@@ -505,7 +507,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to marshal genesis: %w", err)
 	}
 
-	if err := os.WriteFile(actualOutput, output, 0644); err != nil {
+	if err := os.WriteFile(actualOutput, output, 0o644); err != nil {
 		return fmt.Errorf("failed to write genesis file: %w", err)
 	}
 
@@ -515,12 +517,12 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	// Also save to ~/.lux/networks/<network>/genesis.json if --save flag is set
 	if saveToLux && outputFile != "" {
 		networksDir := filepath.Join(app.GetBaseDir(), "networks", networkName)
-		if err := os.MkdirAll(networksDir, 0755); err != nil {
+		if err := os.MkdirAll(networksDir, 0o755); err != nil {
 			return fmt.Errorf("failed to create networks directory: %w", err)
 		}
 		defaultOutput := filepath.Join(networksDir, "genesis.json")
 		if actualOutput != defaultOutput {
-			if err := os.WriteFile(defaultOutput, output, 0644); err != nil {
+			if err := os.WriteFile(defaultOutput, output, 0o644); err != nil {
 				return fmt.Errorf("failed to write genesis to ~/.lux: %w", err)
 			}
 			ux.Logger.Info("Genesis also saved to: %s", defaultOutput)
@@ -595,20 +597,9 @@ func formatLuxAddress(chainPrefix, hrp string, data []byte) (string, error) {
 		return "", err
 	}
 	// Compute bech32 with just the HRP (lux, test, local)
-	bech32Addr, err := bech32Encode(hrp, converted)
-	if err != nil {
-		return "", err
-	}
+	bech32Addr := bech32Encode(hrp, converted)
 	// Prepend chain prefix: P-lux1..., X-lux1..., etc.
 	return chainPrefix + "-" + bech32Addr, nil
-}
-
-func formatBech32(hrp string, data []byte) (string, error) {
-	converted, err := bech32ConvertBits(data, 8, 5, true)
-	if err != nil {
-		return "", err
-	}
-	return bech32Encode(hrp, converted)
 }
 
 // Bech32 encoding helpers
@@ -640,7 +631,7 @@ func bech32ConvertBits(data []byte, fromBits, toBits uint, pad bool) ([]byte, er
 	return ret, nil
 }
 
-func bech32Encode(hrp string, data []byte) (string, error) {
+func bech32Encode(hrp string, data []byte) string {
 	combined := append([]byte{}, data...)
 	checksum := bech32Checksum(hrp, combined)
 	combined = append(combined, checksum...)
@@ -649,7 +640,7 @@ func bech32Encode(hrp string, data []byte) (string, error) {
 	for _, b := range combined {
 		result += string(bech32Charset[b])
 	}
-	return result, nil
+	return result
 }
 
 func bech32Checksum(hrp string, data []byte) []byte {

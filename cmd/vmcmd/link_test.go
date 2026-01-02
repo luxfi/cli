@@ -63,7 +63,7 @@ func TestSymlinkOperations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create a fake binary
 	binaryPath := filepath.Join(tmpDir, "fake-vm")

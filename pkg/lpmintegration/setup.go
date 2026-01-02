@@ -45,7 +45,7 @@ func SetupLpm(app *application.Lux, lpmBaseDir string) error {
 	if err != nil {
 		return err
 	}
-	defer lpmLog.Close()
+	defer func() { _ = lpmLog.Close() }()
 	os.Stdout = lpmLog
 	lpmInstance, err := lpm.NewClient(
 		lpmBaseDir,

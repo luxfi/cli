@@ -520,7 +520,7 @@ func (*realPrompter) CaptureURL(promptStr string, validateConnection bool) (stri
 					continue
 				}
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			// Accept any successful response (2xx, 3xx)
 			if resp.StatusCode >= 400 {
@@ -956,7 +956,7 @@ func (*realPrompter) CaptureFloat(promptStr string, validator func(float64) erro
 		Validate: func(input string) error {
 			val, err := strconv.ParseFloat(input, 64)
 			if err != nil {
-				return fmt.Errorf("strconv.ParseFloat: %v", err)
+				return fmt.Errorf("strconv.ParseFloat: %w", err)
 			}
 			if validator != nil {
 				return validator(val)
@@ -987,7 +987,7 @@ func (*realPrompter) CaptureUint16(promptStr string) (uint16, error) {
 			val, err := strconv.ParseUint(numStr, base, 16)
 			if err != nil {
 				// Include strconv in the error message for tests
-				return fmt.Errorf("strconv.ParseUint: %v", err)
+				return fmt.Errorf("strconv.ParseUint: %w", err)
 			}
 			if val > 65535 {
 				return errors.New("value must be between 0 and 65535")
@@ -1033,7 +1033,7 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 			_, err := strconv.ParseUint(numStr, base, 32)
 			if err != nil {
 				// Include strconv in the error message for tests
-				return fmt.Errorf("strconv.ParseUint: %v", err)
+				return fmt.Errorf("strconv.ParseUint: %w", err)
 			}
 			return nil
 		},
@@ -1135,7 +1135,7 @@ func (*realPrompter) CaptureInt(promptStr string, validator func(int) error) (in
 		Validate: func(input string) error {
 			val, err := strconv.Atoi(input)
 			if err != nil {
-				return fmt.Errorf("strconv.Atoi: %v", err)
+				return fmt.Errorf("strconv.Atoi: %w", err)
 			}
 			if validator != nil {
 				return validator(val)
@@ -1169,7 +1169,7 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 			}
 			_, err := strconv.ParseUint(numStr, base, 8)
 			if err != nil {
-				return fmt.Errorf("strconv.ParseUint: %v", err)
+				return fmt.Errorf("strconv.ParseUint: %w", err)
 			}
 			return nil
 		},

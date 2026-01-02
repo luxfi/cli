@@ -213,11 +213,7 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 	// restart the network setting the upgrade bytes file
 	opts := ANRclient.WithUpgradeConfigs(netUpgradeConfs)
 	// LoadSnapshot takes options, not bool as parameter
-	if app.Conf.GetConfigBoolValue(constants.ConfigSnapshotsAutoSaveKey) {
-		_, err = cli.LoadSnapshot(ctx, snapName, opts)
-	} else {
-		_, err = cli.LoadSnapshot(ctx, snapName, opts)
-	}
+	_, err = cli.LoadSnapshot(ctx, snapName, opts)
 	if err != nil {
 		return err
 	}
@@ -348,7 +344,7 @@ func validateUpgrade(blockchainName, networkKey string, sc *models.Sidecar, skip
 	// let's check update bytes actually exist
 	netUpgradeBytes, err := app.ReadUpgradeFile(blockchainName)
 	if err != nil {
-		if err == os.ErrNotExist {
+		if errors.Is(err, os.ErrNotExist) {
 			ux.Logger.PrintToUser("No file with upgrade specs for the given blockchain has been found")
 			ux.Logger.PrintToUser("You may need to first create it with the `lux blockchain upgrade generate` command or import it")
 			ux.Logger.PrintToUser("Aborting this command. No changes applied")

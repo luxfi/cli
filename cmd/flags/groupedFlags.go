@@ -46,16 +46,16 @@ func determineShownGroups(groups []GroupedFlags) map[string]bool {
 // printUsage prints the general command usage/help text.
 func printUsage(cmd *cobra.Command) {
 	if err := cmd.Root().UsageFunc()(cmd); err != nil {
-		fmt.Fprintf(cmd.ErrOrStderr(), "error showing command usage: %v\n", err)
+		_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "error showing command usage: %v\n", err)
 	}
 }
 
 // printGroup prints a specific group of flags, properly formatted and optionally hidden if not shown.
 func printGroup(cmd *cobra.Command, group GroupedFlags, isShown bool) {
-	fmt.Fprintf(cmd.OutOrStdout(), "\n%s:\n", group.Name)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "\n%s:\n", group.Name)
 
 	if !isShown {
-		fmt.Fprintf(cmd.OutOrStdout(), "  (hidden) Use %s to show these options\n", group.ShowFlag)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  (hidden) Use %s to show these options\n", group.ShowFlag)
 		return
 	}
 
@@ -63,7 +63,7 @@ func printGroup(cmd *cobra.Command, group GroupedFlags, isShown bool) {
 
 	for _, flag := range flags {
 		padding := strings.Repeat(" ", maxLen-len(flag.nameAndType)+2)
-		fmt.Fprintf(cmd.OutOrStdout(), "  %s%s%s\n", flag.nameAndType, padding, flag.usage)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "  %s%s%s\n", flag.nameAndType, padding, flag.usage)
 	}
 }
 

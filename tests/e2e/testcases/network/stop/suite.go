@@ -36,7 +36,7 @@ var _ = ginkgo.Describe("[Local Network]", ginkgo.Ordered, func() {
 		gomega.Expect(snapshotExists).Should(gomega.BeTrue(), "default snapshot should exist")
 
 		// clean up the snapshot
-		utils.DeleteSnapshot(constants.DefaultSnapshotName)
+		_ = utils.DeleteSnapshot(constants.DefaultSnapshotName)
 	})
 
 	ginkgo.It("can stop a started network with --dont-save", func() {
@@ -74,7 +74,7 @@ var _ = ginkgo.Describe("[Local Network]", ginkgo.Ordered, func() {
 			fmt.Sprintf("snapshot %s should exist", testSnapshotName))
 
 		// clean up the snapshot
-		utils.DeleteSnapshot(testSnapshotName)
+		_ = utils.DeleteSnapshot(testSnapshotName)
 	})
 
 	ginkgo.It("should fail when stop network when no network is up", func() {

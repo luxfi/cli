@@ -115,27 +115,27 @@ func describe(_ *cobra.Command, _ []string) error {
 	// table.SetRowLine(true)
 	// table.SetAlignment(tablewriter.ALIGN_LEFT)
 	// table.SetAutoMergeCellsByColumnIndex([]int{0})
-	table.Append([]string{"RPC URL", rpcURL})
+	_ = table.Append([]string{"RPC URL", rpcURL})
 	codespaceURL, err := utils.GetCodespaceURL(rpcURL)
 	if err != nil {
 		return err
 	}
 	if codespaceURL != "" {
-		table.Append([]string{"Codespace RPC URL", codespaceURL})
+		_ = table.Append([]string{"Codespace RPC URL", codespaceURL})
 	}
-	table.Append([]string{"EVM Chain ID", fmt.Sprint(evmChainID)})
-	table.Append([]string{"TOKEN SYMBOL", "LUX"})
-	table.Append([]string{"Address", address})
-	table.Append([]string{"Balance", balanceStr})
-	table.Append([]string{"Private Key", privKey})
-	table.Append([]string{"BlockchainID (CB58)", blockchainID.String()})
-	table.Append([]string{"BlockchainID (HEX)", blockchainIDHexEncoding})
+	_ = table.Append([]string{"EVM Chain ID", fmt.Sprint(evmChainID)})
+	_ = table.Append([]string{"TOKEN SYMBOL", "LUX"})
+	_ = table.Append([]string{"Address", address})
+	_ = table.Append([]string{"Balance", balanceStr})
+	_ = table.Append([]string{"Private Key", privKey})
+	_ = table.Append([]string{"BlockchainID (CB58)", blockchainID.String()})
+	_ = table.Append([]string{"BlockchainID (HEX)", blockchainIDHexEncoding})
 	if warpMessengerAddress != "" {
-		table.Append([]string{"Warp Messenger Address", warpMessengerAddress})
+		_ = table.Append([]string{"Warp Messenger Address", warpMessengerAddress})
 	}
 	if warpRegistryAddress != "" {
-		table.Append([]string{"Warp Registry Address", warpRegistryAddress})
+		_ = table.Append([]string{"Warp Registry Address", warpRegistryAddress})
 	}
-	table.Render()
+	_ = table.Render()
 	return nil
 }

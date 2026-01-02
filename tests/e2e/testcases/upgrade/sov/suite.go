@@ -123,7 +123,7 @@ var _ = ginkgo.Describe("[Upgrade public network SOV]", ginkgo.Ordered, func() {
 		// in the system
 		luxdConfigDir, err := os.MkdirTemp("", "cli-tmp-luxd-conf-dir")
 		gomega.Expect(err).Should(gomega.BeNil())
-		defer os.RemoveAll(luxdConfigDir)
+		defer func() { _ = os.RemoveAll(luxdConfigDir) }()
 
 		// now we try to apply
 		_, err = commands.ApplyUpgradeToPublicNode(subnetName, luxdConfigDir)

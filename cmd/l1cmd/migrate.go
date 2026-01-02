@@ -12,6 +12,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Rental plan types
+const (
+	rentalPlanMonthly   = "monthly"
+	rentalPlanAnnual    = "annual"
+	rentalPlanPerpetual = "perpetual"
+)
+
+// Validator management type for hybrid
+const validatorMgmtHybrid = "hybrid"
+
 var (
 	skipValidatorCheck   bool
 	rentalPlan           string
@@ -122,19 +132,19 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 
 		switch choice {
 		case "Monthly (100 LUX/month)":
-			rentalPlan = "monthly"
+			rentalPlan = rentalPlanMonthly
 		case "Annual (1,000 LUX/year - save 200 LUX)":
-			rentalPlan = "annual"
+			rentalPlan = rentalPlanAnnual
 		case "Perpetual (10,000 LUX - one-time)":
-			rentalPlan = "perpetual"
+			rentalPlan = rentalPlanPerpetual
 		}
 	} else {
 		// Validate the provided rental plan
 		switch rentalPlan {
-		case "monthly", "annual", "perpetual":
+		case rentalPlanMonthly, rentalPlanAnnual, rentalPlanPerpetual:
 			// valid
 		default:
-			return fmt.Errorf("invalid rental plan: %s (valid: monthly, annual, perpetual)", rentalPlan)
+			return fmt.Errorf("invalid rental plan: %s (valid: %s, %s, %s)", rentalPlan, rentalPlanMonthly, rentalPlanAnnual, rentalPlanPerpetual)
 		}
 	}
 
@@ -152,15 +162,15 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("")
 
 	// Validator management choice
-	validatorManagement := "proof-of-authority"
+	validatorManagement := ValidatorManagementPoA
 	if migrateValidatorMgmt != "" {
 		switch migrateValidatorMgmt {
 		case "poa":
-			validatorManagement = "proof-of-authority"
+			validatorManagement = ValidatorManagementPoA
 		case "pos":
-			validatorManagement = "proof-of-stake"
-		case "hybrid":
-			validatorManagement = "hybrid"
+			validatorManagement = ValidatorManagementPoS
+		case validatorMgmtHybrid:
+			validatorManagement = validatorMgmtHybrid
 		default:
 			return fmt.Errorf("invalid validator management: %s (valid: poa, pos, hybrid)", migrateValidatorMgmt)
 		}
@@ -185,7 +195,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 		if validatorChoice == "Enable permissionless staking (PoS)" {
 			validatorManagement = "proof-of-stake"
 		} else if validatorChoice == "Hybrid (start PoA, transition to PoS)" {
-			validatorManagement = "hybrid"
+			validatorManagement = validatorMgmtHybrid
 		}
 	}
 
@@ -239,7 +249,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 
 	// Step 5: Deploy validator contracts
 	ux.Logger.PrintToUser("4️⃣ Deploying validator management contracts...")
-	if validatorManagement == "proof-of-authority" {
+	if validatorManagement == ValidatorManagementPoA {
 		ux.Logger.PrintToUser("   Deployed PoA validator manager")
 	} else {
 		ux.Logger.PrintToUser("   Deployed PoS staking contracts")
@@ -262,7 +272,7 @@ func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("   2. Deploy L2/L3 chains: lux l2 create %s-l2 --l1 %s", subnetName, subnetName)
 	ux.Logger.PrintToUser("   3. Enable cross-protocol bridges: lux bridge enable %s", subnetName)
 
-	if rentalPlan == "monthly" {
+	if rentalPlan == rentalPlanMonthly {
 		ux.Logger.PrintToUser("   4. Next payment due: %s", time.Now().AddDate(0, 1, 0).Format("2006-01-02"))
 	}
 

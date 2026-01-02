@@ -25,6 +25,9 @@ import (
 
 // WalletConnect v2 protocol constants
 const (
+	// WalletConnectName is the display name for the WalletConnect backend
+	WalletConnectName = "WalletConnect (Mobile Signing)"
+
 	wcRelayURL      = "wss://relay.walletconnect.com"
 	wcProtocolID    = "wc"
 	wcVersion       = "2"
@@ -99,14 +102,6 @@ type wcError struct {
 	Message string `json:"message"`
 }
 
-// wcPairingURI represents the WalletConnect pairing URI
-type wcPairingURI struct {
-	Topic   string
-	SymKey  string
-	Relay   string
-	Methods []string
-}
-
 // NewWalletConnectBackend creates a new WalletConnect backend
 func NewWalletConnectBackend() *WalletConnectBackend {
 	return &WalletConnectBackend{
@@ -119,7 +114,7 @@ func (b *WalletConnectBackend) Type() BackendType {
 }
 
 func (b *WalletConnectBackend) Name() string {
-	return "WalletConnect (Mobile Signing)"
+	return WalletConnectName
 }
 
 func (b *WalletConnectBackend) Available() bool {
@@ -156,7 +151,7 @@ func (b *WalletConnectBackend) Initialize(ctx context.Context) error {
 		b.dataDir = filepath.Join(keysDir, ".walletconnect")
 	}
 
-	if err := os.MkdirAll(b.dataDir, 0700); err != nil {
+	if err := os.MkdirAll(b.dataDir, 0o700); err != nil {
 		return fmt.Errorf("failed to create walletconnect directory: %w", err)
 	}
 
@@ -513,7 +508,7 @@ func (b *WalletConnectBackend) connectRelay(ctx context.Context, topic string) e
 	if err != nil {
 		if resp != nil {
 			body, _ := io.ReadAll(resp.Body)
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return fmt.Errorf("relay connection failed: %s: %w", string(body), err)
 		}
 		return fmt.Errorf("relay connection failed: %w", err)
@@ -533,7 +528,7 @@ func (b *WalletConnectBackend) connectRelay(ctx context.Context, topic string) e
 	}
 
 	if err := conn.WriteJSON(subscribeMsg); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		b.conn = nil
 		return fmt.Errorf("failed to subscribe to topic: %w", err)
 	}
@@ -733,7 +728,7 @@ func (b *WalletConnectBackend) saveSessions() error {
 	}
 
 	sessionsFile := filepath.Join(b.dataDir, "sessions.json")
-	return os.WriteFile(sessionsFile, data, 0600)
+	return os.WriteFile(sessionsFile, data, 0o600)
 }
 
 // GetSessionChecksum returns a checksum for session verification
