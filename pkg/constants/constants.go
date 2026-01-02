@@ -26,6 +26,7 @@ const (
 	CustomVMDir        = sharedconst.CustomVMDir
 	ReposDir           = sharedconst.ReposDir
 	LPMDir             = sharedconst.LPMDir
+	DevDir             = sharedconst.DevDir
 
 	// From sharedconst.repos
 	LuxOrg            = sharedconst.LuxOrg
