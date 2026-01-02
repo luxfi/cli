@@ -131,7 +131,7 @@ func (h *Host) UploadBytes(data []byte, remoteFile string, timeout time.Duration
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	if _, err := tmpFile.Write(data); err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (h *Host) ReadFileBytes(remoteFile string, timeout time.Duration) ([]byte, 
 	if err != nil {
 		return nil, err
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	if err := h.Download(remoteFile, tmpFile.Name(), timeout); err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func (h *Host) UntimedMkdirAll(remoteDir string) error {
 	if err != nil {
 		return err
 	}
-	defer sftp.Close()
+	defer func() { _ = sftp.Close() }()
 	return sftp.MkdirAll(remoteDir)
 }
 
@@ -296,7 +296,7 @@ func (h *Host) UntimedForward(httpRequest string) ([]byte, error) {
 		}
 	}
 
-	defer proxy.Close()
+	defer func() { _ = proxy.Close() }()
 	// send request to server
 	if _, err = proxy.Write([]byte(httpRequest)); err != nil {
 		return nil, err
@@ -331,7 +331,7 @@ func (h *Host) FileExists(path string) (bool, error) {
 	if err != nil {
 		return false, nil
 	}
-	defer sftp.Close()
+	defer func() { _ = sftp.Close() }()
 	_, err = sftp.Stat(path)
 	if err != nil {
 		return false, nil
@@ -350,7 +350,7 @@ func (h *Host) CreateTempFile() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer sftp.Close()
+	defer func() { _ = sftp.Close() }()
 	tmpFileName := filepath.Join("/tmp", randomString(10))
 	_, err = sftp.Create(tmpFileName)
 	if err != nil {
@@ -370,7 +370,7 @@ func (h *Host) CreateTempDir() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer sftp.Close()
+	defer func() { _ = sftp.Close() }()
 	tmpDirName := filepath.Join("/tmp", randomString(10))
 	err = sftp.Mkdir(tmpDirName)
 	if err != nil {
@@ -390,7 +390,7 @@ func (h *Host) Remove(path string, recursive bool) error {
 	if err != nil {
 		return err
 	}
-	defer sftp.Close()
+	defer func() { _ = sftp.Close() }()
 	if recursive {
 		// return sftp.RemoveAll(path) is very slow
 		_, err := h.Command(fmt.Sprintf("rm -rf %s", path), nil, constants.SSHLongRunningScriptTimeout)
@@ -503,7 +503,7 @@ func (h *Host) StreamSSHCommand(command string, env []string, timeout time.Durat
 	if err != nil {
 		return err
 	}
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	stdout, err := session.StdoutPipe()
 	if err != nil {
@@ -571,7 +571,7 @@ func (h *Host) IsSystemD() bool {
 	if err != nil {
 		return false
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 	// check for the service
 	if err := h.Download("/proc/1/comm", tmpFile.Name(), constants.SSHFileOpsTimeout); err != nil {
 		return false

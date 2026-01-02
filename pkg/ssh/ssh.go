@@ -365,7 +365,7 @@ func RunSSHSetupPrometheusConfig(host *models.Host, luxdPorts, machinePorts, loa
 	if err != nil {
 		return err
 	}
-	defer os.Remove(promConfig.Name())
+	defer func() { _ = os.Remove(promConfig.Name()) }()
 	if err := monitoring.WritePrometheusConfig(promConfig.Name(), luxdPorts, machinePorts, loadTestPorts); err != nil {
 		return err
 	}
@@ -388,7 +388,7 @@ func RunSSHSetupLokiConfig(host *models.Host, port int) error {
 	if err != nil {
 		return err
 	}
-	defer os.Remove(lokiConfig.Name())
+	defer func() { _ = os.Remove(lokiConfig.Name()) }()
 	if err := monitoring.WriteLokiConfig(lokiConfig.Name(), strconv.Itoa(port)); err != nil {
 		return err
 	}
@@ -410,7 +410,7 @@ func RunSSHSetupPromtailConfig(host *models.Host, lokiIP string, lokiPort int, c
 	if err != nil {
 		return err
 	}
-	defer os.Remove(promtailConfig.Name())
+	defer func() { _ = os.Remove(promtailConfig.Name()) }()
 
 	if err := monitoring.WritePromtailConfig(promtailConfig.Name(), lokiIP, strconv.Itoa(lokiPort), cloudID, nodeID, chainID); err != nil {
 		return err
@@ -563,7 +563,7 @@ func RunSSHRenderLuxdAliasConfigFile(
 	if err != nil {
 		return err
 	}
-	defer os.Remove(aliasConfFile.Name())
+	defer func() { _ = os.Remove(aliasConfFile.Name()) }()
 	if err := os.WriteFile(aliasConfFile.Name(), aliasConf, constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -911,7 +911,7 @@ func StreamOverSSH(
 func RunSSHWhitelistPubKey(host *models.Host, sshPubKey string) error {
 	const sshAuthFile = "/home/ubuntu/.ssh/authorized_keys"
 	tmpName := filepath.Join(os.TempDir(), utils.RandomString(10))
-	defer os.Remove(tmpName)
+	defer func() { _ = os.Remove(tmpName) }()
 	if err := host.Download(sshAuthFile, tmpName, constants.SSHFileOpsTimeout); err != nil {
 		return err
 	}

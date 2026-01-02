@@ -157,7 +157,7 @@ func (b *KChainBackend) Initialize(ctx context.Context) error {
 			b.connected = false
 			return nil // Not available, but not an error
 		}
-		conn.Close()
+		_ = conn.Close()
 		b.connected = true
 		return nil
 	}
@@ -770,7 +770,7 @@ func (b *KChainBackend) storeShareOnValidator(ctx context.Context, addr, keyName
 		ValidatorID: addr,
 	})
 	if err != nil {
-		return fmt.Errorf("%w: %v", ErrShareStoreFailed, err)
+		return fmt.Errorf("%w: %w", ErrShareStoreFailed, err)
 	}
 
 	if !result.Stored {
@@ -791,7 +791,7 @@ func (b *KChainBackend) retrieveShareFromValidator(ctx context.Context, addr, ke
 		ValidatorID: addr,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrShareRetrieveFailed, err)
+		return nil, fmt.Errorf("%w: %w", ErrShareRetrieveFailed, err)
 	}
 
 	var share EncryptedShare
@@ -846,7 +846,7 @@ func (b *KChainBackend) requestSignatureShare(ctx context.Context, addr, keyName
 		Algorithm:   algorithm,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrValidatorUnreachable, err)
+		return nil, fmt.Errorf("%w: %w", ErrValidatorUnreachable, err)
 	}
 
 	return []byte(result.ShareData), nil

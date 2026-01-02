@@ -16,10 +16,10 @@ func CreateTmpFile(namePrefix string, content []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if err := os.WriteFile(file.Name(), content, constants.DefaultPerms755); err != nil {
-		os.Remove(file.Name())
+		_ = os.Remove(file.Name())
 		return "", err
 	}
 

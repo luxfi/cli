@@ -13,6 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Known blockchain IDs
+const (
+	// MainnetSubnetBlockchainID is the known blockchain ID for the mainnet subnet
+	MainnetSubnetBlockchainID = "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+)
+
 var (
 	// New flags for existing state support
 	subnetStatePath string
@@ -30,7 +36,7 @@ func LoadExistingSubnetState(networkDir string) error {
 		if info, err := os.Stat(defaultPath); err == nil && info.IsDir() {
 			ux.Logger.PrintToUser("Found existing mainnet-regenesis database at default location")
 			subnetStatePath = defaultPath
-			blockchainID = "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+			blockchainID = MainnetSubnetBlockchainID
 		} else {
 			return nil // No existing state to load
 		}
@@ -66,7 +72,7 @@ func LoadExistingSubnetState(networkDir string) error {
 	targetDir := filepath.Join(networkDir, "node1", "data", "chains", blockchainID, "db")
 
 	// Create parent directories
-	if err := os.MkdirAll(filepath.Dir(targetDir), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(targetDir), 0o755); err != nil {
 		return fmt.Errorf("failed to create target directory structure: %w", err)
 	}
 
@@ -92,12 +98,12 @@ func loadStateFromChaindata(chainDataPath string, networkDir string) error {
 			// Parse metadata to get blockchain ID
 			// For now, we'll use a known mapping
 			if blockchainID == "" {
-				blockchainID = "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB" // Known subnet blockchain ID
+				blockchainID = MainnetSubnetBlockchainID // Known subnet blockchain ID
 			}
 		}
 
 		targetDir := filepath.Join(networkDir, "node1", "data", "chains", blockchainID, "db")
-		if err := os.MkdirAll(filepath.Dir(targetDir), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(targetDir), 0o755); err != nil {
 			return fmt.Errorf("failed to create target directory: %w", err)
 		}
 
@@ -117,7 +123,7 @@ func loadStateFromChaindata(chainDataPath string, networkDir string) error {
 func detectBlockchainID(dbPath string) string {
 	// Check if the path contains a known blockchain ID
 	knownIDs := map[string]string{
-		"2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB": "LUX Mainnet Subnet",
+		MainnetSubnetBlockchainID:                             "LUX Mainnet Subnet",
 		"2sdADEgBC3NjLM4inKc1hY1PQpCT3JVyGVJxdmcq6sqrDndjFG": "LUX Subnet",
 	}
 
@@ -128,7 +134,7 @@ func detectBlockchainID(dbPath string) string {
 	}
 
 	// Default to the known mainnet subnet ID if not detected
-	return "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+	return MainnetSubnetBlockchainID
 }
 
 // copyDirectory recursively copies a directory from src to dst
@@ -176,7 +182,7 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
+	defer func() { _ = srcFile.Close() }()
 
 	srcInfo, err := srcFile.Stat()
 	if err != nil {
@@ -187,7 +193,7 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
+	defer func() { _ = dstFile.Close() }()
 
 	_, err = io.Copy(dstFile, srcFile)
 	return err

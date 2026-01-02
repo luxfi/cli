@@ -10,11 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var app *application.Lux
-
 // NewCmd creates the vm command suite.
-func NewCmd(injectedApp *application.Lux) *cobra.Command {
-	app = injectedApp
+func NewCmd(_ *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "vm",
 		Short: "Manage VM plugins",

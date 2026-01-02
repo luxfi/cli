@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const platformDarwin = "darwin"
+
 // mockBackend implements KeyBackend for testing
 type mockBackend struct {
 	backendType BackendType
@@ -31,9 +33,11 @@ func (m *mockBackend) Close() error                         { return nil }
 func (m *mockBackend) CreateKey(ctx context.Context, name string, opts CreateKeyOptions) (*HDKeySet, error) {
 	return nil, nil
 }
+
 func (m *mockBackend) LoadKey(ctx context.Context, name, password string) (*HDKeySet, error) {
 	return nil, nil
 }
+
 func (m *mockBackend) SaveKey(ctx context.Context, keySet *HDKeySet, password string) error {
 	return nil
 }
@@ -270,7 +274,7 @@ func TestGetDefaultBackend(t *testing.T) {
 	})
 
 	t.Run("darwin prefers keychain", func(t *testing.T) {
-		if runtime.GOOS != "darwin" {
+		if runtime.GOOS != platformDarwin {
 			t.Skip("darwin-specific test")
 		}
 
@@ -296,7 +300,7 @@ func TestGetDefaultBackend(t *testing.T) {
 	})
 
 	t.Run("darwin falls back to software when keychain unavailable", func(t *testing.T) {
-		if runtime.GOOS != "darwin" {
+		if runtime.GOOS != platformDarwin {
 			t.Skip("darwin-specific test")
 		}
 
