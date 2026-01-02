@@ -91,7 +91,7 @@ var _ = ginkgo.Describe("[Node create]", func() {
 	})
 	ginkgo.It("can wait up 30 seconds for luxd to startup", func() {
 		timeout := 30 * time.Second
-		address := fmt.Sprintf("%s:%d", utils.E2EConvertIP(ElasticIP), constants.LuxdP2PPort)
+		address := net.JoinHostPort(utils.E2EConvertIP(ElasticIP), fmt.Sprintf("%d", constants.LuxdP2PPort))
 		deadline := time.Now().Add(timeout)
 		var err error
 
