@@ -149,7 +149,7 @@ var _ = ginkgo.Describe("[Upgrade local network SOV]", ginkgo.Ordered, func() {
 	})
 
 	ginkgo.BeforeEach(func() {
-		output, err := commands.CreateKeyFromPath(keyName, utils.EwoqKeyPath)
+		output, err := commands.CreateKeyFromPath(keyName, utils.LocalKeyPath)
 		if err != nil {
 			fmt.Println(output)
 			utils.PrintStdErr(err)
