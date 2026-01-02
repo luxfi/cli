@@ -716,7 +716,7 @@ func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Networ
 		return false, fmt.Errorf("failed to get current validators")
 	}
 
-	return !(len(vals) == 0), nil
+	return len(vals) != 0, nil
 }
 
 func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platformvm.ClientPermissionlessValidator, error) {
