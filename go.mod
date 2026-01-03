@@ -30,7 +30,7 @@ require (
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/onsi/ginkgo/v2 v2.27.3
-	github.com/onsi/gomega v1.38.2
+	github.com/onsi/gomega v1.38.3
 	github.com/otiai10/copy v1.14.1 // indirect
 	github.com/pborman/ansi v1.0.0
 	github.com/posthog/posthog-go v1.6.1
