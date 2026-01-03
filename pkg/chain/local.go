@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package chain provides chain deployment and management utilities.
 package chain
 
 import (
@@ -47,6 +49,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Chain deployment constants.
 const (
 	WriteReadReadPerms = 0o644
 	// ChainHealthTimeout is the maximum time to wait for a newly deployed chain to become healthy
@@ -103,14 +106,15 @@ func NewRecoverableDeploymentError(chainName string, cause error, suggestion str
 // emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
 type emptyEthKeychain struct{}
 
-func (e *emptyEthKeychain) GetEth(addr common.Address) (walletkeychain.Signer, bool) {
+func (*emptyEthKeychain) GetEth(_ common.Address) (walletkeychain.Signer, bool) {
 	return nil, false
 }
 
-func (e *emptyEthKeychain) EthAddresses() set.Set[common.Address] {
+func (*emptyEthKeychain) EthAddresses() set.Set[common.Address] {
 	return set.NewSet[common.Address](0)
 }
 
+// LocalDeployer handles local chain deployment.
 type LocalDeployer struct {
 	procChecker        binutils.ProcessChecker
 	binChecker         binutils.BinaryChecker
@@ -124,6 +128,7 @@ type LocalDeployer struct {
 	networkType        string // "mainnet", "testnet", or "local"
 }
 
+// NewLocalDeployer creates a new LocalDeployer instance.
 func NewLocalDeployer(app *application.Lux, luxVersion string, vmBin string) *LocalDeployer {
 	return &LocalDeployer{
 		procChecker:        binutils.NewProcessChecker(),
@@ -252,10 +257,11 @@ func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) er
 	return err
 }
 
+// IssueTransformSubnetTx transforms a subnet to a permissionless elastic subnet.
 func IssueTransformSubnetTx(
 	elasticSubnetConfig climodels.ElasticChainConfig,
 	kc keychain.Keychain,
-	subnetID ids.ID,
+	_ ids.ID, // subnetID comes from elasticSubnetConfig
 	tokenName string,
 	tokenSymbol string,
 	maxSupply uint64,
@@ -319,6 +325,7 @@ func IssueTransformSubnetTx(
 	return transformSubnetTxID.ID(), subnetAssetID, err
 }
 
+// IssueAddPermissionlessValidatorTx issues an add permissionless validator transaction.
 func IssueAddPermissionlessValidatorTx(
 	kc keychain.Keychain,
 	subnetID ids.ID,
@@ -412,6 +419,7 @@ func (d *LocalDeployer) StartServerForNetwork(networkType string) error {
 	return nil
 }
 
+// GetCurrentSupply prints the current supply of a subnet.
 func GetCurrentSupply(subnetID ids.ID) error {
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
@@ -950,8 +958,8 @@ func (d *LocalDeployer) validateVMBinary(vmBin string, vmID ids.ID) error {
 	return nil
 }
 
-// Initialize default snapshot with bootstrap snapshot archive
-// If force flag is set to true, overwrite the default snapshot if it exists
+// SetDefaultSnapshot initializes the default snapshot with the bootstrap snapshot archive.
+// If force flag is set to true, it overwrites the default snapshot if it exists.
 func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 	defaultSnapshotPath := filepath.Join(snapshotsDir, "anr-snapshot-"+constants.DefaultSnapshotName)
 	if force {
@@ -962,7 +970,7 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 	// Always create a fresh snapshot with embedded genesis from netrunner
 	// This avoids downloading potentially corrupted snapshots from GitHub
 	if _, err := os.Stat(defaultSnapshotPath); os.IsNotExist(err) {
-		if err := os.MkdirAll(defaultSnapshotPath, 0o755); err != nil {
+		if err := os.MkdirAll(defaultSnapshotPath, 0o750); err != nil {
 			return fmt.Errorf("failed creating snapshot directory: %w", err)
 		}
 		// Create network.json with embedded genesis from netrunner
@@ -982,8 +990,8 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 		if err != nil {
 			return fmt.Errorf("failed marshaling network config: %w", err)
 		}
-		networkJsonPath := filepath.Join(defaultSnapshotPath, "network.json")
-		if err := os.WriteFile(networkJsonPath, networkBytes, WriteReadReadPerms); err != nil {
+		networkJSONPath := filepath.Join(defaultSnapshotPath, "network.json")
+		if err := os.WriteFile(networkJSONPath, networkBytes, WriteReadReadPerms); err != nil {
 			return fmt.Errorf("failed writing network.json: %w", err)
 		}
 		ux.Logger.PrintToUser("Created fresh snapshot with embedded genesis")
@@ -991,7 +999,7 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 	return nil
 }
 
-// Returns an error if the server cannot be contacted. You may want to ignore this error.
+// GetLocallyDeployedSubnets returns the locally deployed subnets. Returns an error if the server cannot be contacted.
 func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
 	deployedNames := map[string]struct{}{}
 	// if the server can not be contacted, or there is a problem with the query,
@@ -1014,6 +1022,7 @@ func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
 	return deployedNames, nil
 }
 
+// IssueRemoveSubnetValidatorTx issues a remove subnet validator transaction.
 func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
@@ -1043,6 +1052,7 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 	return tx.ID(), nil
 }
 
+// GetSubnetValidators returns the validators for a subnet.
 func GetSubnetValidators(subnetID ids.ID) ([]platformvm.ClientPermissionlessValidator, error) {
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
@@ -1052,6 +1062,7 @@ func GetSubnetValidators(subnetID ids.ID) ([]platformvm.ClientPermissionlessVali
 	return pClient.GetCurrentValidators(ctx, subnetID, nil)
 }
 
+// CheckNodeIsInSubnetPendingValidators checks if a node is in the pending validators for a subnet.
 func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool, error) {
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
@@ -1059,7 +1070,7 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 	defer cancel()
 
 	// Get validators that will be active in the future (pending validators)
-	futureTime := uint64(time.Now().Add(time.Hour).Unix())
+	futureTime := uint64(time.Now().Add(time.Hour).Unix()) //nolint:gosec // G115: Unix time is positive
 	validators, err := pClient.GetValidatorsAt(ctx, subnetID, platformapi.Height(futureTime))
 	if err != nil {
 		return false, err

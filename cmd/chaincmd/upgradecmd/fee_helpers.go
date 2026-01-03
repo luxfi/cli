@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package upgradecmd
 
 import (
@@ -21,7 +22,7 @@ const (
 )
 
 // setLowGasConfig configures low throughput fee settings
-func setLowGasConfig(feeConfig *commontype.FeeConfig, useDynamicFees bool) {
+func setLowGasConfig(feeConfig *commontype.FeeConfig, _ bool) {
 	if feeConfig == nil {
 		return
 	}
@@ -36,7 +37,7 @@ func setLowGasConfig(feeConfig *commontype.FeeConfig, useDynamicFees bool) {
 }
 
 // setMediumGasConfig configures medium throughput fee settings
-func setMediumGasConfig(feeConfig *commontype.FeeConfig, useDynamicFees bool) {
+func setMediumGasConfig(feeConfig *commontype.FeeConfig, _ bool) {
 	if feeConfig == nil {
 		return
 	}
@@ -51,7 +52,7 @@ func setMediumGasConfig(feeConfig *commontype.FeeConfig, useDynamicFees bool) {
 }
 
 // setHighGasConfig configures high throughput fee settings
-func setHighGasConfig(feeConfig *commontype.FeeConfig, useDynamicFees bool) {
+func setHighGasConfig(feeConfig *commontype.FeeConfig, _ bool) {
 	if feeConfig == nil {
 		return
 	}

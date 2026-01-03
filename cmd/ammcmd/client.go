@@ -569,7 +569,7 @@ func (a *AMM) SwapExactInputSingleV3(ctx context.Context, tokenIn, tokenOut comm
 }
 
 // deriveKey derives a private key from seed using BIP44 path m/44'/60'/0'/0/0
-func deriveKey(seed []byte, path string) (*ecdsa.PrivateKey, error) {
+func deriveKey(seed []byte, _ string) (*ecdsa.PrivateKey, error) {
 	// Create master key from seed using btcsuite hdkeychain
 	masterKey, err := hdkeychain.NewMaster(seed, &chaincfg.MainNetParams)
 	if err != nil {

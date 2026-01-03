@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import (
@@ -27,6 +29,7 @@ const (
 	sshConnectionRetries = 5
 )
 
+// Host represents a remote host for SSH operations.
 type Host struct {
 	NodeID            string
 	IP                string
@@ -37,6 +40,7 @@ type Host struct {
 	APINode           bool
 }
 
+// NewHostConnection creates a new SSH connection to the host.
 func NewHostConnection(h *Host, port uint) (*goph.Client, error) {
 	if port == 0 {
 		port = constants.SSHTCPPort
@@ -93,10 +97,12 @@ func (h *Host) Connect(port uint) error {
 	return nil
 }
 
+// Connected returns true if the host has an active SSH connection.
 func (h *Host) Connected() bool {
 	return h.Connection != nil
 }
 
+// Disconnect closes the SSH connection to the host.
 func (h *Host) Disconnect() error {
 	if h.Connection == nil {
 		return nil
@@ -148,7 +154,7 @@ func (h *Host) Download(remoteFile string, localFile string, timeout time.Durati
 			return err
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(localFile), 0o750); err != nil { //nolint:gosec // G301: Using 0750 for directory
+	if err := os.MkdirAll(filepath.Dir(localFile), 0o750); err != nil {
 		return err
 	}
 	_, err := timedFunction(
@@ -395,11 +401,11 @@ func (h *Host) Remove(path string, recursive bool) error {
 		// return sftp.RemoveAll(path) is very slow
 		_, err := h.Command(fmt.Sprintf("rm -rf %s", path), nil, constants.SSHLongRunningScriptTimeout)
 		return err
-	} else {
-		return sftp.Remove(path)
 	}
+	return sftp.Remove(path)
 }
 
+// GetAnsibleInventoryRecord returns the Ansible inventory line for the host.
 func (h *Host) GetAnsibleInventoryRecord() string {
 	return strings.Join([]string{
 		h.NodeID,
@@ -410,6 +416,7 @@ func (h *Host) GetAnsibleInventoryRecord() string {
 	}, " ")
 }
 
+// HostCloudIDToAnsibleID converts a cloud instance ID to an Ansible inventory ID.
 func HostCloudIDToAnsibleID(cloudService string, hostCloudID string) (string, error) {
 	switch cloudService {
 	case constants.GCPCloudService:
@@ -561,7 +568,7 @@ func consumeOutput(ctx context.Context, output io.Reader) error {
 	return scanner.Err()
 }
 
-// HasSystemDAvaliable checks if systemd is available on a remote host.
+// IsSystemD checks if systemd is available on a remote host.
 func (h *Host) IsSystemD() bool {
 	// check for the folder
 	if _, err := h.FileExists("/run/systemd/system"); err != nil {

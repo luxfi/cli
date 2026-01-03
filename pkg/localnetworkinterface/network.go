@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package localnetworkinterface provides local network status checking.
 package localnetworkinterface
 
 import (
@@ -13,6 +14,7 @@ import (
 	"github.com/luxfi/node/api/info"
 )
 
+// StatusChecker provides network status checking operations.
 type StatusChecker interface {
 	GetCurrentNetworkVersion() (string, int, bool, error)
 }

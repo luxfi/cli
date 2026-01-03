@@ -34,7 +34,7 @@ func NewDownloader() Downloader {
 }
 
 func (downloader) Download(url string) ([]byte, error) {
-	resp, err := http.Get(url) //nolint:gosec // G107: URL is from trusted sources (node binaries)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (downloader) Download(url string) ([]byte, error) {
 
 // DownloadWithTee downloads a file and saves it to disk while also returning the content
 func (downloader) DownloadWithTee(url string, filePath string) ([]byte, error) {
-	resp, err := http.Get(url) //nolint:gosec // G107: URL is from trusted sources (node binaries)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}

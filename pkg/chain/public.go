@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package chain provides chain deployment and management utilities.
 package chain
 
 import (
@@ -34,8 +36,10 @@ import (
 	"github.com/luxfi/sdk/wallet/primary/common"
 )
 
+// ErrNoSubnetAuthKeysInWallet indicates the wallet doesn't contain required subnet auth keys.
 var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")
 
+// PublicDeployer handles chain deployment to public networks.
 type PublicDeployer struct {
 	LocalDeployer
 	usingLedger bool
@@ -44,6 +48,7 @@ type PublicDeployer struct {
 	app         *application.Lux
 }
 
+// NewPublicDeployer creates a new PublicDeployer instance.
 func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keychain, network models.Network) *PublicDeployer {
 	return &PublicDeployer{
 		LocalDeployer: *NewLocalDeployer(app, "", ""),
@@ -54,12 +59,9 @@ func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keych
 	}
 }
 
-// adds a subnet validator to the given [subnetID]
-//   - creates an add subnet validator tx
-//   - sets the change output owner to be a wallet address (if not, it may go to any other subnet auth address)
-//   - signs the tx with the wallet as the owner of fee outputs and a possible subnet auth key
-//   - if partially signed, returns the tx so that it can later on be signed by the rest of the subnet auth keys
-//   - if fully signed, issues it
+// AddValidator adds a subnet validator to the given subnetID.
+// It creates an add subnet validator tx, signs it with the wallet,
+// and if fully signed, issues it. If partially signed, returns the tx for additional signatures.
 func (d *PublicDeployer) AddValidator(
 	controlKeys []string,
 	subnetAuthKeysStrs []string,
@@ -80,8 +82,8 @@ func (d *PublicDeployer) AddValidator(
 	validator := &txs.ChainValidator{
 		Validator: txs.Validator{
 			NodeID: nodeID,
-			Start:  uint64(startTime.Unix()),
-			End:    uint64(startTime.Add(duration).Unix()),
+			Start:  uint64(startTime.Unix()),               //nolint:gosec // G115: Unix time is positive
+			End:    uint64(startTime.Add(duration).Unix()), //nolint:gosec // G115: Unix time is positive
 			Wght:   weight,
 		},
 		Chain: subnetID,
@@ -114,6 +116,7 @@ func (d *PublicDeployer) AddValidator(
 	return false, tx, remainingSubnetAuthKeys, nil
 }
 
+// CreateAssetTx creates a new asset on the X-Chain.
 func (d *PublicDeployer) CreateAssetTx(
 	subnetID ids.ID,
 	tokenName string,
@@ -139,6 +142,7 @@ func (d *PublicDeployer) CreateAssetTx(
 	return tx.ID(), err
 }
 
+// ExportToPChainTx exports assets from X-Chain to P-Chain.
 func (d *PublicDeployer) ExportToPChainTx(
 	subnetID ids.ID,
 	subnetAssetID ids.ID,
@@ -173,6 +177,7 @@ func (d *PublicDeployer) ExportToPChainTx(
 	return tx.ID(), err
 }
 
+// ImportFromXChain imports assets from X-Chain to P-Chain.
 func (d *PublicDeployer) ImportFromXChain(
 	subnetID ids.ID,
 	owner *secp256k1fx.OutputOwners,
@@ -197,6 +202,7 @@ func (d *PublicDeployer) ImportFromXChain(
 	return tx.ID(), err
 }
 
+// TransformSubnetTx transforms a subnet to a permissionless elastic subnet.
 func (d *PublicDeployer) TransformSubnetTx(
 	controlKeys []string,
 	subnetAuthKeysStrs []string,
@@ -240,14 +246,10 @@ func (d *PublicDeployer) TransformSubnetTx(
 	return false, ids.Empty, tx, remainingSubnetAuthKeys, nil
 }
 
-// removes a subnet validator from the given [subnet]
-// - verifies that the wallet is one of the subnet auth keys (so as to sign the AddSubnetValidator tx)
-// - if operation is multisig (len(subnetAuthKeysStrs) > 1):
-//   - creates a remove subnet validator tx
-//   - sets the change output owner to be a wallet address (if not, it may go to any other subnet auth address)
-//   - signs the tx with the wallet as the owner of fee outputs and a possible subnet auth key
-//   - if partially signed, returns the tx so that it can later on be signed by the rest of the subnet auth keys
-//   - if fully signed, issues it
+// RemoveValidator removes a subnet validator from the given subnet.
+// It verifies that the wallet is one of the subnet auth keys (so as to sign the tx).
+// If operation is multisig (len(subnetAuthKeysStrs) > 1), it creates a remove
+// subnet validator tx and sets the change output owner to be a wallet address.
 func (d *PublicDeployer) RemoveValidator(
 	controlKeys []string,
 	subnetAuthKeysStrs []string,
@@ -291,7 +293,7 @@ func (d *PublicDeployer) RemoveValidator(
 	return false, tx, remainingSubnetAuthKeys, nil
 }
 
-// - creates a subnet for [chain] using the given [controlKeys] and [threshold] as subnet authentication parameters
+// DeploySubnet creates a subnet using the given control keys and threshold.
 func (d *PublicDeployer) DeploySubnet(
 	controlKeys []string,
 	threshold uint32,
@@ -312,12 +314,9 @@ func (d *PublicDeployer) DeploySubnet(
 	return subnetID, nil
 }
 
-// creates a blockchain for the given [subnetID]
-//   - creates a create blockchain tx
-//   - sets the change output owner to be a wallet address (if not, it may go to any other subnet auth address)
-//   - signs the tx with the wallet as the owner of fee outputs and a possible subnet auth key
-//   - if partially signed, returns the tx so that it can later on be signed by the rest of the subnet auth keys
-//   - if fully signed, issues it
+// DeployBlockchain creates a blockchain for the given subnet.
+// It creates a create blockchain tx and sets the change output owner
+// to be a wallet address (if not, it may go to any other subnet auth address).
 func (d *PublicDeployer) DeployBlockchain(
 	controlKeys []string,
 	subnetAuthKeysStrs []string,
@@ -368,6 +367,7 @@ func (d *PublicDeployer) DeployBlockchain(
 	return isFullySigned, id, tx, remainingSubnetAuthKeys, nil
 }
 
+// Commit issues a fully signed transaction to the network.
 func (d *PublicDeployer) Commit(
 	tx *txs.Tx,
 ) (ids.ID, error) {
@@ -382,6 +382,7 @@ func (d *PublicDeployer) Commit(
 	return tx.ID(), nil
 }
 
+// Sign signs a transaction with the wallet's keys.
 func (d *PublicDeployer) Sign(
 	tx *txs.Tx,
 	subnetAuthKeysStrs []string,
@@ -598,11 +599,11 @@ func (d *PublicDeployer) ConvertL1(
 	// Convert []interface{} to []*txs.ConvertChainToL1Validator
 	convertValidators := make([]*txs.ConvertChainToL1Validator, 0, len(validators))
 	for _, v := range validators {
-		if validator, ok := v.(*txs.ConvertChainToL1Validator); ok {
-			convertValidators = append(convertValidators, validator)
-		} else {
+		validator, ok := v.(*txs.ConvertChainToL1Validator)
+		if !ok {
 			return false, ids.Empty, nil, nil, fmt.Errorf("invalid validator type: expected *txs.ConvertChainToL1Validator, got %T", v)
 		}
+		convertValidators = append(convertValidators, validator)
 	}
 
 	// Build ConvertChainToL1Tx using the wallet builder
@@ -697,6 +698,7 @@ func (d *PublicDeployer) checkWalletHasSubnetAuthAddresses(subnetAuth []ids.Shor
 	return len(addrs) != 0
 }
 
+// IsSubnetValidator checks if a node is a validator for the given subnet.
 func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Network) (bool, error) {
 	var apiURL string
 	switch network {
@@ -719,6 +721,7 @@ func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Networ
 	return len(vals) != 0, nil
 }
 
+// GetPublicSubnetValidators returns the validators for a subnet on a public network.
 func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platformvm.ClientPermissionlessValidator, error) {
 	var apiURL string
 	switch network {
@@ -750,9 +753,9 @@ func ValidateSubnetNameAndGetChains(subnetName string) error {
 	return nil
 }
 
-// IncreaseValidatorPChainBalance increases a validator's balance on P-chain
+// IncreaseValidatorPChainBalance increases a validator's balance on P-chain.
 func (d *PublicDeployer) IncreaseValidatorPChainBalance(
-	validationID ids.ID,
+	_ ids.ID, // validationID reserved for future use
 	balance uint64,
 ) error {
 	wallet, err := d.loadWallet()
@@ -790,11 +793,11 @@ func (d *PublicDeployer) IncreaseValidatorPChainBalance(
 	return nil
 }
 
-// RegisterL1Validator registers a validator on the P-Chain for an L1 subnet
+// RegisterL1Validator registers a validator on the P-Chain for an L1 subnet.
 func (d *PublicDeployer) RegisterL1Validator(
 	balance uint64,
-	blsInfo signer.ProofOfPossession,
-	message []byte,
+	_ signer.ProofOfPossession, // blsInfo reserved for future use
+	_ []byte, // message reserved for future use
 ) (ids.ID, ids.ID, error) {
 	wallet, err := d.loadWallet()
 	if err != nil {
@@ -840,8 +843,8 @@ func (d *PublicDeployer) RegisterL1Validator(
 	return tx.ID(), validationID, nil
 }
 
-// GetDefaultSubnetAirdropKeyInfo returns the default airdrop key information for a subnet
-func GetDefaultSubnetAirdropKeyInfo(app *application.Lux, blockchainName string) (string, string, string, error) {
+// GetDefaultSubnetAirdropKeyInfo returns the default airdrop key information for a subnet.
+func GetDefaultSubnetAirdropKeyInfo(_ *application.Lux, _ string) (string, string, string, error) {
 	// Return empty values for now - this would typically read from sidecar
 	return "", "", "", nil
 }

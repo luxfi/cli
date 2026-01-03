@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import (
@@ -11,9 +13,12 @@ import (
 	constants "github.com/luxfi/const"
 )
 
+// Network represents a blockchain network type.
 type Network int64
 
+// Network type constants.
 const (
+	// Undefined represents an undefined network.
 	Undefined Network = iota
 	Mainnet
 	Testnet
@@ -21,7 +26,7 @@ const (
 	Devnet
 )
 
-// Aliases for compatibility
+// UndefinedNetwork is an alias for Undefined for compatibility.
 const UndefinedNetwork = Undefined
 
 func (s Network) String() string {
@@ -38,6 +43,7 @@ func (s Network) String() string {
 	return "Unknown Network"
 }
 
+// NetworkID returns the numeric network ID for the network.
 func (s Network) NetworkID() (uint32, error) {
 	switch s {
 	case Mainnet:
@@ -50,6 +56,7 @@ func (s Network) NetworkID() (uint32, error) {
 	return 0, fmt.Errorf("unsupported network")
 }
 
+// NetworkIDFlagValue returns the network ID as a string for CLI flags.
 func (s Network) NetworkIDFlagValue() string {
 	id, err := s.NetworkID()
 	if err != nil {
@@ -58,11 +65,13 @@ func (s Network) NetworkIDFlagValue() string {
 	return fmt.Sprintf("%d", id)
 }
 
+// ID returns the numeric network ID, ignoring errors.
 func (s Network) ID() uint32 {
 	id, _ := s.NetworkID()
 	return id
 }
 
+// Kind returns the network type.
 func (s Network) Kind() Network {
 	return s
 }
@@ -72,10 +81,12 @@ func (s Network) Name() string {
 	return s.String()
 }
 
+// HandlePublicNetworkSimulation returns true if the network simulates a public network.
 func (s Network) HandlePublicNetworkSimulation() bool {
 	return s == Local
 }
 
+// NetworkFromString returns a Network from its string representation.
 func NetworkFromString(s string) Network {
 	switch s {
 	case Mainnet.String():
@@ -88,6 +99,7 @@ func NetworkFromString(s string) Network {
 	return Undefined
 }
 
+// NetworkFromNetworkID returns a Network from its numeric ID.
 func NetworkFromNetworkID(networkID uint32) Network {
 	switch networkID {
 	case constants.MainnetID:
@@ -121,7 +133,7 @@ func NewDevnetNetwork() Network {
 }
 
 // BootstrappingContext returns a context for bootstrapping operations
-func (s Network) BootstrappingContext() (context.Context, func()) {
+func (Network) BootstrappingContext() (context.Context, func()) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	return ctx, cancel
 }

@@ -98,12 +98,12 @@ func NewKChainBackend() *KChainBackend {
 }
 
 // Type returns the backend type identifier.
-func (b *KChainBackend) Type() BackendType {
+func (*KChainBackend) Type() BackendType {
 	return BackendKChain
 }
 
 // Name returns a human-readable name.
-func (b *KChainBackend) Name() string {
+func (*KChainBackend) Name() string {
 	return "K-Chain Distributed Secrets"
 }
 
@@ -115,17 +115,17 @@ func (b *KChainBackend) Available() bool {
 }
 
 // RequiresPassword returns false; keys are protected by threshold distribution.
-func (b *KChainBackend) RequiresPassword() bool {
+func (*KChainBackend) RequiresPassword() bool {
 	return false
 }
 
 // RequiresHardware returns false; uses network validators.
-func (b *KChainBackend) RequiresHardware() bool {
+func (*KChainBackend) RequiresHardware() bool {
 	return false
 }
 
 // SupportsRemoteSigning returns true; signing happens on validators.
-func (b *KChainBackend) SupportsRemoteSigning() bool {
+func (*KChainBackend) SupportsRemoteSigning() bool {
 	return true
 }
 
@@ -462,17 +462,17 @@ func (b *KChainBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 }
 
 // Lock is a no-op for distributed keys (always protected by threshold).
-func (b *KChainBackend) Lock(ctx context.Context, name string) error {
+func (*KChainBackend) Lock(_ context.Context, _ string) error {
 	return nil
 }
 
 // Unlock is a no-op for distributed keys.
-func (b *KChainBackend) Unlock(ctx context.Context, name, password string) error {
+func (*KChainBackend) Unlock(_ context.Context, _, _ string) error {
 	return nil
 }
 
 // IsLocked returns false; distributed keys are not locked in traditional sense.
-func (b *KChainBackend) IsLocked(name string) bool {
+func (*KChainBackend) IsLocked(_ string) bool {
 	return false
 }
 
@@ -545,7 +545,7 @@ func (b *KChainBackend) Sign(ctx context.Context, name string, request SignReque
 
 // splitSecret splits a secret using Shamir Secret Sharing.
 // Uses GF(2^256) arithmetic for splitting arbitrary byte data.
-func (b *KChainBackend) splitSecret(secret []byte, k, n int) ([][]byte, error) {
+func (*KChainBackend) splitSecret(secret []byte, k, n int) ([][]byte, error) {
 	if k < 1 || k > n || n > 255 {
 		return nil, ErrInvalidShareConfig
 	}
@@ -591,7 +591,7 @@ func (b *KChainBackend) splitSecret(secret []byte, k, n int) ([][]byte, error) {
 }
 
 // reconstructSecret reconstructs secret using Lagrange interpolation.
-func (b *KChainBackend) reconstructSecret(shares [][]byte, indices []int) ([]byte, error) {
+func (*KChainBackend) reconstructSecret(shares [][]byte, indices []int) ([]byte, error) {
 	prime := new(big.Int)
 	prime.SetString("115792089237316195423570985008687907853269984665640564039457584007913129639747", 10)
 
@@ -660,7 +660,7 @@ func evaluatePoly(coeffs []*big.Int, x, prime *big.Int) *big.Int {
 }
 
 // encryptShare encrypts a share using ML-KEM hybrid encryption.
-func (b *KChainBackend) encryptShare(shareData []byte, index int, pubKey *mlkem.PublicKey, validatorID string) (*EncryptedShare, error) {
+func (*KChainBackend) encryptShare(shareData []byte, index int, pubKey *mlkem.PublicKey, validatorID string) (*EncryptedShare, error) {
 	// ML-KEM encapsulation
 	ciphertext, sharedSecret, err := pubKey.Encapsulate()
 	if err != nil {
@@ -731,7 +731,7 @@ func (b *KChainBackend) decryptShare(encShare *EncryptedShare) ([]byte, error) {
 }
 
 // getValidatorPublicKey retrieves or generates ML-KEM public key for a validator.
-func (b *KChainBackend) getValidatorPublicKey(ctx context.Context, addr string) (*mlkem.PublicKey, error) {
+func (b *KChainBackend) getValidatorPublicKey(_ context.Context, addr string) (*mlkem.PublicKey, error) {
 	// In production, this would fetch the validator's public key from the network.
 	// For now, generate deterministically for testing.
 	b.mu.Lock()
@@ -853,7 +853,7 @@ func (b *KChainBackend) requestSignatureShare(ctx context.Context, addr, keyName
 }
 
 // getDefaultValidators returns default validator addresses.
-func (b *KChainBackend) getDefaultValidators() []string {
+func (*KChainBackend) getDefaultValidators() []string {
 	return []string{
 		"validator-1.kchain.lux.network:9630",
 		"validator-2.kchain.lux.network:9631",

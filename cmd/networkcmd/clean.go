@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -97,7 +98,7 @@ func clean(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("%s", luxlog.Red.Wrap("No network is running."))
 	}
 
-	if err := relayer.RelayerCleanup(
+	if err := relayer.Cleanup(
 		app.GetLocalRelayerRunPath(models.Local),
 		app.GetLocalRelayerLogPath(models.Local),
 		app.GetLocalRelayerStorageDir(models.Local),
@@ -107,7 +108,7 @@ func clean(*cobra.Command, []string) error {
 
 	// Clean up signature aggregator
 	network := models.NewLocalNetwork()
-	if err := signatureaggregator.SignatureAggregatorCleanup(
+	if err := signatureaggregator.Cleanup(
 		app.GetLocalRelayerRunPath(network),
 		app.GetLocalRelayerStorageDir(network),
 	); err != nil {

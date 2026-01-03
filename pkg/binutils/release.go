@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package binutils
 
 import (
@@ -55,6 +56,7 @@ func installBinaryWithVersion(
 	return binDir, nil
 }
 
+// InstallBinary downloads and installs a binary from GitHub releases.
 func InstallBinary(
 	app *application.Lux,
 	version string,

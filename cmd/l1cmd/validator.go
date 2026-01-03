@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -22,7 +23,7 @@ Validators can participate in multiple protocols:
 - Other blockchain protocols
 
 This allows a single node to validate across multiple blockchain ecosystems.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			err := cmd.Help()
 			if err != nil {
 				fmt.Println(err)
@@ -60,7 +61,7 @@ The validator can be added to:
 - L2/L3 built on top of an L1
 - Cross-protocol validation (e.g., also validate OP Stack)`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			l1Name := args[0]
 
 			ux.Logger.PrintToUser("Adding validator to L1: %s", l1Name)
@@ -100,7 +101,7 @@ func newValidatorProtocolsCmd() *cobra.Command {
 		Use:   "protocols",
 		Short: "List supported validator protocols",
 		Long:  `List all protocols that validators can participate in.`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ux.Logger.PrintToUser("Supported Validator Protocols:")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("🔷 Lux Protocol")
@@ -135,7 +136,7 @@ func newValidatorRemoveCmd() *cobra.Command {
 		Use:   "remove [l1Name]",
 		Short: "Remove a validator from an L1",
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			l1Name := args[0]
 			ux.Logger.PrintToUser("Removing validator from L1: %s", l1Name)
 			// Implementation
@@ -150,7 +151,7 @@ func newValidatorListCmd() *cobra.Command {
 		Use:   "list [l1Name]",
 		Short: "List validators for an L1",
 		Args:  cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				// List all L1s and their validators
 				ux.Logger.PrintToUser("All L1 Validators:")

@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package packageman contains package manager E2E tests.
 package packageman
 
 import (

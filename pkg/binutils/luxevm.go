@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/constants"
 )
 
+// SetupEVM downloads and installs the EVM binary.
 func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
 	// Setup EVM for L1 or L2 chains
 	binDir := filepath.Join(app.GetBaseDir(), constants.EVMInstallDir)

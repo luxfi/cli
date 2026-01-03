@@ -63,7 +63,7 @@ func Test_installLuxWithVersion_Zip(t *testing.T) {
 	require.NoError(err)
 
 	// Check the installed binary
-	installedBin, err := os.ReadFile(filepath.Join(binDir, nodeBin))
+	installedBin, err := os.ReadFile(filepath.Join(binDir, nodeBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary1, installedBin)
 }
@@ -91,7 +91,7 @@ func Test_installLuxWithVersion_Tar(t *testing.T) {
 	require.NoError(err)
 
 	// Check the installed binary
-	installedBin, err := os.ReadFile(filepath.Join(binDir, nodeBin))
+	installedBin, err := os.ReadFile(filepath.Join(binDir, nodeBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary1, installedBin)
 }
@@ -133,11 +133,11 @@ func Test_installLuxWithVersion_MultipleCoinstalls(t *testing.T) {
 	require.NotEqual(binDir1, binDir2)
 
 	// Check the installed binary
-	installedBin1, err := os.ReadFile(filepath.Join(binDir1, nodeBin))
+	installedBin1, err := os.ReadFile(filepath.Join(binDir1, nodeBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary1, installedBin1)
 
-	installedBin2, err := os.ReadFile(filepath.Join(binDir2, nodeBin))
+	installedBin2, err := os.ReadFile(filepath.Join(binDir2, nodeBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary2, installedBin2)
 }
@@ -166,7 +166,7 @@ func Test_installEVMWithVersion(t *testing.T) {
 	require.NoError(err)
 
 	// Check the installed binary
-	installedBin, err := os.ReadFile(filepath.Join(binDir, constants.EVMBin))
+	installedBin, err := os.ReadFile(filepath.Join(binDir, constants.EVMBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary1, installedBin)
 }
@@ -209,11 +209,11 @@ func Test_installEVMWithVersion_MultipleCoinstalls(t *testing.T) {
 	require.NotEqual(binDir1, binDir2)
 
 	// Check the installed binary
-	installedBin1, err := os.ReadFile(filepath.Join(binDir1, constants.EVMBin))
+	installedBin1, err := os.ReadFile(filepath.Join(binDir1, constants.EVMBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary1, installedBin1)
 
-	installedBin2, err := os.ReadFile(filepath.Join(binDir2, constants.EVMBin))
+	installedBin2, err := os.ReadFile(filepath.Join(binDir2, constants.EVMBin)) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 	require.Equal(binary2, installedBin2)
 }

@@ -25,7 +25,7 @@ type Credential struct {
 	Password string `yaml:"password"`
 }
 
-// Note, you can only call this method once per run
+// SetupLpm initializes the LPM client. Note: can only be called once per run.
 func SetupLpm(app *application.Lux, lpmBaseDir string) error {
 	// Note: credentials not used in LPM currently, but keeping for future auth
 	_, err := initCredentials()

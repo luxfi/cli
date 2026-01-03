@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -19,7 +20,7 @@ func newUpgradeCmd() *cobra.Command {
 - Validator management (PoA to PoS migration)
 - Protocol support (add Lux compatibility, OP Stack, etc.)
 - Network parameters`,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			err := cmd.Help()
 			if err != nil {
 				fmt.Println(err)
@@ -51,7 +52,7 @@ NON-INTERACTIVE MODE:
 EXAMPLES:
   lux l1 upgrade vm mychain --version v1.2.3`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			l1Name := args[0]
 
 			sc, err := app.LoadSidecar(l1Name)
@@ -116,7 +117,7 @@ NON-INTERACTIVE MODE:
 EXAMPLES:
   lux l1 upgrade validator-management mychain --to-pos --min-stake 1000 --reward-rate 5.0 --delegation`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			l1Name := args[0]
 
 			sc, err := app.LoadSidecar(l1Name)
@@ -227,7 +228,7 @@ EXAMPLES:
   lux l1 upgrade protocol mychain --protocol lux
   lux l1 upgrade protocol mychain --protocol opstack`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			l1Name := args[0]
 
 			protocols := []string{

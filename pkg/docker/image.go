@@ -22,8 +22,8 @@ func PullDockerImage(host *models.Host, image string) error {
 	return err
 }
 
-// DockerLocalImageExists checks if a docker image exists on a remote host.
-func DockerLocalImageExists(host *models.Host, image string) (bool, error) {
+// LocalImageExists checks if a docker image exists on a remote host.
+func LocalImageExists(host *models.Host, image string) (bool, error) {
 	output, err := host.Command("docker images --format '{{.Repository}}:{{.Tag}}'", nil, constants.SSHLongRunningScriptTimeout)
 	if err != nil {
 		return false, err
@@ -97,20 +97,21 @@ func BuildDockerImageFromGitRepo(host *models.Host, image string, gitRepo string
 	return nil
 }
 
+// PrepareDockerImageWithRepo ensures a docker image is available on the host,
+// pulling or building from the git repo if necessary.
 func PrepareDockerImageWithRepo(host *models.Host, image string, gitRepo string, commit string) error {
-	localImageExists, _ := DockerLocalImageExists(host, image)
+	localImageExists, _ := LocalImageExists(host, image)
 	if localImageExists {
 		ux.Logger.Info("Docker image %s is FOUND on %s", image, host.NodeID)
 		return nil
-	} else {
-		ux.Logger.Info("Docker image %s not found on %s, pulling it", image, host.NodeID)
-		if err := PullDockerImage(host, image); err != nil {
-			ux.Logger.Info("Docker image %s not found on %s, building it from %s using %s commit/branch/tag", image, host.NodeID, gitRepo, commit)
-			if err := BuildDockerImageFromGitRepo(host, image, gitRepo, commit); err != nil {
-				return err
-			}
-			return nil
+	}
+	ux.Logger.Info("Docker image %s not found on %s, pulling it", image, host.NodeID)
+	if err := PullDockerImage(host, image); err != nil {
+		ux.Logger.Info("Docker image %s not found on %s, building it from %s using %s commit/branch/tag", image, host.NodeID, gitRepo, commit)
+		if err := BuildDockerImageFromGitRepo(host, image, gitRepo, commit); err != nil {
+			return err
 		}
+		return nil
 	}
 	ux.Logger.Info("Docker image %s is READY on %s", image, host.NodeID)
 	return nil

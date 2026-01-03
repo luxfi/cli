@@ -1,9 +1,9 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package warp
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -35,7 +35,7 @@ func BuildContracts(
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running forge build tool
 		forgePath,
 		"build",
 		"--extra-output-files",
@@ -68,7 +68,7 @@ func DownloadRepo(
 		return err
 	}
 	if !alreadyCloned {
-		cmd := exec.Command(
+		cmd := exec.Command( //nolint:gosec // G204: Running git clone with known arguments
 			"git",
 			"clone",
 			"-b",
@@ -85,7 +85,7 @@ func DownloadRepo(
 			return fmt.Errorf("could not clone repository %s: %w", constants.WarpURL, err)
 		}
 	} else {
-		cmd := exec.Command("git", "checkout", constants.WarpBranch)
+		cmd := exec.Command("git", "checkout", constants.WarpBranch) //nolint:gosec // G204: Running git checkout with known branch
 		cmd.Dir = repoDir
 		stdout, stderr := utils.SetupRealtimeCLIOutput(cmd, false, false)
 		if err := cmd.Run(); err != nil {

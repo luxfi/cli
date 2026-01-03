@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package vm
 
 import (
@@ -39,7 +40,7 @@ func loadCustomGenesis(app *application.Lux, genesisPath string) ([]byte, error)
 		}
 	}
 
-	genesisBytes, err := os.ReadFile(genesisPath)
+	genesisBytes, err := os.ReadFile(genesisPath) //nolint:gosec // G304: User-specified genesis file
 	return genesisBytes, err
 }
 

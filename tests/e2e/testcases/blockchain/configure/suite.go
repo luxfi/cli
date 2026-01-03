@@ -45,7 +45,7 @@ func AssertBlockchainConfigIsSet(
 ) {
 	for nodeID, nodeInfo := range nodesInfo {
 		logFile := path.Join(nodeInfo.LogDir, blockchainID+".log")
-		fileBytes, err := os.ReadFile(logFile)
+		fileBytes, err := os.ReadFile(logFile) //nolint:gosec // G304: Test code reading from test directories
 		gomega.Expect(err).Should(gomega.BeNil())
 		if nodesRPCTxFeeCap != nil {
 			var ok bool
@@ -70,7 +70,7 @@ func AssertSubnetConfigIsSet(
 ) {
 	for _, nodeInfo := range nodesInfo {
 		logFile := path.Join(nodeInfo.LogDir, "main.log")
-		fileBytes, err := os.ReadFile(logFile)
+		fileBytes, err := os.ReadFile(logFile) //nolint:gosec // G304: Test code reading from test directories
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(fileBytes).Should(gomega.ContainSubstring(subnetConfigLog(expectedNodeID)))
 		for _, unexpectedNodeID := range []string{node1ID, node2ID} {
@@ -90,7 +90,7 @@ func AssertNodeConfigIsSet(
 ) {
 	for _, nodeInfo := range nodesInfo {
 		logFile := path.Join(nodeInfo.LogDir, "main.log")
-		fileBytes, err := os.ReadFile(logFile)
+		fileBytes, err := os.ReadFile(logFile) //nolint:gosec // G304: Test code reading from test directories
 		gomega.Expect(err).Should(gomega.BeNil())
 		if expectedACPSupport != -1 {
 			gomega.Expect(fileBytes).Should(gomega.ContainSubstring(fmt.Sprintf("\"acp-support\":%d", expectedACPSupport)))

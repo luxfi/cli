@@ -172,7 +172,7 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 
 	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
 
-	jsonBytes, err := os.ReadFile(sidecar)
+	jsonBytes, err := os.ReadFile(sidecar) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func SubnetCustomVMExists(subnetName string) (bool, error) {
 
 func SubnetLPMVMExists(subnetName string) (bool, error) {
 	sidecarPath := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
-	jsonBytes, err := os.ReadFile(sidecarPath)
+	jsonBytes, err := os.ReadFile(sidecarPath) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return false, err
 	}
@@ -457,12 +457,12 @@ func PrintStdErr(err error) {
 }
 
 func CheckKeyEquality(keyPath1, keyPath2 string) (bool, error) {
-	key1, err := os.ReadFile(keyPath1)
+	key1, err := os.ReadFile(keyPath1) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return false, err
 	}
 
-	key2, err := os.ReadFile(keyPath2)
+	key2, err := os.ReadFile(keyPath2) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return false, err
 	}
@@ -631,7 +631,7 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 }
 
 func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
-	fileBytes, err := os.ReadFile(configFile)
+	fileBytes, err := os.ReadFile(configFile) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
 	}
@@ -689,7 +689,7 @@ func WaitSubnetValidators(subnetIDStr string, nodeInfos map[string]NodeInfo) err
 }
 
 func GetFileHash(filename string) (string, error) {
-	f, err := os.Open(filename)
+	f, err := os.Open(filename) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return "", err
 	}
@@ -822,7 +822,7 @@ func GetSideCar(subnetName string) (models.Sidecar, error) {
 
 	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
 
-	jsonBytes, err := os.ReadFile(sidecar)
+	jsonBytes, err := os.ReadFile(sidecar) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return models.Sidecar{}, err
 	}

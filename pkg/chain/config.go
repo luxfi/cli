@@ -78,7 +78,7 @@ func (c *Config) LoadGlobal() error {
 		return nil // No global config, use defaults
 	}
 
-	data, err := os.ReadFile(configPath)
+	data, err := os.ReadFile(configPath) //nolint:gosec // G304: Reading from app's chain config directory
 	if err != nil {
 		return fmt.Errorf("failed to read global config: %w", err)
 	}
@@ -143,7 +143,7 @@ func (c *Config) EffectiveJSON() (string, error) {
 // SaveGlobal saves the effective config as the global config
 func (c *Config) SaveGlobal() error {
 	configDir := filepath.Dir(c.globalConfigPath())
-	if err := os.MkdirAll(configDir, 0o755); err != nil {
+	if err := os.MkdirAll(configDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
@@ -152,13 +152,13 @@ func (c *Config) SaveGlobal() error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	return os.WriteFile(c.globalConfigPath(), data, 0o644)
+	return os.WriteFile(c.globalConfigPath(), data, 0o644) //nolint:gosec // G306: Config needs to be readable
 }
 
 // Render writes the config to the specified run directory's chainConfigs
 func (c *Config) Render(runDir string) error {
 	chainConfigDir := filepath.Join(runDir, "chainConfigs", c.chainID)
-	if err := os.MkdirAll(chainConfigDir, 0o755); err != nil {
+	if err := os.MkdirAll(chainConfigDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create chain config dir: %w", err)
 	}
 
@@ -168,7 +168,7 @@ func (c *Config) Render(runDir string) error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	return os.WriteFile(configPath, data, 0o644)
+	return os.WriteFile(configPath, data, 0o644) //nolint:gosec // G306: Config needs to be readable
 }
 
 // globalConfigPath returns the path to the global config file

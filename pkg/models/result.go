@@ -1,19 +1,25 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import "sync"
 
+// NodeResult contains the result of an operation on a single node.
 type NodeResult struct {
 	NodeID string
 	Value  interface{}
 	Err    error
 }
+
+// NodeResults contains results from operations on multiple nodes.
 type NodeResults struct {
 	Results []NodeResult
 	Lock    sync.Mutex
 }
 
+// AddResult adds a result for a node to the results collection.
 func (nr *NodeResults) AddResult(nodeID string, value interface{}, err error) {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
@@ -24,12 +30,14 @@ func (nr *NodeResults) AddResult(nodeID string, value interface{}, err error) {
 	})
 }
 
+// GetResults returns all node results.
 func (nr *NodeResults) GetResults() []NodeResult {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
 	return nr.Results
 }
 
+// GetResultMap returns results as a map from node ID to value.
 func (nr *NodeResults) GetResultMap() map[string]interface{} {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
@@ -40,12 +48,14 @@ func (nr *NodeResults) GetResultMap() map[string]interface{} {
 	return result
 }
 
+// Len returns the number of results.
 func (nr *NodeResults) Len() int {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
 	return len(nr.Results)
 }
 
+// GetNodeList returns a list of all node IDs.
 func (nr *NodeResults) GetNodeList() []string {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
@@ -56,6 +66,7 @@ func (nr *NodeResults) GetNodeList() []string {
 	return nodes
 }
 
+// GetErrorHostMap returns a map from node ID to error for nodes with errors.
 func (nr *NodeResults) GetErrorHostMap() map[string]error {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
@@ -68,6 +79,7 @@ func (nr *NodeResults) GetErrorHostMap() map[string]error {
 	return hostErrors
 }
 
+// HasIDWithError returns true if the given node ID has an error.
 func (nr *NodeResults) HasIDWithError(id string) bool {
 	nr.Lock.Lock()
 	defer nr.Lock.Unlock()
@@ -79,10 +91,12 @@ func (nr *NodeResults) HasIDWithError(id string) bool {
 	return false
 }
 
+// HasErrors returns true if any node has an error.
 func (nr *NodeResults) HasErrors() bool {
 	return len(nr.GetErrorHostMap()) > 0
 }
 
+// GetErrorHosts returns the list of node IDs with errors.
 func (nr *NodeResults) GetErrorHosts() []string {
 	var nodes []string
 	for _, node := range nr.Results {

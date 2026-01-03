@@ -1,6 +1,7 @@
 // Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package rpccmd provides RPC commands for interacting with Lux nodes.
 package rpccmd
 
 import (
@@ -52,7 +53,7 @@ func newCallCmd() *cobra.Command {
 		Use:   "call",
 		Short: "Make a JSON-RPC call",
 		Long:  "Make a JSON-RPC call to the specified endpoint with the given method and parameters",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			// Parse params if provided
 			var paramsObj interface{}
 			if params != "" {
