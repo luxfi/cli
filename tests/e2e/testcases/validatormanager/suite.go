@@ -46,7 +46,7 @@ func createEtnaEVMConfig() error {
 	}
 
 	// Create config
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
 		"create",
@@ -76,7 +76,7 @@ func createSovereignSubnet() (string, string, error) {
 		return "", "", err
 	}
 	// Deploy subnet on etna local network with local machine as bootstrap validator
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
 		"deploy",
@@ -111,7 +111,7 @@ func destroyLocalNode() {
 	if os.IsNotExist(err) {
 		return
 	}
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"node",
 		"local",

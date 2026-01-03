@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 )
 
-// RelayerCleanup cleans up relayer state files
-func RelayerCleanup(runPath, logPath, storageDir string) error {
+// Cleanup cleans up relayer state files.
+func Cleanup(runPath, logPath, storageDir string) error {
 	// Clean up run path
 	if runPath != "" {
 		pidFile := filepath.Join(runPath, "relayer.pid")

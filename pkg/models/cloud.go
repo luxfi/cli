@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import (
@@ -7,6 +9,7 @@ import (
 	"slices"
 )
 
+// RegionConfig contains cloud infrastructure configuration for a specific region.
 type RegionConfig struct {
 	InstanceIDs       []string
 	APIInstanceIDs    []string
@@ -22,6 +25,7 @@ type RegionConfig struct {
 	InstanceType      string
 }
 
+// CloudConfig maps region names to their configurations.
 type CloudConfig map[string]RegionConfig
 
 // GetRegions returns a slice of strings representing the regions of the RegionConfig.

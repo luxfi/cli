@@ -21,7 +21,7 @@ const (
 // There is no default option - users must always provide their own addresses.
 func getAllocation(
 	app *application.Lux,
-	defaultAirdropAmount string,
+	_ string,
 	multiplier *big.Int,
 	captureAmountLabel string,
 ) (types.GenesisAlloc, statemachine.StateDirection, error) {

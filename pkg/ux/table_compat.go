@@ -12,9 +12,9 @@ import (
 
 // Alignment constants for backward compatibility
 var (
-	ALIGN_LEFT   = tw.AlignLeft
-	ALIGN_CENTER = tw.AlignCenter
-	ALIGN_RIGHT  = tw.AlignRight
+	AlignLeft   = tw.AlignLeft
+	AlignCenter = tw.AlignCenter
+	AlignRight  = tw.AlignRight
 )
 
 // TableCompatWrapper provides backward compatibility for tablewriter v0.0.5 API
@@ -45,13 +45,13 @@ func (t *TableCompatWrapper) SetHeader(headers []string) {
 }
 
 // SetRowLine is a no-op in v1.0.9 (row lines controlled via renderer settings)
-func (t *TableCompatWrapper) SetRowLine(enable bool) {
+func (*TableCompatWrapper) SetRowLine(_ bool) {
 	// Row lines are now controlled via renderer configuration
 	// This is a no-op for compatibility
 }
 
 // SetAutoMergeCells is a no-op in v1.0.9 (merge mode controlled via config)
-func (t *TableCompatWrapper) SetAutoMergeCells(enable bool) {
+func (*TableCompatWrapper) SetAutoMergeCells(_ bool) {
 	// Cell merging is now controlled via config.Row.Formatting.MergeMode
 	// This is a no-op for compatibility
 }

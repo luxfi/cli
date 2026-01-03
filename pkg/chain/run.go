@@ -61,7 +61,7 @@ func (r *RunManager) EnsureRunDir(fresh, newRun bool) (string, error) {
 	currentLink := r.CurrentLink()
 
 	// Create base profile directory if needed
-	if err := os.MkdirAll(base, 0o755); err != nil {
+	if err := os.MkdirAll(base, 0o750); err != nil {
 		return "", fmt.Errorf("failed to create profile directory: %w", err)
 	}
 
@@ -76,7 +76,7 @@ func (r *RunManager) EnsureRunDir(fresh, newRun bool) (string, error) {
 			if fresh {
 				// Wipe and recreate
 				_ = os.RemoveAll(absPath)
-				if err := os.MkdirAll(absPath, 0o755); err != nil {
+				if err := os.MkdirAll(absPath, 0o750); err != nil {
 					return "", fmt.Errorf("failed to recreate run directory: %w", err)
 				}
 			}
@@ -87,7 +87,7 @@ func (r *RunManager) EnsureRunDir(fresh, newRun bool) (string, error) {
 	// Create a new timestamped run directory and update current symlink
 	runName := fmt.Sprintf("run_%s", time.Now().Format("20060102_150405"))
 	runDir := filepath.Join(base, runName)
-	if err := os.MkdirAll(runDir, 0o755); err != nil {
+	if err := os.MkdirAll(runDir, 0o750); err != nil {
 		return "", fmt.Errorf("failed to create run directory: %w", err)
 	}
 
@@ -201,7 +201,7 @@ func EnsureNetworkRunDir(baseRunsDir, network string) (string, error) {
 	currentLink := filepath.Join(base, "current")
 
 	// Create base directory
-	if err := os.MkdirAll(base, 0o755); err != nil {
+	if err := os.MkdirAll(base, 0o750); err != nil {
 		return "", fmt.Errorf("failed to create network run directory: %w", err)
 	}
 
@@ -217,7 +217,7 @@ func EnsureNetworkRunDir(baseRunsDir, network string) (string, error) {
 	// Create a new timestamped run directory and update current symlink
 	runName := fmt.Sprintf("run_%s", time.Now().Format("20060102_150405"))
 	runDir := filepath.Join(base, runName)
-	if err := os.MkdirAll(runDir, 0o755); err != nil {
+	if err := os.MkdirAll(runDir, 0o750); err != nil {
 		return "", fmt.Errorf("failed to create run directory: %w", err)
 	}
 

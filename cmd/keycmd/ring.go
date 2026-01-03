@@ -101,7 +101,7 @@ func runRingSign(_ *cobra.Command, args []string) error {
 	switch {
 	case ringInputFile != "":
 		var err error
-		message, err = os.ReadFile(ringInputFile)
+		message, err = os.ReadFile(ringInputFile) //nolint:gosec // G304: User-specified message file
 		if err != nil {
 			return fmt.Errorf("failed to read message file: %w", err)
 		}
@@ -169,7 +169,7 @@ func runRingSign(_ *cobra.Command, args []string) error {
 	keyImageHex := hex.EncodeToString(sig.KeyImage())
 
 	if ringOutputFile != "" {
-		if err := os.WriteFile(ringOutputFile, []byte(sigHex), 0o644); err != nil {
+		if err := os.WriteFile(ringOutputFile, []byte(sigHex), 0o644); err != nil { //nolint:gosec // G306: Signature file needs to be readable
 			return fmt.Errorf("failed to write signature file: %w", err)
 		}
 		ux.Logger.PrintToUser("")
@@ -217,7 +217,7 @@ func runRingVerify(cmd *cobra.Command, args []string) error {
 	switch {
 	case ringInputFile != "":
 		var err error
-		message, err = os.ReadFile(ringInputFile)
+		message, err = os.ReadFile(ringInputFile) //nolint:gosec // G304: User-specified message file
 		if err != nil {
 			return fmt.Errorf("failed to read message file: %w", err)
 		}
@@ -236,7 +236,7 @@ func runRingVerify(cmd *cobra.Command, args []string) error {
 	}
 
 	if sigFile != "" {
-		sigBytes, err := os.ReadFile(sigFile)
+		sigBytes, err := os.ReadFile(sigFile) //nolint:gosec // G304: User-specified signature file
 		if err != nil {
 			return fmt.Errorf("failed to read signature file: %w", err)
 		}

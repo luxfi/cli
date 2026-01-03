@@ -22,8 +22,8 @@ require (
 	github.com/luxfi/ledger v1.1.5
 	github.com/luxfi/log v1.2.1
 	github.com/luxfi/lpm v1.7.13
-	github.com/luxfi/netrunner v1.15.3
-	github.com/luxfi/node v1.22.77
+	github.com/luxfi/netrunner v1.15.4
+	github.com/luxfi/node v1.22.80
 	github.com/luxfi/sdk v1.16.38
 	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
@@ -253,6 +253,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-// Use local netrunner for development
-replace github.com/luxfi/netrunner => ../netrunner

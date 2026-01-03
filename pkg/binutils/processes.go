@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package binutils
 
 import (
@@ -46,11 +47,13 @@ func NewProcessChecker() ProcessChecker {
 	return &realProcessRunner{}
 }
 
+// GRPCClientOp holds options for gRPC client operations.
 type GRPCClientOp struct {
 	avoidRPCVersionCheck bool
 	endpoint             string // Custom endpoint, overrides default
 }
 
+// GRPCClientOpOption is a function that modifies GRPCClientOp.
 type GRPCClientOpOption func(*GRPCClientOp)
 
 func (op *GRPCClientOp) applyOpts(opts []GRPCClientOpOption) {
@@ -59,6 +62,7 @@ func (op *GRPCClientOp) applyOpts(opts []GRPCClientOpOption) {
 	}
 }
 
+// WithAvoidRPCVersionCheck sets whether to skip RPC version checking.
 func WithAvoidRPCVersionCheck(avoidRPCVersionCheck bool) GRPCClientOpOption {
 	return func(op *GRPCClientOp) {
 		op.avoidRPCVersionCheck = avoidRPCVersionCheck
@@ -178,7 +182,7 @@ func (*realProcessRunner) IsServerProcessRunning(app *application.Lux) (bool, er
 		return false, err
 	}
 
-	p32 := int32(pid)
+	p32 := int32(pid) //nolint:gosec // G115: PID values are within int32 range
 	// iterate all processes...
 	for _, p := range procs {
 		if p.Pid == p32 {
@@ -196,6 +200,7 @@ type runFile struct {
 	GatewayPort        int    `json:"gatewayPort,omitempty"`
 }
 
+// GetBackendLogFile returns the path to the backend log file.
 func GetBackendLogFile(app *application.Lux) (string, error) {
 	var rf runFile
 	serverRunFilePath := app.GetRunFile()
@@ -210,6 +215,7 @@ func GetBackendLogFile(app *application.Lux) (string, error) {
 	return rf.GRPCserverFileName, nil
 }
 
+// GetServerPID returns the PID of the running server process.
 func GetServerPID(app *application.Lux) (int, error) {
 	var rf runFile
 	serverRunFilePath := app.GetRunFile()
@@ -253,14 +259,14 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 
 	// Create output directory for logs
 	outputDirPrefix := path.Join(app.GetRunDir(), "server", networkType)
-	if err := os.MkdirAll(outputDirPrefix, 0o750); err != nil { //nolint:gosec // G301: Using 0750 for directory
+	if err := os.MkdirAll(outputDirPrefix, 0o750); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	// Create timestamped directory
 	timestamp := fmt.Sprintf("%d", os.Getpid())
 	outputDir := filepath.Join(outputDirPrefix, timestamp)
-	if err := os.MkdirAll(outputDir, 0o750); err != nil { //nolint:gosec // G301: Using 0750 for directory
+	if err := os.MkdirAll(outputDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create timestamped output directory: %w", err)
 	}
 
@@ -278,7 +284,7 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 		"--snapshots-dir", app.GetSnapshotsDir(),
 	}
 
-	cmd := exec.Command(netrunnerPath, args...)
+	cmd := exec.Command(netrunnerPath, args...) //nolint:gosec // G204: Running our netrunner binary
 	cmd.Env = append(os.Environ(), fmt.Sprintf("LUX_NETWORK_TYPE=%s", networkType))
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
@@ -413,7 +419,7 @@ func IsServerProcessRunningForNetwork(app *application.Lux, networkType string) 
 		return false, err
 	}
 
-	p32 := int32(pid)
+	p32 := int32(pid) //nolint:gosec // G115: PID values are within int32 range
 	for _, p := range procs {
 		if p.Pid == p32 {
 			return true, nil
@@ -422,6 +428,7 @@ func IsServerProcessRunningForNetwork(app *application.Lux, networkType string) 
 	return false, nil
 }
 
+// WatchServerProcess monitors the server process for signals or errors.
 func WatchServerProcess(serverCancel context.CancelFunc, errc chan error, logger luxlog.Logger) {
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)

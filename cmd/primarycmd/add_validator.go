@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package primarycmd provides commands for managing primary network validators.
 package primarycmd
 
 import (
@@ -24,17 +26,18 @@ import (
 )
 
 var (
-	globalNetworkFlags           networkoptions.NetworkFlags
-	keyName                      string
-	useLedger                    bool
-	ledgerAddresses              []string
-	nodeIDStr                    string
-	weight                       uint64
-	delegationFee                uint32
-	startTimeStr                 string
-	duration                     time.Duration
-	publicKey                    string
-	pop                          string
+	globalNetworkFlags networkoptions.NetworkFlags
+	keyName            string
+	useLedger          bool
+	ledgerAddresses    []string
+	nodeIDStr          string
+	weight             uint64
+	delegationFee      uint32
+	startTimeStr       string
+	duration           time.Duration
+	publicKey          string
+	pop                string
+	// ErrMutuallyExlusiveKeyLedger indicates --key and --ledger options cannot be used together.
 	ErrMutuallyExlusiveKeyLedger = errors.New("--key and --ledger,--ledger-addrs are mutually exclusive")
 	ErrStoredKeyOnMainnet        = errors.New("--key is not available for mainnet operations")
 )

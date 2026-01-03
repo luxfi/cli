@@ -1,9 +1,9 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package warp
 
 import (
-	_ "embed"
 	"fmt"
 	"math/big"
 	"time"
@@ -38,11 +38,11 @@ func GetEndpointKind(
 	if _, err := NativeTokenRemoteGetTotalNativeAssetSupply(rpcURL, address); err == nil {
 		return NativeTokenRemote, nil
 	}
-	if _, err := ERC20TokenRemoteGetTokenHomeAddress(rpcURL, address); err == nil {
+	_, err := ERC20TokenRemoteGetTokenHomeAddress(rpcURL, address)
+	if err == nil {
 		return ERC20TokenRemote, nil
-	} else {
-		return Undefined, err
 	}
+	return Undefined, err
 }
 
 func ERC20TokenHomeGetTokenAddress(

@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package prompts
 
 import (
@@ -432,17 +433,19 @@ func ValidateRepoFile(filepath string) error {
 }
 
 // validateWeightFunc returns a validator function for weight values
-func validateWeightFunc(min, max uint64) func(string) error {
+//
+//nolint:unparam // minWeight is configurable even if tests only use 1
+func validateWeightFunc(minWeight, maxWeight uint64) func(string) error {
 	return func(input string) error {
 		val, err := strconv.ParseUint(input, 10, 64)
 		if err != nil {
 			return err
 		}
-		if val < min {
-			return fmt.Errorf("weight must be at least %d", min)
+		if val < minWeight {
+			return fmt.Errorf("weight must be at least %d", minWeight)
 		}
-		if val > max {
-			return fmt.Errorf("weight cannot exceed %d", max)
+		if val > maxWeight {
+			return fmt.Errorf("weight cannot exceed %d", maxWeight)
 		}
 		return nil
 	}

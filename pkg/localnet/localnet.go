@@ -168,7 +168,7 @@ func NewStatusChecker() StatusChecker {
 }
 
 // GetCurrentNetworkVersion returns the current network version
-func (sc *statusChecker) GetCurrentNetworkVersion() (string, int, bool, error) {
+func (*statusChecker) GetCurrentNetworkVersion() (string, int, bool, error) {
 	// Return default values for local network
 	return "v1.11.0", 35, false, nil
 }

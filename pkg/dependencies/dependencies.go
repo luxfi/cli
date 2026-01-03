@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package dependencies
 
 import (
@@ -60,7 +61,7 @@ func GetLatestCLISupportedDependencyVersion(app *application.Lux, dependencyName
 		// Try to load from local min-version.json file (in CLI repo or executable directory)
 		localPath := findLocalMinVersionFile()
 		if localPath != "" {
-			dependencyBytes, err = os.ReadFile(localPath)
+			dependencyBytes, err = os.ReadFile(localPath) //nolint:gosec // G304: Reading from app's config directory
 		}
 		if err != nil || localPath == "" {
 			// Fall back to embedded default

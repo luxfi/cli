@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -88,7 +89,7 @@ EXAMPLES:
 	return cmd
 }
 
-func createL1(cmd *cobra.Command, args []string) error {
+func createL1(_ *cobra.Command, args []string) error {
 	l1Name := args[0]
 
 	// Check if L1 already exists
@@ -183,9 +184,9 @@ func createL1(cmd *cobra.Command, args []string) error {
 
 	// Create genesis configuration
 	genesis := vm.CreateEVMGenesis(
-		big.NewInt(int64(chainID)),
-		nil, // allocations will be added later
-		nil, // timestamps
+		big.NewInt(int64(chainID)), //nolint:gosec // G115: Chain ID is within int64 range
+		nil,                        // allocations will be added later
+		nil,                        // timestamps
 	)
 
 	// Add validator manager configuration based on type

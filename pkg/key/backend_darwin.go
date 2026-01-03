@@ -41,29 +41,29 @@ func NewKeychainBackend() *KeychainBackend {
 	}
 }
 
-func (b *KeychainBackend) Type() BackendType {
+func (*KeychainBackend) Type() BackendType {
 	return BackendKeychain
 }
 
-func (b *KeychainBackend) Name() string {
+func (*KeychainBackend) Name() string {
 	return "macOS Keychain (TouchID)"
 }
 
-func (b *KeychainBackend) Available() bool {
+func (*KeychainBackend) Available() bool {
 	// Check if security command is available
 	_, err := exec.LookPath("security")
 	return err == nil
 }
 
-func (b *KeychainBackend) RequiresPassword() bool {
+func (*KeychainBackend) RequiresPassword() bool {
 	return false // Uses biometrics or keychain password
 }
 
-func (b *KeychainBackend) RequiresHardware() bool {
+func (*KeychainBackend) RequiresHardware() bool {
 	return false
 }
 
-func (b *KeychainBackend) SupportsRemoteSigning() bool {
+func (*KeychainBackend) SupportsRemoteSigning() bool {
 	return false
 }
 
@@ -348,7 +348,7 @@ func (b *KeychainBackend) writeToKeychain(name string, data []byte) error {
 	return nil
 }
 
-func (b *KeychainBackend) readFromKeychain(name string) ([]byte, error) {
+func (*KeychainBackend) readFromKeychain(name string) ([]byte, error) {
 	account := fmt.Sprintf("lux-key-%s", name)
 
 	cmd := exec.Command("security", "find-generic-password", //nolint:gosec // G204: Intentional keychain command
@@ -367,7 +367,7 @@ func (b *KeychainBackend) readFromKeychain(name string) ([]byte, error) {
 	return hex.DecodeString(hexData)
 }
 
-func (b *KeychainBackend) deleteFromKeychain(name string) error {
+func (*KeychainBackend) deleteFromKeychain(name string) error {
 	account := fmt.Sprintf("lux-key-%s", name)
 
 	cmd := exec.Command("security", "delete-generic-password", //nolint:gosec // G204: Intentional keychain command
@@ -383,7 +383,7 @@ func (b *KeychainBackend) deleteFromKeychain(name string) error {
 	return nil
 }
 
-func (b *KeychainBackend) loadFromSession(name string, data []byte) (*HDKeySet, error) {
+func (*KeychainBackend) loadFromSession(_ string, data []byte) (*HDKeySet, error) {
 	return parseKeySetJSON(append([]byte{}, data...))
 }
 

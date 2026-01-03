@@ -16,7 +16,7 @@ import (
 
 const gitExtension = ".git"
 
-// Returns alias
+// AddRepo adds a new LPM repository and returns its alias.
 func AddRepo(app *application.Lux, repoURL *url.URL, branch string) (string, error) {
 	alias, err := getAlias(repoURL)
 	if err != nil {
@@ -39,10 +39,12 @@ func AddRepo(app *application.Lux, repoURL *url.URL, branch string) (string, err
 	return alias, app.Lpm.AddRepository(alias, repoStr, branch)
 }
 
+// UpdateRepos updates all LPM repositories.
 func UpdateRepos(app *application.Lux) error {
 	return app.Lpm.Update()
 }
 
+// InstallVM installs all VMs for a given subnet from LPM.
 func InstallVM(app *application.Lux, subnetKey string) error {
 	vms, err := getVMsInSubnet(app, subnetKey)
 	if err != nil {

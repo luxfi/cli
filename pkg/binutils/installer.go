@@ -7,12 +7,14 @@ import (
 	"runtime"
 )
 
+// Installer provides system architecture information.
 type Installer interface {
 	GetArch() (string, string)
 }
 
 type installerImpl struct{}
 
+// NewInstaller creates a new installer.
 func NewInstaller() Installer {
 	return &installerImpl{}
 }

@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package monitoring provides utilities for setting up monitoring dashboards.
 package monitoring
 
 import (
@@ -33,10 +34,12 @@ var dashboards embed.FS
 //go:embed configs/*
 var configs embed.FS
 
+// Setup initializes the monitoring directory with dashboard files.
 func Setup(monitoringDir string) error {
 	return WriteMonitoringJSONFiles(monitoringDir)
 }
 
+// WriteMonitoringJSONFiles writes the dashboard JSON files to the monitoring directory.
 func WriteMonitoringJSONFiles(monitoringDir string) error {
 	dashboardDir := filepath.Join(monitoringDir, constants.DashboardsDir)
 	files, err := dashboards.ReadDir(constants.DashboardsDir)
@@ -48,7 +51,7 @@ func WriteMonitoringJSONFiles(monitoringDir string) error {
 		if err != nil {
 			return err
 		}
-		dashboardJSONFile, err := os.Create(filepath.Join(dashboardDir, file.Name()))
+		dashboardJSONFile, err := os.Create(filepath.Join(dashboardDir, file.Name())) //nolint:gosec // G304: Creating file in app's config directory
 		if err != nil {
 			return err
 		}
@@ -60,6 +63,7 @@ func WriteMonitoringJSONFiles(monitoringDir string) error {
 	return nil
 }
 
+// GenerateConfig generates a configuration file from a template.
 func GenerateConfig(configPath string, configDesc string, templateVars configInputs) (string, error) {
 	configTemplate, err := configs.ReadFile(configPath)
 	if err != nil {

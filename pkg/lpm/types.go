@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
-// Placeholder for LPM types
+// See the file LICENSE for licensing terms.
+
 package lpm
 
 type Metadata struct {

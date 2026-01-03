@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package ssh
 
 import (
@@ -95,6 +96,7 @@ func RunOverSSH(
 	return nil
 }
 
+// PostOverSSH sends a POST request over SSH to the specified path.
 func PostOverSSH(host *models.Host, path string, requestBody string) ([]byte, error) {
 	if path == "" {
 		path = "/ext/info"
@@ -144,10 +146,9 @@ func RunSSHSetupDockerService(host *models.Host) error {
 			"shell/setupDockerService.sh",
 			scriptInputs{},
 		)
-	} else {
-		// no need to setup docker service
-		return nil
 	}
+	// no need to setup docker service
+	return nil
 }
 
 // RunSSHRestartNode runs script to restart luxd
@@ -188,7 +189,7 @@ func RunSSHUpgradeLuxgo(host *models.Host, luxdVersion string) error {
 		host,
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
-		docker.DockerComposeInputs{
+		docker.ComposeInputs{
 			LuxgoVersion:   luxdVersion,
 			WithMonitoring: withMonitoring,
 			WithLuxgo:      true,
@@ -230,7 +231,7 @@ func RunSSHStopNode(host *models.Host) error {
 }
 
 func replaceCustomVarDashboardValues(customGrafanaDashboardFileName, chainID string) error {
-	content, err := os.ReadFile(customGrafanaDashboardFileName)
+	content, err := os.ReadFile(customGrafanaDashboardFileName) //nolint:gosec // G304: Reading dashboard file from app's config
 	if err != nil {
 		return err
 	}
@@ -252,6 +253,7 @@ func replaceCustomVarDashboardValues(customGrafanaDashboardFileName, chainID str
 	return nil
 }
 
+// RunSSHUpdateMonitoringDashboards updates monitoring dashboards on the remote host.
 func RunSSHUpdateMonitoringDashboards(host *models.Host, monitoringDashboardPath, customGrafanaDashboardPath, chainID string) error {
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
 	if !sdkutils.DirExists(monitoringDashboardPath) {
@@ -278,6 +280,7 @@ func RunSSHUpdateMonitoringDashboards(host *models.Host, monitoringDashboardPath
 	return docker.RestartDockerComposeService(host, utils.GetRemoteComposeFile(), "grafana", constants.SSHLongRunningScriptTimeout)
 }
 
+// RunSSHSetupMonitoringFolders creates monitoring folders on the remote host.
 func RunSSHSetupMonitoringFolders(host *models.Host) error {
 	for _, folder := range remoteconfig.RemoteFoldersToCreateMonitoring() {
 		if err := host.MkdirAll(folder, constants.SSHDirOpsTimeout); err != nil {
@@ -287,6 +290,7 @@ func RunSSHSetupMonitoringFolders(host *models.Host) error {
 	return nil
 }
 
+// RunSSHCopyMonitoringDashboards copies monitoring dashboards to the remote host.
 func RunSSHCopyMonitoringDashboards(host *models.Host, monitoringDashboardPath string) error {
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
 
@@ -338,11 +342,11 @@ func RunSSHCopyMonitoringDashboards(host *models.Host, monitoringDashboardPath s
 
 	if composeFileExists(host) {
 		return docker.RestartDockerComposeService(host, utils.GetRemoteComposeFile(), "grafana", constants.SSHLongRunningScriptTimeout)
-	} else {
-		return nil
 	}
+	return nil
 }
 
+// RunSSHCopyYAMLFile copies a YAML file to the remote host.
 func RunSSHCopyYAMLFile(host *models.Host, yamlFilePath string) error {
 	if err := host.Upload(
 		yamlFilePath,
@@ -354,6 +358,7 @@ func RunSSHCopyYAMLFile(host *models.Host, yamlFilePath string) error {
 	return nil
 }
 
+// RunSSHSetupPrometheusConfig sets up Prometheus configuration on the remote host.
 func RunSSHSetupPrometheusConfig(host *models.Host, luxdPorts, machinePorts, loadTestPorts []string) error {
 	for _, folder := range remoteconfig.PrometheusFoldersToCreate() {
 		if err := host.MkdirAll(folder, constants.SSHDirOpsTimeout); err != nil {
@@ -377,6 +382,7 @@ func RunSSHSetupPrometheusConfig(host *models.Host, luxdPorts, machinePorts, loa
 	)
 }
 
+// RunSSHSetupLokiConfig sets up Loki configuration on the remote host.
 func RunSSHSetupLokiConfig(host *models.Host, port int) error {
 	for _, folder := range remoteconfig.LokiFoldersToCreate() {
 		if err := host.MkdirAll(folder, constants.SSHDirOpsTimeout); err != nil {
@@ -399,6 +405,7 @@ func RunSSHSetupLokiConfig(host *models.Host, port int) error {
 	)
 }
 
+// RunSSHSetupPromtailConfig sets up Promtail configuration on the remote host.
 func RunSSHSetupPromtailConfig(host *models.Host, lokiIP string, lokiPort int, cloudID string, nodeID string, chainID string) error {
 	for _, folder := range remoteconfig.PromtailFoldersToCreate() {
 		if err := host.MkdirAll(folder, constants.SSHDirOpsTimeout); err != nil {
@@ -422,6 +429,7 @@ func RunSSHSetupPromtailConfig(host *models.Host, lokiIP string, lokiPort int, c
 	)
 }
 
+// RunSSHDownloadNodePrometheusConfig downloads Prometheus config from the remote host.
 func RunSSHDownloadNodePrometheusConfig(host *models.Host, nodeInstanceDirPath string) error {
 	return host.Download(
 		constants.CloudNodePrometheusConfigPath,
@@ -430,6 +438,7 @@ func RunSSHDownloadNodePrometheusConfig(host *models.Host, nodeInstanceDirPath s
 	)
 }
 
+// RunSSHUploadNodeWarpRelayerConfig uploads warp relayer config to the remote host.
 func RunSSHUploadNodeWarpRelayerConfig(host *models.Host, nodeInstanceDirPath string) error {
 	cloudWarpRelayerConfigDir := filepath.Join(constants.CloudNodeCLIConfigBasePath, constants.ServicesDir, constants.WarpRelayerInstallDir)
 	if err := host.MkdirAll(cloudWarpRelayerConfigDir, constants.SSHDirOpsTimeout); err != nil {
@@ -586,9 +595,8 @@ func RunSSHRenderLuxNodeConfig(
 		sc, err := app.LoadSidecar(subnetName)
 		if err != nil {
 			return "", err
-		} else {
-			return sc.Networks[network.String()].SubnetID.String(), nil
 		}
+		return sc.Networks[network.String()].SubnetID.String(), nil
 	})
 	if err != nil {
 		return err
@@ -711,7 +719,7 @@ func mergeSubnetNodeConfig(host *models.Host, subnetNodeConfigPath string) error
 	if err := json.Unmarshal(remoteNodeConfigBytes, &remoteNodeConfig); err != nil {
 		return fmt.Errorf("error unmarshalling remote node config: %w", err)
 	}
-	subnetNodeConfigBytes, err := os.ReadFile(subnetNodeConfigPath)
+	subnetNodeConfigBytes, err := os.ReadFile(subnetNodeConfigPath) //nolint:gosec // G304: Reading node config from app's directory
 	if err != nil {
 		return fmt.Errorf("error reading node config: %w", err)
 	}
@@ -805,6 +813,7 @@ func RunSSHSyncSubnetData(app *application.Lux, host *models.Host, network model
 	return nil
 }
 
+// RunSSHBuildLoadTestCode builds load test code on the remote host.
 func RunSSHBuildLoadTestCode(host *models.Host, loadTestRepo, loadTestPath, loadTestGitCommit, repoDirName, loadTestBranch string, checkoutCommit bool) error {
 	return StreamOverSSH(
 		"Build Load Test",
@@ -819,6 +828,7 @@ func RunSSHBuildLoadTestCode(host *models.Host, loadTestRepo, loadTestPath, load
 	)
 }
 
+// RunSSHBuildLoadTestDependencies builds load test dependencies on the remote host.
 func RunSSHBuildLoadTestDependencies(host *models.Host) error {
 	return RunOverSSH(
 		"Build Load Test",
@@ -829,6 +839,7 @@ func RunSSHBuildLoadTestDependencies(host *models.Host) error {
 	)
 }
 
+// RunSSHRunLoadTest runs a load test on the remote host.
 func RunSSHRunLoadTest(host *models.Host, loadTestCommand, loadTestName string) error {
 	return RunOverSSH(
 		"Run Load Test",
@@ -871,7 +882,7 @@ func RunSSHGetNodeID(host *models.Host) ([]byte, error) {
 	return PostOverSSH(host, "", requestBody)
 }
 
-// SubnetSyncStatus checks if node is synced to subnet
+// RunSSHSubnetSyncStatus checks if node is synced to subnet.
 func RunSSHSubnetSyncStatus(host *models.Host, blockchainID string) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := fmt.Sprintf("{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"platform.getBlockchainStatus\", \"params\": {\"blockchainID\":\"%s\"}}", blockchainID)
@@ -916,7 +927,7 @@ func RunSSHWhitelistPubKey(host *models.Host, sshPubKey string) error {
 		return err
 	}
 	// write ssh public key
-	tmpFile, err := os.OpenFile(tmpName, os.O_APPEND|os.O_WRONLY, 0o644)
+	tmpFile, err := os.OpenFile(tmpName, os.O_APPEND|os.O_WRONLY, 0o644) //nolint:gosec // G304: Opening temp file we just downloaded
 	if err != nil {
 		return err
 	}
@@ -934,6 +945,7 @@ func RunSSHDownloadFile(host *models.Host, filePath string, localFilePath string
 	return host.Download(filePath, localFilePath, constants.SSHFileOpsTimeout)
 }
 
+// RunSSHUpsizeRootDisk resizes the root disk on the remote host.
 func RunSSHUpsizeRootDisk(host *models.Host) error {
 	return RunOverSSH(
 		"Upsize Disk",

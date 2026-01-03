@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -11,7 +12,7 @@ import (
 
 var app *application.Lux
 
-// lux l1
+// NewCmd creates the l1 command for managing sovereign L1 blockchains.
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "l1",
@@ -23,7 +24,7 @@ validator sets, tokenomics, and consensus mechanisms. They support both Proof of
 and Proof of Stake (PoS) validator management.
 
 To get started, use the l1 create command to configure your L1, then deploy it with l1 deploy.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			err := cmd.Help()
 			if err != nil {
 				fmt.Println(err)

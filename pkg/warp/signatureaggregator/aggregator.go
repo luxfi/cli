@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 )
 
-// SignatureAggregatorCleanup cleans up signature aggregator state files
-func SignatureAggregatorCleanup(runPath, storageDir string) error {
+// Cleanup cleans up signature aggregator state files.
+func Cleanup(runPath, storageDir string) error {
 	// Clean up run path
 	if runPath != "" {
 		pidFile := filepath.Join(runPath, "aggregator.pid")

@@ -74,7 +74,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 			fmt.Printf("✅ Found existing PebbleDB at %s\n", existingDB)
 
 			// Check database size
-			cmd := exec.Command("du", "-sh", existingDB)
+			cmd := exec.Command("du", "-sh", existingDB) //nolint:gosec // G204: Known command
 			output, err := cmd.Output()
 			if err == nil {
 				fmt.Printf("   Database size: %s", output)
@@ -99,7 +99,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, dir := range dirs {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+		if err := os.MkdirAll(dir, 0o750); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
@@ -125,11 +125,11 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	pluginDst := filepath.Join(evmDataDir, "plugins", "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy")
 
 	if _, err := os.Stat(pluginSrc); err == nil {
-		copyCmd := exec.Command("cp", pluginSrc, pluginDst)
+		copyCmd := exec.Command("cp", pluginSrc, pluginDst) //nolint:gosec // G204: Known command
 		if err := copyCmd.Run(); err != nil {
 			return fmt.Errorf("failed to copy EVM plugin: %w", err)
 		}
-		_ = os.Chmod(pluginDst, 0o755)
+		_ = os.Chmod(pluginDst, 0o755) //nolint:gosec // G302: Executable needs 0755
 		fmt.Println("✅ EVM plugin installed")
 	}
 
@@ -144,7 +144,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	fmt.Println("\n🔐 Generating staking certificates...")
 	stakingDir := filepath.Join(evmDataDir, "staking")
 
-	genCertCmd := exec.Command("openssl", "req", "-x509", "-newkey", "rsa:4096",
+	genCertCmd := exec.Command("openssl", "req", "-x509", "-newkey", "rsa:4096", //nolint:gosec // G204: Known openssl command
 		"-keyout", filepath.Join(stakingDir, "staker.key"),
 		"-out", filepath.Join(stakingDir, "staker.crt"),
 		"-sha256", "-days", "365", "-nodes",
@@ -153,7 +153,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to generate certificates: %w", err)
 	}
 
-	copyCmd := exec.Command("cp",
+	copyCmd := exec.Command("cp", //nolint:gosec // G204: Known command
 		filepath.Join(stakingDir, "staker.key"),
 		filepath.Join(stakingDir, "signer.key"))
 	_ = copyCmd.Run()
@@ -163,8 +163,8 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 		chainConfigDst := filepath.Join(evmDataDir, "configs", "chains",
 			"2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB", "config.json")
 
-		_ = os.MkdirAll(filepath.Dir(chainConfigDst), 0o755)
-		copyCmd := exec.Command("cp", evmChainConfig, chainConfigDst)
+		_ = os.MkdirAll(filepath.Dir(chainConfigDst), 0o750)
+		copyCmd := exec.Command("cp", evmChainConfig, chainConfigDst) //nolint:gosec // G204: Known command
 		if err := copyCmd.Run(); err != nil {
 			fmt.Printf("Warning: Could not copy chain config: %v\n", err)
 		}
@@ -197,7 +197,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	}
 
 	configPath := filepath.Join(evmDataDir, "config.json")
-	configFile, err := os.Create(configPath)
+	configFile, err := os.Create(configPath) //nolint:gosec // G304: Creating config in app's data directory
 	if err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
 	}
@@ -220,7 +220,7 @@ echo ""
 exec /home/z/work/lux/node/build/luxd --config-file=%s
 `, evmDataDir, evmPort, configPath)
 
-	if err := os.WriteFile(launchScript, []byte(script), 0o755); err != nil {
+	if err := os.WriteFile(launchScript, []byte(script), 0o755); err != nil { //nolint:gosec // G306: Launch script needs to be executable
 		return fmt.Errorf("failed to create launch script: %w", err)
 	}
 

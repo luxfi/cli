@@ -22,33 +22,33 @@ type mockBackend struct {
 	available   bool
 }
 
-func (m *mockBackend) Type() BackendType                    { return m.backendType }
-func (m *mockBackend) Name() string                         { return m.name }
-func (m *mockBackend) Available() bool                      { return m.available }
-func (m *mockBackend) RequiresPassword() bool               { return true }
-func (m *mockBackend) RequiresHardware() bool               { return false }
-func (m *mockBackend) SupportsRemoteSigning() bool          { return false }
-func (m *mockBackend) Initialize(ctx context.Context) error { return nil }
-func (m *mockBackend) Close() error                         { return nil }
-func (m *mockBackend) CreateKey(ctx context.Context, name string, opts CreateKeyOptions) (*HDKeySet, error) {
+func (m *mockBackend) Type() BackendType                { return m.backendType }
+func (m *mockBackend) Name() string                     { return m.name }
+func (m *mockBackend) Available() bool                  { return m.available }
+func (*mockBackend) RequiresPassword() bool             { return true }
+func (*mockBackend) RequiresHardware() bool             { return false }
+func (*mockBackend) SupportsRemoteSigning() bool        { return false }
+func (*mockBackend) Initialize(_ context.Context) error { return nil }
+func (*mockBackend) Close() error                       { return nil }
+func (*mockBackend) CreateKey(_ context.Context, _ string, _ CreateKeyOptions) (*HDKeySet, error) {
 	return nil, nil
 }
 
-func (m *mockBackend) LoadKey(ctx context.Context, name, password string) (*HDKeySet, error) {
+func (*mockBackend) LoadKey(_ context.Context, _, _ string) (*HDKeySet, error) {
 	return nil, nil
 }
 
-func (m *mockBackend) SaveKey(ctx context.Context, keySet *HDKeySet, password string) error {
+func (*mockBackend) SaveKey(_ context.Context, _ *HDKeySet, _ string) error {
 	return nil
 }
-func (m *mockBackend) DeleteKey(ctx context.Context, name string) error { return nil }
-func (m *mockBackend) ListKeys(ctx context.Context) ([]KeyInfo, error)  { return nil, nil }
-func (m *mockBackend) Lock(ctx context.Context, name string) error      { return nil }
-func (m *mockBackend) Unlock(ctx context.Context, name, password string) error {
+func (*mockBackend) DeleteKey(_ context.Context, _ string) error   { return nil }
+func (*mockBackend) ListKeys(_ context.Context) ([]KeyInfo, error) { return nil, nil }
+func (*mockBackend) Lock(_ context.Context, _ string) error        { return nil }
+func (*mockBackend) Unlock(_ context.Context, _, _ string) error {
 	return nil
 }
-func (m *mockBackend) IsLocked(name string) bool { return true }
-func (m *mockBackend) Sign(ctx context.Context, name string, request SignRequest) (*SignResponse, error) {
+func (*mockBackend) IsLocked(_ string) bool { return true }
+func (*mockBackend) Sign(_ context.Context, _ string, _ SignRequest) (*SignResponse, error) {
 	return nil, nil
 }
 
@@ -131,7 +131,7 @@ func TestBackendRegistry(t *testing.T) {
 		var wg sync.WaitGroup
 		for i := 0; i < 10; i++ {
 			wg.Add(1)
-			go func(idx int) {
+			go func(_ int) {
 				defer wg.Done()
 				mock := &mockBackend{
 					backendType: BackendType("concurrent"),

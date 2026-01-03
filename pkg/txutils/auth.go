@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package txutils provides transaction utilities for creating, signing, and managing transactions.
 package txutils
 
 import (
@@ -11,18 +13,14 @@ import (
 	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
-// get all subnet auth addresses that are required to sign a given tx
-//   - get subnet control keys as string slice using P-Chain API (GetOwners)
-//   - get subnet auth indices from the tx, field tx.UnsignedTx.SubnetAuth
-//   - creates the string slice of required subnet auth addresses by applying
-//     the indices to the control keys slice
+// GetAuthSigners returns all subnet auth addresses that are required to sign a given tx.
+// It gets subnet control keys as string slice using P-Chain API (GetOwners),
+// gets subnet auth indices from the tx (field tx.UnsignedTx.SubnetAuth),
+// and creates the string slice of required subnet auth addresses by applying
+// the indices to the control keys slice.
 //
-// expect tx.Unsigned type to be in:
-// - txs.CreateChainTx
-// - txs.AddChainValidatorTx
-// - txs.RemoveChainValidatorTx
-//
-// controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners)
+// Expected tx.Unsigned types: txs.CreateChainTx, txs.AddChainValidatorTx, txs.RemoveChainValidatorTx.
+// controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners).
 func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	unsignedTx := tx.Unsigned
 	var chainAuth verify.Verifiable
@@ -52,18 +50,12 @@ func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	return authSigners, nil
 }
 
-// get subnet auth addresses that did not yet signed a given tx
-//   - get the string slice of auth signers for the tx (GetAuthSigners)
-//   - verifies that all creds in tx.Creds, except the last one, are fully signed
-//     (a cred is fully signed if all the signatures in cred.Sigs are non-empty)
-//   - computes remaining signers by iterating the last cred in tx.Creds, associated to subnet auth signing
-//   - for each sig in cred.Sig: if sig is empty, then add the associated auth signer address (obtained from
-//     authSigners by using the index) to the remaining signers list
+// GetRemainingSigners returns subnet auth addresses that have not yet signed a given tx.
+// It verifies that all creds in tx.Creds (except the last one) are fully signed,
+// and computes remaining signers by iterating the last cred in tx.Creds.
+// If the tx is fully signed, returns empty slice.
 //
-// if the tx is fully signed, returns empty slice
-// expect tx.Unsigned type to be in [txs.AddSubnetValidatorTx, txs.CreateChainTx]
-//
-// controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners)
+// controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners).
 func GetRemainingSigners(tx *txs.Tx, controlKeys []string) ([]string, []string, error) {
 	authSigners, err := GetAuthSigners(tx, controlKeys)
 	if err != nil {

@@ -1,9 +1,9 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package warp
 
 import (
-	_ "embed"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -65,7 +65,7 @@ func DeployERC20Remote(
 	tokenRemoteDecimals uint8,
 ) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/ERC20TokenRemote.sol/ERC20TokenRemote.bin")
-	binBytes, err := os.ReadFile(binPath)
+	binBytes, err := os.ReadFile(binPath) //nolint:gosec // G304: Reading compiled contract from known directory
 	if err != nil {
 		return crypto.Address{}, err
 	}
@@ -102,7 +102,7 @@ func DeployNativeRemote(
 	burnedFeesReportingRewardPercentage *big.Int,
 ) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/NativeTokenRemote.sol/NativeTokenRemote.bin")
-	binBytes, err := os.ReadFile(binPath)
+	binBytes, err := os.ReadFile(binPath) //nolint:gosec // G304: Reading compiled contract from known directory
 	if err != nil {
 		return crypto.Address{}, err
 	}
@@ -135,7 +135,7 @@ func DeployERC20Home(
 	erc20TokenDecimals uint8,
 ) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/ERC20TokenHome.sol/ERC20TokenHome.bin")
-	binBytes, err := os.ReadFile(binPath)
+	binBytes, err := os.ReadFile(binPath) //nolint:gosec // G304: Reading compiled contract from known directory
 	if err != nil {
 		return crypto.Address{}, err
 	}
@@ -160,7 +160,7 @@ func DeployNativeHome(
 	wrappedNativeTokenAddress crypto.Address,
 ) (crypto.Address, error) {
 	binPath := filepath.Join(srcDir, "contracts/out/NativeTokenHome.sol/NativeTokenHome.bin")
-	binBytes, err := os.ReadFile(binPath)
+	binBytes, err := os.ReadFile(binPath) //nolint:gosec // G304: Reading compiled contract from known directory
 	if err != nil {
 		return crypto.Address{}, err
 	}
@@ -182,7 +182,7 @@ func DeployWrappedNativeToken(
 	tokenSymbol string,
 ) (crypto.Address, error) {
 	binPath := filepath.Join(utils.ExpandHome(srcDir), "contracts/out/WrappedNativeToken.sol/WrappedNativeToken.bin")
-	binBytes, err := os.ReadFile(binPath)
+	binBytes, err := os.ReadFile(binPath) //nolint:gosec // G304: Reading compiled contract from known directory
 	if err != nil {
 		return crypto.Address{}, err
 	}

@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package upgradecmd
 
 import (
@@ -57,7 +58,7 @@ func upgradeImportCmd(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	upgradeBytes, err := os.ReadFile(upgradeBytesFilePath)
+	upgradeBytes, err := os.ReadFile(upgradeBytesFilePath) //nolint:gosec // G304: User-specified upgrade file
 	if err != nil {
 		return fmt.Errorf("failed to read the provided upgrade file: %w", err)
 	}

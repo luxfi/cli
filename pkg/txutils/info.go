@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package txutils
 
 import (
@@ -16,8 +17,8 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-// get network model associated to tx
-// expect tx.Unsigned type to be in [txs.AddChainValidatorTx, txs.CreateChainTx]
+// GetNetwork returns the network model associated with a tx.
+// Expected tx.Unsigned types: txs.AddChainValidatorTx, txs.CreateChainTx.
 func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	unsignedTx := tx.Unsigned
 	var networkID uint32
@@ -40,6 +41,7 @@ func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	return network, nil
 }
 
+// GetLedgerDisplayName returns the display name for a tx on the ledger.
 func GetLedgerDisplayName(tx *txs.Tx) string {
 	unsignedTx := tx.Unsigned
 	switch unsignedTx.(type) {
@@ -52,6 +54,7 @@ func GetLedgerDisplayName(tx *txs.Tx) string {
 	}
 }
 
+// IsCreateChainTx returns true if the tx is a CreateChainTx.
 func IsCreateChainTx(tx *txs.Tx) bool {
 	_, ok := tx.Unsigned.(*txs.CreateChainTx)
 	return ok

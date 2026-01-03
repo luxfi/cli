@@ -12,6 +12,7 @@ const (
 	luxdBinPrefix = "luxd-"
 )
 
+// SetupLuxgo downloads and installs the Lux node binary.
 func SetupLuxgo(app *application.Lux, luxdVersion string) (string, error) {
 	binDir := app.GetLuxgoBinDir()
 

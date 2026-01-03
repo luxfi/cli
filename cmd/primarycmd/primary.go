@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package primarycmd
 
 import (
@@ -10,7 +11,7 @@ import (
 
 var app *application.Lux
 
-// lux primary
+// NewCmd creates the primary command for interacting with the Primary Network.
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "primary",

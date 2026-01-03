@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package cmd
 
 import (
@@ -285,7 +286,7 @@ func setupEnv() (string, error) {
 	baseDir := filepath.Join(usr.HomeDir, constants.BaseDirName)
 
 	// Create base dir if it doesn't exist
-	err = os.MkdirAll(baseDir, os.ModePerm)
+	err = os.MkdirAll(baseDir, 0o750)
 	if err != nil {
 		// no logger here yet
 		fmt.Printf("failed creating the basedir %s: %s\n", baseDir, err)
@@ -294,41 +295,41 @@ func setupEnv() (string, error) {
 
 	// Create snapshots dir if it doesn't exist
 	snapshotsDir := filepath.Join(baseDir, constants.SnapshotsDirName)
-	if err = os.MkdirAll(snapshotsDir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(snapshotsDir, 0o750); err != nil {
 		fmt.Printf("failed creating the snapshots dir %s: %s\n", snapshotsDir, err)
 		os.Exit(1)
 	}
 
 	// Create key dir if it doesn't exist
 	keyDir := filepath.Join(baseDir, constants.KeyDir)
-	if err = os.MkdirAll(keyDir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(keyDir, 0o750); err != nil {
 		fmt.Printf("failed creating the key dir %s: %s\n", keyDir, err)
 		os.Exit(1)
 	}
 
 	// Create custom vm dir if it doesn't exist
 	vmDir := filepath.Join(baseDir, constants.CustomVMDir)
-	if err = os.MkdirAll(vmDir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(vmDir, 0o750); err != nil {
 		fmt.Printf("failed creating the vm dir %s: %s\n", vmDir, err)
 		os.Exit(1)
 	}
 
 	// Create subnet dir if it doesn't exist
 	subnetDir := filepath.Join(baseDir, constants.ChainsDir)
-	if err = os.MkdirAll(subnetDir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(subnetDir, 0o750); err != nil {
 		fmt.Printf("failed creating the subnet dir %s: %s\n", subnetDir, err)
 		os.Exit(1)
 	}
 
 	// Create repos dir if it doesn't exist
 	repoDir := filepath.Join(baseDir, constants.ReposDir)
-	if err = os.MkdirAll(repoDir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(repoDir, 0o750); err != nil {
 		fmt.Printf("failed creating the repo dir %s: %s\n", repoDir, err)
 		os.Exit(1)
 	}
 
 	pluginDir := filepath.Join(baseDir, constants.PluginDir)
-	if err = os.MkdirAll(pluginDir, os.ModePerm); err != nil {
+	if err = os.MkdirAll(pluginDir, 0o750); err != nil {
 		fmt.Printf("failed creating the plugin dir %s: %s\n", pluginDir, err)
 		os.Exit(1)
 	}

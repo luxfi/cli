@@ -1,5 +1,6 @@
 // Copyright (C) 2020-2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -33,7 +34,7 @@ func GetCLIVersion() string {
 		return ""
 	}
 	versionPath := filepath.Join(wdPath, "VERSION")
-	content, err := os.ReadFile(versionPath)
+	content, err := os.ReadFile(versionPath) //nolint:gosec // G304: Reading VERSION file from current directory
 	if err != nil {
 		return ""
 	}

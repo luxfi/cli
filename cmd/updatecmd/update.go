@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package updatecmd
 
 import (
@@ -21,12 +22,14 @@ import (
 )
 
 var (
+	// ErrUserAbortedInstallation is returned when user cancels an installation.
 	ErrUserAbortedInstallation = errors.New("user canceled installation")
 	ErrNoVersion               = errors.New("failed to find current version - did you install following official instructions?")
 	app                        *application.Lux
 	yes                        bool
 )
 
+// NewCmd creates the update command.
 func NewCmd(injectedApp *application.Lux, version string) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
@@ -48,6 +51,7 @@ func runUpdate(cmd *cobra.Command, _ []string) error {
 	return Update(cmd, isUserCalled, "")
 }
 
+// Update checks for and installs the latest CLI version.
 func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 	// first check if there is a new version exists
 	url := binutils.GetGithubLatestReleaseURL(constants.LuxOrg, constants.CliRepoName)

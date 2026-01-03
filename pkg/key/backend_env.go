@@ -44,34 +44,34 @@ func NewEnvBackend() *EnvBackend {
 	}
 }
 
-func (b *EnvBackend) Type() BackendType {
+func (*EnvBackend) Type() BackendType {
 	return BackendEnv
 }
 
-func (b *EnvBackend) Name() string {
+func (*EnvBackend) Name() string {
 	return "Environment Variables"
 }
 
-func (b *EnvBackend) Available() bool {
+func (*EnvBackend) Available() bool {
 	// Available if any key env vars are set
 	return os.Getenv(EnvMnemonic) != "" ||
 		os.Getenv(EnvPrivateKey) != "" ||
 		os.Getenv(EnvBLSKey) != ""
 }
 
-func (b *EnvBackend) RequiresPassword() bool {
+func (*EnvBackend) RequiresPassword() bool {
 	return false
 }
 
-func (b *EnvBackend) RequiresHardware() bool {
+func (*EnvBackend) RequiresHardware() bool {
 	return false
 }
 
-func (b *EnvBackend) SupportsRemoteSigning() bool {
+func (*EnvBackend) SupportsRemoteSigning() bool {
 	return false
 }
 
-func (b *EnvBackend) Initialize(ctx context.Context) error {
+func (*EnvBackend) Initialize(_ context.Context) error {
 	return nil
 }
 
@@ -91,7 +91,7 @@ func (b *EnvBackend) Close() error {
 	return nil
 }
 
-func (b *EnvBackend) CreateKey(ctx context.Context, name string, opts CreateKeyOptions) (*HDKeySet, error) {
+func (*EnvBackend) CreateKey(_ context.Context, _ string, _ CreateKeyOptions) (*HDKeySet, error) {
 	return nil, errors.New("cannot create keys in environment backend - set LUX_MNEMONIC or LUX_PRIVATE_KEY")
 }
 
@@ -112,7 +112,7 @@ func (b *EnvBackend) LoadKey(ctx context.Context, name, password string) (*HDKey
 	return ks, nil
 }
 
-func (b *EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
+func (*EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
 	// Priority 1: LUX_MNEMONIC
 	if mnemonic := os.Getenv(EnvMnemonic); mnemonic != "" {
 		if !ValidateMnemonic(mnemonic) {
@@ -158,7 +158,7 @@ func (b *EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
 	return nil, errors.New("no key found in environment (set LUX_MNEMONIC or LUX_PRIVATE_KEY)")
 }
 
-func (b *EnvBackend) SaveKey(ctx context.Context, keySet *HDKeySet, password string) error {
+func (*EnvBackend) SaveKey(_ context.Context, _ *HDKeySet, _ string) error {
 	return errors.New("cannot save keys to environment backend")
 }
 
@@ -193,7 +193,7 @@ func (b *EnvBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 	return keys, nil
 }
 
-func (b *EnvBackend) Lock(ctx context.Context, name string) error {
+func (*EnvBackend) Lock(_ context.Context, _ string) error {
 	// Cannot lock env keys - they're always available via env
 	return nil
 }
@@ -204,7 +204,7 @@ func (b *EnvBackend) Unlock(ctx context.Context, name, password string) error {
 	return err
 }
 
-func (b *EnvBackend) IsLocked(name string) bool {
+func (*EnvBackend) IsLocked(_ string) bool {
 	return false // Env keys are never locked
 }
 

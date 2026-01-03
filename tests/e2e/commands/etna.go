@@ -44,7 +44,7 @@ func CreateEtnaEVMConfig(
 		subnetManagementStr = PoSString
 	}
 	// Create config
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
 		"create",
@@ -90,7 +90,7 @@ func CreateLocalEtnaNode(
 	clusterName string,
 	numNodes int,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"node",
 		"local",
@@ -117,7 +117,7 @@ func CreateLocalEtnaNode(
 func DestroyLocalNode(
 	clusterName string,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"node",
 		"local",
@@ -176,7 +176,7 @@ func DeployEtnaBlockchain(
 	if bootstrapEndpointsFlag != "" {
 		args = append(args, bootstrapEndpointsFlag)
 	}
-	cmd := exec.Command(CLIBinary, args...)
+	cmd := exec.Command(CLIBinary, args...) //nolint:gosec // G204: Running our own CLI binary in tests
 	fmt.Println(cmd)
 	output, err := cmd.CombinedOutput()
 	fmt.Println(string(output))
@@ -192,7 +192,7 @@ func TrackLocalEtnaSubnet(
 	clusterName string,
 	subnetName string,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"node",
 		"local",
@@ -218,7 +218,7 @@ func InitValidatorManager(
 	endpoint string,
 	blockchainID string,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"contract",
 		"initValidatorManager",
@@ -251,7 +251,7 @@ func AddEtnaSubnetValidatorToCluster(
 	balance int,
 	createLocalValidator bool,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
 		"addValidator",
@@ -302,7 +302,7 @@ func RemoveEtnaSubnetValidatorFromCluster(
 	keyName string,
 	uptimeSec uint64,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
 		"removeValidator",
@@ -314,7 +314,7 @@ func RemoveEtnaSubnetValidatorFromCluster(
 		"--key",
 		keyName,
 		"--uptime",
-		strconv.Itoa(int(uptimeSec)),
+		strconv.Itoa(int(uptimeSec)), //nolint:gosec // G115: uptimeSec is bounded by test duration
 		"--force",
 		"--"+constants.SkipUpdateFlag,
 	)
@@ -332,7 +332,7 @@ func GetLocalClusterStatus(
 	clusterName string,
 	blockchainName string,
 ) (string, error) {
-	cmd := exec.Command(
+	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"node",
 		"local",

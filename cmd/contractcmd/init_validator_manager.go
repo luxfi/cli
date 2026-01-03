@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package contractcmd
 
 import (
@@ -285,12 +286,12 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 			privateKey,
 			aggregatorLogger,
 			validatormanagerSDK.PoSParams{
-				MinimumStakeAmount:      big.NewInt(int64(initPOSManagerFlags.minimumStakeAmount)),
-				MaximumStakeAmount:      big.NewInt(int64(initPOSManagerFlags.maximumStakeAmount)),
+				MinimumStakeAmount:      big.NewInt(int64(initPOSManagerFlags.minimumStakeAmount)), //nolint:gosec // G115: Stake amounts are bounded
+				MaximumStakeAmount:      big.NewInt(int64(initPOSManagerFlags.maximumStakeAmount)), //nolint:gosec // G115: Stake amounts are bounded
 				MinimumStakeDuration:    initPOSManagerFlags.minimumStakeDuration,
 				MinimumDelegationFee:    initPOSManagerFlags.minimumDelegationFee,
 				MaximumStakeMultiplier:  initPOSManagerFlags.maximumStakeMultiplier,
-				WeightToValueFactor:     big.NewInt(int64(initPOSManagerFlags.weightToValueFactor)),
+				WeightToValueFactor:     big.NewInt(int64(initPOSManagerFlags.weightToValueFactor)), //nolint:gosec // G115: Weight factor is bounded
 				RewardCalculatorAddress: initPOSManagerFlags.rewardCalculatorAddress,
 				UptimeBlockchainID:      blockchainID,
 			},

@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package binutils provides binary download and management utilities.
 package binutils
 
 import (
@@ -24,12 +26,14 @@ var (
 	_ BinaryChecker          = (*binaryChecker)(nil)
 )
 
+// PluginBinaryDownloader handles VM plugin binary downloads.
 type PluginBinaryDownloader interface {
 	InstallVM(vmID, vmBin string) error
 	UpgradeVM(vmID, vmBin string) error
 	RemoveVM(vmID string) error
 }
 
+// BinaryChecker checks for binary existence and versions.
 type BinaryChecker interface {
 	ExistsWithVersion(name, binaryPrefix, version string) (bool, error)
 }
@@ -41,10 +45,12 @@ type (
 	}
 )
 
+// NewBinaryChecker creates a new binary checker.
 func NewBinaryChecker() BinaryChecker {
 	return &binaryChecker{}
 }
 
+// NewPluginBinaryDownloader creates a new plugin binary downloader.
 func NewPluginBinaryDownloader(app *application.Lux) PluginBinaryDownloader {
 	return &pluginBinaryDownloader{
 		app: app,

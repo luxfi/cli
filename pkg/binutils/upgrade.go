@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package binutils
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
+// UpgradeVM upgrades a VM binary to the specified version.
 func UpgradeVM(app *application.Lux, vmID string, vmBinPath string) error {
 	installer := NewPluginBinaryDownloader(app)
 	if err := installer.UpgradeVM(vmID, vmBinPath); err != nil {
@@ -18,7 +20,7 @@ func UpgradeVM(app *application.Lux, vmID string, vmBinPath string) error {
 	return nil
 }
 
-// update the RPC version of the VM in the sidecar file
+// UpdateLocalSidecarRPC updates the RPC version of the VM in the sidecar file.
 func UpdateLocalSidecarRPC(app *application.Lux, sc models.Sidecar, rpcVersion int) error {
 	// find local network deployment info in sidecar
 	networkData, ok := sc.Networks[models.Local.String()]

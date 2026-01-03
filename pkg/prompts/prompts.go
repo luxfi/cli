@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package prompts
 
 import (
@@ -912,7 +913,7 @@ func CaptureKeyAddress(
 }
 
 // CaptureListWithSize allows selection of multiple items from a list
-func (p realPrompter) CaptureListWithSize(prompt string, options []string, size int) ([]string, error) {
+func (prompter *realPrompter) CaptureListWithSize(prompt string, options []string, size int) ([]string, error) {
 	if len(options) == 0 {
 		return nil, errors.New("no options provided")
 	}
@@ -926,7 +927,7 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 			prompt = fmt.Sprintf("Select item %d of %d", i+1, size)
 		}
 
-		choice, err := p.CaptureList(prompt, append(remaining, Done))
+		choice, err := prompter.CaptureList(prompt, append(remaining, Done))
 		if err != nil {
 			return nil, err
 		}

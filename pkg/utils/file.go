@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -87,7 +88,7 @@ func FileCopy(src string, dst string) error {
 	if !FileExists(src) {
 		return fmt.Errorf("source file does not exist")
 	}
-	data, err := os.ReadFile(src)
+	data, err := os.ReadFile(src) //nolint:gosec // G304: Copying file from validated path
 	if err != nil {
 		return err
 	}
@@ -128,7 +129,7 @@ func ReadFile(filePath string) (string, error) {
 	if !FileExists(filePath) {
 		return "", fmt.Errorf("file does not exist")
 	} else {
-		data, err := os.ReadFile(filePath)
+		data, err := os.ReadFile(filePath) //nolint:gosec // G304: Reading file from validated path
 		if err != nil {
 			return "", err
 		}
@@ -170,7 +171,7 @@ func GetRemoteComposeServicePath(serviceName string, dirs ...string) string {
 
 // ReadGoVersion reads the Go version from the go.mod file
 func ReadGoVersion(filePath string) (string, error) {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec // G304: Reading go.mod file from provided path
 	if err != nil {
 		return "", err
 	}

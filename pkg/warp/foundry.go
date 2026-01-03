@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package warp
 
 import (
@@ -37,7 +38,7 @@ func GetForgePath() (string, error) {
 
 func InstallFoundry() error {
 	ux.Logger.PrintToUser("Installing Foundry")
-	downloadCmd := exec.Command(
+	downloadCmd := exec.Command( //nolint:gosec // G204: Running curl with known URL
 		"curl",
 		"-L",
 		fmt.Sprintf("https://raw.githubusercontent.com/luxfi/foundry/%s/foundryup/install", foundryVersion),
@@ -78,7 +79,7 @@ func InstallFoundry() error {
 		return err
 	}
 	ux.Logger.PrintToUser("%s", strings.TrimSuffix(installOutbuf.String(), "\n"))
-	foundryupCmd := exec.Command(foundryupPath, "-v", foundryVersion)
+	foundryupCmd := exec.Command(foundryupPath, "-v", foundryVersion) //nolint:gosec // G204: Running foundryup with known arguments
 	foundryupCmd.Env = cmdsEnv
 	out, err := foundryupCmd.CombinedOutput()
 	ux.Logger.PrintToUser("%s", string(out))

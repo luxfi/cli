@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -75,7 +76,7 @@ EXAMPLES:
 	return cmd
 }
 
-func migrateSubnetToL1(cmd *cobra.Command, args []string) error {
+func migrateSubnetToL1(_ *cobra.Command, args []string) error {
 	subnetName := args[0]
 
 	ux.Logger.PrintToUser("🔄 Subnet to L1 Migration Wizard")
@@ -300,7 +301,7 @@ func createMigrationTransaction(sc *models.Sidecar, validatorManagement, rentalP
 	}
 }
 
-func notifyValidators(sc *models.Sidecar) error {
+func notifyValidators(_ *models.Sidecar) error {
 	// Notify validators of upcoming migration
 	// This would send messages to all current validators
 	ux.Logger.PrintToUser("   Notified %d validators", 5) // Placeholder

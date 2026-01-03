@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -33,13 +34,13 @@ func LoadExistingSubnetState(networkDir string) error {
 	if subnetStatePath == "" && statePath == "" {
 		// Check for default mainnet-regenesis database
 		defaultPath := filepath.Join(os.Getenv("HOME"), ".lux-cli", "runs", "mainnet-regenesis", "node1", "chains", "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB", "db")
-		if info, err := os.Stat(defaultPath); err == nil && info.IsDir() {
-			ux.Logger.PrintToUser("Found existing mainnet-regenesis database at default location")
-			subnetStatePath = defaultPath
-			blockchainID = MainnetSubnetBlockchainID
-		} else {
+		info, err := os.Stat(defaultPath)
+		if err != nil || !info.IsDir() {
 			return nil // No existing state to load
 		}
+		ux.Logger.PrintToUser("Found existing mainnet-regenesis database at default location")
+		subnetStatePath = defaultPath
+		blockchainID = MainnetSubnetBlockchainID
 	}
 
 	// Determine which path to use
@@ -72,7 +73,7 @@ func LoadExistingSubnetState(networkDir string) error {
 	targetDir := filepath.Join(networkDir, "node1", "data", "chains", blockchainID, "db")
 
 	// Create parent directories
-	if err := os.MkdirAll(filepath.Dir(targetDir), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(targetDir), 0o750); err != nil {
 		return fmt.Errorf("failed to create target directory structure: %w", err)
 	}
 
@@ -103,7 +104,7 @@ func loadStateFromChaindata(chainDataPath string, networkDir string) error {
 		}
 
 		targetDir := filepath.Join(networkDir, "node1", "data", "chains", blockchainID, "db")
-		if err := os.MkdirAll(filepath.Dir(targetDir), 0o755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(targetDir), 0o750); err != nil {
 			return fmt.Errorf("failed to create target directory: %w", err)
 		}
 
@@ -178,7 +179,7 @@ func copyDirectory(src, dst string) error {
 
 // copyFile copies a single file from src to dst
 func copyFile(src, dst string) error {
-	srcFile, err := os.Open(src)
+	srcFile, err := os.Open(src) //nolint:gosec // G304: Copying files within app's directories
 	if err != nil {
 		return err
 	}
@@ -189,7 +190,7 @@ func copyFile(src, dst string) error {
 		return err
 	}
 
-	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, srcInfo.Mode())
+	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, srcInfo.Mode()) //nolint:gosec // G304: Writing to app's directory
 	if err != nil {
 		return err
 	}

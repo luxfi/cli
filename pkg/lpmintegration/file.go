@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package lpmintegration provides integration with the Lux Package Manager (LPM).
 package lpmintegration
 
 import (
@@ -12,6 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// GetRepos returns a list of all available LPM repositories.
 func GetRepos(app *application.Lux) ([]string, error) {
 	repositoryDir := filepath.Join(app.LpmDir, "repositories")
 	orgs, err := os.ReadDir(repositoryDir)
@@ -35,6 +37,7 @@ func GetRepos(app *application.Lux) ([]string, error) {
 	return output, nil
 }
 
+// GetSubnets returns a list of subnets available in a repository.
 func GetSubnets(app *application.Lux, repoAlias string) ([]string, error) {
 	subnetDir := filepath.Join(app.LpmDir, "repositories", repoAlias, "subnets")
 	subnets, err := os.ReadDir(subnetDir)
@@ -50,7 +53,7 @@ func GetSubnets(app *application.Lux, repoAlias string) ([]string, error) {
 	return subnetOptions, nil
 }
 
-// Types for LPM compatibility
+// Subnet represents an LPM subnet configuration.
 type Subnet struct {
 	ID          string   `yaml:"id"`
 	Alias       string   `yaml:"alias"`
@@ -61,6 +64,7 @@ type Subnet struct {
 	Description string   `yaml:"description"`
 }
 
+// VM represents an LPM virtual machine configuration.
 type VM struct {
 	ID          string `yaml:"id"`
 	Alias       string `yaml:"alias"`
@@ -76,14 +80,17 @@ type VM struct {
 	Description string `yaml:"description"`
 }
 
+// SubnetWrapper wraps a Subnet for YAML parsing.
 type SubnetWrapper struct {
 	Subnet Subnet `yaml:"subnet"`
 }
 
+// VMWrapper wraps a VM for YAML parsing.
 type VMWrapper struct {
 	VM VM `yaml:"vm"`
 }
 
+// LoadSubnetFile loads a subnet configuration from a YAML file.
 func LoadSubnetFile(app *application.Lux, subnetKey string) (Subnet, error) {
 	repoAlias, subnetName, err := splitKey(subnetKey)
 	if err != nil {
@@ -115,6 +122,7 @@ func getVMsInSubnet(app *application.Lux, subnetKey string) ([]string, error) {
 	return subnet.VMs, nil
 }
 
+// LoadVMFile loads a VM configuration from a YAML file.
 func LoadVMFile(app *application.Lux, repo, vm string) (VM, error) {
 	vmYamlPath := filepath.Join(app.LpmDir, "repositories", repo, "vms", vm+".yaml")
 	var vmWrapper VMWrapper

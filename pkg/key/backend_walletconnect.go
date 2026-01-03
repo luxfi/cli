@@ -109,27 +109,27 @@ func NewWalletConnectBackend() *WalletConnectBackend {
 	}
 }
 
-func (b *WalletConnectBackend) Type() BackendType {
+func (*WalletConnectBackend) Type() BackendType {
 	return BackendWalletConnect
 }
 
-func (b *WalletConnectBackend) Name() string {
+func (*WalletConnectBackend) Name() string {
 	return WalletConnectName
 }
 
-func (b *WalletConnectBackend) Available() bool {
+func (*WalletConnectBackend) Available() bool {
 	return true // Always available as a signing option
 }
 
-func (b *WalletConnectBackend) RequiresPassword() bool {
+func (*WalletConnectBackend) RequiresPassword() bool {
 	return false
 }
 
-func (b *WalletConnectBackend) RequiresHardware() bool {
+func (*WalletConnectBackend) RequiresHardware() bool {
 	return false
 }
 
-func (b *WalletConnectBackend) SupportsRemoteSigning() bool {
+func (*WalletConnectBackend) SupportsRemoteSigning() bool {
 	return true
 }
 
@@ -182,7 +182,7 @@ func (b *WalletConnectBackend) Close() error {
 }
 
 // CreateKey is not supported - WalletConnect uses external wallets
-func (b *WalletConnectBackend) CreateKey(ctx context.Context, name string, opts CreateKeyOptions) (*HDKeySet, error) {
+func (*WalletConnectBackend) CreateKey(_ context.Context, _ string, _ CreateKeyOptions) (*HDKeySet, error) {
 	return nil, errors.New("walletconnect: key creation not supported, use Pair() to connect mobile wallet")
 }
 
@@ -244,7 +244,7 @@ func (b *WalletConnectBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) 
 	return keys, nil
 }
 
-func (b *WalletConnectBackend) Lock(ctx context.Context, name string) error {
+func (*WalletConnectBackend) Lock(_ context.Context, _ string) error {
 	// No-op for WalletConnect - sessions managed externally
 	return nil
 }
@@ -384,7 +384,7 @@ func (b *WalletConnectBackend) Pair(ctx context.Context, name string, chainID in
 }
 
 // DisplayQR generates and displays a QR code in the terminal
-func (b *WalletConnectBackend) DisplayQR(uri string) error {
+func (*WalletConnectBackend) DisplayQR(uri string) error {
 	// Generate QR code
 	qr, err := qrcode.New(uri, qrcode.Medium)
 	if err != nil {

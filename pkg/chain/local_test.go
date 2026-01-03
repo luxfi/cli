@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package chain
 
 import (
@@ -104,7 +105,7 @@ func TestDeployToLocal(t *testing.T) {
 	require.NoError(err)
 
 	// create a dummy node file, deploy will check it exists
-	f, err := os.Create(filepath.Join(binDir, "node"))
+	f, err := os.Create(filepath.Join(binDir, "node")) //nolint:gosec // G304: Test file creation
 	require.NoError(err)
 	defer func() {
 		_ = f.Close()
@@ -113,8 +114,8 @@ func TestDeployToLocal(t *testing.T) {
 	// Create a dummy VM binary that passes validation
 	// Must be executable and at least 1KB to pass preflight checks
 	vmBinPath := filepath.Join(testDir, "test-vm-binary")
-	dummyVMContent := make([]byte, 2048) // 2KB of zeros
-	err = os.WriteFile(vmBinPath, dummyVMContent, 0o755)
+	dummyVMContent := make([]byte, 2048)                 // 2KB of zeros
+	err = os.WriteFile(vmBinPath, dummyVMContent, 0o755) //nolint:gosec // G306: Test binary needs to be executable
 	require.NoError(err)
 
 	binChecker.On("ExistsWithLatestVersion", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(true, tmpDir, nil)
@@ -147,7 +148,7 @@ func TestDeployToLocal(t *testing.T) {
 	testSubnetDir := filepath.Join(testDir, constants.ChainsDir, testChainName)
 	err = os.MkdirAll(testSubnetDir, constants.DefaultPerms755)
 	require.NoError(err)
-	testSidecar, err := os.Create(filepath.Join(testSubnetDir, constants.SidecarFileName))
+	testSidecar, err := os.Create(filepath.Join(testSubnetDir, constants.SidecarFileName)) //nolint:gosec // G304: Test file creation
 	require.NoError(err)
 	err = os.WriteFile(testSidecar.Name(), []byte(sidecar), constants.DefaultPerms755)
 	require.NoError(err)
@@ -162,7 +163,7 @@ func TestGetLatestLuxVersion(t *testing.T) {
 	require := setupTest(t)
 
 	testVersion := "v1.99.9999"
-	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	testHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		resp := fmt.Sprintf(`{"some":"unimportant","fake":"data","tag_name":"%s","tag_name_was":"what we are interested in"}`, testVersion)
 		_, err := w.Write([]byte(resp))
 		require.NoError(err)
@@ -231,10 +232,10 @@ func TestValidateVMBinary(t *testing.T) {
 
 	deployer := &LocalDeployer{app: app}
 
-	t.Run("valid binary passes", func(t *testing.T) {
+	t.Run("valid binary passes", func(_ *testing.T) {
 		// Create a valid VM binary (executable, >1KB)
 		vmPath := filepath.Join(tmpDir, "valid-vm")
-		err := os.WriteFile(vmPath, make([]byte, 2048), 0o755)
+		err := os.WriteFile(vmPath, make([]byte, 2048), 0o755) //nolint:gosec // G306: Test binary needs to be executable
 		require.NoError(err)
 
 		vmID, _ := anrutils.VMID("test")
@@ -242,16 +243,16 @@ func TestValidateVMBinary(t *testing.T) {
 		require.NoError(err)
 	})
 
-	t.Run("missing binary fails", func(t *testing.T) {
+	t.Run("missing binary fails", func(_ *testing.T) {
 		vmID, _ := anrutils.VMID("test")
 		err := deployer.validateVMBinary("/nonexistent/path", vmID)
 		require.Error(err)
 		require.Contains(err.Error(), "not found")
 	})
 
-	t.Run("non-executable binary fails", func(t *testing.T) {
+	t.Run("non-executable binary fails", func(_ *testing.T) {
 		vmPath := filepath.Join(tmpDir, "nonexec-vm")
-		err := os.WriteFile(vmPath, make([]byte, 2048), 0o644) // no exec perms
+		err := os.WriteFile(vmPath, make([]byte, 2048), 0o644) //nolint:gosec // G306: Test file, intentionally not executable
 		require.NoError(err)
 
 		vmID, _ := anrutils.VMID("test")
@@ -260,9 +261,9 @@ func TestValidateVMBinary(t *testing.T) {
 		require.Contains(err.Error(), "not executable")
 	})
 
-	t.Run("too small binary fails", func(t *testing.T) {
+	t.Run("too small binary fails", func(_ *testing.T) {
 		vmPath := filepath.Join(tmpDir, "small-vm")
-		err := os.WriteFile(vmPath, make([]byte, 100), 0o755) // too small
+		err := os.WriteFile(vmPath, make([]byte, 100), 0o755) //nolint:gosec // G306: Test binary needs to be executable
 		require.NoError(err)
 
 		vmID, _ := anrutils.VMID("test")
@@ -275,7 +276,7 @@ func TestValidateVMBinary(t *testing.T) {
 func TestDeploymentError(t *testing.T) {
 	require := setupTest(t)
 
-	t.Run("error with healthy network", func(t *testing.T) {
+	t.Run("error with healthy network", func(_ *testing.T) {
 		err := &DeploymentError{
 			ChainName:      "mychain",
 			Cause:          fmt.Errorf("VM failed to load"),
@@ -286,7 +287,7 @@ func TestDeploymentError(t *testing.T) {
 		require.Contains(err.Error(), "VM failed to load")
 	})
 
-	t.Run("error with crashed network", func(t *testing.T) {
+	t.Run("error with crashed network", func(_ *testing.T) {
 		err := &DeploymentError{
 			ChainName:      "mychain",
 			Cause:          fmt.Errorf("node stopped unexpectedly"),
@@ -296,7 +297,7 @@ func TestDeploymentError(t *testing.T) {
 		require.Contains(err.Error(), "network crashed")
 	})
 
-	t.Run("unwrap returns cause", func(t *testing.T) {
+	t.Run("unwrap returns cause", func(_ *testing.T) {
 		cause := fmt.Errorf("root cause")
 		err := &DeploymentError{ChainName: "test", Cause: cause}
 		require.Equal(cause, err.Unwrap())
