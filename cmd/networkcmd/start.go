@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -47,8 +48,8 @@ type StartFlags struct {
 	NumNodes                uint32
 }
 
-// Start starts the local network with the given flags
-func Start(flags StartFlags, printEndpoints bool) error {
+// Start starts the local network with the given flags.
+func Start(_ StartFlags, _ bool) error {
 	// For now, just call StartNetwork with nil cmd and args
 	return StartNetwork(nil, nil)
 }
@@ -213,6 +214,7 @@ TYPICAL WORKFLOW:
 	return cmd
 }
 
+// StartNetwork starts the local network.
 func StartNetwork(*cobra.Command, []string) error {
 	// Check for conflicting flags
 	flagCount := 0
@@ -346,7 +348,7 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 
 	opts := []client.OpOption{
-		client.WithNumNodes(uint32(numValidators)),
+		client.WithNumNodes(uint32(numValidators)), //nolint:gosec // G115: numValidators is bounded (1-5)
 		client.WithGlobalNodeConfig(globalNodeConfig),
 		client.WithRootDataDir(rootDataDir),
 		client.WithReassignPortsIfUsed(true),
@@ -371,7 +373,7 @@ func startPublicNetwork(cfg networkConfig) error {
 
 	pluginDir := filepath.Join(app.GetPluginsDir(), "current")
 	// Always ensure plugin dir exists and pass it to nodes
-	if err := os.MkdirAll(pluginDir, 0o755); err != nil {
+	if err := os.MkdirAll(pluginDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create plugin directory %s: %w", pluginDir, err)
 	}
 	opts = append(opts, client.WithPluginDir(pluginDir))
@@ -389,11 +391,10 @@ func startPublicNetwork(cfg networkConfig) error {
 	if err != nil {
 		// Check if network is already bootstrapped (backend was started previously)
 		errStr := err.Error()
-		if server.IsServerError(err, server.ErrAlreadyBootstrapped) || strings.Contains(errStr, "already bootstrapped") {
-			ux.Logger.PrintToUser("Network has already been started. Continuing with existing network...")
-		} else {
+		if !server.IsServerError(err, server.ErrAlreadyBootstrapped) && !strings.Contains(errStr, "already bootstrapped") {
 			return fmt.Errorf("failed to start network: %w", err)
 		}
+		ux.Logger.PrintToUser("Network has already been started. Continuing with existing network...")
 	}
 
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
@@ -508,7 +509,7 @@ func StartDevMode() error {
 	}
 
 	// Ensure directories exist
-	if err := os.MkdirAll(logDir, 0o755); err != nil {
+	if err := os.MkdirAll(logDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create log directory: %w", err)
 	}
 
@@ -537,7 +538,7 @@ func StartDevMode() error {
 		"--index-enabled=true",
 	}
 
-	cmd := exec.Command(localNodePath, args...)
+	cmd := exec.Command(localNodePath, args...) //nolint:gosec // G204: Running our own luxd binary
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

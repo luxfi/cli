@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -49,7 +50,7 @@ for cross-chain interoperability.`,
 	return cmd
 }
 
-func deployL1(cmd *cobra.Command, args []string) error {
+func deployL1(_ *cobra.Command, args []string) error {
 	l1Name := args[0]
 
 	// Determine deployment target
@@ -179,7 +180,7 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 	return nil
 }
 
-func deployL1Testnet(l1Name string, sc *models.Sidecar) error {
+func deployL1Testnet(l1Name string, _ *models.Sidecar) error {
 	ux.Logger.PrintToUser("\n🚀 Deploying to testnet...")
 
 	// Use the blockchain deployment logic from blockchaincmd
@@ -202,7 +203,7 @@ func deployL1Testnet(l1Name string, sc *models.Sidecar) error {
 	return nil
 }
 
-func deployL1Mainnet(l1Name string, sc *models.Sidecar) error {
+func deployL1Mainnet(l1Name string, _ *models.Sidecar) error {
 	ux.Logger.PrintToUser("\n🚀 Deploying to mainnet...")
 
 	// Mainnet deployment requires additional security checks

@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package networkoptions provides network option handling for CLI commands.
 package networkoptions
 
 import (
@@ -23,6 +25,7 @@ import (
 	sdkutils "github.com/luxfi/sdk/utils"
 )
 
+// NetworkOption represents a network type option.
 type NetworkOption int64
 
 // CustomEndpointNetwork wraps a Network with a custom endpoint
@@ -39,6 +42,7 @@ func (c *CustomEndpointNetwork) GetEndpoint() string {
 	return c.Network.Endpoint()
 }
 
+// Network option constants.
 const (
 	Undefined NetworkOption = iota
 	Mainnet
@@ -49,6 +53,7 @@ const (
 )
 
 var (
+	// DefaultSupportedNetworkOptions are the default network options.
 	DefaultSupportedNetworkOptions = []NetworkOption{
 		Local,
 		Devnet,
@@ -87,6 +92,7 @@ func (n NetworkOption) String() string {
 	return "invalid network"
 }
 
+// NetworkOptionFromString converts a string to a NetworkOption.
 func NetworkOptionFromString(s string) NetworkOption {
 	switch {
 	case s == "Mainnet":
@@ -104,6 +110,7 @@ func NetworkOptionFromString(s string) NetworkOption {
 	}
 }
 
+// NetworkFlags holds network-related command flags.
 type NetworkFlags struct {
 	UseLocal    bool
 	UseDevnet   bool
@@ -113,6 +120,7 @@ type NetworkFlags struct {
 	ClusterName string
 }
 
+// AddNetworkFlagsToCmd adds network flags to a command.
 func AddNetworkFlagsToCmd(cmd *cobra.Command, networkFlags *NetworkFlags, addEndpoint bool, supportedNetworkOptions []NetworkOption) {
 	addCluster := false
 	for _, networkOption := range supportedNetworkOptions {
@@ -140,6 +148,7 @@ func AddNetworkFlagsToCmd(cmd *cobra.Command, networkFlags *NetworkFlags, addEnd
 	}
 }
 
+// GetNetworkFlagsGroup returns a grouped set of network flags.
 func GetNetworkFlagsGroup(cmd *cobra.Command, networkFlags *NetworkFlags, addEndpoint bool, supportedNetworkOptions []NetworkOption) flags.GroupedFlags {
 	return flags.RegisterFlagGroup(cmd, "Network Flags (Select One)", "show-network-flags", true, func(set *pflag.FlagSet) {
 		addCluster := false
@@ -168,6 +177,7 @@ func GetNetworkFlagsGroup(cmd *cobra.Command, networkFlags *NetworkFlags, addEnd
 	})
 }
 
+// GetSupportedNetworkOptionsForSubnet returns supported network options for a subnet.
 func GetSupportedNetworkOptionsForSubnet(
 	app *application.Lux,
 	subnetName string,
@@ -233,6 +243,7 @@ func GetSupportedNetworkOptionsForSubnet(
 	return filteredSupportedNetworkOptions, clusterNames, devnetEndpoints, nil
 }
 
+// GetNetworkFromSidecar returns network options from a sidecar.
 func GetNetworkFromSidecar(sc models.Sidecar, defaultOption []NetworkOption) []NetworkOption {
 	networkOptionsList := []NetworkOption{}
 	for scNetwork := range sc.Networks {
@@ -248,6 +259,7 @@ func GetNetworkFromSidecar(sc models.Sidecar, defaultOption []NetworkOption) []N
 	return networkOptionsList
 }
 
+// GetNetworkFromCmdLineFlags returns a network based on command line flags.
 func GetNetworkFromCmdLineFlags(
 	app *application.Lux,
 	promptStr string,

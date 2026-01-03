@@ -1,7 +1,10 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
+// NodeConfig contains cloud instance configuration for a node.
 type NodeConfig struct {
 	NodeID        string // instance id on cloud server
 	Region        string // region where cloud server instance is deployed

@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -13,7 +14,7 @@ import (
 func ValidateJSON(path string) ([]byte, error) {
 	var content map[string]interface{}
 
-	contentBytes, err := os.ReadFile(path)
+	contentBytes, err := os.ReadFile(path) //nolint:gosec // G304: Reading JSON file from provided path
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func ValidateJSON(path string) ([]byte, error) {
 
 // ReadJSON reads a JSON file and unmarshals it into the provided interface
 func ReadJSON(path string, v interface{}) error {
-	contentBytes, err := os.ReadFile(path)
+	contentBytes, err := os.ReadFile(path) //nolint:gosec // G304: Reading JSON file from provided path
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func WriteJSON(path string, v interface{}) error {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
 
-	if err := os.WriteFile(path, contentBytes, 0o644); err != nil {
+	if err := os.WriteFile(path, contentBytes, 0o644); err != nil { //nolint:gosec // G306: JSON file needs to be readable
 		return fmt.Errorf("failed to write JSON to %s: %w", path, err)
 	}
 

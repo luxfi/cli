@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package upgradecmd
 
 import (
@@ -325,7 +326,7 @@ func promptNativeMintParams(
 		}
 	}
 	config := nativeminter.NewConfig(
-		evmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())), //nolint:gosec // G115: Unix time is positive
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -352,7 +353,7 @@ func promptRewardManagerParams(
 		return false, err
 	}
 	config := rewardmanager.NewConfig(
-		evmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())), //nolint:gosec // G115: Unix time is positive
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -431,7 +432,7 @@ func promptFeeManagerParams(
 		)
 	}
 	config := feemanager.NewConfig(
-		evmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())), //nolint:gosec // G115: Unix time is positive
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -576,7 +577,7 @@ func promptContractAllowListParams(
 		return cancelled, err
 	}
 	config := deployerallowlist.NewConfig(
-		evmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())), //nolint:gosec // G115: Unix time is positive
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,
@@ -598,7 +599,7 @@ func promptTxAllowListParams(
 		return cancelled, err
 	}
 	config := txallowlist.NewConfig(
-		evmutils.NewUint64(uint64(date.Unix())),
+		evmutils.NewUint64(uint64(date.Unix())), //nolint:gosec // G115: Unix time is positive
 		adminAddrs,
 		enabledAddrs,
 		managerAddrs,

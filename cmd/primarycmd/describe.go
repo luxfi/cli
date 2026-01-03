@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package primarycmd
 
 import (
@@ -74,16 +75,15 @@ func describe(_ *cobra.Command, _ []string) error {
 		}
 		return err
 	}
-	if network.Kind() == models.Local {
-	} else if network.ClusterName() != "" {
-		if clusterConfig, err := app.GetClusterConfig(network.ClusterName()); err != nil {
+	if network.Kind() != models.Local && network.ClusterName() != "" {
+		clusterConfig, err := app.GetClusterConfig(network.ClusterName())
+		if err != nil {
 			return err
-		} else {
-			// TODO: Fix cluster config access - might need type assertion or different method
-			// warpMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
-			// warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
-			_ = clusterConfig
 		}
+		// TODO: Fix cluster config access - might need type assertion or different method
+		// warpMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
+		// warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
+		_ = clusterConfig
 	}
 	fmt.Print(luxlog.LightBlue.Wrap(art))
 	blockchainIDHexEncoding := "0x" + hex.EncodeToString(blockchainID[:])
