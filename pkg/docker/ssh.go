@@ -97,7 +97,7 @@ func ComposeSSHSetupNode(
 		host,
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
-		DockerComposeInputs{
+		ComposeInputs{
 			LuxgoVersion:   luxdVersion,
 			WithMonitoring: withMonitoring,
 			WithLuxgo:      true,
@@ -107,12 +107,13 @@ func ComposeSSHSetupNode(
 		})
 }
 
+// ComposeSSHSetupLoadTest sets up load test environment using docker-compose.
 func ComposeSSHSetupLoadTest(host *models.Host) error {
 	return ComposeOverSSH("Compose Node",
 		host,
 		constants.SSHScriptTimeout,
 		"templates/luxd.docker-compose.yml",
-		DockerComposeInputs{
+		ComposeInputs{
 			WithMonitoring: true,
 			WithLuxgo:      false,
 		})
@@ -165,15 +166,16 @@ func ComposeSSHSetupMonitoring(host *models.Host) error {
 		host,
 		constants.SSHScriptTimeout,
 		"templates/monitoring.docker-compose.yml",
-		DockerComposeInputs{})
+		ComposeInputs{})
 }
 
+// ComposeSSHSetupWarpRelayer sets up the AWM warp relayer using docker-compose.
 func ComposeSSHSetupWarpRelayer(host *models.Host, relayerVersion string) error {
 	return ComposeOverSSH("Setup AWM Relayer",
 		host,
 		constants.SSHScriptTimeout,
 		"templates/awmrelayer.docker-compose.yml",
-		DockerComposeInputs{
+		ComposeInputs{
 			WarpRelayerVersion: relayerVersion,
 		})
 }

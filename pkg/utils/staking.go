@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -75,7 +76,7 @@ func GetNodeParams(nodeDir string) (
 	[]byte, // bls proof of possession
 	error,
 ) {
-	certBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.StakerCertFileName))
+	certBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.StakerCertFileName)) //nolint:gosec // G304: Reading staker cert from node directory
 	if err != nil {
 		return ids.EmptyNodeID, nil, nil, err
 	}
@@ -83,7 +84,7 @@ func GetNodeParams(nodeDir string) (
 	if err != nil {
 		return ids.EmptyNodeID, nil, nil, err
 	}
-	blsKeyBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.BLSKeyFileName))
+	blsKeyBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.BLSKeyFileName)) //nolint:gosec // G304: Reading BLS key from node directory
 	if err != nil {
 		return ids.EmptyNodeID, nil, nil, err
 	}
@@ -105,7 +106,7 @@ func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, subne
 	}
 	for _, v := range vs {
 		if v.NodeID == nodeID {
-			return time.Unix(int64(v.EndTime), 0).Sub(startTime), nil
+			return time.Unix(int64(v.EndTime), 0).Sub(startTime), nil //nolint:gosec // G115: EndTime is positive Unix timestamp
 		}
 	}
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
@@ -254,7 +255,7 @@ func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
 
 	// Load BLS key
 	blsPath := filepath.Join(nodeDir, constants.BLSKeyFileName)
-	keys.BLSSecretKey, err = os.ReadFile(blsPath)
+	keys.BLSSecretKey, err = os.ReadFile(blsPath) //nolint:gosec // G304: Reading from node's key directory
 	if err != nil {
 		return nil, fmt.Errorf("failed to load BLS key: %w", err)
 	}
@@ -265,7 +266,7 @@ func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
 
 	// Load Ringtail key
 	ringtailPath := filepath.Join(nodeDir, constants.RingtailKeyFileName)
-	ringtailHex, err := os.ReadFile(ringtailPath)
+	ringtailHex, err := os.ReadFile(ringtailPath) //nolint:gosec // G304: Reading from node's key directory
 	if err != nil {
 		return nil, fmt.Errorf("failed to load Ringtail key: %w", err)
 	}
@@ -280,7 +281,7 @@ func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
 
 	// Load ML-DSA key
 	mldsaPath := filepath.Join(nodeDir, constants.MLDSAKeyFileName)
-	mldsaHex, err := os.ReadFile(mldsaPath)
+	mldsaHex, err := os.ReadFile(mldsaPath) //nolint:gosec // G304: Reading from node's key directory
 	if err != nil {
 		return nil, fmt.Errorf("failed to load ML-DSA key: %w", err)
 	}
@@ -302,7 +303,7 @@ func GetQuantumNodeParams(nodeDir string) (
 	*QuantumKeys,
 	error,
 ) {
-	certBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.StakerCertFileName))
+	certBytes, err := os.ReadFile(filepath.Join(nodeDir, constants.StakerCertFileName)) //nolint:gosec // G304: Reading from node's directory
 	if err != nil {
 		return ids.EmptyNodeID, nil, err
 	}

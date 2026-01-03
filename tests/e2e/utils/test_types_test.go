@@ -29,7 +29,7 @@ func TestFlagsAsMaps(t *testing.T) {
 	}
 
 	// Verify we can access values
-	if globalFlags["local"] != true {
+	if globalFlags["local"] != true { //nolint:revive // bool-literal-in-expr: map returns interface{}
 		t.Error("Expected global flag 'local' to be true")
 	}
 

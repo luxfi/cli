@@ -53,27 +53,27 @@ func NewSoftwareBackend() *SoftwareBackend {
 	}
 }
 
-func (b *SoftwareBackend) Type() BackendType {
+func (*SoftwareBackend) Type() BackendType {
 	return BackendSoftware
 }
 
-func (b *SoftwareBackend) Name() string {
+func (*SoftwareBackend) Name() string {
 	return "Encrypted File Storage"
 }
 
-func (b *SoftwareBackend) Available() bool {
+func (*SoftwareBackend) Available() bool {
 	return true // Always available
 }
 
-func (b *SoftwareBackend) RequiresPassword() bool {
+func (*SoftwareBackend) RequiresPassword() bool {
 	return true
 }
 
-func (b *SoftwareBackend) RequiresHardware() bool {
+func (*SoftwareBackend) RequiresHardware() bool {
 	return false
 }
 
-func (b *SoftwareBackend) SupportsRemoteSigning() bool {
+func (*SoftwareBackend) SupportsRemoteSigning() bool {
 	return false
 }
 

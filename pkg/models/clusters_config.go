@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import (
@@ -19,16 +21,19 @@ func filter[T any](input []T, f func(T) bool) []T {
 	return output
 }
 
+// GCPConfig contains Google Cloud Platform configuration settings.
 type GCPConfig struct {
 	ProjectName        string // name of GCP Project
 	ServiceAccFilePath string // location of GCP service account key file path
 }
 
+// ExtraNetworkData contains additional network-specific data.
 type ExtraNetworkData struct {
 	CChainTeleporterMessengerAddress string
 	CChainTeleporterRegistryAddress  string
 }
 
+// ClusterConfig contains configuration for a deployment cluster.
 type ClusterConfig struct {
 	Nodes              []string
 	APINodes           []string
@@ -42,6 +47,7 @@ type ClusterConfig struct {
 	HTTPAccess         constants.HTTPAccess
 }
 
+// ClustersConfig contains configuration for all deployment clusters.
 type ClustersConfig struct {
 	Version   string
 	KeyPair   map[string]string        // maps key pair name to cert path
@@ -49,28 +55,31 @@ type ClustersConfig struct {
 	GCPConfig GCPConfig                // stores GCP project name and filepath to service account JSON key
 }
 
-// GetAPINodes returns a filtered list of API nodes based on the ClusterConfig and given hosts.
+// GetAPIHosts returns a filtered list of API hosts from the given hosts.
 func (cc *ClusterConfig) GetAPIHosts(hosts []*Host) []*Host {
 	return filter(hosts, func(h *Host) bool {
 		return slices.Contains(cc.APINodes, h.NodeID)
 	})
 }
 
-// GetValidatorNodes returns the validator nodes from the ClusterConfig.
+// GetValidatorHosts returns the validator hosts (non-API nodes) from the given hosts.
 func (cc *ClusterConfig) GetValidatorHosts(hosts []*Host) []*Host {
 	return filter(hosts, func(h *Host) bool {
 		return !slices.Contains(cc.APINodes, h.GetCloudID())
 	})
 }
 
+// IsAPIHost returns true if the given cloud ID corresponds to an API host.
 func (cc *ClusterConfig) IsAPIHost(hostCloudID string) bool {
 	return cc.Local || slices.Contains(cc.APINodes, hostCloudID)
 }
 
+// IsLuxdHost returns true if the given cloud ID corresponds to a Luxd host.
 func (cc *ClusterConfig) IsLuxdHost(hostCloudID string) bool {
 	return cc.Local || slices.Contains(cc.Nodes, hostCloudID)
 }
 
+// GetCloudIDs returns all cloud instance IDs in the cluster.
 func (cc *ClusterConfig) GetCloudIDs() []string {
 	if cc.Local {
 		return nil
@@ -82,6 +91,7 @@ func (cc *ClusterConfig) GetCloudIDs() []string {
 	return r
 }
 
+// GetHostRoles returns the roles assigned to a host based on its configuration.
 func (cc *ClusterConfig) GetHostRoles(nodeConf NodeConfig) []string {
 	roles := []string{}
 	if cc.IsLuxdHost(nodeConf.NodeID) {

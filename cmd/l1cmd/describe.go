@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -19,7 +20,7 @@ func newDescribeCmd() *cobra.Command {
 		Short: "Show detailed information about an L1",
 		Long:  `Show detailed configuration and status information for a sovereign L1 blockchain.`,
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			l1Name := args[0]
 
 			sc, err := app.LoadSidecar(l1Name)

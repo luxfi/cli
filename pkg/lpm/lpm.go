@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
-// LPM (Lux Plugin Manager) client wrapper for CLI integration
+// See the file LICENSE for licensing terms.
+
 package lpm
 
 import (
@@ -71,11 +72,11 @@ func (c *Client) JoinSubnet(alias string) error {
 // Placeholder methods to maintain compatibility with existing LPM interface
 
 // GetVM is a placeholder to maintain compatibility
-func (c *Client) GetVM(_ string, _ string) (*VMUpload, error) {
+func (*Client) GetVM(_ string, _ string) (*VMUpload, error) {
 	return nil, fmt.Errorf("GetVM not implemented in LPM - use Install instead")
 }
 
 // AddVM is a placeholder to maintain compatibility
-func (c *Client) AddVM(_ *VMUpload) error {
+func (*Client) AddVM(_ *VMUpload) error {
 	return fmt.Errorf("AddVM not implemented in LPM - use repository-based installation")
 }

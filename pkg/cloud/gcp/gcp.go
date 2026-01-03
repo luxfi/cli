@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package gcp provides Google Cloud Platform integration for Lux CLI.
 package gcp
 
 import (
@@ -29,16 +30,18 @@ const (
 	gcpRegionAPI  = "https://www.googleapis.com/compute/v1/projects/%s/regions/%s"
 )
 
+// ErrNodeNotFoundToBeRunning is returned when a node is not found in running state.
 var ErrNodeNotFoundToBeRunning = errors.New("node not found to be running")
 
+// GcpCloud provides GCP cloud operations.
 type GcpCloud struct {
 	gcpClient *compute.Service
 	ctx       context.Context
 	projectID string
 }
 
-// NewGcpCloud creates a GCP cloud
-func NewGcpCloud(gcpClient *compute.Service, projectID string, ctx context.Context) (*GcpCloud, error) {
+// NewGcpCloud creates a GCP cloud.
+func NewGcpCloud(ctx context.Context, gcpClient *compute.Service, projectID string) (*GcpCloud, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -124,10 +127,9 @@ func (c *GcpCloud) SetupNetwork(ipAddress, networkName string) (*compute.Network
 	}
 	if insertOp == nil {
 		return nil, fmt.Errorf("error creating network %s: %w", networkName, err)
-	} else {
-		if err := c.waitForOperation(insertOp); err != nil {
-			return nil, err
-		}
+	}
+	if err := c.waitForOperation(insertOp); err != nil {
+		return nil, err
 	}
 	// Retrieve the created firewall
 	createdNetwork, err := c.gcpClient.Networks.Get(c.projectID, networkName).Do()
@@ -175,10 +177,9 @@ func (c *GcpCloud) SetFirewallRule(ipAddress, firewallName, networkName string, 
 	}
 	if insertOp == nil {
 		return nil, fmt.Errorf("error creating firewall rule %s: %w", firewallName, err)
-	} else {
-		if err := c.waitForOperation(insertOp); err != nil {
-			return nil, err
-		}
+	}
+	if err := c.waitForOperation(insertOp); err != nil {
+		return nil, err
 	}
 	return c.gcpClient.Firewalls.Get(c.projectID, firewallName).Do()
 }

@@ -59,6 +59,7 @@ func makeAlias(org, repo string) string {
 	return org + "/" + repo
 }
 
+// MakeKey creates an LPM key from an alias and subnet name.
 func MakeKey(alias, subnet string) string {
 	return alias + ":" + subnet
 }

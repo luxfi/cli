@@ -20,7 +20,7 @@ import (
 	"golang.org/x/crypto/ripemd160" //nolint:gosec // G507: Required for legacy address derivation
 )
 
-// Genesis types for genesis.json
+// GenesisAllocation represents a genesis allocation entry in genesis.json.
 type GenesisAllocation struct {
 	EthAddr        string           `json:"ethAddr"`
 	LuxAddr        string           `json:"luxAddr"`
@@ -274,7 +274,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	actualOutput := outputFile
 	if actualOutput == "" || saveToLux {
 		networksDir := filepath.Join(app.GetBaseDir(), "networks", networkName)
-		if err := os.MkdirAll(networksDir, 0o755); err != nil {
+		if err := os.MkdirAll(networksDir, 0o750); err != nil {
 			return fmt.Errorf("failed to create networks directory: %w", err)
 		}
 		defaultOutput := filepath.Join(networksDir, "genesis.json")
@@ -321,17 +321,16 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	}
 
 	if len(missingKeys) > 0 {
-		if generateKeys {
-			ux.Logger.Info("Generating missing keys: %s", strings.Join(missingKeys, ", "))
-			for _, keyName := range missingKeys {
-				if err := generateKeySet(keyName); err != nil {
-					return fmt.Errorf("failed to generate key %s: %w", keyName, err)
-				}
-				ux.Logger.Info("Generated key set: %s", keyName)
-			}
-		} else {
+		if !generateKeys {
 			return fmt.Errorf("missing keys: %s\nUse --generate-keys to create them, or create manually with 'lux key create'",
 				strings.Join(missingKeys, ", "))
+		}
+		ux.Logger.Info("Generating missing keys: %s", strings.Join(missingKeys, ", "))
+		for _, keyName := range missingKeys {
+			if err := generateKeySet(keyName); err != nil {
+				return fmt.Errorf("failed to generate key %s: %w", keyName, err)
+			}
+			ux.Logger.Info("Generated key set: %s", keyName)
 		}
 	}
 
@@ -347,7 +346,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		keyDir := filepath.Join(keysDir, keyName)
 
 		// Read EC public key
-		ecPubBytes, err := os.ReadFile(filepath.Join(keyDir, "ec", "public.key"))
+		ecPubBytes, err := os.ReadFile(filepath.Join(keyDir, "ec", "public.key")) //nolint:gosec // G304: Reading from app's key directory
 		if err != nil {
 			return fmt.Errorf("failed to read EC public key for %s: %w", keyName, err)
 		}
@@ -363,7 +362,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 
 		// Derive P-Chain address (bech32)
 		sha256Hash := sha256.Sum256(ecPubDecoded)
-		ripemdHasher := ripemd160.New()
+		ripemdHasher := ripemd160.New() //nolint:gosec // G406: Required for legacy address derivation
 		ripemdHasher.Write(sha256Hash[:])
 		shortID := ripemdHasher.Sum(nil)
 		luxAddr, err := formatLuxAddress("P", config.HRP, shortID)
@@ -372,11 +371,11 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		}
 
 		// Read BLS keys for staker info
-		blsPubBytes, err := os.ReadFile(filepath.Join(keyDir, "bls", "public.key"))
+		blsPubBytes, err := os.ReadFile(filepath.Join(keyDir, "bls", "public.key")) //nolint:gosec // G304: Reading from app's key directory
 		if err != nil {
 			return fmt.Errorf("failed to read BLS public key for %s: %w", keyName, err)
 		}
-		blsPopBytes, err := os.ReadFile(filepath.Join(keyDir, "bls", "pop.key"))
+		blsPopBytes, err := os.ReadFile(filepath.Join(keyDir, "bls", "pop.key")) //nolint:gosec // G304: Reading from app's key directory
 		if err != nil {
 			return fmt.Errorf("failed to read BLS PoP for %s: %w", keyName, err)
 		}
@@ -418,7 +417,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	for i, keyName := range xKeys {
 		keyDir := filepath.Join(keysDir, keyName)
 
-		ecPubBytes, err := os.ReadFile(filepath.Join(keyDir, "ec", "public.key"))
+		ecPubBytes, err := os.ReadFile(filepath.Join(keyDir, "ec", "public.key")) //nolint:gosec // G304: Reading from app's key directory
 		if err != nil {
 			return fmt.Errorf("failed to read EC public key for %s: %w", keyName, err)
 		}
@@ -432,7 +431,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		ethAddr := fmt.Sprintf("0x%x", evmAddr)
 
 		sha256HashX := sha256.Sum256(ecPubDecoded)
-		ripemdHasherX := ripemd160.New()
+		ripemdHasherX := ripemd160.New() //nolint:gosec // G406: Required for legacy address derivation
 		ripemdHasherX.Write(sha256HashX[:])
 		shortID := ripemdHasherX.Sum(nil)
 		luxAddr, err := formatLuxAddress("X", config.HRP, shortID)
@@ -461,7 +460,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	// Create X-Chain genesis JSON
 	xGenesis := XChainGenesis{
 		Allocations:                xAllocations,
-		StartTime:                  uint64(time.Now().Unix()),
+		StartTime:                  uint64(time.Now().Unix()), //nolint:gosec // G115: Unix time is positive
 		InitialStakeDuration:       secondsPerYear,
 		InitialStakeDurationOffset: 5400,
 		InitialStakedFunds:         []string{},
@@ -475,7 +474,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	// Load existing C-Chain genesis if specified
 	cChainGenesis := getDefaultCChainGenesis(config.ChainID)
 	if preserveCGenesis != "" {
-		existingGenesis, err := os.ReadFile(preserveCGenesis)
+		existingGenesis, err := os.ReadFile(preserveCGenesis) //nolint:gosec // G304: User-specified file for genesis preservation
 		if err != nil {
 			return fmt.Errorf("failed to read existing genesis: %w", err)
 		}
@@ -491,7 +490,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	genesis := Genesis{
 		NetworkID:                  config.NetworkID,
 		Allocations:                pAllocations,
-		StartTime:                  uint64(time.Now().Unix()),
+		StartTime:                  uint64(time.Now().Unix()), //nolint:gosec // G115: Unix time is positive
 		InitialStakeDuration:       secondsPerYear,
 		InitialStakeDurationOffset: 5400,
 		InitialStakedFunds:         initialStakedFunds,
@@ -507,7 +506,7 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to marshal genesis: %w", err)
 	}
 
-	if err := os.WriteFile(actualOutput, output, 0o644); err != nil {
+	if err := os.WriteFile(actualOutput, output, 0o644); err != nil { //nolint:gosec // G306: Genesis file needs to be readable
 		return fmt.Errorf("failed to write genesis file: %w", err)
 	}
 
@@ -517,12 +516,12 @@ func runGenesisCmd(_ *cobra.Command, _ []string) error {
 	// Also save to ~/.lux/networks/<network>/genesis.json if --save flag is set
 	if saveToLux && outputFile != "" {
 		networksDir := filepath.Join(app.GetBaseDir(), "networks", networkName)
-		if err := os.MkdirAll(networksDir, 0o755); err != nil {
+		if err := os.MkdirAll(networksDir, 0o750); err != nil {
 			return fmt.Errorf("failed to create networks directory: %w", err)
 		}
 		defaultOutput := filepath.Join(networksDir, "genesis.json")
 		if actualOutput != defaultOutput {
-			if err := os.WriteFile(defaultOutput, output, 0o644); err != nil {
+			if err := os.WriteFile(defaultOutput, output, 0o644); err != nil { //nolint:gosec // G306: Genesis file needs to be readable
 				return fmt.Errorf("failed to write genesis to ~/.lux: %w", err)
 			}
 			ux.Logger.Info("Genesis also saved to: %s", defaultOutput)
@@ -560,7 +559,7 @@ func createVestingAllocation(ethAddr, luxAddr string, totalAmount uint64, years 
 		if unlock > remaining {
 			unlock = remaining
 		}
-		locktime := uint64(jan2020 + (i+1)*secondsPerYear)
+		locktime := uint64(jan2020 + (i+1)*secondsPerYear) //nolint:gosec // G115: Vesting timestamps are bounded
 		schedule = append(schedule, UnlockSchedule{
 			Amount:   unlock,
 			Locktime: locktime,

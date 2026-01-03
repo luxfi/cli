@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import (
@@ -7,6 +9,7 @@ import (
 	"github.com/luxfi/netrunner/utils"
 )
 
+// TokenInfo contains token metadata.
 type TokenInfo struct {
 	Name     string `json:"name"`
 	Symbol   string `json:"symbol"`
@@ -14,6 +17,7 @@ type TokenInfo struct {
 	Supply   string `json:"supply"`
 }
 
+// NetworkData contains deployment information for a network.
 type NetworkData struct {
 	SubnetID                   ids.ID
 	BlockchainID               ids.ID
@@ -26,14 +30,18 @@ type NetworkData struct {
 	BootstrapValidators        []SubnetValidator // Bootstrap validators for the network
 }
 
+// MultisigTxInfo contains multisig transaction information.
 type MultisigTxInfo struct {
 	Threshold uint32   `json:"threshold"`
 	Addresses []string `json:"addresses"`
 }
 
+// PermissionlessValidators contains permissionless validator information.
 type PermissionlessValidators struct {
 	TxID ids.ID
 }
+
+// ElasticChain contains elastic subnet configuration.
 type ElasticChain struct {
 	SubnetID    ids.ID
 	AssetID     ids.ID
@@ -44,6 +52,7 @@ type ElasticChain struct {
 	Txs         map[string]ids.ID
 }
 
+// Sidecar contains chain configuration metadata.
 type Sidecar struct {
 	Name            string
 	VM              VMType
@@ -91,6 +100,7 @@ type Sidecar struct {
 	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
 }
 
+// GetVMID returns the VM ID for the sidecar.
 func (sc Sidecar) GetVMID() (string, error) {
 	// get vmid
 	var vmid string

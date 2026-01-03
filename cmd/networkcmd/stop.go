@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -93,6 +94,7 @@ SNAPSHOT vs CLEAN:
 	return cmd
 }
 
+// StopNetwork stops the local network.
 func StopNetwork(*cobra.Command, []string) error {
 	// Get all running networks
 	runningNetworks := app.GetAllRunningNetworks()
@@ -187,7 +189,7 @@ func StopNetwork(*cobra.Command, []string) error {
 // isDevModeRunning checks if a dev mode node is currently running
 func isDevModeRunning() bool {
 	pidFile := filepath.Join(os.Getenv("HOME"), constants.BaseDirName, constants.DevDir, "luxd.pid")
-	pidData, err := os.ReadFile(pidFile)
+	pidData, err := os.ReadFile(pidFile) //nolint:gosec // G304: Reading PID file from app's directory
 	if err != nil {
 		return false
 	}

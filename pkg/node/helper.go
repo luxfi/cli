@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package node
 
 import (
@@ -173,7 +174,7 @@ func getRPCIncompatibleNodes(app *application.Lux, hosts []*models.Host, subnetN
 	incompatibleNodes := []string{}
 	for nodeID, rpcVersionI := range wgResults.GetResultMap() {
 		rpcVersion := rpcVersionI.(uint32)
-		if rpcVersion != uint32(sc.RPCVersion) {
+		if rpcVersion != uint32(sc.RPCVersion) { //nolint:gosec // G115: RPCVersion is bounded
 			incompatibleNodes = append(incompatibleNodes, nodeID)
 		}
 	}

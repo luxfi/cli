@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package txutils
 
 import (
@@ -10,7 +11,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/txs"
 )
 
-// saves a given [tx] to [txPath]
+// SaveToDisk saves a given tx to the specified path.
 func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
 	// Serialize the signed tx
 	txBytes, err := txs.Codec.Marshal(txs.CodecVersion, tx)
@@ -39,7 +40,7 @@ func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
 	return nil
 }
 
-// loads a tx from [txPath]
+// LoadFromDisk loads a tx from the specified path.
 func LoadFromDisk(txPath string) (*txs.Tx, error) {
 	txEncodedBytes, err := os.ReadFile(txPath) //nolint:gosec // G304: Reading from user-specified path
 	if err != nil {

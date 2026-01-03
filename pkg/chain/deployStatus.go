@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
+// GetLocallyDeployedSubnetsFromFile reads the list of locally deployed subnets from file.
 func GetLocallyDeployedSubnetsFromFile(app *application.Lux) ([]string, error) {
 	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
@@ -158,7 +159,7 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 		// Copy to each node's chainConfigs directory
 		for _, nodeDir := range nodeDirs {
 			destDir := filepath.Join(nodeDir, "chainConfigs", blockchainID)
-			if err := os.MkdirAll(destDir, 0o755); err != nil {
+			if err := os.MkdirAll(destDir, 0o750); err != nil {
 				ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", subnetName, err)
 				continue
 			}
@@ -190,13 +191,13 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 
 // copyFile copies a file from src to dst
 func copyFile(src, dst string) error {
-	sourceFile, err := os.Open(src)
+	sourceFile, err := os.Open(src) //nolint:gosec // G304: Copying files within app's config directories
 	if err != nil {
 		return err
 	}
 	defer func() { _ = sourceFile.Close() }()
 
-	destFile, err := os.Create(dst)
+	destFile, err := os.Create(dst) //nolint:gosec // G304: Creating file within app's config directories
 	if err != nil {
 		return err
 	}
@@ -214,7 +215,7 @@ func copyFile(src, dst string) error {
 func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 	// Use ChainsDir for all chain configs - consolidating chain-configs into chains/
 	chainConfigsDir := app.GetChainConfigDir()
-	if err := os.MkdirAll(chainConfigsDir, 0o755); err != nil {
+	if err := os.MkdirAll(chainConfigsDir, 0o750); err != nil {
 		return "", err
 	}
 
@@ -261,7 +262,7 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 
 		// Create blockchain ID subdirectory
 		blockchainDir := filepath.Join(chainConfigsDir, blockchainID)
-		if err := os.MkdirAll(blockchainDir, 0o755); err != nil {
+		if err := os.MkdirAll(blockchainDir, 0o750); err != nil {
 			ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", subnetName, err)
 			continue
 		}
@@ -303,7 +304,7 @@ func writeSubnetConfig(srcConfig, destConfig string) error {
 
 	// If source config exists, read and merge
 	if _, err := os.Stat(srcConfig); err == nil {
-		data, err := os.ReadFile(srcConfig)
+		data, err := os.ReadFile(srcConfig) //nolint:gosec // G304: Reading from app's config directory
 		if err == nil {
 			var srcCfg map[string]interface{}
 			if json.Unmarshal(data, &srcCfg) == nil {
@@ -322,5 +323,5 @@ func writeSubnetConfig(srcConfig, destConfig string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(destConfig, data, 0o644)
+	return os.WriteFile(destConfig, data, 0o644) //nolint:gosec // G306: Config needs to be readable
 }

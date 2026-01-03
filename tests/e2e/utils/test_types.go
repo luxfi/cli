@@ -75,7 +75,7 @@ func TestCommand(cmd, subCmd string, args []string, globalFlags GlobalFlags, tes
 	}
 
 	// Build exec command
-	execCmd := exec.Command(cmd, cmdArgs...)
+	execCmd := exec.Command(cmd, cmdArgs...) //nolint:gosec // G204: Running our own CLI binary in tests
 
 	// Set environment variables
 	if envMap, ok := testFlags["env"].(map[string]string); ok {

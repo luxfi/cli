@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package l1cmd
 
 import (
@@ -78,7 +79,7 @@ with validator management capabilities.`,
 	return cmd
 }
 
-func importHistoricL1s(cmd *cobra.Command, args []string) error {
+func importHistoricL1s(_ *cobra.Command, _ []string) error {
 	ux.Logger.PrintToUser("Importing historic blockchains as sovereign L1s...")
 
 	for _, l1 := range historicL1s {
@@ -132,9 +133,9 @@ func importHistoricL1s(cmd *cobra.Command, args []string) error {
 
 		// Create genesis with L1 features
 		genesis := vm.CreateEVMGenesis(
-			big.NewInt(int64(l1.ChainID)),
-			nil, // allocations
-			nil, // timestamps
+			big.NewInt(int64(l1.ChainID)), //nolint:gosec // G115: Chain ID is within int64 range
+			nil,                           // allocations
+			nil,                           // timestamps
 		)
 
 		// Add PoA validator manager

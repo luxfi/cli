@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
+// LuxdConfigOptions contains configuration options for Luxd node.
 type LuxdConfigOptions struct {
 	BootstrapIPs      []string
 	BootstrapIDs      []string

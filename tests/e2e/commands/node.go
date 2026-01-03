@@ -28,9 +28,9 @@ const (
 func NodeCreate(network, version string, numNodes int, separateMonitoring bool, numAPINodes int, expectSuccess bool) string {
 	home, err := os.UserHomeDir()
 	gomega.Expect(err).Should(gomega.BeNil())
-	_, err = os.Open(filepath.Join(home, ".ssh", e2eKeyPairName))
+	_, err = os.Open(filepath.Join(home, ".ssh", e2eKeyPairName)) //nolint:gosec // G304: Reading test SSH key
 	gomega.Expect(err).Should(gomega.BeNil())
-	_, err = os.Open(filepath.Join(home, ".ssh", e2eKeyPairName+".pub"))
+	_, err = os.Open(filepath.Join(home, ".ssh", e2eKeyPairName+".pub")) //nolint:gosec // G304: Reading test SSH key
 	gomega.Expect(err).Should(gomega.BeNil())
 	cmdVersion := "--latest-luxd-version=true"
 	if version != "latest" && version != "" {
@@ -122,13 +122,12 @@ func NodeSSH(name, command string) string {
 	re := regexp.MustCompile(pattern)
 
 	lines := strings.Split(multilineText, "\n")
-	var output []string
+	output := make([]string, 0, len(lines))
 	for _, line := range lines {
 		if re.MatchString(line) {
 			continue
-		} else {
-			output = append(output, line)
 		}
+		output = append(output, line)
 	}
 	return strings.Join(output, "\n")
 }
@@ -222,7 +221,7 @@ type PrometheusConfig struct {
 // ParsePrometheusYamlConfig parses prometheus config YAML file installed in separate monitoring
 // host in /etc/prometheus/prometheus.yml
 func ParsePrometheusYamlConfig(filePath string) PrometheusConfig {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec // G304: Reading test config file
 	gomega.Expect(err).Should(gomega.BeNil())
 	var prometheusConfig PrometheusConfig
 	err = yaml.Unmarshal(data, &prometheusConfig)

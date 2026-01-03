@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -53,7 +54,7 @@ func FindErrorLogs(rootDirs ...string) {
 				if !strings.HasSuffix(d.Name(), "log") {
 					return nil
 				}
-				content, err := os.ReadFile(path)
+				content, err := os.ReadFile(path) //nolint:gosec // G304: Reading log files in app's directory
 				if err != nil {
 					return err
 				}

@@ -1,5 +1,6 @@
 // Copyright (C) 2020-2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package types
 
 // ConfigWriter provides methods for writing configuration
