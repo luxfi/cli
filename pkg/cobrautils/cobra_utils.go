@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package cobrautils
 
 import (
@@ -79,12 +80,12 @@ func MinimumNArgs(n int) cobra.PositionalArgs {
 	}
 }
 
-func RangeArgs(min int, max int) cobra.PositionalArgs {
+func RangeArgs(minArgs int, maxArgs int) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
-		if len(args) < min || len(args) > max {
+		if len(args) < minArgs || len(args) > maxArgs {
 			_ = cmd.Help() // show full help with flag grouping
 			fmt.Println("")
-			return ErrRangeArgCount(min, max, len(args))
+			return ErrRangeArgCount(minArgs, maxArgs, len(args))
 		}
 		return nil
 	}

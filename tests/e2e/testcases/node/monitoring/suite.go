@@ -57,7 +57,7 @@ var _ = ginkgo.Describe("[Node monitoring]", func() {
 		usr, err := user.Current()
 		gomega.Expect(err).Should(gomega.BeNil())
 		homeDir := usr.HomeDir
-		content, err := os.ReadFile(filepath.Join(homeDir, constants.E2EBaseDirName, relativePath, constants.ClustersConfigFileName))
+		content, err := os.ReadFile(filepath.Join(homeDir, constants.E2EBaseDirName, relativePath, constants.ClustersConfigFileName)) //nolint:gosec // G304: Test code reading from test directories
 		gomega.Expect(err).Should(gomega.BeNil())
 		clustersConfig := models.ClustersConfig{}
 		err = json.Unmarshal(content, &clustersConfig)

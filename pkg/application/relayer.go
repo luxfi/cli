@@ -8,6 +8,6 @@ import (
 )
 
 // GetWarpRelayerServiceConfigPath returns the path to the warp relayer service config
-func (a *Lux) GetWarpRelayerServiceConfigPath(blockchainName string) string {
-	return filepath.Join(a.GetBaseDir(), "services", "warp-relayer", blockchainName+".yml")
+func (app *Lux) GetWarpRelayerServiceConfigPath(blockchainName string) string {
+	return filepath.Join(app.GetBaseDir(), "services", "warp-relayer", blockchainName+".yml")
 }

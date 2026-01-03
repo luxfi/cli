@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package vm
 
 import (
@@ -37,7 +38,7 @@ func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string
 		}
 	} else {
 		ux.Logger.PrintToUser("Importing genesis")
-		genesisBytes, err = os.ReadFile(genesisPath)
+		genesisBytes, err = os.ReadFile(genesisPath) //nolint:gosec // G304: User-specified genesis file
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}

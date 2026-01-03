@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -552,7 +553,7 @@ func IsValidSemanticVersion(version string, component string) bool {
 func PrintUnreportedErrors(
 	errors []error,
 	returnedError error,
-	print func(string, ...interface{}),
+	printFn func(string, ...interface{}),
 ) {
 	if returnedError == nil {
 		return
@@ -561,7 +562,7 @@ func PrintUnreportedErrors(
 	errSet.Add(returnedError.Error())
 	for _, err := range errors {
 		if !errSet.Contains(err.Error()) {
-			print(err.Error())
+			printFn(err.Error())
 			errSet.Add(err.Error())
 		}
 	}
@@ -573,12 +574,12 @@ func NewLogger(
 	defaultLogLevelStr string,
 	logDir string,
 	logToStdout bool,
-	print func(string, ...interface{}),
+	printFn func(string, ...interface{}),
 ) (luxlog.Logger, error) {
 	logLevel, err := level.ToLevel(logLevelStr)
 	if err != nil {
 		if logLevelStr != "" {
-			print("undefined logLevel %s. Setting %s log to %s", logLevelStr, logName, defaultLogLevelStr)
+			printFn("undefined logLevel %s. Setting %s log to %s", logLevelStr, logName, defaultLogLevelStr)
 		}
 		logLevel, err = level.ToLevel(defaultLogLevelStr)
 		if err != nil {
@@ -623,7 +624,7 @@ func MkDirWithTimestamp(dirPrefix string) (string, error) {
 	const dirTimestampFormat = "20060102_150405"
 	currentTime := time.Now().Format(dirTimestampFormat)
 	dirName := dirPrefix + "_" + currentTime
-	return dirName, os.MkdirAll(dirName, 0o750) //nolint:gosec // G301: Using 0750 for directory
+	return dirName, os.MkdirAll(dirName, 0o750)
 }
 
 func PointersSlice[T any](input []T) []*T {

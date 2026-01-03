@@ -1,12 +1,17 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models contains data structures and types used throughout the CLI.
 package models
 
 import "github.com/luxfi/cli/pkg/constants"
 
+// VMType represents a virtual machine type.
 type VMType string
 
+// VM type constants.
 const (
+	// EVM is the Ethereum Virtual Machine.
 	EVM         = "EVM"
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
@@ -14,6 +19,7 @@ const (
 	CustomVM    = "Custom"
 )
 
+// VMTypeFromString returns a VMType from its string representation.
 func VMTypeFromString(s string) VMType {
 	switch s {
 	case EVM:
@@ -29,6 +35,7 @@ func VMTypeFromString(s string) VMType {
 	}
 }
 
+// RepoName returns the repository name for the VM type.
 func (v VMType) RepoName() string {
 	switch v {
 	case EVM:

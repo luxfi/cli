@@ -1,15 +1,18 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package precompiles provides utilities for interacting with EVM precompiles.
 package precompiles
 
 import (
-	_ "embed"
+	_ "embed" // embed is used for embedding ABI files
 	"math/big"
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/sdk/contract"
 )
 
+// SetAdmin sets an address as admin in a precompile's allow list.
 func SetAdmin(
 	rpcURL string,
 	precompile crypto.Address,

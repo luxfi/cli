@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package upgradecmd
 
 import (
@@ -54,7 +55,7 @@ var (
 	luxdChainConfigFlag       = "luxd-chain-config-dir"
 	luxdChainConfigDir        string
 
-	print bool
+	printManual bool
 )
 
 // lux blockchain upgrade apply
@@ -95,7 +96,7 @@ Examples:
 	cmd.Flags().BoolVar(&useLocal, "local", false, "Apply upgrade to existing local deployment")
 	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "Apply upgrade to existing testnet deployment")
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "Apply upgrade to existing mainnet deployment")
-	cmd.Flags().BoolVar(&print, "print", false, "Print manual config instructions (for public networks only, non-interactive friendly)")
+	cmd.Flags().BoolVar(&printManual, "print", false, "Print manual config instructions (for public networks only, non-interactive friendly)")
 	cmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation prompts (e.g., for timestamps in the past)")
 	cmd.Flags().StringVar(&luxdChainConfigDir, luxdChainConfigFlag, os.ExpandEnv(luxdChainConfigDirDefault), "Luxd chain config directory (e.g., ~/.luxd/chains)")
 
@@ -146,7 +147,7 @@ func applyCmd(_ *cobra.Command, args []string) error {
 // For a already deployed subnet, the supported scheme is to
 // save a snapshot, and to load the snapshot with the upgrade
 func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Sidecar) error {
-	if print {
+	if printManual {
 		ux.Logger.PrintToUser("The --print flag is ignored on local networks. Continuing.")
 	}
 	precmpUpgrades, strNetUpgrades, err := validateUpgrade(blockchainName, networkKey, sc, force)
@@ -261,7 +262,7 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 // For public networks we therefore limit ourselves to just "apply" the upgrades
 // This also means we are *ignoring* the lock file here!
 func applyPublicNetworkUpgrade(blockchainName, networkKey string, sc *models.Sidecar) error {
-	if print {
+	if printManual {
 		blockchainIDstr := "<your-blockchain-id>"
 		if sc.Networks != nil &&
 			!sc.NetworkDataIsEmpty() &&
@@ -492,7 +493,7 @@ func validateTimestamp(ts *uint64) (int64, error) {
 	if val == uint64(0) {
 		return 0, errBlockTimestampInvalid
 	}
-	return int64(val), nil
+	return int64(val), nil //nolint:gosec // G115: Timestamp values are bounded
 }
 
 func getEarliestUpcomingTimestamp(upgrades []extras.PrecompileUpgrade) (int64, error) {
