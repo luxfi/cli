@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package ssh
 
 import (
@@ -60,7 +61,7 @@ func TestReplaceCustomVarDashboardValues(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error replacing custom variables: %v", err)
 	}
-	modifiedContent, err := os.ReadFile(tempFileName)
+	modifiedContent, err := os.ReadFile(tempFileName) //nolint:gosec // G304: Reading test temp file
 	if err != nil {
 		t.Fatalf("Error reading modified content: %v", err)
 	}

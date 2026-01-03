@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package chaincmd
 
 import (
@@ -205,7 +206,7 @@ func createChain(cmd *cobra.Command, args []string) error {
 	var chainGenesis []byte
 	var err error
 	if genesisFile != "" {
-		chainGenesis, err = os.ReadFile(genesisFile)
+		chainGenesis, err = os.ReadFile(genesisFile) //nolint:gosec // G304: User-specified genesis file
 		if err != nil {
 			return fmt.Errorf("failed to read genesis file: %w", err)
 		}
@@ -442,7 +443,7 @@ func getGenesisParams() genesisParams {
 	return params
 }
 
-func generateDefaultGenesis(chainName, chainType string) ([]byte, error) {
+func generateDefaultGenesis(_, _ string) ([]byte, error) {
 	params := getGenesisParams()
 
 	// Default genesis for EVM-compatible chains

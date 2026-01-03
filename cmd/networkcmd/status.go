@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -178,42 +179,42 @@ func checkNetworkStatus(networkType string) error {
 
 	// Use adaptive layout for different screen sizes
 	const maxWidth = 100
-	separator := strings.Repeat("=", min(maxWidth, getTerminalWidth()))
-	nodeSeparator := strings.Repeat("-", min(maxWidth/2, getTerminalWidth()/2))
+	separator := strings.Repeat("=", minInt(maxWidth, getTerminalWidth()))
+	nodeSeparator := strings.Repeat("-", minInt(maxWidth/2, getTerminalWidth()/2))
 
-	if status != nil && status.ClusterInfo != nil {
-		// Get port info from gRPC ports config
-		grpcPorts := binutils.GetGRPCPorts(networkType)
-
-		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("%s Network is Up (gRPC port: %d)", strings.ToUpper(networkType[:1])+networkType[1:], grpcPorts.Server)
-		ux.Logger.PrintToUser("%s", separator)
-		ux.Logger.PrintToUser("Healthy: %t", status.ClusterInfo.Healthy)
-		ux.Logger.PrintToUser("Custom VMs healthy: %t", status.ClusterInfo.CustomChainsHealthy)
-		ux.Logger.PrintToUser("Number of nodes: %d", len(status.ClusterInfo.NodeNames))
-		ux.Logger.PrintToUser("Number of custom VMs: %d", len(status.ClusterInfo.CustomChains))
-		ux.Logger.PrintToUser("%s Node information %s", nodeSeparator, nodeSeparator)
-		for n, nodeInfo := range status.ClusterInfo.NodeInfos {
-			ux.Logger.PrintToUser("%s has ID %s and endpoint %s ", n, nodeInfo.Id, nodeInfo.Uri)
-		}
-		if len(status.ClusterInfo.CustomChains) > 0 {
-			ux.Logger.PrintToUser("%s Custom VM information %s", nodeSeparator, nodeSeparator)
-			for _, nodeInfo := range status.ClusterInfo.NodeInfos {
-				for blockchainID := range status.ClusterInfo.CustomChains {
-					ux.Logger.PrintToUser("Endpoint at %s for blockchain %q: %s/ext/bc/%s/rpc", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
-				}
-			}
-		}
-
-		// Show verbose output if flag is set
-		if verbose {
-			ux.Logger.PrintToUser("")
-			ux.Logger.PrintToUser("Verbose output:")
-			ux.Logger.PrintToUser("%s", status.String())
-		}
-	} else {
+	if status == nil || status.ClusterInfo == nil {
 		ux.Logger.PrintToUser("%s: No network running", networkType)
 		return fmt.Errorf("no %s network running", networkType)
+	}
+
+	// Get port info from gRPC ports config
+	grpcPorts := binutils.GetGRPCPorts(networkType)
+
+	ux.Logger.PrintToUser("")
+	ux.Logger.PrintToUser("%s Network is Up (gRPC port: %d)", strings.ToUpper(networkType[:1])+networkType[1:], grpcPorts.Server)
+	ux.Logger.PrintToUser("%s", separator)
+	ux.Logger.PrintToUser("Healthy: %t", status.ClusterInfo.Healthy)
+	ux.Logger.PrintToUser("Custom VMs healthy: %t", status.ClusterInfo.CustomChainsHealthy)
+	ux.Logger.PrintToUser("Number of nodes: %d", len(status.ClusterInfo.NodeNames))
+	ux.Logger.PrintToUser("Number of custom VMs: %d", len(status.ClusterInfo.CustomChains))
+	ux.Logger.PrintToUser("%s Node information %s", nodeSeparator, nodeSeparator)
+	for n, nodeInfo := range status.ClusterInfo.NodeInfos {
+		ux.Logger.PrintToUser("%s has ID %s and endpoint %s ", n, nodeInfo.Id, nodeInfo.Uri)
+	}
+	if len(status.ClusterInfo.CustomChains) > 0 {
+		ux.Logger.PrintToUser("%s Custom VM information %s", nodeSeparator, nodeSeparator)
+		for _, nodeInfo := range status.ClusterInfo.NodeInfos {
+			for blockchainID := range status.ClusterInfo.CustomChains {
+				ux.Logger.PrintToUser("Endpoint at %s for blockchain %q: %s/ext/bc/%s/rpc", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
+			}
+		}
+	}
+
+	// Show verbose output if flag is set
+	if verbose {
+		ux.Logger.PrintToUser("")
+		ux.Logger.PrintToUser("Verbose output:")
+		ux.Logger.PrintToUser("%s", status.String())
 	}
 
 	return nil
@@ -228,8 +229,8 @@ func getTerminalWidth() int {
 	return width
 }
 
-// min returns the minimum of two integers
-func min(a, b int) int {
+// minInt returns the minimum of two integers.
+func minInt(a, b int) int {
 	if a < b {
 		return a
 	}

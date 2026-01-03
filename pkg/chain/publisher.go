@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package chain provides chain deployment and management utilities.
 package chain
 
 import (
@@ -15,8 +17,11 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 )
 
+// Publisher defines the interface for publishing subnet and VM configurations to a git repository.
 type Publisher interface {
+	// Publish commits and pushes subnet and VM YAML configurations to the repository.
 	Publish(r *git.Repository, subnetName, vmName string, subnetYAML []byte, vmYAML []byte) error
+	// GetRepo returns the git repository, cloning it if necessary.
 	GetRepo() (*git.Repository, error)
 }
 
@@ -28,6 +33,7 @@ type publisherImpl struct {
 
 var _ Publisher = &publisherImpl{}
 
+// NewPublisher creates a new Publisher instance for the given repository.
 func NewPublisher(repoDir, repoURL, alias string) Publisher {
 	repoPath := filepath.Join(repoDir, alias)
 	return &publisherImpl{
@@ -37,6 +43,7 @@ func NewPublisher(repoDir, repoURL, alias string) Publisher {
 	}
 }
 
+// GetRepo returns the git repository, opening it if it exists locally or cloning it otherwise.
 func (p *publisherImpl) GetRepo() (repo *git.Repository, err error) {
 	// path exists
 	if _, err := os.Stat(p.repoPath); err == nil {
@@ -48,6 +55,8 @@ func (p *publisherImpl) GetRepo() (repo *git.Repository, err error) {
 	})
 }
 
+// Publish writes the subnet and VM YAML files to the repository,
+// commits the changes, and pushes to the remote.
 func (p *publisherImpl) Publish(
 	repo *git.Repository,
 	subnetName, vmName string,

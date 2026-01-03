@@ -67,13 +67,13 @@ func TestSymlinkOperations(t *testing.T) {
 
 	// Create a fake binary
 	binaryPath := filepath.Join(tmpDir, "fake-vm")
-	if err := os.WriteFile(binaryPath, []byte("#!/bin/sh\necho hello"), 0o755); err != nil {
+	if err := os.WriteFile(binaryPath, []byte("#!/bin/sh\necho hello"), 0o755); err != nil { //nolint:gosec // G306: Test script needs to be executable
 		t.Fatalf("failed to create fake binary: %v", err)
 	}
 
 	// Create plugins directory
 	pluginDir := filepath.Join(tmpDir, "plugins")
-	if err := os.MkdirAll(pluginDir, 0o755); err != nil {
+	if err := os.MkdirAll(pluginDir, 0o750); err != nil {
 		t.Fatalf("failed to create plugins dir: %v", err)
 	}
 
@@ -101,7 +101,7 @@ func TestSymlinkOperations(t *testing.T) {
 
 	// Test updating symlink (atomic update)
 	newBinaryPath := filepath.Join(tmpDir, "new-fake-vm")
-	if err := os.WriteFile(newBinaryPath, []byte("#!/bin/sh\necho new"), 0o755); err != nil {
+	if err := os.WriteFile(newBinaryPath, []byte("#!/bin/sh\necho new"), 0o755); err != nil { //nolint:gosec // G306: Test script needs to be executable
 		t.Fatalf("failed to create new binary: %v", err)
 	}
 

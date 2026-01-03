@@ -139,7 +139,7 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 		gomega.Expect(expectedPath).Should(gomega.BeARegularFile())
 		ori, err := os.ReadFile(upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
-		cp, err := os.ReadFile(expectedPath)
+		cp, err := os.ReadFile(expectedPath) //nolint:gosec // G304: Test code reading from test directories
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(ori).Should(gomega.Equal(cp))
 	})

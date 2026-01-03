@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -40,7 +41,7 @@ Examples:
   lux network snapshot list
   lux network snapshot load my-test-state
   lux network snapshot delete my-test-state`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}
@@ -149,7 +150,7 @@ func determineNetworkType() string {
 	return networkTypeCustom
 }
 
-func saveSnapshot(cmd *cobra.Command, args []string) error {
+func saveSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
 
 	// Validate snapshot name
@@ -177,7 +178,7 @@ func saveSnapshot(cmd *cobra.Command, args []string) error {
 
 	// Get snapshots directory
 	snapshotsDir := app.GetSnapshotsDir()
-	if err := os.MkdirAll(snapshotsDir, 0o755); err != nil {
+	if err := os.MkdirAll(snapshotsDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create snapshots directory: %w", err)
 	}
 
@@ -211,7 +212,7 @@ func saveSnapshot(cmd *cobra.Command, args []string) error {
 		metadata["created_at"],
 		metadata["source"])
 
-	if err := os.WriteFile(metadataPath, []byte(metadataContent), 0o644); err != nil {
+	if err := os.WriteFile(metadataPath, []byte(metadataContent), 0o644); err != nil { //nolint:gosec // G306: Metadata file should be readable
 		ux.Logger.PrintToUser("Warning: failed to save metadata: %v", err)
 	}
 
@@ -219,7 +220,7 @@ func saveSnapshot(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func loadSnapshot(cmd *cobra.Command, args []string) error {
+func loadSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
 
 	networkType := determineNetworkType()
@@ -278,7 +279,7 @@ func loadSnapshot(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func listSnapshots(cmd *cobra.Command, args []string) error {
+func listSnapshots(_ *cobra.Command, _ []string) error {
 	snapshotsDir := app.GetSnapshotsDir()
 
 	// Check if snapshots directory exists
@@ -313,7 +314,7 @@ func listSnapshots(cmd *cobra.Command, args []string) error {
 
 		// Try to read metadata
 		metadataPath := filepath.Join(snapshotDir, "snapshot_metadata.txt")
-		metadataBytes, err := os.ReadFile(metadataPath)
+		metadataBytes, err := os.ReadFile(metadataPath) //nolint:gosec // G304: Reading from app's snapshot directory
 
 		if err == nil {
 			// Print metadata
@@ -338,7 +339,7 @@ func listSnapshots(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func deleteSnapshot(cmd *cobra.Command, args []string) error {
+func deleteSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
 
 	// Validate snapshot name to prevent path traversal attacks

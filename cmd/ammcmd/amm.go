@@ -45,7 +45,7 @@ Example usage:
   lux amm pools --network zoo
   lux amm quote --network zoo --from LUX --to USDT --amount 100
   lux amm balance --network zoo --private-key 0x...`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
 	}
@@ -93,7 +93,7 @@ func newBalanceCmd() *cobra.Command {
 Examples:
   lux amm balance --network zoo
   lux amm balance --network zoo --token 0x...`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
@@ -172,7 +172,7 @@ Examples:
   lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --slippage 1.0
   lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --v3
   lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --dry-run`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if fromToken == "" || toToken == "" || amount == 0 {
 				return fmt.Errorf("required flags: --from, --to, --amount")
 			}
@@ -392,7 +392,7 @@ Tries V2 pools first, then V3 if no V2 pool exists.
 Examples:
   lux amm quote --network zoo --from 0x... --to 0x... --amount 100
   lux amm quote --network zoo --from 0x... --to 0x... --amount 100 --v3`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if fromToken == "" || toToken == "" || amount == 0 {
 				return fmt.Errorf("required flags: --from, --to, --amount")
 			}
@@ -489,7 +489,7 @@ func newPoolsCmd() *cobra.Command {
 
 Examples:
   lux amm pools --network zoo`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
@@ -528,7 +528,7 @@ func newTokensCmd() *cobra.Command {
 
 Examples:
   lux amm tokens --network zoo 0x...`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return fmt.Errorf("specify at least one token address")
 			}
@@ -575,7 +575,7 @@ func newStatusCmd() *cobra.Command {
 
 Examples:
   lux amm status --network zoo`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 

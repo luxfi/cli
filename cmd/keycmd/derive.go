@@ -86,7 +86,7 @@ func runDerive(_ *cobra.Command, _ []string) error {
 	var results []ValidatorKeyInfo
 
 	for i := 0; i < deriveCount; i++ {
-		accountIndex := uint32(deriveStart + i)
+		accountIndex := uint32(deriveStart + i) //nolint:gosec // G115: Index values are bounded by BIP-44 limits
 		name := fmt.Sprintf("%s-%02d", derivePrefix, accountIndex+1)
 
 		// Derive key using BIP-44 path with account index

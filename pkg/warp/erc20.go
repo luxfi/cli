@@ -1,10 +1,9 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package warp
 
 import (
-	_ "embed"
-
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/erc20-go/erc20"
 	"github.com/luxfi/geth/common"

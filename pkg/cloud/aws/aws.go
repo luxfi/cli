@@ -27,11 +27,13 @@ import (
 )
 
 var (
+	// ErrNoInstanceState is returned when instance state cannot be retrieved.
 	ErrNoInstanceState         = errors.New("unable to get instance state")
 	ErrNoAddressFound          = errors.New("unable to get public IP address info on AWS")
 	ErrNodeNotFoundToBeRunning = errors.New("node not found to be running")
 )
 
+// AwsCloud provides AWS cloud operations.
 type AwsCloud struct {
 	ec2Client *ec2.Client
 	ctx       context.Context
@@ -199,7 +201,7 @@ func (c *AwsCloud) CreateEC2Instances(prefix string, count int, amiID, instanceT
 	if forMonitoring {
 		diskVolumeSize = constants.MonitoringCloudServerStorageSize
 	} else {
-		diskVolumeSize = int32(volumeSize)
+		diskVolumeSize = int32(volumeSize) //nolint:gosec // G115: Volume size is bounded by AWS limits
 	}
 	ebsValue := &types.EbsBlockDevice{
 		VolumeSize:          aws.Int32(diskVolumeSize),
@@ -208,10 +210,10 @@ func (c *AwsCloud) CreateEC2Instances(prefix string, count int, amiID, instanceT
 	}
 	switch volumeType {
 	case types.VolumeTypeGp3:
-		ebsValue.Throughput = aws.Int32(int32(throughput))
-		ebsValue.Iops = aws.Int32(int32(iops))
+		ebsValue.Throughput = aws.Int32(int32(throughput)) //nolint:gosec // G115: Throughput is bounded by AWS limits
+		ebsValue.Iops = aws.Int32(int32(iops))             //nolint:gosec // G115: IOPS is bounded by AWS limits
 	case types.VolumeTypeIo2, types.VolumeTypeIo1:
-		ebsValue.Iops = aws.Int32(int32(iops))
+		ebsValue.Iops = aws.Int32(int32(iops)) //nolint:gosec // G115: IOPS is bounded by AWS limits
 	}
 
 	runResult, err := c.ec2Client.RunInstances(c.ctx, &ec2.RunInstancesInput{
@@ -219,8 +221,8 @@ func (c *AwsCloud) CreateEC2Instances(prefix string, count int, amiID, instanceT
 		InstanceType:     types.InstanceType(instanceType),
 		KeyName:          aws.String(keyName),
 		SecurityGroupIds: []string{securityGroupID},
-		MinCount:         aws.Int32(int32(count)),
-		MaxCount:         aws.Int32(int32(count)),
+		MinCount:         aws.Int32(int32(count)), //nolint:gosec // G115: Count is bounded by practical limits
+		MaxCount:         aws.Int32(int32(count)), //nolint:gosec // G115: Count is bounded by practical limits
 		BlockDeviceMappings: []types.BlockDeviceMapping{
 			{
 				DeviceName: aws.String("/dev/sda1"), // ubuntu ami disk name
@@ -415,7 +417,7 @@ func (c *AwsCloud) DestroyInstance(instanceID, publicIP string, releasePublicIP 
 
 // CreateEIP creates an Elastic IP address.
 func (c *AwsCloud) CreateEIP(prefix string) (string, string, error) {
-	if addr, err := c.ec2Client.AllocateAddress(c.ctx, &ec2.AllocateAddressInput{
+	addr, err := c.ec2Client.AllocateAddress(c.ctx, &ec2.AllocateAddressInput{
 		TagSpecifications: []types.TagSpecification{
 			{
 				ResourceType: types.ResourceTypeElasticIp,
@@ -431,14 +433,14 @@ func (c *AwsCloud) CreateEIP(prefix string) (string, string, error) {
 				},
 			},
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		if isEIPQuotaExceededError(err) {
 			return "", "", fmt.Errorf("elastic IP quota exceeded: %w", err)
 		}
 		return "", "", err
-	} else {
-		return *addr.AllocationId, *addr.PublicIp, nil
 	}
+	return *addr.AllocationId, *addr.PublicIp, nil
 }
 
 // AssociateEIP associates an Elastic IP address with an EC2 instance.
@@ -700,13 +702,12 @@ func (c *AwsCloud) ResizeVolume(volumeID string, newSizeInGB int32) error {
 
 	if currentSize > newSizeInGB {
 		return fmt.Errorf("new size %dGb must be greater than the current size %dGb", newSizeInGB, currentSize)
-	} else {
-		if _, err := c.ec2Client.ModifyVolume(c.ctx, &ec2.ModifyVolumeInput{
-			Size:     &newSizeInGB,
-			VolumeId: volumeOutput.Volumes[0].VolumeId,
-		}); err != nil {
-			return err
-		}
+	}
+	if _, err := c.ec2Client.ModifyVolume(c.ctx, &ec2.ModifyVolumeInput{
+		Size:     &newSizeInGB,
+		VolumeId: volumeOutput.Volumes[0].VolumeId,
+	}); err != nil {
+		return err
 	}
 
 	return c.WaitForVolumeModificationState(volumeID, "optimizing", 30*time.Second)

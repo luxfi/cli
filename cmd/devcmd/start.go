@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package devcmd
 
 import (
@@ -133,7 +134,7 @@ func startDevNode(*cobra.Command, []string) error {
 	}
 
 	// Ensure directories exist
-	if err := os.MkdirAll(logDir, 0o750); err != nil { //nolint:gosec // G301: Using 0750 for log directory
+	if err := os.MkdirAll(logDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create log directory: %w", err)
 	}
 
@@ -211,7 +212,7 @@ func startDevNode(*cobra.Command, []string) error {
 		case <-healthCtx.Done():
 			return fmt.Errorf("timeout waiting for node to become healthy after %s: %w", healthTimeout, healthCtx.Err())
 		case <-ticker.C:
-			resp, err := http.Get(healthURL) //nolint:gosec // G107: Health check URL is local
+			resp, err := http.Get(healthURL)
 			if err != nil {
 				continue // Network not ready yet
 			}
@@ -221,7 +222,7 @@ func startDevNode(*cobra.Command, []string) error {
 			}
 			// Additional check: verify C-Chain is responding
 			cchainURL := fmt.Sprintf("http://localhost:%d/ext/bc/C/rpc", port)
-			cResp, cErr := http.Post(cchainURL, "application/json", //nolint:gosec // G107: C-chain URL is local
+			cResp, cErr := http.Post(cchainURL, "application/json",
 				strings.NewReader(`{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}`))
 			if cErr != nil {
 				continue

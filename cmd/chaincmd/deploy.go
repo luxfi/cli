@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package chaincmd
 
 import (
@@ -292,6 +293,8 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		targetType = "testnet"
 	case models.Mainnet:
 		targetType = "mainnet"
+	case models.Devnet:
+		targetType = "devnet"
 	case models.Local:
 		targetType = "custom"
 	}
@@ -309,6 +312,8 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 			startHint = "lux network start --testnet"
 		case "mainnet":
 			startHint = "lux network start --mainnet"
+		case "devnet":
+			startHint = "lux network start --devnet"
 		}
 		return fmt.Errorf("no %s network running. Start the network first with: %s", targetType, startHint)
 	}
