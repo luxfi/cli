@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Wrapper script for lux CLI
+# Binary is built to build/lux, this script provides convenient execution
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+BINARY="$ROOT_DIR/build/lux"
+
+if [[ ! -x "$BINARY" ]]; then
+    echo "Binary not found at $BINARY, building..."
+    (cd "$ROOT_DIR" && make build) || exit 1
+fi
+
+exec "$BINARY" "$@"
