@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package ansible provides utilities for creating and managing Ansible inventories.
 package ansible
 
 import (
@@ -19,11 +20,11 @@ import (
 // CreateAnsibleHostInventory creates inventory file for ansible
 // specifies the ip address of the cloud server and the corresponding ssh cert path for the cloud server
 func CreateAnsibleHostInventory(inventoryDirPath, certFilePath, cloudService string, publicIPMap map[string]string, cloudConfigMap models.CloudConfig) error {
-	if err := os.MkdirAll(inventoryDirPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(inventoryDirPath, 0o750); err != nil {
 		return err
 	}
 	inventoryHostsFilePath := filepath.Join(inventoryDirPath, constants.AnsibleHostInventoryFileName)
-	inventoryFile, err := os.OpenFile(inventoryHostsFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, constants.WriteReadReadPerms)
+	inventoryFile, err := os.OpenFile(inventoryHostsFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, constants.WriteReadReadPerms) //nolint:gosec // G304: Path is from app's config directory
 	if err != nil {
 		return err
 	}
@@ -70,10 +71,10 @@ func writeToInventoryFile(inventoryFile *os.File, ansibleInstanceID, publicIP, c
 // WriteNodeConfigsToAnsibleInventory writes node configs to ansible inventory file
 func WriteNodeConfigsToAnsibleInventory(inventoryDirPath string, nc []models.NodeConfig) error {
 	inventoryHostsFilePath := filepath.Join(inventoryDirPath, constants.AnsibleHostInventoryFileName)
-	if err := os.MkdirAll(inventoryDirPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(inventoryDirPath, 0o750); err != nil {
 		return err
 	}
-	inventoryFile, err := os.OpenFile(inventoryHostsFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, constants.WriteReadReadPerms)
+	inventoryFile, err := os.OpenFile(inventoryHostsFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, constants.WriteReadReadPerms) //nolint:gosec // G304: Path is from app's config directory
 	if err != nil {
 		return err
 	}
@@ -103,10 +104,11 @@ func GetAnsibleHostsFromInventory(inventoryDirPath string) ([]string, error) {
 	return ansibleHostIDs, nil
 }
 
+// GetInventoryFromAnsibleInventoryFile reads hosts from an Ansible inventory file.
 func GetInventoryFromAnsibleInventoryFile(inventoryDirPath string) ([]*models.Host, error) {
 	inventory := []*models.Host{}
 	inventoryHostsFile := filepath.Join(inventoryDirPath, constants.AnsibleHostInventoryFileName)
-	file, err := os.Open(inventoryHostsFile)
+	file, err := os.Open(inventoryHostsFile) //nolint:gosec // G304: Reading from app's config directory
 	if err != nil {
 		return nil, err
 	}
@@ -133,23 +135,24 @@ func GetInventoryFromAnsibleInventoryFile(inventoryDirPath string) ([]*models.Ho
 	return inventory, nil
 }
 
+// GetHostByNodeID finds a host by its node ID from the inventory.
 func GetHostByNodeID(nodeID string, inventoryDirPath string) (*models.Host, error) {
 	allHosts, err := GetInventoryFromAnsibleInventoryFile(inventoryDirPath)
 	if err != nil {
 		return nil, err
-	} else {
-		hosts := utils.Filter(allHosts, func(h *models.Host) bool { return h.NodeID == nodeID })
-		switch len(hosts) {
-		case 1:
-			return hosts[0], nil
-		case 0:
-			return nil, errors.New("host not found")
-		default:
-			return nil, errors.New("multiple hosts found")
-		}
+	}
+	hosts := utils.Filter(allHosts, func(h *models.Host) bool { return h.NodeID == nodeID })
+	switch len(hosts) {
+	case 1:
+		return hosts[0], nil
+	case 0:
+		return nil, errors.New("host not found")
+	default:
+		return nil, errors.New("multiple hosts found")
 	}
 }
 
+// GetHostMapfromAnsibleInventory returns a map from node ID to host.
 func GetHostMapfromAnsibleInventory(inventoryDirPath string) (map[string]*models.Host, error) {
 	hostMap := map[string]*models.Host{}
 	inventory, err := GetInventoryFromAnsibleInventoryFile(inventoryDirPath)
@@ -174,7 +177,7 @@ func UpdateInventoryHostPublicIP(inventoryDirPath string, nodesWithDynamicIP map
 	if err = os.Remove(inventoryHostsFilePath); err != nil {
 		return err
 	}
-	inventoryFile, err := os.Create(inventoryHostsFilePath)
+	inventoryFile, err := os.Create(inventoryHostsFilePath) //nolint:gosec // G304: Creating file in app's config directory
 	if err != nil {
 		return err
 	}

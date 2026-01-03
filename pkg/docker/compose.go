@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package docker provides Docker and docker-compose integration utilities.
 package docker
 
 import (
@@ -19,7 +20,8 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-type DockerComposeInputs struct {
+// ComposeInputs contains template variables for docker-compose file generation.
+type ComposeInputs struct {
 	WithMonitoring     bool
 	WithLuxgo          bool
 	LuxgoVersion       string
@@ -32,7 +34,7 @@ type DockerComposeInputs struct {
 //go:embed templates/*.docker-compose.yml
 var composeTemplate embed.FS
 
-func renderComposeFile(composePath string, composeDesc string, templateVars DockerComposeInputs) ([]byte, error) {
+func renderComposeFile(composePath string, composeDesc string, templateVars ComposeInputs) ([]byte, error) {
 	compose, err := composeTemplate.ReadFile(composePath)
 	if err != nil {
 		return nil, err
@@ -124,6 +126,7 @@ func mergeComposeFiles(host *models.Host, currentComposeFile string, newComposeF
 	return nil
 }
 
+// StartDockerCompose starts all services in the docker-compose file on a remote host.
 func StartDockerCompose(host *models.Host, timeout time.Duration) error {
 	// we provide systemd service unit for docker compose if the host has systemd
 	if host.IsSystemD() {
@@ -140,6 +143,7 @@ func StartDockerCompose(host *models.Host, timeout time.Duration) error {
 	return nil
 }
 
+// StopDockerCompose stops all services in the docker-compose file on a remote host.
 func StopDockerCompose(host *models.Host, timeout time.Duration) error {
 	if host.IsSystemD() {
 		if output, err := host.Command("sudo systemctl stop lux-cli-docker", nil, timeout); err != nil {
@@ -155,6 +159,7 @@ func StopDockerCompose(host *models.Host, timeout time.Duration) error {
 	return nil
 }
 
+// RestartDockerCompose restarts all services in the docker-compose file on a remote host.
 func RestartDockerCompose(host *models.Host, timeout time.Duration) error {
 	if host.IsSystemD() {
 		if output, err := host.Command("sudo systemctl restart lux-cli-docker", nil, timeout); err != nil {
@@ -170,6 +175,7 @@ func RestartDockerCompose(host *models.Host, timeout time.Duration) error {
 	return nil
 }
 
+// StartDockerComposeService starts a specific service in a docker-compose file on a remote host.
 func StartDockerComposeService(host *models.Host, composeFile string, service string, timeout time.Duration) error {
 	if err := InitDockerComposeService(host, composeFile, service, timeout); err != nil {
 		return err
@@ -180,6 +186,7 @@ func StartDockerComposeService(host *models.Host, composeFile string, service st
 	return nil
 }
 
+// StopDockerComposeService stops a specific service in a docker-compose file on a remote host.
 func StopDockerComposeService(host *models.Host, composeFile string, service string, timeout time.Duration) error {
 	if output, err := host.Command(fmt.Sprintf("docker compose -f %s stop %s", composeFile, service), nil, timeout); err != nil {
 		return fmt.Errorf("%w: %s", err, string(output))
@@ -187,6 +194,7 @@ func StopDockerComposeService(host *models.Host, composeFile string, service str
 	return nil
 }
 
+// RestartDockerComposeService restarts a specific service in a docker-compose file on a remote host.
 func RestartDockerComposeService(host *models.Host, composeFile string, service string, timeout time.Duration) error {
 	if output, err := host.Command(fmt.Sprintf("docker compose -f %s restart %s", composeFile, service), nil, timeout); err != nil {
 		return fmt.Errorf("%w: %s", err, string(output))
@@ -194,6 +202,7 @@ func RestartDockerComposeService(host *models.Host, composeFile string, service 
 	return nil
 }
 
+// InitDockerComposeService creates a specific service in a docker-compose file on a remote host.
 func InitDockerComposeService(host *models.Host, composeFile string, service string, timeout time.Duration) error {
 	if output, err := host.Command(fmt.Sprintf("docker compose -f %s create %s", composeFile, service), nil, timeout); err != nil {
 		return fmt.Errorf("%w: %s", err, string(output))
@@ -207,7 +216,7 @@ func ComposeOverSSH(
 	host *models.Host,
 	timeout time.Duration,
 	composePath string,
-	composeVars DockerComposeInputs,
+	composeVars ComposeInputs,
 ) error {
 	remoteComposeFile := utils.GetRemoteComposeFile()
 	startTime := time.Now()

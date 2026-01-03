@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package chaincmd
 
 import (
@@ -80,7 +81,7 @@ func listChains(cmd *cobra.Command, args []string) error {
 		}
 
 		sidecarPath := filepath.Join(subnetDir, entry.Name(), constants.SidecarFileName)
-		data, err := os.ReadFile(sidecarPath)
+		data, err := os.ReadFile(sidecarPath) //nolint:gosec // G304: Reading from app's data directory
 		if err != nil {
 			continue
 		}

@@ -29,7 +29,7 @@ func TestInstallZipArchive(t *testing.T) {
 	require.NoError(err)
 	defer func() { _ = os.RemoveAll(installDir) }()
 
-	zipBytes, err := os.ReadFile(zip)
+	zipBytes, err := os.ReadFile(zip) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 
 	err = installZipArchive(zipBytes, installDir)
@@ -54,7 +54,7 @@ func TestInstallGzipArchive(t *testing.T) {
 	require.NoError(err)
 	defer func() { _ = os.RemoveAll(installDir) }()
 
-	tgzBytes, err := os.ReadFile(tgz)
+	tgzBytes, err := os.ReadFile(tgz) //nolint:gosec // G304: Test file read
 	require.NoError(err)
 
 	err = installTarGzArchive(tgzBytes, installDir)

@@ -1,5 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package migrations handles internal data migrations for the CLI.
 package migrations
 
 import (
@@ -23,7 +25,8 @@ var (
 	failedEndMessage = "Some updates succeeded - others failed. Check output for hints"
 )
 
-// poor-man's migrations: there are no rollbacks (for now)
+// RunMigrations executes all pending migrations.
+// Note: there are no rollbacks (for now).
 func RunMigrations(app *application.Lux) error {
 	runner := &migrationRunner{
 		showMsg: true,

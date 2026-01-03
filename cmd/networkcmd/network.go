@@ -1,5 +1,6 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package networkcmd
 
 import (
@@ -10,7 +11,7 @@ import (
 
 var app *application.Lux
 
-// lux network
+// NewCmd creates the network command for managing local network runtime.
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{

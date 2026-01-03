@@ -32,7 +32,7 @@ func TestRemoveAllAllowed(t *testing.T) {
 
 	// Create an allowed path
 	runsDir := filepath.Join(baseDir, "runs", "test")
-	if err := os.MkdirAll(runsDir, 0o750); err != nil { //nolint:gosec // G301: Test directory
+	if err := os.MkdirAll(runsDir, 0o750); err != nil {
 		t.Fatal(err)
 	}
 
@@ -49,7 +49,7 @@ func TestRemoveAllDenied(t *testing.T) {
 
 	// Create a denied path
 	chainsDir := filepath.Join(baseDir, "chains")
-	if err := os.MkdirAll(chainsDir, 0o750); err != nil { //nolint:gosec // G301: Test directory
+	if err := os.MkdirAll(chainsDir, 0o750); err != nil {
 		t.Fatal(err)
 	}
 
@@ -66,7 +66,7 @@ func TestRemoveAllNotInAllowList(t *testing.T) {
 
 	// Create a path not in allow list
 	randomDir := filepath.Join(tmpDir, "random")
-	if err := os.MkdirAll(randomDir, 0o750); err != nil { //nolint:gosec // G301: Test directory
+	if err := os.MkdirAll(randomDir, 0o750); err != nil {
 		t.Fatal(err)
 	}
 
@@ -82,7 +82,7 @@ func TestRemoveChainConfig(t *testing.T) {
 
 	// Create chains directory with a chain
 	chainDir := filepath.Join(baseDir, "chains", "mychain")
-	if err := os.MkdirAll(chainDir, 0o750); err != nil { //nolint:gosec // G301: Test directory
+	if err := os.MkdirAll(chainDir, 0o750); err != nil {
 		t.Fatal(err)
 	}
 
@@ -125,8 +125,8 @@ func TestIsProtected(t *testing.T) {
 	// Create protected paths
 	chainsDir := filepath.Join(baseDir, "chains")
 	keysDir := filepath.Join(baseDir, "keys")
-	_ = os.MkdirAll(chainsDir, 0o750) //nolint:gosec // G301: Test directory
-	_ = os.MkdirAll(keysDir, 0o750)   //nolint:gosec // G301: Test directory
+	_ = os.MkdirAll(chainsDir, 0o750)
+	_ = os.MkdirAll(keysDir, 0o750)
 
 	// Should be protected
 	if !IsProtected(policy, chainsDir) {
@@ -138,7 +138,7 @@ func TestIsProtected(t *testing.T) {
 
 	// runs should not be protected
 	runsDir := filepath.Join(baseDir, "runs")
-	_ = os.MkdirAll(runsDir, 0o750) //nolint:gosec // G301: Test directory
+	_ = os.MkdirAll(runsDir, 0o750)
 	if IsProtected(policy, runsDir) {
 		t.Error("expected runs to not be protected")
 	}
@@ -150,14 +150,14 @@ func TestIsAllowed(t *testing.T) {
 	policy := DefaultPolicy(baseDir)
 
 	runsDir := filepath.Join(baseDir, "runs")
-	_ = os.MkdirAll(runsDir, 0o750) //nolint:gosec // G301: Test directory
+	_ = os.MkdirAll(runsDir, 0o750)
 
 	if !IsAllowed(policy, runsDir) {
 		t.Error("expected runs to be allowed")
 	}
 
 	chainsDir := filepath.Join(baseDir, "chains")
-	_ = os.MkdirAll(chainsDir, 0o750) //nolint:gosec // G301: Test directory
+	_ = os.MkdirAll(chainsDir, 0o750)
 
 	if IsAllowed(policy, chainsDir) {
 		t.Error("expected chains to not be in allow list")

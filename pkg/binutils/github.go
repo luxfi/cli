@@ -18,6 +18,7 @@ const (
 	tarExtension = "tar.gz"
 )
 
+// GithubDownloader downloads binaries from GitHub releases.
 type GithubDownloader interface {
 	GetDownloadURL(version string, installer Installer) (string, string, error)
 }
@@ -34,10 +35,12 @@ var (
 	_ GithubDownloader = (*netrunnerDownloader)(nil)
 )
 
+// GetGithubLatestReleaseURL returns the GitHub API URL for the latest release.
 func GetGithubLatestReleaseURL(org, repo string) string {
 	return "https://api.github.com/repos/" + org + "/" + repo + "/releases/latest"
 }
 
+// NewLuxDownloader creates a new Lux node downloader.
 func NewLuxDownloader() GithubDownloader {
 	return &nodeDownloader{}
 }
@@ -91,6 +94,7 @@ func (nodeDownloader) GetDownloadURL(version string, installer Installer) (strin
 	return nodeURL, ext, nil
 }
 
+// NewEVMDownloader creates a new EVM downloader.
 func NewEVMDownloader() GithubDownloader {
 	return &evmDownloader{}
 }

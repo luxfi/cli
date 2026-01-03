@@ -8,7 +8,6 @@
 // - Hardware security modules (Zymbit, Yubikey)
 // - Remote signing via WalletConnect/QR codes
 // - Ledger hardware wallet (optional)
-
 package key
 
 import (
