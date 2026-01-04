@@ -19,6 +19,8 @@ import (
 func TestRunMigrations(t *testing.T) {
 	buffer := make([]byte, 0, 100)
 	bufWriter := bytes.NewBuffer(buffer)
+	// Reset Logger so NewUserLog actually creates a new one with our buffer
+	ux.Logger = nil
 	ux.NewUserLog(luxlog.NewNoOpLogger(), bufWriter)
 	require := require.New(t)
 	testDir := t.TempDir()
