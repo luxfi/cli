@@ -27,7 +27,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	evmutils "github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
-	goethereummath "github.com/luxfi/math/math"
+	goethereummath "github.com/luxfi/math"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
