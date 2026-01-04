@@ -22,7 +22,12 @@ const networkTypeLocal = "local"
 
 var (
 	stopNetworkType string
+	stopNetworkID   uint32 // Custom network ID for non-standard networks
 	forceStop       bool
+	// Network type flags (same as start command for consistency)
+	stopMainnet bool
+	stopTestnet bool
+	stopDevnet  bool
 )
 
 func newStopCmd() *cobra.Command {
@@ -43,18 +48,20 @@ SNAPSHOT BEHAVIOR:
 
 OPTIONS:
 
+  --mainnet           Stop mainnet network (network-id=1)
+  --testnet           Stop testnet network (network-id=2)
+  --devnet            Stop devnet network (network-id=3)
+  --network-id        Stop network by ID (for custom networks)
   --snapshot-name     Name for the snapshot (default: default-snapshot)
-  --network-type      Network to stop (mainnet/testnet/devnet/custom)
-                      REQUIRED if multiple networks are running
   --force             Force stop without confirmation (use with caution)
 
 SAFETY CHECKS:
 
   If multiple networks are running, you MUST specify which one to stop:
-    lux network stop --network-type devnet
-    lux network stop --network-type custom
+    lux network stop --devnet
+    lux network stop --testnet
 
-  Stopping mainnet or testnet requires explicit --network-type flag.
+  Stopping mainnet or testnet requires explicit --mainnet/--testnet flag.
   This prevents accidental disruption of production deployments.
 
 EXAMPLES:
@@ -63,10 +70,11 @@ EXAMPLES:
   lux network stop
 
   # Stop specific network type (required when multiple running)
-  lux network stop --network-type devnet
+  lux network stop --devnet
+  lux network stop --testnet
 
   # Stop with named snapshot
-  lux network stop --network-type custom --snapshot-name my-snapshot
+  lux network stop --devnet --snapshot-name my-snapshot
 
   # Resume from snapshot later
   lux network start --devnet --snapshot-name my-snapshot
@@ -89,13 +97,38 @@ SNAPSHOT vs CLEAN:
 		SilenceUsage: true,
 	}
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to save network state into")
-	cmd.Flags().StringVar(&stopNetworkType, "network-type", "", "network type to stop (mainnet, testnet, devnet, custom) - REQUIRED if multiple networks running")
 	cmd.Flags().BoolVar(&forceStop, "force", false, "force stop without confirmation (use with caution for mainnet/testnet)")
+	// Network type flags (same pattern as start command for consistency)
+	cmd.Flags().BoolVar(&stopMainnet, "mainnet", false, "stop mainnet network (network-id=1)")
+	cmd.Flags().BoolVar(&stopTestnet, "testnet", false, "stop testnet network (network-id=2)")
+	cmd.Flags().BoolVar(&stopDevnet, "devnet", false, "stop devnet network (network-id=3)")
+	cmd.Flags().Uint32Var(&stopNetworkID, "network-id", 0, "stop network by ID (for custom networks)")
 	return cmd
 }
 
 // StopNetwork stops the local network.
 func StopNetwork(*cobra.Command, []string) error {
+	// Handle --mainnet, --testnet, --devnet flags (same pattern as start command)
+	if stopMainnet {
+		stopNetworkType = "mainnet"
+	} else if stopTestnet {
+		stopNetworkType = "testnet"
+	} else if stopDevnet {
+		stopNetworkType = "devnet"
+	} else if stopNetworkID > 0 {
+		// Map network ID to network type
+		switch stopNetworkID {
+		case 1:
+			stopNetworkType = "mainnet"
+		case 2:
+			stopNetworkType = "testnet"
+		case 3:
+			stopNetworkType = "devnet"
+		default:
+			stopNetworkType = fmt.Sprintf("custom-%d", stopNetworkID)
+		}
+	}
+
 	// Get all running networks
 	runningNetworks := app.GetAllRunningNetworks()
 	devRunning := isDevModeRunning()
@@ -111,9 +144,9 @@ func StopNetwork(*cobra.Command, []string) error {
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("Please specify which network to stop:")
 			for _, net := range runningNetworks {
-				ux.Logger.PrintToUser("  lux network stop --network-type %s", net)
+				ux.Logger.PrintToUser("  lux network stop --%s", net)
 			}
-			return fmt.Errorf("ambiguous: multiple networks running. Use --network-type to specify which one to stop")
+			return fmt.Errorf("ambiguous: multiple networks running. Use --%s to specify which one to stop", runningNetworks[0])
 		}
 
 		// If dev mode + one network, warn but allow stopping the network
@@ -147,7 +180,7 @@ func StopNetwork(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("This could disrupt production services. Are you sure?")
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser("To confirm, run:")
-		ux.Logger.PrintToUser("  lux network stop --network-type %s --force", stopNetworkType)
+		ux.Logger.PrintToUser("  lux network stop --%s --force", stopNetworkType)
 		return fmt.Errorf("stopping %s requires --force flag for safety", stopNetworkType)
 	}
 
