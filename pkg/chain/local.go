@@ -58,9 +58,9 @@ const (
 	// LocalNetworkHealthTimeout is for checking if the network itself is running
 	LocalNetworkHealthTimeout = 5 * time.Second
 	// BlockchainCreationTimeout is the maximum time to wait for CreateChains RPC call
-	// This involves a P-chain transaction, subnet creation, and chain creation
-	// On a fresh network, this can take up to 30s for consensus to be reached
-	BlockchainCreationTimeout = 30 * time.Second
+	// This involves a P-chain transaction, subnet creation, chain creation, node restarts,
+	// and P-chain height sync across all 5 validators. Needs 90s minimum for stability.
+	BlockchainCreationTimeout = 90 * time.Second
 )
 
 // DeploymentError represents a chain deployment failure that does NOT crash the network.
