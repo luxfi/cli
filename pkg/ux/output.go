@@ -194,3 +194,129 @@ func ConvertToStringWithThousandSeparator(input uint64) string {
 	s := p.Sprintf("%d", input)
 	return strings.ReplaceAll(s, ",", "_")
 }
+
+// NativeChainInfo holds info for pretty-printing a native chain
+type NativeChainInfo struct {
+	Letter string // P, C, X, Q, A, B, T, Z, G, K, D
+	Name   string // Platform, Contract, Exchange, etc.
+	Type   string // RPC endpoint type
+	Path   string // URL path suffix
+}
+
+// GetNativeChains returns all native chain definitions for RPC display
+func GetNativeChains() []NativeChainInfo {
+	return []NativeChainInfo{
+		{Letter: "P", Name: "Platform", Type: "RPC", Path: "/ext/bc/P"},
+		{Letter: "C", Name: "Contract (EVM)", Type: "RPC", Path: "/ext/bc/C/rpc"},
+		{Letter: "C", Name: "Contract (EVM)", Type: "WS", Path: "/ext/bc/C/ws"},
+		{Letter: "X", Name: "Exchange (DAG)", Type: "RPC", Path: "/ext/bc/X"},
+		{Letter: "Q", Name: "Quantum", Type: "RPC", Path: "/ext/bc/Q/rpc"},
+		{Letter: "A", Name: "AI", Type: "RPC", Path: "/ext/bc/A/rpc"},
+		{Letter: "B", Name: "Bridge", Type: "RPC", Path: "/ext/bc/B/rpc"},
+		{Letter: "T", Name: "Threshold", Type: "RPC", Path: "/ext/bc/T/rpc"},
+		{Letter: "Z", Name: "Zero-knowledge", Type: "RPC", Path: "/ext/bc/Z/rpc"},
+		{Letter: "G", Name: "Graph", Type: "RPC", Path: "/ext/bc/G/rpc"},
+		{Letter: "K", Name: "KMS", Type: "RPC", Path: "/ext/bc/K/rpc"},
+		{Letter: "D", Name: "DEX", Type: "RPC", Path: "/ext/bc/D/rpc"},
+	}
+}
+
+// PrintNativeChainEndpoints prints all native chain RPC endpoints in a formatted table
+func PrintNativeChainEndpoints(baseURL string, portBase int, includeUtility bool) {
+	Logger.PrintToUser("\n╔══════════════════════════════════════════════════════════════════════╗")
+	Logger.PrintToUser("║                        LUX CHAIN ENDPOINTS                           ║")
+	Logger.PrintToUser("╠══════════════════════════════════════════════════════════════════════╣")
+	Logger.PrintToUser("║ Chain   │ Name              │ Type │ Endpoint                        ║")
+	Logger.PrintToUser("╠═════════╪═══════════════════╪══════╪═════════════════════════════════╣")
+
+	chains := GetNativeChains()
+	for _, c := range chains {
+		var url string
+		if baseURL != "" {
+			url = baseURL + c.Path
+		} else {
+			protocol := "http"
+			if c.Type == "WS" {
+				protocol = "ws"
+			}
+			url = fmt.Sprintf("%s://localhost:%d%s", protocol, portBase, c.Path)
+		}
+		Logger.PrintToUser("║ %-7s │ %-17s │ %-4s │ %-31s ║", c.Letter+"-Chain", c.Name, c.Type, url)
+	}
+
+	if includeUtility {
+		Logger.PrintToUser("╠═════════╪═══════════════════╪══════╪═════════════════════════════════╣")
+		Logger.PrintToUser("║ UTILITY │ Health            │ HTTP │ http://localhost:%d/ext/health  ║", portBase)
+		Logger.PrintToUser("║ UTILITY │ Info              │ HTTP │ http://localhost:%d/ext/info    ║", portBase)
+		Logger.PrintToUser("║ UTILITY │ Admin             │ HTTP │ http://localhost:%d/ext/admin   ║", portBase)
+	}
+	Logger.PrintToUser("╚══════════════════════════════════════════════════════════════════════╝")
+}
+
+// PrintCompactChainEndpoints prints chain endpoints in a compact format
+func PrintCompactChainEndpoints(portBase int) {
+	Logger.PrintToUser("\n📡 Native Chain RPC Endpoints:")
+	Logger.PrintToUser("  ┌─────────────────────────────────────────────────────────────────┐")
+	Logger.PrintToUser("  │ P-Chain (Platform):     http://localhost:%d/ext/bc/P            │", portBase)
+	Logger.PrintToUser("  │ C-Chain (EVM) RPC:      http://localhost:%d/ext/bc/C/rpc        │", portBase)
+	Logger.PrintToUser("  │ C-Chain (EVM) WS:       ws://localhost:%d/ext/bc/C/ws           │", portBase)
+	Logger.PrintToUser("  │ X-Chain (Exchange):     http://localhost:%d/ext/bc/X            │", portBase)
+	Logger.PrintToUser("  │ Q-Chain (Quantum):      http://localhost:%d/ext/bc/Q/rpc        │", portBase)
+	Logger.PrintToUser("  │ A-Chain (AI):           http://localhost:%d/ext/bc/A/rpc        │", portBase)
+	Logger.PrintToUser("  │ B-Chain (Bridge):       http://localhost:%d/ext/bc/B/rpc        │", portBase)
+	Logger.PrintToUser("  │ T-Chain (Threshold):    http://localhost:%d/ext/bc/T/rpc        │", portBase)
+	Logger.PrintToUser("  │ Z-Chain (ZK):           http://localhost:%d/ext/bc/Z/rpc        │", portBase)
+	Logger.PrintToUser("  │ G-Chain (Graph):        http://localhost:%d/ext/bc/G/rpc        │", portBase)
+	Logger.PrintToUser("  │ K-Chain (KMS):          http://localhost:%d/ext/bc/K/rpc        │", portBase)
+	Logger.PrintToUser("  │ D-Chain (DEX):          http://localhost:%d/ext/bc/D/rpc        │", portBase)
+	Logger.PrintToUser("  └─────────────────────────────────────────────────────────────────┘")
+	Logger.PrintToUser("\n🔧 Utility Endpoints:")
+	Logger.PrintToUser("  Health:  http://localhost:%d/ext/health", portBase)
+	Logger.PrintToUser("  Info:    http://localhost:%d/ext/info", portBase)
+	Logger.PrintToUser("  Admin:   http://localhost:%d/ext/admin", portBase)
+}
+
+// ValidatorKeyInfo holds derived key info for a validator
+type ValidatorKeyInfo struct {
+	Index       int
+	NodeID      string
+	PChainAddr  string
+	XChainAddr  string
+	CChainAddr  string // Ethereum-style 0x address
+	BLSPubKey   string // Hex-encoded BLS public key
+}
+
+// PrintValidatorKeys prints validator key information in a formatted table
+func PrintValidatorKeys(validators []ValidatorKeyInfo, networkHRP string) {
+	if len(validators) == 0 {
+		return
+	}
+
+	Logger.PrintToUser("\n🔑 Validator Keys (derived from LUX_MNEMONIC):")
+	Logger.PrintToUser("  ╔═══════╤════════════════════════════════════════════════════════════════╗")
+	Logger.PrintToUser("  ║  #    │ Validator Details                                              ║")
+	Logger.PrintToUser("  ╠═══════╪════════════════════════════════════════════════════════════════╣")
+
+	for _, v := range validators {
+		Logger.PrintToUser("  ║  %d    │ NodeID:  %s", v.Index, v.NodeID)
+		Logger.PrintToUser("  ║       │ P-Chain: %s", v.PChainAddr)
+		Logger.PrintToUser("  ║       │ X-Chain: %s", v.XChainAddr)
+		Logger.PrintToUser("  ║       │ C-Chain: %s", v.CChainAddr)
+		if v.Index < len(validators)-1 {
+			Logger.PrintToUser("  ╟───────┼────────────────────────────────────────────────────────────────╢")
+		}
+	}
+	Logger.PrintToUser("  ╚═══════╧════════════════════════════════════════════════════════════════╝")
+}
+
+// PrintValidatorKeysCompact prints validator keys in a compact single-line format
+func PrintValidatorKeysCompact(validators []ValidatorKeyInfo) {
+	if len(validators) == 0 {
+		return
+	}
+
+	Logger.PrintToUser("\n🔑 Validator Keys (from LUX_MNEMONIC):")
+	for _, v := range validators {
+		Logger.PrintToUser("  [%d] %s | C: %s", v.Index, v.NodeID, v.CChainAddr)
+	}
+}

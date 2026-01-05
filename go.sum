@@ -427,8 +427,6 @@ github.com/luxfi/ringtail v0.2.0 h1:DbLMZmE//2T2wXXS/gEkKZrTbre9LD+7EE/tz5SQszU=
 github.com/luxfi/ringtail v0.2.0/go.mod h1:SZ+aDLUdfSAtaTRaaYzeDZ5DNQiLaOCelSaIGjL21R0=
 github.com/luxfi/sampler v1.0.0 h1:k8Sf6otW83w4pQp0jXLA+g3J/joB7w7SqXQsWmNTOV0=
 github.com/luxfi/sampler v1.0.0/go.mod h1:f96/ozlj9vFfZj+akLtrHn4VpulQahwB+MQQhpeIekk=
-github.com/luxfi/sdk v1.16.39 h1:1e1JqPZRTW6Uexs8TZcEI/KDNMHyNPxl5Tq1Fsoin9w=
-github.com/luxfi/sdk v1.16.39/go.mod h1:A42pG3/mmD9aUP/mrZ7q0VFnj0I8LZ1mxwKkbZNEZBw=
 github.com/luxfi/staking v1.0.0 h1:pYI7XMGGb/zK2ATfTIkush/7HPWE7IS2yfmJqj4nzes=
 github.com/luxfi/staking v1.0.0/go.mod h1:E+fm3upfQTOu0fLCr3Uo4xYgAm7r/vEzgcUpNAhJuSE=
 github.com/luxfi/timer v1.0.1 h1:3lRf3j0L/fA3Ud0j67cm/BW2In1kz+jxd1HqgKyglYY=
@@ -623,8 +621,6 @@ github.com/tklauser/go-sysconf v0.3.16 h1:frioLaCQSsF5Cy1jgRBrzr6t502KIIwQ0MArYI
 github.com/tklauser/go-sysconf v0.3.16/go.mod h1:/qNL9xxDhc7tx3HSRsLWNnuzbVfh3e7gh/BmM179nYI=
 github.com/tklauser/numcpus v0.11.0 h1:nSTwhKH5e1dMNsCdVBukSZrURJRoHbSEQjdEbY+9RXw=
 github.com/tklauser/numcpus v0.11.0/go.mod h1:z+LwcLq54uWZTX0u/bGobaV34u6V7KNlTZejzM6/3MQ=
-github.com/tyler-smith/go-bip39 v1.1.0 h1:5eUemwrMargf3BSLRRCalXT93Ns6pQJIjYQN2nyfOP8=
-github.com/tyler-smith/go-bip39 v1.1.0/go.mod h1:gUYDtqQw1JS3ZJ8UWVcGTGqqr6YIN3CWg+kkNaLt55U=
 github.com/urfave/cli v1.22.5 h1:lNq9sAHXK2qfdI8W+GRItjCEkI+2oR4d+MEHy1CKXoU=
 github.com/urfave/cli/v2 v2.27.7 h1:bH59vdhbjLv3LAvIu6gd0usJHgoTTPhCFib8qqOwXYU=
 github.com/urfave/cli/v2 v2.27.7/go.mod h1:CyNAG/xg+iAOg0N4MPGZqVmv2rCoP267496AOXUZjA4=

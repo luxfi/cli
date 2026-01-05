@@ -17,7 +17,9 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
 	cliconstants "github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/sdk/profiles"
 	constants "github.com/luxfi/const"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
@@ -35,6 +37,7 @@ var (
 	numValidators          int
 	nodePath               string // Path to custom luxd binary
 	portBase               int    // Base port for nodes (each node uses 2 ports)
+	profile                string // Performance profile (standard, fast, turbo)
 	// BadgerDB flags
 	dbEngine      string
 	archiveDir    string
@@ -52,6 +55,74 @@ type StartFlags struct {
 func Start(_ StartFlags, _ bool) error {
 	// For now, just call StartNetwork with nil cmd and args
 	return StartNetwork(nil, nil)
+}
+
+// profileConfig contains consensus and network tuning parameters
+type profileConfig struct {
+	ConsensusSampleSize           int
+	ConsensusPreferenceQuorumSize int
+	ConsensusConfidenceQuorumSize int
+	ConsensusCommitThreshold      int
+	ConsensusConcurrentRepolls    int
+	ConsensusOptimalProcessing    int
+	ConsensusMaxProcessing        int
+	ConsensusFrontierPollFreq     string
+	HealthCheckFrequency          string
+	HealthCheckAveragerHalflife   string
+	NetworkMaxReconnectDelay      string
+	NetworkInitialReconnectDelay  string
+	NetworkInitialTimeout         string
+	NetworkMinimumTimeout         string
+	NetworkMaximumTimeout         string
+	NetworkTimeoutHalflife        string
+	NetworkReadHandshakeTimeout   string
+	NetworkPingTimeout            string
+	NetworkPingFrequency          string
+}
+
+// getProfileConfig returns tuning parameters based on profile and network type.
+// Profiles are loaded from embedded JSON files (pkg/profiles/*.json).
+// Per-network defaults:
+//   - mainnet:  standard (conservative, production-safe)
+//   - testnet:  fast     (balanced, testnet optimized)
+//   - devnet:   turbo    (aggressive, 3/5 quorum)
+//   - dev mode: ultra    (minimal latency, single-node K=1)
+func getProfileConfig(networkName, profileOverride string) profileConfig {
+	// Determine effective profile
+	effectiveProfile := profileOverride
+	if effectiveProfile == "" {
+		effectiveProfile = profiles.DefaultProfileForNetwork(networkName)
+	}
+
+	// Load from embedded JSON
+	prof, err := profiles.GetProfile(effectiveProfile)
+	if err != nil {
+		// Fall back to standard if profile not found
+		ux.Logger.PrintToUser("Warning: profile %q not found, using standard", effectiveProfile)
+		prof, _ = profiles.GetProfile("standard")
+	}
+
+	return profileConfig{
+		ConsensusSampleSize:           prof.Consensus.SampleSize,
+		ConsensusPreferenceQuorumSize: prof.Consensus.PreferenceQuorumSize,
+		ConsensusConfidenceQuorumSize: prof.Consensus.ConfidenceQuorumSize,
+		ConsensusCommitThreshold:      prof.Consensus.CommitThreshold,
+		ConsensusConcurrentRepolls:    prof.Consensus.ConcurrentRepolls,
+		ConsensusOptimalProcessing:    prof.Consensus.OptimalProcessing,
+		ConsensusMaxProcessing:        prof.Consensus.MaxProcessing,
+		ConsensusFrontierPollFreq:     prof.Consensus.FrontierPollFreq,
+		HealthCheckFrequency:          prof.Health.CheckFrequency,
+		HealthCheckAveragerHalflife:   prof.Health.AveragerHalflife,
+		NetworkMaxReconnectDelay:      prof.Network.MaxReconnectDelay,
+		NetworkInitialReconnectDelay:  prof.Network.InitialReconnectDelay,
+		NetworkInitialTimeout:         prof.Network.InitialTimeout,
+		NetworkMinimumTimeout:         prof.Network.MinimumTimeout,
+		NetworkMaximumTimeout:         prof.Network.MaximumTimeout,
+		NetworkTimeoutHalflife:        prof.Network.TimeoutHalflife,
+		NetworkReadHandshakeTimeout:   prof.Network.ReadHandshakeTimeout,
+		NetworkPingTimeout:            prof.Network.PingTimeout,
+		NetworkPingFrequency:          prof.Network.PingFrequency,
+	}
 }
 
 const nodeBinaryName = "luxd"
@@ -203,6 +274,7 @@ TYPICAL WORKFLOW:
 	cmd.Flags().BoolVar(&devMode, "dev", false, "single-node dev mode with K=1 consensus")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
 	cmd.Flags().IntVar(&portBase, "port", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
+	cmd.Flags().StringVar(&profile, "profile", "", "performance profile: standard, fast, turbo (default: per-network)")
 	// BadgerDB flags
 	cmd.Flags().StringVar(&dbEngine, "db-backend", "", "database backend to use (pebble, leveldb, or badgerdb)")
 	cmd.Flags().StringVar(&archiveDir, "archive-path", "", "path to BadgerDB archive database (enables dual-database mode)")
@@ -308,17 +380,76 @@ func startPublicNetwork(cfg networkConfig) error {
 		effectivePortBase = 9630
 	}
 
+	// Get profile-specific tuning parameters
+	// Per-network defaults: mainnet=standard, testnet=fast, devnet=turbo
+	prof := getProfileConfig(cfg.networkName, profile)
+	ux.Logger.PrintToUser("Using profile: %s (override: %q)", cfg.networkName, profile)
+
+	// Build node config using profile parameters
 	globalNodeConfig := fmt.Sprintf(`{
 		"network-id": %d,
 		"db-type": "badgerdb",
 		"sybil-protection-enabled": true,
 		"network-allow-private-ips": true,
-		"health-check-frequency": "30s",
-		"log-level": "info",
 		"http-host": "127.0.0.1",
 		"api-admin-enabled": true,
-		"track-chains": %q
-	}`, cfg.networkID, trackChainsValue)
+		"index-enabled": true,
+		"track-chains": %q,
+		"log-level": "error",
+		"log-display-level": "error",
+
+		"consensus-sample-size": %d,
+		"consensus-preference-quorum-size": %d,
+		"consensus-confidence-quorum-size": %d,
+		"consensus-commit-threshold": %d,
+		"consensus-concurrent-repolls": %d,
+		"consensus-optimal-processing": %d,
+		"consensus-max-processing": %d,
+		"consensus-max-time-processing": "0s",
+		"consensus-frontier-poll-frequency": %q,
+		"consensus-shutdown-timeout": "2s",
+		"consensus-app-concurrency": 64,
+
+		"health-check-frequency": %q,
+		"health-check-averager-halflife": %q,
+
+		"bootstrap-beacon-connection-timeout": "1s",
+		"bootstrap-max-time-get-ancestors": "25ms",
+
+		"network-peer-list-pull-gossip-frequency": "250ms",
+		"network-peer-list-bloom-reset-frequency": "30s",
+		"network-max-reconnect-delay": %q,
+		"network-initial-reconnect-delay": %q,
+		"network-initial-timeout": %q,
+		"network-minimum-timeout": %q,
+		"network-maximum-timeout": %q,
+		"network-timeout-halflife": %q,
+		"network-read-handshake-timeout": %q,
+		"network-ping-timeout": %q,
+		"network-ping-frequency": %q,
+		"network-health-max-time-since-msg-sent": "5s",
+		"network-health-max-time-since-msg-received": "5s",
+		"network-outbound-connection-timeout": "500ms"
+	}`, cfg.networkID, trackChainsValue,
+		prof.ConsensusSampleSize,
+		prof.ConsensusPreferenceQuorumSize,
+		prof.ConsensusConfidenceQuorumSize,
+		prof.ConsensusCommitThreshold,
+		prof.ConsensusConcurrentRepolls,
+		prof.ConsensusOptimalProcessing,
+		prof.ConsensusMaxProcessing,
+		prof.ConsensusFrontierPollFreq,
+		prof.HealthCheckFrequency,
+		prof.HealthCheckAveragerHalflife,
+		prof.NetworkMaxReconnectDelay,
+		prof.NetworkInitialReconnectDelay,
+		prof.NetworkInitialTimeout,
+		prof.NetworkMinimumTimeout,
+		prof.NetworkMaximumTimeout,
+		prof.NetworkTimeoutHalflife,
+		prof.NetworkReadHandshakeTimeout,
+		prof.NetworkPingTimeout,
+		prof.NetworkPingFrequency)
 
 	// Build per-node configs with explicit ports to avoid conflicts
 	customNodeConfigs := make(map[string]string)
@@ -420,9 +551,14 @@ func startPublicNetwork(cfg networkConfig) error {
 		ux.PrintTableEndpoints(clusterInfo)
 	}
 
-	ux.Logger.PrintToUser("\nData directory: %s", rootDataDir)
-	ux.Logger.PrintToUser("C-Chain RPC: http://localhost:%d/ext/bc/C/rpc", effectivePortBase)
-	ux.Logger.PrintToUser("Network is ready for use!")
+	// Print all native chain RPC endpoints
+	ux.PrintCompactChainEndpoints(effectivePortBase)
+
+	// Display validator keys from configured sources
+	displayValidatorKeys(cfg.networkID, numValidators)
+
+	ux.Logger.PrintToUser("\n📁 Data directory: %s", rootDataDir)
+	ux.Logger.PrintToUser("✅ Network is ready for use!")
 
 	// Save network state for deploy commands to find the running network
 	grpcPorts := binutils.GetGRPCPorts(cfg.networkName)
@@ -577,12 +713,9 @@ func StartDevMode() error {
 healthy:
 
 	ux.Logger.PrintToUser("\n🚀 Dev mode started successfully!")
-	ux.Logger.PrintToUser("\n📡 Chain Endpoints:")
-	ux.Logger.PrintToUser("  C-Chain RPC:    http://localhost:%d/ext/bc/C/rpc", effectivePortBase)
-	ux.Logger.PrintToUser("  C-Chain WS:     ws://localhost:%d/ext/bc/C/ws", effectivePortBase)
-	ux.Logger.PrintToUser("  P-Chain RPC:    http://localhost:%d/ext/bc/P", effectivePortBase)
-	ux.Logger.PrintToUser("  X-Chain RPC:    http://localhost:%d/ext/bc/X", effectivePortBase)
-	ux.Logger.PrintToUser("  Health:         http://localhost:%d/ext/health", effectivePortBase)
+
+	// Print all native chain RPC endpoints
+	ux.PrintCompactChainEndpoints(effectivePortBase)
 	ux.Logger.PrintToUser("\n⚡ Features:")
 	ux.Logger.PrintToUser("  • K=1 consensus (instant blocks)")
 	ux.Logger.PrintToUser("  • POA single-node mode")
@@ -602,4 +735,57 @@ healthy:
 func isPortBaseFlagSet() bool {
 	// If portBase != default, it was explicitly set
 	return portBase != 9630
+}
+
+// displayValidatorKeys displays validator keys from configured sources
+// Priority: LUX_MNEMONIC > LUX_PRIVATE_KEY > ~/.lux/keys/
+func displayValidatorKeys(networkID uint32, numValidators int) {
+	var validators []ux.ValidatorKeyInfo
+
+	// Check for mnemonic-based derivation first (allows deriving N validators)
+	if mnemonic := key.GetMnemonicFromEnv(); mnemonic != "" {
+		ux.Logger.PrintToUser("\n🔑 Validator Keys (derived from LUX_MNEMONIC):")
+		for i := 0; i < numValidators; i++ {
+			keySet, err := key.DeriveAllKeysWithAccount(fmt.Sprintf("validator%d", i+1), mnemonic, uint32(i))
+			if err != nil {
+				continue
+			}
+			sf, err := key.NewSoftFromMnemonicWithAccount(networkID, mnemonic, uint32(i))
+			if err != nil {
+				continue
+			}
+			validators = append(validators, ux.ValidatorKeyInfo{
+				Index:      i + 1,
+				NodeID:     keySet.NodeID,
+				PChainAddr: sf.P()[0],
+				XChainAddr: sf.X()[0],
+				CChainAddr: sf.C(),
+			})
+		}
+	} else if privKey := os.Getenv("LUX_PRIVATE_KEY"); privKey != "" {
+		// Single key from LUX_PRIVATE_KEY
+		ux.Logger.PrintToUser("\n🔑 Key (from LUX_PRIVATE_KEY):")
+		sf, err := key.NewSoft(networkID, key.WithPrivateKeyEncoded(privKey))
+		if err == nil {
+			validators = append(validators, ux.ValidatorKeyInfo{
+				Index:      1,
+				PChainAddr: sf.P()[0],
+				XChainAddr: sf.X()[0],
+				CChainAddr: sf.C(),
+			})
+		}
+	} else {
+		// Show tip about setting keys
+		ux.Logger.PrintToUser("\n💡 Tip: Set LUX_MNEMONIC to display validator keys for testing")
+		return // No validators to display
+	}
+
+	// Print validators if any were derived
+	for _, v := range validators {
+		if v.NodeID != "" {
+			ux.Logger.PrintToUser("  [%d] %s | C: %s", v.Index, v.NodeID, v.CChainAddr)
+		} else {
+			ux.Logger.PrintToUser("  [%d] P: %s | C: %s", v.Index, v.PChainAddr, v.CChainAddr)
+		}
+	}
 }

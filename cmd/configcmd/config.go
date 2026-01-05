@@ -27,6 +27,8 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	// set user metrics collection preferences cmd
 	cmd.AddCommand(newMetricsCmd())
+	// validate luxd configuration files
+	cmd.AddCommand(newLintCmd())
 
 	return cmd
 }
