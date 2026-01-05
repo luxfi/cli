@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/crypto/mldsa"
 	"github.com/luxfi/crypto/secp256k1"
-	"github.com/tyler-smith/go-bip39"
+	bip39 "github.com/luxfi/go-bip39"
 	"golang.org/x/crypto/hkdf"
 )
 
