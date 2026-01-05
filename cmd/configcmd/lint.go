@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/sdk/configspec"
+	"github.com/luxfi/config/spec"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,7 @@ Reports:
   - Invalid value types (e.g., "abc" for a duration)
   - Deprecated keys (with replacement hints)
 
-Uses the authoritative flag spec from github.com/luxfi/sdk/configspec,
+Uses the authoritative flag spec from github.com/luxfi/config/spec,
 which is generated from the node's source of truth.
 
 Example:
@@ -77,7 +77,7 @@ func runLint(_ *cobra.Command, args []string) error {
 
 func lintConfig(config map[string]interface{}) *LintResult {
 	result := &LintResult{}
-	spec := configspec.MustSpec()
+	spec := spec.MustSpec()
 
 	// Sort keys for deterministic output
 	keys := make([]string, 0, len(config))
@@ -124,7 +124,7 @@ func lintConfig(config map[string]interface{}) *LintResult {
 	return result
 }
 
-func suggestKey(unknown string, spec *configspec.ConfigSpec) string {
+func suggestKey(unknown string, spec *spec.ConfigSpec) string {
 	// Find closest match by similarity
 	bestMatch := ""
 	bestScore := 0
@@ -216,25 +216,25 @@ func similarity(a, b string) int {
 	return tokenScore + charBonus
 }
 
-func validateValue(key string, value interface{}, expectedType configspec.FlagType) error {
+func validateValue(key string, value interface{}, expectedType spec.FlagType) error {
 	switch expectedType {
-	case configspec.TypeBool:
+	case spec.TypeBool:
 		if _, ok := value.(bool); !ok {
 			return fmt.Errorf("invalid value for %q: %v (expected boolean true/false)", key, value)
 		}
 
-	case configspec.TypeString:
+	case spec.TypeString:
 		if _, ok := value.(string); !ok {
 			return fmt.Errorf("invalid value for %q: %v (expected string)", key, value)
 		}
 
-	case configspec.TypeInt, configspec.TypeUint, configspec.TypeUint64:
+	case spec.TypeInt, spec.TypeUint, spec.TypeUint64:
 		switch v := value.(type) {
 		case float64:
 			if v != float64(int64(v)) {
 				return fmt.Errorf("invalid value for %q: %v (expected integer, got float)", key, value)
 			}
-			if expectedType == configspec.TypeUint || expectedType == configspec.TypeUint64 {
+			if expectedType == spec.TypeUint || expectedType == spec.TypeUint64 {
 				if v < 0 {
 					return fmt.Errorf("invalid value for %q: %v (expected non-negative integer)", key, value)
 				}
@@ -245,7 +245,7 @@ func validateValue(key string, value interface{}, expectedType configspec.FlagTy
 			return fmt.Errorf("invalid value for %q: %v (expected integer)", key, value)
 		}
 
-	case configspec.TypeFloat64:
+	case spec.TypeFloat64:
 		switch value.(type) {
 		case float64, int, int64, uint, uint64:
 			// OK
@@ -253,7 +253,7 @@ func validateValue(key string, value interface{}, expectedType configspec.FlagTy
 			return fmt.Errorf("invalid value for %q: %v (expected number)", key, value)
 		}
 
-	case configspec.TypeDuration:
+	case spec.TypeDuration:
 		switch v := value.(type) {
 		case string:
 			if _, err := time.ParseDuration(v); err != nil {
@@ -265,7 +265,7 @@ func validateValue(key string, value interface{}, expectedType configspec.FlagTy
 			return fmt.Errorf("invalid value for %q: %v (expected duration string like \"2s\")", key, value)
 		}
 
-	case configspec.TypeStringSlice:
+	case spec.TypeStringSlice:
 		switch v := value.(type) {
 		case []interface{}:
 			for i, item := range v {
@@ -279,7 +279,7 @@ func validateValue(key string, value interface{}, expectedType configspec.FlagTy
 			return fmt.Errorf("invalid value for %q: %v (expected string array)", key, value)
 		}
 
-	case configspec.TypeIntSlice:
+	case spec.TypeIntSlice:
 		switch v := value.(type) {
 		case []interface{}:
 			for i, item := range v {
@@ -291,7 +291,7 @@ func validateValue(key string, value interface{}, expectedType configspec.FlagTy
 			return fmt.Errorf("invalid value for %q: %v (expected integer array)", key, value)
 		}
 
-	case configspec.TypeStringToString:
+	case spec.TypeStringToString:
 		switch v := value.(type) {
 		case map[string]interface{}:
 			for k, val := range v {
@@ -334,7 +334,7 @@ func ValidateConfigJSON(jsonStr string) (*LintResult, error) {
 
 // IsValidKey returns true if the key is a valid luxd configuration key.
 func IsValidKey(key string) bool {
-	return configspec.KnownKey(key)
+	return spec.KnownKey(key)
 }
 
 // FormatDuration returns a string suitable for duration config values.
