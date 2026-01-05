@@ -13,18 +13,18 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.0.0
-	github.com/luxfi/crypto v1.17.36
+	github.com/luxfi/crypto v1.17.37
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.8.27
-	github.com/luxfi/geth v1.16.68
+	github.com/luxfi/evm v0.8.28
+	github.com/luxfi/geth v1.16.69
 	github.com/luxfi/ids v1.2.7
 	github.com/luxfi/keychain v1.0.1
-	github.com/luxfi/ledger v1.1.5
+	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/log v1.2.1
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.15.4
-	github.com/luxfi/node v1.22.80
-	github.com/luxfi/sdk v1.16.38
+	github.com/luxfi/node v1.22.81
+	github.com/luxfi/sdk v1.16.39
 	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -68,7 +68,7 @@ require (
 	github.com/luxfi/genesis v1.5.19
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/math v1.2.0
+	github.com/luxfi/math v1.2.2
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/sys v0.39.0
@@ -177,10 +177,10 @@ require (
 	github.com/luxfi/address v1.0.0 // indirect
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.1.0 // indirect
-	github.com/luxfi/consensus v1.22.50 // indirect
+	github.com/luxfi/consensus v1.22.51 // indirect
 	github.com/luxfi/database v1.17.35 // indirect
 	github.com/luxfi/fhe v1.7.1 // indirect
-	github.com/luxfi/gpu v0.29.4 // indirect
+	github.com/luxfi/gpu v0.30.0 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.6 // indirect
 	github.com/luxfi/lattice/v7 v7.0.0 // indirect
@@ -188,7 +188,7 @@ require (
 	github.com/luxfi/math/safe v0.0.0-20260105032950-356605c2c1a3 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
-	github.com/luxfi/p2p v1.18.3 // indirect
+	github.com/luxfi/p2p v1.18.4 // indirect
 	github.com/luxfi/precompile v0.4.1 // indirect
 	github.com/luxfi/ringtail v0.2.0 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
