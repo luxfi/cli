@@ -261,3 +261,5 @@ require (
 )
 
 replace github.com/luxfi/sdk => /Users/z/work/lux/sdk
+
+replace github.com/luxfi/genesis => /Users/z/work/lux/genesis

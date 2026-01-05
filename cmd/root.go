@@ -20,6 +20,7 @@ import (
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/devcmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
+	"github.com/luxfi/cli/cmd/gpucmd"
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
@@ -153,6 +154,9 @@ For detailed command help, use: lux <command> --help`,
 
 	// add vm management command
 	rootCmd.AddCommand(vmcmd.NewCmd(app))
+
+	// add gpu management command
+	rootCmd.AddCommand(gpucmd.NewCmd(app))
 
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd())
