@@ -70,7 +70,6 @@ require (
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.2.2
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/sys v0.39.0
 	golang.org/x/term v0.38.0
 )
@@ -260,3 +259,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+replace github.com/luxfi/sdk => /Users/z/work/lux/sdk
