@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/sdk/configspec"
+	"github.com/luxfi/config/spec"
 )
 
 func TestLintConfig_ValidConfig(t *testing.T) {
@@ -259,16 +259,16 @@ func TestIsValidKey(t *testing.T) {
 }
 
 func TestGetFlagType(t *testing.T) {
-	spec := configspec.MustSpec()
-	flag := spec.GetFlag("http-port")
+	s := spec.MustSpec()
+	flag := s.GetFlag("http-port")
 	if flag == nil {
 		t.Fatal("http-port should have a spec")
 	}
-	if flag.Type != configspec.TypeUint {
+	if flag.Type != spec.TypeUint {
 		t.Errorf("http-port should be TypeUint, got %v", flag.Type)
 	}
 
-	flag = spec.GetFlag("not-a-key")
+	flag = s.GetFlag("not-a-key")
 	if flag != nil {
 		t.Error("not-a-key should not have a spec")
 	}
