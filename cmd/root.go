@@ -123,6 +123,7 @@ For detailed command help, use: lux <command> --help`,
 	// add sub commands
 	rootCmd.AddCommand(devcmd.NewCmd(app))     // dev (local dev environment)
 	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (local network management)
+	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(chaincmd.NewCmd(app)) // unified chain command (l1/l2/l3)
 
