@@ -26,6 +26,7 @@ var (
 	subnetID        string
 	blockchainID    string
 	statePath       string
+	importChainData string
 )
 
 // LoadExistingSubnetState loads an existing subnet database into the network
@@ -206,4 +207,5 @@ func AddStateFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&statePath, "state-path", "", "path to existing state directory (e.g., ~/work/lux/state/chaindata/lux-mainnet-96369)")
 	cmd.Flags().StringVar(&subnetID, "subnet-id", "", "subnet ID for the loaded state")
 	cmd.Flags().StringVar(&blockchainID, "blockchain-id", "", "blockchain ID for the loaded state")
+	cmd.Flags().StringVar(&importChainData, "import-chain-data", "", "path to import blockchain data from another chain into C-Chain")
 }
