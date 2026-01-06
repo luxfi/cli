@@ -154,7 +154,7 @@ func networkStatus(cmd *cobra.Command, args []string) error {
 				if strings.Contains(err.Error(), "timed out") || strings.Contains(err.Error(), "connection refused") {
 					results[index] = fmt.Sprintf("%s: Not reachable (process running but unresponsive)", strings.Title(nt))
 				} else {
-					results[index] = fmt.Sprintf("%s: Error - %%v", strings.Title(nt), err)
+					results[index] = fmt.Sprintf("%s: Error - %v", strings.Title(nt), err)
 				}
 			} else {
 				results[index] = out
@@ -173,7 +173,7 @@ func networkStatus(cmd *cobra.Command, args []string) error {
 			if !strings.Contains(res, "Stopped") && !strings.Contains(res, "Not reachable") {
 				anyRunning = true
 			}
-			ux.Logger.PrintToUser(res)
+			ux.Logger.PrintToUser("%s", res)
 		}
 	}
 
@@ -218,31 +218,31 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 	// Get port info from gRPC ports config
 	grpcPorts := binutils.GetGRPCPorts(networkType)
 
-	fmt.Fprintf(&buf, "\n%s Network is Up (gRPC port: %%d)\n", strings.ToUpper(networkType[:1])+networkType[1:], grpcPorts.Server)
+	fmt.Fprintf(&buf, "\n%s Network is Up (gRPC port: %d)\n", strings.ToUpper(networkType[:1])+networkType[1:], grpcPorts.Server)
 	fmt.Fprintf(&buf, "%s\n", separator)
-	fmt.Fprintf(&buf, "Healthy: %%t\n", status.ClusterInfo.Healthy)
-	fmt.Fprintf(&buf, "Custom VMs healthy: %%t\n", status.ClusterInfo.CustomChainsHealthy)
-	fmt.Fprintf(&buf, "Number of nodes: %%d\n", len(status.ClusterInfo.NodeNames))
-	fmt.Fprintf(&buf, "Number of custom VMs: %%d\n", len(status.ClusterInfo.CustomChains))
+	fmt.Fprintf(&buf, "Healthy: %t\n", status.ClusterInfo.Healthy)
+	fmt.Fprintf(&buf, "Custom VMs healthy: %t\n", status.ClusterInfo.CustomChainsHealthy)
+	fmt.Fprintf(&buf, "Number of nodes: %d\n", len(status.ClusterInfo.NodeNames))
+	fmt.Fprintf(&buf, "Number of custom VMs: %d\n", len(status.ClusterInfo.CustomChains))
 	fmt.Fprintf(&buf, "Backend Controller: Enabled\n")
 
 	fmt.Fprintf(&buf, "%s Node information %s\n", nodeSeparator, nodeSeparator)
 
 	for n, nodeInfo := range status.ClusterInfo.NodeInfos {
-		fmt.Fprintf(&buf, "%s has ID %%s and endpoint %%s \n", n, nodeInfo.Id, nodeInfo.Uri)
+		fmt.Fprintf(&buf, "%s has ID %s and endpoint %s \n", n, nodeInfo.Id, nodeInfo.Uri)
 		
 		// Query node info
 		version, vmVersions, err := getNodeVersion(nodeInfo.Uri)
 		if err == nil {
-			fmt.Fprintf(&buf, "  Version: %%s\n", version)
+			fmt.Fprintf(&buf, "  Version: %s\n", version)
 			if len(vmVersions) > 0 {
-				fmt.Fprintf(&buf, "  VM Versions: %%v\n", vmVersions)
+				fmt.Fprintf(&buf, "  VM Versions: %v\n", vmVersions)
 			}
 			// Placeholder for CGO/GPU if available in future
 			// fmt.Fprintf(&buf, "  Acceleration: Unknown\n")
 		} else {
 			// If failed to get version, debug log?
-			// fmt.Fprintf(&buf, "  Version check failed: %%v\n", err)
+			// fmt.Fprintf(&buf, "  Version check failed: %v\n", err)
 		}
 	}
 
@@ -250,7 +250,7 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 		fmt.Fprintf(&buf, "%s Custom VM information %s\n", nodeSeparator, nodeSeparator)
 		for _, nodeInfo := range status.ClusterInfo.NodeInfos {
 			for blockchainID := range status.ClusterInfo.CustomChains {
-				fmt.Fprintf(&buf, "Endpoint at %%s for blockchain %%q: %%s/ext/bc/%%s/rpc\n", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
+				fmt.Fprintf(&buf, "Endpoint at %s for blockchain %q: %s/ext/bc/%s/rpc\n", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
 			}
 		}
 	}
