@@ -72,6 +72,7 @@ NOTES:
 	cmd.AddCommand(newCleanCmd())
 	cmd.AddCommand(newStatusCmd())
 	cmd.AddCommand(newSnapshotCmd())
+	cmd.AddCommand(newBootstrapCmd())
 
 	return cmd
 }
