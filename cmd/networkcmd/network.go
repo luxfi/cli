@@ -70,7 +70,7 @@ NOTES:
 	cmd.AddCommand(newStartCmd())
 	cmd.AddCommand(newStopCmd())
 	cmd.AddCommand(newCleanCmd())
-	cmd.AddCommand(newStatusCmd())
+	cmd.AddCommand(NewStatusCmd()) // Updated to use exported function
 	cmd.AddCommand(newSnapshotCmd())
 	cmd.AddCommand(newBootstrapCmd())
 

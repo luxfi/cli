@@ -386,8 +386,14 @@ func startPublicNetwork(cfg networkConfig) error {
 	ux.Logger.PrintToUser("Using profile: %s (override: %q)", cfg.networkName, profile)
 
 	// Build node config using profile parameters
+	importChainDataConfig := ""
+	if importChainData != "" {
+		importChainDataConfig = fmt.Sprintf(`"import-chain-data": %q,`, importChainData)
+	}
+
 	globalNodeConfig := fmt.Sprintf(`{
 		"network-id": %d,
+		%s
 		"db-type": "badgerdb",
 		"sybil-protection-enabled": true,
 		"network-allow-private-ips": true,
@@ -430,7 +436,7 @@ func startPublicNetwork(cfg networkConfig) error {
 		"network-health-max-time-since-msg-sent": "5s",
 		"network-health-max-time-since-msg-received": "5s",
 		"network-outbound-connection-timeout": "500ms"
-	}`, cfg.networkID, trackChainsValue,
+	}`, cfg.networkID, importChainDataConfig, trackChainsValue,
 		prof.ConsensusSampleSize,
 		prof.ConsensusPreferenceQuorumSize,
 		prof.ConsensusConfidenceQuorumSize,

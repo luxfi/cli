@@ -29,7 +29,9 @@ var (
 	statusAll     bool
 )
 
-func newStatusCmd() *cobra.Command {
+// NewStatusCmd returns the status command.
+// Exported for use by root command alias.
+func NewStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Show network status and endpoints",
@@ -56,6 +58,7 @@ OUTPUT INCLUDES:
   - Network health status
   - Number of validator nodes
   - Node endpoints (RPC, staking)
+  - C-Chain block height
   - Custom chain endpoints (deployed chains)
   - Node version and VM info
   - gRPC server information
@@ -82,6 +85,7 @@ TYPICAL OUTPUT:
   -------- Node information --------
   node1 has ID NodeID-xxx and endpoint http://127.0.0.1:9650
   Version: lux/1.0.0...
+  C-Chain Height: 1234
   ...
 
 NOTES:
@@ -238,11 +242,17 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 			if len(vmVersions) > 0 {
 				fmt.Fprintf(&buf, "  VM Versions: %v\n", vmVersions)
 			}
-			// Placeholder for CGO/GPU if available in future
-			// fmt.Fprintf(&buf, "  Acceleration: Unknown\n")
 		} else {
 			// If failed to get version, debug log?
 			// fmt.Fprintf(&buf, "  Version check failed: %v\n", err)
+		}
+
+		// Query C-Chain height
+		height, err := getCChainHeight(nodeInfo.Uri)
+		if err == nil {
+			fmt.Fprintf(&buf, "  C-Chain Height: %s\n", height)
+		} else {
+			fmt.Fprintf(&buf, "  C-Chain Height: Unknown\n")
 		}
 	}
 
@@ -305,6 +315,42 @@ func getNodeVersion(uri string) (string, map[string]string, error) {
 		return version, vmVersions, nil
 	}
 	return "", nil, fmt.Errorf("invalid response")
+}
+
+func getCChainHeight(uri string) (string, error) {
+	// uri is http://ip:port
+	url := fmt.Sprintf("%s/ext/bc/C/rpc", uri)
+	reqBody := []byte(`{"jsonrpc":"2.0", "id":1, "method":"eth_blockNumber", "params":[]}`)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Short timeout for local check
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var r map[string]interface{}
+	if err := json.Unmarshal(body, &r); err != nil {
+		return "", err
+	}
+
+	if result, ok := r["result"].(string); ok {
+		// Result is hex string (e.g., "0x1b4")
+		return result, nil
+	}
+	return "", fmt.Errorf("invalid response")
 }
 
 // getTerminalWidth returns the current terminal width, or a default if unable to determine
