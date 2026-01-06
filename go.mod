@@ -260,6 +260,6 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
-replace github.com/luxfi/sdk => /Users/z/work/lux/sdk
+replace github.com/luxfi/sdk => ../sdk
 
-replace github.com/luxfi/genesis => /Users/z/work/lux/genesis
+replace github.com/luxfi/genesis => ../genesis

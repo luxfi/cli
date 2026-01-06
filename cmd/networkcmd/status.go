@@ -4,9 +4,15 @@
 package networkcmd
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -32,16 +38,14 @@ func newStatusCmd() *cobra.Command {
 OVERVIEW:
 
   Displays network health, validator nodes, endpoints, and custom chains.
-  By default, auto-detects and shows the currently running network.
+  Checks status of all locally managed networks (mainnet, testnet, devnet, custom).
 
 NETWORK FLAGS:
 
   --mainnet, -m    Check mainnet status (port 9630, gRPC 8369)
   --testnet, -t    Check testnet status (port 9640, gRPC 8368)
   --devnet, -d     Check devnet status (port 9650, gRPC 8370)
-  --all            Check all network types
-
-  If no flag is provided, auto-detects the running network.
+  --all            Check all network types (default behavior)
 
 OPTIONS:
 
@@ -53,19 +57,17 @@ OUTPUT INCLUDES:
   - Number of validator nodes
   - Node endpoints (RPC, staking)
   - Custom chain endpoints (deployed chains)
+  - Node version and VM info
   - gRPC server information
 
 EXAMPLES:
 
-  # Check auto-detected running network
+  # Check all networks
   lux network status
 
   # Check specific network type
   lux network status --devnet
   lux network status -d
-
-  # Check all networks
-  lux network status --all
 
   # Verbose output with full cluster details
   lux network status --verbose
@@ -79,18 +81,19 @@ TYPICAL OUTPUT:
   Number of custom VMs: 1
   -------- Node information --------
   node1 has ID NodeID-xxx and endpoint http://127.0.0.1:9650
+  Version: lux/1.0.0...
   ...
 
 NOTES:
 
-  - Only running networks will show status
-  - Use after 'lux network start' to verify successful startup
-  - Endpoints shown are for connecting dapps and tools
-  - Custom VMs section shows deployed chains`,
+  - Only running networks will show full status
+  - Stopped networks will be listed as Stopped
+  - Use after 'lux network start' to verify successful startup`,
 
-		RunE:         networkStatus,
-		Args:         cobra.ExactArgs(0),
-		SilenceUsage: true,
+		RunE:          networkStatus,
+		Args:          cobra.ExactArgs(0),
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 
 	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "show detailed cluster info including raw protobuf response")
@@ -102,67 +105,91 @@ NOTES:
 	return cmd
 }
 
-func networkStatus(*cobra.Command, []string) error {
-	// Count how many network-specific flags are set
-	flagCount := 0
-	if statusMainnet {
-		flagCount++
-	}
-	if statusTestnet {
-		flagCount++
-	}
-	if statusDevnet {
-		flagCount++
+func networkStatus(cmd *cobra.Command, args []string) error {
+	// Determine which networks to check
+	networksToCheck := []string{}
+	if statusAll || (!statusMainnet && !statusTestnet && !statusDevnet) {
+		networksToCheck = []string{"mainnet", "testnet", "devnet", "custom"}
+	} else {
+		if statusMainnet {
+			networksToCheck = append(networksToCheck, "mainnet")
+		}
+		if statusTestnet {
+			networksToCheck = append(networksToCheck, "testnet")
+		}
+		if statusDevnet {
+			networksToCheck = append(networksToCheck, "devnet")
+		}
 	}
 
-	// Check for conflicting flags (but --all can override)
-	if flagCount > 1 && !statusAll {
-		return fmt.Errorf("cannot use multiple network flags together (use --all to check all networks)")
-	}
+	var wg sync.WaitGroup
+	results := make([]string, len(networksToCheck))
+	errors := make([]error, len(networksToCheck))
 
-	// If --all is set, check all networks
-	if statusAll {
-		networks := []string{"mainnet", "testnet", "devnet", "custom"}
-		anyRunning := false
-		for _, netType := range networks {
-			if err := checkNetworkStatus(netType); err == nil {
+	// Check networks in parallel
+	for i, netType := range networksToCheck {
+		wg.Add(1)
+		go func(index int, nt string) {
+			defer wg.Done()
+
+			// Check if process is running first to avoid timeout
+			running, err := binutils.IsServerProcessRunningForNetwork(app, nt)
+			if err != nil {
+				// Don't error out completely, just record it
+				// But IsServerProcessRunningForNetwork returns error if PID file checks fail in a bad way
+				// Use debug log?
+				errors[index] = fmt.Errorf("failed to check process status: %w", err)
+				return
+			}
+			if !running {
+				results[index] = fmt.Sprintf("%s: Stopped", strings.Title(nt))
+				return
+			}
+
+			// Get detailed status
+			out, err := getNetworkStatusOutput(nt)
+			if err != nil {
+				errors[index] = err
+				// If error is timeout or not connected, say so
+				if strings.Contains(err.Error(), "timed out") || strings.Contains(err.Error(), "connection refused") {
+					results[index] = fmt.Sprintf("%s: Not reachable (process running but unresponsive)", strings.Title(nt))
+				} else {
+					results[index] = fmt.Sprintf("%s: Error - %%v", strings.Title(nt), err)
+				}
+			} else {
+				results[index] = out
+			}
+		}(i, netType)
+	}
+	wg.Wait()
+
+	// Print results in order
+	anyRunning := false
+	for i, res := range results {
+		if errors[i] != nil {
+			// Only print error if it's not just "not exist" or similar
+			ux.Logger.RedXToUser("%s: %v", networksToCheck[i], errors[i])
+		} else if res != "" {
+			if !strings.Contains(res, "Stopped") && !strings.Contains(res, "Not reachable") {
 				anyRunning = true
 			}
-		}
-		if !anyRunning {
-			ux.Logger.PrintToUser("No networks are currently running")
-		}
-		return nil
-	}
-
-	// Determine network type to check
-	var networkType string
-	switch {
-	case statusMainnet:
-		networkType = "mainnet"
-	case statusTestnet:
-		networkType = "testnet"
-	case statusDevnet:
-		networkType = "devnet"
-	default:
-		// Auto-detect from running network state
-		networkType = app.GetRunningNetworkType()
-		if networkType == "" || networkType == "local" {
-			networkType = "custom" // Default fallback ("local" is deprecated)
+			ux.Logger.PrintToUser(res)
 		}
 	}
 
-	return checkNetworkStatus(networkType)
+	if !anyRunning && len(networksToCheck) == 4 && !statusAll {
+		ux.Logger.PrintToUser("\nNo networks are currently running.")
+	}
+
+	return nil
 }
 
-// checkNetworkStatus checks the status of a specific network type
-func checkNetworkStatus(networkType string) error {
-	ux.Logger.PrintToUser("Checking %s network status...", networkType)
+func getNetworkStatusOutput(networkType string) (string, error) {
+	var buf bytes.Buffer
 
 	cli, err := binutils.NewGRPCClient(binutils.WithNetworkType(networkType))
 	if err != nil {
-		ux.Logger.PrintToUser("%s: Not running (failed to connect)", networkType)
-		return err
+		return "", err
 	}
 	defer func() { _ = cli.Close() }()
 
@@ -170,54 +197,114 @@ func checkNetworkStatus(networkType string) error {
 	status, err := cli.Status(ctx)
 	if err != nil {
 		if server.IsServerError(err, server.ErrNotBootstrapped) {
-			ux.Logger.PrintToUser("%s: Not running", networkType)
-			return err
+			return fmt.Sprintf("%s: Not running (not bootstrapped)", networkType), nil
 		}
-		ux.Logger.PrintToUser("%s: Error - %v", networkType, err)
-		return err
+		return "", err
 	}
 
 	// Use adaptive layout for different screen sizes
 	const maxWidth = 100
-	separator := strings.Repeat("=", minInt(maxWidth, getTerminalWidth()))
-	nodeSeparator := strings.Repeat("-", minInt(maxWidth/2, getTerminalWidth()/2))
+	width := getTerminalWidth()
+	if width > maxWidth {
+		width = maxWidth
+	}
+	separator := strings.Repeat("=", width)
+	nodeSeparator := strings.Repeat("-", width/2)
 
 	if status == nil || status.ClusterInfo == nil {
-		ux.Logger.PrintToUser("%s: No network running", networkType)
-		return fmt.Errorf("no %s network running", networkType)
+		return "", fmt.Errorf("no %s network running", networkType)
 	}
 
 	// Get port info from gRPC ports config
 	grpcPorts := binutils.GetGRPCPorts(networkType)
 
-	ux.Logger.PrintToUser("")
-	ux.Logger.PrintToUser("%s Network is Up (gRPC port: %d)", strings.ToUpper(networkType[:1])+networkType[1:], grpcPorts.Server)
-	ux.Logger.PrintToUser("%s", separator)
-	ux.Logger.PrintToUser("Healthy: %t", status.ClusterInfo.Healthy)
-	ux.Logger.PrintToUser("Custom VMs healthy: %t", status.ClusterInfo.CustomChainsHealthy)
-	ux.Logger.PrintToUser("Number of nodes: %d", len(status.ClusterInfo.NodeNames))
-	ux.Logger.PrintToUser("Number of custom VMs: %d", len(status.ClusterInfo.CustomChains))
-	ux.Logger.PrintToUser("%s Node information %s", nodeSeparator, nodeSeparator)
+	fmt.Fprintf(&buf, "\n%s Network is Up (gRPC port: %%d)\n", strings.ToUpper(networkType[:1])+networkType[1:], grpcPorts.Server)
+	fmt.Fprintf(&buf, "%s\n", separator)
+	fmt.Fprintf(&buf, "Healthy: %%t\n", status.ClusterInfo.Healthy)
+	fmt.Fprintf(&buf, "Custom VMs healthy: %%t\n", status.ClusterInfo.CustomChainsHealthy)
+	fmt.Fprintf(&buf, "Number of nodes: %%d\n", len(status.ClusterInfo.NodeNames))
+	fmt.Fprintf(&buf, "Number of custom VMs: %%d\n", len(status.ClusterInfo.CustomChains))
+	fmt.Fprintf(&buf, "Backend Controller: Enabled\n")
+
+	fmt.Fprintf(&buf, "%s Node information %s\n", nodeSeparator, nodeSeparator)
+
 	for n, nodeInfo := range status.ClusterInfo.NodeInfos {
-		ux.Logger.PrintToUser("%s has ID %s and endpoint %s ", n, nodeInfo.Id, nodeInfo.Uri)
+		fmt.Fprintf(&buf, "%s has ID %%s and endpoint %%s \n", n, nodeInfo.Id, nodeInfo.Uri)
+		
+		// Query node info
+		version, vmVersions, err := getNodeVersion(nodeInfo.Uri)
+		if err == nil {
+			fmt.Fprintf(&buf, "  Version: %%s\n", version)
+			if len(vmVersions) > 0 {
+				fmt.Fprintf(&buf, "  VM Versions: %%v\n", vmVersions)
+			}
+			// Placeholder for CGO/GPU if available in future
+			// fmt.Fprintf(&buf, "  Acceleration: Unknown\n")
+		} else {
+			// If failed to get version, debug log?
+			// fmt.Fprintf(&buf, "  Version check failed: %%v\n", err)
+		}
 	}
+
 	if len(status.ClusterInfo.CustomChains) > 0 {
-		ux.Logger.PrintToUser("%s Custom VM information %s", nodeSeparator, nodeSeparator)
+		fmt.Fprintf(&buf, "%s Custom VM information %s\n", nodeSeparator, nodeSeparator)
 		for _, nodeInfo := range status.ClusterInfo.NodeInfos {
 			for blockchainID := range status.ClusterInfo.CustomChains {
-				ux.Logger.PrintToUser("Endpoint at %s for blockchain %q: %s/ext/bc/%s/rpc", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
+				fmt.Fprintf(&buf, "Endpoint at %%s for blockchain %%q: %%s/ext/bc/%%s/rpc\n", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
 			}
 		}
 	}
 
-	// Show verbose output if flag is set
 	if verbose {
-		ux.Logger.PrintToUser("")
-		ux.Logger.PrintToUser("Verbose output:")
-		ux.Logger.PrintToUser("%s", status.String())
+		fmt.Fprintf(&buf, "\nVerbose output:\n%s\n", status.String())
 	}
 
-	return nil
+	return buf.String(), nil
+}
+
+func getNodeVersion(uri string) (string, map[string]string, error) {
+	// uri is http://ip:port
+	url := fmt.Sprintf("%s/ext/info", uri)
+	reqBody := []byte(`{"jsonrpc":"2.0", "id":1, "method":"info.getNodeVersion", "params":{}}`)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return "", nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Short timeout for local info check
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", nil, err
+	}
+
+	var r map[string]interface{}
+	if err := json.Unmarshal(body, &r); err != nil {
+		return "", nil, err
+	}
+
+	if result, ok := r["result"].(map[string]interface{}); ok {
+		version, _ := result["version"].(string)
+
+		vmVersions := make(map[string]string)
+		if vms, ok := result["vmVersions"].(map[string]interface{}); ok {
+			for k, v := range vms {
+				if s, ok := v.(string); ok {
+					vmVersions[k] = s
+				}
+			}
+		}
+		return version, vmVersions, nil
+	}
+	return "", nil, fmt.Errorf("invalid response")
 }
 
 // getTerminalWidth returns the current terminal width, or a default if unable to determine
