@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/cmd/ammcmd"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/cli/cmd/configcmd"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
@@ -45,12 +46,16 @@ import (
 
 var (
 	app *application.Lux
+	logFactory luxlog.Factory
 
 	logLevel       string
 	Version        = "1.22.5"
 	cfgFile        string
 	skipCheck      bool
 	nonInteractive bool
+	verboseFlag    bool
+	debugFlag      bool
+	quietFlag      bool
 )
 
 func NewRootCmd() *cobra.Command {
@@ -119,6 +124,9 @@ For detailed command help, use: lux <command> --help`,
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 	rootCmd.PersistentFlags().BoolVar(&nonInteractive, "non-interactive", false,
 		"Disable prompts; fail if required values are missing (also enabled when stdin is not a TTY or CI=1)")
+	rootCmd.PersistentFlags().Bool("verbose", false, "Show verbose output (info level logs)")
+	rootCmd.PersistentFlags().Bool("debug", false, "Show debug output (debug level logs)")
+	rootCmd.PersistentFlags().Bool("quiet", false, "Show only errors (quiet mode)")
 
 	// add sub commands
 	rootCmd.AddCommand(devcmd.NewCmd(app))     // dev (local dev environment)
@@ -182,7 +190,41 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
+	
+	// Adjust log level based on flags (must be done after flags are parsed)
+	if cmd.Flags().Changed("debug") {
+		logFactory.SetDisplayLevel("lux", luxlog.Level(-4)) // DEBUG
+	} else if cmd.Flags().Changed("verbose") {
+		logFactory.SetDisplayLevel("lux", luxlog.Level(0)) // INFO
+	} else if cmd.Flags().Changed("quiet") {
+		logFactory.SetDisplayLevel("lux", luxlog.Level(8)) // ERROR
+	} else if logLevel != "" {
+		level, err := luxlog.ToLevel(logLevel)
+		if err == nil {
+			logFactory.SetDisplayLevel("lux", level)
+		}
+	}
+	
 	cf := config.New()
+
+	// Adjust log level based on flags BEFORE any logging happens
+	// Use only luxlog types to avoid mixing log libraries
+	if cmd.Flags().Changed("debug") {
+		logFactory.SetLogLevel("lux", level.Debug)
+		logFactory.SetDisplayLevel("lux", level.Debug)
+	} else if cmd.Flags().Changed("verbose") {
+		logFactory.SetLogLevel("lux", level.Info)
+		logFactory.SetDisplayLevel("lux", level.Info)
+	} else if cmd.Flags().Changed("quiet") {
+		logFactory.SetLogLevel("lux", level.Error)
+		logFactory.SetDisplayLevel("lux", level.Error)
+	} else if logLevel != "" {
+		level, err := luxlog.ToLevel(logLevel)
+		if err == nil {
+			logFactory.SetLogLevel("lux", level)
+			logFactory.SetDisplayLevel("lux", level)
+		}
+	}
 
 	// If --non-interactive flag is set, propagate to env so IsInteractive() sees it
 	// This allows TTY detection to work automatically while still respecting the flag
@@ -346,11 +388,14 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 	var err error
 
 	config := luxlog.Config{}
-	config.LogLevel = luxlog.Level(-6) // Info level
-	config.DisplayLevel, err = luxlog.ToLevel(logLevel)
-	if err != nil {
-		return nil, fmt.Errorf("invalid log level configured: %s", logLevel)
-	}
+	config.LogLevel = luxlog.Level(-6) // Info level for file logging
+	
+	// Set default display level to WARN (quiet by default)
+	config.DisplayLevel, _ = luxlog.ToLevel("WARN")
+	
+	// Log level can be overridden by flags, but we'll handle that in createApp
+	// after flags are parsed, by adjusting the logger level dynamically
+	
 	config.Directory = filepath.Join(baseDir, constants.LogDir)
 	if err := os.MkdirAll(config.Directory, perms.ReadWriteExecute); err != nil {
 		return nil, fmt.Errorf("failed creating log directory: %w", err)
@@ -371,7 +416,10 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 		factory.Close()
 		return nil, fmt.Errorf("failed setting up logging, exiting: %w", err)
 	}
+	// Store factory globally so we can adjust levels later
+	logFactory = factory
 	// create the user facing logger as a global var
+	// User output goes to stdout, logs go to stderr
 	ux.NewUserLog(log, os.Stdout)
 	return log, nil
 }

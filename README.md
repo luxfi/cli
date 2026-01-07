@@ -41,8 +41,8 @@ curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh |
 After installing, launch your own custom subnet:
 
 ```bash
-lux subnet create <subnetName>
-lux subnet deploy <subnetName>
+lux chain create <chainName>
+lux chain deploy <chainName>
 ```
 
 Shut down your local deployment with:
@@ -68,8 +68,6 @@ lux node validator status
 # Stop validator
 lux node validator stop --name mainnet-0
 ```
-
-For detailed validator management, see [CLI Validator Guide](../docs/CLI_VALIDATOR_GUIDE.md).
 
 Restart your local deployment (from where you left off) with:
 
@@ -169,21 +167,21 @@ explicitly asked to do so.
 
 Usage of local networks:
 - The local network will be started in the background only if it is not already running
-- If the network is not running, both `network start` and `subnet deploy` will start it from the `default snapshot`.
-`subnet deploy` will also do the deploy on the started network.
-- If the network is running, `network start` will do nothing, and `subnet deploy` will use the running one to do the deploy.
+- If the network is not running, both `network start` and `chain deploy` will start it from the `default snapshot`.
+`chain deploy` will also do the deploy on the started network.
+- If the network is running, `network start` will do nothing, and `chain deploy` will use the running one to do the deploy.
 - The local network will run until calling `network stop`, `network clean`, or until machine reboot
 
 ### Default snapshot
 
 How the CLI commands affect the `default snapshot`:
-- First call of `network start` or `subnet deploy` will initialize `default snapshot` from the `bootstrap snapshot`
-- Subsequent calls to `subnet deploy` do not change the snapshot, only the running network
+- First call of `network start` or `chain deploy` will initialize `default snapshot` from the `bootstrap snapshot`
+- Subsequent calls to `chain deploy` do not change the snapshot, only the running network
 - `network stop` persist the running network into the `default snapshot`
 - `network clean` copy again the `bootstrap snapshot` into the `default snapshot`, doing a reset of the state
 
 So typically a user will want to do the deploy she needs, change the blockchain state in a specific way, and
-after that execute `network stop` to preserve all the state. In a different session, `network start` or `subnet deploy`
+after that execute `network stop` to preserve all the state. In a different session, `network start` or `chain deploy`
 will recover that state.
 
 ### Custom snapshots
@@ -191,14 +189,14 @@ will recover that state.
 How the CLI commands affect the `custom snapshots`:
 - `network stop` can be given an optional snapshot name. This will then be used instead of the default one to save the state
 - `network start` can be given an optional snapshot name. This will then be used instead of the default one to save the state
-- `subnet deploy` will take a running network if it is available, so there is a need to use `network start` previously to do
+- `chain deploy` will take a running network if it is available, so there is a need to use `network start` previously to do
 deploys, if wanting to use custom snapshots
 - `network clean` does not change custom snapshots
 
 So typically a user who wants to use a custom snapshot will do the deploy she needs, change the blockchain state in a specific way, and
 after that execute `network stop` with `--snapshot-name` flag to preserve all the state into the desired snapshot.
 In a different session, `network start` with `--snapshot-name` flag will be called to load that specific snapshot, and after that
-`subnet deploy` can be used on top of it. Notice that you need to continue giving `--snapshot-name` flag to those commands if you
+`chain deploy` can be used on top of it. Notice that you need to continue giving `--snapshot-name` flag to those commands if you
 continue saving/restoring to it, if not, `default snapshot will be used`.
 
 ### Snapshots dir
