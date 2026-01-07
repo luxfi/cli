@@ -20,7 +20,7 @@ require (
 	github.com/luxfi/ids v1.2.7
 	github.com/luxfi/keychain v1.0.1
 	github.com/luxfi/ledger v1.1.6
-	github.com/luxfi/log v1.2.1
+	github.com/luxfi/log v1.2.5
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.15.4
 	github.com/luxfi/node v1.22.81
@@ -46,7 +46,7 @@ require (
 	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93 // indirect
 	golang.org/x/mod v0.31.0
 	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/oauth2 v0.34.0 // indirect
+	golang.org/x/oauth2 v0.34.0
 	golang.org/x/sync v0.19.0
 	golang.org/x/text v0.32.0
 	google.golang.org/api v0.247.0
@@ -63,12 +63,15 @@ require github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 require (
 	github.com/btcsuite/btcd v0.24.2
 	github.com/btcsuite/btcd/btcutil v1.1.6
+	github.com/dgraph-io/badger/v4 v4.9.0
+	github.com/google/go-github/v53 v53.2.0
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/luxfi/const v1.4.1
 	github.com/luxfi/genesis v1.5.19
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/math v1.2.2
+	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	golang.org/x/sys v0.39.0
 	golang.org/x/term v0.38.0
@@ -124,7 +127,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
-	github.com/dgraph-io/badger/v4 v4.9.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.3.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.10.0 // indirect
@@ -152,6 +154,7 @@ require (
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20251213031049-b05bdaca462f // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
@@ -178,7 +181,7 @@ require (
 	github.com/luxfi/codec v1.1.0 // indirect
 	github.com/luxfi/consensus v1.22.51 // indirect
 	github.com/luxfi/database v1.17.35 // indirect
-	github.com/luxfi/fhe v1.7.1 // indirect
+	github.com/luxfi/fhe v1.7.4 // indirect
 	github.com/luxfi/gpu v0.30.0 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.6 // indirect
@@ -198,7 +201,6 @@ require (
 	github.com/luxfi/utils v1.1.0 // indirect
 	github.com/luxfi/vm v1.0.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
@@ -259,3 +261,15 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+replace github.com/luxfi/precompile => ../precompile
+
+replace github.com/luxfi/gpu => ../gpu
+
+replace github.com/luxfi/fhe => ../fhe
+
+replace github.com/luxfi/ringtail => ../ringtail
+
+replace github.com/luxfi/lattice/v7 => ../lattice
+
+replace github.com/luxfi/crypto => ../crypto
