@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -347,8 +348,15 @@ func getCChainHeight(uri string) (string, error) {
 	}
 
 	if result, ok := r["result"].(string); ok {
-		// Result is hex string (e.g., "0x1b4")
-		return result, nil
+		// Result is hex string (e.g., "0x1b4") - convert to decimal
+		if strings.HasPrefix(result, "0x") {
+			// Convert hex to decimal
+			decimalValue, err := strconv.ParseUint(result[2:], 16, 64)
+			if err == nil {
+				return fmt.Sprintf("%d", decimalValue), nil
+			}
+		}
+		return result, nil // Fallback to original if conversion fails
 	}
 	return "", fmt.Errorf("invalid response")
 }

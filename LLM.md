@@ -1,8 +1,7 @@
-# Lux CLI - AI Assistant Knowledge Base
+# Lux CLI Documentation
 
-**Last Updated**: 2026-01-01
 **Version**: 1.22.5
-**Organization**: Lux Industries
+**Last Updated**: 2024-10-15
 
 ## Quick Reference
 
@@ -38,6 +37,12 @@ lux amm status                 # Show AMM contract status
 lux amm pools                  # List liquidity pools
 lux amm swap --from 0x... --to 0x... --amount 100  # Swap tokens
 lux amm quote --from 0x... --to 0x... --amount 100 # Get swap quote
+
+# DEX Trading (High-performance exchange)
+lux dex market list            # List all trading markets
+lux dex order place            # Place limit/market orders
+lux dex pool create            # Create liquidity pools
+lux dex perp open              # Open perpetual positions
 ```
 
 ## Command Architecture
@@ -50,107 +55,11 @@ The CLI is organized into these main command groups:
 | `lux chain` | Unified chain lifecycle | create, deploy, import, export, list |
 | `lux key` | Key management | create, list, export |
 | `lux validator` | P-Chain validator balance | |
-| `lux amm` | AMM/DEX trading | swap, balance, add-liquidity |
+| `lux amm` | AMM/DEX trading | balance, swap, quote, pools, status |
+| `lux dex` | High-performance DEX | market, order, pool, perp, account |
 | `lux warp` | Cross-chain messaging | |
 | `lux contract` | Smart contract tools | deploy, verify |
 | `lux config` | CLI configuration | |
-
-## Interactive Mode (UNIX Standard)
-
-The CLI follows standard UNIX conventions for interactive behavior:
-
-### Mode Detection
-
-| Condition | Mode | Behavior |
-|-----------|------|----------|
-| stdin is TTY | Interactive | Prompts for missing values |
-| stdin is piped | Non-interactive | Uses defaults or fails |
-| LUX_NON_INTERACTIVE=1 | Non-interactive | Never prompts |
-| CI=1 or CI=true | Non-interactive | Never prompts |
-
-### Option Precedence
-
-Values are resolved in order: Flags → Env vars → Config → Defaults → Prompts
-
-### Examples
-
-```bash
-# On a TTY - prompts for missing values
-lux chain create mychain
-
-# Piped input - never prompts, uses defaults or fails
-echo "" | lux chain create mychain
-
-# CI environment - automatically non-interactive
-CI=true lux chain create mychain
-```
-
-### Defaults (Non-Interactive)
-
-When non-interactive, sensible defaults are used:
-- Chain ID: 200200
-- Token: TOKEN (TKN)
-- Sequencer: lux (100ms blocks)
-- Type: l2 (rollup)
-- Airdrop: 500M tokens to test account
-
-## Chain Import
-
-Import RLP-encoded blockchain data to a running chain.
-
-### Admin API Differences: Coreth vs EVM
-
-**IMPORTANT**: The C-Chain (Coreth) and Subnets (EVM) have DIFFERENT admin API implementations:
-
-| Chain Type | Endpoint | Method Format | Parameters |
-|------------|----------|---------------|------------|
-| C-Chain (Coreth) | `/ext/bc/C/rpc` | `admin_importChain` | Array: `["/path/to/file.rlp"]` |
-| Subnets (EVM) | `/ext/bc/<id>/admin` | `admin.importChain` | Object: `{"file":"/path/to/file.rlp"}` |
-
-### C-Chain Import (Coreth)
-
-```bash
-# Via direct curl
-curl -X POST "http://127.0.0.1:9630/ext/bc/C/rpc" \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"admin_importChain","params":["/path/to/blocks.rlp"],"id":1}'
-```
-
-### Subnet Import (EVM Plugin)
-
-```bash
-# Via direct curl (use blockchain ID from deploy output)
-curl -X POST "http://127.0.0.1:9630/ext/bc/<blockchain-id>/admin" \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"admin.importChain","params":{"file":"/path/to/blocks.rlp"},"id":1}'
-```
-
-### CLI Import (Planned)
-
-```bash
-# Import to C-Chain
-lux chain import --chain=c --path=/path/to/blocks.rlp
-
-# Import to subnet
-lux chain import --chain=<blockchain-id> --path=/path/to/blocks.rlp
-```
-
-### Block Import Results (2025-12-25)
-
-Successfully imported blocks to local networks:
-
-| Network | Chain | Blocks | Genesis Hash |
-|---------|-------|--------|--------------|
-| Mainnet | C-Chain (96369) | ~1,082,780 | `0x3f4fa...` |
-| Mainnet | Zoo (200200) | 799 | `0x7c548...` |
-| Testnet | C-Chain (96368) | 218 | `0x1c5fe...` |
-| Testnet | Zootest (200201) | 84 | `0x0652f...` |
-
-**RPC Endpoints** (internal port 9630/9640):
-- Mainnet C-Chain: `http://127.0.0.1:9630/ext/bc/C/rpc`
-- Mainnet Zoo: `http://127.0.0.1:9630/ext/bc/<zoo-id>/rpc`
-- Testnet C-Chain: `http://127.0.0.1:9640/ext/bc/C/rpc`
-- Testnet Zootest: `http://127.0.0.1:9640/ext/bc/<zootest-id>/rpc`
 
 ## Network Start Options
 
@@ -176,17 +85,6 @@ lux network start --snapshot=mybackup
 ## Data Locations
 
 ```
-/Users/z/work/lux/state/
-├── rlp/                          # Exported RLP blockchain data
-│   ├── lux-mainnet-96369.rlp     # C-Chain blocks (1.28GB)
-│   └── zoo-mainnet/
-│       └── zoo-mainnet-200200.rlp # ZOO blocks (1.3MB, 100 blocks)
-│
-└── chaindata/                    # Raw database files
-    ├── lux-mainnet-96369/        # C-Chain PebbleDB
-    ├── zoo-mainnet-200200/       # ZOO chaindata
-    └── spc-mainnet-36911/        # SPC chaindata
-
 ~/.lux/
 ├── chains/                       # All chain configs (consolidated)
 │   ├── C/                        # C-Chain config
@@ -232,7 +130,7 @@ tar -czf ~/.lux/snapshots/backup.tar.gz -C ~/.lux/runs/mainnet run_*
 
 ```bash
 # Build CLI
-cd /Users/z/work/lux/cli
+cd /path/to/lux/cli
 go build -o bin/lux ./main.go
 
 # Install globally
@@ -240,57 +138,6 @@ go install
 
 # Run tests
 go test ./...
-```
-
-## VM Implementations
-
-| Chain Type | VM | Source |
-|------------|----|----|
-| C-Chain | Coreth | `/Users/z/work/lux/coreth` |
-| Subnets (ZOO, SPC) | EVM | `/Users/z/work/lux/evm` |
-
-The admin_importChain RPC is implemented in both:
-- Coreth: `eth/api_admin.go`
-- EVM: `plugin/evm/admin.go`
-
-## Troubleshooting
-
-### "404 page not found" on subnet RPC
-The subnet is not tracked or deployed. Ensure:
-1. Network is running: `lux network status`
-2. Subnet is deployed: `lux l2 deploy <name> --local`
-3. Using correct blockchain ID in RPC path
-
-### "ErrPrunedAncestor" during import
-The genesis state is not accessible. This is a known issue with fresh subnet deployments. The genesis state trie must be properly committed before imports can work.
-
-### "invalid gas limit" during import
-If you see `invalid gas limit: have 12000000, want 10000000`, the Fortuna upgrade is activated prematurely.
-
-**Fix**: Set far-future timestamps for Fortuna and related upgrades in genesis:
-
-```json
-{
-  "config": {
-    "etnaTimestamp": 253399622400,
-    "fortunaTimestamp": 253399622400,
-    "graniteTimestamp": 253399622400
-  }
-}
-```
-
-The value `253399622400` is year 9999, effectively disabling these upgrades.
-
-### Port 9650 vs 9630
-- **9650**: Public API port (external)
-- **9630**: Internal admin API port (use this for admin_importChain)
-
-### Import hangs or timeouts
-The `admin_importChain` RPC may timeout for large imports (>10k blocks), but the import continues in the background. Monitor progress via logs:
-
-```bash
-# Check import progress
-tail -f ~/.lux/runs/mainnet/current/node1/db/mainnet/main.log | grep "Inserted new block"
 ```
 
 ## AMM Trading
@@ -349,6 +196,153 @@ Mnemonics are derived using BIP44 path `m/44'/60'/0'/0/0`:
 
 Treasury address `0x9011E888251AB053B7bD1cdB598Db4f9DEd94714` is derived from the production mnemonic.
 
+## DEX Trading
+
+The Lux DEX provides a high-performance decentralized exchange with spot trading, AMM pools, and perpetual futures.
+
+### Key Features
+
+- **Central Limit Order Book (CLOB)**: Limit and market orders with 1ms block times
+- **AMM Pools**: Constant Product, StableSwap, and Concentrated Liquidity
+- **Perpetual Futures**: Up to 100x leverage on major assets
+- **Cross-Chain Swaps**: Via Warp messaging between L1/L2/L3 chains
+- **High-Frequency Trading**: Ultra-low latency for professional traders
+
+### Network Configuration
+
+| Network | Chain ID | Features |
+|---------|----------|----------|
+| Lux Mainnet | 96369 | Full DEX functionality |
+| Zoo Mainnet | 200200 | AMM pools only |
+| Lux Testnet | 96368 | Full DEX (test tokens) |
+
+### Command Structure
+
+```bash
+# Market operations
+lux dex market list              # List all markets
+lux dex market info LUX/USDT     # Market details
+lux dex market create            # Create new market
+
+# Order operations
+lux dex order place --market LUX/USDT --side buy --type limit --price 10.50 --amount 100
+lux dex order cancel --order-id 12345
+lux dex order history           # View order history
+
+# Pool operations
+lux dex pool create --type constant-product --token-a LUX --token-b USDT
+lux dex pool add-liquidity --pool-id 1 --amount-a 1000 --amount-b 10000
+lux dex pool list                # List available pools
+
+# Perpetual futures
+lux dex perp open --market BTC/USD --side long --leverage 10x --amount 0.1
+lux dex perp close --position-id 5678
+lux dex perp positions          # View open positions
+
+# Account management
+lux dex account balance          # View account balances
+lux dex account history          # View trading history
+lux dex account positions        # View open positions
+```
+
+### Order Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `limit` | Order at specific price | `--type limit --price 10.50` |
+| `market` | Immediate execution | `--type market` |
+| `stop-limit` | Triggered limit order | `--type stop-limit --stop 9.50 --limit 9.40` |
+| `stop-market` | Triggered market order | `--type stop-market --stop 11.00` |
+
+### Pool Types
+
+| Type | Description | Fee |
+|------|-------------|-----|
+| `constant-product` | Uniswap-style AMM | 0.3% |
+| `stable` | Curve-style stablecoin pool | 0.04% |
+| `concentrated` | Uniswap V3-style | 0.05%-1% |
+
+### Perpetual Futures
+
+- **Leverage**: 2x to 100x (configurable per market)
+- **Funding Rate**: Dynamic based on market conditions
+- **Liquidation**: Automatic with partial liquidation support
+- **Markets**: BTC/USD, ETH/USD, LUX/USD, and more
+
+### Cross-Chain Trading
+
+```bash
+# Cross-chain swap via Warp
+lux dex swap --from-chain my-l1 --to-chain my-l2 \
+  --from-token 0xUSDC_L1... --to-token 0xWETH_L2... \
+  --amount 1000000000 --cross-chain
+
+# Cross-chain order execution
+lux dex order place --market LUX/USDT \
+  --side buy --type limit --price 10.50 --amount 100 \
+  --cross-chain --target-chain my-l2
+```
+
+### Configuration
+
+DEX configuration is stored in `~/.lux-cli/dex/config.json`:
+
+```json
+{
+  "defaultChain": "my-l1",
+  "slippage": 0.5,
+  "deadline": "20m",
+  "gasMultiplier": 1.1,
+  "routers": {
+    "my-l1": {
+      "default": "0xRouterAddr...",
+      "amm": "0xAMMRouter...",
+      "clob": "0xCLOBRouter..."
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### "404 page not found" on subnet RPC
+The subnet is not tracked or deployed. Ensure:
+1. Network is running: `lux network status`
+2. Subnet is deployed: `lux chain deploy <name> --local`
+3. Using correct blockchain ID in RPC path
+
+### "ErrPrunedAncestor" during import
+The genesis state is not accessible. This is a known issue with fresh subnet deployments. The genesis state trie must be properly committed before imports can work.
+
+### "invalid gas limit" during import
+If you see `invalid gas limit: have 12000000, want 10000000`, the Fortuna upgrade is activated prematurely.
+
+**Fix**: Set far-future timestamps for Fortuna and related upgrades in genesis:
+
+```json
+{
+  "config": {
+    "etnaTimestamp": 253399622400,
+    "fortunaTimestamp": 253399622400,
+    "graniteTimestamp": 253399622400
+  }
+}
+```
+
+The value `253399622400` is year 9999, effectively disabling these upgrades.
+
+### Port 9650 vs 9630
+- **9650**: Public API port (external)
+- **9630**: Internal admin API port (use this for admin_importChain)
+
+### Import hangs or timeouts
+The `admin_importChain` RPC may timeout for large imports (>10k blocks), but the import continues in the background. Monitor progress via logs:
+
+```bash
+# Check import progress
+tail -f ~/.lux/runs/mainnet/current/node1/db/mainnet/main.log | grep "Inserted new block"
+```
+
 ## Token Denominations
 
 | Chain | Decimals | Notes |
@@ -356,14 +350,6 @@ Treasury address `0x9011E888251AB053B7bD1cdB598Db4f9DEd94714` is derived from th
 | P-Chain/X-Chain | 6 | 1 LUX = 1,000,000 µLUX |
 | C-Chain (EVM) | 18 | Standard EVM decimals |
 
-## Rules for AI Assistants
-
-1. **ALWAYS** update this LLM.md with significant discoveries
-2. **NEVER** create random summary files - update THIS file
-3. **NEVER** use ava-labs packages - use luxfi packages
-4. Use port 9630 for admin APIs, not 9650
-5. Test changes with actual data from `/Users/z/work/lux/state/`
-
 ---
 
-*This file is the single source of truth for AI assistants working on this project.*
+*This file contains essential documentation for the Lux CLI project.*
