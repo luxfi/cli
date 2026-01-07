@@ -34,11 +34,11 @@ func NewUserLog(log luxlog.Logger, userwriter io.Writer) {
 	}
 }
 
-// PrintToUser prints msg directly on the screen, but also to log file
+// PrintToUser prints msg directly to stdout (command output)
+// Does NOT log to avoid duplication - logs should go to stderr separately
 func (ul *UserLog) PrintToUser(msg string, args ...interface{}) {
 	formattedMsg := fmt.Sprintf(msg, args...)
 	_, _ = fmt.Fprintln(ul.writer, formattedMsg)
-	ul.log.Info(formattedMsg)
 }
 
 // Info logs an info message

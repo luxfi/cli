@@ -19,4 +19,9 @@ fi
 # to pass this flag to all child processes spawned by the shell.
 export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
 
+# Suppress duplicate library warnings when CGO is enabled
+if [ "$CGO_ENABLED" != "0" ]; then
+    export CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries"
+fi
+
 go build -v -ldflags="-X 'github.com/luxfi/cli/cmd.Version=$VERSION' -X github.com/luxfi/cli/pkg/utils.telemetryToken=$TELEMETRY_TOKEN" -o bin/lux
