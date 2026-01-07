@@ -18,14 +18,22 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p build
-	GOSUMDB=off GOPROXY=direct go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) main.go
+	if [ "$$CGO_ENABLED" != "0" ]; then \
+		GOSUMDB=off GOPROXY=direct CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries" go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) main.go; \
+	else \
+		GOSUMDB=off GOPROXY=direct CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) main.go; \
+	fi
 	@echo "Build complete: ./build/$(BINARY_NAME)"
 
 # Install the binary to GOBIN
 .PHONY: install
 install:
 	@echo "Installing $(BINARY_NAME) to $(GOBIN)..."
-	go install -ldflags "$(LDFLAGS)" .
+	if [ "$$CGO_ENABLED" != "0" ]; then \
+		CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries" go install -ldflags "$(LDFLAGS)" .; \
+	else \
+		CGO_ENABLED=0 go install -ldflags "$(LDFLAGS)" .; \
+	fi
 	@echo "Installed to: $(GOBIN)/$(BINARY_NAME)"
 
 # Run tests
