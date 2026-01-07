@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/lpm v1.7.13
 	github.com/luxfi/netrunner v1.15.4
 	github.com/luxfi/node v1.22.81
-	github.com/luxfi/sdk v1.16.39
+	github.com/luxfi/sdk v1.16.40
 	github.com/luxfi/warp v1.18.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -184,7 +184,7 @@ require (
 	github.com/luxfi/keys v1.0.6 // indirect
 	github.com/luxfi/lattice/v7 v7.0.0 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
-	github.com/luxfi/math/safe v0.0.0-20260105032950-356605c2c1a3 // indirect
+	github.com/luxfi/math/safe v0.0.0-20260105093802-21b7243e9ffb // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.18.4 // indirect
