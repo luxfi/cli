@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,9 +14,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
+)
+
+var (
+	// ErrNoNetwork indicates no nodes are running for a network status check.
+	ErrNoNetwork = errors.New("no network running")
 )
 
 // StatusService handles status probing and reporting
@@ -496,13 +502,17 @@ func (s *StatusService) getNetworkConfigurations() ([]Network, error) {
 		}
 	}
 
+	if len(networks) == 0 {
+		return nil, ErrNoNetwork
+	}
+
 	return networks, nil
 }
 
 // getChainEndpoints returns the chain endpoints for a network
 func (s *StatusService) getChainEndpoints(network Network) ([]EndpointStatus, error) {
 	if len(network.Nodes) == 0 {
-		return nil, fmt.Errorf("no nodes in network")
+		return nil, ErrNoNetwork
 	}
 	baseURL := network.Nodes[0].HTTPURL
 

@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"

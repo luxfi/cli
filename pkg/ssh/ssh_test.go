@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 func TestReplaceCustomVarDashboardValues(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/prompts"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/stretchr/testify/require"
 )

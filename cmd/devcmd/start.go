@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

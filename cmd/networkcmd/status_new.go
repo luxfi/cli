@@ -5,6 +5,7 @@ package networkcmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -107,6 +108,9 @@ func runStatusNew(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		if statusVerbose {
 			progress.FailStep("Network status check", err)
+		}
+		if errors.Is(err, status.ErrNoNetwork) {
+			return fmt.Errorf("no network running")
 		}
 		return fmt.Errorf("failed to get status: %w", err)
 	}

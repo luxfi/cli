@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 )
