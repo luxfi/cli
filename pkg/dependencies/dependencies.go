@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 var ErrNoLuxdVersion = errors.New("unable to find a compatible luxd version")

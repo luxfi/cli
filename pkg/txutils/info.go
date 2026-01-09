@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/address"
 	"github.com/luxfi/cli/pkg/key"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/vm/vms/platformvm"

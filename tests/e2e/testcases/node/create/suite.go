@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	e2eUtils "github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/cli/internal/mocks"
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
