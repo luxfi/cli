@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/warp/relayer"
 	"github.com/luxfi/cli/pkg/warp/signatureaggregator"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"
 

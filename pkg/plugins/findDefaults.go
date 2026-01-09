@@ -12,7 +12,7 @@ import (
 	"github.com/kardianos/osext"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/config"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/shirou/gopsutil/process"
 )

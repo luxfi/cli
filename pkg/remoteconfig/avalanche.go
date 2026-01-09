@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 type LuxConfigInputs struct {

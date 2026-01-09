@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/signatureaggregator"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"

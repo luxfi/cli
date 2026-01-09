@@ -7,7 +7,7 @@ package models
 import (
 	"slices"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 // filter is a helper function to filter slices based on a predicate

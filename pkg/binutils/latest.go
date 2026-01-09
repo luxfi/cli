@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/sdk/utils/perms"
+	"github.com/luxfi/vm/utils/perms"
 	"go.uber.org/zap"
 )
 

@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/api"
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/rpc"
 	"github.com/luxfi/vm/vms/platformvm"
 	"github.com/stretchr/testify/mock"
 )

@@ -11,7 +11,7 @@ import (
 	"golang.org/x/mod/semver"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 type CLIMinVersionMap struct {

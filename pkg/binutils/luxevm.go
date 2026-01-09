@@ -9,7 +9,7 @@ import (
 	"runtime"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 // SetupEVM downloads and installs the EVM binary.

@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/sdk/profiles"

@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/netrunner/local"
 	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"

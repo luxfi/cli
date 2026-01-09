@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"

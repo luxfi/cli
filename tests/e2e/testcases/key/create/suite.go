@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

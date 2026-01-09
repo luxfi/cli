@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/rpc"
 	"github.com/onsi/gomega"

@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 )
 
