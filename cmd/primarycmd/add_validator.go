@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	cliprompts "github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
 	sdkprompts "github.com/luxfi/sdk/prompts"

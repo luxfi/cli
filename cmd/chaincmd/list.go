@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"

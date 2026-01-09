@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/address"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/cb58"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/go-bip32"

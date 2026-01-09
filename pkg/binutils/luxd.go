@@ -5,7 +5,7 @@ package binutils
 
 import (
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 const (

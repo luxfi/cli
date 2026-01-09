@@ -10,7 +10,7 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	rpc "github.com/luxfi/sdk/utils/rpc"
+	rpc "github.com/luxfi/rpc"
 
 	signer "github.com/luxfi/vm/vms/platformvm/signer"
 )

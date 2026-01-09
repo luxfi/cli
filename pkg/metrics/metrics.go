@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 

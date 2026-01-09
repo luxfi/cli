@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"

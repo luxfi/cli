@@ -4,7 +4,7 @@
 // Package models contains data structures and types used throughout the CLI.
 package models
 
-import "github.com/luxfi/constantsants"
+import "github.com/luxfi/constants"
 
 // VMType represents a virtual machine type.
 type VMType string

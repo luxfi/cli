@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 // Up to version 1.0.0 the sidecar and genesis files were stored at

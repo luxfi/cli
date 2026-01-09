@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/log/level"
 	"github.com/spf13/cobra"
 )

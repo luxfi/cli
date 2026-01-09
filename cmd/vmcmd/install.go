@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxconfig "github.com/luxfi/config"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 )
 
