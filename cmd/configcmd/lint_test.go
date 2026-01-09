@@ -12,11 +12,11 @@ import (
 
 func TestLintConfig_ValidConfig(t *testing.T) {
 	config := map[string]interface{}{
-		"http-host":          "127.0.0.1",
-		"http-port":          float64(9630),
-		"log-level":          "info",
+		"http-host":                "127.0.0.1",
+		"http-port":                float64(9630),
+		"log-level":                "info",
 		"network-timeout-halflife": "2s",
-		"api-admin-enabled":  true,
+		"api-admin-enabled":        true,
 	}
 
 	result := lintConfig(config)

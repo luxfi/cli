@@ -9,8 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	cliconstants "github.com/luxfi/cli/pkg/constants"
-	constants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 )
 
 // Network represents a blockchain network type.
@@ -51,7 +50,7 @@ func (s Network) NetworkID() (uint32, error) {
 	case Testnet:
 		return constants.TestnetID, nil
 	case Local:
-		return cliconstants.LocalNetworkID, nil
+		return constants.LocalNetworkID, nil
 	}
 	return 0, fmt.Errorf("unsupported network")
 }
@@ -106,7 +105,7 @@ func NetworkFromNetworkID(networkID uint32) Network {
 		return Mainnet
 	case constants.TestnetID:
 		return Testnet
-	case cliconstants.LocalNetworkID:
+	case constants.LocalNetworkID:
 		return Local
 	}
 	return Undefined
@@ -142,15 +141,15 @@ func (Network) BootstrappingContext() (context.Context, func()) {
 func (s Network) Endpoint() string {
 	switch s {
 	case Mainnet:
-		return cliconstants.MainnetAPIEndpoint
+		return constants.MainnetAPIEndpoint
 	case Testnet:
-		return cliconstants.TestnetAPIEndpoint
+		return constants.TestnetAPIEndpoint
 	case Local:
-		return cliconstants.LocalAPIEndpoint
+		return constants.LocalAPIEndpoint
 	case Devnet:
-		return cliconstants.DevnetAPIEndpoint
+		return constants.DevnetAPIEndpoint
 	default:
-		return cliconstants.LocalAPIEndpoint
+		return constants.LocalAPIEndpoint
 	}
 }
 
@@ -168,15 +167,15 @@ func (s Network) ClusterName() string {
 func (s Network) WSEndpoints() []string {
 	switch s {
 	case Mainnet:
-		return []string{cliconstants.MainnetWSEndpoint}
+		return []string{constants.MainnetWSEndpoint}
 	case Testnet:
-		return []string{cliconstants.TestnetWSEndpoint}
+		return []string{constants.TestnetWSEndpoint}
 	case Local:
-		return []string{cliconstants.LocalWSEndpoint}
+		return []string{constants.LocalWSEndpoint}
 	case Devnet:
-		return []string{cliconstants.DevnetWSEndpoint}
+		return []string{constants.DevnetWSEndpoint}
 	default:
-		return []string{cliconstants.LocalWSEndpoint}
+		return []string{constants.LocalWSEndpoint}
 	}
 }
 

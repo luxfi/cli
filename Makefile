@@ -18,7 +18,7 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p build
-	if [ "$$CGO_ENABLED" != "0" ]; then \
+	@if [ "$$CGO_ENABLED" != "0" ]; then \
 		GOSUMDB=off GOPROXY=direct CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries" go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) main.go; \
 	else \
 		GOSUMDB=off GOPROXY=direct CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) main.go; \
@@ -29,7 +29,7 @@ build:
 .PHONY: install
 install:
 	@echo "Installing $(BINARY_NAME) to $(GOBIN)..."
-	if [ "$$CGO_ENABLED" != "0" ]; then \
+	@if [ "$$CGO_ENABLED" != "0" ]; then \
 		CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries" go install -ldflags "$(LDFLAGS)" .; \
 	else \
 		CGO_ENABLED=0 go install -ldflags "$(LDFLAGS)" .; \

@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
 
@@ -74,7 +74,7 @@ func list(_ *cobra.Command, args []string) error {
 			validator.NodeID.String(),
 			validator.ValidationID.String(),
 			fmt.Sprintf("%d", validator.Weight),
-			fmt.Sprintf("%.5f", float64(validator.Balance)/float64(units.Lux)),
+			fmt.Sprintf("%.5f", float64(validator.Balance)/float64(constants.Lux)),
 		})
 	}
 	_ = t.Render()

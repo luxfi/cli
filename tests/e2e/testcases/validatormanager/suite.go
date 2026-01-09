@@ -4,24 +4,23 @@
 package packageman
 
 import (
-	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
 
 	"github.com/luxfi/cli/pkg/chainvalidators"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/api/info"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 
 	"github.com/luxfi/geth/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
@@ -135,8 +134,8 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error)
 	if err != nil {
 		return nil, err
 	}
-	publicKey := "0x" + hex.EncodeToString(proofOfPossession.PublicKey[:])
-	pop := "0x" + hex.EncodeToString(proofOfPossession.ProofOfPossession[:])
+	publicKey := "0x" + proofOfPossession.PublicKey
+	pop := "0x" + proofOfPossession.ProofOfPossession
 
 	bootstrapValidator := models.SubnetValidator{
 		NodeID:               nodeID.String(),

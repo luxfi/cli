@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/sdk/models"
 	"go.uber.org/zap"
 )
@@ -74,9 +73,9 @@ func getAccountBalance(cClient *ethclient.Client, addrStr string) (float64, erro
 		return 0, err
 	}
 	// convert to nLux
-	balance = balance.Div(balance, big.NewInt(int64(units.Lux)))
+	balance = balance.Div(balance, big.NewInt(int64(constants.Lux)))
 	if balance.Cmp(big.NewInt(0)) == 0 {
 		return 0, nil
 	}
-	return float64(balance.Uint64()) / float64(units.Lux), nil
+	return float64(balance.Uint64()) / float64(constants.Lux), nil
 }

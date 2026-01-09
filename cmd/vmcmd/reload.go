@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/node/api/admin"
+	"github.com/luxfi/constantsants"
+	"github.com/luxfi/sdk/api/admin"
 	"github.com/spf13/cobra"
 )
 

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 	ginkgo "github.com/onsi/ginkgo/v2"
