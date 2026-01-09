@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/tests/e2e/commands"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"

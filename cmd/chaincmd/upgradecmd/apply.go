@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/ids"

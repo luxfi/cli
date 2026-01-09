@@ -23,7 +23,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"

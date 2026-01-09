@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binpaths"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 const (
