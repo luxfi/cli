@@ -278,12 +278,12 @@ func PrintCompactChainEndpoints(portBase int) {
 
 // ValidatorKeyInfo holds derived key info for a validator
 type ValidatorKeyInfo struct {
-	Index       int
-	NodeID      string
-	PChainAddr  string
-	XChainAddr  string
-	CChainAddr  string // Ethereum-style 0x address
-	BLSPubKey   string // Hex-encoded BLS public key
+	Index      int
+	NodeID     string
+	PChainAddr string
+	XChainAddr string
+	CChainAddr string // Ethereum-style 0x address
+	BLSPubKey  string // Hex-encoded BLS public key
 }
 
 // PrintValidatorKeys prints validator key information in a formatted table

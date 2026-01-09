@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 )
 

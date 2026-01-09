@@ -23,22 +23,21 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/models"
-	luxconstants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
 	ledger "github.com/luxfi/ledger"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/wallet/primary"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 const (
@@ -758,7 +757,7 @@ func FundLedgerAddress(amount uint64) error {
 		},
 	}
 	outputs := []*lux.TransferableOutput{output}
-	if _, err := wallet.X().IssueExportTx(luxconstants.PlatformChainID, outputs); err != nil {
+	if _, err := wallet.X().IssueExportTx(constants.PlatformChainID, outputs); err != nil {
 		return err
 	}
 
@@ -973,7 +972,7 @@ func FundAddress(addr ids.ShortID, amount uint64) error {
 	outputs := []*lux.TransferableOutput{output}
 
 	// Export from X-Chain to P-Chain
-	_, err = wallet.X().IssueExportTx(luxconstants.PlatformChainID, outputs)
+	_, err = wallet.X().IssueExportTx(constants.PlatformChainID, outputs)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
-	wallkeychain "github.com/luxfi/node/wallet/keychain"
+	wallkeychain "github.com/luxfi/keychain"
 )
 
 // CryptoToWalletWrapper wraps a crypto keychain to implement wallet keychain interface

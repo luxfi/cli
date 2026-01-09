@@ -4,7 +4,6 @@
 package node
 
 import (
-	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,17 +12,16 @@ import (
 	"github.com/luxfi/cli/pkg/dependencies"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/config"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/vm/vms/platformvm"
 )
 
 func setupLuxd(
@@ -248,8 +246,8 @@ func LocalStatus(
 					ux.Logger.RedXToUser("failed to get node  %s info: %v", luxdURI, err)
 					continue
 				}
-				nodePOPPubKey := "0x" + hex.EncodeToString(nodePOP.PublicKey[:])
-				nodePOPProof := "0x" + hex.EncodeToString(nodePOP.ProofOfPossession[:])
+				nodePOPPubKey := formatPOPField(nodePOP.PublicKey)
+				nodePOPProof := formatPOPField(nodePOP.ProofOfPossession)
 
 				isBootStr := "Primary:" + luxlog.Red.Wrap("Not Bootstrapped")
 				if isBoot {
@@ -282,7 +280,7 @@ func LocalStatus(
 
 func getInfo(uri string, blockchainID string) (
 	ids.NodeID, // nodeID
-	*signer.ProofOfPossession, // nodePOP
+	*info.ProofOfPossession, // nodePOP
 	bool, // isBootstrapped
 	error, // error
 ) {
@@ -291,13 +289,20 @@ func getInfo(uri string, blockchainID string) (
 	defer cancel()
 	nodeID, nodePOP, err := client.GetNodeID(ctx)
 	if err != nil {
-		return ids.EmptyNodeID, &signer.ProofOfPossession{}, false, err
+		return ids.EmptyNodeID, &info.ProofOfPossession{}, false, err
 	}
 	isBootstrapped, err := client.IsBootstrapped(ctx, blockchainID)
 	if err != nil {
 		return nodeID, nodePOP, isBootstrapped, err
 	}
 	return nodeID, nodePOP, isBootstrapped, err
+}
+
+func formatPOPField(field string) string {
+	if strings.HasPrefix(field, "0x") || strings.HasPrefix(field, "0X") {
+		return field
+	}
+	return "0x" + field
 }
 
 func getBlockchainStatus(uri string, blockchainID string) (

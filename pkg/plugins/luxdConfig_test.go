@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/internal/testutils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/sdk/models"
 
 	luxlog "github.com/luxfi/log"
