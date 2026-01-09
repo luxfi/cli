@@ -13,15 +13,15 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/crypto/mldsa"
 	"github.com/luxfi/crypto/secp256k1"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/staking"
-	"github.com/luxfi/node/vms/platformvm"
+	luxtls "github.com/luxfi/tls"
+	"github.com/luxfi/vm/vms/platformvm"
 )
 
 func NewBlsSecretKeyBytes() ([]byte, error) {
@@ -37,7 +37,7 @@ func ToNodeID(certBytes []byte) (ids.NodeID, error) {
 	if block == nil {
 		return ids.EmptyNodeID, fmt.Errorf("failed to decode certificate")
 	}
-	cert, err := staking.ParseCertificate(block.Bytes)
+	cert, err := luxtls.ParseCertificate(block.Bytes)
 	if err != nil {
 		return ids.EmptyNodeID, err
 	}

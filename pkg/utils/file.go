@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	luxlog "github.com/luxfi/log"
 	sdkutils "github.com/luxfi/sdk/utils"
 

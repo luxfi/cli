@@ -15,12 +15,11 @@ import (
 	"strings"
 	"time"
 
-	cliconstants "github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/address"
 	"github.com/luxfi/cli/pkg/ux"
-	constants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/sdk/models"
 )
 
@@ -56,12 +55,12 @@ func validatePositiveBigInt(input string) error {
 }
 
 func validateTime(input string) error {
-	t, err := time.Parse(cliconstants.TimeParseLayout, input)
+	t, err := time.Parse(constants.TimeParseLayout, input)
 	if err != nil {
 		return err
 	}
-	if t.Before(time.Now().Add(cliconstants.StakingStartLeadTime)) {
-		return fmt.Errorf("time should be at least start from now + %s", cliconstants.StakingStartLeadTime)
+	if t.Before(time.Now().Add(constants.StakingStartLeadTime)) {
+		return fmt.Errorf("time should be at least start from now + %s", constants.StakingStartLeadTime)
 	}
 	return nil
 }
@@ -90,7 +89,7 @@ func validateWeight(input string) error {
 	if err != nil {
 		return err
 	}
-	if val < cliconstants.MinStakeWeight {
+	if val < constants.MinStakeWeight {
 		return errors.New("the weight must be an integer between 1 and 100")
 	}
 	return nil

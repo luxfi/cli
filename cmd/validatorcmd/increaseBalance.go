@@ -10,13 +10,12 @@ import (
 	"github.com/luxfi/cli/pkg/blockchain"
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/validator"
 	"github.com/spf13/cobra"
@@ -101,12 +100,12 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 			return err
 		}
 		prompt := "How many LUX do you want to increase the balance of this validator by?"
-		balanceLUX, err = blockchain.PromptValidatorBalance(app, float64(availableBalance)/float64(units.Lux), prompt)
+		balanceLUX, err = blockchain.PromptValidatorBalance(app, float64(availableBalance)/float64(constants.Lux), prompt)
 		if err != nil {
 			return err
 		}
 	}
-	balance = uint64(balanceLUX * float64(units.Lux))
+	balance = uint64(balanceLUX * float64(constants.Lux))
 
 	// Create deployer and increase validator balance
 	deployer := chain.NewPublicDeployer(app, useLedger, kc.Keychain, network)
@@ -121,7 +120,7 @@ func increaseBalance(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	ux.Logger.PrintToUser("  New Validator Balance: %.5f LUX", float64(balance)/float64(units.Lux))
+	ux.Logger.PrintToUser("  New Validator Balance: %.5f LUX", float64(balance)/float64(constants.Lux))
 
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/constantsants"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
@@ -45,7 +45,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		ginkgo.It("can transfer from P-chain to P-chain with ewoq key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
-			amountNLux := uint64(amount * float64(units.Lux))
+			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
@@ -85,7 +85,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		ginkgo.It("can transfer from P-chain to C-chain with ewoq key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
-			amountNLux := uint64(amount * float64(units.Lux))
+			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
@@ -128,7 +128,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		ginkgo.It("can transfer from C-chain to P-chain with ewoq key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
-			amountNLux := uint64(amount * float64(units.Lux))
+			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
@@ -172,7 +172,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		ginkgo.It("can transfer from P-chain to X-chain with ewoq key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
-			amountNLux := uint64(amount * float64(units.Lux))
+			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
@@ -216,7 +216,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		ginkgo.It("can transfer from C-chain to C-chain with ewoq key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
-			amountNLux := uint64(amount * float64(units.Lux))
+			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
@@ -256,7 +256,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		ginkgo.It("can transfer from Subnet to Subnet with ewoq key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
-			amountNLux := uint64(amount * float64(units.Lux))
+			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",

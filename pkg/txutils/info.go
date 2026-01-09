@@ -7,14 +7,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/address"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 // GetNetwork returns the network model associated with a tx.

@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/sdk/utils"
@@ -75,7 +75,7 @@ func getBalance(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	ux.Logger.PrintToUser("  Validator Balance: %.5f LUX", float64(balance)/float64(units.Lux))
+	ux.Logger.PrintToUser("  Validator Balance: %.5f LUX", float64(balance)/float64(constants.Lux))
 
 	return nil
 }

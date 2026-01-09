@@ -295,7 +295,7 @@ Test full system integration:
 # integration-test.sh
 
 # Start test network
-lux network start --snapshot=clean-state
+lux network start --snapshot-name=clean-state
 
 # Deploy test blockchains
 lux blockchain deploy test-chain-1 --local
@@ -305,7 +305,7 @@ lux blockchain deploy test-chain-2 --local
 npm run test:integration
 
 # Save successful state
-lux network stop --snapshot=integration-passed
+lux network stop --snapshot-name=integration-passed
 ```
 
 ### Load Testing

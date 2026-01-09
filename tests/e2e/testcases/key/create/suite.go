@@ -8,9 +8,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
