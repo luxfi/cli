@@ -17,11 +17,11 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/network/peer"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/p2p/peer"
+	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/vm/vms/platformvm/signer"
 )
 
 // GetAggregatorExtraPeers returns a list of peers for the aggregator from the cluster.

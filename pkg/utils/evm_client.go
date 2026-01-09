@@ -12,9 +12,9 @@ import (
 
 // EVMClient wraps the native Lux EVM client
 type EVMClient struct {
-	client ethclient.Client
+	client    ethclient.Client
 	rpcClient *rpc.Client
-	timeout time.Duration
+	timeout   time.Duration
 }
 
 // NewEVMClientWithTimeout creates an EVM client with a custom timeout
@@ -26,9 +26,9 @@ func NewEVMClientWithTimeout(url string, timeout time.Duration) (*EVMClient, err
 	}
 
 	return &EVMClient{
-		client:   client,
+		client:    client,
 		rpcClient: client.Client(),
-		timeout: timeout,
+		timeout:   timeout,
 	}, nil
 }
 
@@ -36,7 +36,7 @@ func NewEVMClientWithTimeout(url string, timeout time.Duration) (*EVMClient, err
 func (c *EVMClient) BlockNumber(ctx context.Context) (uint64, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	
+
 	return c.client.BlockNumber(ctx)
 }
 
@@ -44,7 +44,7 @@ func (c *EVMClient) BlockNumber(ctx context.Context) (uint64, error) {
 func (c *EVMClient) ChainID(ctx context.Context) (*big.Int, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	
+
 	return c.client.ChainID(ctx)
 }
 
@@ -52,7 +52,7 @@ func (c *EVMClient) ChainID(ctx context.Context) (*big.Int, error) {
 func (c *EVMClient) Syncing(ctx context.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	
+
 	var result interface{}
 	err := c.rpcClient.CallContext(ctx, &result, "eth_syncing")
 	if err != nil {
@@ -65,7 +65,7 @@ func (c *EVMClient) Syncing(ctx context.Context) (interface{}, error) {
 func (c *EVMClient) ClientVersion(ctx context.Context) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-	
+
 	var result string
 	err := c.rpcClient.CallContext(ctx, &result, "web3_clientVersion")
 	if err != nil {

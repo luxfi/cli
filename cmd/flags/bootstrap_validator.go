@@ -6,8 +6,7 @@ package flags
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -80,7 +79,7 @@ func AddBootstrapValidatorFlagsToCmd(cmd *cobra.Command, bootstrapFlags *Bootstr
 		set.Float64Var(
 			&bootstrapFlags.DeployBalanceLUX,
 			balanceFlag,
-			float64(constants.BootstrapValidatorBalanceNanoLUX)/float64(units.Lux),
+			float64(constants.BootstrapValidatorBalanceNanoLUX)/float64(constants.Lux),
 			"set the LUX balance of each bootstrap validator that will be used for continuous fee on P-Chain (setting balance=1 equals to 1 LUX for each bootstrap validator)",
 		)
 		set.StringVar(&bootstrapFlags.ChangeOwnerAddress, changeOwnerAddressFlag, "", "address that will receive change if node is no longer L1 validator")

@@ -9,9 +9,9 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm/signer"
-	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/vm/vms/platformvm/signer"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 )
 
 // ChainValidator represents a typed validator for a chain.

@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
-	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/constantsants"
+	"github.com/luxfi/sdk/api/info"
 )
 
 // StatusChecker provides network status checking operations.

@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/kardianos/osext"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/config"
+	"github.com/luxfi/constantsants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/config"
 	"github.com/shirou/gopsutil/process"
 )
 

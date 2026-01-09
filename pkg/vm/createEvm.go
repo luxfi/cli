@@ -12,9 +12,9 @@ import (
 	"os"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/statemachine"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"

@@ -4,7 +4,7 @@
 package flags
 
 import (
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 )
 
 func CheckVersionIsOverMin(app *application.Lux, dependencyName string, network models.Network, version string) error {

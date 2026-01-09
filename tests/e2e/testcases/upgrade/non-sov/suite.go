@@ -14,10 +14,10 @@ import (
 
 	"github.com/luxfi/cli/cmd/chaincmd/upgradecmd"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
 	cliutils "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"

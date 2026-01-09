@@ -8,12 +8,12 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	luxdjson "github.com/luxfi/node/utils/json"
-	"github.com/luxfi/node/utils/rpc"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/utils"
+	luxdjson "github.com/luxfi/codec/jsonrpc"
+	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/vm/vms/platformvm"
 
 	"github.com/luxfi/crypto"
 )

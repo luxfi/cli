@@ -71,7 +71,7 @@ lux network start --mainnet
 lux network start --testnet
 
 # From snapshot
-lux network start --snapshot=mybackup
+lux network start --snapshot-name=mybackup
 ```
 
 ## Historic Chains
@@ -120,10 +120,13 @@ Save and restore network state:
 lux network stop --snapshot-name=my_snapshot
 
 # Start from snapshot
-lux network start --snapshot=my_snapshot
+lux network start --snapshot-name=my_snapshot
 
 # Manual snapshot (while network running)
 tar -czf ~/.lux/snapshots/backup.tar.gz -C ~/.lux/runs/mainnet run_*
+
+Notes:
+- Advanced snapshots (base/incremental/squash) live under `lux network snapshot advanced` and require nodes to be stopped.
 ```
 
 ## Development

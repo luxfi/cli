@@ -32,7 +32,7 @@ lux network start [flags]
 - `--custom-luxgo` - Path to custom node binary
 - `--latest-luxgo-version` - Use latest node version
 - `--luxgo-version` - Specific node version
-- `--snapshot` - Start from snapshot
+- `--snapshot-name` - Start from snapshot
 - `--no-api` - Disable API endpoints
 - `--partial` - Allow partial network start
 
@@ -49,7 +49,7 @@ lux network start --num-nodes=10
 lux network start --custom-luxgo=/path/to/luxd
 
 # Start from snapshot
-lux network start --snapshot=mysnapshot
+lux network start --snapshot-name=mysnapshot
 
 # Start and deploy blockchains
 lux network start --blockchain-specs=mychain,otherchain
@@ -64,7 +64,7 @@ lux network stop [flags]
 ```
 
 **Flags:**
-- `--snapshot` - Save network state as snapshot
+- `--snapshot-name` - Save network state as snapshot
 
 **Examples:**
 
@@ -73,7 +73,7 @@ lux network stop [flags]
 lux network stop
 
 # Stop and save snapshot
-lux network stop --snapshot=mysnapshot
+lux network stop --snapshot-name=mysnapshot
 ```
 
 ### network clean
@@ -169,10 +169,10 @@ Snapshots allow you to save and restore network state.
 **Create Snapshot:**
 ```bash
 # During network stop
-lux network stop --snapshot=my-test-state
+lux network stop --snapshot-name=my-test-state
 
 # Or explicitly
-lux network snapshot create my-test-state
+lux network snapshot save my-test-state
 ```
 
 **List Snapshots:**
@@ -182,7 +182,7 @@ lux network snapshot list
 
 **Load Snapshot:**
 ```bash
-lux network start --snapshot=my-test-state
+lux network start --snapshot-name=my-test-state
 ```
 
 **Delete Snapshot:**
@@ -327,7 +327,7 @@ lux blockchain deploy mychain --local
 npm test
 
 # 5. Stop and save state
-lux network stop --snapshot=test-state
+lux network stop --snapshot-name=test-state
 ```
 
 ### Continuous Testing

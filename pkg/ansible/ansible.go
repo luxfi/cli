@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/sdk/models"
 )
 

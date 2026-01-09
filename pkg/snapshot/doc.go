@@ -13,11 +13,12 @@
 //   - Parallel snapshot creation for minimal downtime
 //
 // Usage:
-//   manager := snapshot.NewSnapshotManager("~/.lux", "mainnet", 5)
-//   err := manager.CreateSnapshot("production-backup")
-//   if err != nil {
-//       // handle error
-//   }
+//
+//	manager := snapshot.NewSnapshotManager("~/.lux", "mainnet", 5)
+//	err := manager.CreateSnapshot("production-backup")
+//	if err != nil {
+//	    // handle error
+//	}
 //
 // The snapshot system is designed to work with Lux networks of any size,
 // providing consistent state capture for rollback and recovery scenarios.

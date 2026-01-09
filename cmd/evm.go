@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	constants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 )
 
@@ -190,7 +190,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 		"api-health-enabled":       true,
 		"api-info-enabled":         true,
 		"index-enabled":            true,
-		"db-type":                  "pebbledb",
+		"db-type":                  "badgerdb",
 		"http-allowed-origins":     "*",
 		"http-allowed-hosts":       "*",
 		"chain-data-dir":           filepath.Join(evmDataDir, "chaindata"),

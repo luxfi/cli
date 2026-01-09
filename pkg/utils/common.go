@@ -7,7 +7,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,16 +23,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/mod/semver"
@@ -426,8 +425,8 @@ func GetNodeID(endpoint string) (
 		return "", "", "", err
 	}
 	return nodeID.String(),
-		"0x" + hex.EncodeToString(proofOfPossession.PublicKey[:]),
-		"0x" + hex.EncodeToString(proofOfPossession.ProofOfPossession[:]),
+		"0x" + proofOfPossession.PublicKey,
+		"0x" + proofOfPossession.ProofOfPossession,
 		nil
 }
 

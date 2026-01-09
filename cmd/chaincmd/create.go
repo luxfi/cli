@@ -13,10 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	luxconstants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
@@ -322,11 +321,11 @@ func createChain(cmd *cobra.Command, args []string) error {
 		if vmVersion != "" {
 			sc.VMVersion = vmVersion
 		} else {
-			sc.VMVersion = luxconstants.DefaultEVMVersion // Default EVM version
+			sc.VMVersion = constants.DefaultEVMVersion // Default EVM version
 		}
 		// Set correct RPC version for Lux EVM
 		// This must match the running node's EVM RPC version
-		sc.RPCVersion = luxconstants.DefaultEVMRPCVersion
+		sc.RPCVersion = constants.DefaultEVMRPCVersion
 	}
 
 	// Create chain directory

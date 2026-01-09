@@ -15,10 +15,10 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxconfig "github.com/luxfi/config"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 )
 
