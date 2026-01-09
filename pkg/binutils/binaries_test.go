@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/cli/internal/testutils"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/stretchr/testify/require"
 )
 

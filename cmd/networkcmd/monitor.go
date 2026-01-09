@@ -5,6 +5,7 @@ package networkcmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -100,6 +101,9 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 			// Get status
 			result, err := service.GetStatus(ctx)
 			if err != nil {
+				if errors.Is(err, status.ErrNoNetwork) {
+					return fmt.Errorf("no network running")
+				}
 				return fmt.Errorf("failed to get status: %w", err)
 			}
 
