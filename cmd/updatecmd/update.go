@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"

@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/cli/pkg/utils"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/sdk/models"

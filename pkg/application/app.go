@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/cli/pkg/config"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/types"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	sdkapp "github.com/luxfi/sdk/application"
 	sdkprompts "github.com/luxfi/sdk/prompts"

@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ripemd160" //nolint:gosec // G507: Required for legacy address derivation
