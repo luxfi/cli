@@ -70,7 +70,8 @@ NOTES:
 	cmd.AddCommand(newStartCmd())
 	cmd.AddCommand(newStopCmd())
 	cmd.AddCommand(newCleanCmd())
-	cmd.AddCommand(NewStatusCmd()) // Updated to use exported function
+	cmd.AddCommand(NewStatusCmd())  // New improved status command
+	cmd.AddCommand(NewMonitorCmd()) // Real-time network monitor
 	cmd.AddCommand(newSnapshotCmd())
 	cmd.AddCommand(newBootstrapCmd())
 

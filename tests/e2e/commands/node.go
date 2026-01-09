@@ -14,8 +14,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/onsi/gomega"
 )
 

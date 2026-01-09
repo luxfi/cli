@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 )
 
 // CopyFile copies a file from src to dest.

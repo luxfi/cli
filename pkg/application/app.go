@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/config"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/types"
+	"github.com/luxfi/constantsants"
 	luxlog "github.com/luxfi/log"
 	sdkapp "github.com/luxfi/sdk/application"
 	sdkprompts "github.com/luxfi/sdk/prompts"

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	constants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 )
 
 const (
