@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/cmd/ammcmd"
-	"github.com/luxfi/log/level"
 	"github.com/luxfi/cli/cmd/configcmd"
+	"github.com/luxfi/log/level"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/chaincmd"
@@ -33,19 +33,19 @@ import (
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/lpmintegration"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/perms"
+	"github.com/luxfi/sdk/utils/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	app *application.Lux
+	app        *application.Lux
 	logFactory luxlog.Factory
 
 	logLevel       string
@@ -129,9 +129,9 @@ For detailed command help, use: lux <command> --help`,
 	rootCmd.PersistentFlags().Bool("quiet", false, "Show only errors (quiet mode)")
 
 	// add sub commands
-	rootCmd.AddCommand(devcmd.NewCmd(app))     // dev (local dev environment)
-	rootCmd.AddCommand(networkcmd.NewCmd(app)) // network (local network management)
-	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias
+	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (local dev environment)
+	rootCmd.AddCommand(networkcmd.NewCmd(app))    // network (local network management)
+	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias (new version)
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(chaincmd.NewCmd(app)) // unified chain command (l1/l2/l3)
 
@@ -190,7 +190,7 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Adjust log level based on flags (must be done after flags are parsed)
 	if cmd.Flags().Changed("debug") {
 		logFactory.SetDisplayLevel("lux", luxlog.Level(-4)) // DEBUG
@@ -204,7 +204,7 @@ func createApp(cmd *cobra.Command, _ []string) error {
 			logFactory.SetDisplayLevel("lux", level)
 		}
 	}
-	
+
 	cf := config.New()
 
 	// Adjust log level based on flags BEFORE any logging happens
@@ -389,13 +389,13 @@ func setupLogging(baseDir string) (luxlog.Logger, error) {
 
 	config := luxlog.Config{}
 	config.LogLevel = luxlog.Level(-6) // Info level for file logging
-	
+
 	// Set default display level to WARN (quiet by default)
 	config.DisplayLevel, _ = luxlog.ToLevel("WARN")
-	
+
 	// Log level can be overridden by flags, but we'll handle that in createApp
 	// after flags are parsed, by adjusting the logger level dynamically
-	
+
 	config.Directory = filepath.Join(baseDir, constants.LogDir)
 	if err := os.MkdirAll(config.Directory, perms.ReadWriteExecute); err != nil {
 		return nil, fmt.Errorf("failed creating log directory: %w", err)

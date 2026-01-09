@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -80,7 +80,7 @@ func findNodeBinary() (string, error) {
 	}
 
 	// Priority 2: Environment/config
-	if configPath := viper.GetString(cliconstants.ConfigNodePath); configPath != "" {
+	if configPath := viper.GetString(constants.ConfigNodePath); configPath != "" {
 		if strings.HasPrefix(configPath, "~") {
 			home, _ := os.UserHomeDir()
 			configPath = filepath.Join(home, configPath[1:])
@@ -120,8 +120,8 @@ func startDevNode(*cobra.Command, []string) error {
 	}
 
 	// Data directories - use constants for consistent paths
-	baseDir := filepath.Join(os.Getenv("HOME"), cliconstants.BaseDirName)
-	dataDir := filepath.Join(baseDir, cliconstants.DevDir)
+	baseDir := filepath.Join(os.Getenv("HOME"), constants.BaseDirName)
+	dataDir := filepath.Join(baseDir, constants.DevDir)
 	dbDir := filepath.Join(dataDir, "db")
 	logDir := filepath.Join(dataDir, "logs")
 
@@ -151,7 +151,7 @@ func startDevNode(*cobra.Command, []string) error {
 	// - ephemeral staking certs
 	// Chain config dir - luxd's --chain-config-dir points here
 	// Uses ~/.lux/chains/ for all chain configs (genesis, config.json, etc.)
-	chainConfigDir := filepath.Join(baseDir, cliconstants.ChainsDir)
+	chainConfigDir := filepath.Join(baseDir, constants.ChainsDir)
 	args := []string{
 		"--dev",
 		fmt.Sprintf("--network-id=%d", 1337),

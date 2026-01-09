@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -26,22 +27,18 @@ func newSnapshotCmd() *cobra.Command {
 		Long: `The snapshot command allows you to save, load, list, and delete snapshots of your local network state.
 
 Snapshots capture the entire network state including all node data, databases, and configurations.
-This is useful for:
-  - Creating backpoints before major changes
-  - Sharing network states across development environments
-  - Testing different scenarios from the same initial state
 
 Commands:
-  save <name>   - Save current network state as a named snapshot
-  load <name>   - Load a snapshot and restart the network
-  list          - List all available snapshots
-  delete <name> - Delete a snapshot
+  save <name>      - Save current network state as a named snapshot (Legacy)
+  load <name>      - Load a snapshot and restart the network (Legacy)
+  list             - List all available snapshots
+  delete <name>    - Delete a snapshot
+  advanced         - Advanced coordinated snapshots (incremental, squash, etc)
 
 Examples:
   lux network snapshot save my-test-state
-  lux network snapshot list
-  lux network snapshot load my-test-state
-  lux network snapshot delete my-test-state`,
+  lux network snapshot advanced create my-prod-state --incremental
+  lux network snapshot list`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
@@ -155,7 +152,6 @@ func determineNetworkType() string {
 func saveSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
 
-	// Validate snapshot name
 	if strings.ContainsAny(snapshotName, "/\\:*?\"<>|") {
 		return fmt.Errorf("invalid snapshot name: cannot contain special characters /\\:*?\"<>|")
 	}
@@ -163,28 +159,23 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 	networkType := determineNetworkType()
 	ux.Logger.PrintToUser("Saving snapshot for network: %s", networkType)
 
-	// Check if network is running
 	state, err := app.LoadNetworkStateForType(networkType)
 	if err == nil && state != nil && state.Running {
 		return fmt.Errorf("network %s is currently running. Please stop it first with 'lux network stop --network-type %s'", networkType, networkType)
 	}
 
-	// Get source directory (the current network state)
 	runDir := app.GetRunDir()
 	sourceDir := filepath.Join(runDir, networkType)
 
-	// Check if source exists
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
 		return fmt.Errorf("no network data found for %s. Start a network first", networkType)
 	}
 
-	// Get snapshots directory
 	snapshotsDir := app.GetSnapshotsDir()
 	if err := os.MkdirAll(snapshotsDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create snapshots directory: %w", err)
 	}
 
-	// Create snapshot directory
 	snapshotDir := filepath.Join(snapshotsDir, snapshotName)
 	if _, err := os.Stat(snapshotDir); err == nil {
 		return fmt.Errorf("snapshot '%s' already exists. Delete it first or choose a different name", snapshotName)
@@ -194,15 +185,11 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Source: %s", sourceDir)
 	ux.Logger.PrintToUser("Destination: %s", snapshotDir)
 
-	// Define archive path
 	archivePath := filepath.Join(snapshotDir, "archive.tar.gz")
-
-	// Create compressed archive of the directory
 	if err := archiveDirectory(sourceDir, archivePath); err != nil {
 		return fmt.Errorf("failed to create snapshot archive: %w", err)
 	}
 
-	// Save metadata
 	metadata := map[string]string{
 		"name":         snapshotName,
 		"network_type": networkType,
@@ -229,35 +216,28 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 
 func loadSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
-
 	networkType := determineNetworkType()
 	ux.Logger.PrintToUser("Loading snapshot for network: %s", networkType)
 
-	// Get snapshot directory
 	snapshotsDir := app.GetSnapshotsDir()
 	snapshotDir := filepath.Join(snapshotsDir, snapshotName)
 
-	// Check if snapshot exists
 	if _, err := os.Stat(snapshotDir); os.IsNotExist(err) {
 		return fmt.Errorf("snapshot '%s' not found", snapshotName)
 	}
 
-	// Check if network is running
 	state, err := app.LoadNetworkStateForType(networkType)
 	if err == nil && state != nil && state.Running {
 		ux.Logger.PrintToUser("Stopping running network...")
 		if err := StopNetwork(nil, nil); err != nil {
 			return fmt.Errorf("failed to stop network: %w", err)
 		}
-		// Wait a bit for graceful shutdown
 		time.Sleep(2 * time.Second)
 	}
 
-	// Get destination directory
 	runDir := app.GetRunDir()
 	destDir := filepath.Join(runDir, networkType)
 
-	// Backup existing data if it exists
 	if _, err := os.Stat(destDir); err == nil {
 		backupDir := destDir + ".backup." + time.Now().Format("20060102-150405")
 		ux.Logger.PrintToUser("Backing up existing data to: %s", backupDir)
@@ -267,26 +247,20 @@ func loadSnapshot(_ *cobra.Command, args []string) error {
 	}
 
 	ux.Logger.PrintToUser("Loading snapshot: %s", snapshotName)
-	ux.Logger.PrintToUser("Source: %s", snapshotDir)
-	ux.Logger.PrintToUser("Destination: %s", destDir)
 
-	// Check if we have a compressed archive
 	archivePath := filepath.Join(snapshotDir, "archive.tar.gz")
 	if _, err := os.Stat(archivePath); err == nil {
-		// Found archive, extract it
 		ux.Logger.PrintToUser("Extracting compressed snapshot...")
 		if err := extractArchive(archivePath, destDir); err != nil {
 			return fmt.Errorf("failed to extract snapshot: %w", err)
 		}
 	} else {
-		// No archive, try legacy directory copy
 		ux.Logger.PrintToUser("Copying snapshot directory...")
 		if err := copyDirectory(snapshotDir, destDir); err != nil {
 			return fmt.Errorf("failed to load snapshot: %w", err)
 		}
 	}
 
-	// Remove metadata file from destination (it's not part of the network data)
 	metadataPath := filepath.Join(destDir, "snapshot_metadata.txt")
 	_ = os.Remove(metadataPath)
 
@@ -299,113 +273,63 @@ func loadSnapshot(_ *cobra.Command, args []string) error {
 
 func listSnapshots(_ *cobra.Command, _ []string) error {
 	snapshotsDir := app.GetSnapshotsDir()
-
-	// Check if snapshots directory exists
 	if _, err := os.Stat(snapshotsDir); os.IsNotExist(err) {
 		ux.Logger.PrintToUser("No snapshots found. Create one with 'lux network snapshot save <name>'")
 		return nil
 	}
-
-	// Read directory
 	entries, err := os.ReadDir(snapshotsDir)
 	if err != nil {
 		return fmt.Errorf("failed to read snapshots directory: %w", err)
 	}
 
-	// Filter directories only
 	var snapshots []string
 	for _, entry := range entries {
 		if entry.IsDir() {
 			snapshots = append(snapshots, entry.Name())
 		}
 	}
-
 	if len(snapshots) == 0 {
-		ux.Logger.PrintToUser("No snapshots found. Create one with 'lux network snapshot save <name>'")
+		ux.Logger.PrintToUser("No snapshots found.")
 		return nil
 	}
 
 	ux.Logger.PrintToUser("Available snapshots:\n")
-
 	for _, name := range snapshots {
 		snapshotDir := filepath.Join(snapshotsDir, name)
-
-		// Try to read metadata
 		metadataPath := filepath.Join(snapshotDir, "snapshot_metadata.txt")
-		metadataBytes, err := os.ReadFile(metadataPath) //nolint:gosec // G304: Reading from app's snapshot directory
-
+		metadataBytes, err := os.ReadFile(metadataPath)
 		if err == nil {
-			// Print metadata
 			ux.Logger.PrintToUser("Snapshot: %s", name)
 			ux.Logger.PrintToUser("%s", string(metadataBytes))
-
-			// Calculate size
-			var size int64
-			archivePath := filepath.Join(snapshotDir, "archive.tar.gz")
-			if info, err := os.Stat(archivePath); err == nil {
-				size = info.Size()
-			} else {
-				size, _ = getDirSize(snapshotDir)
-			}
-			ux.Logger.PrintToUser("Size: %s\n", formatBytes(size))
 		} else {
-			// No metadata, just print name and basic info
 			info, _ := os.Stat(snapshotDir)
 			ux.Logger.PrintToUser("Snapshot: %s", name)
 			if info != nil {
 				ux.Logger.PrintToUser("Modified: %s", info.ModTime().Format(time.RFC3339))
 			}
-			size, _ := getDirSize(snapshotDir)
-			ux.Logger.PrintToUser("Size: %s\n", formatBytes(size))
 		}
 	}
-
 	return nil
 }
 
 func deleteSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
-
-	// Validate snapshot name to prevent path traversal attacks
-	if snapshotName == "" || snapshotName == "." || snapshotName == ".." || filepath.Base(snapshotName) != snapshotName {
-		return fmt.Errorf("invalid snapshot name: %s", snapshotName)
+	if snapshotName == "" || strings.Contains(snapshotName, "..") {
+		return fmt.Errorf("invalid snapshot name")
 	}
-
 	snapshotsDir := app.GetSnapshotsDir()
 	snapshotDir := filepath.Join(snapshotsDir, snapshotName)
-
-	// Check if snapshot exists
 	if _, err := os.Stat(snapshotDir); os.IsNotExist(err) {
 		return fmt.Errorf("snapshot '%s' not found", snapshotName)
 	}
-
-	// Safety check: ensure we're only deleting within the snapshots directory
-	absSnapshotDir, err := filepath.Abs(snapshotDir)
-	if err != nil {
-		return fmt.Errorf("failed to resolve snapshot path: %w", err)
-	}
-	absSnapshotsDir, err := filepath.Abs(snapshotsDir)
-	if err != nil {
-		return fmt.Errorf("failed to resolve snapshots directory: %w", err)
-	}
-
-	// Verify that snapshotDir is directly inside snapshotsDir
-	if filepath.Dir(absSnapshotDir) != absSnapshotsDir {
-		return fmt.Errorf("SAFETY: snapshot directory must be directly inside snapshots directory")
-	}
-
-	ux.Logger.PrintToUser("Deleting snapshot: %s", snapshotName)
-
-	// Use SafeRemoveAll to ensure we don't accidentally delete protected directories
 	if err := app.SafeRemoveAll(snapshotDir); err != nil {
 		return fmt.Errorf("failed to delete snapshot: %w", err)
 	}
-
 	ux.Logger.PrintToUser("Snapshot '%s' deleted successfully", snapshotName)
 	return nil
 }
 
-// Advanced snapshot commands using the new snapshot manager
+// Advanced snapshot commands
 
 func newAdvancedSnapshotCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -413,22 +337,17 @@ func newAdvancedSnapshotCmd() *cobra.Command {
 		Short: "Advanced snapshot operations for multi-node networks",
 		Long: `Advanced snapshot commands for coordinated multi-node snapshots.
 
-This provides enhanced snapshot functionality including:
-  - Coordinated snapshots across all nodes with minimal downtime
-  - Database flushing for consistent state
-  - Automatic chunking for GitHub upload
-  - Multi-node restoration
-
 Commands:
-  create <name>    - Create advanced snapshot of all nodes
+  create <name>    - Create advanced snapshot of all nodes (base or incremental)
   restore <name>   - Restore network from advanced snapshot
-  download <name>  - Download and recombine snapshot from GitHub
-  upload <name>    - Upload snapshot chunks to GitHub (placeholder)
+  squash <network> <chain-id> - Squash incrementals into base
+  download <name>  - Download from GitHub (placeholder)
+  upload <name>    - Upload to GitHub (placeholder)
 
 Examples:
-  lux network snapshot advanced create production-backup
+  lux network snapshot advanced create production-backup --incremental
   lux network snapshot advanced restore production-backup
-  lux network snapshot advanced download production-backup`,
+  lux network snapshot advanced squash mainnet 1`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return cmd.Help()
 		},
@@ -436,6 +355,7 @@ Examples:
 
 	cmd.AddCommand(newAdvancedSnapshotCreateCmd())
 	cmd.AddCommand(newAdvancedSnapshotRestoreCmd())
+	cmd.AddCommand(newAdvancedSnapshotSquashCmd())
 	cmd.AddCommand(newAdvancedSnapshotDownloadCmd())
 	cmd.AddCommand(newAdvancedSnapshotUploadCmd())
 
@@ -443,195 +363,103 @@ Examples:
 }
 
 func newAdvancedSnapshotCreateCmd() *cobra.Command {
-	var nodeCount int
-	
+	var incremental bool
+
 	cmd := &cobra.Command{
 		Use:   "create <name>",
 		Short: "Create advanced snapshot of all nodes",
 		Long: `Create a coordinated snapshot of all nodes in the network.
-
-This command:
-  1. Flushes all node databases for consistent state
-  2. Creates compressed archives of each node
-  3. Generates metadata with checksums
-  4. Chunks the snapshot into 99MB pieces for GitHub
-
-The network should be stopped before creating a snapshot for consistency.
-
-Example:
-  lux network snapshot advanced create production-backup --node-count 5`,
-		Args:         cobra.ExactArgs(1),
-		RunE:         createAdvancedSnapshot,
+If --incremental is set, tries to create an incremental backup from the last checkpoint.
+Otherwise creates a full base snapshot.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return createAdvancedSnapshot(cmd, args, incremental)
+		},
 		SilenceUsage: true,
 	}
 
-	cmd.Flags().IntVar(&nodeCount, "node-count", 5, "Number of nodes to snapshot (default: 5)")
+	cmd.Flags().BoolVar(&incremental, "incremental", false, "Create incremental snapshot if possible")
 
 	return cmd
 }
 
 func newAdvancedSnapshotRestoreCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "restore <name>",
-		Short: "Restore network from advanced snapshot",
-		Long: `Restore the network state from a previously created advanced snapshot.
-
-This command:
-  1. Recombines chunks if necessary
-  2. Stops all running nodes
-  3. Restores each node from its snapshot
-  4. Verifies checksums and integrity
-
-After restoration, you can start the network with:
-  lux network start --<network-type>
-
-Example:
-  lux network snapshot advanced restore production-backup`,
+		Use:          "restore <name>",
+		Short:        "Restore network from advanced snapshot",
 		Args:         cobra.ExactArgs(1),
 		RunE:         restoreAdvancedSnapshot,
 		SilenceUsage: true,
 	}
+	return cmd
+}
 
+func newAdvancedSnapshotSquashCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "squash <network> <chain-id> <snapshot-name>",
+		Short: "Squash incrementals into base snapshot",
+		Long: `Squashes all incremental snapshots for a specific chain into the base snapshot.
+This creates a new base snapshot and removes the incrementals, saving space.`,
+		Args:         cobra.ExactArgs(3),
+		RunE:         squashAdvancedSnapshot,
+		SilenceUsage: true,
+	}
 	return cmd
 }
 
 func newAdvancedSnapshotDownloadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "download <name>",
-		Short: "Download and recombine snapshot from GitHub",
-		Long: `Download snapshot chunks from GitHub and recombine them.
-
-This is a placeholder for the actual GitHub download implementation.
-
-Example:
-  lux network snapshot advanced download production-backup`,
-		Args:         cobra.ExactArgs(1),
-		RunE:         downloadAdvancedSnapshot,
-		SilenceUsage: true,
+		Short: "Download snapshot from GitHub",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ux.Logger.PrintToUser("Not implemented")
+			return nil
+		},
 	}
-
 	return cmd
 }
 
 func newAdvancedSnapshotUploadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upload <name>",
-		Short: "Upload snapshot chunks to GitHub (placeholder)",
-		Long: `Upload snapshot chunks to GitHub repository.
-
-This is a placeholder for the actual GitHub upload implementation.
-
-Example:
-  lux network snapshot advanced upload production-backup`,
-		Args:         cobra.ExactArgs(1),
-		RunE:         uploadAdvancedSnapshot,
-		SilenceUsage: true,
+		Short: "Upload snapshot to GitHub",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ux.Logger.PrintToUser("Not implemented")
+			return nil
+		},
 	}
-
 	return cmd
 }
 
-func createAdvancedSnapshot(cmd *cobra.Command, args []string) error {
+func createAdvancedSnapshot(cmd *cobra.Command, args []string, incremental bool) error {
 	snapshotName := args[0]
-	
-	// Get node count from flag
-	nodeCount, err := cmd.Flags().GetInt("node-count")
-	if err != nil {
-		return fmt.Errorf("failed to get node count: %w", err)
-	}
-	
-	// Determine network type
-	networkType := determineNetworkType()
-	
-	// Create snapshot manager
-	manager := snapshot.NewSnapshotManager(app.GetBaseDir(), networkType, nodeCount)
-	
-	// Create the snapshot
-	if err := manager.CreateSnapshot(snapshotName); err != nil {
-		return fmt.Errorf("failed to create advanced snapshot: %w", err)
-	}
-	
-	ux.Logger.PrintToUser("✓ Advanced snapshot '%s' created successfully", snapshotName)
-	ux.Logger.PrintToUser("Snapshot location: %s", filepath.Join(app.GetBaseDir(), "snapshots", snapshotName))
-	ux.Logger.PrintToUser("Chunks available in: %s", filepath.Join(app.GetBaseDir(), "snapshots", snapshotName, "chunks"))
-	
-	return nil
+
+	// Ensure network is stopped (because we use direct DB access in manager)
+	// Or warn user
+	ux.Logger.PrintToUser("Note: 'create' currently requires nodes to be stopped for DB access.")
+
+	manager := snapshot.NewSnapshotManager(app.GetBaseDir())
+	return manager.CreateSnapshot(snapshotName, incremental)
 }
 
 func restoreAdvancedSnapshot(cmd *cobra.Command, args []string) error {
 	snapshotName := args[0]
-	
-	// Determine network type
-	networkType := determineNetworkType()
-	
-	// Create snapshot manager
-	manager := snapshot.NewSnapshotManager(app.GetBaseDir(), networkType, 5) // Default to 5 nodes for restore
-	
-	// Restore the snapshot
-	if err := manager.RestoreSnapshot(snapshotName); err != nil {
-		return fmt.Errorf("failed to restore advanced snapshot: %w", err)
+	manager := snapshot.NewSnapshotManager(app.GetBaseDir())
+	return manager.RestoreSnapshot(snapshotName)
+}
+
+func squashAdvancedSnapshot(cmd *cobra.Command, args []string) error {
+	network := args[0]
+	chainIDStr := args[1]
+	snapshotName := args[2]
+
+	chainID, err := strconv.ParseUint(chainIDStr, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid chain ID: %w", err)
 	}
-	
-	return nil
-}
 
-func downloadAdvancedSnapshot(cmd *cobra.Command, args []string) error {
-	_ = args[0] // snapshotName
-	
-	ux.Logger.PrintToUser("⚠️  GitHub download functionality is not yet implemented")
-	ux.Logger.PrintToUser("This would download chunks from https://github.com/luxfi/state")
-	ux.Logger.PrintToUser("and recombine them into a usable snapshot.")
-	
-	// In a real implementation, this would:
-	// 1. Clone or download from https://github.com/luxfi/state
-	// 2. Find the snapshot chunks
-	// 3. Recombine them using the existing recombine functionality
-	// 4. Verify checksums
-	
-	return nil
-}
-
-func uploadAdvancedSnapshot(cmd *cobra.Command, args []string) error {
-	_ = args[0] // snapshotName
-	
-	ux.Logger.PrintToUser("⚠️  GitHub upload functionality is not yet implemented")
-	ux.Logger.PrintToUser("This would upload chunks to https://github.com/luxfi/state")
-	
-	// In a real implementation, this would:
-	// 1. Create a PR or commit to https://github.com/luxfi/state
-	// 2. Upload all chunks from the chunks directory
-	// 3. Update any necessary metadata or indexes
-	
-	return nil
-}
-
-// Helper function to calculate directory size
-func getDirSize(path string) (int64, error) {
-	var size int64
-
-	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			size += info.Size()
-		}
-		return nil
-	})
-
-	return size, err
-}
-
-// Helper function to format bytes as human-readable size
-func formatBytes(bytes int64) string {
-	const unit = 1024
-	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
-	}
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+	manager := snapshot.NewSnapshotManager(app.GetBaseDir())
+	return manager.Squash(network, chainID, snapshotName)
 }

@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/address"
 	cliutils "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -46,7 +46,7 @@ func deploySubnetToTestnetNonSOV() (string, map[string]utils.NodeInfo) {
 	gomega.Expect(err).Should(gomega.BeNil())
 	testKeyAddrShort, err := address.ParseToID(testKeyAddr)
 	gomega.Expect(err).Should(gomega.BeNil())
-	fee := 3 * units.Lux
+	fee := 3 * constants.Lux
 	err = utils.FundAddress(testKeyAddrShort, fee)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// deploy
@@ -437,6 +437,6 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 // estimateTestFees calculates the total fee for test transactions
 func estimateTestFees(numTransactions int) uint64 {
 	// Base fee per transaction in test environment
-	baseFee := units.Lux
+	baseFee := constants.Lux
 	return uint64(numTransactions) * baseFee //nolint:gosec // G115: numTransactions is bounded by test parameters
 }

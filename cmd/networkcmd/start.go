@@ -16,13 +16,12 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
-	cliconstants "github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/ux"
-	"github.com/luxfi/sdk/profiles"
-	constants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
+	"github.com/luxfi/sdk/profiles"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -144,7 +143,7 @@ func findNodeBinary() (string, error) {
 
 	// Priority 2 & 3: Check viper (handles both env var and config file)
 	// viper automatically checks LUX_NODE_PATH env var first, then config file
-	if configPath := viper.GetString(cliconstants.ConfigNodePath); configPath != "" {
+	if configPath := viper.GetString(constants.ConfigNodePath); configPath != "" {
 		// Expand ~ to home directory
 		if strings.HasPrefix(configPath, "~") {
 			home, _ := os.UserHomeDir()
@@ -678,6 +677,7 @@ func StartDevMode() error {
 		"--api-admin-enabled=true",
 		"--api-keystore-enabled=true",
 		"--index-enabled=true",
+		"--db-type=badgerdb",
 	}
 
 	cmd := exec.Command(localNodePath, args...) //nolint:gosec // G204: Running our own luxd binary

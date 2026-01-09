@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 )
 
 // CreateTmpFile creates a temporary file with the given name prefix and content

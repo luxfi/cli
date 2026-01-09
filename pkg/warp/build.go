@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/cli/pkg/application"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/utils"
+	"github.com/luxfi/constantsants"
 )
 
 func RepoDir(

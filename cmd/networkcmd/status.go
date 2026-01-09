@@ -30,9 +30,9 @@ var (
 	statusAll     bool
 )
 
-// NewStatusCmd returns the status command.
-// Exported for use by root command alias.
-func NewStatusCmd() *cobra.Command {
+// NewStatusCmdOld returns the old status command.
+// Deprecated: Use the new status command instead.
+func NewStatusCmdOld() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status",
 		Short: "Show network status and endpoints",
@@ -235,7 +235,7 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 
 	for n, nodeInfo := range status.ClusterInfo.NodeInfos {
 		fmt.Fprintf(&buf, "%s has ID %s and endpoint %s \n", n, nodeInfo.Id, nodeInfo.Uri)
-		
+
 		// Query node info
 		version, vmVersions, err := getNodeVersion(nodeInfo.Uri)
 		if err == nil {

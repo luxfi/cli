@@ -15,8 +15,8 @@ import (
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
 
@@ -107,8 +107,8 @@ func describe(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	balance = balance.Div(balance, big.NewInt(int64(units.Lux)))
-	balanceStr := fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(units.Lux))
+	balance = balance.Div(balance, big.NewInt(int64(constants.Lux)))
+	balanceStr := fmt.Sprintf("%.9f", float64(balance.Uint64())/float64(constants.Lux))
 	table := tablewriter.NewWriter(os.Stdout)
 	_ = []string{"Parameter", "Value"}
 	// table.SetHeader(header)

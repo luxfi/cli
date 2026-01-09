@@ -13,9 +13,9 @@ import (
 	cliutils "github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/sdk/models"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -416,5 +416,5 @@ var _ = ginkgo.Describe("[Public Subnet SOV]", func() {
 
 func estimateDeploymentFee(txCount int) uint64 {
 	// Base fee per transaction type
-	return uint64(txCount) * units.Lux //nolint:gosec // G115: txCount is bounded by test parameters
+	return uint64(txCount) * constants.Lux //nolint:gosec // G115: txCount is bounded by test parameters
 }
