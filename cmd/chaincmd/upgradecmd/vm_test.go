@@ -9,10 +9,10 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/models"
 	"github.com/stretchr/testify/require"

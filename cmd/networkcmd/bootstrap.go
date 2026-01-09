@@ -37,7 +37,7 @@ instead of syncing from genesis.`,
 
 func bootstrapNetwork(cmd *cobra.Command, args []string) error {
 	networkType := determineNetworkType()
-	
+
 	// Default URL pointing to the official repo's state/snapshots directory
 	// In a real scenario, this might point to a release asset or raw content URL
 	// For now, we'll assume a structure similar to what we saw in state/snapshots
@@ -71,12 +71,12 @@ func bootstrapNetwork(cmd *cobra.Command, args []string) error {
 	defer os.RemoveAll(tmpDir)
 
 	// Identify parts
-	// In a real implementation, we might fetch a manifest. 
+	// In a real implementation, we might fetch a manifest.
 	// Here, we'll try to detect parts by probing or assume a pattern if we knew the count.
-	// Since we don't know the exact count without a manifest, we'll implement a probe or 
+	// Since we don't know the exact count without a manifest, we'll implement a probe or
 	// expect the user to provide it.
 	// For this task, let's assume we implement a "Smart Download" that tries .part.aa, .ab, etc.
-	
+
 	parts, err := downloadParts(baseURL, snapshotName, tmpDir)
 	if err != nil {
 		return fmt.Errorf("failed to download snapshot parts: %w", err)
@@ -106,7 +106,7 @@ func bootstrapNetwork(cmd *cobra.Command, args []string) error {
 	// Extract to run dir
 	runDir := app.GetRunDir()
 	destDir := filepath.Join(runDir, networkType)
-	
+
 	// Backup existing
 	if _, err := os.Stat(destDir); err == nil {
 		backupDir := destDir + ".backup." + time.Now().Format("20060102-150405")
@@ -131,21 +131,21 @@ func downloadParts(baseURL, baseName, destDir string) ([]string, error) {
 	var parts []string
 	var partsMutex sync.Mutex
 	var wg sync.WaitGroup
-	
+
 	// Suffixes aa, ab, ac, ...
 	// We'll generate a reasonable range. 'az' is 26 parts. 'zz' is 676.
 	// Should be enough for probe.
 	suffixes := generateSuffixes()
-	
+
 	// Semaphore for concurrency limit
-	sem := make(chan struct{}, 5) 
+	sem := make(chan struct{}, 5)
 	errChan := make(chan error, len(suffixes))
-	
-	// We need to know when to stop probing. 
+
+	// We need to know when to stop probing.
 	// Strategy: Try downloading in parallel. If we get 404s, we assume we reached the end.
 	// But parallel probing needs care.
 	// Simpler approach: Download .tar.gz first (single file). If fail, try parts.
-	
+
 	// Try single file first
 	singleUrl := fmt.Sprintf("%s/%s.tar.gz", baseURL, baseName)
 	singleDest := filepath.Join(destDir, baseName+".tar.gz")
@@ -157,10 +157,10 @@ func downloadParts(baseURL, baseName, destDir string) ([]string, error) {
 	ux.Logger.PrintToUser("Single file not found, checking for split archive parts...")
 
 	// Download parts.
-	// We'll iterate until we hit a 404 sequentially for the *existence* check? 
+	// We'll iterate until we hit a 404 sequentially for the *existence* check?
 	// Or just fire off requests and see what sticks?
 	// Better: Sequentially check HEAD requests to determine count, then parallel download.
-	
+
 	var validSuffixes []string
 	for _, suffix := range suffixes {
 		url := fmt.Sprintf("%s/%s.tar.gz.part.%s", baseURL, baseName, suffix)
@@ -169,7 +169,7 @@ func downloadParts(baseURL, baseName, destDir string) ([]string, error) {
 			validSuffixes = append(validSuffixes, suffix)
 			resp.Body.Close()
 		} else {
-			// Assume contiguous parts. If we miss 'aa', we stop? 
+			// Assume contiguous parts. If we miss 'aa', we stop?
 			// If we miss 'aa', maybe it's not split.
 			// If we found 'aa' but miss 'ab', that's the end.
 			if len(validSuffixes) > 0 {
@@ -188,7 +188,7 @@ func downloadParts(baseURL, baseName, destDir string) ([]string, error) {
 		wg.Add(1)
 		go func(s string) {
 			defer wg.Done()
-			sem <- struct{}{} // Acquire
+			sem <- struct{}{}        // Acquire
 			defer func() { <-sem }() // Release
 
 			filename := fmt.Sprintf("%s.tar.gz.part.%s", baseName, s)
@@ -199,7 +199,7 @@ func downloadParts(baseURL, baseName, destDir string) ([]string, error) {
 				errChan <- err
 				return
 			}
-			
+
 			partsMutex.Lock()
 			parts = append(parts, dest)
 			partsMutex.Unlock()
@@ -218,7 +218,7 @@ func downloadParts(baseURL, baseName, destDir string) ([]string, error) {
 	// Since we appended in random order, we must sort.
 	// But we constructed filenames with suffixes, so standard sort works.
 	// (We should implement sort)
-	
+
 	return sortParts(parts), nil
 }
 
@@ -255,7 +255,7 @@ func reassembleParts(parts []string, dest string) error {
 		if err != nil {
 			return err
 		}
-		
+
 		if _, err := io.Copy(out, in); err != nil {
 			in.Close()
 			return err
@@ -277,11 +277,11 @@ func generateSuffixes() []string {
 }
 
 func sortParts(parts []string) []string {
-	// Simple bubble sort or use sort package. 
+	// Simple bubble sort or use sort package.
 	// Since slice is small, bubble sort is fine, or just import sort.
 	// networkcmd package context... let's check imports.
 	// I'll add "sort" to imports.
-	
+
 	// Placeholder manual sort to avoid import churn for now if easy:
 	for i := 0; i < len(parts); i++ {
 		for j := i + 1; j < len(parts); j++ {

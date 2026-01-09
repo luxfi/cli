@@ -6,7 +6,7 @@ package commands
 import (
 	"os/exec"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	"github.com/onsi/gomega"
 )
 

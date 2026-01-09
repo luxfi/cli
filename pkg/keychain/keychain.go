@@ -8,21 +8,21 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/luxfi/address"
 	"github.com/luxfi/cli/cmd/flags"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/ledger"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/utils/formatting/address"
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/vm/vms/platformvm"
 )
 
 const (
@@ -311,7 +311,7 @@ func getNetworkEndpoint(network models.Network) string {
 
 // search for a set of indices that pay a given amount
 func searchForFundedLedgerIndices(network models.Network, ledgerDevice keychain.Ledger, amount uint64) ([]uint32, error) {
-	ux.Logger.PrintToUser("Looking for ledger indices to pay for %.9f LUX...", float64(amount)/float64(units.Lux))
+	ux.Logger.PrintToUser("Looking for ledger indices to pay for %.9f LUX...", float64(amount)/float64(constants.Lux))
 	endpoint := getNetworkEndpoint(network)
 	pClient := platformvm.NewClient(endpoint)
 	totalBalance := uint64(0)
@@ -328,7 +328,7 @@ func searchForFundedLedgerIndices(network models.Network, ledgerDevice keychain.
 			return nil, err
 		}
 		if resp.Balance > 0 {
-			ux.Logger.PrintToUser("  Found index %d with %.9f LUX", ledgerIndex, float64(resp.Balance)/float64(units.Lux))
+			ux.Logger.PrintToUser("  Found index %d with %.9f LUX", ledgerIndex, float64(resp.Balance)/float64(constants.Lux))
 			totalBalance += uint64(resp.Balance)
 			ledgerIndices = append(ledgerIndices, ledgerIndex)
 		}

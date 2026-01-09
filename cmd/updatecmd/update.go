@@ -13,9 +13,9 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/mod/semver"

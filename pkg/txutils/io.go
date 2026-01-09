@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/node/utils/formatting"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/formatting"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 )
 
 // SaveToDisk saves a given tx to the specified path.

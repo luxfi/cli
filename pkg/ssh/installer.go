@@ -7,7 +7,7 @@ package ssh
 import (
 	"strings"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/sdk/models"
 )
 

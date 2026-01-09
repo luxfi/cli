@@ -10,12 +10,12 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/plugins"
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/vm"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/netrunner/server"
 	"github.com/luxfi/sdk/models"
 

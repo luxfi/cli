@@ -1,8 +1,13 @@
 package status
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/luxfi/cli/pkg/utils"
@@ -23,19 +28,19 @@ func (r *EVMHeightResolver) Kind() string {
 
 func (r *EVMHeightResolver) Height(ctx context.Context, url string) (uint64, map[string]any, error) {
 	meta := make(map[string]any)
-	
+
 	// Create a client with timeout
 	client, err := utils.NewEVMClientWithTimeout(url, 2*time.Second)
 	if err != nil {
 		return 0, meta, fmt.Errorf("failed to create EVM client: %w", err)
 	}
-	
+
 	// Get block number
 	height, err := client.BlockNumber(ctx)
 	if err != nil {
 		return 0, meta, fmt.Errorf("failed to get block number: %w", err)
 	}
-	
+
 	// Get chain ID
 	chainID, err := client.ChainID(ctx)
 	if err != nil {
@@ -43,7 +48,7 @@ func (r *EVMHeightResolver) Height(ctx context.Context, url string) (uint64, map
 	} else {
 		meta["chain_id"] = chainID.Uint64()
 	}
-	
+
 	// Get syncing status
 	syncing, err := client.Syncing(ctx)
 	if err != nil {
@@ -51,7 +56,7 @@ func (r *EVMHeightResolver) Height(ctx context.Context, url string) (uint64, map
 	} else {
 		meta["syncing"] = syncing
 	}
-	
+
 	// Get client version
 	version, err := client.ClientVersion(ctx)
 	if err != nil {
@@ -59,7 +64,7 @@ func (r *EVMHeightResolver) Height(ctx context.Context, url string) (uint64, map
 	} else {
 		meta["client_version"] = version
 	}
-	
+
 	return height, meta, nil
 }
 
@@ -72,13 +77,79 @@ func (r *PChainHeightResolver) Kind() string {
 
 func (r *PChainHeightResolver) Height(ctx context.Context, url string) (uint64, map[string]any, error) {
 	meta := make(map[string]any)
-	
-	// TODO: Implement actual P-Chain height resolution
-	// This is a placeholder - replace with actual API calls
-	meta["method"] = "pchain.getHeight (placeholder)"
-	
-	// For now, return a placeholder value
-	return 0, meta, fmt.Errorf("pchain height resolver not yet implemented")
+
+	// Implement actual P-Chain height resolution using Lux P-Chain API
+	// The P-Chain API endpoint is typically at /ext/bc/P
+
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	// Build the request URL - P-Chain uses /rpc endpoint
+	requestURL := fmt.Sprintf("%s/rpc", url)
+
+	// Create JSON-RPC request for P-Chain height
+	requestBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "platform.getHeight",
+		"params":  map[string]interface{}{},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return 0, meta, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", requestURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return 0, meta, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, meta, fmt.Errorf("failed to make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		// P-Chain endpoint might not exist, return 0 with appropriate error
+		meta["error"] = "pchain_endpoint_not_found"
+		return 0, meta, nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, meta, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Parse response
+	var responseMap map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
+		return 0, meta, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	// Extract height from response
+	if result, ok := responseMap["result"].(map[string]interface{}); ok {
+		if heightStr, ok := result["height"].(string); ok {
+			// Height might be in decimal or hex format
+			height, err := strconv.ParseUint(heightStr, 10, 64)
+			if err != nil {
+				// Try hex format
+				height, err = strconv.ParseUint(strings.TrimPrefix(heightStr, "0x"), 16, 64)
+				if err != nil {
+					return 0, meta, fmt.Errorf("failed to parse height: %w", err)
+				}
+			}
+
+			meta["method"] = "platform.getHeight"
+			return height, meta, nil
+		}
+	}
+
+	return 0, meta, fmt.Errorf("invalid response format")
 }
 
 // XChainHeightResolver resolves heights for X-Chain
@@ -90,13 +161,69 @@ func (r *XChainHeightResolver) Kind() string {
 
 func (r *XChainHeightResolver) Height(ctx context.Context, url string) (uint64, map[string]any, error) {
 	meta := make(map[string]any)
-	
-	// TODO: Implement actual X-Chain height resolution
-	// This is a placeholder - replace with actual API calls
-	meta["method"] = "xchain.getHeight (placeholder)"
-	
-	// For now, return a placeholder value
-	return 0, meta, fmt.Errorf("xchain height resolver not yet implemented")
+
+	// Implement actual X-Chain height resolution using Lux X-Chain API
+	// The X-Chain API endpoint is typically at /ext/bc/X
+
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	// Build the request URL
+	requestURL := fmt.Sprintf("%s/rpc", url)
+
+	// Create JSON-RPC request for X-Chain height
+	requestBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "avax.getHeight",
+		"params":  map[string]interface{}{},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return 0, meta, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", requestURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return 0, meta, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, meta, fmt.Errorf("failed to make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, meta, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Parse response
+	var responseMap map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
+		return 0, meta, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	// Extract height from response
+	if result, ok := responseMap["result"].(map[string]interface{}); ok {
+		if heightStr, ok := result["height"].(string); ok {
+			// Convert hex string to uint64
+			height, err := strconv.ParseUint(heightStr, 10, 64)
+			if err != nil {
+				return 0, meta, fmt.Errorf("failed to parse height: %w", err)
+			}
+
+			meta["method"] = "avax.getHeight"
+			return height, meta, nil
+		}
+	}
+
+	return 0, meta, fmt.Errorf("invalid response format")
 }
 
 // FallbackHeightResolver tries EVM first, then falls back to unknown
@@ -108,7 +235,7 @@ func (r *FallbackHeightResolver) Kind() string {
 
 func (r *FallbackHeightResolver) Height(ctx context.Context, url string) (uint64, map[string]any, error) {
 	meta := make(map[string]any)
-	
+
 	// First try EVM
 	evmResolver := &EVMHeightResolver{}
 	height, evmMeta, err := evmResolver.Height(ctx, url)
@@ -120,7 +247,7 @@ func (r *FallbackHeightResolver) Height(ctx context.Context, url string) (uint64
 		meta["resolver"] = "evm"
 		return height, meta, nil
 	}
-	
+
 	// If EVM fails, mark as unknown
 	meta["resolver"] = "fallback"
 	meta["error"] = err.Error()
@@ -130,12 +257,29 @@ func (r *FallbackHeightResolver) Height(ctx context.Context, url string) (uint64
 // GetResolverForChain returns the appropriate resolver for a chain alias
 func GetResolverForChain(chainAlias string) HeightResolver {
 	switch chainAlias {
-	case "c", "a", "b", "d", "g", "k", "q", "t", "z", "dex":
+	case "c": // Only C-Chain is EVM
 		return &EVMHeightResolver{}
 	case "p":
 		return &PChainHeightResolver{}
 	case "x":
 		return &XChainHeightResolver{}
+	case "a": // AI VM
+		return &FallbackHeightResolver{}
+	case "b": // Bridge VM
+		return &FallbackHeightResolver{}
+	case "d": // DEX VM
+		return &FallbackHeightResolver{}
+	case "g": // Graph VM
+		return &FallbackHeightResolver{}
+	case "k": // KMS VM
+		return &FallbackHeightResolver{}
+	case "q": // Quantum VM
+		return &FallbackHeightResolver{}
+	case "t": // Threshold VM
+		return &FallbackHeightResolver{}
+	case "z": // Zero-Knowledge VM
+		return &FallbackHeightResolver{}
+	// Removed duplicate "dex" case - "d" already covers DEX VM
 	default:
 		return &FallbackHeightResolver{}
 	}

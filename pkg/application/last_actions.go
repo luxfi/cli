@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/cli/pkg/constants"
+	"github.com/luxfi/constantsants"
 	"go.uber.org/zap"
 )
 

@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/constants"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/netrunner/local"
 	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"
