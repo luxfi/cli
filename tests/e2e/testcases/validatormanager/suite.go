@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/api/info"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/evm"

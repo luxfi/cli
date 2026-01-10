@@ -13,8 +13,8 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
-	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
 )
