@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +51,7 @@ func commitTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	chainID := sc.Networks[network.String()].ChainID
+	chainID := sc.Networks[network.String()].SubnetID
 	if chainID == ids.Empty {
 		return errNoChainID
 	}
