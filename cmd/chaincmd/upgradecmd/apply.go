@@ -39,9 +39,9 @@ const (
 
 var (
 	ErrNetworkNotStartedOutput = "No local network running. Please start the network first."
-	ErrSubnetNotDeployedOutput = "Looks like this blockchain has not been deployed to this network yet."
+	ErrChainNotDeployedOutput  = "Looks like this blockchain has not been deployed to this network yet."
 
-	errSubnetNotYetDeployed       = errors.New("blockchain not yet deployed")
+	errChainNotYetDeployed        = errors.New("blockchain not yet deployed")
 	errInvalidPrecompiles         = errors.New("invalid precompiles")
 	errNoBlockTimestamp           = errors.New("no blockTimestamp value set")
 	errBlockTimestampInvalid      = errors.New("blockTimestamp is invalid")
@@ -73,7 +73,7 @@ to upgrade your node manually.
 
 After you update your validator's configuration, you need to restart your validator manually.
 If you provide the --luxd-chain-config-dir flag, this command attempts to write the upgrade file at that path.
-Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs for related documentation.
+Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#chain-chain-configs for related documentation.
 
 In non-interactive mode (CI/scripts), use --force to skip confirmation prompts for
 timestamps in the past. The --luxd-chain-config-dir defaults to ~/.luxd/chains and
@@ -92,7 +92,7 @@ Examples:
 		Args: cobrautils.ExactArgs(1),
 	}
 
-	cmd.Flags().BoolVar(&useConfig, "config", false, "Create upgrade config for future subnet deployments (same as generate)")
+	cmd.Flags().BoolVar(&useConfig, "config", false, "Create upgrade config for future chain deployments (same as generate)")
 	cmd.Flags().BoolVar(&useLocal, "local", false, "Apply upgrade to existing local deployment")
 	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "Apply upgrade to existing testnet deployment")
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "Apply upgrade to existing mainnet deployment")
@@ -134,9 +134,9 @@ func applyCmd(_ *cobra.Command, args []string) error {
 }
 
 // applyLocalNetworkUpgrade:
-// * if subnet NOT deployed (`network status`):
+// * if chain NOT deployed (`network status`):
 // *   Stop the apply command and print a message suggesting to deploy first
-// * if subnet deployed:
+// * if chain deployed:
 // *   if never upgraded before, apply
 // *   if upgraded before, and this upgrade contains the same upgrade as before (.lock)
 // *     if has new valid upgrade on top, apply
@@ -144,7 +144,7 @@ func applyCmd(_ *cobra.Command, args []string) error {
 // *   if upgraded before, but this upgrade is not cumulative (append-only)
 // *     fail the apply, print message
 
-// For a already deployed subnet, the supported scheme is to
+// For a already deployed chain, the supported scheme is to
 // save a snapshot, and to load the snapshot with the upgrade
 func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Sidecar) error {
 	if printManual {
@@ -173,25 +173,25 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 		return err
 	}
 
-	// confirm in the status that the subnet actually is deployed and running
+	// confirm in the status that the chain actually is deployed and running
 	deployed := false
 	customChains := status.ClusterInfo.GetCustomChains()
 	for _, chainInfo := range customChains {
-		if chainInfo.GetPchainId() == sc.Networks[networkKey].SubnetID.String() {
+		if chainInfo.GetPchainId() == sc.Networks[networkKey].ChainID.String() {
 			deployed = true
 			break
 		}
 	}
 
 	if !deployed {
-		return subnetNotYetDeployed()
+		return chainNotYetDeployed()
 	}
 
 	// get the blockchainID from the sidecar
 	blockchainID := sc.Networks[networkKey].BlockchainID
 	if blockchainID == ids.Empty {
 		return errors.New(
-			"failed to find deployment information about this subnet in state - aborting")
+			"failed to find deployment information about this chain in state - aborting")
 	}
 
 	// into ANR network ops
@@ -288,7 +288,7 @@ func applyPublicNetworkUpgrade(blockchainName, networkKey string, sc *models.Sid
 		ux.Logger.PrintToUser("   *************************************************************************************************************")
 		ux.Logger.PrintToUser("   * Upgrades are tricky. The syntactic correctness of the upgrade file is important.                          *")
 		ux.Logger.PrintToUser("   * The sequence of upgrades must be strictly observed.                                                       *")
-		ux.Logger.PrintToUser("   * Make sure you understand https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs *")
+		ux.Logger.PrintToUser("   * Make sure you understand https://docs.lux.network/nodes/maintain/chain-config-flags#chain-chain-configs *")
 		ux.Logger.PrintToUser("   * before applying upgrades manually.                                                                        *")
 		ux.Logger.PrintToUser("   *************************************************************************************************************")
 		return nil
@@ -336,11 +336,11 @@ func applyPublicNetworkUpgrade(blockchainName, networkKey string, sc *models.Sid
 func validateUpgrade(blockchainName, networkKey string, sc *models.Sidecar, skipPrompting bool) ([]extras.PrecompileUpgrade, string, error) {
 	// if there's no entry in the Sidecar, we assume there hasn't been a deploy yet
 	if sc.NetworkDataIsEmpty() {
-		return nil, "", subnetNotYetDeployed()
+		return nil, "", chainNotYetDeployed()
 	}
 	chainID := sc.Networks[networkKey].BlockchainID
 	if chainID == ids.Empty {
-		return nil, "", errors.New(ErrSubnetNotDeployedOutput)
+		return nil, "", errors.New(ErrChainNotDeployedOutput)
 	}
 	// let's check update bytes actually exist
 	netUpgradeBytes, err := app.ReadUpgradeFile(blockchainName)
@@ -386,10 +386,10 @@ func validateUpgrade(blockchainName, networkKey string, sc *models.Sidecar, skip
 	return upgrds, string(netUpgradeBytes), nil
 }
 
-func subnetNotYetDeployed() error {
-	ux.Logger.PrintToUser("%s", ErrSubnetNotDeployedOutput)
+func chainNotYetDeployed() error {
+	ux.Logger.PrintToUser("%s", ErrChainNotDeployedOutput)
 	ux.Logger.PrintToUser("Please deploy this network first.")
-	return errSubnetNotYetDeployed
+	return errChainNotYetDeployed
 }
 
 func writeLockFile(precmpUpgrades []extras.PrecompileUpgrade, blockchainName string) {

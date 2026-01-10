@@ -6,9 +6,9 @@ package binutils
 import "github.com/luxfi/cli/pkg/application"
 
 // SetupCustomBin returns the path for a custom VM binary.
-func SetupCustomBin(app *application.Lux, subnetName string) string {
+func SetupCustomBin(app *application.Lux, chainName string) string {
 	// Just need to get the path of the vm
-	return app.GetCustomVMPath(subnetName)
+	return app.GetCustomVMPath(chainName)
 }
 
 // SetupLPMBin returns the path for an LPM VM binary.

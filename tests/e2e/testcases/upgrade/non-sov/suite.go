@@ -26,8 +26,8 @@ import (
 )
 
 const (
-	subnetName       = "e2eSubnetTest"
-	secondSubnetName = "e2eSecondSubnetTest"
+	chainName       = "e2eChainTest"
+	secondChainName = "e2eSecondChainTest"
 
 	evmVersion1 = "v0.6.9"
 	evmVersion2 = "v0.6.10"
@@ -52,34 +52,34 @@ var (
 var _ = ginkgo.Describe("[Upgrade expect network failure non SOV]", ginkgo.Ordered, func() {
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
 
 	ginkgo.It("fails on stopped network non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
-		_, err = commands.ImportUpgradeBytes(subnetName, upgradeBytesPath)
+		_, err = commands.ImportUpgradeBytes(chainName, upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		// we want to simulate a situation here where the subnet has been deployed
+		// we want to simulate a situation here where the chain has been deployed
 		// but the network is stopped
 		// the code would detect it hasn't been deployed yet so report that error first
 		// therefore we can just manually edit the file to fake it had been deployed
 		app := utils.GetApp()
 		sc := models.Sidecar{
-			Name:     subnetName,
-			Subnet:   subnetName,
+			Name:     chainName,
+			Chain:    chainName,
 			Networks: make(map[string]models.NetworkData),
 		}
 		sc.Networks[models.Local.String()] = models.NetworkData{
-			SubnetID:     ids.GenerateTestID(),
+			ChainID:      ids.GenerateTestID(),
 			BlockchainID: ids.GenerateTestID(),
 		}
 		err = app.UpdateSidecar(&sc)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		out, err := commands.ApplyUpgradeLocal(subnetName)
+		out, err := commands.ApplyUpgradeLocal(chainName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 		gomega.Expect(out).Should(gomega.ContainSubstring(binutils.ErrGRPCTimeout.Error()))
 	})
@@ -92,31 +92,31 @@ var _ = ginkgo.Describe("[Upgrade expect network failure non SOV]", ginkgo.Order
 var _ = ginkgo.Describe("[Upgrade public network non SOV]", ginkgo.Ordered, func() {
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
 
 	ginkgo.It("can create and apply to public node non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
 		// simulate as if this had already been deployed to testnet
 		// by just entering fake data into the struct
 		app := utils.GetApp()
 
-		sc, err := app.LoadSidecar(subnetName)
+		sc, err := app.LoadSidecar(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		blockchainID := ids.GenerateTestID()
 		sc.Networks = make(map[string]models.NetworkData)
 		sc.Networks[models.Testnet.String()] = models.NetworkData{
-			SubnetID:     ids.GenerateTestID(),
+			ChainID:      ids.GenerateTestID(),
 			BlockchainID: blockchainID,
 		}
 		err = app.UpdateSidecar(&sc)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// import the upgrade bytes file so have one
-		_, err = commands.ImportUpgradeBytes(subnetName, upgradeBytesPath)
+		_, err = commands.ImportUpgradeBytes(chainName, upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// we'll set a fake chain config dir to not mess up with a potential real one
@@ -126,7 +126,7 @@ var _ = ginkgo.Describe("[Upgrade public network non SOV]", ginkgo.Ordered, func
 		defer func() { _ = os.RemoveAll(luxdConfigDir) }()
 
 		// now we try to apply
-		_, err = commands.ApplyUpgradeToPublicNode(subnetName, luxdConfigDir)
+		_, err = commands.ApplyUpgradeToPublicNode(chainName, luxdConfigDir)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// we expect the file to be present at the expected location and being
@@ -159,36 +159,36 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		err = utils.DeleteConfigs(secondSubnetName)
+		err = utils.DeleteConfigs(secondChainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		_ = utils.DeleteKey(keyName)
-		utils.DeleteCustomBinary(subnetName)
+		utils.DeleteCustomBinary(chainName)
 	})
 
-	ginkgo.It("fails on undeployed subnet non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+	ginkgo.It("fails on undeployed chain non SOV", func() {
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
-		_, err = commands.ImportUpgradeBytes(subnetName, upgradeBytesPath)
+		_, err = commands.ImportUpgradeBytes(chainName, upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		_ = commands.StartNetwork()
 
-		out, err := commands.ApplyUpgradeLocal(subnetName)
+		out, err := commands.ApplyUpgradeLocal(chainName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
-		gomega.Expect(out).Should(gomega.ContainSubstring(upgradecmd.ErrSubnetNotDeployedOutput))
+		gomega.Expect(out).Should(gomega.ContainSubstring(upgradecmd.ErrChainNotDeployedOutput))
 	})
 
-	ginkgo.It("can create and apply to locally running subnet non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+	ginkgo.It("can create and apply to locally running chain non SOV", func() {
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 
-		_, err = commands.ImportUpgradeBytes(subnetName, upgradeBytesPath)
+		_, err = commands.ImportUpgradeBytes(chainName, upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.ApplyUpgradeLocal(subnetName)
+		_, err = commands.ApplyUpgradeLocal(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		upgradeBytes, err := os.ReadFile(upgradeBytesPath)
@@ -208,42 +208,42 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		app := utils.GetApp()
 
 		stripped := stripWhitespaces(string(upgradeBytes))
-		lockUpgradeBytes, err := app.ReadLockUpgradeFile(subnetName)
+		lockUpgradeBytes, err := app.ReadLockUpgradeFile(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect([]byte(stripped)).Should(gomega.Equal(lockUpgradeBytes))
 	})
 
 	ginkgo.It("can't upgrade transactionAllowList precompile because admin address doesn't have enough token non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
-		commands.DeploySubnetLocallyNonSOV(subnetName)
+		commands.DeployChainLocallyNonSOV(chainName)
 
-		_, err = commands.ImportUpgradeBytes(subnetName, upgradeBytesPath2)
+		_, err = commands.ImportUpgradeBytes(chainName, upgradeBytesPath2)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.ApplyUpgradeLocal(subnetName)
+		_, err = commands.ApplyUpgradeLocal(chainName)
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 	})
 
 	ginkgo.It("can upgrade transactionAllowList precompile because admin address has enough tokens non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
-		commands.DeploySubnetLocallyNonSOV(subnetName)
+		commands.DeployChainLocallyNonSOV(chainName)
 
-		_, err = commands.ImportUpgradeBytes(subnetName, upgradeBytesPath)
+		_, err = commands.ImportUpgradeBytes(chainName, upgradeBytesPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		_, err = commands.ApplyUpgradeLocal(subnetName)
+		_, err = commands.ApplyUpgradeLocal(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
 
 	ginkgo.It("can create and update future non SOV", func() {
 		evmVersion1 := binaryToVersion[utils.SoloEVMKey1]
 		evmVersion2 := binaryToVersion[utils.SoloEVMKey2]
-		commands.CreateEVMConfigWithVersionNonSOV(subnetName, utils.EVMGenesisPath, evmVersion1, false)
+		commands.CreateEVMConfigWithVersionNonSOV(chainName, utils.EVMGenesisPath, evmVersion1, false)
 
 		// check version
-		output, err := commands.DescribeSubnet(subnetName)
+		output, err := commands.DescribeChain(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		containsVersion1 := strings.Contains(output, evmVersion1)
@@ -251,10 +251,10 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(containsVersion1).Should(gomega.BeTrue())
 		gomega.Expect(containsVersion2).Should(gomega.BeFalse())
 
-		_, err = commands.UpgradeVMConfig(subnetName, evmVersion2)
+		_, err = commands.UpgradeVMConfig(chainName, evmVersion2)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		output, err = commands.DescribeSubnet(subnetName)
+		output, err = commands.DescribeChain(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		containsVersion1 = strings.Contains(output, evmVersion1)
@@ -262,12 +262,12 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(containsVersion1).Should(gomega.BeFalse())
 		gomega.Expect(containsVersion2).Should(gomega.BeTrue())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("upgrade EVM local deployment non SOV", func() {
-		commands.CreateEVMConfigWithVersionNonSOV(subnetName, utils.EVMGenesisPath, evmVersion1, false)
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		commands.CreateEVMConfigWithVersionNonSOV(chainName, utils.EVMGenesisPath, evmVersion1, false)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -276,7 +276,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		// check running version
 		// remove string suffix starting with /ext
 		nodeURI := strings.Split(rpcs[0], "/ext")[0]
-		vmid, err := cliutils.VMID(subnetName)
+		vmid, err := cliutils.VMID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		version, err := utils.GetNodeVMVersion(nodeURI, vmid.String())
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -287,7 +287,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// upgrade
-		commands.UpgradeVMLocal(subnetName, evmVersion2)
+		commands.UpgradeVMLocal(chainName, evmVersion2)
 
 		// restart network
 		commands.StartNetwork()
@@ -297,7 +297,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(version).Should(gomega.Equal(evmVersion2))
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("upgrade custom vm local deployment non SOV", func() {
@@ -308,10 +308,10 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// create and deploy
-		commands.CreateCustomVMConfigNonSOV(subnetName, utils.EVMGenesisPath, customVMPath1)
+		commands.CreateCustomVMConfigNonSOV(chainName, utils.EVMGenesisPath, customVMPath1)
 		// need to set luxd version manually since VMs are custom
 		commands.StartNetworkWithVersion(luxdRPC1Version)
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -320,7 +320,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		// check running version
 		// remove string suffix starting with /ext from rpc url to get node uri
 		nodeURI := strings.Split(rpcs[0], "/ext")[0]
-		vmid, err := cliutils.VMID(subnetName)
+		vmid, err := cliutils.VMID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		version, err := utils.GetNodeVMVersion(nodeURI, vmid.String())
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -331,7 +331,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// upgrade
-		commands.UpgradeCustomVMLocal(subnetName, customVMPath2)
+		commands.UpgradeCustomVMLocal(chainName, customVMPath2)
 
 		// restart network
 		commands.StartNetworkWithVersion(luxdRPC2Version)
@@ -341,7 +341,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(version).Should(gomega.Equal(evmVersion2))
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("can update a evm to a custom VM non SOV", func() {
@@ -349,14 +349,14 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		commands.CreateEVMConfigWithVersionNonSOV(
-			subnetName,
+			chainName,
 			utils.EVMGenesisPath,
 			binaryToVersion[utils.SoloEVMKey1],
 			false,
 		)
 
 		// check version
-		output, err := commands.DescribeSubnet(subnetName)
+		output, err := commands.DescribeChain(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		containsVersion1 := strings.Contains(output, binaryToVersion[utils.SoloEVMKey1])
@@ -364,60 +364,60 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(containsVersion1).Should(gomega.BeTrue())
 		gomega.Expect(containsVersion2).Should(gomega.BeFalse())
 
-		_, err = commands.UpgradeCustomVM(subnetName, customVMPath)
+		_, err = commands.UpgradeCustomVM(chainName, customVMPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		output, err = commands.DescribeSubnet(subnetName)
+		output, err = commands.DescribeChain(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		containsVersion2 = strings.Contains(output, binaryToVersion[utils.SoloEVMKey2])
 		gomega.Expect(containsVersion2).Should(gomega.BeFalse())
 
 		// the following indicates it is a custom VM
-		isCustom, err := utils.IsCustomVM(subnetName)
+		isCustom, err := utils.IsCustomVM(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(isCustom).Should(gomega.BeTrue())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("can upgrade evm on public deployment non SOV", func() {
 		_ = commands.StartNetworkWithVersion(binaryToVersion[utils.SoloLuxdKey])
-		commands.CreateEVMConfigWithVersionNonSOV(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1], false)
+		commands.CreateEVMConfigWithVersionNonSOV(chainName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1], false)
 
 		// Simulate testnet deployment
-		s := commands.SimulateTestnetDeployNonSOV(subnetName, keyName, controlKeys)
-		subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
+		s := commands.SimulateTestnetDeployNonSOV(chainName, keyName, controlKeys)
+		chainID, err := utils.ParsePublicDeployOutput(s, utils.ChainIDParseType)
 		gomega.Expect(err).Should(gomega.BeNil())
-		// add validators to subnet
+		// add validators to chain
 		nodeInfos, err := utils.GetLocalNetworkNodesInfo()
 		gomega.Expect(err).Should(gomega.BeNil())
 		for _, nodeInfo := range nodeInfos {
 			start := time.Now().Add(time.Second * 30).UTC().Format("2006-01-02 15:04:05")
-			_ = commands.SimulateTestnetAddValidator(subnetName, keyName, nodeInfo.ID, start, "24h", "20")
+			_ = commands.SimulateTestnetAddValidator(chainName, keyName, nodeInfo.ID, start, "24h", "20")
 		}
 		// join to copy vm binary and update config file
 		for _, nodeInfo := range nodeInfos {
-			_ = commands.SimulateTestnetJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
+			_ = commands.SimulateTestnetJoin(chainName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
 		}
-		// get and check whitelisted subnets from config file
+		// get and check whitelisted chains from config file
 		for _, nodeInfo := range nodeInfos {
-			whitelistedSubnets, err := utils.GetWhitelistedSubnetsFromConfigFile(nodeInfo.ConfigFile)
+			whitelistedChains, err := utils.GetWhitelistedChainsFromConfigFile(nodeInfo.ConfigFile)
 			gomega.Expect(err).Should(gomega.BeNil())
-			whitelistedSubnetsSlice := strings.Split(whitelistedSubnets, ",")
-			gomega.Expect(whitelistedSubnetsSlice).Should(gomega.ContainElement(subnetID))
+			whitelistedChainsSlice := strings.Split(whitelistedChains, ",")
+			gomega.Expect(whitelistedChainsSlice).Should(gomega.ContainElement(chainID))
 		}
 		// restart nodes
 		err = utils.RestartNodes()
 		gomega.Expect(err).Should(gomega.BeNil())
-		// wait for subnet walidators to be up
-		err = utils.WaitSubnetValidators(subnetID, nodeInfos)
+		// wait for chain walidators to be up
+		err = utils.WaitChainValidators(chainID, nodeInfos)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		var originalHash string
 
 		// upgrade the vm on each node
-		vmid, err := cliutils.VMID(subnetName)
+		vmid, err := cliutils.VMID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		for _, nodeInfo := range nodeInfos {
@@ -430,7 +430,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		for _, nodeInfo := range nodeInfos {
-			_, err := commands.UpgradeVMPublic(subnetName, binaryToVersion[utils.SoloEVMKey2], nodeInfo.PluginDir)
+			_, err := commands.UpgradeVMPublic(chainName, binaryToVersion[utils.SoloEVMKey2], nodeInfo.PluginDir)
 			gomega.Expect(err).Should(gomega.BeNil())
 		}
 
@@ -441,7 +441,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 			gomega.Expect(measuredHash).ShouldNot(gomega.Equal(originalHash))
 		}
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 })
 

@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	subnet1 = "wagmi"
-	subnet2 = "spaces"
-	vmid1   = "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
-	vmid2   = "sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm"
+	chain1 = "wagmi"
+	chain2 = "spaces"
+	vmid1  = "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
+	vmid2  = "sqja3uK17MJxfC7AN8nGadBw9JK5BcrsNwNynsqP5Gih8M5Bm"
 
-	testRepo = "https://github.com/luxfi/test-subnet-configs"
+	testRepo = "https://github.com/luxfi/test-chain-configs"
 )
 
 var _ = ginkgo.Describe("[LPM]", func() {
@@ -29,12 +29,12 @@ var _ = ginkgo.Describe("[LPM]", func() {
 	})
 
 	ginkgo.AfterEach(func() {
-		err := utils.DeleteConfigs(subnet1)
+		err := utils.DeleteConfigs(chain1)
 		if err != nil {
 			fmt.Println("Clean network error:", err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
-		err = utils.DeleteConfigs(subnet2)
+		err = utils.DeleteConfigs(chain2)
 		if err != nil {
 			fmt.Println("Delete config error:", err)
 		}
@@ -47,11 +47,11 @@ var _ = ginkgo.Describe("[LPM]", func() {
 
 	ginkgo.It("can import from core", func() {
 		repo := "luxfi/plugins-core"
-		commands.ImportSubnetConfig(repo, subnet1)
+		commands.ImportChainConfig(repo, chain1)
 	})
 
 	ginkgo.It("can import from url", func() {
 		branch := "master"
-		commands.ImportSubnetConfigFromURL(testRepo, branch, subnet2)
+		commands.ImportChainConfigFromURL(testRepo, branch, chain2)
 	})
 })

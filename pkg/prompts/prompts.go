@@ -697,53 +697,53 @@ func getIndexInSlice[T comparable](list []T, element T) (int, error) {
 	return 0, fmt.Errorf("element not found")
 }
 
-// check subnet authorization criteria:
-// - [subnetAuthKeys] satisfy subnet's [threshold]
-// - [subnetAuthKeys] is a subset of subnet's [controlKeys]
-func CheckSubnetAuthKeys(subnetAuthKeys []string, controlKeys []string, threshold uint32) error {
-	if len(subnetAuthKeys) != int(threshold) {
-		return fmt.Errorf("number of given subnet auth differs from the threshold")
+// check chain authorization criteria:
+// - [chainAuthKeys] satisfy chain's [threshold]
+// - [chainAuthKeys] is a subset of chain's [controlKeys]
+func CheckChainAuthKeys(chainAuthKeys []string, controlKeys []string, threshold uint32) error {
+	if len(chainAuthKeys) != int(threshold) {
+		return fmt.Errorf("number of given chain auth differs from the threshold")
 	}
-	for _, subnetAuthKey := range subnetAuthKeys {
+	for _, chainAuthKey := range chainAuthKeys {
 		found := false
 		for _, controlKey := range controlKeys {
-			if subnetAuthKey == controlKey {
+			if chainAuthKey == controlKey {
 				found = true
 				break
 			}
 		}
 		if !found {
-			return fmt.Errorf("subnet auth key %s does not belong to control keys", subnetAuthKey)
+			return fmt.Errorf("chain auth key %s does not belong to control keys", chainAuthKey)
 		}
 	}
 	return nil
 }
 
-// get subnet authorization keys from the user, as a subset of the subnet's [controlKeys]
-// with a len equal to the subnet's [threshold]
-func GetSubnetAuthKeys(prompt Prompter, controlKeys []string, threshold uint32) ([]string, error) {
+// get chain authorization keys from the user, as a subset of the chain's [controlKeys]
+// with a len equal to the chain's [threshold]
+func GetChainAuthKeys(prompt Prompter, controlKeys []string, threshold uint32) ([]string, error) {
 	if len(controlKeys) == int(threshold) {
 		return controlKeys, nil
 	}
-	subnetAuthKeys := []string{}
+	chainAuthKeys := []string{}
 	filteredControlKeys := []string{}
 	filteredControlKeys = append(filteredControlKeys, controlKeys...)
-	for len(subnetAuthKeys) != int(threshold) {
-		subnetAuthKey, err := prompt.CaptureList(
-			"Choose a subnet auth key",
+	for len(chainAuthKeys) != int(threshold) {
+		chainAuthKey, err := prompt.CaptureList(
+			"Choose a chain auth key",
 			filteredControlKeys,
 		)
 		if err != nil {
 			return nil, err
 		}
-		index, err := getIndexInSlice(filteredControlKeys, subnetAuthKey)
+		index, err := getIndexInSlice(filteredControlKeys, chainAuthKey)
 		if err != nil {
 			return nil, err
 		}
-		subnetAuthKeys = append(subnetAuthKeys, subnetAuthKey)
+		chainAuthKeys = append(chainAuthKeys, chainAuthKey)
 		filteredControlKeys = append(filteredControlKeys[:index], filteredControlKeys[index+1:]...)
 	}
-	return subnetAuthKeys, nil
+	return chainAuthKeys, nil
 }
 
 func GetTestnetKeyOrLedger(prompt Prompter, goal string, keyDir string) (bool, string, error) {

@@ -20,9 +20,9 @@ import (
 	"github.com/luxfi/ledger"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/vm/vms/platformvm"
 )
 
 const (

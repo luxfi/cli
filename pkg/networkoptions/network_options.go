@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
+	sdkutils "github.com/luxfi/utils"
 )
 
 // NetworkOption represents a network type option.
@@ -177,13 +177,13 @@ func GetNetworkFlagsGroup(cmd *cobra.Command, networkFlags *NetworkFlags, addEnd
 	})
 }
 
-// GetSupportedNetworkOptionsForSubnet returns supported network options for a subnet.
-func GetSupportedNetworkOptionsForSubnet(
+// GetSupportedNetworkOptionsForChain returns supported network options for a chain.
+func GetSupportedNetworkOptionsForChain(
 	app *application.Lux,
-	subnetName string,
+	chainName string,
 	supportedNetworkOptions []NetworkOption,
 ) ([]NetworkOption, []string, []string, error) {
-	sc, err := app.LoadSidecar(subnetName)
+	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -267,7 +267,7 @@ func GetNetworkFromCmdLineFlags(
 	requireDevnetEndpointSpecification bool,
 	onlyEndpointBasedDevnets bool,
 	supportedNetworkOptions []NetworkOption,
-	subnetName string,
+	chainName string,
 ) (models.Network, error) {
 	supportedNetworkOptionsToPrompt := supportedNetworkOptions
 	if slices.Contains(supportedNetworkOptions, Devnet) && !slices.Contains(supportedNetworkOptions, Cluster) {
@@ -278,16 +278,16 @@ func GetNetworkFromCmdLineFlags(
 	filteredSupportedNetworkOptionsStrs := ""
 	scClusterNames := []string{}
 	scDevnetEndpoints := []string{}
-	if subnetName != "" {
+	if chainName != "" {
 		var filteredSupportedNetworkOptions []NetworkOption
-		filteredSupportedNetworkOptions, scClusterNames, scDevnetEndpoints, err = GetSupportedNetworkOptionsForSubnet(app, subnetName, supportedNetworkOptions)
+		filteredSupportedNetworkOptions, scClusterNames, scDevnetEndpoints, err = GetSupportedNetworkOptionsForChain(app, chainName, supportedNetworkOptions)
 		if err != nil {
 			return models.UndefinedNetwork, err
 		}
 		supportedNetworkOptionsStrs = strings.Join(sdkutils.Map(supportedNetworkOptions, func(s NetworkOption) string { return s.String() }), ", ")
 		filteredSupportedNetworkOptionsStrs = strings.Join(sdkutils.Map(filteredSupportedNetworkOptions, func(s NetworkOption) string { return s.String() }), ", ")
 		if len(filteredSupportedNetworkOptions) == 0 {
-			return models.UndefinedNetwork, fmt.Errorf("no supported deployed networks available on blockchain %q. please deploy to one of: [%s]", subnetName, supportedNetworkOptionsStrs)
+			return models.UndefinedNetwork, fmt.Errorf("no supported deployed networks available on blockchain %q. please deploy to one of: [%s]", chainName, supportedNetworkOptionsStrs)
 		}
 		supportedNetworkOptions = filteredSupportedNetworkOptions
 	}
@@ -329,7 +329,7 @@ func GetNetworkFromCmdLineFlags(
 	// don't check for unsupported network on e2e run
 	if networkOption != Undefined && !slices.Contains(supportedNetworkOptions, networkOption) && networkOption != Cluster && os.Getenv(constants.SimulatePublicNetwork) == "" {
 		errMsg := fmt.Errorf("network flag %s is not supported. use one of %s", networkFlagsMap[networkOption], supportedNetworksFlags)
-		if subnetName != "" {
+		if chainName != "" {
 			clustersMsg := ""
 			endpointsMsg := ""
 			if len(scClusterNames) != 0 {
@@ -338,7 +338,7 @@ func GetNetworkFromCmdLineFlags(
 			if len(scDevnetEndpoints) != 0 {
 				endpointsMsg = fmt.Sprintf(". valid devnet endpoints: [%s]", strings.Join(scDevnetEndpoints, ", "))
 			}
-			errMsg = fmt.Errorf("network flag %s is not available on blockchain %s. use one of %s or made a deploy for that network%s%s", networkFlagsMap[networkOption], subnetName, supportedNetworksFlags, clustersMsg, endpointsMsg)
+			errMsg = fmt.Errorf("network flag %s is not available on blockchain %s. use one of %s or made a deploy for that network%s%s", networkFlagsMap[networkOption], chainName, supportedNetworksFlags, clustersMsg, endpointsMsg)
 		}
 		return models.UndefinedNetwork, errMsg
 	}
@@ -348,9 +348,9 @@ func GetNetworkFromCmdLineFlags(
 	}
 
 	if networkOption == Undefined {
-		if subnetName != "" && supportedNetworkOptionsStrs != filteredSupportedNetworkOptionsStrs {
-			ux.Logger.PrintToUser("currently supported deployed networks on %q for this command: [%s]", subnetName, filteredSupportedNetworkOptionsStrs)
-			ux.Logger.PrintToUser("for more options, deploy %q to one of: [%s]", subnetName, supportedNetworkOptionsStrs)
+		if chainName != "" && supportedNetworkOptionsStrs != filteredSupportedNetworkOptionsStrs {
+			ux.Logger.PrintToUser("currently supported deployed networks on %q for this command: [%s]", chainName, filteredSupportedNetworkOptionsStrs)
+			ux.Logger.PrintToUser("for more options, deploy %q to one of: [%s]", chainName, supportedNetworkOptionsStrs)
 			ux.Logger.PrintToUser("")
 		}
 		// undefined, so prompt
@@ -358,7 +358,7 @@ func GetNetworkFromCmdLineFlags(
 		if err != nil {
 			return models.UndefinedNetwork, err
 		}
-		if subnetName != "" {
+		if chainName != "" {
 			clusterNames = scClusterNames
 		}
 		if len(clusterNames) == 0 {
@@ -416,9 +416,9 @@ func GetNetworkFromCmdLineFlags(
 		}
 	}
 
-	if subnetName != "" && networkFlags.ClusterName != "" {
+	if chainName != "" && networkFlags.ClusterName != "" {
 		if _, err := utils.GetIndexInSlice(scClusterNames, networkFlags.ClusterName); err != nil {
-			return models.UndefinedNetwork, fmt.Errorf("blockchain %s has not been deployed to cluster %s", subnetName, networkFlags.ClusterName)
+			return models.UndefinedNetwork, fmt.Errorf("blockchain %s has not been deployed to cluster %s", chainName, networkFlags.ClusterName)
 		}
 	}
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -73,6 +74,12 @@ func (s *StatusService) GetStatus(ctx context.Context) (*StatusResult, error) {
 			}
 			defer sem.Release(1)
 
+			// Skip probing stopped networks - just copy them as-is
+			if network.Metadata.Status == "stopped" || len(network.Nodes) == 0 {
+				result.Networks[i] = network
+				return nil
+			}
+
 			// Probe this network
 			probedNetwork, err := s.probeNetwork(ctx, network)
 			if err != nil {
@@ -89,6 +96,10 @@ func (s *StatusService) GetStatus(ctx context.Context) (*StatusResult, error) {
 		return nil, fmt.Errorf("failed to probe networks: %w", err)
 	}
 
+	// Probe tracked L1 EVMs (Zoo, Hanzo, SPC)
+	trackedEVMs := s.probeTrackedEVMs(ctx, result.Networks)
+	result.TrackedEVMs = trackedEVMs
+
 	// Calculate duration
 	durationMS := int(time.Since(startTime).Milliseconds())
 	result.Timestamp = time.Now()
@@ -97,14 +108,173 @@ func (s *StatusService) GetStatus(ctx context.Context) (*StatusResult, error) {
 	return &result, nil
 }
 
+// getL1ChainConfig returns the L1 chain configurations for Zoo, Hanzo, SPC
+func (s *StatusService) getL1ChainConfig() []TrackedEVM {
+	return []TrackedEVM{
+		// Zoo - Decentralized AI network
+		{Name: "zoo", Network: "mainnet", RPCs: []string{}, BlockchainID: "", VMID: ""},
+		{Name: "zoo", Network: "testnet", RPCs: []string{}, BlockchainID: "", VMID: ""},
+		// Hanzo - AI compute network
+		{Name: "hanzo", Network: "mainnet", RPCs: []string{}, BlockchainID: "", VMID: ""},
+		{Name: "hanzo", Network: "testnet", RPCs: []string{}, BlockchainID: "", VMID: ""},
+		// SPC - Smart Payment Chain
+		{Name: "spc", Network: "mainnet", RPCs: []string{}, BlockchainID: "", VMID: ""},
+		{Name: "spc", Network: "testnet", RPCs: []string{}, BlockchainID: "", VMID: ""},
+	}
+}
+
+// probeTrackedEVMs probes L1 chains (Zoo, Hanzo, SPC) based on network status
+func (s *StatusService) probeTrackedEVMs(ctx context.Context, networks []Network) []EVMStatus {
+	var results []EVMStatus
+
+	// L1 chain IDs from CLAUDE.md
+	l1Chains := map[string]map[string]uint64{
+		"zoo":   {"mainnet": 200200, "testnet": 200201},
+		"hanzo": {"mainnet": 36963, "testnet": 36962},
+		"spc":   {"mainnet": 36911, "testnet": 36910},
+	}
+
+	// For each running network, try to discover L1 chains
+	for _, network := range networks {
+		if network.Metadata.Status != "up" || len(network.Nodes) == 0 {
+			continue
+		}
+
+		baseURL := network.Nodes[0].HTTPURL
+		networkType := network.Name // mainnet or testnet
+
+		// Query for any L1 blockchains that might be running
+		blockchains, err := s.getBlockchainsFromNode(ctx, baseURL)
+		if err != nil {
+			continue
+		}
+
+		// Check for each L1 chain
+		for chainName, chainIDs := range l1Chains {
+			expectedChainID := chainIDs[networkType]
+			if expectedChainID == 0 {
+				continue
+			}
+
+			// Look for this chain in the discovered blockchains
+			for _, bc := range blockchains {
+				bcName, _ := bc["name"].(string)
+				bcID, _ := bc["id"].(string)
+
+				// Match by name (case-insensitive) or check the chain ID via RPC
+				if strings.EqualFold(bcName, chainName+"-chain") || strings.Contains(strings.ToLower(bcName), chainName) {
+					// Found a potential L1 chain, probe it
+					rpcURL := fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, bcID)
+
+					evmStatus := s.probeL1Chain(ctx, chainName, networkType, rpcURL, expectedChainID)
+					if evmStatus != nil {
+						results = append(results, *evmStatus)
+					}
+					break
+				}
+			}
+		}
+	}
+
+	return results
+}
+
+// getBlockchainsFromNode retrieves the list of blockchains from a node
+func (s *StatusService) getBlockchainsFromNode(ctx context.Context, baseURL string) ([]map[string]interface{}, error) {
+	client := &http.Client{Timeout: 3 * time.Second}
+
+	requestURL := fmt.Sprintf("%s/ext/bc/P", baseURL)
+	requestBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "platform.getBlockchains",
+		"params":  map[string]interface{}{},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", requestURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var responseMap map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
+		return nil, err
+	}
+
+	var blockchains []map[string]interface{}
+	if result, ok := responseMap["result"].(map[string]interface{}); ok {
+		if bcs, ok := result["blockchains"].([]interface{}); ok {
+			for _, bc := range bcs {
+				if bcMap, ok := bc.(map[string]interface{}); ok {
+					blockchains = append(blockchains, bcMap)
+				}
+			}
+		}
+	}
+
+	return blockchains, nil
+}
+
+// probeL1Chain probes a single L1 EVM chain
+func (s *StatusService) probeL1Chain(ctx context.Context, name, network, rpcURL string, expectedChainID uint64) *EVMStatus {
+	resolver := &EVMHeightResolver{}
+	height, meta, err := resolver.Height(ctx, rpcURL)
+
+	status := &EVMStatus{
+		Name:    name,
+		Network: network,
+		Endpoints: []EndpointStatus{
+			{ChainAlias: name, URL: rpcURL, OK: err == nil},
+		},
+	}
+
+	if err != nil {
+		return status
+	}
+
+	status.Height = height
+
+	// Extract chain ID
+	if chainID, ok := meta["chain_id"].(uint64); ok {
+		status.ChainID = chainID
+		if chainID != expectedChainID {
+			status.ChainIDMismatch = true
+		}
+	}
+
+	// Extract client version
+	if version, ok := meta["client_version"].(string); ok {
+		status.ClientVersion = version
+	}
+
+	// Extract syncing status
+	if syncing, ok := meta["syncing"]; ok {
+		status.Syncing = syncing
+	}
+
+	return status
+}
+
 // probeNetwork probes a single network
 func (s *StatusService) probeNetwork(ctx context.Context, network Network) (*Network, error) {
 	// Create context with timeout for this network
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	networkCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	// Probe nodes concurrently
-	errGroup, ctx := errgroup.WithContext(ctx)
+	// Probe nodes concurrently - use a separate context for errgroup to avoid cancellation issues
+	nodeErrGroup, nodeCtx := errgroup.WithContext(networkCtx)
 
 	var mu sync.Mutex
 	probedNodes := make([]Node, len(network.Nodes))
@@ -113,8 +283,8 @@ func (s *StatusService) probeNetwork(ctx context.Context, network Network) (*Net
 		i := i
 		node := node
 
-		errGroup.Go(func() error {
-			probedNode, err := s.probeNode(ctx, node)
+		nodeErrGroup.Go(func() error {
+			probedNode, err := s.probeNode(nodeCtx, node)
 			if err != nil {
 				return err
 			}
@@ -126,21 +296,74 @@ func (s *StatusService) probeNetwork(ctx context.Context, network Network) (*Net
 		})
 	}
 
-	if err := errGroup.Wait(); err != nil {
+	if err := nodeErrGroup.Wait(); err != nil {
 		return nil, fmt.Errorf("failed to probe nodes: %w", err)
 	}
 
 	// Update network with probed nodes
 	network.Nodes = probedNodes
 
-	// Probe chains
-	probedChains, err := s.probeChains(ctx, network)
+	// Probe chains - use the main networkCtx, not the cancelled nodeCtx
+	probedChains, err := s.probeChains(networkCtx, network)
 	if err != nil {
 		return nil, fmt.Errorf("failed to probe chains: %w", err)
 	}
 	network.Chains = probedChains
 
+	// Query balances for validators if we have any
+	if len(network.Validators) > 0 && len(network.Nodes) > 0 {
+		baseURL := network.Nodes[0].HTTPURL
+		network.Validators = s.queryValidatorBalances(networkCtx, baseURL, network.Validators)
+	}
+
 	return &network, nil
+}
+
+// queryValidatorBalances queries P/X/C balances for all validators
+func (s *StatusService) queryValidatorBalances(ctx context.Context, baseURL string, validators []ValidatorAccount) []ValidatorAccount {
+	// Query balances concurrently for all validators
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	for i := range validators {
+		wg.Add(1)
+		go func(idx int) {
+			defer wg.Done()
+
+			v := &validators[idx]
+
+			// Query P-chain balance
+			if v.PChainAddress != "" {
+				if balance, err := s.QueryPChainBalance(ctx, baseURL, v.PChainAddress); err == nil {
+					mu.Lock()
+					validators[idx].PChainBalance = balance
+					mu.Unlock()
+				}
+			}
+
+			// Query X-chain balance
+			if v.XChainAddress != "" {
+				if balance, err := s.QueryXChainBalance(ctx, baseURL, v.XChainAddress); err == nil {
+					mu.Lock()
+					validators[idx].XChainBalance = balance
+					mu.Unlock()
+				}
+			}
+
+			// Query C-chain balance
+			if v.CChainAddress != "" {
+				if balance, err := s.QueryCChainBalance(ctx, baseURL, v.CChainAddress); err == nil {
+					mu.Lock()
+					validators[idx].CChainBalance = balance
+					validators[idx].CChainBalanceLUX = FormatCChainBalanceLUX(balance)
+					mu.Unlock()
+				}
+			}
+		}(i)
+	}
+
+	wg.Wait()
+	return validators
 }
 
 // probeNode probes a single node by making real API calls
@@ -215,6 +438,124 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 			if result, ok := r["result"].(map[string]interface{}); ok {
 				if peers, ok := result["peers"].([]interface{}); ok {
 					node.PeerCount = len(peers)
+				}
+			}
+		}
+	}
+
+	// 4. Get Uptime
+	uptimeBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "info.uptime",
+		"params":  map[string]interface{}{},
+	}
+	uptimeJson, _ := json.Marshal(uptimeBody)
+	reqUptime, _ := http.NewRequestWithContext(ctx, "POST", versionURL, bytes.NewBuffer(uptimeJson))
+	reqUptime.Header.Set("Content-Type", "application/json")
+	if respUptime, err := client.Do(reqUptime); err == nil {
+		defer respUptime.Body.Close()
+		var r map[string]interface{}
+		if err := json.NewDecoder(respUptime.Body).Decode(&r); err == nil {
+			if result, ok := r["result"].(map[string]interface{}); ok {
+				if uptime, ok := result["rewardingStakePercentage"].(float64); ok {
+					node.Uptime = fmt.Sprintf("%.1f%%", uptime*100)
+				}
+			}
+		}
+	}
+
+	// 5. Check GPU acceleration (via health check or custom endpoint)
+	healthURL := fmt.Sprintf("%s/ext/health", node.HTTPURL)
+	healthReq, _ := http.NewRequestWithContext(ctx, "GET", healthURL, nil)
+	if healthResp, err := client.Do(healthReq); err == nil {
+		defer healthResp.Body.Close()
+		var r map[string]interface{}
+		if err := json.NewDecoder(healthResp.Body).Decode(&r); err == nil {
+			// Check for GPU-related info in health response
+			if checks, ok := r["checks"].(map[string]interface{}); ok {
+				if gpuCheck, ok := checks["gpu"].(map[string]interface{}); ok {
+					if msg, ok := gpuCheck["message"].(map[string]interface{}); ok {
+						if device, ok := msg["device"].(string); ok {
+							node.GPUDevice = device
+							node.GPUAccelerated = true
+						}
+						if driver, ok := msg["driver"].(string); ok {
+							node.GPUDriverVersion = driver
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// 6. Get validator addresses if this node is a validator
+	if node.NodeID != "" {
+		// Query platform.getCurrentValidators to get validator address
+		validatorsBody := map[string]interface{}{
+			"jsonrpc": "2.0",
+			"id":      1,
+			"method":  "platform.getCurrentValidators",
+			"params": map[string]interface{}{
+				"nodeIDs": []string{node.NodeID},
+			},
+		}
+		validatorsJson, _ := json.Marshal(validatorsBody)
+		pChainURL := fmt.Sprintf("%s/ext/bc/P", node.HTTPURL)
+		reqValidators, _ := http.NewRequestWithContext(ctx, "POST", pChainURL, bytes.NewBuffer(validatorsJson))
+		reqValidators.Header.Set("Content-Type", "application/json")
+		if respValidators, err := client.Do(reqValidators); err == nil {
+			defer respValidators.Body.Close()
+			var r map[string]interface{}
+			if err := json.NewDecoder(respValidators.Body).Decode(&r); err == nil {
+				if result, ok := r["result"].(map[string]interface{}); ok {
+					if validators, ok := result["validators"].([]interface{}); ok && len(validators) > 0 {
+						if validator, ok := validators[0].(map[string]interface{}); ok {
+							// Get validationRewardOwner address (P-chain address)
+							if rewardOwner, ok := validator["validationRewardOwner"].(map[string]interface{}); ok {
+								if addrs, ok := rewardOwner["addresses"].([]interface{}); ok && len(addrs) > 0 {
+									if addr, ok := addrs[0].(string); ok {
+										// Address format: "11111111111111111111111111111111P-lux1..." or "...P-test1..."
+										// Extract just the P-... part
+										if idx := strings.Index(addr, "P-lux"); idx >= 0 {
+											node.PChainAddress = addr[idx:]
+											node.XChainAddress = "X-lux" + strings.TrimPrefix(addr[idx:], "P-lux")
+										} else if idx := strings.Index(addr, "P-test"); idx >= 0 {
+											node.PChainAddress = addr[idx:]
+											node.XChainAddress = "X-test" + strings.TrimPrefix(addr[idx:], "P-test")
+										} else {
+											node.PChainAddress = addr
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// 7. Get C-chain address (derive from nodeID or check if node exposes it)
+		// C-chain addresses are Ethereum-style (0x...) and derived differently
+		// For now, try to get it from the node's keystore if available
+		cChainBody := map[string]interface{}{
+			"jsonrpc": "2.0",
+			"id":      1,
+			"method":  "eth_accounts",
+			"params":  []interface{}{},
+		}
+		cChainJson, _ := json.Marshal(cChainBody)
+		cChainURL := fmt.Sprintf("%s/ext/bc/C/rpc", node.HTTPURL)
+		reqCChain, _ := http.NewRequestWithContext(ctx, "POST", cChainURL, bytes.NewBuffer(cChainJson))
+		reqCChain.Header.Set("Content-Type", "application/json")
+		if respCChain, err := client.Do(reqCChain); err == nil {
+			defer respCChain.Body.Close()
+			var r map[string]interface{}
+			if err := json.NewDecoder(respCChain.Body).Decode(&r); err == nil {
+				if accounts, ok := r["result"].([]interface{}); ok && len(accounts) > 0 {
+					if addr, ok := accounts[0].(string); ok {
+						node.CChainAddress = addr
+					}
 				}
 			}
 		}
@@ -353,12 +694,27 @@ func (s *StatusService) getNetworkConfigurations() ([]Network, error) {
 			continue
 		}
 
+		type ValidatorInfo struct {
+			Index         int    `json:"index"`
+			NodeID        string `json:"nodeID"`
+			PChainAddress string `json:"pChainAddress"`
+			XChainAddress string `json:"xChainAddress"`
+			CChainAddress string `json:"cChainAddress"`
+		}
+		type ActiveAccountInfo struct {
+			Index         int    `json:"index"`
+			PChainAddress string `json:"pChainAddress"`
+			XChainAddress string `json:"xChainAddress"`
+			CChainAddress string `json:"cChainAddress"`
+		}
 		type NetworkState struct {
-			NetworkType string `json:"network_type"`
-			PortBase    int    `json:"port_base"`
-			GRPCPort    int    `json:"grpc_port"`
-			Running     bool   `json:"running"`
-			ApiEndpoint string `json:"api_endpoint"`
+			NetworkType   string             `json:"network_type"`
+			PortBase      int                `json:"port_base"`
+			GRPCPort      int                `json:"grpc_port"`
+			Running       bool               `json:"running"`
+			ApiEndpoint   string             `json:"api_endpoint"`
+			Validators    []ValidatorInfo    `json:"validators"`
+			ActiveAccount *ActiveAccountInfo `json:"active_account"`
 		}
 
 		var state NetworkState
@@ -467,9 +823,34 @@ func (s *StatusService) getNetworkConfigurations() ([]Network, error) {
 			grpcPort = ports.Server
 		}
 
+		// Convert validators from state to status model
+		var validators []ValidatorAccount
+		for _, v := range state.Validators {
+			validators = append(validators, ValidatorAccount{
+				Index:         v.Index,
+				NodeID:        v.NodeID,
+				PChainAddress: v.PChainAddress,
+				XChainAddress: v.XChainAddress,
+				CChainAddress: v.CChainAddress,
+			})
+		}
+
+		// Convert active account
+		var activeAccount *ActiveAccount
+		if state.ActiveAccount != nil {
+			activeAccount = &ActiveAccount{
+				Index:         state.ActiveAccount.Index,
+				PChainAddress: state.ActiveAccount.PChainAddress,
+				XChainAddress: state.ActiveAccount.XChainAddress,
+				CChainAddress: state.ActiveAccount.CChainAddress,
+			}
+		}
+
 		networks = append(networks, Network{
-			Name:  state.NetworkType,
-			Nodes: nodes,
+			Name:          state.NetworkType,
+			Nodes:         nodes,
+			Validators:    validators,
+			ActiveAccount: activeAccount,
 			Metadata: NetworkMetadata{
 				GRPCPort:   grpcPort,
 				NodesCount: len(nodes),
@@ -519,15 +900,30 @@ func (s *StatusService) getChainEndpoints(network Network) ([]EndpointStatus, er
 	// Try to discover actual chain endpoints from the node
 	endpoints, err := s.discoverChainEndpointsFromNode(baseURL)
 	if err != nil {
-		// Fallback to standard chains if discovery fails
-		endpoints = []EndpointStatus{
-			{ChainAlias: "p", URL: fmt.Sprintf("%s/ext/bc/P", baseURL)},
-			{ChainAlias: "x", URL: fmt.Sprintf("%s/ext/bc/X", baseURL)},
-			{ChainAlias: "c", URL: fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)},
-		}
+		// Fallback to all native chains if discovery fails
+		endpoints = s.getAllNativeChainEndpoints(baseURL)
 	}
 
 	return endpoints, nil
+}
+
+// getAllNativeChainEndpoints returns endpoints for all native Lux chains
+// P-chain and X-chain use JSON-RPC directly (no /rpc suffix)
+// EVM chains (C, Q, A, B, T, Z, G, K, D) use /rpc suffix
+func (s *StatusService) getAllNativeChainEndpoints(baseURL string) []EndpointStatus {
+	return []EndpointStatus{
+		{ChainAlias: "p", URL: fmt.Sprintf("%s/ext/bc/P", baseURL)},     // Platform chain (JSON-RPC)
+		{ChainAlias: "x", URL: fmt.Sprintf("%s/ext/bc/X", baseURL)},     // Exchange chain (JSON-RPC)
+		{ChainAlias: "c", URL: fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)}, // Coreth (EVM)
+		{ChainAlias: "q", URL: fmt.Sprintf("%s/ext/bc/Q/rpc", baseURL)}, // Quantum (EVM)
+		{ChainAlias: "a", URL: fmt.Sprintf("%s/ext/bc/A/rpc", baseURL)}, // AI (EVM)
+		{ChainAlias: "b", URL: fmt.Sprintf("%s/ext/bc/B/rpc", baseURL)}, // Bridge (EVM)
+		{ChainAlias: "t", URL: fmt.Sprintf("%s/ext/bc/T/rpc", baseURL)}, // Threshold (EVM)
+		{ChainAlias: "z", URL: fmt.Sprintf("%s/ext/bc/Z/rpc", baseURL)}, // ZK (EVM)
+		{ChainAlias: "g", URL: fmt.Sprintf("%s/ext/bc/G/rpc", baseURL)}, // Graph (EVM)
+		{ChainAlias: "k", URL: fmt.Sprintf("%s/ext/bc/K/rpc", baseURL)}, // KMS (EVM)
+		{ChainAlias: "d", URL: fmt.Sprintf("%s/ext/bc/D/rpc", baseURL)}, // DEX (EVM)
+	}
 }
 
 // discoverChainEndpointsFromNode attempts to discover all available chain endpoints
@@ -602,29 +998,18 @@ func (s *StatusService) discoverChainEndpointsFromNode(baseURL string) ([]Endpoi
 		}
 	}
 
-	// Always include core chains if not found
+	// Always include all native chains if not found
 	foundChains := make(map[string]bool)
 	for _, ep := range endpoints {
 		foundChains[ep.ChainAlias] = true
 	}
 
-	if !foundChains["p"] {
-		endpoints = append(endpoints, EndpointStatus{
-			ChainAlias: "p",
-			URL:        fmt.Sprintf("%s/ext/bc/P", baseURL),
-		})
-	}
-	if !foundChains["x"] {
-		endpoints = append(endpoints, EndpointStatus{
-			ChainAlias: "x",
-			URL:        fmt.Sprintf("%s/ext/bc/X", baseURL),
-		})
-	}
-	if !foundChains["c"] {
-		endpoints = append(endpoints, EndpointStatus{
-			ChainAlias: "c",
-			URL:        fmt.Sprintf("%s/ext/bc/C/rpc", baseURL),
-		})
+	// Add all native chains that weren't discovered
+	nativeChains := s.getAllNativeChainEndpoints(baseURL)
+	for _, nc := range nativeChains {
+		if !foundChains[nc.ChainAlias] {
+			endpoints = append(endpoints, nc)
+		}
 	}
 
 	return endpoints, nil
@@ -653,4 +1038,201 @@ func (s *StatusService) mapBlockchainIDToAlias(blockchainID string) string {
 		}
 		return blockchainID
 	}
+}
+
+// QueryPChainBalance queries the P-chain balance for an address
+func (s *StatusService) QueryPChainBalance(ctx context.Context, baseURL, address string) (uint64, error) {
+	client := &http.Client{Timeout: 3 * time.Second}
+
+	requestURL := fmt.Sprintf("%s/ext/bc/P", baseURL)
+	requestBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "platform.getBalance",
+		"params": map[string]interface{}{
+			"addresses": []string{address},
+		},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return 0, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", requestURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	var responseMap map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
+		return 0, err
+	}
+
+	if result, ok := responseMap["result"].(map[string]interface{}); ok {
+		if balanceStr, ok := result["balance"].(string); ok {
+			balance, err := strconv.ParseUint(balanceStr, 10, 64)
+			if err != nil {
+				return 0, err
+			}
+			return balance, nil
+		}
+	}
+
+	return 0, fmt.Errorf("failed to parse P-chain balance response")
+}
+
+// QueryXChainBalance queries the X-chain balance for an address
+func (s *StatusService) QueryXChainBalance(ctx context.Context, baseURL, address string) (uint64, error) {
+	client := &http.Client{Timeout: 3 * time.Second}
+
+	requestURL := fmt.Sprintf("%s/ext/bc/X", baseURL)
+	requestBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "avm.getBalance",
+		"params": map[string]interface{}{
+			"address": address,
+			"assetID": "LUX",
+		},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return 0, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", requestURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	var responseMap map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
+		return 0, err
+	}
+
+	if result, ok := responseMap["result"].(map[string]interface{}); ok {
+		if balanceStr, ok := result["balance"].(string); ok {
+			balance, err := strconv.ParseUint(balanceStr, 10, 64)
+			if err != nil {
+				return 0, err
+			}
+			return balance, nil
+		}
+	}
+
+	return 0, fmt.Errorf("failed to parse X-chain balance response")
+}
+
+// QueryCChainBalance queries the C-chain balance for an address (0x format)
+func (s *StatusService) QueryCChainBalance(ctx context.Context, baseURL, address string) (string, error) {
+	client := &http.Client{Timeout: 3 * time.Second}
+
+	requestURL := fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)
+	requestBody := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      1,
+		"method":  "eth_getBalance",
+		"params":  []interface{}{address, "latest"},
+	}
+
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", requestURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var responseMap map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
+		return "", err
+	}
+
+	if result, ok := responseMap["result"].(string); ok {
+		return result, nil // Returns hex string like "0x1234..."
+	}
+
+	return "", fmt.Errorf("failed to parse C-chain balance response")
+}
+
+// FormatCChainBalanceLUX converts C-chain balance (wei hex) to human-readable LUX
+func FormatCChainBalanceLUX(weiHex string) string {
+	// Remove 0x prefix
+	weiHex = strings.TrimPrefix(weiHex, "0x")
+	if weiHex == "" || weiHex == "0" {
+		return "0 LUX"
+	}
+
+	// Parse as big int
+	wei := new(big.Int)
+	wei.SetString(weiHex, 16)
+
+	// 1 LUX = 10^18 wei
+	divisor := new(big.Int)
+	divisor.SetString("1000000000000000000", 10)
+
+	// Calculate whole LUX and remainder
+	luxWhole := new(big.Int).Div(wei, divisor)
+	remainder := new(big.Int).Mod(wei, divisor)
+
+	// Format with decimals if there's a remainder
+	if remainder.Cmp(big.NewInt(0)) == 0 {
+		return fmt.Sprintf("%s LUX", luxWhole.String())
+	}
+
+	// Show up to 4 decimal places
+	remainderStr := fmt.Sprintf("%018s", remainder.String())
+	remainderStr = strings.TrimRight(remainderStr[:4], "0")
+	if remainderStr == "" {
+		return fmt.Sprintf("%s LUX", luxWhole.String())
+	}
+	return fmt.Sprintf("%s.%s LUX", luxWhole.String(), remainderStr)
+}
+
+// FormatNLUXToLUX converts nLUX (nanoLUX) to human-readable LUX
+func FormatNLUXToLUX(nLUX uint64) string {
+	if nLUX == 0 {
+		return "0 LUX"
+	}
+
+	// 1 LUX = 10^9 nLUX
+	luxWhole := nLUX / 1_000_000_000
+	remainder := nLUX % 1_000_000_000
+
+	if remainder == 0 {
+		return fmt.Sprintf("%d LUX", luxWhole)
+	}
+
+	// Show up to 4 decimal places
+	remainderStr := fmt.Sprintf("%09d", remainder)
+	remainderStr = strings.TrimRight(remainderStr[:4], "0")
+	if remainderStr == "" {
+		return fmt.Sprintf("%d LUX", luxWhole)
+	}
+	return fmt.Sprintf("%d.%s LUX", luxWhole, remainderStr)
 }

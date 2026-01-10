@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	subnetName1 = "TEST_subnet"
-	subnetName2 = "TEST_copied_subnet"
+	chainName1 = "TEST_chain"
+	chainName2 = "TEST_copied_chain"
 
-	subnetID  = "testSubNet"
+	chainID   = "testSubNet"
 	networkID = uint32(67443)
 )
 
@@ -36,7 +36,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	ap := testutils.SetupTestInTempDir(t)
 
 	genesisBytes := []byte("genesis")
-	err := ap.WriteGenesisFile(subnetName1, genesisBytes)
+	err := ap.WriteGenesisFile(chainName1, genesisBytes)
 	require.NoError(err)
 
 	configFile := constants.NodeFileName
@@ -47,13 +47,13 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	defer func() { _ = os.Remove(configPath) }()
 
 	// testing backward compatibility
-	configBytes := []byte("{\"whitelisted-subnets\": \"subNetId000\"}")
+	configBytes := []byte("{\"whitelisted-chains\": \"subNetId000\"}")
 	err = os.MkdirAll(filepath.Dir(configPath), constants.DefaultPerms755)
 	require.NoError(err)
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
+	err = EditConfigFile(ap, chainID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Test utility
@@ -66,7 +66,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	require.Equal("subNetId000,testSubNet", luxConfig["track-chains"])
 
 	// ensure that the old setting has been deleted
-	require.Equal(nil, luxConfig["whitelisted-subnets"])
+	require.Equal(nil, luxConfig["whitelisted-chains"])
 }
 
 // testing backward compatibility
@@ -78,7 +78,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	ap := testutils.SetupTestInTempDir(t)
 
 	genesisBytes := []byte("genesis")
-	err := ap.WriteGenesisFile(subnetName1, genesisBytes)
+	err := ap.WriteGenesisFile(chainName1, genesisBytes)
 	require.NoError(err)
 
 	configFile := constants.NodeFileName
@@ -95,7 +95,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
+	err = EditConfigFile(ap, chainID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Test utility
@@ -108,7 +108,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	require.Equal("subNetId000,testSubNet", luxConfig["track-chains"])
 
 	// ensure that the old setting wont be applied at all
-	require.Equal(nil, luxConfig["whitelisted-subnets"])
+	require.Equal(nil, luxConfig["whitelisted-chains"])
 }
 
 func TestEditConfigFileWithNoSettings(t *testing.T) {
@@ -119,7 +119,7 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	ap := testutils.SetupTestInTempDir(t)
 
 	genesisBytes := []byte("genesis")
-	err := ap.WriteGenesisFile(subnetName1, genesisBytes)
+	err := ap.WriteGenesisFile(chainName1, genesisBytes)
 	require.NoError(err)
 
 	configFile := constants.NodeFileName
@@ -129,14 +129,14 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	configPath := filepath.Join(tmpDir, configFile)
 	defer func() { _ = os.Remove(configPath) }()
 
-	// testing when no setting for tracked subnets exists
+	// testing when no setting for tracked chains exists
 	configBytes := []byte("{\"networkId\": \"5\"}")
 	err = os.MkdirAll(filepath.Dir(configPath), constants.DefaultPerms755)
 	require.NoError(err)
 	err = os.WriteFile(configPath, configBytes, 0o600)
 	require.NoError(err)
 
-	err = EditConfigFile(ap, subnetID, models.NetworkFromNetworkID(networkID), configPath, true, "")
+	err = EditConfigFile(ap, chainID, models.NetworkFromNetworkID(networkID), configPath, true, "")
 	require.NoError(err)
 
 	fileBytes, err := os.ReadFile(configPath) //nolint:gosec // G304: Test utility
@@ -149,5 +149,5 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	require.Equal("testSubNet", luxConfig["track-chains"])
 
 	// ensure that the old setting wont be applied at all
-	require.Equal(nil, luxConfig["whitelisted-subnets"])
+	require.Equal(nil, luxConfig["whitelisted-chains"])
 }

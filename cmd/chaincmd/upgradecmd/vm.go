@@ -56,7 +56,7 @@ command line flags.`,
 		Args: cobrautils.ExactArgs(1),
 	}
 
-	cmd.Flags().BoolVar(&useConfig, "config", false, "upgrade config for future subnet deployments")
+	cmd.Flags().BoolVar(&useConfig, "config", false, "upgrade config for future chain deployments")
 	cmd.Flags().BoolVar(&useLocal, "local", false, "upgrade existing `local` deployment")
 	cmd.Flags().BoolVar(&useTestnet, "testnet", false, "upgrade existing `testnet` deployment (alias for `testnet`)")
 	cmd.Flags().BoolVar(&useMainnet, "mainnet", false, "upgrade existing `mainnet` deployment")
@@ -165,24 +165,24 @@ func selectNetworkToUpgrade(sc models.Sidecar, upgradeOptions []string) (string,
 		upgradeOptions = []string{}
 	}
 
-	// get locally deployed subnets from file since network is shut down
-	locallyDeployedSubnets, err := chain.GetLocallyDeployedSubnetsFromFile(app)
+	// get locally deployed chains from file since network is shut down
+	locallyDeployedChains, err := chain.GetLocallyDeployedChainsFromFile(app)
 	if err != nil {
-		return "", fmt.Errorf("unable to read deployed subnets: %w", err)
+		return "", fmt.Errorf("unable to read deployed chains: %w", err)
 	}
 
-	for _, subnet := range locallyDeployedSubnets {
-		if subnet == sc.Name {
+	for _, chain := range locallyDeployedChains {
+		if chain == sc.Name {
 			upgradeOptions = append(upgradeOptions, localDeployment)
 		}
 	}
 
-	// check if subnet deployed on testnet
+	// check if chain deployed on testnet
 	if _, ok := sc.Networks[models.Testnet.String()]; ok {
 		upgradeOptions = append(upgradeOptions, testnetDeployment)
 	}
 
-	// check if subnet deployed on mainnet
+	// check if chain deployed on mainnet
 	if _, ok := sc.Networks[models.Mainnet.String()]; ok {
 		upgradeOptions = append(upgradeOptions, mainnetDeployment)
 	}
@@ -224,7 +224,7 @@ func selectUpdateOption(vmType models.VMType, sc models.Sidecar, networkToUpgrad
 
 	updateOptions := []string{latestVersionUpdate, specificVersionUpdate, customBinaryUpdate}
 
-	updatePrompt := "How would you like to update your subnet's virtual machine"
+	updatePrompt := "How would you like to update your chain's virtual machine"
 	updateDecision, err := app.Prompt.CaptureList(updatePrompt, updateOptions)
 	if err != nil {
 		return err
@@ -336,7 +336,7 @@ func updateFutureVM(sc models.Sidecar, targetVersion string) error {
 	if err := app.UpdateSidecar(&sc); err != nil {
 		return err
 	}
-	ux.Logger.PrintToUser("VM updated for future deployments. Update will apply next time subnet is deployed.")
+	ux.Logger.PrintToUser("VM updated for future deployments. Update will apply next time chain is deployed.")
 	return nil
 }
 

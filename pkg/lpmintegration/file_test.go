@@ -22,18 +22,18 @@ const (
 	repo1 = "repo1"
 	repo2 = "repo2"
 
-	subnet1 = "testsubnet1"
-	subnet2 = "testsubnet2"
+	chain1 = "testchain1"
+	chain2 = "testchain2"
 
 	vm = "testvm"
 
-	testSubnetYaml = `subnet:
+	testChainYaml = `chain:
   id: "abcd"
-  alias: "testsubnet"
-  homepage: "https://subnet.com"
-  description: It's a subnet
+  alias: "testchain"
+  homepage: "https://chain.com"
+  description: It's a chain
   maintainers:
-    - "dev@subnet.com"
+    - "dev@chain.com"
   vms:
     - "testvm1"
     - "testvm2"
@@ -122,32 +122,32 @@ func TestGetRepos(t *testing.T) {
 	}
 }
 
-func TestGetSubnets(t *testing.T) {
+func TestGetChains(t *testing.T) {
 	type test struct {
-		name        string
-		org         string
-		repo        string
-		subnetNames []string
+		name       string
+		org        string
+		repo       string
+		chainNames []string
 	}
 
 	tests := []test{
 		{
-			name:        "Single",
-			org:         org1,
-			repo:        repo1,
-			subnetNames: []string{subnet1},
+			name:       "Single",
+			org:        org1,
+			repo:       repo1,
+			chainNames: []string{chain1},
 		},
 		{
-			name:        "Multiple",
-			org:         org1,
-			repo:        repo1,
-			subnetNames: []string{subnet1, subnet2},
+			name:       "Multiple",
+			org:        org1,
+			repo:       repo1,
+			chainNames: []string{chain1, chain2},
 		},
 		{
-			name:        "Empty",
-			org:         org1,
-			repo:        repo1,
-			subnetNames: []string{},
+			name:       "Empty",
+			org:        org1,
+			repo:       repo1,
+			chainNames: []string{},
 		},
 	}
 
@@ -158,97 +158,97 @@ func TestGetSubnets(t *testing.T) {
 			testDir := t.TempDir()
 			app := newTestApp(t, testDir)
 
-			// Setup subnet directory
-			subnetPath := filepath.Join(testDir, "repositories", tt.org, tt.repo, "subnets")
-			err := os.MkdirAll(subnetPath, constants.DefaultPerms755)
+			// Setup chain directory
+			chainPath := filepath.Join(testDir, "repositories", tt.org, tt.repo, "chains")
+			err := os.MkdirAll(chainPath, constants.DefaultPerms755)
 			require.NoError(err)
 
-			// Create subnet files
-			for _, subnet := range tt.subnetNames {
-				subnetFile := filepath.Join(subnetPath, subnet+".yaml")
-				err = os.WriteFile(subnetFile, []byte(testSubnetYaml), constants.DefaultPerms755)
+			// Create chain files
+			for _, chain := range tt.chainNames {
+				chainFile := filepath.Join(chainPath, chain+".yaml")
+				err = os.WriteFile(chainFile, []byte(testChainYaml), constants.DefaultPerms755)
 				require.NoError(err)
 			}
 
-			subnets, err := GetSubnets(app, makeAlias(tt.org, tt.repo))
+			chains, err := GetChains(app, makeAlias(tt.org, tt.repo))
 			require.NoError(err)
 
 			// check results
-			require.Equal(len(tt.subnetNames), len(subnets))
-			for i, subnet := range tt.subnetNames {
-				require.Equal(tt.subnetNames[i], subnet)
+			require.Equal(len(tt.chainNames), len(chains))
+			for i, chain := range tt.chainNames {
+				require.Equal(tt.chainNames[i], chain)
 			}
 		})
 	}
 }
 
-func TestLoadSubnetFile_Success(t *testing.T) {
+func TestLoadChainFile_Success(t *testing.T) {
 	require := require.New(t)
 
 	testDir := t.TempDir()
 	app := newTestApp(t, testDir)
 
-	// Setup subnet directory
-	subnetPath := filepath.Join(testDir, "repositories", org1, repo1, "subnets")
-	err := os.MkdirAll(subnetPath, constants.DefaultPerms755)
+	// Setup chain directory
+	chainPath := filepath.Join(testDir, "repositories", org1, repo1, "chains")
+	err := os.MkdirAll(chainPath, constants.DefaultPerms755)
 	require.NoError(err)
 
-	// Create subnet files
-	subnetFile := filepath.Join(subnetPath, subnet1+".yaml")
-	err = os.WriteFile(subnetFile, []byte(testSubnetYaml), constants.DefaultPerms755)
+	// Create chain files
+	chainFile := filepath.Join(chainPath, chain1+".yaml")
+	err = os.WriteFile(chainFile, []byte(testChainYaml), constants.DefaultPerms755)
 	require.NoError(err)
 
-	expectedSubnet := Subnet{
+	expectedChain := Chain{
 		ID:          "abcd",
-		Alias:       "testsubnet",
-		Description: "It's a subnet",
+		Alias:       "testchain",
+		Description: "It's a chain",
 		VMs:         []string{"testvm1", "testvm2"},
 	}
 
-	loadedSubnet, err := LoadSubnetFile(app, MakeKey(makeAlias(org1, repo1), subnet1))
+	loadedChain, err := LoadChainFile(app, MakeKey(makeAlias(org1, repo1), chain1))
 	require.NoError(err)
-	require.Equal(expectedSubnet, loadedSubnet)
+	require.Equal(expectedChain, loadedChain)
 }
 
-func TestLoadSubnetFile_BadKey(t *testing.T) {
+func TestLoadChainFile_BadKey(t *testing.T) {
 	require := require.New(t)
 
 	testDir := t.TempDir()
 	app := newTestApp(t, testDir)
 
-	// Setup subnet directory
-	subnetPath := filepath.Join(testDir, "repositories", org1, repo1, "subnets")
-	err := os.MkdirAll(subnetPath, constants.DefaultPerms755)
+	// Setup chain directory
+	chainPath := filepath.Join(testDir, "repositories", org1, repo1, "chains")
+	err := os.MkdirAll(chainPath, constants.DefaultPerms755)
 	require.NoError(err)
 
-	// Create subnet files
-	subnetFile := filepath.Join(subnetPath, subnet1+".yaml")
-	err = os.WriteFile(subnetFile, []byte(testSubnetYaml), constants.DefaultPerms755)
+	// Create chain files
+	chainFile := filepath.Join(chainPath, chain1+".yaml")
+	err = os.WriteFile(chainFile, []byte(testChainYaml), constants.DefaultPerms755)
 	require.NoError(err)
 
-	_, err = LoadSubnetFile(app, subnet1)
-	require.ErrorContains(err, "invalid subnet key")
+	_, err = LoadChainFile(app, chain1)
+	require.ErrorContains(err, "invalid chain key")
 }
 
-func TestGetVMsInSubnet(t *testing.T) {
+func TestGetVMsInChain(t *testing.T) {
 	require := require.New(t)
 
 	testDir := t.TempDir()
 	app := newTestApp(t, testDir)
 
-	// Setup subnet directory
-	subnetPath := filepath.Join(testDir, "repositories", org1, repo1, "subnets")
-	err := os.MkdirAll(subnetPath, constants.DefaultPerms755)
+	// Setup chain directory
+	chainPath := filepath.Join(testDir, "repositories", org1, repo1, "chains")
+	err := os.MkdirAll(chainPath, constants.DefaultPerms755)
 	require.NoError(err)
 
-	// Create subnet files
-	subnetFile := filepath.Join(subnetPath, subnet1+".yaml")
-	err = os.WriteFile(subnetFile, []byte(testSubnetYaml), constants.DefaultPerms755)
+	// Create chain files
+	chainFile := filepath.Join(chainPath, chain1+".yaml")
+	err = os.WriteFile(chainFile, []byte(testChainYaml), constants.DefaultPerms755)
 	require.NoError(err)
 
 	expectedVMs := []string{"testvm1", "testvm2"}
 
-	loadedVMs, err := getVMsInSubnet(app, MakeKey(makeAlias(org1, repo1), subnet1))
+	loadedVMs, err := getVMsInChain(app, MakeKey(makeAlias(org1, repo1), chain1))
 	require.NoError(err)
 	require.Equal(expectedVMs, loadedVMs)
 }
@@ -264,7 +264,7 @@ func TestLoadVMFile(t *testing.T) {
 	err := os.MkdirAll(vmPath, constants.DefaultPerms755)
 	require.NoError(err)
 
-	// Create subnet files
+	// Create chain files
 	vmFile := filepath.Join(vmPath, vm+".yaml")
 	err = os.WriteFile(vmFile, []byte(testVMYaml), constants.DefaultPerms755)
 	require.NoError(err)

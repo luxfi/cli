@@ -141,8 +141,8 @@ func (app *Lux) GetEVMBinDir() string {
 	return filepath.Join(app.GetBaseDir(), constants.LuxCliBinDir, constants.EVMInstallDir)
 }
 
-func (app *Lux) GetUpgradeBytesFilepath(subnetName string) string {
-	return app.GetUpgradeBytesFilePath(subnetName) // Use SDK method
+func (app *Lux) GetUpgradeBytesFilepath(chainName string) string {
+	return app.GetUpgradeBytesFilePath(chainName) // Use SDK method
 }
 
 func (app *Lux) GetReposDir() string {
@@ -429,15 +429,34 @@ func (app *Lux) GetClusterYAMLFilePath(clusterName string) string {
 // All the SDK methods are now provided by embedded type
 // These duplicate SDK functionality and should be removed
 
+// ValidatorInfo contains validator addresses and optional balance info
+type ValidatorInfo struct {
+	Index         int    `json:"index"`
+	NodeID        string `json:"nodeID"`
+	PChainAddress string `json:"pChainAddress"`
+	XChainAddress string `json:"xChainAddress"`
+	CChainAddress string `json:"cChainAddress"` // 0x format
+}
+
+// ActiveAccountInfo represents the currently active account for network operations
+type ActiveAccountInfo struct {
+	Index         int    `json:"index"`
+	PChainAddress string `json:"pChainAddress"`
+	XChainAddress string `json:"xChainAddress"`
+	CChainAddress string `json:"cChainAddress"`
+}
+
 // NetworkState tracks the state of a running local network
 type NetworkState struct {
-	NetworkType string `json:"network_type"` // "local", "testnet", "mainnet"
-	NetworkID   uint32 `json:"network_id"`
-	PortBase    int    `json:"port_base"`
-	GRPCPort    int    `json:"grpc_port"`    // gRPC server port for this network
-	GatewayPort int    `json:"gateway_port"` // gRPC gateway port for this network
-	APIEndpoint string `json:"api_endpoint"`
-	Running     bool   `json:"running"`
+	NetworkType   string             `json:"network_type"` // "local", "testnet", "mainnet"
+	NetworkID     uint32             `json:"network_id"`
+	PortBase      int                `json:"port_base"`
+	GRPCPort      int                `json:"grpc_port"`    // gRPC server port for this network
+	GatewayPort   int                `json:"gateway_port"` // gRPC gateway port for this network
+	APIEndpoint   string             `json:"api_endpoint"`
+	Running       bool               `json:"running"`
+	Validators    []ValidatorInfo    `json:"validators,omitempty"`     // Validator addresses
+	ActiveAccount *ActiveAccountInfo `json:"active_account,omitempty"` // Currently active account
 }
 
 // GetNetworkStateFile returns the path to the default network state file

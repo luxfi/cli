@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidChecks bool, subnetAliases []string) error {
+func SyncChain(app *application.Lux, clusterName, blockchainName string, avoidChecks bool, chainAliases []string) error {
 	if err := CheckCluster(app, clusterName); err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidC
 	if err != nil {
 		return err
 	}
-	if err := chain.ValidateSubnetNameAndGetChains(blockchainName); err != nil {
+	if err := chain.ValidateChainNameAndGetChains(blockchainName); err != nil {
 		return err
 	}
 	hosts, err := ansible.GetInventoryFromAnsibleInventoryFile(app.GetAnsibleInventoryDirPath(clusterName))
@@ -46,13 +46,13 @@ func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidC
 			return err
 		}
 	}
-	if err := prepareSubnetPlugin(app, hosts, blockchainName); err != nil {
+	if err := prepareChainPlugin(app, hosts, blockchainName); err != nil {
 		return err
 	}
 	// Type assertion for network field
 	networkStr, _ := clusterConfig["network"].(string)
 	network := models.NetworkFromString(networkStr)
-	if err := trackSubnet(app, hosts, clusterName, network, blockchainName, subnetAliases); err != nil {
+	if err := trackChain(app, hosts, clusterName, network, blockchainName, chainAliases); err != nil {
 		return err
 	}
 	ux.Logger.PrintToUser("Node(s) successfully started syncing with blockchain!")
@@ -60,8 +60,8 @@ func SyncSubnet(app *application.Lux, clusterName, blockchainName string, avoidC
 	return nil
 }
 
-// prepareSubnetPlugin creates subnet plugin to all nodes in the cluster
-func prepareSubnetPlugin(app *application.Lux, hosts []*models.Host, blockchainName string) error {
+// prepareChainPlugin creates chain plugin to all nodes in the cluster
+func prepareChainPlugin(app *application.Lux, hosts []*models.Host, blockchainName string) error {
 	sc, err := app.LoadSidecar(blockchainName)
 	if err != nil {
 		return err
@@ -84,24 +84,24 @@ func prepareSubnetPlugin(app *application.Lux, hosts []*models.Host, blockchainN
 	return nil
 }
 
-func trackSubnet(
+func trackChain(
 	app *application.Lux,
 	hosts []*models.Host,
 	clusterName string,
 	network models.Network,
 	blockchainName string,
-	subnetAliases []string,
+	chainAliases []string,
 ) error {
 	// load cluster config
 	clusterConfig, err := app.GetClusterConfig(clusterName)
 	if err != nil {
 		return err
 	}
-	// and get list of subnets
-	subnets, _ := clusterConfig["subnets"].([]string)
-	allSubnets := utils.Unique(append(subnets, blockchainName))
+	// and get list of chains
+	chains, _ := clusterConfig["chains"].([]string)
+	allChains := utils.Unique(append(chains, blockchainName))
 
-	// load sidecar to get subnet blockchain ID
+	// load sidecar to get chain blockchain ID
 	sc, err := app.LoadSidecar(blockchainName)
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func trackSubnet(
 			if err := ssh.RunSSHRenderLuxdAliasConfigFile(
 				host,
 				blockchainID.String(),
-				subnetAliases,
+				chainAliases,
 			); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 			}
@@ -139,12 +139,12 @@ func trackSubnet(
 				app,
 				host,
 				network,
-				allSubnets,
+				allChains,
 				isAPIHost,
 			); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 			}
-			if err := ssh.RunSSHSyncSubnetData(app, host, network, blockchainName); err != nil {
+			if err := ssh.RunSSHSyncChainData(app, host, network, blockchainName); err != nil {
 				nodeResults.AddResult(host.NodeID, nil, err)
 			}
 			if err := ssh.RunSSHStartNode(host); err != nil {
@@ -158,8 +158,8 @@ func trackSubnet(
 		return fmt.Errorf("failed to track network for node(s) %s", wgResults.GetErrorHostMap())
 	}
 
-	// update slice of subnets synced by the cluster
-	clusterConfig["subnets"] = allSubnets
+	// update slice of chains synced by the cluster
+	clusterConfig["chains"] = allChains
 	// Save the updated cluster configuration
 	if err := app.SetClusterConfig(clusterName, clusterConfig); err != nil {
 		return fmt.Errorf("failed to save cluster config: %w", err)

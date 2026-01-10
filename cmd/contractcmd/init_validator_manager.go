@@ -107,7 +107,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		}
 	}
 	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), initValidatorManagerFlags.RPC)
-	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMChainPrefundedKey(
 		app.GetSDKApp(),
 		network,
 		chainSpec,
@@ -142,7 +142,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	}
 	// Get bootstrap validators from the blockchain configuration
 	// Note: Using empty validator list as NetworkData doesn't have validators
-	var bootstrapValidators []models.SubnetValidator
+	var bootstrapValidators []models.ChainValidator
 	luxdBootstrapValidators, err := chainvalidators.ToL1Validators(bootstrapValidators)
 	if err != nil {
 		return err
@@ -161,7 +161,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app.GetSDKApp(),
 		network,
 		chainSpec,
@@ -184,7 +184,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		validators[i] = v
 	}
 	netSDK := blockchainSDK.Net{
-		NetID:               subnetID,
+		NetID:               chainID,
 		BlockchainID:        blockchainID,
 		BootstrapValidators: validators,
 		OwnerAddress:        &ownerAddress,
@@ -195,7 +195,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	for i, p := range extraAggregatorPeers {
 		extraPeers[i] = p
 	}
-	err = signatureaggregator.CreateSignatureAggregatorInstance(app, subnetID.String(), network, extraPeers, aggregatorLogger, "latest")
+	err = signatureaggregator.CreateSignatureAggregatorInstance(app, chainID.String(), network, extraPeers, aggregatorLogger, "latest")
 	if err != nil {
 		return err
 	}

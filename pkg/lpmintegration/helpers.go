@@ -59,17 +59,17 @@ func makeAlias(org, repo string) string {
 	return org + "/" + repo
 }
 
-// MakeKey creates an LPM key from an alias and subnet name.
-func MakeKey(alias, subnet string) string {
-	return alias + ":" + subnet
+// MakeKey creates an LPM key from an alias and chain name.
+func MakeKey(alias, chain string) string {
+	return alias + ":" + chain
 }
 
-func splitKey(subnetKey string) (string, string, error) {
-	splitSubnet := strings.Split(subnetKey, ":")
-	if len(splitSubnet) != 2 {
-		return "", "", fmt.Errorf("invalid subnet key: %s", subnetKey)
+func splitKey(chainKey string) (string, string, error) {
+	splitChain := strings.Split(chainKey, ":")
+	if len(splitChain) != 2 {
+		return "", "", fmt.Errorf("invalid chain key: %s", chainKey)
 	}
-	repo := splitSubnet[0]
-	subnetName := splitSubnet[1]
-	return repo, subnetName, nil
+	repo := splitChain[0]
+	chainName := splitChain[1]
+	return repo, chainName, nil
 }

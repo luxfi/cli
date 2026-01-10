@@ -24,7 +24,7 @@ type LuxConfigInputs struct {
 	PruningEnabled             bool
 	Aliases                    []string
 	BlockChainID               string
-	TrackSubnets               string
+	TrackChains                string
 	BootstrapIDs               string
 	BootstrapIPs               string
 	PartialSync                bool
@@ -33,7 +33,7 @@ type LuxConfigInputs struct {
 	ProposerVMUseCurrentHeight bool
 }
 
-func PrepareLuxConfig(publicIP string, networkID string, subnets []string) LuxConfigInputs {
+func PrepareLuxConfig(publicIP string, networkID string, chains []string) LuxConfigInputs {
 	return LuxConfigInputs{
 		HTTPHost:                   "127.0.0.1",
 		NetworkID:                  networkID,
@@ -42,7 +42,7 @@ func PrepareLuxConfig(publicIP string, networkID string, subnets []string) LuxCo
 		PublicIP:                   publicIP,
 		StateSyncEnabled:           true,
 		PruningEnabled:             false,
-		TrackSubnets:               strings.Join(subnets, ","),
+		TrackChains:                strings.Join(chains, ","),
 		Aliases:                    nil,
 		BlockChainID:               "",
 		ProposerVMUseCurrentHeight: constants.DevnetFlagsProposerVMUseCurrentHeight,
@@ -119,7 +119,7 @@ func LuxFolderToCreate() []string {
 		"/home/ubuntu/.luxd/db",
 		"/home/ubuntu/.luxd/logs",
 		"/home/ubuntu/.luxd/configs",
-		"/home/ubuntu/.luxd/configs/subnets/",
+		"/home/ubuntu/.luxd/configs/chains/",
 		"/home/ubuntu/.luxd/configs/chains/C",
 		"/home/ubuntu/.luxd/staking",
 		"/home/ubuntu/.luxd/plugins",

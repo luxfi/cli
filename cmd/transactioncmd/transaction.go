@@ -12,7 +12,7 @@ import (
 
 var app *application.Lux
 
-// lux subnet vm
+// lux chain vm
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "transaction",
@@ -26,9 +26,9 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 		},
 	}
 	app = injectedApp
-	// subnet upgrade vm
+	// chain upgrade vm
 	cmd.AddCommand(newTransactionSignCmd())
-	// subnet upgrade generate
+	// chain upgrade generate
 	cmd.AddCommand(newTransactionCommitCmd())
 	return cmd
 }

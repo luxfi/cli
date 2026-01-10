@@ -63,7 +63,7 @@ func newDescribeCmd() *cobra.Command {
 			if sc.BlockchainID.String() != "" {
 				ux.Logger.PrintToUser("🚀 Deployment Status:")
 				ux.Logger.PrintToUser("   Blockchain ID: %s", sc.BlockchainID)
-				ux.Logger.PrintToUser("   Subnet ID: %s", sc.SubnetID)
+				ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
 				vmid, _ := sc.GetVMID()
 				ux.Logger.PrintToUser("   VM ID: %s", vmid)
 				ux.Logger.PrintToUser("")

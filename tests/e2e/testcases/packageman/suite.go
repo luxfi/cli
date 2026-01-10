@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	subnetName       = "e2eSubnetTest"
-	secondSubnetName = "e2eSecondSubnetTest"
+	chainName       = "e2eChainTest"
+	secondChainName = "e2eSecondChainTest"
 )
 
 var (
@@ -36,19 +36,19 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		err = utils.DeleteConfigs(secondSubnetName)
+		err = utils.DeleteConfigs(secondChainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
 
-	ginkgo.It("can deploy a subnet with evm version", func() {
+	ginkgo.It("can deploy a chain with evm version", func() {
 		// check evm install precondition
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey1])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeFalse())
 
-		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1])
-		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.SoloLuxKey])
+		commands.CreateEVMConfigWithVersion(chainName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1])
+		deployOutput := commands.DeployChainLocallyWithVersion(chainName, binaryToVersion[utils.SoloLuxKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -67,7 +67,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey1])).Should(gomega.BeTrue())
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.SoloLuxKey])).Should(gomega.BeTrue())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("can deploy multiple evm versions", func() {
@@ -75,10 +75,10 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey1])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey2])).Should(gomega.BeFalse())
 
-		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1])
-		commands.CreateEVMConfigWithVersion(secondSubnetName, utils.EVMGenesis2Path, binaryToVersion[utils.SoloEVMKey2])
+		commands.CreateEVMConfigWithVersion(chainName, utils.EVMGenesisPath, binaryToVersion[utils.SoloEVMKey1])
+		commands.CreateEVMConfigWithVersion(secondChainName, utils.EVMGenesis2Path, binaryToVersion[utils.SoloEVMKey2])
 
-		deployOutput := commands.DeploySubnetLocally(subnetName)
+		deployOutput := commands.DeployChainLocally(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -86,7 +86,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(rpcs).Should(gomega.HaveLen(1))
 
-		deployOutput = commands.DeploySubnetLocally(secondSubnetName)
+		deployOutput = commands.DeployChainLocally(secondChainName)
 		rpcs, err = utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -110,8 +110,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey1])).Should(gomega.BeTrue())
 		gomega.Expect(utils.CheckEVMExists(binaryToVersion[utils.SoloEVMKey2])).Should(gomega.BeTrue())
 
-		commands.DeleteSubnetConfig(subnetName)
-		commands.DeleteSubnetConfig(secondSubnetName)
+		commands.DeleteChainConfig(chainName)
+		commands.DeleteChainConfig(secondChainName)
 	})
 
 	ginkgo.It("can deploy with multiple node versions", func() {
@@ -119,8 +119,8 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeFalse())
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeFalse())
 
-		commands.CreateEVMConfigWithVersion(subnetName, utils.EVMGenesisPath, binaryToVersion[utils.MultiLuxEVMKey])
-		deployOutput := commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLux1Key])
+		commands.CreateEVMConfigWithVersion(chainName, utils.EVMGenesisPath, binaryToVersion[utils.MultiLuxEVMKey])
+		deployOutput := commands.DeployChainLocallyWithVersion(chainName, binaryToVersion[utils.MultiLux1Key])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -151,7 +151,7 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 
 		commands.CleanNetwork()
 
-		deployOutput = commands.DeploySubnetLocallyWithVersion(subnetName, binaryToVersion[utils.MultiLux2Key])
+		deployOutput = commands.DeployChainLocallyWithVersion(chainName, binaryToVersion[utils.MultiLux2Key])
 		rpcs, err = utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -170,6 +170,6 @@ var _ = ginkgo.Describe("[Package Management]", ginkgo.Ordered, func() {
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux1Key])).Should(gomega.BeTrue())
 		gomega.Expect(utils.CheckLuxExists(binaryToVersion[utils.MultiLux2Key])).Should(gomega.BeTrue())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 })
