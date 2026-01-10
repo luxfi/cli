@@ -30,9 +30,9 @@ func SanitizePath(path string) (string, error) {
 	return path, nil
 }
 
-// Downloads the subnet's VM (if necessary) and copies it into the plugin directory
-func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (string, error) {
-	sc, err := app.LoadSidecar(subnetName)
+// Downloads the chain's VM (if necessary) and copies it into the plugin directory
+func CreatePlugin(app *application.Lux, chainName string, pluginDir string) (string, error) {
+	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return "", fmt.Errorf("failed to load sidecar: %w", err)
 	}
@@ -45,9 +45,9 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 		vmDestPath = filepath.Join(pluginDir, sc.ImportedVMID)
 	} else {
 		// Not imported
-		chainVMID, err := utils.VMID(subnetName)
+		chainVMID, err := utils.VMID(chainName)
 		if err != nil {
-			return "", fmt.Errorf("failed to create VM ID from %s: %w", subnetName, err)
+			return "", fmt.Errorf("failed to create VM ID from %s: %w", chainName, err)
 		}
 
 		switch sc.VM {
@@ -57,7 +57,7 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 				return "", fmt.Errorf("failed to install evm: %w", err)
 			}
 		case models.CustomVM:
-			vmSourcePath = binutils.SetupCustomBin(app, subnetName)
+			vmSourcePath = binutils.SetupCustomBin(app, chainName)
 		default:
 			return "", fmt.Errorf("unknown vm: %s", sc.VM)
 		}
@@ -70,7 +70,7 @@ func CreatePlugin(app *application.Lux, subnetName string, pluginDir string) (st
 // Downloads the target VM (if necessary) and copies it into the plugin directory
 func CreatePluginFromVersion(
 	app *application.Lux,
-	subnetName string,
+	chainName string,
 	vm models.VMType,
 	version string,
 	vmid string,
@@ -87,7 +87,7 @@ func CreatePluginFromVersion(
 			return "", fmt.Errorf("failed to install evm: %w", err)
 		}
 	case models.CustomVM:
-		vmSourcePath = binutils.SetupCustomBin(app, subnetName)
+		vmSourcePath = binutils.SetupCustomBin(app, chainName)
 	default:
 		return "", fmt.Errorf("unknown vm: %s", vm)
 	}

@@ -99,7 +99,7 @@ func deployL1(_ *cobra.Command, args []string) error {
 	if useExisting && sc.BlockchainID.String() != "" {
 		ux.Logger.PrintToUser("\n📂 Using existing blockchain data:")
 		ux.Logger.PrintToUser("   Blockchain ID: %s", sc.BlockchainID)
-		ux.Logger.PrintToUser("   Subnet ID: %s", sc.SubnetID)
+		ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
 	}
 
 	// Deploy based on network
@@ -161,7 +161,7 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 	// Set up cross-protocol support if needed
 	if protocol == "lux-compat" {
 		ux.Logger.PrintToUser("Enabling Lux compatibility mode...")
-		// Enable Lux subnet compatibility by setting appropriate configurations
+		// Enable Lux chain compatibility by setting appropriate configurations
 		sc.ProtocolCompatibility = "lux,ethereum"
 		ux.Logger.PrintToUser("Cross-protocol support enabled")
 	}
@@ -191,13 +191,13 @@ func deployL1Testnet(l1Name string, _ *models.Sidecar) error {
 	if err != nil {
 		return fmt.Errorf("failed to load genesis: %w", err)
 	}
-	subnetID, blockchainID, err := deployer.DeployBlockchain(l1Name, genesis)
+	chainID, blockchainID, err := deployer.DeployBlockchain(l1Name, genesis)
 	if err != nil {
 		return fmt.Errorf("failed to deploy L1 to testnet: %w", err)
 	}
 
 	ux.Logger.PrintToUser("L1 deployed to testnet!")
-	ux.Logger.PrintToUser("Subnet ID: %s", subnetID)
+	ux.Logger.PrintToUser("Chain ID: %s", chainID)
 	ux.Logger.PrintToUser("Blockchain ID: %s", blockchainID)
 
 	return nil
@@ -220,13 +220,13 @@ func deployL1Mainnet(l1Name string, _ *models.Sidecar) error {
 	if err != nil {
 		return fmt.Errorf("failed to load genesis: %w", err)
 	}
-	subnetID, blockchainID, err := deployer.DeployBlockchain(l1Name, genesis)
+	chainID, blockchainID, err := deployer.DeployBlockchain(l1Name, genesis)
 	if err != nil {
 		return fmt.Errorf("failed to deploy L1 to mainnet: %w", err)
 	}
 
 	ux.Logger.PrintToUser("L1 deployed to mainnet!")
-	ux.Logger.PrintToUser("Subnet ID: %s", subnetID)
+	ux.Logger.PrintToUser("Chain ID: %s", chainID)
 	ux.Logger.PrintToUser("Blockchain ID: %s", blockchainID)
 
 	return nil

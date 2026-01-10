@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package subnet
+package chain
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ var (
 )
 
 var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
-	ginkgo.It("Create Etna Subnet Config", func() {
+	ginkgo.It("Create Etna Chain Config", func() {
 		_, luxdVersion = commands.CreateEtnaEVMConfig(
 			utils.BlockchainName,
 			ewoqEVMAddress,
@@ -53,7 +53,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 		gomega.Expect(len(localClusterUris)).Should(gomega.Equal(7))
 	})
 
-	ginkgo.It("Deploy Etna Subnet", func() {
+	ginkgo.It("Deploy Etna Chain", func() {
 		output, err := commands.DeployEtnaBlockchain(
 			utils.BlockchainName,
 			utils.TestLocalNodeName,
@@ -71,8 +71,8 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 		fmt.Println(output)
 	})
 
-	ginkgo.It("Can make cluster track a subnet", func() {
-		output, err := commands.TrackLocalEtnaSubnet(utils.TestLocalNodeName, utils.BlockchainName)
+	ginkgo.It("Can make cluster track a chain", func() {
+		output, err := commands.TrackLocalEtnaChain(utils.TestLocalNodeName, utils.BlockchainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println(output)
 		// parse blockchainID from output
@@ -99,7 +99,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 	})
 
 	ginkgo.It("Can add validator", func() {
-		output, err := commands.AddEtnaSubnetValidatorToCluster(
+		output, err := commands.AddEtnaChainValidatorToCluster(
 			utils.TestLocalNodeName,
 			utils.BlockchainName,
 			localClusterUris[5],
@@ -112,7 +112,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 	})
 
 	ginkgo.It("Can add second validator", func() {
-		output, err := commands.AddEtnaSubnetValidatorToCluster(
+		output, err := commands.AddEtnaChainValidatorToCluster(
 			utils.TestLocalNodeName,
 			utils.BlockchainName,
 			localClusterUris[6],
@@ -144,7 +144,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 	})
 
 	ginkgo.It("Can remove bootstrap validator", func() {
-		output, err := commands.RemoveEtnaSubnetValidatorFromCluster(
+		output, err := commands.RemoveEtnaChainValidatorFromCluster(
 			utils.TestLocalNodeName,
 			utils.BlockchainName,
 			localClusterUris[2],
@@ -156,7 +156,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 	})
 
 	ginkgo.It("Can remove non-bootstrap validator", func() {
-		output, err := commands.RemoveEtnaSubnetValidatorFromCluster(
+		output, err := commands.RemoveEtnaChainValidatorFromCluster(
 			utils.TestLocalNodeName,
 			utils.BlockchainName,
 			localClusterUris[5],
@@ -177,7 +177,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoA]", func() {
 		commands.CleanNetwork()
 	})
 
-	ginkgo.It("Can remove Etna Subnet Config", func() {
-		commands.DeleteSubnetConfig(utils.BlockchainName)
+	ginkgo.It("Can remove Etna Chain Config", func() {
+		commands.DeleteChainConfig(utils.BlockchainName)
 	})
 })

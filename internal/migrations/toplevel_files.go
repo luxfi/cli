@@ -17,7 +17,7 @@ import (
 // Up to version 1.0.0 the sidecar and genesis files were stored at
 // {baseDir} in the top-level.
 // Due to new requirements and evolution of the tool, we now store
-// every subnet-specific file in {baseDir}/subnets/{subnetName}
+// every chain-specific file in {baseDir}/chains/{chainName}
 func migrateTopLevelFiles(app *application.Lux, runner *migrationRunner) error {
 	baseDir := app.GetBaseDir()
 	sidecarMatches, err := filepath.Glob(filepath.Join(baseDir, "*"+constants.SidecarSuffix))
@@ -34,13 +34,13 @@ func migrateTopLevelFiles(app *application.Lux, runner *migrationRunner) error {
 
 	//nolint: gocritic
 	allMatches := append(sidecarMatches, genesisMatches...)
-	var subnet, suffix, fileName string
+	var chain, suffix, fileName string
 	for _, m := range allMatches {
 		fileName = filepath.Base(m)
 		parts := strings.Split(fileName, constants.SuffixSeparator)
-		subnet = parts[0]
+		chain = parts[0]
 		suffix = parts[1]
-		newDir := filepath.Join(baseDir, constants.ChainsDir, subnet)
+		newDir := filepath.Join(baseDir, constants.ChainsDir, chain)
 		// instead of checking if it already exists, just let's try to create the dir
 		// if it already exists this will not return an error
 		if err := os.MkdirAll(newDir, constants.DefaultPerms755); err != nil {
