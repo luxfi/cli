@@ -96,7 +96,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	chainID := sc.Networks[network.String()].ChainID
+	chainID := sc.Networks[network.String()].SubnetID
 	if chainID == ids.Empty {
 		return errNoChainID
 	}

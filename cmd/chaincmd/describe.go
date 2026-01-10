@@ -52,7 +52,7 @@ func describeChain(cmd *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("\nDeployments:")
 		for network, data := range sc.Networks {
 			ux.Logger.PrintToUser("  %s:", network)
-			ux.Logger.PrintToUser("    Chain ID: %s", data.ChainID)
+			ux.Logger.PrintToUser("    Subnet ID: %s", data.SubnetID)
 			ux.Logger.PrintToUser("    Blockchain ID: %s", data.BlockchainID)
 		}
 	}

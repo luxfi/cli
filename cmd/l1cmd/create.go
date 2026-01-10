@@ -172,7 +172,7 @@ func createL1(_ *cobra.Command, args []string) error {
 		Name:                l1Name,
 		VM:                  models.EVM,
 		VMVersion:           constants.LatestEVMVersion,
-		EVMChainID:          fmt.Sprintf("%d", chainID),
+		ChainID:             fmt.Sprintf("%d", chainID),
 		Sovereign:           true,
 		ValidatorManagement: validatorManagement,
 		TokenInfo: models.TokenInfo{
