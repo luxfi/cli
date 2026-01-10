@@ -288,13 +288,13 @@ func TestUpdateToCustomBin(t *testing.T) {
 	assert := require.New(t)
 	testDir := t.TempDir()
 
-	blockchainName := "testSubnet"
+	blockchainName := "testChain"
 	sc := models.Sidecar{
 		Name:       blockchainName,
 		VM:         models.EVM,
 		VMVersion:  "v3.0.0",
 		RPCVersion: 20,
-		Subnet:     blockchainName,
+		Chain:      blockchainName,
 	}
 	networkToUpgrade := futureDeployment
 
