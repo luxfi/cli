@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package elasticsubnet
+package elasticchain
 
 import (
 	"errors"
@@ -14,34 +14,34 @@ import (
 
 // GetLocalElasticChainsFromFile returns the list of local elastic chains.
 func GetLocalElasticChainsFromFile(app *application.Lux) ([]string, error) {
-	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
+	allChainDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		return nil, err
 	}
 
-	elasticSubnets := []string{}
+	elasticChains := []string{}
 
-	for _, subnetDir := range allSubnetDirs {
-		if !subnetDir.IsDir() {
+	for _, chainDir := range allChainDirs {
+		if !chainDir.IsDir() {
 			continue
 		}
 		// read sidecar file
-		sc, err := app.LoadSidecar(subnetDir.Name())
+		sc, err := app.LoadSidecar(chainDir.Name())
 		if errors.Is(err, os.ErrNotExist) {
 			// don't fail on missing sidecar file, just warn
-			ux.Logger.PrintToUser("warning: inconsistent subnet directory. No sidecar file found for subnet %s", subnetDir.Name())
+			ux.Logger.PrintToUser("warning: inconsistent chain directory. No sidecar file found for chain %s", chainDir.Name())
 			continue
 		}
 		if err != nil {
 			return nil, err
 		}
 
-		// check if sidecar contains local elastic subnets info in Elastic Subnets map
-		// if so, add to list of elastic subnets
+		// check if sidecar contains local elastic chains info in Elastic Chains map
+		// if so, add to list of elastic chains
 		if _, ok := sc.ElasticChain[models.Local.String()]; ok {
-			elasticSubnets = append(elasticSubnets, sc.Name)
+			elasticChains = append(elasticChains, sc.Name)
 		}
 	}
 
-	return elasticSubnets, nil
+	return elasticChains, nil
 }

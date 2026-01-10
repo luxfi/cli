@@ -20,24 +20,24 @@ import (
 )
 
 /* #nosec G204 */
-func CreateEVMConfig(subnetName string, genesisPath string) (string, string) {
+func CreateEVMConfig(chainName string, genesisPath string) (string, string) {
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// let's use a EVM version which has a guaranteed compatible lux
-	CreateEVMConfigWithVersion(subnetName, genesisPath, mapping[utils.LatestEVM2LuxKey])
+	CreateEVMConfigWithVersion(chainName, genesisPath, mapping[utils.LatestEVM2LuxKey])
 	return mapping[utils.LatestEVM2LuxKey], mapping[utils.LatestLux2EVMKey]
 }
 
 /* #nosec G204 */
-func CreateEVMConfigWithVersion(subnetName string, genesisPath string, version string) {
+func CreateEVMConfigWithVersion(chainName string, genesisPath string, version string) {
 	// Check config does not already exist
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 
 	// Create config
-	cmdArgs := []string{SubnetCmd, "create", "--genesis", genesisPath, "--evm", subnetName, "--" + constants.SkipUpdateFlag}
+	cmdArgs := []string{ChainCmd, "create", "--genesis", genesisPath, "--evm", chainName, "--" + constants.SkipUpdateFlag}
 	if version == "" {
 		cmdArgs = append(cmdArgs, "--latest")
 	} else {
@@ -53,14 +53,14 @@ func CreateEVMConfigWithVersion(subnetName string, genesisPath string, version s
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	// Config should now exist
-	exists, err = utils.SubnetConfigExists(subnetName)
+	exists, err = utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
-func ConfigureChainConfig(subnetName string, genesisPath string) {
+func ConfigureChainConfig(chainName string, genesisPath string) {
 	// run configure
-	cmdArgs := []string{SubnetCmd, "configure", subnetName, "--chain-config", genesisPath, "--" + constants.SkipUpdateFlag}
+	cmdArgs := []string{ChainCmd, "configure", chainName, "--chain-config", genesisPath, "--" + constants.SkipUpdateFlag}
 	cmd := exec.Command(CLIBinary, cmdArgs...) //nolint:gosec // G204: Running our own CLI binary in tests
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -70,14 +70,14 @@ func ConfigureChainConfig(subnetName string, genesisPath string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	// Config should now exist
-	exists, err := utils.ChainConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
-func ConfigurePerNodeChainConfig(subnetName string, perNodeChainConfigPath string) {
+func ConfigurePerNodeChainConfig(chainName string, perNodeChainConfigPath string) {
 	// run configure
-	cmdArgs := []string{SubnetCmd, "configure", subnetName, "--per-node-chain-config", perNodeChainConfigPath, "--" + constants.SkipUpdateFlag}
+	cmdArgs := []string{ChainCmd, "configure", chainName, "--per-node-chain-config", perNodeChainConfigPath, "--" + constants.SkipUpdateFlag}
 	cmd := exec.Command(CLIBinary, cmdArgs...) //nolint:gosec // G204: Running our own CLI binary in tests
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -87,33 +87,33 @@ func ConfigurePerNodeChainConfig(subnetName string, perNodeChainConfigPath strin
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	// Config should now exist
-	exists, err := utils.PerNodeChainConfigExists(subnetName)
+	exists, err := utils.PerNodeChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
 /* #nosec G204 */
-func CreateCustomVMConfig(subnetName string, genesisPath string, vmPath string) {
+func CreateCustomVMConfig(chainName string, genesisPath string, vmPath string) {
 	// Check config does not already exist
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 	// Check vm binary does not already exist
-	exists, err = utils.SubnetCustomVMExists(subnetName)
+	exists, err = utils.ChainCustomVMExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 
 	// Create config
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"create",
 		"--genesis",
 		genesisPath,
 		"--vm",
 		vmPath,
 		"--custom",
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -131,22 +131,22 @@ func CreateCustomVMConfig(subnetName string, genesisPath string, vmPath string) 
 	}
 
 	// Config should now exist
-	exists, err = utils.SubnetConfigExists(subnetName)
+	exists, err = utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
-	exists, err = utils.SubnetCustomVMExists(subnetName)
+	exists, err = utils.ChainCustomVMExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
-func DeleteSubnetConfig(subnetName string) {
+func DeleteChainConfig(chainName string) {
 	// Config should exist
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	// Now delete config
-	cmd := exec.Command(CLIBinary, SubnetCmd, "delete", subnetName, "--"+constants.SkipUpdateFlag) //nolint:gosec // G204: Running our own CLI binary in tests
+	cmd := exec.Command(CLIBinary, ChainCmd, "delete", chainName, "--"+constants.SkipUpdateFlag) //nolint:gosec // G204: Running our own CLI binary in tests
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println(cmd.String())
@@ -156,64 +156,64 @@ func DeleteSubnetConfig(subnetName string) {
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	// Config should no longer exist
-	exists, err = utils.SubnetConfigExists(subnetName)
+	exists, err = utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 }
 
-func DeleteElasticChainConfig(subnetName string) {
+func DeleteElasticChainConfig(chainName string) {
 	var err error
-	elasticSubnetConfig := filepath.Join(utils.GetBaseDir(), constants.ChainsDir, subnetName, constants.ElasticChainConfigFileName)
-	if _, err = os.Stat(elasticSubnetConfig); errors.Is(err, os.ErrNotExist) {
+	elasticChainConfig := filepath.Join(utils.GetBaseDir(), constants.ChainsDir, chainName, constants.ElasticChainConfigFileName)
+	if _, err = os.Stat(elasticChainConfig); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
 		err = nil
 	} else {
-		err = os.Remove(elasticSubnetConfig)
+		err = os.Remove(elasticChainConfig)
 	}
 	gomega.Expect(err).Should(gomega.BeNil())
 }
 
 // Returns the deploy output
 /* #nosec G204 */
-func DeploySubnetLocally(subnetName string) string {
-	return DeploySubnetLocallyWithArgs(subnetName, "", "")
+func DeployChainLocally(chainName string) string {
+	return DeployChainLocallyWithArgs(chainName, "", "")
 }
 
 /* #nosec G204 */
-func DeploySubnetLocallyExpectError(subnetName string) {
+func DeployChainLocallyExpectError(chainName string) {
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	DeploySubnetLocallyWithArgsExpectError(subnetName, mapping[utils.OnlyLuxKey], "")
+	DeployChainLocallyWithArgsExpectError(chainName, mapping[utils.OnlyLuxKey], "")
 }
 
 // Returns the deploy output
 /* #nosec G204 */
-func DeploySubnetLocallyWithViperConf(subnetName string, confPath string) string {
+func DeployChainLocallyWithViperConf(chainName string, confPath string) string {
 	mapper := utils.NewVersionMapper()
 	mapping, err := utils.GetVersionMapping(mapper)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	return DeploySubnetLocallyWithArgs(subnetName, mapping[utils.OnlyLuxKey], confPath)
+	return DeployChainLocallyWithArgs(chainName, mapping[utils.OnlyLuxKey], confPath)
 }
 
 // Returns the deploy output
 /* #nosec G204 */
-func DeploySubnetLocallyWithVersion(subnetName string, version string) string {
-	return DeploySubnetLocallyWithArgs(subnetName, version, "")
+func DeployChainLocallyWithVersion(chainName string, version string) string {
+	return DeployChainLocallyWithArgs(chainName, version, "")
 }
 
 // Returns the deploy output
 /* #nosec G204 */
-func DeploySubnetLocallyWithArgs(subnetName string, version string, confPath string) string {
+func DeployChainLocallyWithArgs(chainName string, version string, confPath string) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
-	// Deploy subnet locally
-	cmdArgs := []string{SubnetCmd, "deploy", "--local", subnetName, "--" + constants.SkipUpdateFlag}
+	// Deploy chain locally
+	cmdArgs := []string{ChainCmd, "deploy", "--local", chainName, "--" + constants.SkipUpdateFlag}
 	if version != "" {
 		cmdArgs = append(cmdArgs, "--node-version", version)
 	}
@@ -239,14 +239,14 @@ func DeploySubnetLocallyWithArgs(subnetName string, version string, confPath str
 	return string(output)
 }
 
-func DeploySubnetLocallyWithArgsAndOutput(subnetName string, version string, confPath string) ([]byte, error) {
+func DeployChainLocallyWithArgsAndOutput(chainName string, version string, confPath string) ([]byte, error) {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
-	// Deploy subnet locally
-	cmdArgs := []string{SubnetCmd, "deploy", "--local", subnetName, "--" + constants.SkipUpdateFlag}
+	// Deploy chain locally
+	cmdArgs := []string{ChainCmd, "deploy", "--local", chainName, "--" + constants.SkipUpdateFlag}
 	if version != "" {
 		cmdArgs = append(cmdArgs, "--node-version", version)
 	}
@@ -257,20 +257,20 @@ func DeploySubnetLocallyWithArgsAndOutput(subnetName string, version string, con
 	return cmd.CombinedOutput()
 }
 
-func DeploySubnetLocallyWithArgsExpectError(subnetName string, version string, confPath string) {
-	_, err := DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
+func DeployChainLocallyWithArgsExpectError(chainName string, version string, confPath string) {
+	_, err := DeployChainLocallyWithArgsAndOutput(chainName, version, confPath)
 	gomega.Expect(err).Should(gomega.HaveOccurred())
 }
 
 // simulates testnet deploy execution path on a local network
 /* #nosec G204 */
 func SimulateTestnetDeploy(
-	subnetName string,
+	chainName string,
 	key string,
 	controlKeys string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -278,10 +278,10 @@ func SimulateTestnetDeploy(
 	err = os.Setenv(constants.SimulatePublicNetwork, "true")
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	// Deploy subnet locally
+	// Deploy chain locally
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"deploy",
 		"--testnet",
 		"--threshold",
@@ -290,7 +290,7 @@ func SimulateTestnetDeploy(
 		key,
 		"--control-keys",
 		controlKeys,
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -311,10 +311,10 @@ func SimulateTestnetDeploy(
 // simulates mainnet deploy execution path on a local network
 /* #nosec G204 */
 func SimulateMainnetDeploy(
-	subnetName string,
+	chainName string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -322,16 +322,16 @@ func SimulateMainnetDeploy(
 	err = os.Setenv(constants.SimulatePublicNetwork, "true")
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	// Deploy subnet locally
+	// Deploy chain locally
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"deploy",
 		"--mainnet",
 		"--threshold",
 		"1",
 		"--same-control-key",
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	stdoutPipe, err := cmd.StdoutPipe()
@@ -369,7 +369,7 @@ func SimulateMainnetDeploy(
 // simulates testnet add validator execution path on a local network
 /* #nosec G204 */
 func SimulateTestnetAddValidator(
-	subnetName string,
+	chainName string,
 	key string,
 	nodeID string,
 	start string,
@@ -377,7 +377,7 @@ func SimulateTestnetAddValidator(
 	weight string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -387,7 +387,7 @@ func SimulateTestnetAddValidator(
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"addValidator",
 		"--testnet",
 		"--key",
@@ -400,7 +400,7 @@ func SimulateTestnetAddValidator(
 		period,
 		"--weight",
 		weight,
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -420,12 +420,12 @@ func SimulateTestnetAddValidator(
 
 // simulates testnet add validator execution path on a local network
 func SimulateTestnetRemoveValidator(
-	subnetName string,
+	chainName string,
 	key string,
 	nodeID string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -435,14 +435,14 @@ func SimulateTestnetRemoveValidator(
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"removeValidator",
 		"--testnet",
 		"--key",
 		key,
 		"--nodeID",
 		nodeID,
-		subnetName,
+		chainName,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -459,12 +459,12 @@ func SimulateTestnetRemoveValidator(
 	return string(output)
 }
 
-func SimulateTestnetTransformSubnet(
-	subnetName string,
+func SimulateTestnetTransformChain(
+	chainName string,
 	key string,
 ) (string, error) {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -473,7 +473,7 @@ func SimulateTestnetTransformSubnet(
 	gomega.Expect(err).Should(gomega.BeNil())
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		ElasticTransformCmd,
 		"--testnet",
 		"--key",
@@ -486,7 +486,7 @@ func SimulateTestnetTransformSubnet(
 		"0",
 		"--default",
 		"--force",
-		subnetName,
+		chainName,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -508,14 +508,14 @@ func SimulateTestnetTransformSubnet(
 // simulates mainnet add validator execution path on a local network
 /* #nosec G204 */
 func SimulateMainnetAddValidator(
-	subnetName string,
+	chainName string,
 	nodeID string,
 	start string,
 	period string,
 	weight string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -525,7 +525,7 @@ func SimulateMainnetAddValidator(
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"addValidator",
 		"--mainnet",
 		"--nodeID",
@@ -536,7 +536,7 @@ func SimulateMainnetAddValidator(
 		period,
 		"--weight",
 		weight,
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	stdoutPipe, err := cmd.StdoutPipe()
@@ -574,13 +574,13 @@ func SimulateMainnetAddValidator(
 // simulates testnet join execution path on a local network
 /* #nosec G204 */
 func SimulateTestnetJoin(
-	subnetName string,
+	chainName string,
 	nodeConfig string,
 	pluginDir string,
 	nodeID string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -590,7 +590,7 @@ func SimulateTestnetJoin(
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"join",
 		"--testnet",
 		"--node-config",
@@ -602,7 +602,7 @@ func SimulateTestnetJoin(
 		"--nodeID",
 		nodeID,
 		"--force-write",
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -622,13 +622,13 @@ func SimulateTestnetJoin(
 // simulates mainnet join execution path on a local network
 /* #nosec G204 */
 func SimulateMainnetJoin(
-	subnetName string,
+	chainName string,
 	nodeConfig string,
 	pluginDir string,
 	nodeID string,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -638,7 +638,7 @@ func SimulateMainnetJoin(
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"join",
 		"--mainnet",
 		"--node-config",
@@ -650,7 +650,7 @@ func SimulateMainnetJoin(
 		"--nodeID",
 		nodeID,
 		"--force-write",
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -669,26 +669,26 @@ func SimulateMainnetJoin(
 }
 
 /* #nosec G204 */
-func ImportSubnetConfig(repoAlias string, subnetName string) {
+func ImportChainConfig(repoAlias string, chainName string) {
 	// Check config does not already exist
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 	// Check vm binary does not already exist
-	exists, err = utils.SubnetCustomVMExists(subnetName)
+	exists, err = utils.ChainCustomVMExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 
 	// Create config
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"import",
 		"file",
 		"--repo",
 		repoAlias,
-		"--subnet",
-		subnetName,
+		"--chain",
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -706,37 +706,37 @@ func ImportSubnetConfig(repoAlias string, subnetName string) {
 	}
 
 	// Config should now exist
-	exists, err = utils.LPMConfigExists(subnetName)
+	exists, err = utils.LPMConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
-	exists, err = utils.SubnetLPMVMExists(subnetName)
+	exists, err = utils.ChainLPMVMExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
 /* #nosec G204 */
-func ImportSubnetConfigFromURL(repoURL string, branch string, subnetName string) {
+func ImportChainConfigFromURL(repoURL string, branch string, chainName string) {
 	// Check config does not already exist
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 	// Check vm binary does not already exist
-	exists, err = utils.SubnetCustomVMExists(subnetName)
+	exists, err = utils.ChainCustomVMExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 
 	// Create config
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"import",
 		"file",
 		"--repo",
 		repoURL,
 		"--branch",
 		branch,
-		"--subnet",
-		subnetName,
+		"--chain",
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -754,22 +754,22 @@ func ImportSubnetConfigFromURL(repoURL string, branch string, subnetName string)
 	}
 
 	// Config should now exist
-	exists, err = utils.LPMConfigExists(subnetName)
+	exists, err = utils.LPMConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
-	exists, err = utils.SubnetLPMVMExists(subnetName)
+	exists, err = utils.ChainLPMVMExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 }
 
 /* #nosec G204 */
-func DescribeSubnet(subnetName string) (string, error) {
+func DescribeChain(chainName string) (string, error) {
 	// Create config
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"describe",
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 
@@ -783,24 +783,24 @@ func DescribeSubnet(subnetName string) (string, error) {
 }
 
 /* #nosec G204 */
-func SimulateGetSubnetStatsTestnet(subnetName, subnetID string) string {
+func SimulateGetChainStatsTestnet(chainName, chainID string) string {
 	// Check config does already exist:
-	// We want to run stats on an existing subnet
-	exists, err := utils.SubnetConfigExists(subnetName)
+	// We want to run stats on an existing chain
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
-	// add the subnet ID to the `testnet` section so that the `stats` command
+	// add the chain ID to the `testnet` section so that the `stats` command
 	// can find it (as this is a simulation with a `local` network,
 	// it got written in to the `local` network section)
-	err = utils.AddSubnetIDToSidecar(subnetName, models.Testnet, subnetID)
+	err = utils.AddChainIDToSidecar(chainName, models.Testnet, chainID)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// run stats
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"stats",
-		subnetName,
+		chainName,
 		"--testnet",
 		"--"+constants.SkipUpdateFlag,
 	)
@@ -819,15 +819,15 @@ func SimulateGetSubnetStatsTestnet(subnetName, subnetID string) string {
 	return string(output)
 }
 
-func TransformElasticChainLocally(subnetName string) (string, error) {
+func TransformElasticChainLocally(chainName string) (string, error) {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		ElasticTransformCmd,
 		"--local",
 		"--tokenName",
@@ -836,7 +836,7 @@ func TransformElasticChainLocally(subnetName string) (string, error) {
 		"BRRR",
 		"--default",
 		"--force",
-		subnetName,
+		chainName,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -848,15 +848,15 @@ func TransformElasticChainLocally(subnetName string) (string, error) {
 	return string(output), err
 }
 
-func TransformElasticChainLocallyandTransformValidators(subnetName string, stakeAmount string) (string, error) {
+func TransformElasticChainLocallyandTransformValidators(chainName string, stakeAmount string) (string, error) {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		ElasticTransformCmd,
 		"--local",
 		"--tokenName",
@@ -868,7 +868,7 @@ func TransformElasticChainLocallyandTransformValidators(subnetName string, stake
 		"--transform-validators",
 		"--stake-amount",
 		stakeAmount,
-		subnetName,
+		chainName,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -880,20 +880,20 @@ func TransformElasticChainLocallyandTransformValidators(subnetName string, stake
 	return string(output), err
 }
 
-func RemoveValidator(subnetName string, nodeID string) (string, error) {
+func RemoveValidator(chainName string, nodeID string) (string, error) {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		RemoveValidatorCmd,
 		"--local",
 		"--nodeID",
 		nodeID,
-		subnetName,
+		chainName,
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -905,16 +905,16 @@ func RemoveValidator(subnetName string, nodeID string) (string, error) {
 	return string(output), err
 }
 
-func AddPermissionlessValidator(subnetName string, nodeID string, stakeAmount string, stakingPeriod string) (string, error) {
+func AddPermissionlessValidator(chainName string, nodeID string, stakeAmount string, stakingPeriod string) (string, error) {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	startTimeStr := time.Now().Add(constants.StakingStartLeadTime).UTC().Format(constants.TimeParseLayout)
 	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		JoinCmd,
 		"--local",
 		"--elastic",
@@ -926,7 +926,7 @@ func AddPermissionlessValidator(subnetName string, nodeID string, stakeAmount st
 		startTimeStr,
 		"--staking-period",
 		stakingPeriod,
-		subnetName,
+		chainName,
 	)
 
 	output, err := cmd.CombinedOutput()
@@ -940,13 +940,13 @@ func AddPermissionlessValidator(subnetName string, nodeID string, stakeAmount st
 }
 
 /* #nosec G204 */
-func ListValidators(subnetName string, network string) (string, error) {
+func ListValidators(chainName string, network string) (string, error) {
 	// Create config
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		"validators",
-		subnetName,
+		chainName,
 		"--"+network,
 		"--"+constants.SkipUpdateFlag,
 	)
@@ -955,157 +955,157 @@ func ListValidators(subnetName string, network string) (string, error) {
 	return string(out), err
 }
 
-// CreateEVMConfigNonSOV creates a non-sovereign subnet EVM config
+// CreateEVMConfigNonSOV creates a non-sovereign chain EVM config
 /* #nosec G204 */
-func CreateEVMConfigNonSOV(subnetName string, genesisPath string, _ bool) (string, string) {
+func CreateEVMConfigNonSOV(chainName string, genesisPath string, _ bool) (string, string) {
 	// For now, just call the regular CreateEVMConfig
 	// The bootstrapped parameter is ignored in the base implementation
-	return CreateEVMConfig(subnetName, genesisPath)
+	return CreateEVMConfig(chainName, genesisPath)
 }
 
-// CreateEVMConfigSOV creates a sovereign subnet EVM config
+// CreateEVMConfigSOV creates a sovereign chain EVM config
 /* #nosec G204 */
-func CreateEVMConfigSOV(subnetName string, genesisPath string) (string, string) {
+func CreateEVMConfigSOV(chainName string, genesisPath string) (string, string) {
 	// For now, just call the regular CreateEVMConfig
 	// SOV-specific functionality would be added here
-	return CreateEVMConfig(subnetName, genesisPath)
+	return CreateEVMConfig(chainName, genesisPath)
 }
 
 // CreateCustomVMConfigNonSOV creates a non-sovereign custom VM config
 /* #nosec G204 */
-func CreateCustomVMConfigNonSOV(subnetName string, genesisPath string, vmPath string) {
+func CreateCustomVMConfigNonSOV(chainName string, genesisPath string, vmPath string) {
 	// For now, just call the regular CreateCustomVMConfig
-	CreateCustomVMConfig(subnetName, genesisPath, vmPath)
+	CreateCustomVMConfig(chainName, genesisPath, vmPath)
 }
 
 // CreateCustomVMConfigSOV creates a sovereign custom VM config
 /* #nosec G204 */
-func CreateCustomVMConfigSOV(subnetName string, genesisPath string, vmPath string) {
+func CreateCustomVMConfigSOV(chainName string, genesisPath string, vmPath string) {
 	// For now, just call the regular CreateCustomVMConfig
 	// SOV-specific functionality would be added here
-	CreateCustomVMConfig(subnetName, genesisPath, vmPath)
+	CreateCustomVMConfig(chainName, genesisPath, vmPath)
 }
 
-// DeploySubnetLocallyNonSOV deploys a non-sovereign subnet locally
+// DeployChainLocallyNonSOV deploys a non-sovereign chain locally
 /* #nosec G204 */
-func DeploySubnetLocallyNonSOV(subnetName string) string {
-	// For now, just call the regular DeploySubnetLocally
-	return DeploySubnetLocally(subnetName)
+func DeployChainLocallyNonSOV(chainName string) string {
+	// For now, just call the regular DeployChainLocally
+	return DeployChainLocally(chainName)
 }
 
-// DeploySubnetLocallyWithVersionNonSOV deploys a non-sovereign subnet locally with specific version
+// DeployChainLocallyWithVersionNonSOV deploys a non-sovereign chain locally with specific version
 /* #nosec G204 */
-func DeploySubnetLocallyWithVersionNonSOV(subnetName string, version string) string {
+func DeployChainLocallyWithVersionNonSOV(chainName string, version string) string {
 	// Call the existing function with version
-	return DeploySubnetLocallyWithVersion(subnetName, version)
+	return DeployChainLocallyWithVersion(chainName, version)
 }
 
-// DeploySubnetLocallyWithViperConfNonSOV deploys a non-sovereign subnet locally with viper config
+// DeployChainLocallyWithViperConfNonSOV deploys a non-sovereign chain locally with viper config
 /* #nosec G204 */
-func DeploySubnetLocallyWithViperConfNonSOV(subnetName string, confPath string) string {
+func DeployChainLocallyWithViperConfNonSOV(chainName string, confPath string) string {
 	// Call the existing function with config path
-	return DeploySubnetLocallyWithViperConf(subnetName, confPath)
+	return DeployChainLocallyWithViperConf(chainName, confPath)
 }
 
-// SimulateTestnetDeploySOV simulates sovereign subnet deployment on testnet
+// SimulateTestnetDeploySOV simulates sovereign chain deployment on testnet
 /* #nosec G204 */
-func SimulateTestnetDeploySOV(subnetName string, key string, controlKeys string) string {
+func SimulateTestnetDeploySOV(chainName string, key string, controlKeys string) string {
 	// For now, just call the regular SimulateTestnetDeploy
 	// SOV-specific functionality would be added here
-	return SimulateTestnetDeploy(subnetName, key, controlKeys)
+	return SimulateTestnetDeploy(chainName, key, controlKeys)
 }
 
-// DeploySubnetLocallySOV deploys a sovereign subnet locally
+// DeployChainLocallySOV deploys a sovereign chain locally
 /* #nosec G204 */
-func DeploySubnetLocallySOV(subnetName string) string {
-	// For now, just call the regular DeploySubnetLocally
+func DeployChainLocallySOV(chainName string) string {
+	// For now, just call the regular DeployChainLocally
 	// SOV-specific functionality would be added here
-	return DeploySubnetLocally(subnetName)
+	return DeployChainLocally(chainName)
 }
 
-// DeploySubnetLocallyWithViperConfSOV deploys a sovereign subnet locally with viper config
+// DeployChainLocallyWithViperConfSOV deploys a sovereign chain locally with viper config
 /* #nosec G204 */
-func DeploySubnetLocallyWithViperConfSOV(subnetName string, confPath string) string {
+func DeployChainLocallyWithViperConfSOV(chainName string, confPath string) string {
 	// Call the existing function with config path
 	// SOV-specific functionality would be added here
-	return DeploySubnetLocallyWithViperConf(subnetName, confPath)
+	return DeployChainLocallyWithViperConf(chainName, confPath)
 }
 
-// DeploySubnetLocallyWithVersionSOV deploys a sovereign subnet locally with specific version
+// DeployChainLocallyWithVersionSOV deploys a sovereign chain locally with specific version
 /* #nosec G204 */
-func DeploySubnetLocallyWithVersionSOV(subnetName string, version string) string {
+func DeployChainLocallyWithVersionSOV(chainName string, version string) string {
 	// Call the existing function with version
 	// SOV-specific functionality would be added here
-	return DeploySubnetLocallyWithVersion(subnetName, version)
+	return DeployChainLocallyWithVersion(chainName, version)
 }
 
-// DeploySubnetLocallyWithArgsAndOutputSOV deploys a sovereign subnet locally and returns output
+// DeployChainLocallyWithArgsAndOutputSOV deploys a sovereign chain locally and returns output
 /* #nosec G204 */
-func DeploySubnetLocallyWithArgsAndOutputSOV(subnetName string, version string, confPath string) ([]byte, error) {
+func DeployChainLocallyWithArgsAndOutputSOV(chainName string, version string, confPath string) ([]byte, error) {
 	// Call the existing function
 	// SOV-specific functionality would be added here
-	return DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
+	return DeployChainLocallyWithArgsAndOutput(chainName, version, confPath)
 }
 
-// CreateEVMConfigWithVersionSOV creates a sovereign subnet EVM config with specific version
+// CreateEVMConfigWithVersionSOV creates a sovereign chain EVM config with specific version
 /* #nosec G204 */
-func CreateEVMConfigWithVersionSOV(subnetName string, genesisPath string, version string) {
+func CreateEVMConfigWithVersionSOV(chainName string, genesisPath string, version string) {
 	// Call the existing function with version
 	// SOV-specific functionality would be added here
-	CreateEVMConfigWithVersion(subnetName, genesisPath, version)
+	CreateEVMConfigWithVersion(chainName, genesisPath, version)
 }
 
-// DeploySubnetLocallyExpectErrorSOV deploys a sovereign subnet locally expecting an error
+// DeployChainLocallyExpectErrorSOV deploys a sovereign chain locally expecting an error
 /* #nosec G204 */
-func DeploySubnetLocallyExpectErrorSOV(subnetName string) {
+func DeployChainLocallyExpectErrorSOV(chainName string) {
 	// Call the existing function
 	// SOV-specific functionality would be added here
-	DeploySubnetLocallyExpectError(subnetName)
+	DeployChainLocallyExpectError(chainName)
 }
 
-// DeploySubnetLocallyWithArgsAndOutputNonSOV deploys a non-sovereign subnet locally and returns output
+// DeployChainLocallyWithArgsAndOutputNonSOV deploys a non-sovereign chain locally and returns output
 /* #nosec G204 */
-func DeploySubnetLocallyWithArgsAndOutputNonSOV(subnetName string, version string, confPath string) ([]byte, error) {
+func DeployChainLocallyWithArgsAndOutputNonSOV(chainName string, version string, confPath string) ([]byte, error) {
 	// Call the existing function
-	return DeploySubnetLocallyWithArgsAndOutput(subnetName, version, confPath)
+	return DeployChainLocallyWithArgsAndOutput(chainName, version, confPath)
 }
 
-// CreateEVMConfigWithVersionNonSOV creates a non-sovereign subnet EVM config with specific version
+// CreateEVMConfigWithVersionNonSOV creates a non-sovereign chain EVM config with specific version
 /* #nosec G204 */
-func CreateEVMConfigWithVersionNonSOV(subnetName string, genesisPath string, version string, _ bool) {
+func CreateEVMConfigWithVersionNonSOV(chainName string, genesisPath string, version string, _ bool) {
 	// Call the existing function with version
 	// The bootstrapped parameter is ignored in the base implementation for now
-	CreateEVMConfigWithVersion(subnetName, genesisPath, version)
+	CreateEVMConfigWithVersion(chainName, genesisPath, version)
 }
 
-// DeploySubnetLocallyExpectErrorNonSOV deploys a non-sovereign subnet locally expecting an error
+// DeployChainLocallyExpectErrorNonSOV deploys a non-sovereign chain locally expecting an error
 /* #nosec G204 */
-func DeploySubnetLocallyExpectErrorNonSOV(subnetName string) {
+func DeployChainLocallyExpectErrorNonSOV(chainName string) {
 	// Call the existing function
-	DeploySubnetLocallyExpectError(subnetName)
+	DeployChainLocallyExpectError(chainName)
 }
 
-// SimulateTestnetDeployNonSOV simulates non-sovereign subnet deployment on testnet
+// SimulateTestnetDeployNonSOV simulates non-sovereign chain deployment on testnet
 /* #nosec G204 */
-func SimulateTestnetDeployNonSOV(subnetName string, key string, controlKeys string) string {
+func SimulateTestnetDeployNonSOV(chainName string, key string, controlKeys string) string {
 	// For now, just call the regular SimulateTestnetDeploy
-	return SimulateTestnetDeploy(subnetName, key, controlKeys)
+	return SimulateTestnetDeploy(chainName, key, controlKeys)
 }
 
-// SimulateMainnetDeployNonSOV simulates non-sovereign subnet deployment on mainnet
+// SimulateMainnetDeployNonSOV simulates non-sovereign chain deployment on mainnet
 // Updated to accept chainID and skipPrompt parameters to match usage
 /* #nosec G204 */
-func SimulateMainnetDeployNonSOV(subnetName string, chainID int, skipPrompt bool) string {
+func SimulateMainnetDeployNonSOV(chainName string, chainID int, skipPrompt bool) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	// Build command args
 	cmdArgs := []string{
-		SubnetCmd,
+		ChainCmd,
 		"deploy",
-		subnetName,
+		chainName,
 		"--mainnet",
 		"--" + constants.SkipUpdateFlag,
 	}

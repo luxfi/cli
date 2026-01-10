@@ -10,9 +10,9 @@ import (
 	"github.com/luxfi/ids"
 )
 
-// ElasticChainConfig contains configuration for elastic subnet transformations.
+// ElasticChainConfig contains configuration for elastic chain transformations.
 type ElasticChainConfig struct {
-	SubnetID                 ids.ID
+	ChainID                  ids.ID
 	AssetID                  ids.ID
 	InitialSupply            uint64
 	MaxSupply                uint64

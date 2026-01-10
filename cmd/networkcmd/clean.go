@@ -151,13 +151,13 @@ func clean(*cobra.Command, []string) error {
 
 func removeLocalDeployInfoFromSidecars() error {
 	// Remove all local deployment info from sidecar files
-	deployedSubnets, err := chain.GetLocallyDeployedSubnetsFromFile(app)
+	deployedChains, err := chain.GetLocallyDeployedChainsFromFile(app)
 	if err != nil {
 		return err
 	}
 
-	for _, subnet := range deployedSubnets {
-		sc, err := app.LoadSidecar(subnet)
+	for _, chain := range deployedChains {
+		sc, err := app.LoadSidecar(chain)
 		if err != nil {
 			return err
 		}

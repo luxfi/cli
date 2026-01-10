@@ -5,9 +5,8 @@ package main
 
 import (
 	"fmt"
+
 	"golang.org/x/crypto/pbkdf2"
-	"golang.org/x/crypto/sha3"
-	"reflect"
 	//"golang.org/x/crypto/hkdf" // check if this exists
 )
 

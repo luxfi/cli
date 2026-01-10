@@ -147,7 +147,7 @@ func CleanupLogs(nodesInfo map[string]NodeInfo, blockchainID string) {
 		blockchainLogFile := filepath.Join(nodeInfo.LogDir, blockchainID+".log")
 		_ = os.Remove(blockchainLogFile)
 
-		// Also try to clear main.log if it exists (for subnet configs)
+		// Also try to clear main.log if it exists (for chain configs)
 		mainLogFile := filepath.Join(nodeInfo.LogDir, "main.log")
 		if _, err := os.Stat(mainLogFile); err == nil {
 			// Truncate the file instead of deleting it to avoid issues with open file handles

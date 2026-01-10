@@ -33,11 +33,11 @@ import (
 	ledger "github.com/luxfi/ledger"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
+	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/wallet/primary"
-	"github.com/luxfi/vm/vms/components/lux"
-	"github.com/luxfi/vm/vms/platformvm"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 const (
@@ -67,8 +67,8 @@ func GetLPMDir() string {
 	return path.Join(usr.HomeDir, LPMDir)
 }
 
-func ChainConfigExists(subnetName string) (bool, error) {
-	cfgPath := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.ChainConfigFile)
+func ChainConfigFileExists(chainName string) (bool, error) {
+	cfgPath := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.ChainConfigFile)
 	cfgExists := true
 	if _, err := os.Stat(cfgPath); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -80,8 +80,8 @@ func ChainConfigExists(subnetName string) (bool, error) {
 	return cfgExists, nil
 }
 
-func PerNodeChainConfigExists(subnetName string) (bool, error) {
-	cfgPath := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.PerNodeChainConfigFileName)
+func PerNodeChainConfigExists(chainName string) (bool, error) {
+	cfgPath := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.PerNodeChainConfigFileName)
 	cfgExists := true
 	if _, err := os.Stat(cfgPath); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -93,8 +93,8 @@ func PerNodeChainConfigExists(subnetName string) (bool, error) {
 	return cfgExists, nil
 }
 
-func genesisExists(subnetName string) (bool, error) {
-	genesis := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.GenesisFileName)
+func genesisExists(chainName string) (bool, error) {
+	genesis := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.GenesisFileName)
 	genesisExists := true
 	if _, err := os.Stat(genesis); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -106,8 +106,8 @@ func genesisExists(subnetName string) (bool, error) {
 	return genesisExists, nil
 }
 
-func sidecarExists(subnetName string) (bool, error) {
-	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
+func sidecarExists(chainName string) (bool, error) {
+	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.SidecarFileName)
 	sidecarExists := true
 	if _, err := os.Stat(sidecar); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -119,36 +119,36 @@ func sidecarExists(subnetName string) (bool, error) {
 	return sidecarExists, nil
 }
 
-func ElasticChainConfigExists(subnetName string) (bool, error) {
-	elasticSubnetConfig := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.ElasticChainConfigFileName)
-	elasticSubnetConfigExists := true
-	if _, err := os.Stat(elasticSubnetConfig); errors.Is(err, os.ErrNotExist) {
+func ElasticChainConfigExists(chainName string) (bool, error) {
+	elasticChainConfig := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.ElasticChainConfigFileName)
+	elasticChainConfigExists := true
+	if _, err := os.Stat(elasticChainConfig); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
-		elasticSubnetConfigExists = false
+		elasticChainConfigExists = false
 	} else if err != nil {
 		// Schrodinger: file may or may not exist. See err for details.
 		return false, err
 	}
-	return elasticSubnetConfigExists, nil
+	return elasticChainConfigExists, nil
 }
 
-func PermissionlessValidatorExistsInSidecar(subnetName string, nodeID string, network string) (bool, error) {
-	sc, err := getSideCar(subnetName)
+func PermissionlessValidatorExistsInSidecar(chainName string, nodeID string, network string) (bool, error) {
+	sc, err := getSideCar(chainName)
 	if err != nil {
 		return false, err
 	}
-	elasticSubnetValidators := sc.ElasticChain[network].Validators
-	_, ok := elasticSubnetValidators[nodeID]
+	elasticChainValidators := sc.ElasticChain[network].Validators
+	_, ok := elasticChainValidators[nodeID]
 	return ok, nil
 }
 
-func SubnetConfigExists(subnetName string) (bool, error) {
-	gen, err := genesisExists(subnetName)
+func ChainConfigExists(chainName string) (bool, error) {
+	gen, err := genesisExists(chainName)
 	if err != nil {
 		return false, err
 	}
 
-	sc, err := sidecarExists(subnetName)
+	sc, err := sidecarExists(chainName)
 	if err != nil {
 		return false, err
 	}
@@ -160,16 +160,16 @@ func SubnetConfigExists(subnetName string) (bool, error) {
 	return gen && sc, nil
 }
 
-func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID string) error {
-	exists, err := sidecarExists(subnetName)
+func AddChainIDToSidecar(chainName string, network models.Network, chainID string) error {
+	exists, err := sidecarExists(chainName)
 	if err != nil {
-		return fmt.Errorf("failed to access sidecar for %s: %w", subnetName, err)
+		return fmt.Errorf("failed to access sidecar for %s: %w", chainName, err)
 	}
 	if !exists {
-		return fmt.Errorf("failed to access sidecar for %s: not found", subnetName)
+		return fmt.Errorf("failed to access sidecar for %s: not found", chainName)
 	}
 
-	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
+	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.SidecarFileName)
 
 	jsonBytes, err := os.ReadFile(sidecar) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
@@ -182,12 +182,12 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 		return err
 	}
 
-	subnetIDstr, err := ids.FromString(subnetID)
+	chainIDstr, err := ids.FromString(chainID)
 	if err != nil {
 		return err
 	}
 	sc.Networks[network.String()] = models.NetworkData{
-		SubnetID: subnetIDstr,
+		ChainID: chainIDstr,
 	}
 
 	fileBytes, err := json.Marshal(&sc)
@@ -198,12 +198,12 @@ func AddSubnetIDToSidecar(subnetName string, network models.Network, subnetID st
 	return os.WriteFile(sidecar, fileBytes, constants.DefaultPerms755)
 }
 
-func LPMConfigExists(subnetName string) (bool, error) {
-	return sidecarExists(subnetName)
+func LPMConfigExists(chainName string) (bool, error) {
+	return sidecarExists(chainName)
 }
 
-func SubnetCustomVMExists(subnetName string) (bool, error) {
-	vm := path.Join(GetBaseDir(), constants.CustomVMDir, subnetName)
+func ChainCustomVMExists(chainName string) (bool, error) {
+	vm := path.Join(GetBaseDir(), constants.CustomVMDir, chainName)
 	vmExists := true
 	if _, err := os.Stat(vm); errors.Is(err, os.ErrNotExist) {
 		// does *not* exist
@@ -215,8 +215,8 @@ func SubnetCustomVMExists(subnetName string) (bool, error) {
 	return vmExists, nil
 }
 
-func SubnetLPMVMExists(subnetName string) (bool, error) {
-	sidecarPath := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
+func ChainLPMVMExists(chainName string) (bool, error) {
+	sidecarPath := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.SidecarFileName)
 	jsonBytes, err := os.ReadFile(sidecarPath) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
 		return false, err
@@ -255,15 +255,15 @@ func KeyExists(keyName string) (bool, error) {
 	return true, nil
 }
 
-func DeleteConfigs(subnetName string) error {
-	subnetDir := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName)
-	if _, err := os.Stat(subnetDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+func DeleteConfigs(chainName string) error {
+	chainDir := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName)
+	if _, err := os.Stat(chainDir); err != nil && !errors.Is(err, os.ErrNotExist) {
 		// Schrodinger: file may or may not exist. See err for details.
 		return err
 	}
 
 	// ignore error, file may not exist
-	_ = os.RemoveAll(subnetDir)
+	_ = os.RemoveAll(chainDir)
 
 	return nil
 }
@@ -420,7 +420,7 @@ func SetHardhatRPC(rpc string) error {
 }
 
 func RunHardhatTests(test string) error {
-	cmd := exec.Command("npx", "hardhat", "test", test, "--network", "subnet")
+	cmd := exec.Command("npx", "hardhat", "test", test, "--network", "chain")
 	cmd.Dir = hardhatDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -431,7 +431,7 @@ func RunHardhatTests(test string) error {
 }
 
 func RunHardhatScript(script string) (string, string, error) {
-	cmd := exec.Command("npx", "hardhat", "run", script, "--network", "subnet")
+	cmd := exec.Command("npx", "hardhat", "run", script, "--network", "chain")
 	cmd.Dir = hardhatDir
 	output, err := cmd.CombinedOutput()
 	var (
@@ -490,7 +490,7 @@ func DownloadCustomVMBin(evmVersion string) (string, error) {
 	}
 	evmBin := path.Join(evmDir, evmName)
 	if _, err := os.Stat(evmBin); errors.Is(err, os.ErrNotExist) {
-		return "", errors.New("subnet evm bin file was not created")
+		return "", errors.New("chain evm bin file was not created")
 	} else if err != nil {
 		return "", err
 	}
@@ -499,18 +499,18 @@ func DownloadCustomVMBin(evmVersion string) (string, error) {
 
 func ParsePublicDeployOutput(output string, parseType string) (string, error) {
 	lines := strings.Split(output, "\n")
-	var subnetID string
+	var chainID string
 	var blockchainID string
 	for _, line := range lines {
-		if !strings.Contains(line, "Subnet ID") && !strings.Contains(line, "RPC URL") && !strings.Contains(line, "Blockchain ID") {
+		if !strings.Contains(line, "Chain ID") && !strings.Contains(line, "RPC URL") && !strings.Contains(line, "Blockchain ID") {
 			continue
 		}
 		words := strings.Split(line, "|")
 		if len(words) != 4 {
 			return "", errors.New("error parsing output: invalid number of words in line")
 		}
-		if strings.Contains(line, "Subnet ID") {
-			subnetID = strings.TrimSpace(words[2])
+		if strings.Contains(line, "Chain ID") {
+			chainID = strings.TrimSpace(words[2])
 		}
 		if strings.Contains(line, "Blockchain ID") {
 			blockchainID = strings.TrimSpace(words[2])
@@ -529,22 +529,22 @@ func ParsePublicDeployOutput(output string, parseType string) (string, error) {
 	}
 
 	switch parseType {
-	case SubnetIDParseType:
-		if subnetID == "" {
-			return "", errors.New("subnet ID not found in output")
+	case ChainIDParseType:
+		if chainID == "" {
+			return "", errors.New("chain ID not found in output")
 		}
-		return subnetID, nil
+		return chainID, nil
 	case BlockchainIDParseType:
 		if blockchainID == "" {
 			return "", errors.New("blockchain ID not found in output")
 		}
 		return blockchainID, nil
 	default:
-		// Legacy behavior: return subnet ID by default
-		if subnetID == "" {
+		// Legacy behavior: return chain ID by default
+		if chainID == "" {
 			return "", errors.New("information not found in output")
 		}
-		return subnetID, nil
+		return chainID, nil
 	}
 }
 
@@ -629,7 +629,7 @@ func GetNodesInfo() (map[string]NodeInfo, error) {
 	return nodesInfo, nil
 }
 
-func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
+func GetWhitelistedChainsFromConfigFile(configFile string) (string, error) {
 	fileBytes, err := os.ReadFile(configFile) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return "", fmt.Errorf("failed to load node config file %s: %w", configFile, err)
@@ -638,22 +638,22 @@ func GetWhitelistedSubnetsFromConfigFile(configFile string) (string, error) {
 	if err := json.Unmarshal(fileBytes, &luxConfig); err != nil {
 		return "", fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
-	whitelistedSubnetsIntf := luxConfig["track-chains"]
-	whitelistedSubnets, ok := whitelistedSubnetsIntf.(string)
+	whitelistedChainsIntf := luxConfig["track-chains"]
+	whitelistedChains, ok := whitelistedChainsIntf.(string)
 	if !ok {
-		return "", fmt.Errorf("expected a string value, but got %T", whitelistedSubnetsIntf)
+		return "", fmt.Errorf("expected a string value, but got %T", whitelistedChainsIntf)
 	}
-	return whitelistedSubnets, nil
+	return whitelistedChains, nil
 }
 
-func WaitSubnetValidators(subnetIDStr string, nodeInfos map[string]NodeInfo) error {
+func WaitChainValidators(chainIDStr string, nodeInfos map[string]NodeInfo) error {
 	var uri string
 	for _, nodeInfo := range nodeInfos {
 		uri = nodeInfo.URI
 		break
 	}
 	pClient := platformvm.NewClient(uri)
-	subnetID, err := ids.FromString(subnetIDStr)
+	chainID, err := ids.FromString(chainIDStr)
 	if err != nil {
 		return err
 	}
@@ -662,17 +662,17 @@ func WaitSubnetValidators(subnetIDStr string, nodeInfos map[string]NodeInfo) err
 	for {
 		ready := true
 		ctx, ctxCancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
-		vs, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+		vs, err := pClient.GetCurrentValidators(ctx, chainID, nil)
 		ctxCancel()
 		if err != nil {
 			return err
 		}
-		subnetValidators := map[string]struct{}{}
+		chainValidators := map[string]struct{}{}
 		for _, v := range vs {
-			subnetValidators[v.NodeID.String()] = struct{}{}
+			chainValidators[v.NodeID.String()] = struct{}{}
 		}
 		for _, nodeInfo := range nodeInfos {
-			if _, isValidator := subnetValidators[nodeInfo.ID]; !isValidator {
+			if _, isValidator := chainValidators[nodeInfo.ID]; !isValidator {
 				ready = false
 			}
 		}
@@ -809,17 +809,17 @@ func GetPluginBinaries() ([]string, error) {
 	return pluginFiles, nil
 }
 
-// GetSideCar returns the sidecar configuration for a given subnet name
-func GetSideCar(subnetName string) (models.Sidecar, error) {
-	exists, err := sidecarExists(subnetName)
+// GetSideCar returns the sidecar configuration for a given chain name
+func GetSideCar(chainName string) (models.Sidecar, error) {
+	exists, err := sidecarExists(chainName)
 	if err != nil {
-		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: %w", subnetName, err)
+		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: %w", chainName, err)
 	}
 	if !exists {
-		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: not found", subnetName)
+		return models.Sidecar{}, fmt.Errorf("failed to access sidecar for %s: not found", chainName)
 	}
 
-	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, subnetName, constants.SidecarFileName)
+	sidecar := filepath.Join(GetBaseDir(), constants.ChainsDir, chainName, constants.SidecarFileName)
 
 	jsonBytes, err := os.ReadFile(sidecar) //nolint:gosec // G304: Test code reading from test directories
 	if err != nil {
@@ -835,21 +835,21 @@ func GetSideCar(subnetName string) (models.Sidecar, error) {
 }
 
 // keep the internal version for backwards compatibility within the package
-func getSideCar(subnetName string) (models.Sidecar, error) {
-	return GetSideCar(subnetName)
+func getSideCar(chainName string) (models.Sidecar, error) {
+	return GetSideCar(chainName)
 }
 
-func GetValidators(subnetName string) ([]string, error) {
-	sc, err := getSideCar(subnetName)
+func GetValidators(chainName string) ([]string, error) {
+	sc, err := getSideCar(chainName)
 	if err != nil {
 		return nil, err
 	}
-	subnetID := sc.Networks[models.Local.String()].SubnetID
-	if subnetID == ids.Empty {
-		return nil, errors.New("no subnet id")
+	chainID := sc.Networks[models.Local.String()].ChainID
+	if chainID == ids.Empty {
+		return nil, errors.New("no chain id")
 	}
-	// Get NodeIDs of all validators on the subnet
-	validators, err := chain.GetSubnetValidators(subnetID)
+	// Get NodeIDs of all validators on the chain
+	validators, err := chain.GetChainValidators(chainID)
 	if err != nil {
 		return nil, err
 	}
@@ -860,37 +860,37 @@ func GetValidators(subnetName string) ([]string, error) {
 	return nodeIDsList, nil
 }
 
-func GetCurrentSupply(subnetName string) error {
-	sc, err := getSideCar(subnetName)
+func GetCurrentSupply(chainName string) error {
+	sc, err := getSideCar(chainName)
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[models.Local.String()].SubnetID
-	return chain.GetCurrentSupply(subnetID)
+	chainID := sc.Networks[models.Local.String()].ChainID
+	return chain.GetCurrentSupply(chainID)
 }
 
-func IsNodeInPendingValidator(subnetName string, nodeID string) (bool, error) {
-	sc, err := getSideCar(subnetName)
+func IsNodeInPendingValidator(chainName string, nodeID string) (bool, error) {
+	sc, err := getSideCar(chainName)
 	if err != nil {
 		return false, err
 	}
-	subnetID := sc.Networks[models.Local.String()].SubnetID
-	return chain.CheckNodeIsInSubnetPendingValidators(subnetID, nodeID)
+	chainID := sc.Networks[models.Local.String()].ChainID
+	return chain.CheckNodeIsInChainPendingValidators(chainID, nodeID)
 }
 
-func CheckAllNodesAreCurrentValidators(subnetName string) (bool, error) {
-	sc, err := getSideCar(subnetName)
+func CheckAllNodesAreCurrentValidators(chainName string) (bool, error) {
+	sc, err := getSideCar(chainName)
 	if err != nil {
 		return false, err
 	}
-	subnetID := sc.Networks[models.Local.String()].SubnetID
+	chainID := sc.Networks[models.Local.String()].ChainID
 
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
-	validators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+	validators, err := pClient.GetCurrentValidators(ctx, chainID, nil)
 	if err != nil {
 		return false, err
 	}
@@ -903,20 +903,20 @@ func CheckAllNodesAreCurrentValidators(subnetName string) (bool, error) {
 			}
 		}
 		if !currentValidator {
-			return false, fmt.Errorf("%s is still not a current validator of the elastic subnet", nodeIDstr)
+			return false, fmt.Errorf("%s is still not a current validator of the elastic chain", nodeIDstr)
 		}
 	}
 	return true, nil
 }
 
-func AllPermissionlessValidatorExistsInSidecar(subnetName string, network string) (bool, error) {
-	sc, err := getSideCar(subnetName)
+func AllPermissionlessValidatorExistsInSidecar(chainName string, network string) (bool, error) {
+	sc, err := getSideCar(chainName)
 	if err != nil {
 		return false, err
 	}
-	elasticSubnetValidators := sc.ElasticChain[network].Validators
+	elasticChainValidators := sc.ElasticChain[network].Validators
 	for _, nodeIDstr := range defaultLocalNetworkNodeIDs {
-		_, ok := elasticSubnetValidators[nodeIDstr]
+		_, ok := elasticChainValidators[nodeIDstr]
 		if !ok {
 			return false, err
 		}
@@ -1061,10 +1061,10 @@ func RestartNodes() error {
 }
 
 // ParseWarpContractAddressesFromOutput parses the Warp Messenger and Registry contract addresses from deploy output
-func ParseWarpContractAddressesFromOutput(subnetName string, output string) (string, string, error) {
+func ParseWarpContractAddressesFromOutput(chainName string, output string) (string, string, error) {
 	// Parse for messenger address
-	// Looking for pattern like: "Warp Messenger successfully deployed to <subnet> (0x<address>)"
-	messengerPattern := fmt.Sprintf(`Warp Messenger successfully deployed to %s \((0x[a-fA-F0-9]{40})\)`, regexp.QuoteMeta(subnetName))
+	// Looking for pattern like: "Warp Messenger successfully deployed to <chain> (0x<address>)"
+	messengerPattern := fmt.Sprintf(`Warp Messenger successfully deployed to %s \((0x[a-fA-F0-9]{40})\)`, regexp.QuoteMeta(chainName))
 	messengerRegex := regexp.MustCompile(messengerPattern)
 	messengerMatch := messengerRegex.FindStringSubmatch(output)
 
@@ -1074,8 +1074,8 @@ func ParseWarpContractAddressesFromOutput(subnetName string, output string) (str
 	}
 
 	// Parse for registry address
-	// Looking for pattern like: "Warp Registry successfully deployed to <subnet> (0x<address>)"
-	registryPattern := fmt.Sprintf(`Warp Registry successfully deployed to %s \((0x[a-fA-F0-9]{40})\)`, regexp.QuoteMeta(subnetName))
+	// Looking for pattern like: "Warp Registry successfully deployed to <chain> (0x<address>)"
+	registryPattern := fmt.Sprintf(`Warp Registry successfully deployed to %s \((0x[a-fA-F0-9]{40})\)`, regexp.QuoteMeta(chainName))
 	registryRegex := regexp.MustCompile(registryPattern)
 	registryMatch := registryRegex.FindStringSubmatch(output)
 
@@ -1085,7 +1085,7 @@ func ParseWarpContractAddressesFromOutput(subnetName string, output string) (str
 	}
 
 	if messengerAddr == "" && registryAddr == "" {
-		return "", "", fmt.Errorf("could not find Warp contract addresses for %s in output", subnetName)
+		return "", "", fmt.Errorf("could not find Warp contract addresses for %s in output", chainName)
 	}
 
 	return messengerAddr, registryAddr, nil
@@ -1221,10 +1221,10 @@ func GetApp() *application.Lux {
 	return app
 }
 
-// IsCustomVM checks if a subnet is using a custom VM
-func IsCustomVM(subnetName string) (bool, error) {
+// IsCustomVM checks if a chain is using a custom VM
+func IsCustomVM(chainName string) (bool, error) {
 	app := GetApp()
-	sidecar, err := app.LoadSidecar(subnetName)
+	sidecar, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return false, err
 	}

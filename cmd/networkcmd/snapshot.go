@@ -411,9 +411,18 @@ func newAdvancedSnapshotDownloadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "download <name>",
 		Short: "Download snapshot from GitHub",
-		Args:  cobra.ExactArgs(1),
+		Long: `Download a snapshot from GitHub releases.
+
+This feature will download chunked snapshot files from GitHub releases
+and verify SHA256 hashes before restoring.
+
+Note: This is a planned feature. For now, manually download snapshot
+chunks and use 'lux network snapshot advanced restore' to restore.`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ux.Logger.PrintToUser("Not implemented")
+			ux.Logger.PrintToUser("GitHub snapshot download is a planned feature.")
+			ux.Logger.PrintToUser("For now, manually download snapshot chunks and use:")
+			ux.Logger.PrintToUser("  lux network snapshot advanced restore <name>")
 			return nil
 		},
 	}
@@ -424,9 +433,18 @@ func newAdvancedSnapshotUploadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upload <name>",
 		Short: "Upload snapshot to GitHub",
-		Args:  cobra.ExactArgs(1),
+		Long: `Upload a snapshot to GitHub releases.
+
+This feature will upload chunked snapshot files (99MB each) to GitHub
+releases for distribution.
+
+Note: This is a planned feature. For now, manually upload the snapshot
+chunks from ~/.lux/snapshots/<name>/.`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ux.Logger.PrintToUser("Not implemented")
+			ux.Logger.PrintToUser("GitHub snapshot upload is a planned feature.")
+			ux.Logger.PrintToUser("Snapshot location: ~/.lux/snapshots/%s", args[0])
+			ux.Logger.PrintToUser("Manually upload the chunk files from the snapshot directory.")
 			return nil
 		},
 	}

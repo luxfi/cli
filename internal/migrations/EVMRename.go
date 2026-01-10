@@ -15,18 +15,18 @@ import (
 const oldEVM = "EVM"
 
 func migrateEVMNames(app *application.Lux, runner *migrationRunner) error {
-	subnetDir := app.GetChainsDir()
-	subnets, err := os.ReadDir(subnetDir)
+	chainDir := app.GetChainsDir()
+	chains, err := os.ReadDir(chainDir)
 	if err != nil {
 		return err
 	}
 
-	for _, subnet := range subnets {
-		if !subnet.IsDir() {
+	for _, chain := range chains {
+		if !chain.IsDir() {
 			continue
 		}
-		// disregard any empty subnet directories
-		dirContents, err := os.ReadDir(filepath.Join(subnetDir, subnet.Name()))
+		// disregard any empty chain directories
+		dirContents, err := os.ReadDir(filepath.Join(chainDir, chain.Name()))
 		if err != nil {
 			return err
 		}
@@ -34,7 +34,7 @@ func migrateEVMNames(app *application.Lux, runner *migrationRunner) error {
 			continue
 		}
 
-		sc, err := app.LoadSidecar(subnet.Name())
+		sc, err := app.LoadSidecar(chain.Name())
 		if err != nil {
 			return err
 		}

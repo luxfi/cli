@@ -26,8 +26,8 @@ const (
 	// PrimaryCmd is the primary command name
 	PrimaryCmd = "primary"
 
-	// SubnetCmd is the subnet command name
-	SubnetCmd = "subnet"
+	// ChainCmd is the chain command name
+	ChainCmd = "chain"
 
 	// L1Cmd is the l1 command name
 	L1Cmd = "l1"

@@ -16,11 +16,11 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/api/info"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/vm/vms/platformvm/txs"
 
 	"github.com/luxfi/geth/common"
 	ginkgo "github.com/onsi/ginkgo/v2"
@@ -39,7 +39,7 @@ var err error
 
 func createEtnaEVMConfig() error {
 	// Check config does not already exist
-	_, err = utils.SubnetConfigExists(utils.BlockchainName)
+	_, err = utils.ChainConfigExists(utils.BlockchainName)
 	if err != nil {
 		return err
 	}
@@ -70,11 +70,11 @@ func createEtnaEVMConfig() error {
 	return err
 }
 
-func createSovereignSubnet() (string, string, error) {
+func createSovereignChain() (string, string, error) {
 	if err := createEtnaEVMConfig(); err != nil {
 		return "", "", err
 	}
-	// Deploy subnet on etna local network with local machine as bootstrap validator
+	// Deploy chain on etna local network with local machine as bootstrap validator
 	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
@@ -94,7 +94,7 @@ func createSovereignSubnet() (string, string, error) {
 		utils.PrintStdErr(err)
 	}
 	fmt.Println(string(output))
-	subnetID, err := utils.ParsePublicDeployOutput(string(output), utils.SubnetIDParseType)
+	chainID, err := utils.ParsePublicDeployOutput(string(output), utils.ChainIDParseType)
 	if err != nil {
 		return "", "", err
 	}
@@ -102,7 +102,7 @@ func createSovereignSubnet() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	return subnetID, blockchainID, err
+	return chainID, blockchainID, err
 }
 
 func destroyLocalNode() {
@@ -137,7 +137,7 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error)
 	publicKey := "0x" + proofOfPossession.PublicKey
 	pop := "0x" + proofOfPossession.ProofOfPossession
 
-	bootstrapValidator := models.SubnetValidator{
+	bootstrapValidator := models.ChainValidator{
 		NodeID:               nodeID.String(),
 		Weight:               constants.BootstrapValidatorWeight,
 		Balance:              constants.BootstrapValidatorBalanceNanoLUX,
@@ -145,7 +145,7 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error)
 		BLSProofOfPossession: pop,
 		ChangeOwnerAddr:      ewoqPChainAddress,
 	}
-	luxdBootstrapValidators, err := chainvalidators.ToL1Validators([]models.SubnetValidator{bootstrapValidator})
+	luxdBootstrapValidators, err := chainvalidators.ToL1Validators([]models.ChainValidator{bootstrapValidator})
 	if err != nil {
 		return nil, err
 	}
@@ -163,27 +163,27 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 			utils.PrintStdErr(err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
-		// subnet config
+		// chain config
 		_ = utils.DeleteConfigs(utils.BlockchainName)
 		destroyLocalNode()
 	})
 
 	ginkgo.AfterEach(func() {
 		destroyLocalNode()
-		commands.DeleteSubnetConfig(utils.BlockchainName)
+		commands.DeleteChainConfig(utils.BlockchainName)
 		err := utils.DeleteKey(keyName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		commands.CleanNetwork()
 	})
 	ginkgo.It("Set Up POA Validator Manager", func() {
-		subnetIDStr, blockchainIDStr, err := createSovereignSubnet()
+		chainIDStr, blockchainIDStr, err := createSovereignChain()
 		gomega.Expect(err).Should(gomega.BeNil())
 		uris, err := utils.GetLocalClusterUris()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(uris)).Should(gomega.Equal(1))
-		_, err = commands.TrackLocalEtnaSubnet(utils.TestLocalNodeName, utils.BlockchainName)
+		_, err = commands.TrackLocalEtnaChain(utils.TestLocalNodeName, utils.BlockchainName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		keyPath := path.Join(utils.GetBaseDir(), constants.KeyDir, fmt.Sprintf("subnet_%s_airdrop", utils.BlockchainName)+constants.KeySuffix)
+		keyPath := path.Join(utils.GetBaseDir(), constants.KeyDir, fmt.Sprintf("chain_%s_airdrop", utils.BlockchainName)+constants.KeySuffix)
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
 		gomega.Expect(err).Should(gomega.BeNil())
 		rpcURL := fmt.Sprintf("%s/ext/bc/%s/rpc", uris[0], blockchainIDStr)
@@ -194,7 +194,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 
 		network := models.NewNetworkFromCluster(models.NewLocalNetwork(), utils.TestLocalNodeName)
 
-		subnetID, err := ids.FromString(subnetIDStr)
+		chainID, err := ids.FromString(chainIDStr)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		blockchainID, err := ids.FromString(blockchainIDStr)
@@ -209,7 +209,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		}
 		ownerAddress := common.HexToAddress(ewoqEVMAddress)
 		netSDK := blockchainSDK.Net{
-			NetID:               subnetID,
+			NetID:               chainID,
 			BlockchainID:        blockchainID,
 			OwnerAddress:        &ownerAddress,
 			RPC:                 rpcURL,

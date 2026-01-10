@@ -19,9 +19,9 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/vm/vms/platformvm"
 )
 
 func setupLuxd(

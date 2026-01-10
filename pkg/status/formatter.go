@@ -82,7 +82,7 @@ func (f *StatusFormatter) FormatNetworkStatus(result *StatusResult) {
 	for _, network := range result.Networks {
 		if len(network.Nodes) > 0 {
 			fmt.Fprintf(f.writer, "\n%s nodes\n", network.Name)
-			fmt.Fprintf(f.writer, "node            node_id                                  http                         version       peers  uptime     ok\n")
+			fmt.Fprintf(f.writer, "node            node_id                                  http                         version       peers  uptime     gpu        ok\n")
 
 			for _, node := range network.Nodes {
 				okStr := "no"
@@ -105,13 +105,27 @@ func (f *StatusFormatter) FormatNetworkStatus(result *StatusResult) {
 
 				version := strings.TrimPrefix(node.Version, "luxd/")
 
-				fmt.Fprintf(f.writer, "%-12s  %-30s  %-32s %-12s  %-5d  %-8s  %s\n",
+				// GPU status
+				gpuStatus := "-"
+				if node.GPUAccelerated {
+					if node.GPUDevice != "" {
+						gpuStatus = node.GPUDevice
+						if len(gpuStatus) > 10 {
+							gpuStatus = gpuStatus[:10]
+						}
+					} else {
+						gpuStatus = "yes"
+					}
+				}
+
+				fmt.Fprintf(f.writer, "%-12s  %-30s  %-32s %-12s  %-5d  %-8s  %-10s %s\n",
 					nodeIdentifier,
 					nodeID,
 					node.HTTPURL,
 					version,
 					node.PeerCount,
 					node.Uptime,
+					gpuStatus,
 					okStr)
 			}
 		}
@@ -173,36 +187,22 @@ func (f *StatusFormatter) FormatNetworkStatus(result *StatusResult) {
 					chainID = chain.ChainID
 				}
 
-				// Get RPC endpoint for this chain
+				// Get RPC endpoint for this chain from actual network nodes
 				rpcEndpoint := "-"
-				baseURL := "http://127.0.0.1:9630"
-				if network.Name == "testnet" {
-					baseURL = "http://127.0.0.1:9631"
+				baseURL := "http://127.0.0.1:9650"
+				if len(network.Nodes) > 0 {
+					baseURL = network.Nodes[0].HTTPURL
 				}
 
-				if chain.Alias == "p" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/P/rpc", baseURL)
-				} else if chain.Alias == "x" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/X/rpc", baseURL)
-				} else if chain.Alias == "c" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)
-				} else if chain.Alias == "a" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/A/rpc", baseURL)
-				} else if chain.Alias == "b" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/B/rpc", baseURL)
-				} else if chain.Alias == "d" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/D/rpc", baseURL)
-				} else if chain.Alias == "g" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/G/rpc", baseURL)
-				} else if chain.Alias == "k" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/K/rpc", baseURL)
-				} else if chain.Alias == "q" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/Q/rpc", baseURL)
-				} else if chain.Alias == "t" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/T/rpc", baseURL)
-				} else if chain.Alias == "z" {
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/Z/rpc", baseURL)
-				} else {
+				// P-chain and X-chain don't use /rpc suffix, EVM chains do
+				switch chain.Alias {
+				case "p":
+					rpcEndpoint = fmt.Sprintf("%s/ext/bc/P", baseURL)
+				case "x":
+					rpcEndpoint = fmt.Sprintf("%s/ext/bc/X", baseURL)
+				case "c", "a", "b", "d", "g", "k", "q", "t", "z":
+					rpcEndpoint = fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, strings.ToUpper(chain.Alias))
+				default:
 					rpcEndpoint = fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, chain.Alias)
 				}
 
@@ -231,6 +231,115 @@ func (f *StatusFormatter) FormatNetworkStatus(result *StatusResult) {
 					endpoint.URL,
 					1) // Placeholder for count
 			}
+		}
+	}
+
+	// Format L1 EVM chains (Zoo, Hanzo, SPC)
+	if len(result.TrackedEVMs) > 0 {
+		fmt.Fprintf(f.writer, "\nl1 chains (zoo, hanzo, spc)\n")
+		fmt.Fprintf(f.writer, "chain    network   chain_id  height     rpc_ok  client_version               rpc_endpoint\n")
+
+		for _, evm := range result.TrackedEVMs {
+			rpcOK := "no"
+			rpcEndpoint := "-"
+			if len(evm.Endpoints) > 0 {
+				if evm.Endpoints[0].OK {
+					rpcOK = "yes"
+				}
+				rpcEndpoint = evm.Endpoints[0].URL
+			}
+
+			chainID := "-"
+			if evm.ChainID > 0 {
+				chainID = fmt.Sprintf("%d", evm.ChainID)
+			}
+
+			clientVersion := "-"
+			if evm.ClientVersion != "" {
+				if len(evm.ClientVersion) > 28 {
+					clientVersion = evm.ClientVersion[:28]
+				} else {
+					clientVersion = evm.ClientVersion
+				}
+			}
+
+			fmt.Fprintf(f.writer, "%-8s %-9s %-9s  %-10d %-6s  %-28s  %s\n",
+				evm.Name,
+				evm.Network,
+				chainID,
+				evm.Height,
+				rpcOK,
+				clientVersion,
+				rpcEndpoint)
+		}
+	}
+
+	// Format validator accounts with balances for each network
+	for _, network := range result.Networks {
+		if len(network.Validators) > 0 {
+			fmt.Fprintf(f.writer, "\n%s validators\n", network.Name)
+			fmt.Fprintf(f.writer, "#  node_id                                    p-chain                                  x-chain                                  c-chain                                    active\n")
+
+			for _, v := range network.Validators {
+				activeStr := " "
+				if v.IsActive {
+					activeStr = "*"
+				}
+
+				// Truncate node_id for display
+				nodeID := v.NodeID
+				if len(nodeID) > 40 {
+					nodeID = nodeID[:40]
+				}
+
+				// Truncate addresses for display
+				pAddr := v.PChainAddress
+				if len(pAddr) > 38 {
+					pAddr = pAddr[:38]
+				}
+				xAddr := v.XChainAddress
+				if len(xAddr) > 38 {
+					xAddr = xAddr[:38]
+				}
+
+				fmt.Fprintf(f.writer, "%-2d %-42s %-40s %-40s %-42s %s\n",
+					v.Index,
+					nodeID,
+					pAddr,
+					xAddr,
+					v.CChainAddress,
+					activeStr)
+			}
+		}
+
+		// Show validator balances
+		if len(network.Validators) > 0 {
+			fmt.Fprintf(f.writer, "\n%s validator balances\n", network.Name)
+			fmt.Fprintf(f.writer, "#  p-chain balance      x-chain balance      c-chain balance\n")
+
+			for _, v := range network.Validators {
+				pBalance := FormatNLUXToLUX(v.PChainBalance)
+				xBalance := FormatNLUXToLUX(v.XChainBalance)
+				cBalance := v.CChainBalanceLUX
+				if cBalance == "" {
+					cBalance = "0 LUX"
+				}
+
+				fmt.Fprintf(f.writer, "%-2d %-20s %-20s %s\n",
+					v.Index,
+					pBalance,
+					xBalance,
+					cBalance)
+			}
+		}
+
+		// Show active account summary
+		if network.ActiveAccount != nil {
+			fmt.Fprintf(f.writer, "\n%s active account\n", network.Name)
+			fmt.Fprintf(f.writer, "  validator #%d\n", network.ActiveAccount.Index)
+			fmt.Fprintf(f.writer, "  P-Chain: %s\n", network.ActiveAccount.PChainAddress)
+			fmt.Fprintf(f.writer, "  X-Chain: %s\n", network.ActiveAccount.XChainAddress)
+			fmt.Fprintf(f.writer, "  C-Chain: %s\n", network.ActiveAccount.CChainAddress)
 		}
 	}
 }

@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/vm/vms/components/lux"
-	"github.com/luxfi/vm/vms/components/verify"
-	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/vm/components/verify"
 
 	"github.com/luxfi/address"
 	"github.com/luxfi/cli/pkg/application"
@@ -26,16 +26,16 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
-// ErrNoSubnetAuthKeysInWallet indicates the wallet doesn't contain required subnet auth keys.
-var ErrNoSubnetAuthKeysInWallet = errors.New("auth wallet does not contain subnet auth keys")
+// ErrNoChainAuthKeysInWallet indicates the wallet doesn't contain required chain auth keys.
+var ErrNoChainAuthKeysInWallet = errors.New("auth wallet does not contain chain auth keys")
 
 // PublicDeployer handles chain deployment to public networks.
 type PublicDeployer struct {
@@ -57,25 +57,25 @@ func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keych
 	}
 }
 
-// AddValidator adds a subnet validator to the given subnetID.
-// It creates an add subnet validator tx, signs it with the wallet,
+// AddValidator adds a chain validator to the given chainID.
+// It creates an add chain validator tx, signs it with the wallet,
 // and if fully signed, issues it. If partially signed, returns the tx for additional signatures.
 func (d *PublicDeployer) AddValidator(
 	controlKeys []string,
-	subnetAuthKeysStrs []string,
-	subnetID ids.ID,
+	chainAuthKeysStrs []string,
+	chainID ids.ID,
 	nodeID ids.NodeID,
 	weight uint64,
 	startTime time.Time,
 	duration time.Duration,
 ) (bool, *txs.Tx, []string, error) {
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return false, nil, nil, err
 	}
-	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
 	if err != nil {
-		return false, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
+		return false, nil, nil, fmt.Errorf("failure parsing chain auth keys: %w", err)
 	}
 	validator := &txs.ChainValidator{
 		Validator: txs.Validator{
@@ -84,22 +84,22 @@ func (d *PublicDeployer) AddValidator(
 			End:    uint64(startTime.Add(duration).Unix()), //nolint:gosec // G115: Unix time is positive
 			Wght:   weight,
 		},
-		Chain: subnetID,
+		Chain: chainID,
 	}
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign ChainValidator transaction on the ledger device *** ")
 	}
 
-	tx, err := d.createAddSubnetValidatorTx(subnetAuthKeys, validator, wallet)
+	tx, err := d.createAddChainValidatorTx(chainAuthKeys, validator, wallet)
 	if err != nil {
 		return false, nil, nil, err
 	}
 
-	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	_, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return false, nil, nil, err
 	}
-	isFullySigned := len(remainingSubnetAuthKeys) == 0
+	isFullySigned := len(remainingChainAuthKeys) == 0
 
 	if isFullySigned {
 		id, err := d.Commit(tx)
@@ -111,18 +111,18 @@ func (d *PublicDeployer) AddValidator(
 	}
 
 	ux.Logger.PrintToUser("Partial tx created")
-	return false, tx, remainingSubnetAuthKeys, nil
+	return false, tx, remainingChainAuthKeys, nil
 }
 
 // CreateAssetTx creates a new asset on the X-Chain.
 func (d *PublicDeployer) CreateAssetTx(
-	subnetID ids.ID,
+	chainID ids.ID,
 	tokenName string,
 	tokenSymbol string,
 	denomination byte,
 	initialState map[uint32][]verify.State,
 ) (ids.ID, error) {
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -142,12 +142,12 @@ func (d *PublicDeployer) CreateAssetTx(
 
 // ExportToPChainTx exports assets from X-Chain to P-Chain.
 func (d *PublicDeployer) ExportToPChainTx(
-	subnetID ids.ID,
-	subnetAssetID ids.ID,
+	chainID ids.ID,
+	chainAssetID ids.ID,
 	owner *secp256k1fx.OutputOwners,
 	assetAmount uint64,
 ) (ids.ID, error) {
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -160,7 +160,7 @@ func (d *PublicDeployer) ExportToPChainTx(
 		[]*lux.TransferableOutput{
 			{
 				Asset: lux.Asset{
-					ID: subnetAssetID,
+					ID: chainAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt:          assetAmount,
@@ -177,10 +177,10 @@ func (d *PublicDeployer) ExportToPChainTx(
 
 // ImportFromXChain imports assets from X-Chain to P-Chain.
 func (d *PublicDeployer) ImportFromXChain(
-	subnetID ids.ID,
+	chainID ids.ID,
 	owner *secp256k1fx.OutputOwners,
 ) (ids.ID, error) {
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -200,36 +200,36 @@ func (d *PublicDeployer) ImportFromXChain(
 	return tx.ID(), err
 }
 
-// TransformSubnetTx transforms a subnet to a permissionless elastic subnet.
-func (d *PublicDeployer) TransformSubnetTx(
+// TransformChainTx transforms a chain to a permissionless elastic chain.
+func (d *PublicDeployer) TransformChainTx(
 	controlKeys []string,
-	subnetAuthKeysStrs []string,
-	elasticSubnetConfig climodels.ElasticChainConfig,
-	subnetID ids.ID,
-	subnetAssetID ids.ID,
+	chainAuthKeysStrs []string,
+	elasticChainConfig climodels.ElasticChainConfig,
+	chainID ids.ID,
+	chainAssetID ids.ID,
 ) (bool, ids.ID, *txs.Tx, []string, error) {
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
-	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
 	if err != nil {
-		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
+		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing chain auth keys: %w", err)
 	}
 
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign Transform Net hash on the ledger device *** ")
 	}
 
-	tx, err := d.createTransformSubnetTX(subnetAuthKeys, elasticSubnetConfig, wallet, subnetAssetID)
+	tx, err := d.createTransformChainTX(chainAuthKeys, elasticChainConfig, wallet, chainAssetID)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
-	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	_, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
-	isFullySigned := len(remainingSubnetAuthKeys) == 0
+	isFullySigned := len(remainingChainAuthKeys) == 0
 
 	if isFullySigned {
 		txID, err := d.Commit(tx)
@@ -241,42 +241,42 @@ func (d *PublicDeployer) TransformSubnetTx(
 	}
 
 	ux.Logger.PrintToUser("Partial tx created")
-	return false, ids.Empty, tx, remainingSubnetAuthKeys, nil
+	return false, ids.Empty, tx, remainingChainAuthKeys, nil
 }
 
-// RemoveValidator removes a subnet validator from the given subnet.
-// It verifies that the wallet is one of the subnet auth keys (so as to sign the tx).
-// If operation is multisig (len(subnetAuthKeysStrs) > 1), it creates a remove
-// subnet validator tx and sets the change output owner to be a wallet address.
+// RemoveValidator removes a chain validator from the given chain.
+// It verifies that the wallet is one of the chain auth keys (so as to sign the tx).
+// If operation is multisig (len(chainAuthKeysStrs) > 1), it creates a remove
+// chain validator tx and sets the change output owner to be a wallet address.
 func (d *PublicDeployer) RemoveValidator(
 	controlKeys []string,
-	subnetAuthKeysStrs []string,
-	subnetID ids.ID,
+	chainAuthKeysStrs []string,
+	chainID ids.ID,
 	nodeID ids.NodeID,
 ) (bool, *txs.Tx, []string, error) {
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return false, nil, nil, err
 	}
-	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
 	if err != nil {
-		return false, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
+		return false, nil, nil, fmt.Errorf("failure parsing chain auth keys: %w", err)
 	}
 
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign tx hash on the ledger device *** ")
 	}
 
-	tx, err := d.createRemoveValidatorTX(subnetAuthKeys, nodeID, subnetID, wallet)
+	tx, err := d.createRemoveValidatorTX(chainAuthKeys, nodeID, chainID, wallet)
 	if err != nil {
 		return false, nil, nil, err
 	}
 
-	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	_, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return false, nil, nil, err
 	}
-	isFullySigned := len(remainingSubnetAuthKeys) == 0
+	isFullySigned := len(remainingChainAuthKeys) == 0
 
 	if isFullySigned {
 		id, err := d.Commit(tx)
@@ -288,11 +288,11 @@ func (d *PublicDeployer) RemoveValidator(
 	}
 
 	ux.Logger.PrintToUser("Partial tx created")
-	return false, tx, remainingSubnetAuthKeys, nil
+	return false, tx, remainingChainAuthKeys, nil
 }
 
-// DeploySubnet creates a subnet using the given control keys and threshold.
-func (d *PublicDeployer) DeploySubnet(
+// DeployChain creates a chain using the given control keys and threshold.
+func (d *PublicDeployer) DeployChain(
 	controlKeys []string,
 	threshold uint32,
 ) (ids.ID, error) {
@@ -302,29 +302,29 @@ func (d *PublicDeployer) DeploySubnet(
 		return ids.Empty, err
 	}
 	ux.Logger.PrintToUser("DeployNet: calling createNetTx...")
-	subnetID, err := d.createSubnetTx(controlKeys, threshold, wallet)
+	chainID, err := d.createChainTx(controlKeys, threshold, wallet)
 	if err != nil {
 		ux.Logger.PrintToUser("DeployNet: createNetTx error: %v", err)
 		return ids.Empty, err
 	}
-	ux.Logger.PrintToUser("Net has been created with ID: %s", subnetID.String())
+	ux.Logger.PrintToUser("Net has been created with ID: %s", chainID.String())
 	time.Sleep(2 * time.Second)
-	return subnetID, nil
+	return chainID, nil
 }
 
-// DeployBlockchain creates a blockchain for the given subnet.
+// DeployBlockchain creates a blockchain for the given chain.
 // It creates a create blockchain tx and sets the change output owner
-// to be a wallet address (if not, it may go to any other subnet auth address).
+// to be a wallet address (if not, it may go to any other chain auth address).
 func (d *PublicDeployer) DeployBlockchain(
 	controlKeys []string,
-	subnetAuthKeysStrs []string,
-	subnetID ids.ID,
+	chainAuthKeysStrs []string,
+	chainID ids.ID,
 	chain string,
 	genesis []byte,
 ) (bool, ids.ID, *txs.Tx, []string, error) {
 	ux.Logger.PrintToUser("Now creating blockchain...")
 
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
@@ -334,25 +334,25 @@ func (d *PublicDeployer) DeployBlockchain(
 		return false, ids.Empty, nil, nil, fmt.Errorf("failed to create VM ID from %s: %w", chain, err)
 	}
 
-	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
 	if err != nil {
-		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing subnet auth keys: %w", err)
+		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing chain auth keys: %w", err)
 	}
 
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
 	}
 
-	tx, err := d.createBlockchainTx(subnetAuthKeys, chain, vmID, subnetID, genesis, wallet)
+	tx, err := d.createBlockchainTx(chainAuthKeys, chain, vmID, chainID, genesis, wallet)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
 
-	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	_, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
-	isFullySigned := len(remainingSubnetAuthKeys) == 0
+	isFullySigned := len(remainingChainAuthKeys) == 0
 
 	id := ids.Empty
 	if isFullySigned {
@@ -362,7 +362,7 @@ func (d *PublicDeployer) DeployBlockchain(
 		}
 	}
 
-	return isFullySigned, id, tx, remainingSubnetAuthKeys, nil
+	return isFullySigned, id, tx, remainingChainAuthKeys, nil
 }
 
 // Commit issues a fully signed transaction to the network.
@@ -383,19 +383,19 @@ func (d *PublicDeployer) Commit(
 // Sign signs a transaction with the wallet's keys.
 func (d *PublicDeployer) Sign(
 	tx *txs.Tx,
-	subnetAuthKeysStrs []string,
-	subnet ids.ID,
+	chainAuthKeysStrs []string,
+	chain ids.ID,
 ) error {
-	wallet, err := d.loadWallet(subnet)
+	wallet, err := d.loadWallet(chain)
 	if err != nil {
 		return err
 	}
-	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
 	if err != nil {
-		return fmt.Errorf("failure parsing subnet auth keys: %w", err)
+		return fmt.Errorf("failure parsing chain auth keys: %w", err)
 	}
-	if ok := d.checkWalletHasSubnetAuthAddresses(subnetAuthKeys); !ok {
-		return ErrNoSubnetAuthKeysInWallet
+	if ok := d.checkWalletHasChainAuthAddresses(chainAuthKeys); !ok {
+		return ErrNoChainAuthKeysInWallet
 	}
 	if d.usingLedger {
 		txName := txutils.GetLedgerDisplayName(tx)
@@ -438,8 +438,8 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 		ethKc = &emptyEthKeychain{}
 	}
 
-	// Build the set of P-Chain transactions to fetch (e.g., subnet creation txs)
-	// This is needed so the wallet knows about subnet owners when creating blockchain txs
+	// Build the set of P-Chain transactions to fetch (e.g., chain creation txs)
+	// This is needed so the wallet knows about chain owners when creating blockchain txs
 	pChainTxsToFetch := set.Set[ids.ID]{}
 	for _, txID := range preloadTxs {
 		pChainTxsToFetch.Add(txID)
@@ -462,15 +462,15 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	return wallet, nil
 }
 
-func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []common.Option {
+func (d *PublicDeployer) getMultisigTxOptions(chainAuthKeys []ids.ShortID) []common.Option {
 	options := []common.Option{}
 	walletAddr := d.kc.Addresses().List()[0]
 	// addrs to use for signing
 	customAddrsSet := set.Set[ids.ShortID]{}
 	customAddrsSet.Add(walletAddr)
-	customAddrsSet.Add(subnetAuthKeys...)
+	customAddrsSet.Add(chainAuthKeys...)
 	options = append(options, common.WithCustomAddresses(customAddrsSet))
-	// set change to go to wallet addr (instead of any other subnet auth key)
+	// set change to go to wallet addr (instead of any other chain auth key)
 	changeOwner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs:     []ids.ShortID{walletAddr},
@@ -480,18 +480,18 @@ func (d *PublicDeployer) getMultisigTxOptions(subnetAuthKeys []ids.ShortID) []co
 }
 
 func (d *PublicDeployer) createBlockchainTx(
-	subnetAuthKeys []ids.ShortID,
+	chainAuthKeys []ids.ShortID,
 	chainName string,
 	vmID,
-	subnetID ids.ID,
+	chainID ids.ID,
 	genesis []byte,
 	wallet primary.Wallet,
 ) (*txs.Tx, error) {
 	fxIDs := make([]ids.ID, 0)
-	options := d.getMultisigTxOptions(subnetAuthKeys)
+	options := d.getMultisigTxOptions(chainAuthKeys)
 	// create tx
 	unsignedTx, err := wallet.P().Builder().NewCreateChainTx(
-		subnetID,
+		chainID,
 		genesis,
 		vmID,
 		fxIDs,
@@ -509,12 +509,12 @@ func (d *PublicDeployer) createBlockchainTx(
 	return &tx, nil
 }
 
-func (d *PublicDeployer) createAddSubnetValidatorTx(
-	subnetAuthKeys []ids.ShortID,
+func (d *PublicDeployer) createAddChainValidatorTx(
+	chainAuthKeys []ids.ShortID,
 	validator *txs.ChainValidator,
 	wallet primary.Wallet,
 ) (*txs.Tx, error) {
-	options := d.getMultisigTxOptions(subnetAuthKeys)
+	options := d.getMultisigTxOptions(chainAuthKeys)
 	// create tx
 	unsignedTx, err := wallet.P().Builder().NewAddChainValidatorTx(validator, options...)
 	if err != nil {
@@ -529,14 +529,14 @@ func (d *PublicDeployer) createAddSubnetValidatorTx(
 }
 
 func (d *PublicDeployer) createRemoveValidatorTX(
-	subnetAuthKeys []ids.ShortID,
+	chainAuthKeys []ids.ShortID,
 	nodeID ids.NodeID,
-	subnetID ids.ID,
+	chainID ids.ID,
 	wallet primary.Wallet,
 ) (*txs.Tx, error) {
-	options := d.getMultisigTxOptions(subnetAuthKeys)
+	options := d.getMultisigTxOptions(chainAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewRemoveChainValidatorTx(nodeID, subnetID, options...)
+	unsignedTx, err := wallet.P().Builder().NewRemoveChainValidatorTx(nodeID, chainID, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -548,19 +548,19 @@ func (d *PublicDeployer) createRemoveValidatorTX(
 	return &tx, nil
 }
 
-func (d *PublicDeployer) createTransformSubnetTX(
-	subnetAuthKeys []ids.ShortID,
-	elasticSubnetConfig climodels.ElasticChainConfig,
+func (d *PublicDeployer) createTransformChainTX(
+	chainAuthKeys []ids.ShortID,
+	elasticChainConfig climodels.ElasticChainConfig,
 	wallet primary.Wallet,
 	assetID ids.ID,
 ) (*txs.Tx, error) {
-	options := d.getMultisigTxOptions(subnetAuthKeys)
+	options := d.getMultisigTxOptions(chainAuthKeys)
 	// create tx
-	unsignedTx, err := wallet.P().Builder().NewTransformChainTx(elasticSubnetConfig.SubnetID, assetID,
-		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
-		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
-		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
-		elasticSubnetConfig.MinDelegatorStake, elasticSubnetConfig.MaxValidatorWeightFactor, elasticSubnetConfig.UptimeRequirement, options...)
+	unsignedTx, err := wallet.P().Builder().NewTransformChainTx(elasticChainConfig.ChainID, assetID,
+		elasticChainConfig.InitialSupply, elasticChainConfig.MaxSupply, elasticChainConfig.MinConsumptionRate,
+		elasticChainConfig.MaxConsumptionRate, elasticChainConfig.MinValidatorStake, elasticChainConfig.MaxValidatorStake,
+		elasticChainConfig.MinStakeDuration, elasticChainConfig.MaxStakeDuration, elasticChainConfig.MinDelegationFee,
+		elasticChainConfig.MinDelegatorStake, elasticChainConfig.MaxValidatorWeightFactor, elasticChainConfig.UptimeRequirement, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -572,11 +572,11 @@ func (d *PublicDeployer) createTransformSubnetTX(
 	return &tx, nil
 }
 
-// ConvertL1 converts a subnet to an L1 (LP99)
+// ConvertL1 converts a chain to an L1 (LP99)
 func (d *PublicDeployer) ConvertL1(
 	controlKeys []string,
-	subnetAuthKeysStrs []string,
-	subnetID ids.ID,
+	chainAuthKeysStrs []string,
+	chainID ids.ID,
 	blockchainID ids.ID,
 	managerAddress ethcommon.Address,
 	validators []interface{}, // []*txs.ConvertChainToL1Validator
@@ -584,12 +584,12 @@ func (d *PublicDeployer) ConvertL1(
 	ux.Logger.PrintToUser("Now calling ConvertChainToL1Tx...")
 
 	// Get wallet
-	wallet, err := d.loadWallet(subnetID)
+	wallet, err := d.loadWallet(chainID)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
 
-	subnetAuthKeys, err := address.ParseToIDs(subnetAuthKeysStrs)
+	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
 	if err != nil {
 		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing auth keys: %w", err)
 	}
@@ -605,10 +605,10 @@ func (d *PublicDeployer) ConvertL1(
 	}
 
 	// Build ConvertChainToL1Tx using the wallet builder
-	options := d.getMultisigTxOptions(subnetAuthKeys)
+	options := d.getMultisigTxOptions(chainAuthKeys)
 
 	unsignedTx, err := wallet.P().Builder().NewConvertChainToL1Tx(
-		subnetID,
+		chainID,
 		blockchainID,
 		managerAddress.Bytes(),
 		convertValidators,
@@ -625,20 +625,20 @@ func (d *PublicDeployer) ConvertL1(
 		return false, ids.Empty, nil, nil, fmt.Errorf("error signing tx: %w", err)
 	}
 
-	_, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(&tx, controlKeys)
+	_, remainingChainAuthKeys, err := txutils.GetRemainingSigners(&tx, controlKeys)
 	if err != nil {
 		return false, ids.Empty, nil, nil, err
 	}
 
-	if len(remainingSubnetAuthKeys) == 0 {
+	if len(remainingChainAuthKeys) == 0 {
 		// Commit the transaction
 		txID, err := d.Commit(&tx)
 		if err != nil {
 			return false, ids.Empty, nil, nil, err
 		}
-		return true, txID, &tx, remainingSubnetAuthKeys, nil
+		return true, txID, &tx, remainingChainAuthKeys, nil
 	}
-	return false, ids.Empty, &tx, remainingSubnetAuthKeys, nil
+	return false, ids.Empty, &tx, remainingChainAuthKeys, nil
 }
 
 func (*PublicDeployer) signTx(
@@ -651,13 +651,13 @@ func (*PublicDeployer) signTx(
 	return nil
 }
 
-func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
-	ux.Logger.PrintToUser("createSubnetTx: starting with control keys: %v", controlKeys)
+func (d *PublicDeployer) createChainTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
+	ux.Logger.PrintToUser("createChainTx: starting with control keys: %v", controlKeys)
 	addrs, err := address.ParseToIDs(controlKeys)
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failure parsing control keys: %w", err)
 	}
-	ux.Logger.PrintToUser("createSubnetTx: parsed addresses: %v", addrs)
+	ux.Logger.PrintToUser("createChainTx: parsed addresses: %v", addrs)
 	owners := &secp256k1fx.OutputOwners{
 		Addrs:     addrs,
 		Threshold: threshold,
@@ -665,39 +665,39 @@ func (d *PublicDeployer) createSubnetTx(controlKeys []string, threshold uint32, 
 	}
 	opts := []common.Option{}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign CreateSubnet transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
 	}
-	ux.Logger.PrintToUser("createSubnetTx: calling IssueCreateSubnetTx...")
-	tx, err := wallet.P().IssueCreateSubnetTx(owners, opts...)
+	ux.Logger.PrintToUser("createNetworkTx: calling IssueCreateNetworkTx...")
+	tx, err := wallet.P().IssueCreateNetworkTx(owners, opts...)
 	if err != nil {
-		ux.Logger.PrintToUser("createSubnetTx: IssueCreateSubnetTx error: %v", err)
+		ux.Logger.PrintToUser("createNetworkTx: IssueCreateNetworkTx error: %v", err)
 		return ids.Empty, err
 	}
-	ux.Logger.PrintToUser("createSubnetTx: tx issued successfully with ID: %s", tx.ID().String())
+	ux.Logger.PrintToUser("createNetworkTx: tx issued successfully with ID: %s", tx.ID().String())
 	return tx.ID(), nil
 }
 
-func (d *PublicDeployer) getSubnetAuthAddressesInWallet(subnetAuth []ids.ShortID) []ids.ShortID {
+func (d *PublicDeployer) getChainAuthAddressesInWallet(chainAuth []ids.ShortID) []ids.ShortID {
 	walletAddrs := d.kc.Addresses().List()
-	subnetAuthInWallet := []ids.ShortID{}
+	chainAuthInWallet := []ids.ShortID{}
 	for _, walletAddr := range walletAddrs {
-		for _, addr := range subnetAuth {
+		for _, addr := range chainAuth {
 			if addr == walletAddr {
-				subnetAuthInWallet = append(subnetAuthInWallet, addr)
+				chainAuthInWallet = append(chainAuthInWallet, addr)
 			}
 		}
 	}
-	return subnetAuthInWallet
+	return chainAuthInWallet
 }
 
-// check that the wallet at least contain one subnet auth address
-func (d *PublicDeployer) checkWalletHasSubnetAuthAddresses(subnetAuth []ids.ShortID) bool {
-	addrs := d.getSubnetAuthAddressesInWallet(subnetAuth)
+// check that the wallet at least contain one chain auth address
+func (d *PublicDeployer) checkWalletHasChainAuthAddresses(chainAuth []ids.ShortID) bool {
+	addrs := d.getChainAuthAddressesInWallet(chainAuth)
 	return len(addrs) != 0
 }
 
-// IsSubnetValidator checks if a node is a validator for the given subnet.
-func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Network) (bool, error) {
+// IsChainValidator checks if a node is a validator for the given chain.
+func IsChainValidator(chainID ids.ID, nodeID ids.NodeID, network models.Network) (bool, error) {
 	var apiURL string
 	switch network {
 	case models.Mainnet:
@@ -711,7 +711,7 @@ func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Networ
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
-	vals, err := pClient.GetCurrentValidators(ctx, subnetID, []ids.NodeID{nodeID})
+	vals, err := pClient.GetCurrentValidators(ctx, chainID, []ids.NodeID{nodeID})
 	if err != nil {
 		return false, fmt.Errorf("failed to get current validators")
 	}
@@ -719,8 +719,8 @@ func IsSubnetValidator(subnetID ids.ID, nodeID ids.NodeID, network models.Networ
 	return len(vals) != 0, nil
 }
 
-// GetPublicSubnetValidators returns the validators for a subnet on a public network.
-func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platformvm.ClientPermissionlessValidator, error) {
+// GetPublicChainValidators returns the validators for a chain on a public network.
+func GetPublicChainValidators(chainID ids.ID, network models.Network) ([]platformvm.ClientPermissionlessValidator, error) {
 	var apiURL string
 	switch network {
 	case models.Mainnet:
@@ -734,7 +734,7 @@ func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platf
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
-	vals, err := pClient.GetCurrentValidators(ctx, subnetID, []ids.NodeID{})
+	vals, err := pClient.GetCurrentValidators(ctx, chainID, []ids.NodeID{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current validators")
 	}
@@ -742,11 +742,11 @@ func GetPublicSubnetValidators(subnetID ids.ID, network models.Network) ([]platf
 	return vals, nil
 }
 
-// ValidateSubnetNameAndGetChains validates a subnet name and returns chain information
-func ValidateSubnetNameAndGetChains(subnetName string) error {
+// ValidateChainNameAndGetChains validates a chain name and returns chain information
+func ValidateChainNameAndGetChains(chainName string) error {
 	// Basic validation - can be expanded later
-	if subnetName == "" {
-		return fmt.Errorf("subnet name cannot be empty")
+	if chainName == "" {
+		return fmt.Errorf("chain name cannot be empty")
 	}
 	return nil
 }
@@ -791,8 +791,8 @@ func (d *PublicDeployer) IncreaseValidatorPChainBalance(
 	return nil
 }
 
-// GetDefaultSubnetAirdropKeyInfo returns the default airdrop key information for a subnet.
-func GetDefaultSubnetAirdropKeyInfo(_ *application.Lux, _ string) (string, string, string, error) {
+// GetDefaultChainAirdropKeyInfo returns the default airdrop key information for a chain.
+func GetDefaultChainAirdropKeyInfo(_ *application.Lux, _ string) (string, string, string, error) {
 	// Return empty values for now - this would typically read from sidecar
 	return "", "", "", nil
 }

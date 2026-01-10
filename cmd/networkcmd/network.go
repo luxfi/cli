@@ -74,6 +74,7 @@ NOTES:
 	cmd.AddCommand(NewMonitorCmd()) // Real-time network monitor
 	cmd.AddCommand(newSnapshotCmd())
 	cmd.AddCommand(newBootstrapCmd())
+	cmd.AddCommand(newDescribeCmd()) // Network describe with genesis info
 
 	return cmd
 }

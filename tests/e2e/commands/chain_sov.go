@@ -12,19 +12,19 @@ import (
 	"github.com/onsi/gomega"
 )
 
-// SimulateMainnetDeploySOV simulates sovereign subnet deployment on mainnet
+// SimulateMainnetDeploySOV simulates sovereign chain deployment on mainnet
 /* #nosec G204 */
-func SimulateMainnetDeploySOV(subnetName string, chainID int, skipPrompt bool) string {
+func SimulateMainnetDeploySOV(chainName string, chainID int, skipPrompt bool) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	// Build command args
 	cmdArgs := []string{
-		SubnetCmd,
+		ChainCmd,
 		"deploy",
-		subnetName,
+		chainName,
 		"--mainnet",
 		"--sovereign",
 		"--" + constants.SkipUpdateFlag,
@@ -55,25 +55,25 @@ func SimulateMainnetDeploySOV(subnetName string, chainID int, skipPrompt bool) s
 	return outputStr
 }
 
-// SimulateMultisigMainnetDeploySOV simulates multisig sovereign subnet deployment on mainnet
+// SimulateMultisigMainnetDeploySOV simulates multisig sovereign chain deployment on mainnet
 /* #nosec G204 */
 func SimulateMultisigMainnetDeploySOV(
-	subnetName string,
+	chainName string,
 	controlKeys []string,
-	subnetAuthKeys []string,
+	chainAuthKeys []string,
 	txPath string,
 	expectError bool,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	// Build command args
 	cmdArgs := []string{
-		SubnetCmd,
+		ChainCmd,
 		"deploy",
-		subnetName,
+		chainName,
 		"--mainnet",
 		"--sovereign",
 		"--multisig",
@@ -86,9 +86,9 @@ func SimulateMultisigMainnetDeploySOV(
 		cmdArgs = append(cmdArgs, "--control-keys", key)
 	}
 
-	// Add subnet auth keys
-	for _, key := range subnetAuthKeys {
-		cmdArgs = append(cmdArgs, "--subnet-auth-keys", key)
+	// Add chain auth keys
+	for _, key := range chainAuthKeys {
+		cmdArgs = append(cmdArgs, "--chain-auth-keys", key)
 	}
 
 	// Execute command
@@ -110,25 +110,25 @@ func SimulateMultisigMainnetDeploySOV(
 	return outputStr
 }
 
-// SimulateMultisigMainnetDeployNonSOV simulates multisig non-sovereign subnet deployment on mainnet
+// SimulateMultisigMainnetDeployNonSOV simulates multisig non-sovereign chain deployment on mainnet
 /* #nosec G204 */
 func SimulateMultisigMainnetDeployNonSOV(
-	subnetName string,
+	chainName string,
 	controlKeys []string,
-	subnetAuthKeys []string,
+	chainAuthKeys []string,
 	txPath string,
 	expectError bool,
 ) string {
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
 	// Build command args
 	cmdArgs := []string{
-		SubnetCmd,
+		ChainCmd,
 		"deploy",
-		subnetName,
+		chainName,
 		"--mainnet",
 		"--multisig",
 		"--tx-path", txPath,
@@ -140,9 +140,9 @@ func SimulateMultisigMainnetDeployNonSOV(
 		cmdArgs = append(cmdArgs, "--control-keys", key)
 	}
 
-	// Add subnet auth keys
-	for _, key := range subnetAuthKeys {
-		cmdArgs = append(cmdArgs, "--subnet-auth-keys", key)
+	// Add chain auth keys
+	for _, key := range chainAuthKeys {
+		cmdArgs = append(cmdArgs, "--chain-auth-keys", key)
 	}
 
 	// Execute command
@@ -166,12 +166,12 @@ func SimulateMultisigMainnetDeployNonSOV(
 
 // TransactionCommit commits a transaction from a file
 /* #nosec G204 */
-func TransactionCommit(subnetName string, txPath string, expectError bool) string {
+func TransactionCommit(chainName string, txPath string, expectError bool) string {
 	// Build command args
 	cmdArgs := []string{
 		"transaction",
 		"commit",
-		subnetName,
+		chainName,
 		"--tx-path", txPath,
 		"--" + constants.SkipUpdateFlag,
 	}
@@ -197,12 +197,12 @@ func TransactionCommit(subnetName string, txPath string, expectError bool) strin
 
 // TransactionSignWithLedger signs a transaction with a ledger
 /* #nosec G204 */
-func TransactionSignWithLedger(subnetName string, txPath string, expectError bool) string {
+func TransactionSignWithLedger(chainName string, txPath string, expectError bool) string {
 	// Build command args
 	cmdArgs := []string{
 		"transaction",
 		"sign",
-		subnetName,
+		chainName,
 		"--ledger",
 		"--tx-path", txPath,
 		"--" + constants.SkipUpdateFlag,

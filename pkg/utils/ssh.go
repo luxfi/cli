@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/constants"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/utils"
 
 	"golang.org/x/crypto/ssh/agent"
 )

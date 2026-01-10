@@ -39,7 +39,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/vm/utils/perms"
+	"github.com/luxfi/filesystem/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -361,10 +361,10 @@ func setupEnv() (string, error) {
 		os.Exit(1)
 	}
 
-	// Create subnet dir if it doesn't exist
-	subnetDir := filepath.Join(baseDir, constants.ChainsDir)
-	if err = os.MkdirAll(subnetDir, 0o750); err != nil {
-		fmt.Printf("failed creating the subnet dir %s: %s\n", subnetDir, err)
+	// Create chain dir if it doesn't exist
+	chainDir := filepath.Join(baseDir, constants.ChainsDir)
+	if err = os.MkdirAll(chainDir, 0o750); err != nil {
+		fmt.Printf("failed creating the chain dir %s: %s\n", chainDir, err)
 		os.Exit(1)
 	}
 

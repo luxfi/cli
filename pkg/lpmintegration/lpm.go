@@ -44,16 +44,16 @@ func UpdateRepos(app *application.Lux) error {
 	return app.Lpm.Update()
 }
 
-// InstallVM installs all VMs for a given subnet from LPM.
-func InstallVM(app *application.Lux, subnetKey string) error {
-	vms, err := getVMsInSubnet(app, subnetKey)
+// InstallVM installs all VMs for a given chain from LPM.
+func InstallVM(app *application.Lux, chainKey string) error {
+	vms, err := getVMsInChain(app, chainKey)
 	if err != nil {
 		return err
 	}
 
-	splitKey := strings.Split(subnetKey, ":")
+	splitKey := strings.Split(chainKey, ":")
 	if len(splitKey) != 2 {
-		return fmt.Errorf("invalid key: %s", subnetKey)
+		return fmt.Errorf("invalid key: %s", chainKey)
 	}
 
 	repo := splitKey[0]

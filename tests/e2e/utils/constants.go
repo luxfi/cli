@@ -46,6 +46,6 @@ const (
 	PluginDirExt = "plugins"
 
 	// Parse types for ParsePublicDeployOutput
-	SubnetIDParseType     = "subnetID"
+	ChainIDParseType      = "chainID"
 	BlockchainIDParseType = "blockchainID"
 )

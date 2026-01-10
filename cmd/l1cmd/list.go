@@ -16,7 +16,7 @@ func newListCmd() *cobra.Command {
 		Short: "List all L1 blockchain configurations",
 		Long:  `List all sovereign L1 blockchain configurations and their deployment status.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Get all subnet names (which will become L1s)
+			// Get all chain names (which will become L1s)
 			l1s, err := app.GetSidecarNames()
 			if err != nil {
 				return err

@@ -15,6 +15,11 @@ import (
 
 // archiveDirectory creates a tar.gz archive of the source directory
 func archiveDirectory(src string, dst string) error {
+	// Ensure destination directory exists
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return fmt.Errorf("failed to create destination directory: %w", err)
+	}
+
 	// Create the destination file
 	out, err := os.Create(dst)
 	if err != nil {

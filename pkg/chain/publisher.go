@@ -17,10 +17,10 @@ import (
 	"github.com/luxfi/constants"
 )
 
-// Publisher defines the interface for publishing subnet and VM configurations to a git repository.
+// Publisher defines the interface for publishing chain and VM configurations to a git repository.
 type Publisher interface {
-	// Publish commits and pushes subnet and VM YAML configurations to the repository.
-	Publish(r *git.Repository, subnetName, vmName string, subnetYAML []byte, vmYAML []byte) error
+	// Publish commits and pushes chain and VM YAML configurations to the repository.
+	Publish(r *git.Repository, chainName, vmName string, chainYAML []byte, vmYAML []byte) error
 	// GetRepo returns the git repository, cloning it if necessary.
 	GetRepo() (*git.Repository, error)
 }
@@ -55,12 +55,12 @@ func (p *publisherImpl) GetRepo() (repo *git.Repository, err error) {
 	})
 }
 
-// Publish writes the subnet and VM YAML files to the repository,
+// Publish writes the chain and VM YAML files to the repository,
 // commits the changes, and pushes to the remote.
 func (p *publisherImpl) Publish(
 	repo *git.Repository,
-	subnetName, vmName string,
-	subnetYAML []byte,
+	chainName, vmName string,
+	chainYAML []byte,
 	vmYAML []byte,
 ) error {
 	wt, err := repo.Worktree()
@@ -68,15 +68,15 @@ func (p *publisherImpl) Publish(
 		return err
 	}
 	// Determine the correct path based on repo structure
-	subnetPath := getSubnetPath(p.repoPath, subnetName)
-	if err := os.MkdirAll(filepath.Dir(subnetPath), constants.DefaultPerms755); err != nil {
+	chainPath := getChainPath(p.repoPath, chainName)
+	if err := os.MkdirAll(filepath.Dir(chainPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
 	vmPath := filepath.Join(p.repoPath, constants.VMDir, vmName+constants.YAMLSuffix)
 	if err := os.MkdirAll(filepath.Dir(vmPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
-	if err := os.WriteFile(subnetPath, subnetYAML, constants.DefaultPerms755); err != nil {
+	if err := os.WriteFile(chainPath, chainYAML, constants.DefaultPerms755); err != nil {
 		return err
 	}
 
@@ -86,7 +86,7 @@ func (p *publisherImpl) Publish(
 
 	ux.Logger.PrintToUser("Adding resources to local git repo...")
 
-	if _, err := wt.Add("subnets"); err != nil {
+	if _, err := wt.Add("chains"); err != nil {
 		return err
 	}
 
@@ -126,20 +126,20 @@ func (p *publisherImpl) Publish(
 	return repo.Push(&git.PushOptions{})
 }
 
-// getSubnetPath determines the correct path for the subnet file based on repository structure
-func getSubnetPath(repoPath, subnetName string) string {
+// getChainPath determines the correct path for the chain file based on repository structure
+func getChainPath(repoPath, chainName string) string {
 	// Check if the repository has a custom structure
-	customPath := filepath.Join(repoPath, "subnets", subnetName+constants.YAMLSuffix)
+	customPath := filepath.Join(repoPath, "chains", chainName+constants.YAMLSuffix)
 	if _, err := os.Stat(filepath.Dir(customPath)); err == nil {
 		return customPath
 	}
 
 	// Check for legacy structure
-	legacyPath := filepath.Join(repoPath, "subnet", subnetName+constants.YAMLSuffix)
+	legacyPath := filepath.Join(repoPath, "chain", chainName+constants.YAMLSuffix)
 	if _, err := os.Stat(filepath.Dir(legacyPath)); err == nil {
 		return legacyPath
 	}
 
 	// Default to the standard structure
-	return filepath.Join(repoPath, constants.ChainsDir, subnetName+constants.YAMLSuffix)
+	return filepath.Join(repoPath, constants.ChainsDir, chainName+constants.YAMLSuffix)
 }

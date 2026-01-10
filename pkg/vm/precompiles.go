@@ -108,8 +108,8 @@ func configureRewardManager(app *application.Lux) (rewardmanager.Config, bool, e
 	adminPrompt := "Configure reward manager admins"
 	enabledPrompt := "Configure reward manager enabled addresses"
 	info := "\nThis precompile allows to configure the fee reward mechanism " +
-		"on your subnet, including burning or sending fees.\nFor more information visit " +
-		"https://docs.lux.network/subnets/customize-a-subnet#changing-fee-reward-mechanisms\n\n"
+		"on your chain, including burning or sending fees.\nFor more information visit " +
+		"https://docs.lux.network/chains/customize-a-chain#changing-fee-reward-mechanisms\n\n"
 
 	admins, cancelled, err := getAddressList(adminPrompt, info, app)
 	if err != nil || cancelled {
@@ -186,8 +186,8 @@ func configureContractAllowList(app *application.Lux) (deployerallowlist.Config,
 	adminPrompt := "Configure contract deployment admin allow list"
 	enabledPrompt := "Configure contract deployment enabled addresses list"
 	info := "\nThis precompile restricts who has the ability to deploy contracts " +
-		"on your subnet.\nFor more information visit " +
-		"https://docs.lux.network/subnets/customize-a-subnet/#restricting-smart-contract-deployers\n\n"
+		"on your chain.\nFor more information visit " +
+		"https://docs.lux.network/chains/customize-a-chain/#restricting-smart-contract-deployers\n\n"
 
 	admins, cancelled, err := getAddressList(adminPrompt, info, app)
 	if err != nil || cancelled {
@@ -216,8 +216,8 @@ func configureTransactionAllowList(app *application.Lux) (txallowlist.Config, bo
 	adminPrompt := "Configure transaction allow list admin addresses"
 	enabledPrompt := "Configure transaction allow list enabled addresses"
 	info := "\nThis precompile restricts who has the ability to issue transactions " +
-		"on your subnet.\nFor more information visit " +
-		"https://docs.lux.network/subnets/customize-a-subnet/#restricting-who-can-submit-transactions\n\n"
+		"on your chain.\nFor more information visit " +
+		"https://docs.lux.network/chains/customize-a-chain/#restricting-who-can-submit-transactions\n\n"
 
 	admins, cancelled, err := getAddressList(adminPrompt, info, app)
 	if err != nil || cancelled {
@@ -246,8 +246,8 @@ func configureMinterList(app *application.Lux) (nativeminter.Config, bool, error
 	adminPrompt := "Configure native minting allow list"
 	enabledPrompt := "Configure native minting enabled addresses"
 	info := "\nThis precompile allows admins to permit designated contracts to mint the native token " +
-		"on your subnet.\nFor more information visit " +
-		"https://docs.lux.network/subnets/customize-a-subnet#minting-native-coins\n\n"
+		"on your chain.\nFor more information visit " +
+		"https://docs.lux.network/chains/customize-a-chain#minting-native-coins\n\n"
 
 	admins, cancelled, err := getAddressList(adminPrompt, info, app)
 	if err != nil || cancelled {
@@ -277,7 +277,7 @@ func configureFeeConfigAllowList(app *application.Lux) (feemanager.Config, bool,
 	enabledPrompt := "Configure native minting enabled addresses"
 	info := "\nThis precompile allows admins to adjust chain gas and fee parameters without " +
 		"performing a hardfork.\nFor more information visit " +
-		"https://docs.lux.network/subnets/customize-a-subnet#configuring-dynamic-fees\n\n"
+		"https://docs.lux.network/chains/customize-a-chain#configuring-dynamic-fees\n\n"
 
 	admins, cancelled, err := getAddressList(adminPrompt, info, app)
 	if err != nil || cancelled {

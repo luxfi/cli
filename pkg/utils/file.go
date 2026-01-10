@@ -11,14 +11,13 @@ import (
 
 	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
-	sdkutils "github.com/luxfi/sdk/utils"
 
 	"go.uber.org/zap"
 	"golang.org/x/mod/modfile"
 )
 
 func NonEmptyDirectory(dirName string) (bool, error) {
-	if !sdkutils.DirExists(dirName) {
+	if !DirExists(dirName) {
 		return false, fmt.Errorf("%s is not a directory", dirName)
 	}
 	files, err := os.ReadDir(dirName)
@@ -26,6 +25,15 @@ func NonEmptyDirectory(dirName string) (bool, error) {
 		return false, err
 	}
 	return len(files) != 0, nil
+}
+
+// DirExists checks if a directory exists.
+func DirExists(dirName string) bool {
+	info, err := os.Stat(dirName)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
 }
 
 // FileExists checks if a file exists.

@@ -268,15 +268,15 @@ func GetBlockchainID(
 	return blockchainID, nil
 }
 
-func GetSubnetID(
+func GetChainID(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
 ) (ids.ID, error) {
-	var subnetID ids.ID
+	var chainID ids.ID
 	switch {
 	case chainSpec.CChain:
-		subnetID = ids.Empty
+		chainID = ids.Empty
 	case chainSpec.BlockchainName != "":
 		sc, err := app.LoadSidecar(chainSpec.BlockchainName)
 		if err != nil {
@@ -285,21 +285,17 @@ func GetSubnetID(
 		if sc.Networks[network.Name()].BlockchainID == ids.Empty {
 			return ids.Empty, fmt.Errorf("blockchain has not been deployed to %s", network.Name())
 		}
-		subnetID = sc.Networks[network.Name()].SubnetID
+		chainID = sc.Networks[network.Name()].BlockchainID
 	case chainSpec.BlockchainID != "":
 		blockchainID, err := ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failure parsing %s as id: %w", chainSpec.BlockchainID, err)
 		}
-		tx, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
-		if err != nil {
-			return ids.Empty, err
-		}
-		subnetID = tx.ChainID
+		chainID = blockchainID
 	default:
 		return ids.Empty, fmt.Errorf("blockchain is not defined")
 	}
-	return subnetID, nil
+	return chainID, nil
 }
 
 func GetBlockchainDesc(

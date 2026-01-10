@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/rpcpb"
 	anrutils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/vm/utils/perms"
+	"github.com/luxfi/filesystem/perms"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
@@ -32,8 +32,8 @@ import (
 var (
 	testBlockChainID1 = "S4mBqKYypXfnCX7drcacHmSJFneYYrqCTfq3fkVwPnPHVqQ2y"
 	testBlockChainID2 = "11111111111111111111111111111111LpoYY"
-	testSubnetID1     = "XDnPSGJr2XmkkFaBEGcKFmJgtH8Fv7rNa6YFRKxCHQsUV6Egp"
-	testSubnetID2     = "2LSwchh6dK64RtGRXVdjyDd9YPu89mXB2MMjpZ1dDvnKZDYyro"
+	testChainID1      = "XDnPSGJr2XmkkFaBEGcKFmJgtH8Fv7rNa6YFRKxCHQsUV6Egp"
+	testChainID2      = "2LSwchh6dK64RtGRXVdjyDd9YPu89mXB2MMjpZ1dDvnKZDYyro"
 
 	testVMID      = "tGBrM2SXkAdNsqzb3SaFZZWMNdzjjFEUKteheTa4dhUwnfQyu" // VM ID of "test"
 	testChainName = "test"
@@ -62,8 +62,8 @@ var (
 				},
 			},
 			Chains: map[string]*rpcpb.ChainInfo{
-				testSubnetID1: {},
-				testSubnetID2: {},
+				testChainID1: {},
+				testChainID2: {},
 			},
 		},
 	}
@@ -145,17 +145,17 @@ func TestDeployToLocal(t *testing.T) {
 	// create dummy sidecar file, also checked by deploy
 	// Use Custom VM so chainName "test" is used for VM ID computation (matches testVMID)
 	sidecar := `{"VM": "Custom"}`
-	testSubnetDir := filepath.Join(testDir, constants.ChainsDir, testChainName)
-	err = os.MkdirAll(testSubnetDir, constants.DefaultPerms755)
+	testChainDir := filepath.Join(testDir, constants.ChainsDir, testChainName)
+	err = os.MkdirAll(testChainDir, constants.DefaultPerms755)
 	require.NoError(err)
-	testSidecar, err := os.Create(filepath.Join(testSubnetDir, constants.SidecarFileName)) //nolint:gosec // G304: Test file creation
+	testSidecar, err := os.Create(filepath.Join(testChainDir, constants.SidecarFileName)) //nolint:gosec // G304: Test file creation
 	require.NoError(err)
 	err = os.WriteFile(testSidecar.Name(), []byte(sidecar), constants.DefaultPerms755)
 	require.NoError(err)
 	// test actual deploy
 	s, b, err := testDeployer.DeployToLocalNetwork(testChainName, []byte(genesis), testGenesis.Name())
 	require.NoError(err)
-	require.Equal(testSubnetID2, s.String())
+	require.Equal(testChainID2, s.String())
 	require.Equal(testBlockChainID2, b.String())
 }
 
@@ -194,9 +194,9 @@ func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 	c.On("URIs", mock.Anything).Return([]string{"fakeUri"}, nil)
 	// Health is called by formatChainHealthError for diagnostics
 	c.On("Health", mock.Anything).Return(fakeHealthResponse, nil)
-	// When fake deploying, the first response needs to have a bogus subnet ID, because
-	// otherwise the doDeploy function "aborts" when checking if the subnet had already been deployed.
-	// Afterwards, we can set the actual VM ID so that the test returns an expected subnet ID...
+	// When fake deploying, the first response needs to have a bogus chain ID, because
+	// otherwise the doDeploy function "aborts" when checking if the chain had already been deployed.
+	// Afterwards, we can set the actual VM ID so that the test returns an expected chain ID...
 
 	// Return a fake wait for healthy response twice
 	c.On("WaitForHealthy", mock.Anything).Return(fakeWaitForHealthyResponse, nil).Twice()
@@ -204,7 +204,7 @@ func getTestClientFunc(...binutils.GRPCClientOpOption) (client.Client, error) {
 	alteredFakeResponse := proto.Clone(fakeWaitForHealthyResponse).(*rpcpb.WaitForHealthyResponse) // new(rpcpb.WaitForHealthyResponse)
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].VmId = testVMID
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].ChainName = testChainName
-	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].PchainId = testSubnetID2 // Set the subnet ID
+	alteredFakeResponse.ClusterInfo.CustomChains["bchain2"].PchainId = testChainID2 // Set the chain ID
 	alteredFakeResponse.ClusterInfo.CustomChains["bchain1"].ChainName = "bchain1"
 	c.On("WaitForHealthy", mock.Anything).Return(alteredFakeResponse, nil)
 	// Status is called for quick status checks - uses the altered response with VmId set

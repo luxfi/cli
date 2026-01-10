@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package subnet
+package chain
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	subnetName     = "e2eSubnetTest"
+	chainName      = "e2eChainTest"
 	ewoqKey        = "ewoq"
 	testKeyName    = "e2eKey"
 	testKeyPath    = "tests/e2e/assets/test_key.pk"
@@ -39,7 +39,7 @@ const (
 	mainnetChainID = 123456
 )
 
-func deploySubnetToTestnetNonSOV() (string, map[string]utils.NodeInfo) {
+func deployChainToTestnetNonSOV() (string, map[string]utils.NodeInfo) {
 	// fund non ewoq key
 	_, _ = commands.DeleteKey(testKeyName)
 	_, err := commands.CreateKeyFromPath(testKeyName, testKeyPath)
@@ -50,38 +50,38 @@ func deploySubnetToTestnetNonSOV() (string, map[string]utils.NodeInfo) {
 	err = utils.FundAddress(testKeyAddrShort, fee)
 	gomega.Expect(err).Should(gomega.BeNil())
 	// deploy
-	s := commands.SimulateTestnetDeployNonSOV(subnetName, testKeyName, controlKeys)
+	s := commands.SimulateTestnetDeployNonSOV(chainName, testKeyName, controlKeys)
 	fmt.Println(s)
-	subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
+	chainID, err := utils.ParsePublicDeployOutput(s, utils.ChainIDParseType)
 	gomega.Expect(err).Should(gomega.BeNil())
-	// add validators to subnet
+	// add validators to chain
 	nodeInfos, err := utils.GetLocalNetworkNodesInfo()
 	gomega.Expect(err).Should(gomega.BeNil())
 	for _, nodeInfo := range nodeInfos {
 		start := time.Now().Add(time.Second * 30).UTC().Format("2006-01-02 15:04:05")
-		_ = commands.SimulateTestnetAddValidator(subnetName, testKeyName, nodeInfo.ID, start, "24h", "20")
+		_ = commands.SimulateTestnetAddValidator(chainName, testKeyName, nodeInfo.ID, start, "24h", "20")
 	}
 	// join to copy vm binary and update config file
 	for _, nodeInfo := range nodeInfos {
-		_ = commands.SimulateTestnetJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
+		_ = commands.SimulateTestnetJoin(chainName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
 	}
-	// get and check whitelisted subnets from config file
+	// get and check whitelisted chains from config file
 	for _, nodeInfo := range nodeInfos {
-		whitelistedSubnets, err := utils.GetWhitelistedSubnetsFromConfigFile(nodeInfo.ConfigFile)
+		whitelistedChains, err := utils.GetWhitelistedChainsFromConfigFile(nodeInfo.ConfigFile)
 		gomega.Expect(err).Should(gomega.BeNil())
-		whitelistedSubnetsSlice := strings.Split(whitelistedSubnets, ",")
-		gomega.Expect(whitelistedSubnetsSlice).Should(gomega.ContainElement(subnetID))
+		whitelistedChainsSlice := strings.Split(whitelistedChains, ",")
+		gomega.Expect(whitelistedChainsSlice).Should(gomega.ContainElement(chainID))
 	}
 	// restart nodes
 	err = utils.RestartNodes()
 	gomega.Expect(err).Should(gomega.BeNil())
-	// wait for subnet walidators to be up
-	err = utils.WaitSubnetValidators(subnetID, nodeInfos)
+	// wait for chain walidators to be up
+	err = utils.WaitChainValidators(chainID, nodeInfos)
 	gomega.Expect(err).Should(gomega.BeNil())
-	return subnetID, nodeInfos
+	return chainID, nodeInfos
 }
 
-var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
+var _ = ginkgo.Describe("[Public Chain non SOV]", func() {
 	ginkgo.BeforeEach(func() {
 		// key
 		_ = utils.DeleteKey(ewoqKey)
@@ -91,43 +91,43 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 			utils.PrintStdErr(err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
-		// subnet config
-		_ = utils.DeleteConfigs(subnetName)
-		_, luxdVersion := commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+		// chain config
+		_ = utils.DeleteConfigs(chainName)
+		_, luxdVersion := commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
 		// local network
 		commands.StartNetworkWithVersion(luxdVersion)
 	})
 
 	ginkgo.AfterEach(func() {
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 		err := utils.DeleteKey(ewoqKey)
 		gomega.Expect(err).Should(gomega.BeNil())
 		commands.CleanNetwork()
 	})
 
-	ginkgo.It("deploy subnet to testnet", func() {
-		deploySubnetToTestnetNonSOV()
+	ginkgo.It("deploy chain to testnet", func() {
+		deployChainToTestnetNonSOV()
 	})
 
-	ginkgo.It("deploy subnet to mainnet", func() {
+	ginkgo.It("deploy chain to mainnet", func() {
 		var interactionEndCh, ledgerSimEndCh chan struct{}
 		if os.Getenv("LEDGER_SIM") != "" {
 			interactionEndCh, ledgerSimEndCh = utils.StartLedgerSim(4, ledger1Seed, true)
 		}
 		// fund ledger address
 		// Estimate fees based on transaction types
-		// CreateSubnetTxFee + CreateBlockchainTxFee + TxFee
+		// CreateChainTxFee + CreateChainTxFee + TxFee
 		fee := estimateTestFees(3)
 		err := utils.FundLedgerAddress(fee)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println()
-		fmt.Println(luxlog.LightRed.Wrap("DEPLOYING SUBNET. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING"))
-		s := commands.SimulateMainnetDeployNonSOV(subnetName, 0, false)
+		fmt.Println(luxlog.LightRed.Wrap("DEPLOYING CHAIN. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING"))
+		s := commands.SimulateMainnetDeployNonSOV(chainName, 0, false)
 		// deploy
-		subnetID, err := utils.ParsePublicDeployOutput(s, utils.SubnetIDParseType)
+		chainID, err := utils.ParsePublicDeployOutput(s, utils.ChainIDParseType)
 		gomega.Expect(err).Should(gomega.BeNil())
-		// add validators to subnet
+		// add validators to chain
 		nodeInfos, err := utils.GetLocalNetworkNodesInfo()
 		gomega.Expect(err).Should(gomega.BeNil())
 		nodeIdx := 1
@@ -135,7 +135,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 			fmt.Println(luxlog.LightRed.Wrap(
 				fmt.Sprintf("ADDING VALIDATOR %d of %d. VERIFY LEDGER ADDRESS HAS CUSTOM HRP BEFORE SIGNING", nodeIdx, len(nodeInfos))))
 			start := time.Now().Add(time.Second * 30).UTC().Format("2006-01-02 15:04:05")
-			_ = commands.SimulateMainnetAddValidator(subnetName, nodeInfo.ID, start, "24h", "20")
+			_ = commands.SimulateMainnetAddValidator(chainName, nodeInfo.ID, start, "24h", "20")
 			nodeIdx++
 		}
 		if os.Getenv("LEDGER_SIM") != "" {
@@ -145,44 +145,44 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		fmt.Println(luxlog.LightBlue.Wrap("EXECUTING NON INTERACTIVE PART OF THE TEST: JOIN/WHITELIST/WAIT/HARDHAT"))
 		// join to copy vm binary and update config file
 		for _, nodeInfo := range nodeInfos {
-			_ = commands.SimulateMainnetJoin(subnetName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
+			_ = commands.SimulateMainnetJoin(chainName, nodeInfo.ConfigFile, nodeInfo.PluginDir, nodeInfo.ID)
 		}
-		// get and check whitelisted subnets from config file
+		// get and check whitelisted chains from config file
 		for _, nodeInfo := range nodeInfos {
-			whitelistedSubnets, err := utils.GetWhitelistedSubnetsFromConfigFile(nodeInfo.ConfigFile)
+			whitelistedChains, err := utils.GetWhitelistedChainsFromConfigFile(nodeInfo.ConfigFile)
 			gomega.Expect(err).Should(gomega.BeNil())
-			whitelistedSubnetsSlice := strings.Split(whitelistedSubnets, ",")
-			gomega.Expect(whitelistedSubnetsSlice).Should(gomega.ContainElement(subnetID))
+			whitelistedChainsSlice := strings.Split(whitelistedChains, ",")
+			gomega.Expect(whitelistedChainsSlice).Should(gomega.ContainElement(chainID))
 		}
 		// restart nodes
 		err = utils.RestartNodes()
 		gomega.Expect(err).Should(gomega.BeNil())
-		// wait for subnet walidators to be up
-		err = utils.WaitSubnetValidators(subnetID, nodeInfos)
+		// wait for chain walidators to be up
+		err = utils.WaitChainValidators(chainID, nodeInfos)
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// this is a simulation, so app is probably saving the info in the
 		// `local network` section of the sidecar instead of the `testnet` section...
-		// ...need to manipulate the `testnet` section of the sidecar to contain the subnetID info
+		// ...need to manipulate the `testnet` section of the sidecar to contain the chainID info
 		// so that the `stats` command for `testnet` can find it
-		output := commands.SimulateGetSubnetStatsTestnet(subnetName, subnetID)
+		output := commands.SimulateGetChainStatsTestnet(chainName, chainID)
 		gomega.Expect(output).Should(gomega.Not(gomega.BeNil()))
 		gomega.Expect(output).Should(gomega.ContainSubstring("Current validators"))
 		gomega.Expect(output).Should(gomega.ContainSubstring("NodeID-"))
 	})
 
-	ginkgo.It("deploy subnet with new chain id", func() {
-		subnetMainnetChainID, err := utils.GetEVMMainnetChainID(subnetName)
+	ginkgo.It("deploy chain with new chain id", func() {
+		chainMainnetChainID, err := utils.GetEVMMainnetChainID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(subnetMainnetChainID).Should(gomega.Equal(uint(0)))
-		_ = commands.SimulateMainnetDeployNonSOV(subnetName, mainnetChainID, true)
-		subnetMainnetChainID, err = utils.GetEVMMainnetChainID(subnetName)
+		gomega.Expect(chainMainnetChainID).Should(gomega.Equal(uint(0)))
+		_ = commands.SimulateMainnetDeployNonSOV(chainName, mainnetChainID, true)
+		chainMainnetChainID, err = utils.GetEVMMainnetChainID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
-		gomega.Expect(subnetMainnetChainID).Should(gomega.Equal(uint(mainnetChainID)))
+		gomega.Expect(chainMainnetChainID).Should(gomega.Equal(uint(mainnetChainID)))
 	})
 
 	ginkgo.It("remove validator testnet", func() {
-		subnetIDStr, nodeInfos := deploySubnetToTestnetNonSOV()
+		chainIDStr, nodeInfos := deployChainToTestnetNonSOV()
 
 		// pick a validator to remove
 		var validatorToRemove string
@@ -192,13 +192,13 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		}
 
 		// confirm current validator set
-		subnetID, err := ids.FromString(subnetIDStr)
+		chainID, err := ids.FromString(chainIDStr)
 		gomega.Expect(err).Should(gomega.BeNil())
-		validators, err := utils.GetSubnetValidators(subnetID)
+		validators, err := utils.GetChainValidators(chainID)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(validators)).Should(gomega.Equal(2))
 
-		// Check that the validatorToRemove is in the subnet validator set
+		// Check that the validatorToRemove is in the chain validator set
 		var found bool
 		for _, validator := range validators {
 			if validator == validatorToRemove {
@@ -209,14 +209,14 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		gomega.Expect(found).Should(gomega.BeTrue())
 
 		// remove validator
-		_ = commands.SimulateTestnetRemoveValidator(subnetName, testKeyName, validatorToRemove)
+		_ = commands.SimulateTestnetRemoveValidator(chainName, testKeyName, validatorToRemove)
 
 		// confirm current validator set
-		validators, err = utils.GetSubnetValidators(subnetID)
+		validators, err = utils.GetChainValidators(chainID)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(validators)).Should(gomega.Equal(1))
 
-		// Check that the validatorToRemove is NOT in the subnet validator set
+		// Check that the validatorToRemove is NOT in the chain validator set
 		found = false
 		for _, validator := range validators {
 			if validator == validatorToRemove {
@@ -260,10 +260,10 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		ledger1Addr, err := utils.GetLedgerAddress(models.NewLocalNetwork(), 0)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		// multisig deploy from unfunded ledger1 should not create any subnet/blockchain
+		// multisig deploy from unfunded ledger1 should not create any chain/blockchain
 		gomega.Expect(err).Should(gomega.BeNil())
 		s := commands.SimulateMultisigMainnetDeployNonSOV(
-			subnetName,
+			chainName,
 			[]string{ledger2Addr, ledger3Addr, ledger4Addr},
 			[]string{ledger2Addr, ledger3Addr},
 			txPath,
@@ -277,16 +277,16 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// let's fund the ledger
 		// Estimate fees based on transaction types
-		// CreateSubnetTxFee + CreateBlockchainTxFee + TxFee
+		// CreateChainTxFee + CreateChainTxFee + TxFee
 		fee := estimateTestFees(3)
 		err = utils.FundLedgerAddress(fee)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		// multisig deploy from funded ledger1 should create the subnet but not deploy the blockchain,
-		// instead signing only its tx fee as it is not a subnet auth key,
-		// and creating the tx file to wait for subnet auths from ledger2 and ledger3
+		// multisig deploy from funded ledger1 should create the chain but not deploy the blockchain,
+		// instead signing only its tx fee as it is not a chain auth key,
+		// and creating the tx file to wait for chain auths from ledger2 and ledger3
 		s = commands.SimulateMultisigMainnetDeployNonSOV(
-			subnetName,
+			chainName,
 			[]string{ledger2Addr, ledger3Addr, ledger4Addr},
 			[]string{ledger2Addr, ledger3Addr},
 			txPath,
@@ -301,7 +301,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to commit before signature is complete (no funded wallet needed for commit)
 		s = commands.TransactionCommit(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)
@@ -314,11 +314,11 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to sign using unauthorized ledger1
 		s = commands.TransactionSignWithLedger(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)
-		toMatch = "(?s).+Ledger addresses:(?s).+  " + ledger1Addr + "(?s).+There are no required subnet auth keys present in the wallet(?s).+" +
+		toMatch = "(?s).+Ledger addresses:(?s).+  " + ledger1Addr + "(?s).+There are no required chain auth keys present in the wallet(?s).+" +
 			"Expected one of:\\s+" + ledger2Addr + "(?s).+" + ledger3Addr + "(?s).+Error: no remaining signer address present in wallet.*"
 		matched, err = regexp.MatchString(toMatch, cliutils.RemoveLineCleanChars(s))
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -330,7 +330,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to commit before signature is complete
 		s = commands.TransactionCommit(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)
@@ -344,7 +344,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		// sign using ledger2
 		interactionEndCh, ledgerSimEndCh = utils.StartLedgerSim(1, ledger2Seed, true)
 		s = commands.TransactionSignWithLedger(
-			subnetName,
+			chainName,
 			txPath,
 			false,
 		)
@@ -356,11 +356,11 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to sign using ledger2 which already signed
 		s = commands.TransactionSignWithLedger(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)
-		toMatch = "(?s).+Ledger addresses:(?s).+  " + ledger2Addr + "(?s).+There are no required subnet auth keys present in the wallet(?s).+" +
+		toMatch = "(?s).+Ledger addresses:(?s).+  " + ledger2Addr + "(?s).+There are no required chain auth keys present in the wallet(?s).+" +
 			"Expected one of:\\s+" + ledger3Addr + "(?s).+Error: no remaining signer address present in wallet.*"
 		matched, err = regexp.MatchString(toMatch, cliutils.RemoveLineCleanChars(s))
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -372,7 +372,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to commit before signature is complete
 		s = commands.TransactionCommit(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)
@@ -386,7 +386,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 		// sign with ledger3
 		interactionEndCh, ledgerSimEndCh = utils.StartLedgerSim(1, ledger3Seed, true)
 		s = commands.TransactionSignWithLedger(
-			subnetName,
+			chainName,
 			txPath,
 			false,
 		)
@@ -397,7 +397,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to sign using ledger3 which already signedtx is already fully signed"
 		s = commands.TransactionSignWithLedger(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)
@@ -412,7 +412,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// commit after complete signature
 		s = commands.TransactionCommit(
-			subnetName,
+			chainName,
 			txPath,
 			false,
 		)
@@ -423,7 +423,7 @@ var _ = ginkgo.Describe("[Public Subnet non SOV]", func() {
 
 		// try to commit again
 		s = commands.TransactionCommit(
-			subnetName,
+			chainName,
 			txPath,
 			true,
 		)

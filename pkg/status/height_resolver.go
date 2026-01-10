@@ -79,15 +79,15 @@ func (r *PChainHeightResolver) Height(ctx context.Context, url string) (uint64, 
 	meta := make(map[string]any)
 
 	// Implement actual P-Chain height resolution using Lux P-Chain API
-	// The P-Chain API endpoint is typically at /ext/bc/P
+	// The P-Chain API endpoint is at /ext/bc/P (no /rpc suffix)
 
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 2 * time.Second,
 	}
 
-	// Build the request URL - P-Chain uses /rpc endpoint
-	requestURL := fmt.Sprintf("%s/rpc", url)
+	// Use the URL as-is - P-Chain doesn't use /rpc suffix
+	requestURL := url
 
 	// Create JSON-RPC request for P-Chain height
 	requestBody := map[string]interface{}{
@@ -163,21 +163,22 @@ func (r *XChainHeightResolver) Height(ctx context.Context, url string) (uint64, 
 	meta := make(map[string]any)
 
 	// Implement actual X-Chain height resolution using Lux X-Chain API
-	// The X-Chain API endpoint is typically at /ext/bc/X
+	// The X-Chain API endpoint is at /ext/bc/X (no /rpc suffix)
+	// Lux X-chain uses xvm.getHeight (not avm.getHeight)
 
 	// Create HTTP client with timeout
 	client := &http.Client{
 		Timeout: 2 * time.Second,
 	}
 
-	// Build the request URL
-	requestURL := fmt.Sprintf("%s/rpc", url)
+	// Use the URL as-is - X-Chain doesn't use /rpc suffix
+	requestURL := url
 
 	// Create JSON-RPC request for X-Chain height
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
-		"method":  "avax.getHeight",
+		"method":  "xvm.getHeight",
 		"params":  map[string]interface{}{},
 	}
 
@@ -209,16 +210,32 @@ func (r *XChainHeightResolver) Height(ctx context.Context, url string) (uint64, 
 		return 0, meta, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	// Check for error responses (e.g., "chain is not linearized" during bootstrap)
+	if errObj, ok := responseMap["error"].(map[string]interface{}); ok {
+		if errMsg, ok := errObj["message"].(string); ok {
+			if strings.Contains(errMsg, "not linearized") {
+				meta["status"] = "bootstrapping"
+				meta["error"] = errMsg
+				return 0, meta, nil // Return 0 height but no error - chain is bootstrapping
+			}
+			return 0, meta, fmt.Errorf("RPC error: %s", errMsg)
+		}
+	}
+
 	// Extract height from response
 	if result, ok := responseMap["result"].(map[string]interface{}); ok {
 		if heightStr, ok := result["height"].(string); ok {
-			// Convert hex string to uint64
+			// Convert height string to uint64
 			height, err := strconv.ParseUint(heightStr, 10, 64)
 			if err != nil {
-				return 0, meta, fmt.Errorf("failed to parse height: %w", err)
+				// Try hex format
+				height, err = strconv.ParseUint(strings.TrimPrefix(heightStr, "0x"), 16, 64)
+				if err != nil {
+					return 0, meta, fmt.Errorf("failed to parse height: %w", err)
+				}
 			}
 
-			meta["method"] = "avax.getHeight"
+			meta["method"] = "xvm.getHeight"
 			return height, meta, nil
 		}
 	}

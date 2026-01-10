@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	subnetName1 = "TEST_subnet"
-	subnetName2 = "TEST_copied_subnet"
+	chainName1 = "TEST_chain"
+	chainName2 = "TEST_copied_chain"
 )
 
 func TestUpdateSideCar(t *testing.T) {
@@ -39,7 +39,7 @@ func TestUpdateSideCar(t *testing.T) {
 	sc.Networks = make(map[string]models.NetworkData)
 	sc.Networks["local"] = models.NetworkData{
 		BlockchainID: ids.GenerateTestID(),
-		SubnetID:     ids.GenerateTestID(),
+		ChainID:      ids.GenerateTestID(),
 	}
 
 	err = ap.UpdateSidecar(sc)
@@ -56,11 +56,11 @@ func Test_writeGenesisFile_success(t *testing.T) {
 
 	ap := newTestApp(t)
 	// Write genesis
-	err := ap.WriteGenesisFile(subnetName1, genesisBytes)
+	err := ap.WriteGenesisFile(chainName1, genesisBytes)
 	require.NoError(err)
 
 	// Check file exists
-	createdPath := filepath.Join(ap.GetChainsDir(), subnetName1, genesisFile)
+	createdPath := filepath.Join(ap.GetChainsDir(), chainName1, genesisFile)
 	_, err = os.Stat(createdPath)
 	require.NoError(err)
 
@@ -75,16 +75,16 @@ func Test_copyGenesisFile_success(t *testing.T) {
 
 	ap := newTestApp(t)
 	// Create original genesis
-	err := ap.WriteGenesisFile(subnetName1, genesisBytes)
+	err := ap.WriteGenesisFile(chainName1, genesisBytes)
 	require.NoError(err)
 
 	// Copy genesis
-	createdGenesis := ap.GetGenesisPath(subnetName1)
-	err = ap.CopyGenesisFile(createdGenesis, subnetName2)
+	createdGenesis := ap.GetGenesisPath(chainName1)
+	err = ap.CopyGenesisFile(createdGenesis, chainName2)
 	require.NoError(err)
 
 	// Check copied file exists
-	copiedGenesis := ap.GetGenesisPath(subnetName2)
+	copiedGenesis := ap.GetGenesisPath(chainName2)
 	_, err = os.Stat(copiedGenesis)
 	require.NoError(err)
 
@@ -101,12 +101,12 @@ func Test_copyGenesisFile_failure(t *testing.T) {
 
 	ap := newTestApp(t)
 	// Copy genesis
-	createdGenesis := ap.GetGenesisPath(subnetName1)
-	err := ap.CopyGenesisFile(createdGenesis, subnetName2)
+	createdGenesis := ap.GetGenesisPath(chainName1)
+	err := ap.CopyGenesisFile(createdGenesis, chainName2)
 	require.Error(err)
 
 	// Check no copied file exists
-	copiedGenesis := ap.GetGenesisPath(subnetName2)
+	copiedGenesis := ap.GetGenesisPath(chainName2)
 	_, err = os.Stat(copiedGenesis)
 	require.Error(err)
 }
@@ -114,7 +114,7 @@ func Test_copyGenesisFile_failure(t *testing.T) {
 func Test_createSidecar_success(t *testing.T) {
 	type test struct {
 		name              string
-		subnetName        string
+		chainName         string
 		tokenName         string
 		expectedTokenName string
 		chainID           string
@@ -123,14 +123,14 @@ func Test_createSidecar_success(t *testing.T) {
 	tests := []test{
 		{
 			name:              "Success",
-			subnetName:        subnetName1,
+			chainName:         chainName1,
 			tokenName:         "TOKEN",
 			expectedTokenName: "TOKEN",
 			chainID:           "999",
 		},
 		{
 			name:              "no token name",
-			subnetName:        subnetName1,
+			chainName:         chainName1,
 			tokenName:         "",
 			expectedTokenName: "TEST",
 			chainID:           "888",
@@ -145,7 +145,7 @@ func Test_createSidecar_success(t *testing.T) {
 			const vm = models.EVM
 
 			sc := &models.Sidecar{
-				Name:      tt.subnetName,
+				Name:      tt.chainName,
 				VM:        vm,
 				TokenName: tt.tokenName,
 				ChainID:   tt.chainID,
@@ -156,11 +156,11 @@ func Test_createSidecar_success(t *testing.T) {
 			require.NoError(err)
 
 			// Check file exists
-			createdPath := ap.GetSidecarPath(tt.subnetName)
+			createdPath := ap.GetSidecarPath(tt.chainName)
 			_, err = os.Stat(createdPath)
 			require.NoError(err)
 
-			control, err := ap.LoadSidecar(tt.subnetName)
+			control, err := ap.LoadSidecar(tt.chainName)
 			require.NoError(err)
 			require.Equal(*sc, control)
 
@@ -180,8 +180,8 @@ func Test_loadSidecar_success(t *testing.T) {
 	ap := newTestApp(t)
 
 	// Write sidecar
-	sidecarBytes := []byte("{  \"Name\": \"TEST_subnet\",\n  \"VM\": \"Lux EVM\",\n  \"Subnet\": \"TEST_subnet\"\n  }")
-	sidecarPath := ap.GetSidecarPath(subnetName1)
+	sidecarBytes := []byte("{  \"Name\": \"TEST_chain\",\n  \"VM\": \"Lux EVM\",\n  \"Chain\": \"TEST_chain\"\n  }")
+	sidecarPath := ap.GetSidecarPath(chainName1)
 	err := os.MkdirAll(filepath.Dir(sidecarPath), constants.DefaultPerms755)
 	require.NoError(err)
 
@@ -194,13 +194,13 @@ func Test_loadSidecar_success(t *testing.T) {
 
 	// Check contents
 	expectedSc := models.Sidecar{
-		Name:      subnetName1,
+		Name:      chainName1,
 		VM:        vm,
-		Subnet:    subnetName1,
+		Chain:     chainName1,
 		TokenName: constants.DefaultTokenName,
 	}
 
-	sc, err := ap.LoadSidecar(subnetName1)
+	sc, err := ap.LoadSidecar(chainName1)
 	require.NoError(err)
 	require.Equal(sc, expectedSc)
 
@@ -215,11 +215,11 @@ func Test_loadSidecar_failure_notFound(t *testing.T) {
 	ap := newTestApp(t)
 
 	// Assert file doesn't exist at start
-	sidecarPath := ap.GetSidecarPath(subnetName1)
+	sidecarPath := ap.GetSidecarPath(chainName1)
 	_, err := os.Stat(sidecarPath)
 	require.Error(err)
 
-	_, err = ap.LoadSidecar(subnetName1)
+	_, err = ap.LoadSidecar(chainName1)
 	require.Error(err)
 }
 
@@ -230,7 +230,7 @@ func Test_loadSidecar_failure_malformed(t *testing.T) {
 
 	// Write sidecar
 	sidecarBytes := []byte("bad_sidecar")
-	sidecarPath := ap.GetSidecarPath(subnetName1)
+	sidecarPath := ap.GetSidecarPath(chainName1)
 	err := os.MkdirAll(filepath.Dir(sidecarPath), constants.DefaultPerms755)
 	require.NoError(err)
 
@@ -242,7 +242,7 @@ func Test_loadSidecar_failure_malformed(t *testing.T) {
 	require.NoError(err)
 
 	// Check contents
-	_, err = ap.LoadSidecar(subnetName1)
+	_, err = ap.LoadSidecar(chainName1)
 	require.Error(err)
 
 	// Cleanup file
@@ -256,11 +256,11 @@ func Test_genesisExists(t *testing.T) {
 	ap := newTestApp(t)
 
 	// Assert file doesn't exist at start
-	result := ap.GenesisExists(subnetName1)
+	result := ap.GenesisExists(chainName1)
 	require.False(result)
 
 	// Create genesis
-	genesisPath := ap.GetGenesisPath(subnetName1)
+	genesisPath := ap.GetGenesisPath(chainName1)
 	genesisBytes := []byte("genesis")
 	err := os.MkdirAll(filepath.Dir(genesisPath), constants.DefaultPerms755)
 	require.NoError(err)
@@ -268,7 +268,7 @@ func Test_genesisExists(t *testing.T) {
 	require.NoError(err)
 
 	// Verify genesis exists
-	result = ap.GenesisExists(subnetName1)
+	result = ap.GenesisExists(chainName1)
 	require.True(result)
 
 	// Clean up created genesis

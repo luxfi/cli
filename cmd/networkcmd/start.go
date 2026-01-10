@@ -357,12 +357,12 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 	defer func() { _ = cli.Close() }()
 
-	// Build node config - auto-detect deployed subnets for tracking
-	trackSubnets := ""
+	// Build node config - auto-detect deployed chains for tracking
+	trackChains := ""
 	netIDs, trackErr := chain.GetLocallyDeployedNetIDs(app)
 	if trackErr == nil && len(netIDs) > 0 {
-		trackSubnets = strings.Join(netIDs, ",")
-		ux.Logger.PrintToUser("Auto-tracking %d deployed subnet(s): %s", len(netIDs), trackSubnets)
+		trackChains = strings.Join(netIDs, ",")
+		ux.Logger.PrintToUser("Auto-tracking %d deployed chain(s): %s", len(netIDs), trackChains)
 	}
 
 	// Use "all" to auto-track all chains including newly deployed ones
@@ -568,6 +568,19 @@ func startPublicNetwork(cfg networkConfig) error {
 	// Save network state for deploy commands to find the running network
 	grpcPorts := binutils.GetGRPCPorts(cfg.networkName)
 	networkState := application.CreateNetworkStateWithGRPC(cfg.networkName, cfg.networkID, effectivePortBase, grpcPorts.Server, grpcPorts.Gateway)
+
+	// Derive and store validator addresses
+	validators := deriveValidatorAddresses(cfg.networkID, numValidators)
+	networkState.Validators = validators
+	if len(validators) > 0 {
+		networkState.ActiveAccount = &application.ActiveAccountInfo{
+			Index:         validators[0].Index,
+			PChainAddress: validators[0].PChainAddress,
+			XChainAddress: validators[0].XChainAddress,
+			CChainAddress: validators[0].CChainAddress,
+		}
+	}
+
 	if err := app.SaveNetworkState(networkState); err != nil {
 		ux.Logger.PrintToUser("Warning: failed to save network state: %v", err)
 	}
@@ -794,4 +807,44 @@ func displayValidatorKeys(networkID uint32, numValidators int) {
 			ux.Logger.PrintToUser("  [%d] P: %s | C: %s", v.Index, v.PChainAddr, v.CChainAddr)
 		}
 	}
+}
+
+// deriveValidatorAddresses derives and returns validator addresses for storing in network state
+// Priority: LUX_MNEMONIC > LUX_PRIVATE_KEY
+func deriveValidatorAddresses(networkID uint32, numValidators int) []application.ValidatorInfo {
+	var validators []application.ValidatorInfo
+
+	// Check for mnemonic-based derivation first (allows deriving N validators)
+	if mnemonic := key.GetMnemonicFromEnv(); mnemonic != "" {
+		for i := 0; i < numValidators; i++ {
+			keySet, err := key.DeriveAllKeysWithAccount(fmt.Sprintf("validator%d", i+1), mnemonic, uint32(i))
+			if err != nil {
+				continue
+			}
+			sf, err := key.NewSoftFromMnemonicWithAccount(networkID, mnemonic, uint32(i))
+			if err != nil {
+				continue
+			}
+			validators = append(validators, application.ValidatorInfo{
+				Index:         i + 1,
+				NodeID:        keySet.NodeID,
+				PChainAddress: sf.P()[0],
+				XChainAddress: sf.X()[0],
+				CChainAddress: sf.C(),
+			})
+		}
+	} else if privKey := os.Getenv("LUX_PRIVATE_KEY"); privKey != "" {
+		// Single key from LUX_PRIVATE_KEY
+		sf, err := key.NewSoft(networkID, key.WithPrivateKeyEncoded(privKey))
+		if err == nil {
+			validators = append(validators, application.ValidatorInfo{
+				Index:         1,
+				PChainAddress: sf.P()[0],
+				XChainAddress: sf.X()[0],
+				CChainAddress: sf.C(),
+			})
+		}
+	}
+
+	return validators
 }

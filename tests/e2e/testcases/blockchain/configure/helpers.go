@@ -26,14 +26,14 @@ func getPerNodeChainConfig(nodesRPCTxFeeCap map[string]int) string {
 	return perNodeChainConfig
 }
 
-func subnetConfigLog(nodeID string) string {
+func chainConfigLog(nodeID string) string {
 	if nodeID == "" {
 		return "\"validatorOnly\":false,\"allowedNodes\":[]"
 	}
 	return fmt.Sprintf("\"validatorOnly\":true,\"allowedNodes\":[\"%s\"]", nodeID)
 }
 
-func getSubnetConfig(nodeID string) string {
+func getChainConfig(nodeID string) string {
 	return fmt.Sprintf("{\"validatorOnly\": true, \"allowedNodes\": [\"%s\"]}", nodeID)
 }
 

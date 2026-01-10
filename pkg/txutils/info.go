@@ -11,26 +11,26 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/vm/vms/platformvm"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
 // GetNetwork returns the network model associated with a tx.
-// Expected tx.Unsigned types: txs.AddChainValidatorTx, txs.CreateChainTx.
+// Expected tx.Unsigned types: txs.AddChainValidatorTx, txs.CreateChainTx, etc.
 func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	unsignedTx := tx.Unsigned
 	var networkID uint32
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveChainValidatorTx:
-		networkID = unsignedTx.NetworkID
+		networkID = unsignedTx.BaseTx.NetworkID
 	case *txs.AddChainValidatorTx:
-		networkID = unsignedTx.NetworkID
+		networkID = unsignedTx.BaseTx.NetworkID
 	case *txs.CreateChainTx:
-		networkID = unsignedTx.NetworkID
+		networkID = unsignedTx.BaseTx.NetworkID
 	case *txs.ConvertChainToL1Tx:
-		networkID = unsignedTx.NetworkID
+		networkID = unsignedTx.BaseTx.NetworkID
 	default:
 		return models.Undefined, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
@@ -60,35 +60,35 @@ func IsCreateChainTx(tx *txs.Tx) bool {
 	return ok
 }
 
-// SubnetOwners contains the ownership information for a subnet
-type SubnetOwners struct {
+// ChainOwners contains the ownership information for a chain
+type ChainOwners struct {
 	IsPermissioned bool
 	ControlKeys    []string
 	Threshold      uint32
 }
 
-// GetSubnetOwners retrieves ownership information for a subnet
-func GetSubnetOwners(network models.Network, subnetID ids.ID) (*SubnetOwners, error) {
+// GetChainOwners retrieves ownership information for a chain
+func GetChainOwners(network models.Network, chainID ids.ID) (*ChainOwners, error) {
 	pClient, err := getPlatformClient(network)
 	if err != nil {
 		return nil, err
 	}
 
-	tx, err := getSubnetTx(pClient, subnetID)
+	tx, err := getChainTx(pClient, chainID)
 	if err != nil {
 		return nil, err
 	}
 
-	createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
+	createNetworkTx, ok := tx.Unsigned.(*txs.CreateNetworkTx)
 	if !ok {
-		return nil, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, subnetID)
+		return nil, fmt.Errorf("got unexpected type %T for network tx %s", tx.Unsigned, chainID)
 	}
 
-	owner, ok := createSubnetTx.Owner.(*secp256k1fx.OutputOwners)
+	owner, ok := createNetworkTx.Owner.(*secp256k1fx.OutputOwners)
 	if !ok {
 		// If not a standard OutputOwners, it might be a different owner type
 		// For now, treat as non-permissioned
-		return &SubnetOwners{IsPermissioned: false}, nil
+		return &ChainOwners{IsPermissioned: false}, nil
 	}
 
 	// Format control keys as strings
@@ -97,7 +97,7 @@ func GetSubnetOwners(network models.Network, subnetID ids.ID) (*SubnetOwners, er
 		return nil, err
 	}
 
-	return &SubnetOwners{
+	return &ChainOwners{
 		IsPermissioned: true,
 		ControlKeys:    controlKeysStrs,
 		Threshold:      owner.Threshold,
@@ -105,8 +105,8 @@ func GetSubnetOwners(network models.Network, subnetID ids.ID) (*SubnetOwners, er
 }
 
 // GetOwners returns ownership information in the legacy format (for backward compatibility)
-func GetOwners(network models.Network, subnetID ids.ID) (bool, []string, uint32, error) {
-	owners, err := GetSubnetOwners(network, subnetID)
+func GetOwners(network models.Network, chainID ids.ID) (bool, []string, uint32, error) {
+	owners, err := GetChainOwners(network, chainID)
 	if err != nil {
 		return false, nil, 0, err
 	}
@@ -130,16 +130,16 @@ func getPlatformClient(network models.Network) (*platformvm.Client, error) {
 	return platformvm.NewClient(api), nil
 }
 
-func getSubnetTx(pClient *platformvm.Client, subnetID ids.ID) (*txs.Tx, error) {
+func getChainTx(pClient *platformvm.Client, chainID ids.ID) (*txs.Tx, error) {
 	ctx := context.Background()
-	txBytes, err := pClient.GetTx(ctx, subnetID)
+	txBytes, err := pClient.GetTx(ctx, chainID)
 	if err != nil {
-		return nil, fmt.Errorf("subnet tx %s query error: %w", subnetID, err)
+		return nil, fmt.Errorf("chain tx %s query error: %w", chainID, err)
 	}
 
 	var tx txs.Tx
 	if _, err := txs.Codec.Unmarshal(txBytes, &tx); err != nil {
-		return nil, fmt.Errorf("couldn't unmarshal tx %s: %w", subnetID, err)
+		return nil, fmt.Errorf("couldn't unmarshal tx %s: %w", chainID, err)
 	}
 	return &tx, nil
 }

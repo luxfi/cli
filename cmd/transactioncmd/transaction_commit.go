@@ -9,14 +9,14 @@ import (
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
 // lux transaction commit
 func newTransactionCommitCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:          "commit [subnetName]",
+		Use:          "commit [chainName]",
 		Short:        "commit a transaction",
 		Long:         "The transaction commit command commits a transaction by submitting it to the P-Chain.",
 		RunE:         commitTx,
@@ -46,30 +46,30 @@ func commitTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	subnetName := args[0]
-	sc, err := app.LoadSidecar(subnetName)
+	chainName := args[0]
+	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.String()].SubnetID
-	if subnetID == ids.Empty {
-		return errNoSubnetID
+	chainID := sc.Networks[network.String()].ChainID
+	if chainID == ids.Empty {
+		return errNoChainID
 	}
 
-	_, controlKeys, _, err := txutils.GetOwners(network, subnetID)
+	_, controlKeys, _, err := txutils.GetOwners(network, chainID)
 	if err != nil {
 		return err
 	}
-	subnetAuthKeys, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	chainAuthKeys, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return err
 	}
 
-	if len(remainingSubnetAuthKeys) != 0 {
-		signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
-		ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(subnetAuthKeys))
-		ux.Logger.PrintToUser("Remaining signers for %s:", subnetName)
-		for _, addr := range remainingSubnetAuthKeys {
+	if len(remainingChainAuthKeys) != 0 {
+		signedCount := len(chainAuthKeys) - len(remainingChainAuthKeys)
+		ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(chainAuthKeys))
+		ux.Logger.PrintToUser("Remaining signers for %s:", chainName)
+		for _, addr := range remainingChainAuthKeys {
 			ux.Logger.PrintToUser("  - %s", addr)
 		}
 		ux.Logger.PrintToUser("Transaction file: %s", inputTxPath)
@@ -92,10 +92,10 @@ func commitTx(_ *cobra.Command, args []string) error {
 	}
 
 	if txutils.IsCreateChainTx(tx) {
-		ux.Logger.PrintToUser("Blockchain %s deployed successfully", subnetName)
-		ux.Logger.PrintToUser("Chain ID: %s", subnetID)
+		ux.Logger.PrintToUser("Blockchain %s deployed successfully", chainName)
+		ux.Logger.PrintToUser("Chain ID: %s", chainID)
 		ux.Logger.PrintToUser("Blockchain ID: %s", txID)
-		return app.UpdateSidecarNetworks(&sc, network, subnetID, txID)
+		return app.UpdateSidecarNetworks(&sc, network, chainID, txID)
 	}
 	ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", txID)
 

@@ -13,19 +13,19 @@ import (
 )
 
 const (
-	subnetName = "e2eSubnetTest"
+	chainName = "e2eChainTest"
 )
 
 var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 	})
 
-	ginkgo.It("can stop and restart a deployed subnet", func() {
-		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
-		deployOutput := commands.DeploySubnetLocally(subnetName)
+	ginkgo.It("can stop and restart a deployed chain", func() {
+		commands.CreateEVMConfig(chainName, utils.EVMGenesisPath)
+		deployOutput := commands.DeployChainLocally(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -76,12 +76,12 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("clean hard deletes plugin binaries", func() {
-		commands.CreateEVMConfig(subnetName, utils.EVMGenesisPath)
-		deployOutput := commands.DeploySubnetLocally(subnetName)
+		commands.CreateEVMConfig(chainName, utils.EVMGenesisPath)
+		deployOutput := commands.DeployChainLocally(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -103,6 +103,6 @@ var _ = ginkgo.Describe("[Network]", ginkgo.Ordered, func() {
 		gomega.Expect(len(plugins)).Should(gomega.Equal(0))
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 })

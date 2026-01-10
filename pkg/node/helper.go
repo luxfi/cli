@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
+	sdkutils "github.com/luxfi/utils"
 )
 
 const (
@@ -119,13 +119,13 @@ func CheckClusterExists(app *application.Lux, clusterName string) (bool, error) 
 	return exists, nil
 }
 
-func CheckHostsAreRPCCompatible(app *application.Lux, hosts []*models.Host, subnetName string) error {
-	incompatibleNodes, err := getRPCIncompatibleNodes(app, hosts, subnetName)
+func CheckHostsAreRPCCompatible(app *application.Lux, hosts []*models.Host, chainName string) error {
+	incompatibleNodes, err := getRPCIncompatibleNodes(app, hosts, chainName)
 	if err != nil {
 		return err
 	}
 	if len(incompatibleNodes) > 0 {
-		sc, err := app.LoadSidecar(subnetName)
+		sc, err := app.LoadSidecar(chainName)
 		if err != nil {
 			return err
 		}
@@ -133,19 +133,19 @@ func CheckHostsAreRPCCompatible(app *application.Lux, hosts []*models.Host, subn
 		ux.Logger.PrintToUser("To modify your Lux Go version: https://docs.lux.network/nodes/maintain/upgrade-your-luxd-node")
 		switch sc.VM {
 		case models.EVM:
-			ux.Logger.PrintToUser("To modify your EVM version: https://docs.lux.network/build/subnet/upgrade/upgrade-subnet-vm")
+			ux.Logger.PrintToUser("To modify your EVM version: https://docs.lux.network/build/chain/upgrade/upgrade-chain-vm")
 		case models.CustomVM:
-			ux.Logger.PrintToUser("To modify your Custom VM binary: lux blockchain upgrade vm %s --config", subnetName)
+			ux.Logger.PrintToUser("To modify your Custom VM binary: lux blockchain upgrade vm %s --config", chainName)
 		}
 		ux.Logger.PrintToUser("Yoy can use \"lux node upgrade\" to upgrade Lux Go and/or EVM to their latest versions")
-		return fmt.Errorf("the Lux Go version of node(s) %s is incompatible with VM RPC version of %s", incompatibleNodes, subnetName)
+		return fmt.Errorf("the Lux Go version of node(s) %s is incompatible with VM RPC version of %s", incompatibleNodes, chainName)
 	}
 	return nil
 }
 
-func getRPCIncompatibleNodes(app *application.Lux, hosts []*models.Host, subnetName string) ([]string, error) {
-	ux.Logger.PrintToUser("Checking compatibility of node(s) lux go RPC protocol version with Subnet EVM RPC of blockchain %s ...", subnetName)
-	sc, err := app.LoadSidecar(subnetName)
+func getRPCIncompatibleNodes(app *application.Lux, hosts []*models.Host, chainName string) ([]string, error) {
+	ux.Logger.PrintToUser("Checking compatibility of node(s) lux go RPC protocol version with Chain EVM RPC of blockchain %s ...", chainName)
+	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return nil, err
 	}

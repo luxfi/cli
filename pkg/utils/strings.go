@@ -9,18 +9,16 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
-
-	"github.com/luxfi/sdk/utils"
 )
 
 // SplitComaSeparatedString splits and trims a comma-separated string into a slice of strings.
 func SplitComaSeparatedString(s string) []string {
-	return utils.Map(strings.Split(s, ","), strings.TrimSpace)
+	return mapSlice(strings.Split(s, ","), strings.TrimSpace)
 }
 
 // SplitComaSeparatedInt splits a comma-separated string into a slice of integers.
 func SplitComaSeparatedInt(s string) []int {
-	return utils.Map(SplitComaSeparatedString(s), func(item string) int {
+	return mapSlice(SplitComaSeparatedString(s), func(item string) int {
 		num, _ := strconv.Atoi(item)
 		return num
 	})
@@ -39,7 +37,7 @@ func SplitStringWithQuotes(str string, r rune) []string {
 
 // AddSingleQuotes adds single quotes to each string in the given slice.
 func AddSingleQuotes(s []string) []string {
-	return utils.Map(s, func(item string) string {
+	return mapSlice(s, func(item string) string {
 		if item == "" {
 			return "''"
 		}
@@ -63,7 +61,7 @@ func CleanupString(s string) string {
 
 // CleanupStrings cleans up a slice of strings by trimming \r and \n characters.
 func CleanupStrings(s []string) []string {
-	return utils.Map(s, CleanupString)
+	return mapSlice(s, CleanupString)
 }
 
 // Formats an amount of base units as a string representing the amount in the given denomination.
@@ -78,4 +76,12 @@ func FormatAmount(amount *big.Int, decimals uint8) string {
 // Removes the leading 0x/0X part of a hexadecimal string representation
 func TrimHexa(s string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(s, "0x"), "0X")
+}
+
+func mapSlice[T, U any](input []T, f func(T) U) []U {
+	output := make([]U, 0, len(input))
+	for _, e := range input {
+		output = append(output, f(e))
+	}
+	return output
 }

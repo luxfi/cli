@@ -15,7 +15,7 @@ type AllocationEntry struct {
 	Balance string
 }
 
-// EVMGenesisParams contains parameters for Subnet EVM genesis
+// EVMGenesisParams contains parameters for Chain EVM genesis
 type EVMGenesisParams struct {
 	UseDefaults         bool
 	Interop             bool
@@ -43,7 +43,7 @@ func PromptDefaults(app *application.Lux, defaultsKind DefaultsKind, vmType mode
 	return defaultsKind, nil
 }
 
-// PromptEVMVersion prompts for Subnet EVM version
+// PromptEVMVersion prompts for Chain EVM version
 func PromptEVMVersion(app *application.Lux, vmType models.VMType, version string) (string, error) {
 	if version != "" {
 		return version, nil
@@ -66,7 +66,7 @@ func PromptInterop(app *application.Lux, vmType models.VMType, version string, c
 	return interop, nil
 }
 
-// PromptEVMGenesisParams prompts for Subnet EVM genesis parameters
+// PromptEVMGenesisParams prompts for Chain EVM genesis parameters
 func PromptEVMGenesisParams(
 	app *application.Lux,
 	params EVMGenesisParams,

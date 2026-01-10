@@ -19,15 +19,15 @@ type TokenInfo struct {
 
 // NetworkData contains deployment information for a network.
 type NetworkData struct {
-	SubnetID                   ids.ID
+	ChainID                    ids.ID
 	BlockchainID               ids.ID
 	RPCVersion                 int
-	RPCEndpoints               []string          // RPC endpoints for the network
-	WSEndpoints                []string          // WebSocket endpoints for the network
-	TeleporterRegistryAddress  string            // Teleporter registry address
-	TeleporterMessengerAddress string            // Teleporter messenger address
-	ValidatorManagerAddress    string            // Validator manager contract address
-	BootstrapValidators        []SubnetValidator // Bootstrap validators for the network
+	RPCEndpoints               []string         // RPC endpoints for the network
+	WSEndpoints                []string         // WebSocket endpoints for the network
+	TeleporterRegistryAddress  string           // Teleporter registry address
+	TeleporterMessengerAddress string           // Teleporter messenger address
+	ValidatorManagerAddress    string           // Validator manager contract address
+	BootstrapValidators        []ChainValidator // Bootstrap validators for the network
 }
 
 // MultisigTxInfo contains multisig transaction information.
@@ -41,9 +41,9 @@ type PermissionlessValidators struct {
 	TxID ids.ID
 }
 
-// ElasticChain contains elastic subnet configuration.
+// ElasticChain contains elastic chain configuration.
 type ElasticChain struct {
-	SubnetID    ids.ID
+	ChainID     ids.ID
 	AssetID     ids.ID
 	PChainTXID  ids.ID
 	TokenName   string
@@ -58,12 +58,12 @@ type Sidecar struct {
 	VM              VMType
 	VMVersion       string
 	RPCVersion      int
-	Subnet          string
-	SubnetID        ids.ID
+	Chain           string
+	ChainID         ids.ID
 	BlockchainID    ids.ID
 	TokenName       string
 	TokenSymbol     string
-	ChainID         string
+	EVMChainID      string
 	Version         string
 	Networks        map[string]NetworkData
 	ElasticChain    map[string]ElasticChain
@@ -76,7 +76,7 @@ type Sidecar struct {
 	CustomVMBuildScript string
 
 	// L1/L2 Architecture (2025)
-	Sovereign     bool   `json:"sovereign"`     // true for L1, false for L2/subnet
+	Sovereign     bool   `json:"sovereign"`     // true for L1, false for L2/chain
 	BaseChain     string `json:"baseChain"`     // For L2s: ethereum, lux-l1, lux, op-mainnet
 	BasedRollup   bool   `json:"basedRollup"`   // true for L1-sequenced rollups
 	SequencerType string `json:"sequencerType"` // based, centralized, distributed
@@ -94,7 +94,7 @@ type Sidecar struct {
 	ValidatorManagement string `json:"validatorManagement"` // proof-of-authority, proof-of-stake
 
 	// Migration info
-	MigratedAt int64 `json:"migratedAt"` // When subnet became L1
+	MigratedAt int64 `json:"migratedAt"` // When chain became L1
 
 	// Chain layer (1=L1, 2=L2, 3=L3)
 	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
@@ -116,9 +116,9 @@ func (sc Sidecar) GetVMID() (string, error) {
 	return vmid, nil
 }
 
-// MigrationTx represents a subnet to L1 migration transaction
+// MigrationTx represents a chain to L1 migration transaction
 type MigrationTx struct {
-	SubnetID            ids.ID `json:"subnetId"`
+	ChainID             ids.ID `json:"chainId"`
 	BlockchainID        ids.ID `json:"blockchainId"`
 	ValidatorManagement string `json:"validatorManagement"`
 	RentalPlan          string `json:"rentalPlan"`
