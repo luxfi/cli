@@ -233,8 +233,8 @@ func (m *Manager) LoadDeployedChains() error {
 	_ = cCfg.LoadGlobal()
 
 	// Load deployed chains from sidecars
-	subnetDir := m.app.GetChainsDir()
-	entries, err := os.ReadDir(subnetDir)
+	chainDir := m.app.GetChainsDir()
+	entries, err := os.ReadDir(chainDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil

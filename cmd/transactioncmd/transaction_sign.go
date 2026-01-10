@@ -24,7 +24,7 @@ var (
 	useLedger       bool
 	ledgerAddresses []string
 
-	errNoSubnetID                 = errors.New("failed to find the subnet ID for this subnet, has it been deployed/created on this network?")
+	errNoChainID                  = errors.New("failed to find the chain ID for this chain, has it been deployed/created on this network?")
 	errMutuallyExclusiveKeyLedger = errors.New("--key and --ledger/--ledger-addrs are mutually exclusive")
 	errStoredKeyOnMainnet         = errors.New("--key is not available for mainnet operations")
 )
@@ -32,7 +32,7 @@ var (
 // lux transaction sign
 func newTransactionSignCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:          "sign [subnetName]",
+		Use:          "sign [chainName]",
 		Short:        "sign a transaction",
 		Long:         "The transaction sign command signs a multisig transaction.",
 		RunE:         signTx,
@@ -90,31 +90,31 @@ func signTx(_ *cobra.Command, args []string) error {
 		return errors.New("unsupported network")
 	}
 
-	// we need subnet wallet signing validation + process
-	subnetName := args[0]
-	sc, err := app.LoadSidecar(subnetName)
+	// we need chain wallet signing validation + process
+	chainName := args[0]
+	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.String()].SubnetID
-	if subnetID == ids.Empty {
-		return errNoSubnetID
+	chainID := sc.Networks[network.String()].ChainID
+	if chainID == ids.Empty {
+		return errNoChainID
 	}
 
-	_, controlKeys, _, err := txutils.GetOwners(network, subnetID)
+	_, controlKeys, _, err := txutils.GetOwners(network, chainID)
 	if err != nil {
 		return err
 	}
 
 	// get the remaining tx signers so as to check that the wallet does contain an expected signer
-	subnetAuthKeys, remainingSubnetAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	chainAuthKeys, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return err
 	}
 
-	if len(remainingSubnetAuthKeys) == 0 {
-		ux.Logger.PrintToUser("Transaction for %s is ready to commit", subnetName)
-		ux.Logger.PrintToUser("Run: lux transaction commit %s --input-tx-filepath %s", subnetName, inputTxPath)
+	if len(remainingChainAuthKeys) == 0 {
+		ux.Logger.PrintToUser("Transaction for %s is ready to commit", chainName)
+		ux.Logger.PrintToUser("Run: lux transaction commit %s --input-tx-filepath %s", chainName, inputTxPath)
 		return nil
 	}
 
@@ -125,12 +125,12 @@ func signTx(_ *cobra.Command, args []string) error {
 	}
 
 	deployer := chain.NewPublicDeployer(app, useLedger, kc.Keychain, network)
-	if err := deployer.Sign(tx, remainingSubnetAuthKeys, subnetID); err != nil {
-		if errors.Is(err, chain.ErrNoSubnetAuthKeysInWallet) {
-			ux.Logger.PrintToUser("There are no required subnet auth keys present in the wallet")
+	if err := deployer.Sign(tx, remainingChainAuthKeys, chainID); err != nil {
+		if errors.Is(err, chain.ErrNoChainAuthKeysInWallet) {
+			ux.Logger.PrintToUser("There are no required chain auth keys present in the wallet")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("Expected one of:")
-			for _, addr := range remainingSubnetAuthKeys {
+			for _, addr := range remainingChainAuthKeys {
 				ux.Logger.PrintToUser("  %s", addr)
 			}
 			return nil
@@ -139,7 +139,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	}
 
 	// update the remaining tx signers after the signature has been done
-	_, remainingSubnetAuthKeys, err = txutils.GetRemainingSigners(tx, controlKeys)
+	_, remainingChainAuthKeys, err = txutils.GetRemainingSigners(tx, controlKeys)
 	if err != nil {
 		return err
 	}
@@ -149,11 +149,11 @@ func signTx(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	signedCount := len(subnetAuthKeys) - len(remainingSubnetAuthKeys)
-	ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(subnetAuthKeys))
-	if len(remainingSubnetAuthKeys) > 0 {
+	signedCount := len(chainAuthKeys) - len(remainingChainAuthKeys)
+	ux.Logger.PrintToUser("%d of %d required signatures have been signed.", signedCount, len(chainAuthKeys))
+	if len(remainingChainAuthKeys) > 0 {
 		ux.Logger.PrintToUser("Remaining signers:")
-		for _, addr := range remainingSubnetAuthKeys {
+		for _, addr := range remainingChainAuthKeys {
 			ux.Logger.PrintToUser("  - %s", addr)
 		}
 	} else {

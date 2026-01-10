@@ -14,10 +14,10 @@ import (
 	"github.com/onsi/gomega"
 )
 
-type SubnetManagementType uint
+type ChainManagementType uint
 
 const (
-	Unknown SubnetManagementType = iota
+	Unknown ChainManagementType = iota
 	PoA
 	PoS
 )
@@ -28,29 +28,29 @@ const (
 )
 
 func CreateEtnaEVMConfig(
-	subnetName string,
+	chainName string,
 	ewoqEVMAddress string,
-	subnetManagementType SubnetManagementType,
+	chainManagementType ChainManagementType,
 ) (string, string) {
 	// Check config does not already exist
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeFalse())
 
 	rewardBasisPoints := ""
-	subnetManagementStr := PoAString
-	if subnetManagementType == PoS {
+	chainManagementStr := PoAString
+	if chainManagementType == PoS {
 		rewardBasisPoints = "--reward-basis-points=1000000000"
-		subnetManagementStr = PoSString
+		chainManagementStr = PoSString
 	}
 	// Create config
 	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
 		"create",
-		subnetName,
+		chainName,
 		"--evm",
-		fmt.Sprintf("--%s", subnetManagementStr),
+		fmt.Sprintf("--%s", chainManagementStr),
 		"--validator-manager-owner",
 		ewoqEVMAddress,
 		"--proxy-contract-owner",
@@ -74,7 +74,7 @@ func CreateEtnaEVMConfig(
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	// Config should now exist
-	exists, err = utils.SubnetConfigExists(subnetName)
+	exists, err = utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
@@ -136,7 +136,7 @@ func DestroyLocalNode(
 }
 
 func DeployEtnaBlockchain(
-	subnetName string,
+	chainName string,
 	clusterName string,
 	bootstrapEndpoints []string,
 	ewoqPChainAddress string,
@@ -151,15 +151,15 @@ func DeployEtnaBlockchain(
 		bootstrapEndpointsFlag = "--bootstrap-endpoints=" + strings.Join(bootstrapEndpoints, ",")
 	}
 	// Check config exists
-	exists, err := utils.SubnetConfigExists(subnetName)
+	exists, err := utils.ChainConfigExists(chainName)
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
-	// Deploy subnet on etna devnet with local machine as bootstrap validator
+	// Deploy chain on etna devnet with local machine as bootstrap validator
 	args := []string{
 		"blockchain",
 		"deploy",
-		subnetName,
+		chainName,
 		"--ewoq",
 		"--change-owner-address",
 		ewoqPChainAddress,
@@ -188,9 +188,9 @@ func DeployEtnaBlockchain(
 	return string(output), err
 }
 
-func TrackLocalEtnaSubnet(
+func TrackLocalEtnaChain(
 	clusterName string,
-	subnetName string,
+	chainName string,
 ) (string, error) {
 	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
@@ -198,7 +198,7 @@ func TrackLocalEtnaSubnet(
 		"local",
 		"track",
 		clusterName,
-		subnetName,
+		chainName,
 		"--"+constants.SkipUpdateFlag,
 	)
 	fmt.Println(cmd)
@@ -213,7 +213,7 @@ func TrackLocalEtnaSubnet(
 }
 
 func InitValidatorManager(
-	subnetName string,
+	chainName string,
 	clusterName string,
 	endpoint string,
 	blockchainID string,
@@ -222,7 +222,7 @@ func InitValidatorManager(
 		CLIBinary,
 		"contract",
 		"initValidatorManager",
-		subnetName,
+		chainName,
 		"--cluster",
 		clusterName,
 		"--endpoint",
@@ -243,9 +243,9 @@ func InitValidatorManager(
 	return string(output), err
 }
 
-func AddEtnaSubnetValidatorToCluster(
+func AddEtnaChainValidatorToCluster(
 	clusterName string,
-	subnetName string,
+	chainName string,
 	nodeEndpoint string,
 	ewoqPChainAddress string,
 	balance int,
@@ -255,7 +255,7 @@ func AddEtnaSubnetValidatorToCluster(
 		CLIBinary,
 		"blockchain",
 		"addValidator",
-		subnetName,
+		chainName,
 		"--ewoq",
 		"--balance",
 		strconv.Itoa(balance),
@@ -295,9 +295,9 @@ func AddEtnaSubnetValidatorToCluster(
 	return string(output), err
 }
 
-func RemoveEtnaSubnetValidatorFromCluster(
+func RemoveEtnaChainValidatorFromCluster(
 	clusterName string,
-	subnetName string,
+	chainName string,
 	nodeEndpoint string,
 	keyName string,
 	uptimeSec uint64,
@@ -306,7 +306,7 @@ func RemoveEtnaSubnetValidatorFromCluster(
 		CLIBinary,
 		"blockchain",
 		"removeValidator",
-		subnetName,
+		chainName,
 		"--cluster",
 		clusterName,
 		"--node-endpoint",

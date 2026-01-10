@@ -61,8 +61,8 @@ NOTES:
 }
 
 func listChains(cmd *cobra.Command, args []string) error {
-	subnetDir := app.GetChainsDir()
-	entries, err := os.ReadDir(subnetDir)
+	chainDir := app.GetChainsDir()
+	entries, err := os.ReadDir(chainDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			fmt.Println("No chains configured")
@@ -80,7 +80,7 @@ func listChains(cmd *cobra.Command, args []string) error {
 			continue
 		}
 
-		sidecarPath := filepath.Join(subnetDir, entry.Name(), constants.SidecarFileName)
+		sidecarPath := filepath.Join(chainDir, entry.Name(), constants.SidecarFileName)
 		data, err := os.ReadFile(sidecarPath) //nolint:gosec // G304: Reading from app's data directory
 		if err != nil {
 			continue
@@ -112,7 +112,7 @@ func listChains(cmd *cobra.Command, args []string) error {
 		_ = table.Append([]string{
 			sc.Name,
 			chainType,
-			sc.ChainID,
+			sc.EVMChainID,
 			string(sc.VM),
 			sequencer,
 			deployed,

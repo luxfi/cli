@@ -15,6 +15,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/net"
 )
 
 type configInputs struct {
@@ -104,7 +105,7 @@ func WriteLokiConfig(filePath string, port string) error {
 }
 
 func WritePromtailConfig(filePath string, lokiIP string, lokiPort string, host string, nodeID string, chainID string) error {
-	if !utils.IsValidIP(lokiIP) {
+	if !netutil.IsValidIP(lokiIP) {
 		return fmt.Errorf("invalid IP address: %s", lokiIP)
 	}
 	config, err := GenerateConfig("configs/promtail.yml", "Promtail Config", configInputs{

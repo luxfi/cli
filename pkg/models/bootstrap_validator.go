@@ -4,8 +4,8 @@
 // Package models contains data structures and types used throughout the CLI.
 package models
 
-// SubnetValidator represents a validator configuration for a subnet.
-type SubnetValidator struct {
+// ChainValidator represents a validator configuration for a chain.
+type ChainValidator struct {
 	NodeID string `json:"NodeID"`
 
 	Weight uint64 `json:"Weight"`

@@ -8,9 +8,9 @@ import (
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/api"
+	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/rpc"
-	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/sdk/api"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -19,9 +19,9 @@ type PClient struct {
 	mock.Mock
 }
 
-// GetCurrentValidators provides a mock function with given fields: ctx, subnetID, nodeIDs, options
-func (m *PClient) GetCurrentValidators(ctx context.Context, subnetID ids.ID, nodeIDs []ids.NodeID, options ...rpc.Option) ([]platformvm.ClientPermissionlessValidator, error) {
-	args := []interface{}{ctx, subnetID, nodeIDs}
+// GetCurrentValidators provides a mock function with given fields: ctx, chainID, nodeIDs, options
+func (m *PClient) GetCurrentValidators(ctx context.Context, chainID ids.ID, nodeIDs []ids.NodeID, options ...rpc.Option) ([]platformvm.ClientPermissionlessValidator, error) {
+	args := []interface{}{ctx, chainID, nodeIDs}
 	for _, opt := range options {
 		args = append(args, opt)
 	}
@@ -29,7 +29,7 @@ func (m *PClient) GetCurrentValidators(ctx context.Context, subnetID ids.ID, nod
 
 	var r0 []platformvm.ClientPermissionlessValidator
 	if rf, ok := ret.Get(0).(func(context.Context, ids.ID, []ids.NodeID) []platformvm.ClientPermissionlessValidator); ok {
-		r0 = rf(ctx, subnetID, nodeIDs)
+		r0 = rf(ctx, chainID, nodeIDs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]platformvm.ClientPermissionlessValidator)
@@ -38,7 +38,7 @@ func (m *PClient) GetCurrentValidators(ctx context.Context, subnetID ids.ID, nod
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, ids.ID, []ids.NodeID) error); ok {
-		r1 = rf(ctx, subnetID, nodeIDs)
+		r1 = rf(ctx, chainID, nodeIDs)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -6,11 +6,13 @@ import (
 
 // Network represents a Lux network (mainnet, testnet, devnet, custom)
 type Network struct {
-	Name      string
-	Nodes     []Node
-	Chains    []ChainStatus
-	Endpoints []EndpointStatus
-	Metadata  NetworkMetadata
+	Name          string
+	Nodes         []Node
+	Chains        []ChainStatus
+	Endpoints     []EndpointStatus
+	Metadata      NetworkMetadata
+	Validators    []ValidatorAccount // Validator accounts with addresses and balances
+	ActiveAccount *ActiveAccount     // Currently active account for operations
 }
 
 // NetworkMetadata contains additional network information
@@ -43,6 +45,36 @@ type Node struct {
 	PChainAddress    string
 	XChainAddress    string
 	CChainAddress    string
+	// Balances (in nLUX for P/X, wei for C)
+	PChainBalance uint64
+	XChainBalance uint64
+	CChainBalance string // hex string for large balances
+}
+
+// ValidatorAccount represents a validator's addresses and balances
+type ValidatorAccount struct {
+	Index         int    `json:"index"`
+	NodeID        string `json:"nodeID"`
+	PChainAddress string `json:"pChainAddress"`
+	XChainAddress string `json:"xChainAddress"`
+	CChainAddress string `json:"cChainAddress"` // 0x format
+	// Balances
+	PChainBalance    uint64 `json:"pChainBalance"`    // nLUX
+	XChainBalance    uint64 `json:"xChainBalance"`    // nLUX
+	CChainBalance    string `json:"cChainBalance"`    // wei (hex)
+	CChainBalanceLUX string `json:"cChainBalanceLUX"` // human readable
+	// Staking info
+	StakeWeight  uint64 `json:"stakeWeight"`
+	DelegatorFee uint64 `json:"delegatorFee"`
+	IsActive     bool   `json:"isActive"` // Is this the active account for operations
+}
+
+// ActiveAccount represents the currently active account for network operations
+type ActiveAccount struct {
+	Index         int    `json:"index"`
+	PChainAddress string `json:"pChainAddress"`
+	XChainAddress string `json:"xChainAddress"`
+	CChainAddress string `json:"cChainAddress"`
 }
 
 // ChainStatus represents the status of a chain

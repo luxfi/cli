@@ -15,8 +15,8 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/validator"
+	sdkutils "github.com/luxfi/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -152,11 +152,11 @@ func getNodeValidationID(
 		if sc.Networks[network.Name()].ValidatorManagerAddress == "" {
 			return ids.Empty, false, fmt.Errorf("unable to find Validator Manager address")
 		}
-		subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
+		chainID, err := contract.GetNetworkID(app.GetSDKApp(), network, chainSpec)
 		if err != nil {
 			return ids.Empty, false, err
 		}
-		validators, err := validator.GetCurrentValidators(network, subnetID)
+		validators, err := validator.GetCurrentValidators(network, chainID)
 		if err != nil {
 			return ids.Empty, false, err
 		}

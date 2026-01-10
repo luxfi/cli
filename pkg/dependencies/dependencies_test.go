@@ -179,7 +179,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			expectedResult:    "v1.20.3-testnet",
 		},
 		{
-			name:              "evm dependency, where cli latest.json doesn't support newest subnet evm version yet",
+			name:              "evm dependency, where cli latest.json doesn't support newest chain evm version yet",
 			dependency:        constants.EVMRepoName,
 			cliDependencyData: testCLICompat,
 			expectedError:     false,
@@ -187,7 +187,7 @@ func TestGetLatestCLISupportedDependencyVersion(t *testing.T) {
 			latestVersion:     "v0.7.4",
 		},
 		{
-			name:              "evm dependency, where cli supports newest subnet evm version",
+			name:              "evm dependency, where cli supports newest chain evm version",
 			dependency:        constants.EVMRepoName,
 			cliDependencyData: testCLICompat,
 			expectedError:     false,
@@ -264,7 +264,7 @@ func TestGetLatestCLISupportedDependencyVersionWithLowerRPC(t *testing.T) {
 			latestVersion:     "v1.20.5",
 		},
 		{
-			name:              "evm dependency, where cli supports newest subnet evm version",
+			name:              "evm dependency, where cli supports newest chain evm version",
 			dependency:        constants.EVMRepoName,
 			cliDependencyData: testCLICompat,
 			expectedError:     false,

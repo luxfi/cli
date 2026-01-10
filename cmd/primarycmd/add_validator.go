@@ -212,7 +212,7 @@ func addValidator(_ *cobra.Command, _ []string) error {
 			return fmt.Errorf("delegation fee has to be larger than %d", defaultFee)
 		}
 	}
-	// For primary network, use AddValidator with empty subnet ID
+	// For primary network, use AddValidator with empty chain ID
 	// AddValidator returns (bool, *txs.Tx, []string, error)
 	// The popBytes and recipientAddr are used for PoS validators, but primary network uses the simpler model
 	_, _, _, err = deployer.AddValidator(nil, nil, ids.Empty, nodeID, weight, start, duration)

@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-func CreateCustomSubnetConfig(app *application.Lux, subnetName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {
-	ux.Logger.PrintToUser("creating custom VM net %s", subnetName)
+func CreateCustomChainConfig(app *application.Lux, chainName string, genesisPath, vmPath string) ([]byte, *models.Sidecar, error) {
+	ux.Logger.PrintToUser("creating custom VM net %s", chainName)
 
 	genesisBytes, err := loadCustomGenesis(app, genesisPath)
 	if err != nil {
@@ -20,13 +20,13 @@ func CreateCustomSubnetConfig(app *application.Lux, subnetName string, genesisPa
 	}
 
 	sc := &models.Sidecar{
-		Name:      subnetName,
+		Name:      chainName,
 		VM:        models.CustomVM,
-		Subnet:    subnetName,
+		Chain:     chainName,
 		TokenName: "",
 	}
 
-	err = CopyCustomVM(app, subnetName, vmPath)
+	err = CopyCustomVM(app, chainName, vmPath)
 
 	return genesisBytes, sc, err
 }
@@ -44,7 +44,7 @@ func loadCustomGenesis(app *application.Lux, genesisPath string) ([]byte, error)
 	return genesisBytes, err
 }
 
-func CopyCustomVM(app *application.Lux, subnetName string, vmPath string) error {
+func CopyCustomVM(app *application.Lux, chainName string, vmPath string) error {
 	var err error
 	if vmPath == "" {
 		vmPath, err = app.Prompt.CaptureExistingFilepath("Enter path to vm binary")
@@ -53,5 +53,5 @@ func CopyCustomVM(app *application.Lux, subnetName string, vmPath string) error 
 		}
 	}
 
-	return app.CopyVMBinary(vmPath, subnetName)
+	return app.CopyVMBinary(vmPath, chainName)
 }

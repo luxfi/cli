@@ -8,19 +8,19 @@ import (
 	"fmt"
 
 	"github.com/luxfi/crypto/secp256k1"
-	"github.com/luxfi/vm/vms/components/verify"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/vm/components/verify"
+	"github.com/luxfi/node/vms/secp256k1fx"
 )
 
-// GetAuthSigners returns all subnet auth addresses that are required to sign a given tx.
-// It gets subnet control keys as string slice using P-Chain API (GetOwners),
-// gets subnet auth indices from the tx (field tx.UnsignedTx.SubnetAuth),
-// and creates the string slice of required subnet auth addresses by applying
+// GetAuthSigners returns all chain auth addresses that are required to sign a given tx.
+// It gets chain control keys as string slice using P-Chain API (GetOwners),
+// gets chain auth indices from the tx (field tx.UnsignedTx.ChainAuth),
+// and creates the string slice of required chain auth addresses by applying
 // the indices to the control keys slice.
 //
 // Expected tx.Unsigned types: txs.CreateChainTx, txs.AddChainValidatorTx, txs.RemoveChainValidatorTx.
-// controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners).
+// controlKeys must be in the same order as in the chain creation tx (as obtained by GetOwners).
 func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	unsignedTx := tx.Unsigned
 	var chainAuth verify.Verifiable
@@ -50,19 +50,19 @@ func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	return authSigners, nil
 }
 
-// GetRemainingSigners returns subnet auth addresses that have not yet signed a given tx.
+// GetRemainingSigners returns chain auth addresses that have not yet signed a given tx.
 // It verifies that all creds in tx.Creds (except the last one) are fully signed,
 // and computes remaining signers by iterating the last cred in tx.Creds.
 // If the tx is fully signed, returns empty slice.
 //
-// controlKeys must be in the same order as in the subnet creation tx (as obtained by GetOwners).
+// controlKeys must be in the same order as in the chain creation tx (as obtained by GetOwners).
 func GetRemainingSigners(tx *txs.Tx, controlKeys []string) ([]string, []string, error) {
 	authSigners, err := GetAuthSigners(tx, controlKeys)
 	if err != nil {
 		return nil, nil, err
 	}
 	emptySig := [secp256k1.SignatureLen]byte{}
-	// we should have at least 1 cred for output owners and 1 cred for subnet auth
+	// we should have at least 1 cred for output owners and 1 cred for chain auth
 	if len(tx.Creds) < 2 {
 		return nil, nil, fmt.Errorf("expected tx.Creds of len 2, got %d", len(tx.Creds))
 	}
@@ -78,7 +78,7 @@ func GetRemainingSigners(tx *txs.Tx, controlKeys []string) ([]string, []string, 
 			}
 		}
 	}
-	// signatures for subnet auth (last cred)
+	// signatures for chain auth (last cred)
 	cred, ok := tx.Creds[len(tx.Creds)-1].(*secp256k1fx.Credential)
 	if !ok {
 		return nil, nil, fmt.Errorf("expected cred to be of type *secp256k1fx.Credential, got %T", tx.Creds[1])

@@ -1,8 +1,8 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// Package elasticsubnet provides elastic subnet configuration and management.
-package elasticsubnet
+// Package elasticchain provides elastic chain configuration and management.
+package elasticchain
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/models"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/protocol/p/reward"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/vm/vms/platformvm/reward"
 )
 
 // default elastic config parameter values are from
-// https://docs.lux.network/subnets/reference-elastic-subnets-parameters#primary-network-parameters-on-mainnet
+// https://docs.lux.network/chains/reference-elastic-chains-parameters#primary-network-parameters-on-mainnet
 const (
 	defaultInitialSupply               = 240_000_000
 	defaultMaximumSupply               = 720_000_000
@@ -40,10 +40,10 @@ const (
 // GetElasticChainConfig returns the elastic chain configuration.
 func GetElasticChainConfig(app *application.Lux, tokenSymbol string, useDefaultConfig bool) (models.ElasticChainConfig, error) {
 	const (
-		defaultConfig   = "Use default elastic subnet config"
-		customizeConfig = "Customize elastic subnet config"
+		defaultConfig   = "Use default elastic chain config"
+		customizeConfig = "Customize elastic chain config"
 	)
-	elasticSubnetConfig := models.ElasticChainConfig{
+	elasticChainConfig := models.ElasticChainConfig{
 		InitialSupply:            defaultInitialSupply,
 		MaxSupply:                defaultMaximumSupply,
 		MinConsumptionRate:       defaultMinConsumptionRate * reward.PercentDenominator,
@@ -58,19 +58,19 @@ func GetElasticChainConfig(app *application.Lux, tokenSymbol string, useDefaultC
 		UptimeRequirement:        defaultUptimeRequirement * reward.PercentDenominator,
 	}
 	if useDefaultConfig {
-		return elasticSubnetConfig, nil
+		return elasticChainConfig, nil
 	}
-	elasticSubnetConfigOptions := []string{defaultConfig, customizeConfig}
+	elasticChainConfigOptions := []string{defaultConfig, customizeConfig}
 	chosenConfig, err := app.Prompt.CaptureList(
 		"How would you like to set fees",
-		elasticSubnetConfigOptions,
+		elasticChainConfigOptions,
 	)
 	if err != nil {
 		return models.ElasticChainConfig{}, err
 	}
 
 	if chosenConfig == defaultConfig {
-		return elasticSubnetConfig, nil
+		return elasticChainConfig, nil
 	}
 	customElasticChainConfig, err := getCustomElasticChainConfig(app, tokenSymbol)
 	if err != nil {
@@ -80,7 +80,7 @@ func GetElasticChainConfig(app *application.Lux, tokenSymbol string, useDefaultC
 }
 
 func getCustomElasticChainConfig(app *application.Lux, tokenSymbol string) (models.ElasticChainConfig, error) {
-	ux.Logger.PrintToUser("More info regarding elastic subnet parameters can be found at https://docs.lux.network/subnets/reference-elastic-subnets-parameters")
+	ux.Logger.PrintToUser("More info regarding elastic chain parameters can be found at https://docs.lux.network/chains/reference-elastic-chains-parameters")
 	initialSupply, err := getInitialSupply(app, tokenSymbol)
 	if err != nil {
 		return models.ElasticChainConfig{}, err
@@ -118,7 +118,7 @@ func getCustomElasticChainConfig(app *application.Lux, tokenSymbol string) (mode
 		return models.ElasticChainConfig{}, err
 	}
 
-	elasticSubnetConfig := models.ElasticChainConfig{
+	elasticChainConfig := models.ElasticChainConfig{
 		InitialSupply:            initialSupply,
 		MaxSupply:                maxSupply,
 		MinConsumptionRate:       minConsumptionRate,
@@ -132,7 +132,7 @@ func getCustomElasticChainConfig(app *application.Lux, tokenSymbol string) (mode
 		MaxValidatorWeightFactor: maxValidatorWeightFactor,
 		UptimeRequirement:        uptimeReq,
 	}
-	return elasticSubnetConfig, err
+	return elasticChainConfig, err
 }
 
 func getInitialSupply(app *application.Lux, tokenName string) (uint64, error) {
@@ -341,7 +341,7 @@ func getMinDelegatorStake(app *application.Lux) (uint64, error) {
 
 func getMaxValidatorWeightFactor(app *application.Lux) (byte, error) {
 	ux.Logger.PrintToUser("Select the Maximum Validator Weight Factor. A value of 1 effectively disables delegation")
-	ux.Logger.PrintToUser("More info can be found at https://docs.lux.network/subnets/reference-elastic-subnets-parameters#delegators-weight-checks")
+	ux.Logger.PrintToUser("More info can be found at https://docs.lux.network/chains/reference-elastic-chains-parameters#delegators-weight-checks")
 	ux.Logger.PrintToUser("Mainnet Maximum Validator Weight Factor is %d", defaultMaxValidatorWeightFactor)
 	maxValidatorWeightFactor, err := app.Prompt.CaptureUint64Compare(
 		"Maximum Validator Weight Factor",

@@ -16,24 +16,24 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-// GetLocallyDeployedSubnetsFromFile reads the list of locally deployed subnets from file.
-func GetLocallyDeployedSubnetsFromFile(app *application.Lux) ([]string, error) {
-	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
+// GetLocallyDeployedChainsFromFile reads the list of locally deployed chains from file.
+func GetLocallyDeployedChainsFromFile(app *application.Lux) ([]string, error) {
+	allChainDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		return nil, err
 	}
 
-	deployedSubnets := []string{}
+	deployedChains := []string{}
 
-	for _, subnetDir := range allSubnetDirs {
-		if !subnetDir.IsDir() {
+	for _, chainDir := range allChainDirs {
+		if !chainDir.IsDir() {
 			continue
 		}
 		// read sidecar file
-		sc, err := app.LoadSidecar(subnetDir.Name())
+		sc, err := app.LoadSidecar(chainDir.Name())
 		if errors.Is(err, os.ErrNotExist) {
 			// don't fail on missing sidecar file, just warn
-			ux.Logger.PrintToUser("warning: inconsistent subnet directory. No sidecar file found for subnet %s", subnetDir.Name())
+			ux.Logger.PrintToUser("warning: inconsistent chain directory. No sidecar file found for chain %s", chainDir.Name())
 			continue
 		}
 		if err != nil {
@@ -41,26 +41,26 @@ func GetLocallyDeployedSubnetsFromFile(app *application.Lux) ([]string, error) {
 		}
 
 		// check if sidecar contains local deployment info in Networks map
-		// if so, add to list of deployed subnets
+		// if so, add to list of deployed chains
 		if _, ok := sc.Networks[models.Local.String()]; ok {
-			deployedSubnets = append(deployedSubnets, sc.Name)
+			deployedChains = append(deployedChains, sc.Name)
 		}
 	}
 
-	return deployedSubnets, nil
+	return deployedChains, nil
 }
 
-// GetLocallyDeployedSubnetIDs returns a list of subnet IDs for locally deployed subnets
-// This is used for auto-tracking subnets when starting the local network
+// GetLocallyDeployedChainIDs returns a list of chain IDs for locally deployed chains
+// This is used for auto-tracking chains when starting the local network
 // Deprecated: Use GetLocallyDeployedNetIDs instead
-func GetLocallyDeployedSubnetIDs(app *application.Lux) ([]string, error) {
+func GetLocallyDeployedChainIDs(app *application.Lux) ([]string, error) {
 	return GetLocallyDeployedNetIDs(app)
 }
 
 // GetLocallyDeployedNetIDs returns a list of net IDs for locally deployed nets
 // This is used for auto-tracking nets when starting the local network
 func GetLocallyDeployedNetIDs(app *application.Lux) ([]string, error) {
-	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
+	allChainDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -68,36 +68,36 @@ func GetLocallyDeployedNetIDs(app *application.Lux) ([]string, error) {
 		return nil, err
 	}
 
-	subnetIDs := []string{}
+	chainIDs := []string{}
 
-	for _, subnetDir := range allSubnetDirs {
-		if !subnetDir.IsDir() {
+	for _, chainDir := range allChainDirs {
+		if !chainDir.IsDir() {
 			continue
 		}
 		// read sidecar file
-		sc, err := app.LoadSidecar(subnetDir.Name())
+		sc, err := app.LoadSidecar(chainDir.Name())
 		if err != nil {
 			continue // skip on any error
 		}
 
-		// check if sidecar contains local deployment info with a valid SubnetID
+		// check if sidecar contains local deployment info with a valid ChainID
 		if network, ok := sc.Networks[models.Local.String()]; ok {
-			if network.SubnetID.String() != "" && network.SubnetID.String() != PChainID {
-				subnetIDs = append(subnetIDs, network.SubnetID.String())
+			if network.ChainID.String() != "" && network.ChainID.String() != PChainID {
+				chainIDs = append(chainIDs, network.ChainID.String())
 			}
 		}
 	}
 
-	return subnetIDs, nil
+	return chainIDs, nil
 }
 
-// CopySubnetChainConfigsToNetwork copies chain configs from ~/.lux/subnets/<name>/ to each node's
+// CopyChainChainConfigsToNetwork copies chain configs from ~/.lux/chains/<name>/ to each node's
 // chainConfigs/<blockchainID>/ directory. This is necessary because evm requires genesis.json
 // in the chain config directory for initialization.
-// The canonical source is always ~/.lux/subnets/<name>/ and this function ensures
+// The canonical source is always ~/.lux/chains/<name>/ and this function ensures
 // the running network nodes have access to these configs.
-func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) error {
-	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
+func CopyChainChainConfigsToNetwork(app *application.Lux, networkDir string) error {
+	allChainDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -124,13 +124,13 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 	}
 
 	copiedCount := 0
-	for _, subnetDir := range allSubnetDirs {
-		if !subnetDir.IsDir() {
+	for _, chainDir := range allChainDirs {
+		if !chainDir.IsDir() {
 			continue
 		}
 
-		subnetName := subnetDir.Name()
-		sc, err := app.LoadSidecar(subnetName)
+		chainName := chainDir.Name()
+		sc, err := app.LoadSidecar(chainName)
 		if err != nil {
 			continue
 		}
@@ -147,9 +147,9 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 		}
 
 		// Source files from canonical location
-		subnetConfigDir := filepath.Join(app.GetChainsDir(), subnetName)
-		genesisFile := filepath.Join(subnetConfigDir, constants.GenesisFileName)
-		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFile)
+		chainConfigDir := filepath.Join(app.GetChainsDir(), chainName)
+		genesisFile := filepath.Join(chainConfigDir, constants.GenesisFileName)
+		chainConfigFile := filepath.Join(chainConfigDir, constants.ChainConfigFile)
 
 		// Check if genesis exists (required for evm)
 		if _, err := os.Stat(genesisFile); os.IsNotExist(err) {
@@ -160,14 +160,14 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 		for _, nodeDir := range nodeDirs {
 			destDir := filepath.Join(nodeDir, "chainConfigs", blockchainID)
 			if err := os.MkdirAll(destDir, 0o750); err != nil {
-				ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", subnetName, err)
+				ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", chainName, err)
 				continue
 			}
 
 			// Copy genesis.json
 			destGenesis := filepath.Join(destDir, "genesis.json")
 			if err := copyFile(genesisFile, destGenesis); err != nil {
-				ux.Logger.PrintToUser("Warning: failed to copy genesis for %s: %v", subnetName, err)
+				ux.Logger.PrintToUser("Warning: failed to copy genesis for %s: %v", chainName, err)
 				continue
 			}
 
@@ -175,7 +175,7 @@ func CopySubnetChainConfigsToNetwork(app *application.Lux, networkDir string) er
 			if _, err := os.Stat(chainConfigFile); err == nil {
 				destConfig := filepath.Join(destDir, "config.json")
 				if err := copyFile(chainConfigFile, destConfig); err != nil {
-					ux.Logger.PrintToUser("Warning: failed to copy chain config for %s: %v", subnetName, err)
+					ux.Logger.PrintToUser("Warning: failed to copy chain config for %s: %v", chainName, err)
 				}
 			}
 		}
@@ -208,7 +208,7 @@ func copyFile(src, dst string) error {
 }
 
 // PrepareCanonicalChainConfigs creates the canonical chain configs directory at ~/.lux/chains/
-// with subdirectories for each locally deployed subnet's blockchain ID.
+// with subdirectories for each locally deployed chain's blockchain ID.
 // This directory can be passed to nodes via --chain-config-dir flag so all nodes share
 // the same chain configs from a single source.
 // Returns the canonical chain configs directory path.
@@ -219,7 +219,7 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 		return "", err
 	}
 
-	allSubnetDirs, err := os.ReadDir(app.GetChainsDir())
+	allChainDirs, err := os.ReadDir(app.GetChainsDir())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return chainConfigsDir, nil
@@ -228,13 +228,13 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 	}
 
 	preparedCount := 0
-	for _, subnetDir := range allSubnetDirs {
-		if !subnetDir.IsDir() {
+	for _, chainDir := range allChainDirs {
+		if !chainDir.IsDir() {
 			continue
 		}
 
-		subnetName := subnetDir.Name()
-		sc, err := app.LoadSidecar(subnetName)
+		chainName := chainDir.Name()
+		sc, err := app.LoadSidecar(chainName)
 		if err != nil {
 			continue
 		}
@@ -250,10 +250,10 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 			continue
 		}
 
-		// Source files from canonical subnet location
-		subnetConfigDir := filepath.Join(app.GetChainsDir(), subnetName)
-		genesisFile := filepath.Join(subnetConfigDir, constants.GenesisFileName)
-		chainConfigFile := filepath.Join(subnetConfigDir, constants.ChainConfigFile)
+		// Source files from canonical chain location
+		chainConfigDir := filepath.Join(app.GetChainsDir(), chainName)
+		genesisFile := filepath.Join(chainConfigDir, constants.GenesisFileName)
+		chainConfigFile := filepath.Join(chainConfigDir, constants.ChainConfigFile)
 
 		// Check if genesis exists (required for evm)
 		if _, err := os.Stat(genesisFile); os.IsNotExist(err) {
@@ -263,21 +263,21 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 		// Create blockchain ID subdirectory
 		blockchainDir := filepath.Join(chainConfigsDir, blockchainID)
 		if err := os.MkdirAll(blockchainDir, 0o750); err != nil {
-			ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", subnetName, err)
+			ux.Logger.PrintToUser("Warning: failed to create chain config dir for %s: %v", chainName, err)
 			continue
 		}
 
 		// Copy genesis.json
 		destGenesis := filepath.Join(blockchainDir, "genesis.json")
 		if err := copyFile(genesisFile, destGenesis); err != nil {
-			ux.Logger.PrintToUser("Warning: failed to copy genesis for %s: %v", subnetName, err)
+			ux.Logger.PrintToUser("Warning: failed to copy genesis for %s: %v", chainName, err)
 			continue
 		}
 
 		// Create or update chain config with admin API enabled
 		destConfig := filepath.Join(blockchainDir, "config.json")
-		if err := writeSubnetConfig(chainConfigFile, destConfig); err != nil {
-			ux.Logger.PrintToUser("Warning: failed to write chain config for %s: %v", subnetName, err)
+		if err := writeChainConfig(chainConfigFile, destConfig); err != nil {
+			ux.Logger.PrintToUser("Warning: failed to write chain config for %s: %v", chainName, err)
 		}
 		preparedCount++
 	}
@@ -289,9 +289,9 @@ func PrepareCanonicalChainConfigs(app *application.Lux) (string, error) {
 	return chainConfigsDir, nil
 }
 
-// writeSubnetConfig creates a chain config for a subnet with admin API enabled
+// writeChainConfig creates a chain config for a chain with admin API enabled
 // If srcConfig exists, it merges admin settings into it; otherwise creates a default config
-func writeSubnetConfig(srcConfig, destConfig string) error {
+func writeChainConfig(srcConfig, destConfig string) error {
 	config := map[string]interface{}{
 		"eth-apis": []string{
 			"eth", "eth-filter", "net", "web3",
