@@ -15,6 +15,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/cli/pkg/vm"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/sdk/models"
@@ -56,7 +57,7 @@ OVERVIEW:
 CHAIN TYPES:
 
   l1    Sovereign L1 with independent validation
-  l2    Layer 2 rollup/subnet (default)
+  l2    Layer 2 rollup/chain (default)
   l3    App-specific L3 chain
 
 SEQUENCER OPTIONS (for L2):
@@ -288,10 +289,10 @@ func createChain(cmd *cobra.Command, args []string) error {
 	sc := models.Sidecar{
 		Name:              chainName,
 		VM:                vmType,
-		Net:               chainName, // Network name (not subnet)
+		Net:               chainName, // Network name (not chain)
 		TokenName:         resolvedTokenName,
 		TokenSymbol:       resolvedTokenSymbol,
-		ChainID:           fmt.Sprintf("%d", resolvedChainID),
+		EVMChainID:        fmt.Sprintf("%d", resolvedChainID),
 		Version:           "1.4.0",
 		BasedRollup:       chainType == "l2",
 		Sovereign:         chainType == "l1",
@@ -312,8 +313,10 @@ func createChain(cmd *cobra.Command, args []string) error {
 
 	// Handle custom VM
 	if useCustomVM && customVMBin != "" {
-		// TODO: Implement custom VM copy
-		ux.Logger.PrintToUser("Custom VM support coming soon")
+		if err := vm.CopyCustomVM(app, chainName, customVMBin); err != nil {
+			return fmt.Errorf("failed to copy custom VM binary: %w", err)
+		}
+		ux.Logger.PrintToUser("Copied custom VM binary")
 	}
 
 	// Get VM version and RPC version if using EVM
