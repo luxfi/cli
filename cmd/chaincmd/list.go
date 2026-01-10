@@ -112,7 +112,7 @@ func listChains(cmd *cobra.Command, args []string) error {
 		_ = table.Append([]string{
 			sc.Name,
 			chainType,
-			sc.EVMChainID,
+			sc.ChainID,
 			string(sc.VM),
 			sequencer,
 			deployed,

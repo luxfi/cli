@@ -292,7 +292,7 @@ func createChain(cmd *cobra.Command, args []string) error {
 		Net:               chainName, // Network name (not chain)
 		TokenName:         resolvedTokenName,
 		TokenSymbol:       resolvedTokenSymbol,
-		EVMChainID:        fmt.Sprintf("%d", resolvedChainID),
+		ChainID:           fmt.Sprintf("%d", resolvedChainID),
 		Version:           "1.4.0",
 		BasedRollup:       chainType == "l2",
 		Sovereign:         chainType == "l1",

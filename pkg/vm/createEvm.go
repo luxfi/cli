@@ -58,7 +58,7 @@ func CreateEvmConfig(app *application.Lux, chainName string, genesisPath string,
 			VM:         models.EVM,
 			VMVersion:  evmVersion,
 			RPCVersion: rpcVersion,
-			Chain:      chainName,
+			Subnet:     chainName,
 			TokenName:  "",
 		}
 	}
@@ -169,7 +169,7 @@ func createEvmGenesis(
 		VM:         models.EVM,
 		VMVersion:  vmVersion,
 		RPCVersion: rpcVersion,
-		Chain:      chainName,
+		Subnet:     chainName,
 		TokenName:  tokenName,
 	}
 

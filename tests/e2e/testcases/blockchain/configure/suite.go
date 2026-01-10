@@ -320,7 +320,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 		ginkgo.It("set chain config", func() {
 			// set chain config before deploy
 			chainConfig := getChainConfig(node1ID)
-			chainConfigPath, err := utils.CreateTmpFile(constants.ChainChainConfigFile, []byte(chainConfig))
+			chainConfigPath, err := utils.CreateTmpFile(constants.ChainConfigFile, []byte(chainConfig))
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, err = commands.ConfigureBlockchain(
 				utils.BlockchainName,
@@ -353,7 +353,7 @@ var _ = ginkgo.Describe("[Blockchain Configure]", ginkgo.Ordered, func() {
 			utils.CleanupLogs(nodesInfo, blockchainID)
 			// change chain config
 			chainConfig = getChainConfig(node2ID)
-			chainConfigPath, err = utils.CreateTmpFile(constants.ChainChainConfigFile, []byte(chainConfig))
+			chainConfigPath, err = utils.CreateTmpFile(constants.ChainConfigFile, []byte(chainConfig))
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, err = commands.ConfigureBlockchain(
 				utils.BlockchainName,

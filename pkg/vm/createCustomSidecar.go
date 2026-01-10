@@ -22,9 +22,9 @@ func CreateCustomSidecar(
 		}
 	}
 
-	// Always set Name and Chain from blockchainName
+	// Always set Name and Subnet from blockchainName
 	sc.Name = blockchainName
-	sc.Chain = blockchainName
+	sc.Subnet = blockchainName
 
 	// Update sidecar with custom VM information
 	sc.VM = models.CustomVM

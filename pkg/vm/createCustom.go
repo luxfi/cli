@@ -22,7 +22,7 @@ func CreateCustomChainConfig(app *application.Lux, chainName string, genesisPath
 	sc := &models.Sidecar{
 		Name:      chainName,
 		VM:        models.CustomVM,
-		Chain:     chainName,
+		Subnet:    chainName,
 		TokenName: "",
 	}
 

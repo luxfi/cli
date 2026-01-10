@@ -256,11 +256,11 @@ func replaceCustomVarDashboardValues(customGrafanaDashboardFileName, chainID str
 // RunSSHUpdateMonitoringDashboards updates monitoring dashboards on the remote host.
 func RunSSHUpdateMonitoringDashboards(host *models.Host, monitoringDashboardPath, customGrafanaDashboardPath, chainID string) error {
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
-	if !sdkfs.DirExists(monitoringDashboardPath) {
+	if !sdkutils.DirExists(monitoringDashboardPath) {
 		return fmt.Errorf("%s does not exist", monitoringDashboardPath)
 	}
-	if customGrafanaDashboardPath != "" && fs.FileExists(fs.ExpandHome(customGrafanaDashboardPath)) {
-		if err := utils.FileCopy(fs.ExpandHome(customGrafanaDashboardPath), filepath.Join(monitoringDashboardPath, constants.CustomGrafanaDashboardJSON)); err != nil {
+	if customGrafanaDashboardPath != "" && sdkutils.FileExists(sdkutils.ExpandHome(customGrafanaDashboardPath)) {
+		if err := utils.FileCopy(sdkutils.ExpandHome(customGrafanaDashboardPath), filepath.Join(monitoringDashboardPath, constants.CustomGrafanaDashboardJSON)); err != nil {
 			return err
 		}
 		if err := replaceCustomVarDashboardValues(filepath.Join(monitoringDashboardPath, constants.CustomGrafanaDashboardJSON), chainID); err != nil {
@@ -295,7 +295,7 @@ func RunSSHCopyMonitoringDashboards(host *models.Host, monitoringDashboardPath s
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
 
 	// If path is provided, use local dashboards
-	if monitoringDashboardPath != "" && sdkfs.DirExists(monitoringDashboardPath) {
+	if monitoringDashboardPath != "" && sdkutils.DirExists(monitoringDashboardPath) {
 		if err := host.MkdirAll(remoteDashboardsPath, constants.SSHFileOpsTimeout); err != nil {
 			return err
 		}
@@ -596,7 +596,7 @@ func RunSSHRenderLuxNodeConfig(
 		if err != nil {
 			return "", err
 		}
-		return sc.Networks[network.String()].ChainID.String(), nil
+		return sc.Networks[network.String()].SubnetID.String(), nil
 	})
 	if err != nil {
 		return err
@@ -741,7 +741,7 @@ func RunSSHSyncChainData(app *application.Lux, host *models.Host, network models
 	if err != nil {
 		return err
 	}
-	chainID := sc.Networks[network.String()].ChainID
+	chainID := sc.Networks[network.String()].SubnetID
 	if chainID == ids.Empty {
 		return errors.New("chain id is empty")
 	}
@@ -749,7 +749,7 @@ func RunSSHSyncChainData(app *application.Lux, host *models.Host, network models
 	blockchainID := sc.Networks[network.String()].BlockchainID
 	// genesis config
 	genesisFilename := filepath.Join(app.GetNodesDir(), host.GetCloudID(), constants.GenesisFileName)
-	if fs.FileExists(genesisFilename) {
+	if sdkutils.FileExists(genesisFilename) {
 		if err := host.Upload(genesisFilename, remoteconfig.GetRemoteLuxGenesis(), constants.SSHFileOpsTimeout); err != nil {
 			return fmt.Errorf("error uploading genesis config to %s: %w", remoteconfig.GetRemoteLuxGenesis(), err)
 		}
@@ -757,14 +757,14 @@ func RunSSHSyncChainData(app *application.Lux, host *models.Host, network models
 	// end genesis config
 	// chain node config
 	chainNodeConfigPath := app.GetLuxdNodeConfigPath(chainName)
-	if fs.FileExists(chainNodeConfigPath) {
+	if sdkutils.FileExists(chainNodeConfigPath) {
 		if err := mergeChainNodeConfig(host, chainNodeConfigPath); err != nil {
 			return err
 		}
 	}
 	// chain config
-	if app.LuxdChainConfigExists(chainName) {
-		chainConfig, err := app.LoadRawLuxdChainConfig(chainName)
+	if app.ChainConfigExists(chainName) {
+		chainConfig, err := app.LoadRawLuxdSubnetConfig(chainName)
 		if err != nil {
 			return fmt.Errorf("error loading blockchain config: %w", err)
 		}

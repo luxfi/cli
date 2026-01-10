@@ -69,11 +69,11 @@ var _ = ginkgo.Describe("[Upgrade expect network failure non SOV]", ginkgo.Order
 		app := utils.GetApp()
 		sc := models.Sidecar{
 			Name:     chainName,
-			Chain:    chainName,
+			Subnet:   chainName,
 			Networks: make(map[string]models.NetworkData),
 		}
 		sc.Networks[models.Local.String()] = models.NetworkData{
-			ChainID:      ids.GenerateTestID(),
+			SubnetID:     ids.GenerateTestID(),
 			BlockchainID: ids.GenerateTestID(),
 		}
 		err = app.UpdateSidecar(&sc)
@@ -109,7 +109,7 @@ var _ = ginkgo.Describe("[Upgrade public network non SOV]", ginkgo.Ordered, func
 		blockchainID := ids.GenerateTestID()
 		sc.Networks = make(map[string]models.NetworkData)
 		sc.Networks[models.Testnet.String()] = models.NetworkData{
-			ChainID:      ids.GenerateTestID(),
+			SubnetID:     ids.GenerateTestID(),
 			BlockchainID: blockchainID,
 		}
 		err = app.UpdateSidecar(&sc)

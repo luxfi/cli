@@ -142,8 +142,8 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 	// Create L3 configuration
 	sc := &models.Sidecar{
-		Name:  l3Name,
-		Chain: l3Name,
+		Name:   l3Name,
+		Subnet: l3Name,
 
 		// L3 specific
 		Sovereign:         false, // L3s are never sovereign
@@ -207,7 +207,7 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 // getAvailableL2s returns a list of available L2 configurations
 func getAvailableL2s() ([]string, error) {
-	chainDir := app.GetChainDir()
+	chainDir := app.GetChainsDir()
 	entries, err := os.ReadDir(chainDir)
 	if err != nil {
 		return nil, err
@@ -223,8 +223,8 @@ func getAvailableL2s() ([]string, error) {
 				if err == nil {
 					var sc models.Sidecar
 					if json.Unmarshal(data, &sc) == nil {
-						// Consider it an L2 if it has chain or blockchain configuration
-						if sc.Chain != "" || len(sc.Networks) > 0 {
+						// Consider it an L2 if it has subnet or blockchain configuration
+						if sc.Subnet != "" || len(sc.Networks) > 0 {
 							l2s = append(l2s, entry.Name())
 						}
 					}

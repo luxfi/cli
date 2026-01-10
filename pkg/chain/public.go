@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/vms/platformvm"
-	lux "github.com/luxfi/utxo"
+	lux "github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/components/verify"
 
 	"github.com/luxfi/address"
@@ -26,12 +26,12 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 // ErrNoChainAuthKeysInWallet indicates the wallet doesn't contain required chain auth keys.
@@ -667,10 +667,10 @@ func (d *PublicDeployer) createChainTx(controlKeys []string, threshold uint32, w
 	if d.usingLedger {
 		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
 	}
-	ux.Logger.PrintToUser("createNetworkTx: calling IssueCreateNetworkTx...")
-	tx, err := wallet.P().IssueCreateNetworkTx(owners, opts...)
+	ux.Logger.PrintToUser("createNetworkTx: calling IssueCreateSubnetTx...")
+	tx, err := wallet.P().IssueCreateSubnetTx(owners, opts...)
 	if err != nil {
-		ux.Logger.PrintToUser("createNetworkTx: IssueCreateNetworkTx error: %v", err)
+		ux.Logger.PrintToUser("createNetworkTx: IssueCreateSubnetTx error: %v", err)
 		return ids.Empty, err
 	}
 	ux.Logger.PrintToUser("createNetworkTx: tx issued successfully with ID: %s", tx.ID().String())
