@@ -38,7 +38,7 @@ func newDescribeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe",
 		Short: "Print details of the primary network configuration",
-		Long:  `The subnet describe command prints details of the primary network configuration to the console.`,
+		Long:  `The chain describe command prints details of the primary network configuration to the console.`,
 		RunE:  describe,
 		Args:  cobrautils.ExactArgs(0),
 	}
@@ -80,10 +80,15 @@ func describe(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			return err
 		}
-		// TODO: Fix cluster config access - might need type assertion or different method
-		// warpMessengerAddress = clusterConfig.ExtraNetworkData.CChainTeleporterMessengerAddress
-		// warpRegistryAddress = clusterConfig.ExtraNetworkData.CChainTeleporterRegistryAddress
-		_ = clusterConfig
+		// Access ExtraNetworkData from the config map
+		if extraData, ok := clusterConfig["ExtraNetworkData"].(map[string]interface{}); ok {
+			if addr, ok := extraData["CChainTeleporterMessengerAddress"].(string); ok {
+				warpMessengerAddress = addr
+			}
+			if addr, ok := extraData["CChainTeleporterRegistryAddress"].(string); ok {
+				warpRegistryAddress = addr
+			}
+		}
 	}
 	fmt.Print(luxlog.LightBlue.Wrap(art))
 	blockchainIDHexEncoding := "0x" + hex.EncodeToString(blockchainID[:])
