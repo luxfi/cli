@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 // GetNetwork returns the network model associated with a tx.
@@ -79,12 +79,12 @@ func GetChainOwners(network models.Network, chainID ids.ID) (*ChainOwners, error
 		return nil, err
 	}
 
-	createNetworkTx, ok := tx.Unsigned.(*txs.CreateNetworkTx)
+	createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
 	if !ok {
-		return nil, fmt.Errorf("got unexpected type %T for network tx %s", tx.Unsigned, chainID)
+		return nil, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, chainID)
 	}
 
-	owner, ok := createNetworkTx.Owner.(*secp256k1fx.OutputOwners)
+	owner, ok := createSubnetTx.Owner.(*secp256k1fx.OutputOwners)
 	if !ok {
 		// If not a standard OutputOwners, it might be a different owner type
 		// For now, treat as non-permissioned

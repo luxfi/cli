@@ -30,7 +30,7 @@ import (
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/utils"
 

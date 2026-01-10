@@ -11,9 +11,9 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/node/vms/platformvm/txs"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var (
