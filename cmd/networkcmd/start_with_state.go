@@ -16,23 +16,23 @@ import (
 
 // Known blockchain IDs
 const (
-	// MainnetSubnetBlockchainID is the known blockchain ID for the mainnet subnet
-	MainnetSubnetBlockchainID = "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+	// MainnetChainBlockchainID is the known blockchain ID for the mainnet chain
+	MainnetChainBlockchainID = "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 )
 
 var (
 	// New flags for existing state support
-	subnetStatePath string
-	subnetID        string
+	chainStatePath  string
+	chainID         string
 	blockchainID    string
 	statePath       string
 	importChainData string
 )
 
-// LoadExistingSubnetState loads an existing subnet database into the network
-func LoadExistingSubnetState(networkDir string) error {
+// LoadExistingChainState loads an existing chain database into the network
+func LoadExistingChainState(networkDir string) error {
 	// Check for default existing state if no paths specified
-	if subnetStatePath == "" && statePath == "" {
+	if chainStatePath == "" && statePath == "" {
 		// Check for default mainnet-regenesis database
 		defaultPath := filepath.Join(os.Getenv("HOME"), ".lux-cli", "runs", "mainnet-regenesis", "node1", "chains", "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB", "db")
 		info, err := os.Stat(defaultPath)
@@ -40,12 +40,12 @@ func LoadExistingSubnetState(networkDir string) error {
 			return nil // No existing state to load
 		}
 		ux.Logger.PrintToUser("Found existing mainnet-regenesis database at default location")
-		subnetStatePath = defaultPath
-		blockchainID = MainnetSubnetBlockchainID
+		chainStatePath = defaultPath
+		blockchainID = MainnetChainBlockchainID
 	}
 
 	// Determine which path to use
-	pathToUse := subnetStatePath
+	pathToUse := chainStatePath
 	if pathToUse == "" {
 		pathToUse = statePath
 	}
@@ -61,16 +61,16 @@ func LoadExistingSubnetState(networkDir string) error {
 		return loadStateFromChaindata(pathToUse, networkDir)
 	}
 
-	// For subnet databases, we need the blockchain ID
+	// For chain databases, we need the blockchain ID
 	if blockchainID == "" {
-		// Try to detect it from known subnet configurations
+		// Try to detect it from known chain configurations
 		blockchainID = detectBlockchainID(pathToUse)
 		if blockchainID == "" {
 			return fmt.Errorf("blockchain ID not provided and could not be detected")
 		}
 	}
 
-	// Target directory for the subnet database
+	// Target directory for the chain database
 	targetDir := filepath.Join(networkDir, "node1", "data", "chains", blockchainID, "db")
 
 	// Create parent directories
@@ -79,12 +79,12 @@ func LoadExistingSubnetState(networkDir string) error {
 	}
 
 	// Copy the database
-	ux.Logger.PrintToUser("Loading existing subnet state from %s", pathToUse)
+	ux.Logger.PrintToUser("Loading existing chain state from %s", pathToUse)
 	if err := copyDirectory(pathToUse, targetDir); err != nil {
-		return fmt.Errorf("failed to copy subnet database: %w", err)
+		return fmt.Errorf("failed to copy chain database: %w", err)
 	}
 
-	ux.Logger.PrintToUser("Successfully loaded existing subnet state for blockchain %s", blockchainID)
+	ux.Logger.PrintToUser("Successfully loaded existing chain state for blockchain %s", blockchainID)
 	return nil
 }
 
@@ -100,7 +100,7 @@ func loadStateFromChaindata(chainDataPath string, networkDir string) error {
 			// Parse metadata to get blockchain ID
 			// For now, we'll use a known mapping
 			if blockchainID == "" {
-				blockchainID = MainnetSubnetBlockchainID // Known subnet blockchain ID
+				blockchainID = MainnetChainBlockchainID // Known chain blockchain ID
 			}
 		}
 
@@ -125,8 +125,8 @@ func loadStateFromChaindata(chainDataPath string, networkDir string) error {
 func detectBlockchainID(dbPath string) string {
 	// Check if the path contains a known blockchain ID
 	knownIDs := map[string]string{
-		MainnetSubnetBlockchainID:                            "LUX Mainnet Subnet",
-		"2sdADEgBC3NjLM4inKc1hY1PQpCT3JVyGVJxdmcq6sqrDndjFG": "LUX Subnet",
+		MainnetChainBlockchainID:                             "LUX Mainnet Chain",
+		"2sdADEgBC3NjLM4inKc1hY1PQpCT3JVyGVJxdmcq6sqrDndjFG": "LUX Chain",
 	}
 
 	for id := range knownIDs {
@@ -135,8 +135,8 @@ func detectBlockchainID(dbPath string) string {
 		}
 	}
 
-	// Default to the known mainnet subnet ID if not detected
-	return MainnetSubnetBlockchainID
+	// Default to the known mainnet chain ID if not detected
+	return MainnetChainBlockchainID
 }
 
 // copyDirectory recursively copies a directory from src to dst
@@ -203,9 +203,9 @@ func copyFile(src, dst string) error {
 
 // AddStateFlags adds the state-related flags to the command
 func AddStateFlags(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&subnetStatePath, "subnet-state-path", "", "path to existing subnet database to load")
+	cmd.Flags().StringVar(&chainStatePath, "chain-state-path", "", "path to existing chain database to load")
 	cmd.Flags().StringVar(&statePath, "state-path", "", "path to existing state directory (e.g., ~/work/lux/state/chaindata/lux-mainnet-96369)")
-	cmd.Flags().StringVar(&subnetID, "subnet-id", "", "subnet ID for the loaded state")
+	cmd.Flags().StringVar(&chainID, "chain-id", "", "chain ID for the loaded state")
 	cmd.Flags().StringVar(&blockchainID, "blockchain-id", "", "blockchain ID for the loaded state")
 	cmd.Flags().StringVar(&importChainData, "import-chain-data", "", "path to import blockchain data from another chain into C-Chain")
 }

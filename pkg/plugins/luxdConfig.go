@@ -19,11 +19,11 @@ import (
 // Edits an Luxgo config file or creates one if it doesn't exist. Contains prompts unless forceWrite is set to true.
 func EditConfigFile(
 	app *application.Lux,
-	subnetID string,
+	chainID string,
 	network models.Network,
 	configFile string,
 	forceWrite bool,
-	subnetLuxdConfigFile string,
+	chainLuxdConfigFile string,
 ) error {
 	if !forceWrite {
 		warn := "This will edit your existing config file. This edit is nondestructive,\n" +
@@ -50,17 +50,17 @@ func EditConfigFile(
 		return fmt.Errorf("failed to unpack the config file %s to JSON: %w", configFile, err)
 	}
 
-	if subnetLuxdConfigFile != "" {
-		subnetLuxdConfigFileBytes, err := os.ReadFile(subnetLuxdConfigFile) //nolint:gosec // G304: Reading config from known location
+	if chainLuxdConfigFile != "" {
+		chainLuxdConfigFileBytes, err := os.ReadFile(chainLuxdConfigFile) //nolint:gosec // G304: Reading config from known location
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("failed to load extra flags from blockchain luxd config file %s: %w", subnetLuxdConfigFile, err)
+			return fmt.Errorf("failed to load extra flags from blockchain luxd config file %s: %w", chainLuxdConfigFile, err)
 		}
-		var subnetLuxdConfig map[string]interface{}
-		if err := json.Unmarshal(subnetLuxdConfigFileBytes, &subnetLuxdConfig); err != nil {
-			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", subnetLuxdConfigFile, err)
+		var chainLuxdConfig map[string]interface{}
+		if err := json.Unmarshal(chainLuxdConfigFileBytes, &chainLuxdConfig); err != nil {
+			return fmt.Errorf("failed to unpack the config file %s to JSON: %w", chainLuxdConfigFile, err)
 		}
-		for k, v := range subnetLuxdConfig {
-			if k == "track-chains" || k == "whitelisted-subnets" {
+		for k, v := range chainLuxdConfig {
+			if k == "track-chains" || k == "whitelisted-chains" {
 				ux.Logger.PrintToUser("ignoring configuration setting for %q, a blockchain luxd config file should not change it", k)
 				continue
 			}
@@ -68,17 +68,17 @@ func EditConfigFile(
 		}
 	}
 
-	// Banff.10: "track-chains" instead of "whitelisted-subnets"
+	// Banff.10: "track-chains" instead of "whitelisted-chains"
 	oldVal := luxdConfig["track-chains"]
 	if oldVal == nil {
-		// check the old key in the config file for tracked-subnets
-		oldVal = luxdConfig["whitelisted-subnets"]
+		// check the old key in the config file for tracked-chains
+		oldVal = luxdConfig["whitelisted-chains"]
 	}
 
 	newVal := ""
 	if oldVal != nil {
-		// if an entry already exists, we check if the subnetID already is part
-		// of the whitelisted-subnets...
+		// if an entry already exists, we check if the chainID already is part
+		// of the whitelisted-chains...
 		exists := false
 		var oldValStr string
 		var ok bool
@@ -87,23 +87,23 @@ func EditConfigFile(
 		}
 		elems := strings.Split(oldValStr, ",")
 		for _, s := range elems {
-			if s == subnetID {
+			if s == chainID {
 				// ...if it is, we just don't need to update the value...
 				newVal = oldVal.(string)
 				exists = true
 			}
 		}
-		// ...but if it is not, we concatenate the new subnet to the existing ones
+		// ...but if it is not, we concatenate the new chain to the existing ones
 		if !exists {
-			newVal = strings.Join([]string{oldVal.(string), subnetID}, ",")
+			newVal = strings.Join([]string{oldVal.(string), chainID}, ",")
 		}
 	} else {
-		// there were no entries yet, so add this subnet as its new value
-		newVal = subnetID
+		// there were no entries yet, so add this chain as its new value
+		newVal = chainID
 	}
 
-	// Banf.10 changes from "whitelisted-subnets" to "track-chains"
-	delete(luxdConfig, "whitelisted-subnets")
+	// Banf.10 changes from "whitelisted-chains" to "track-chains"
+	delete(luxdConfig, "whitelisted-chains")
 	luxdConfig["track-chains"] = newVal
 	luxdConfig["network-id"] = network.NetworkIDFlagValue()
 

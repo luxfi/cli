@@ -29,10 +29,10 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/api/info"
-	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/vm/vms/platformvm"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/utils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/mod/semver"
@@ -466,10 +466,6 @@ func FileIsEVMGenesis(genesisPath string) (bool, error) {
 		return false, err
 	}
 	return ByteSliceIsEVMGenesis(genesisBytes), nil
-}
-
-func GetDefaultBlockchainAirdropKeyName(blockchainName string) string {
-	return "subnet_" + blockchainName + "_airdrop"
 }
 
 // AppendSlices appends multiple slices into a single slice.

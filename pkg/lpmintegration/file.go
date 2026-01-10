@@ -37,24 +37,24 @@ func GetRepos(app *application.Lux) ([]string, error) {
 	return output, nil
 }
 
-// GetSubnets returns a list of subnets available in a repository.
-func GetSubnets(app *application.Lux, repoAlias string) ([]string, error) {
-	subnetDir := filepath.Join(app.LpmDir, "repositories", repoAlias, "subnets")
-	subnets, err := os.ReadDir(subnetDir)
+// GetChains returns a list of chains available in a repository.
+func GetChains(app *application.Lux, repoAlias string) ([]string, error) {
+	chainDir := filepath.Join(app.LpmDir, "repositories", repoAlias, "chains")
+	chains, err := os.ReadDir(chainDir)
 	if err != nil {
 		return []string{}, err
 	}
-	subnetOptions := make([]string, len(subnets))
-	for i, subnet := range subnets {
+	chainOptions := make([]string, len(chains))
+	for i, chain := range chains {
 		// Remove the .yaml extension
-		subnetOptions[i] = strings.TrimSuffix(subnet.Name(), filepath.Ext(subnet.Name()))
+		chainOptions[i] = strings.TrimSuffix(chain.Name(), filepath.Ext(chain.Name()))
 	}
 
-	return subnetOptions, nil
+	return chainOptions, nil
 }
 
-// Subnet represents an LPM subnet configuration.
-type Subnet struct {
+// Chain represents an LPM chain configuration.
+type Chain struct {
 	ID          string   `yaml:"id"`
 	Alias       string   `yaml:"alias"`
 	VM          string   `yaml:"vm"`
@@ -71,7 +71,7 @@ type VM struct {
 	VMType      string `yaml:"vm_type"`
 	Binary      string `yaml:"binary"`
 	ChainConfig string `yaml:"chain_config"`
-	Subnet      string `yaml:"subnet"`
+	Chain       string `yaml:"chain"`
 	Genesis     string `yaml:"genesis"`
 	Version     string `yaml:"version"`
 	URL         string `yaml:"url"`
@@ -80,9 +80,9 @@ type VM struct {
 	Description string `yaml:"description"`
 }
 
-// SubnetWrapper wraps a Subnet for YAML parsing.
-type SubnetWrapper struct {
-	Subnet Subnet `yaml:"subnet"`
+// ChainWrapper wraps a Chain for YAML parsing.
+type ChainWrapper struct {
+	Chain Chain `yaml:"chain"`
 }
 
 // VMWrapper wraps a VM for YAML parsing.
@@ -90,36 +90,36 @@ type VMWrapper struct {
 	VM VM `yaml:"vm"`
 }
 
-// LoadSubnetFile loads a subnet configuration from a YAML file.
-func LoadSubnetFile(app *application.Lux, subnetKey string) (Subnet, error) {
-	repoAlias, subnetName, err := splitKey(subnetKey)
+// LoadChainFile loads a chain configuration from a YAML file.
+func LoadChainFile(app *application.Lux, chainKey string) (Chain, error) {
+	repoAlias, chainName, err := splitKey(chainKey)
 	if err != nil {
-		return Subnet{}, err
+		return Chain{}, err
 	}
 
-	subnetYamlPath := filepath.Join(app.LpmDir, "repositories", repoAlias, "subnets", subnetName+".yaml")
-	var subnetWrapper SubnetWrapper
+	chainYamlPath := filepath.Join(app.LpmDir, "repositories", repoAlias, "chains", chainName+".yaml")
+	var chainWrapper ChainWrapper
 
-	subnetYamlBytes, err := os.ReadFile(subnetYamlPath) //nolint:gosec // G304: Reading from app's data directory
+	chainYamlBytes, err := os.ReadFile(chainYamlPath) //nolint:gosec // G304: Reading from app's data directory
 	if err != nil {
-		return Subnet{}, err
+		return Chain{}, err
 	}
 
-	err = yaml.Unmarshal(subnetYamlBytes, &subnetWrapper)
+	err = yaml.Unmarshal(chainYamlBytes, &chainWrapper)
 	if err != nil {
-		return Subnet{}, err
+		return Chain{}, err
 	}
 
-	return subnetWrapper.Subnet, nil
+	return chainWrapper.Chain, nil
 }
 
-func getVMsInSubnet(app *application.Lux, subnetKey string) ([]string, error) {
-	subnet, err := LoadSubnetFile(app, subnetKey)
+func getVMsInChain(app *application.Lux, chainKey string) ([]string, error) {
+	chain, err := LoadChainFile(app, chainKey)
 	if err != nil {
 		return []string{}, err
 	}
 
-	return subnet.VMs, nil
+	return chain.VMs, nil
 }
 
 // LoadVMFile loads a VM configuration from a YAML file.

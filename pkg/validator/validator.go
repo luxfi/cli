@@ -7,13 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	luxdjson "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
-	luxdjson "github.com/luxfi/codec/jsonrpc"
-	"github.com/luxfi/rpc"
-	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/utils"
 
 	"github.com/luxfi/crypto"
 )
@@ -35,8 +35,8 @@ type CurrentValidatorInfo struct {
 	Balance      luxdjson.Uint64 `json:"balance"`
 }
 
-func GetTotalWeight(network models.Network, subnetID ids.ID) (uint64, error) {
-	validators, err := GetCurrentValidators(network, subnetID)
+func GetTotalWeight(network models.Network, chainID ids.ID) (uint64, error) {
+	validators, err := GetCurrentValidators(network, chainID)
 	if err != nil {
 		return 0, err
 	}
@@ -47,8 +47,8 @@ func GetTotalWeight(network models.Network, subnetID ids.ID) (uint64, error) {
 	return weight, nil
 }
 
-func IsValidator(network models.Network, subnetID ids.ID, nodeID ids.NodeID) (bool, error) {
-	validators, err := GetCurrentValidators(network, subnetID)
+func IsValidator(network models.Network, chainID ids.ID, nodeID ids.NodeID) (bool, error) {
+	validators, err := GetCurrentValidators(network, chainID)
 	if err != nil {
 		return false, err
 	}
@@ -67,7 +67,7 @@ func GetValidatorBalance(net models.Network, validationID ids.ID) (uint64, error
 }
 
 func GetValidatorInfo(net models.Network, validationID ids.ID) (CurrentValidatorInfo, error) {
-	// Use GetCurrentValidators as L1 validators are part of subnet validators
+	// Use GetCurrentValidators as L1 validators are part of chain validators
 	validators, err := GetCurrentValidators(net, ids.Empty)
 	if err != nil {
 		return CurrentValidatorInfo{}, err
@@ -117,13 +117,13 @@ func GetValidationID(
 
 func GetValidatorKind(
 	network models.Network,
-	subnetID ids.ID,
+	chainID ids.ID,
 	nodeID ids.NodeID,
 ) (ValidatorKind, error) {
 	pClient := platformvm.NewClient(network.Endpoint())
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
-	vs, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+	vs, err := pClient.GetCurrentValidators(ctx, chainID, nil)
 	if err != nil {
 		return UndefinedValidatorKind, err
 	}
@@ -139,7 +139,7 @@ func GetValidatorKind(
 }
 
 // Enables querying the validation IDs from P-Chain
-func GetCurrentValidators(network models.Network, subnetID ids.ID) ([]CurrentValidatorInfo, error) {
+func GetCurrentValidators(network models.Network, chainID ids.ID) ([]CurrentValidatorInfo, error) {
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
 	requester := rpc.NewEndpointRequester(network.Endpoint() + "/ext/P")
@@ -148,7 +148,7 @@ func GetCurrentValidators(network models.Network, subnetID ids.ID) ([]CurrentVal
 		ctx,
 		"platform.getCurrentValidators",
 		&platformvm.GetCurrentValidatorsArgs{
-			NetID:   subnetID,
+			NetID:   chainID,
 			NodeIDs: nil,
 		},
 		res,

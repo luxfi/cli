@@ -9,8 +9,10 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/luxfi/constants"
@@ -20,9 +22,41 @@ import (
 	"github.com/luxfi/crypto/secp256k1"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/vms/platformvm"
 	luxtls "github.com/luxfi/tls"
-	"github.com/luxfi/vm/vms/platformvm"
 )
+
+// SplitRPCURI parses an RPC URL like "http://127.0.0.1:9650/ext/bc/C/rpc"
+// into network endpoint ("http://127.0.0.1:9650") and blockchain ID ("C")
+func SplitRPCURI(rpcURL string) (string, string, error) {
+	u, err := url.Parse(rpcURL)
+	if err != nil {
+		return "", "", fmt.Errorf("invalid RPC URL: %w", err)
+	}
+
+	// Extract the path components
+	// Expected format: /ext/bc/<chainID>/rpc
+	path := strings.TrimPrefix(u.Path, "/")
+	parts := strings.Split(path, "/")
+
+	// Find the blockchain ID after "bc/"
+	var blockchainID string
+	for i, part := range parts {
+		if part == "bc" && i+1 < len(parts) {
+			blockchainID = parts[i+1]
+			break
+		}
+	}
+
+	if blockchainID == "" {
+		return "", "", fmt.Errorf("could not extract blockchain ID from URL: %s", rpcURL)
+	}
+
+	// Build the network endpoint (scheme + host)
+	networkEndpoint := fmt.Sprintf("%s://%s", u.Scheme, u.Host)
+
+	return networkEndpoint, blockchainID, nil
+}
 
 func NewBlsSecretKeyBytes() ([]byte, error) {
 	blsSignerKey, err := localsigner.New()
@@ -95,11 +129,11 @@ func GetNodeParams(nodeDir string) (
 	return nodeID, blsPub, blsPoP, nil
 }
 
-func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, subnetID ids.ID, startTime time.Time) (time.Duration, error) {
+func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, chainID ids.ID, startTime time.Time) (time.Duration, error) {
 	ctx, cancel := GetAPIContext()
 	defer cancel()
 	platformCli := platformvm.NewClient(networkEndpoint)
-	vs, err := platformCli.GetCurrentValidators(ctx, subnetID, nil)
+	vs, err := platformCli.GetCurrentValidators(ctx, chainID, nil)
 	cancel()
 	if err != nil {
 		return 0, err

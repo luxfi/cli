@@ -18,7 +18,7 @@ func newValidatorCmd() *cobra.Command {
 
 Validators can participate in multiple protocols:
 - Lux L1s (sovereign blockchains)
-- Legacy Lux subnets
+- Legacy Lux chains
 - OP Stack L2/L3 chains
 - Other blockchain protocols
 
@@ -110,7 +110,7 @@ func newValidatorProtocolsCmd() *cobra.Command {
 			ux.Logger.PrintToUser("   - Native Lux consensus")
 			ux.Logger.PrintToUser("")
 			ux.Logger.PrintToUser("🔺 Lux Protocol")
-			ux.Logger.PrintToUser("   - Legacy subnet support")
+			ux.Logger.PrintToUser("   - Legacy chain support")
 			ux.Logger.PrintToUser("   - C-Chain compatibility")
 			ux.Logger.PrintToUser("   - Lux consensus")
 			ux.Logger.PrintToUser("")

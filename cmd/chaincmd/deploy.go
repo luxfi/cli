@@ -100,14 +100,14 @@ DEPLOYMENT PROCESS:
   2. Verifies network is running
   3. Checks VM plugin is installed
   4. Creates blockchain on the network
-  5. Updates sidecar with deployment info (subnet ID, blockchain ID)
+  5. Updates sidecar with deployment info (chain ID, blockchain ID)
   6. Returns endpoints for the deployed chain
 
 OUTPUT:
 
   On success, displays:
   - Blockchain ID
-  - Subnet ID
+  - Chain ID
   - RPC endpoints for each validator node
 
 TROUBLESHOOTING:
@@ -217,6 +217,7 @@ func verifyVMInstalled(chainName string, sc *models.Sidecar) error {
 
 	// Get plugins directory path - plugins/current is the active plugins directory
 	pluginPath := filepath.Join(app.GetCurrentPluginsDir(), vmIDStr)
+	app.Log.Debug("Checking plugin path", "path", pluginPath, "vmid", vmIDStr, "pluginsDir", app.GetCurrentPluginsDir())
 
 	// Check if plugin exists
 	info, err := os.Lstat(pluginPath)
@@ -377,7 +378,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	genesisPath := app.GetGenesisPath(chainName)
 
 	// Deploy to locally-running network (works for local, testnet, mainnet started via CLI)
-	subnetID, blockchainID, err := deployer.DeployToLocalNetwork(chainName, chainGenesis, genesisPath)
+	chainID, blockchainID, err := deployer.DeployToLocalNetwork(chainName, chainGenesis, genesisPath)
 	if err != nil {
 		// Check if this is a DeploymentError (chain-specific failure)
 		var deployErr *chain.DeploymentError
@@ -406,7 +407,7 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	}
 
 	// Update sidecar with deployment info (using the target network)
-	if err := app.UpdateSidecarNetworks(sc, network, subnetID, blockchainID); err != nil {
+	if err := app.UpdateSidecarNetworks(sc, network, chainID, blockchainID); err != nil {
 		return fmt.Errorf("failed to update sidecar: %w", err)
 	}
 	return nil

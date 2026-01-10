@@ -216,7 +216,7 @@ func newUpgradeProtocolCmd() *cobra.Command {
 		Use:   "protocol [l1Name]",
 		Short: "Add protocol support to L1",
 		Long: `Add support for additional protocols to your L1:
-- lux: Enable Lux subnet compatibility
+- lux: Enable Lux chain compatibility
 - opstack: Enable OP Stack L2/L3 support
 - cosmos: Enable IBC compatibility
 
@@ -268,7 +268,7 @@ EXAMPLES:
 			case "Lux Compatibility":
 				ux.Logger.PrintToUser("\nEnabling Lux compatibility...")
 				ux.Logger.PrintToUser("This allows your L1 to:")
-				ux.Logger.PrintToUser("- Accept Lux subnet validators")
+				ux.Logger.PrintToUser("- Accept Lux chain validators")
 				ux.Logger.PrintToUser("- Support Lux Warp messaging")
 				ux.Logger.PrintToUser("- Bridge with Lux C-Chain")
 
