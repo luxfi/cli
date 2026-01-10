@@ -25,7 +25,7 @@ import (
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
-	"github.com/luxfi/vm/utils/perms"
+	"github.com/luxfi/filesystem/perms"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"
 )

@@ -184,11 +184,11 @@ type LuxdVersionSettings struct {
 	UseCustomLuxgoVersion           string
 	UseLatestLuxgoReleaseVersion    bool
 	UseLatestLuxgoPreReleaseVersion bool
-	UseLuxgoVersionFromSubnet       string
+	UseLuxgoVersionFromChain        string
 }
 
 // GetLuxdVersion asks users whether they want to install the newest Lux Go version
-// or if they want to use the newest Lux Go Version that is still compatible with Subnet EVM
+// or if they want to use the newest Lux Go Version that is still compatible with Chain EVM
 // version of their choice
 func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, network models.Network) (string, error) {
 	// skip this logic if custom-luxd-version flag is set
@@ -205,7 +205,7 @@ func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, netwo
 		return "", err
 	}
 
-	if !luxdVersion.UseLatestLuxgoReleaseVersion && !luxdVersion.UseLatestLuxgoPreReleaseVersion && luxdVersion.UseCustomLuxgoVersion == "" && luxdVersion.UseLuxgoVersionFromSubnet == "" {
+	if !luxdVersion.UseLatestLuxgoReleaseVersion && !luxdVersion.UseLatestLuxgoPreReleaseVersion && luxdVersion.UseCustomLuxgoVersion == "" && luxdVersion.UseLuxgoVersionFromChain == "" {
 		luxdVersion, err = promptLuxdVersionChoice(app, latestReleaseVersion, latestPreReleaseVersion)
 		if err != nil {
 			return "", err
@@ -220,8 +220,8 @@ func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, netwo
 		version = latestPreReleaseVersion
 	case luxdVersion.UseCustomLuxgoVersion != "":
 		version = luxdVersion.UseCustomLuxgoVersion
-	case luxdVersion.UseLuxgoVersionFromSubnet != "":
-		sc, err := app.LoadSidecar(luxdVersion.UseLuxgoVersionFromSubnet)
+	case luxdVersion.UseLuxgoVersionFromChain != "":
+		sc, err := app.LoadSidecar(luxdVersion.UseLuxgoVersionFromChain)
 		if err != nil {
 			return "", err
 		}
@@ -234,7 +234,7 @@ func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, netwo
 }
 
 // promptLuxdVersionChoice sets flags for either using the latest Lux Go
-// version or using the latest Lux Go version that is still compatible with the subnet that user
+// version or using the latest Lux Go version that is still compatible with the chain that user
 // wants the cloud server to track
 func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, latestPreReleaseVersion string) (LuxdVersionSettings, error) {
 	versionComments := map[string]string{
@@ -242,13 +242,13 @@ func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, 
 	}
 	latestReleaseVersionOption := "Use latest Lux Go Release Version" + versionComments[latestReleaseVersion]
 	latestPreReleaseVersionOption := "Use latest Lux Go Pre-release Version" + versionComments[latestPreReleaseVersion]
-	subnetBasedVersionOption := "Use the deployed Subnet's VM version that the node will be validating"
+	chainBasedVersionOption := "Use the deployed Chain's VM version that the node will be validating"
 	customOption := "Custom"
 
 	txt := "What version of Lux Go would you like to install in the node?"
-	versionOptions := []string{latestReleaseVersionOption, subnetBasedVersionOption, customOption}
+	versionOptions := []string{latestReleaseVersionOption, chainBasedVersionOption, customOption}
 	if latestPreReleaseVersion != latestReleaseVersion {
-		versionOptions = []string{latestPreReleaseVersionOption, latestReleaseVersionOption, subnetBasedVersionOption, customOption}
+		versionOptions = []string{latestPreReleaseVersionOption, latestReleaseVersionOption, chainBasedVersionOption, customOption}
 	}
 	versionOption, err := app.Prompt.CaptureList(txt, versionOptions)
 	if err != nil {
@@ -267,18 +267,18 @@ func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, 
 		}
 		return LuxdVersionSettings{UseCustomLuxgoVersion: useCustomLuxgoVersion}, nil
 	default:
-		useLuxgoVersionFromSubnet := ""
+		useLuxgoVersionFromChain := ""
 		for {
-			useLuxgoVersionFromSubnet, err = app.Prompt.CaptureString("Which Subnet would you like to use to choose the lux go version?")
+			useLuxgoVersionFromChain, err = app.Prompt.CaptureString("Which Chain would you like to use to choose the lux go version?")
 			if err != nil {
 				return LuxdVersionSettings{}, err
 			}
-			err = chain.ValidateSubnetNameAndGetChains(useLuxgoVersionFromSubnet)
+			err = chain.ValidateChainNameAndGetChains(useLuxgoVersionFromChain)
 			if err == nil {
 				break
 			}
-			ux.Logger.PrintToUser("%s", fmt.Sprintf("no blockchain named as %s found", useLuxgoVersionFromSubnet))
+			ux.Logger.PrintToUser("%s", fmt.Sprintf("no blockchain named as %s found", useLuxgoVersionFromChain))
 		}
-		return LuxdVersionSettings{UseLuxgoVersionFromSubnet: useLuxgoVersionFromSubnet}, nil
+		return LuxdVersionSettings{UseLuxgoVersionFromChain: useLuxgoVersionFromChain}, nil
 	}
 }

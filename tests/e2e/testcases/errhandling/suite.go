@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	subnetName = "doFailSubnet"
+	chainName = "doFailChain"
 )
 
 /*
@@ -27,22 +27,22 @@ const (
 var _ = ginkgo.Describe("[Error handling]", func() {
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		if err != nil {
 			fmt.Println("Clean network error:", err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// delete custom vm
-		utils.DeleteCustomBinary(subnetName)
+		utils.DeleteCustomBinary(chainName)
 	})
 	ginkgo.It("evm has error but booted", func() {
 		// tip: if you really want to run this, reduce the RequestTimeout
 		ginkgo.Skip("run this manually only, times out")
-		// this will boot the subnet with a bad genesis:
+		// this will boot the chain with a bad genesis:
 		// the root gas limit is smaller than the fee config gas limit, should fail
-		commands.CreateEVMConfig(subnetName, utils.EVMGenesisBadPath)
-		out, err := commands.DeploySubnetLocallyWithArgsAndOutput(subnetName, "", "")
+		commands.CreateEVMConfig(chainName, utils.EVMGenesisBadPath)
+		out, err := commands.DeployChainLocallyWithArgsAndOutput(chainName, "", "")
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 		gomega.Expect(out).Should(gomega.ContainSubstring("does not match gas limit"))
 		fmt.Println(string(out))

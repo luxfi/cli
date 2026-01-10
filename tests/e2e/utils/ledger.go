@@ -66,11 +66,11 @@ func GetLedgerAddress(network models.Network, index uint32) (string, error) {
 	return fmt.Sprintf("P-custom1test%d", index), nil
 }
 
-// GetSubnetValidators returns the validators for a subnet
-func GetSubnetValidators(subnetID ids.ID) ([]string, error) {
+// GetChainValidators returns the validators for a chain
+func GetChainValidators(chainID ids.ID) ([]string, error) {
 	// This is a stub implementation
 	// In real implementation, this would query the P-Chain
-	// to get the current validator set for the subnet
+	// to get the current validator set for the chain
 
 	// Return test validators for now
 	validators := []string{
@@ -100,10 +100,10 @@ func GetTmpFilePath(prefix string) (string, error) {
 }
 
 // GetEVMMainnetChainID retrieves the mainnet chain ID for a EVM
-func GetEVMMainnetChainID(subnetName string) (uint, error) {
+func GetEVMMainnetChainID(chainName string) (uint, error) {
 	// This is a stub implementation
 	// In real implementation, this would:
-	// 1. Read the subnet configuration
+	// 1. Read the chain configuration
 	// 2. Extract the mainnet chain ID from the genesis or sidecar
 
 	// For testing, return 0 initially (not configured)

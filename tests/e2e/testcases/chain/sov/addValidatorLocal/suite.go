@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package subnet
+package chain
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ const (
 var luxdVersion string
 
 var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
-	ginkgo.It("Create Etna Subnet Config", func() {
+	ginkgo.It("Create Etna Chain Config", func() {
 		_, luxdVersion = commands.CreateEtnaEVMConfig(
 			utils.BlockchainName,
 			ewoqEVMAddress,
@@ -41,7 +41,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 		)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println(output)
-		output, err = commands.AddEtnaSubnetValidatorToCluster(
+		output, err = commands.AddEtnaChainValidatorToCluster(
 			"",
 			utils.BlockchainName,
 			"",
@@ -63,7 +63,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 		commands.CleanNetwork()
 	})
 
-	ginkgo.It("Can remove Etna Subnet Config", func() {
-		commands.DeleteSubnetConfig(utils.BlockchainName)
+	ginkgo.It("Can remove Etna Chain Config", func() {
+		commands.DeleteChainConfig(utils.BlockchainName)
 	})
 })

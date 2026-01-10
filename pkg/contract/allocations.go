@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/sdk/models"
 )
 
@@ -23,9 +24,9 @@ func GetDefaultBlockchainAirdropKeyInfo(
 	app *application.Lux,
 	blockchainName string,
 ) (string, string, string, error) {
-	keyName := utils.GetDefaultBlockchainAirdropKeyName(blockchainName)
+	keyName := genesis.GetDefaultBlockchainAirdropKeyName(blockchainName)
 	keyPath := app.GetKeyPath(keyName)
-	if utils.FileExists(keyPath) {
+	if fs.FileExists(keyPath) {
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
 		if err != nil {
 			return "", "", "", err
@@ -109,7 +110,7 @@ func SearchForManagedKey(
 // get the deployed blockchain genesis, and then look for known
 // private keys inside it
 // returns address + private key when found
-func GetEVMSubnetPrefundedKey(
+func GetEVMChainPrefundedKey(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -168,7 +169,7 @@ func sumGenesisSupply(
 	return sum, nil
 }
 
-func GetEVMSubnetGenesisSupply(
+func GetEVMChainGenesisSupply(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -253,7 +254,7 @@ func getGenesisNativeMinterManager(
 	return false, false, "", "", "", nil
 }
 
-func GetEVMSubnetGenesisNativeMinterAdmin(
+func GetEVMChainGenesisNativeMinterAdmin(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -272,7 +273,7 @@ func GetEVMSubnetGenesisNativeMinterAdmin(
 	return getGenesisNativeMinterAdmin(app, network, genesisData)
 }
 
-func GetEVMSubnetGenesisNativeMinterManager(
+func GetEVMChainGenesisNativeMinterManager(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,

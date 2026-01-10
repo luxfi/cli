@@ -159,11 +159,11 @@ type CacheTypeStatus struct {
 
 // MetricsStatus represents metrics system status
 type MetricsStatus struct {
-	OptimizedCounters   int    `json:"optimized_counters"`
-	OptimizedGauges     int    `json:"optimized_gauges"`
-	OptimizedHistograms int    `json:"optimized_histograms"`
-	CollectionTime      string `json:"collection_time"`
-	ScrapeTime          string `json:"scrape_time"`
+	Counters       int    `json:"counters"`
+	Gauges         int    `json:"gauges"`
+	Histograms     int    `json:"histograms"`
+	CollectionTime string `json:"collection_time"`
+	ScrapeTime     string `json:"scrape_time"`
 }
 
 // collectStatus collects comprehensive status information
@@ -262,11 +262,11 @@ func collectOptimizationStatus() OptimizationStatus {
 			MemoryUsage:  "68MB",
 		},
 		Metrics: MetricsStatus{
-			OptimizedCounters:   120,
-			OptimizedGauges:     85,
-			OptimizedHistograms: 45,
-			CollectionTime:      "8ms",
-			ScrapeTime:          "45ms",
+			Counters:       120,
+			Gauges:         85,
+			Histograms:     45,
+			CollectionTime: "8ms",
+			ScrapeTime:     "45ms",
 		},
 	}
 }
@@ -354,10 +354,10 @@ func outputText(cmd *cobra.Command, status *Status) error {
 		})
 
 		printSubSection(cmd, "Metrics", func() {
-			fmt.Fprintf(cmd.OutOrStdout(), "    Optimized:     %d counters, %d gauges, %d histograms\n",
-				status.Optimizations.Metrics.OptimizedCounters,
-				status.Optimizations.Metrics.OptimizedGauges,
-				status.Optimizations.Metrics.OptimizedHistograms)
+			fmt.Fprintf(cmd.OutOrStdout(), "    Counts:        %d counters, %d gauges, %d histograms\n",
+				status.Optimizations.Metrics.Counters,
+				status.Optimizations.Metrics.Gauges,
+				status.Optimizations.Metrics.Histograms)
 			fmt.Fprintf(cmd.OutOrStdout(), "    Scrape Time:   %s\n", status.Optimizations.Metrics.ScrapeTime)
 		})
 	})
@@ -381,7 +381,7 @@ func outputText(cmd *cobra.Command, status *Status) error {
 	})
 
 	// Summary
-	fmt.Fprintf(cmd.OutOrStdout(), "\n✅ All systems operational with VictoriaMetrics optimizations\n")
+	fmt.Fprintf(cmd.OutOrStdout(), "\n✅ All systems operational with cache optimizations\n")
 	fmt.Fprintf(cmd.OutOrStdout(), "   PQ TLS enforced: %v, Performance: %s, Memory: %s saved\n",
 		status.Security.PQEnforced,
 		status.Performance.RequestRate,
@@ -422,7 +422,7 @@ func CheckPQStatus(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(cmd.OutOrStdout(), "\n📦 Optimization Packages:\n")
 	fmt.Fprintf(cmd.OutOrStdout(), "  ✅ Memory Pooling:   Available\n")
 	fmt.Fprintf(cmd.OutOrStdout(), "  ✅ FastHTTP:         Available\n")
-	fmt.Fprintf(cmd.OutOrStdout(), "  ✅ Optimized Metrics: Available\n")
+	fmt.Fprintf(cmd.OutOrStdout(), "  ✅ Metrics:          Available\n")
 	fmt.Fprintf(cmd.OutOrStdout(), "  ✅ Advanced Caching: Available\n")
 	fmt.Fprintf(cmd.OutOrStdout(), "  ✅ PQ TLS:           Available\n")
 

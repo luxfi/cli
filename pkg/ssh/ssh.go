@@ -30,13 +30,13 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
+	sdkutils "github.com/luxfi/utils"
 )
 
 type scriptInputs struct {
 	LuxdVersion             string
-	SubnetExportFileName    string
-	SubnetName              string
+	ChainExportFileName     string
+	ChainName               string
 	ClusterName             string
 	GoVersion               string
 	IsDevNet                bool
@@ -256,11 +256,11 @@ func replaceCustomVarDashboardValues(customGrafanaDashboardFileName, chainID str
 // RunSSHUpdateMonitoringDashboards updates monitoring dashboards on the remote host.
 func RunSSHUpdateMonitoringDashboards(host *models.Host, monitoringDashboardPath, customGrafanaDashboardPath, chainID string) error {
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
-	if !sdkutils.DirExists(monitoringDashboardPath) {
+	if !sdkfs.DirExists(monitoringDashboardPath) {
 		return fmt.Errorf("%s does not exist", monitoringDashboardPath)
 	}
-	if customGrafanaDashboardPath != "" && utils.FileExists(utils.ExpandHome(customGrafanaDashboardPath)) {
-		if err := utils.FileCopy(utils.ExpandHome(customGrafanaDashboardPath), filepath.Join(monitoringDashboardPath, constants.CustomGrafanaDashboardJSON)); err != nil {
+	if customGrafanaDashboardPath != "" && fs.FileExists(fs.ExpandHome(customGrafanaDashboardPath)) {
+		if err := utils.FileCopy(fs.ExpandHome(customGrafanaDashboardPath), filepath.Join(monitoringDashboardPath, constants.CustomGrafanaDashboardJSON)); err != nil {
 			return err
 		}
 		if err := replaceCustomVarDashboardValues(filepath.Join(monitoringDashboardPath, constants.CustomGrafanaDashboardJSON), chainID); err != nil {
@@ -295,7 +295,7 @@ func RunSSHCopyMonitoringDashboards(host *models.Host, monitoringDashboardPath s
 	remoteDashboardsPath := utils.GetRemoteComposeServicePath("grafana", "dashboards")
 
 	// If path is provided, use local dashboards
-	if monitoringDashboardPath != "" && sdkutils.DirExists(monitoringDashboardPath) {
+	if monitoringDashboardPath != "" && sdkfs.DirExists(monitoringDashboardPath) {
 		if err := host.MkdirAll(remoteDashboardsPath, constants.SSHFileOpsTimeout); err != nil {
 			return err
 		}
@@ -451,10 +451,10 @@ func RunSSHUploadNodeWarpRelayerConfig(host *models.Host, nodeInstanceDirPath st
 	)
 }
 
-// RunSSHGetNewEVMRelease runs script to download new subnet evm
+// RunSSHGetNewEVMRelease runs script to download new chain evm
 func RunSSHGetNewEVMRelease(host *models.Host, evmReleaseURL, evmArchive string) error {
 	return RunOverSSH(
-		"Get Subnet EVM Release",
+		"Get Chain EVM Release",
 		host,
 		constants.SSHScriptTimeout,
 		"shell/getNewEVMRelease.sh",
@@ -542,7 +542,7 @@ func RunSSHUploadStakingFiles(host *models.Host, nodeInstanceDirPath string) err
 func RunSSHRenderLuxdAliasConfigFile(
 	host *models.Host,
 	blockchainID string,
-	subnetAliases []string,
+	chainAliases []string,
 ) error {
 	aliasToBlockchain := map[string]string{}
 	if aliasConfigFileExists(host) {
@@ -557,7 +557,7 @@ func RunSSHRenderLuxdAliasConfigFile(
 			}
 		}
 	}
-	for _, alias := range subnetAliases {
+	for _, alias := range chainAliases {
 		aliasToBlockchain[alias] = blockchainID
 	}
 	newAliases := map[string][]string{}
@@ -587,22 +587,22 @@ func RunSSHRenderLuxNodeConfig(
 	app *application.Lux,
 	host *models.Host,
 	network models.Network,
-	trackSubnets []string,
+	trackChains []string,
 	isAPIHost bool,
 ) error {
-	// get subnet ids
-	subnetIDs, err := utils.MapWithError(trackSubnets, func(subnetName string) (string, error) {
-		sc, err := app.LoadSidecar(subnetName)
+	// get chain ids
+	chainIDs, err := utils.MapWithError(trackChains, func(chainName string) (string, error) {
+		sc, err := app.LoadSidecar(chainName)
 		if err != nil {
 			return "", err
 		}
-		return sc.Networks[network.String()].SubnetID.String(), nil
+		return sc.Networks[network.String()].ChainID.String(), nil
 	})
 	if err != nil {
 		return err
 	}
 
-	luxdConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), subnetIDs)
+	luxdConf := remoteconfig.PrepareLuxConfig(host.IP, network.NetworkIDFlagValue(), chainIDs)
 	// preserve remote configuration if it exists
 	if nodeConfigFileExists(host) {
 		// make sure that genesis and bootstrap data is preserved
@@ -706,9 +706,9 @@ func RunSSHCreatePlugin(host *models.Host, sc models.Sidecar) error {
 	return nil
 }
 
-// RunSSHMergeSubnetNodeConfig merges subnet node config to the node config on the remote host
-func mergeSubnetNodeConfig(host *models.Host, subnetNodeConfigPath string) error {
-	if subnetNodeConfigPath == "" {
+// RunSSHMergeChainNodeConfig merges chain node config to the node config on the remote host
+func mergeChainNodeConfig(host *models.Host, chainNodeConfigPath string) error {
+	if chainNodeConfigPath == "" {
 		return fmt.Errorf("node config path is empty")
 	}
 	remoteNodeConfigBytes, err := host.ReadFileBytes(remoteconfig.GetRemoteLuxNodeConfig(), constants.SSHFileOpsTimeout)
@@ -719,15 +719,15 @@ func mergeSubnetNodeConfig(host *models.Host, subnetNodeConfigPath string) error
 	if err := json.Unmarshal(remoteNodeConfigBytes, &remoteNodeConfig); err != nil {
 		return fmt.Errorf("error unmarshalling remote node config: %w", err)
 	}
-	subnetNodeConfigBytes, err := os.ReadFile(subnetNodeConfigPath) //nolint:gosec // G304: Reading node config from app's directory
+	chainNodeConfigBytes, err := os.ReadFile(chainNodeConfigPath) //nolint:gosec // G304: Reading node config from app's directory
 	if err != nil {
 		return fmt.Errorf("error reading node config: %w", err)
 	}
-	var subnetNodeConfig map[string]interface{}
-	if err := json.Unmarshal(subnetNodeConfigBytes, &subnetNodeConfig); err != nil {
+	var chainNodeConfig map[string]interface{}
+	if err := json.Unmarshal(chainNodeConfigBytes, &chainNodeConfig); err != nil {
 		return fmt.Errorf("error unmarshalling node config: %w", err)
 	}
-	maps.Copy(remoteNodeConfig, subnetNodeConfig) // merge remote config into local subnet config. subnetNodeConfig takes precedence
+	maps.Copy(remoteNodeConfig, chainNodeConfig) // merge remote config into local chain config. chainNodeConfig takes precedence
 	mergedNodeConfigBytes, err := json.MarshalIndent(remoteNodeConfig, "", " ")
 	if err != nil {
 		return fmt.Errorf("error creating merged node config: %w", err)
@@ -735,52 +735,52 @@ func mergeSubnetNodeConfig(host *models.Host, subnetNodeConfigPath string) error
 	return host.UploadBytes(mergedNodeConfigBytes, remoteconfig.GetRemoteLuxNodeConfig(), constants.SSHFileOpsTimeout)
 }
 
-// RunSSHSyncSubnetData syncs subnet data required
-func RunSSHSyncSubnetData(app *application.Lux, host *models.Host, network models.Network, subnetName string) error {
-	sc, err := app.LoadSidecar(subnetName)
+// RunSSHSyncChainData syncs chain data required
+func RunSSHSyncChainData(app *application.Lux, host *models.Host, network models.Network, chainName string) error {
+	sc, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return err
 	}
-	subnetID := sc.Networks[network.String()].SubnetID
-	if subnetID == ids.Empty {
-		return errors.New("subnet id is empty")
+	chainID := sc.Networks[network.String()].ChainID
+	if chainID == ids.Empty {
+		return errors.New("chain id is empty")
 	}
-	subnetIDStr := subnetID.String()
+	chainIDStr := chainID.String()
 	blockchainID := sc.Networks[network.String()].BlockchainID
 	// genesis config
 	genesisFilename := filepath.Join(app.GetNodesDir(), host.GetCloudID(), constants.GenesisFileName)
-	if utils.FileExists(genesisFilename) {
+	if fs.FileExists(genesisFilename) {
 		if err := host.Upload(genesisFilename, remoteconfig.GetRemoteLuxGenesis(), constants.SSHFileOpsTimeout); err != nil {
 			return fmt.Errorf("error uploading genesis config to %s: %w", remoteconfig.GetRemoteLuxGenesis(), err)
 		}
 	}
 	// end genesis config
-	// subnet node config
-	subnetNodeConfigPath := app.GetLuxdNodeConfigPath(subnetName)
-	if utils.FileExists(subnetNodeConfigPath) {
-		if err := mergeSubnetNodeConfig(host, subnetNodeConfigPath); err != nil {
+	// chain node config
+	chainNodeConfigPath := app.GetLuxdNodeConfigPath(chainName)
+	if fs.FileExists(chainNodeConfigPath) {
+		if err := mergeChainNodeConfig(host, chainNodeConfigPath); err != nil {
 			return err
 		}
 	}
-	// subnet config
-	if app.LuxdSubnetConfigExists(subnetName) {
-		subnetConfig, err := app.LoadRawLuxdSubnetConfig(subnetName)
+	// chain config
+	if app.LuxdChainConfigExists(chainName) {
+		chainConfig, err := app.LoadRawLuxdChainConfig(chainName)
 		if err != nil {
 			return fmt.Errorf("error loading blockchain config: %w", err)
 		}
-		subnetConfigPath := filepath.Join(constants.CloudNodeConfigPath, "subnets", subnetIDStr+".json")
-		if err := host.MkdirAll(filepath.Dir(subnetConfigPath), constants.SSHDirOpsTimeout); err != nil {
+		chainConfigPath := filepath.Join(constants.CloudNodeConfigPath, "chains", chainIDStr+".json")
+		if err := host.MkdirAll(filepath.Dir(chainConfigPath), constants.SSHDirOpsTimeout); err != nil {
 			return err
 		}
-		if err := host.UploadBytes(subnetConfig, subnetConfigPath, constants.SSHFileOpsTimeout); err != nil {
-			return fmt.Errorf("error uploading blockchain config to %s: %w", subnetConfigPath, err)
+		if err := host.UploadBytes(chainConfig, chainConfigPath, constants.SSHFileOpsTimeout); err != nil {
+			return fmt.Errorf("error uploading blockchain config to %s: %w", chainConfigPath, err)
 		}
 	}
-	// end subnet config
+	// end chain config
 
 	// chain config
-	if blockchainID != ids.Empty && app.ChainConfigExists(subnetName) {
-		chainConfig, err := app.LoadRawChainConfig(subnetName)
+	if blockchainID != ids.Empty && app.ChainConfigExists(chainName) {
+		chainConfig, err := app.LoadRawChainConfig(chainName)
 		if err != nil {
 			return fmt.Errorf("error loading chain config: %w", err)
 		}
@@ -795,12 +795,12 @@ func RunSSHSyncSubnetData(app *application.Lux, host *models.Host, network model
 	// end chain config
 
 	// network upgrade
-	if app.NetworkUpgradeExists(subnetName) {
-		networkUpgrades, err := app.LoadRawNetworkUpgrades(subnetName)
+	if app.NetworkUpgradeExists(chainName) {
+		networkUpgrades, err := app.LoadRawNetworkUpgrades(chainName)
 		if err != nil {
 			return fmt.Errorf("error loading network upgrades: %w", err)
 		}
-		networkUpgradesPath := filepath.Join(constants.CloudNodeConfigPath, "subnets", "chains", blockchainID.String(), "upgrade.json")
+		networkUpgradesPath := filepath.Join(constants.CloudNodeConfigPath, "chains", "chains", blockchainID.String(), "upgrade.json")
 		if err := host.MkdirAll(filepath.Dir(networkUpgradesPath), constants.SSHDirOpsTimeout); err != nil {
 			return err
 		}
@@ -882,8 +882,8 @@ func RunSSHGetNodeID(host *models.Host) ([]byte, error) {
 	return PostOverSSH(host, "", requestBody)
 }
 
-// RunSSHSubnetSyncStatus checks if node is synced to subnet.
-func RunSSHSubnetSyncStatus(host *models.Host, blockchainID string) ([]byte, error) {
+// RunSSHChainSyncStatus checks if node is synced to chain.
+func RunSSHChainSyncStatus(host *models.Host, blockchainID string) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := fmt.Sprintf("{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"platform.getBlockchainStatus\", \"params\": {\"blockchainID\":\"%s\"}}", blockchainID)
 	return PostOverSSH(host, "/ext/bc/P", requestBody)

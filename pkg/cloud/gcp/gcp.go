@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
+	sdkutils "github.com/luxfi/utils"
 
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/compute/v1"

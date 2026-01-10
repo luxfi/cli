@@ -38,13 +38,13 @@ func (_m *Publisher) GetRepo() (*git.Repository, error) {
 	return r0, r1
 }
 
-// Publish provides a mock function with given fields: r, subnetName, vmName, subnetYAML, vmYAML
-func (_m *Publisher) Publish(r *git.Repository, subnetName string, vmName string, subnetYAML []byte, vmYAML []byte) error {
-	ret := _m.Called(r, subnetName, vmName, subnetYAML, vmYAML)
+// Publish provides a mock function with given fields: r, chainName, vmName, chainYAML, vmYAML
+func (_m *Publisher) Publish(r *git.Repository, chainName string, vmName string, chainYAML []byte, vmYAML []byte) error {
+	ret := _m.Called(r, chainName, vmName, chainYAML, vmYAML)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*git.Repository, string, string, []byte, []byte) error); ok {
-		r0 = rf(r, subnetName, vmName, subnetYAML, vmYAML)
+		r0 = rf(r, chainName, vmName, chainYAML, vmYAML)
 	} else {
 		r0 = ret.Error(0)
 	}

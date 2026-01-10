@@ -34,18 +34,17 @@ import (
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/vms/platformvm"
+	platformapi "github.com/luxfi/protocol/p/api"
+	"github.com/luxfi/protocol/p/reward"
+	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/vm/utils/storage"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
-	"github.com/luxfi/vm/vms/components/lux"
-	"github.com/luxfi/vm/vms/components/verify"
-	"github.com/luxfi/vm/vms/platformvm"
-	platformapi "github.com/luxfi/vm/vms/platformvm/api"
-	"github.com/luxfi/vm/vms/platformvm/reward"
-	"github.com/luxfi/vm/vms/platformvm/signer"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/vm/components/verify"
+	"github.com/luxfi/node/vms/secp256k1fx"
 	"go.uber.org/zap"
 )
 
@@ -58,7 +57,7 @@ const (
 	// LocalNetworkHealthTimeout is for checking if the network itself is running
 	LocalNetworkHealthTimeout = 5 * time.Second
 	// BlockchainCreationTimeout is the maximum time to wait for CreateChains RPC call
-	// This involves a P-chain transaction, subnet creation, chain creation, node restarts,
+	// This involves a P-chain transaction, chain creation, chain creation, node restarts,
 	// and P-chain height sync across all 5 validators. Needs 90s minimum for stability.
 	BlockchainCreationTimeout = 90 * time.Second
 )
@@ -203,7 +202,7 @@ func getAssetID(wallet primary.Wallet, ownerAddr ids.ShortID, tokenName string, 
 		},
 	}
 	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
-	subnetAssetTx, err := xWallet.IssueCreateAssetTx(
+	chainAssetTx, err := xWallet.IssueCreateAssetTx(
 		tokenName,
 		tokenSymbol,
 		9, // denomination for UI purposes only in explorer
@@ -220,10 +219,10 @@ func getAssetID(wallet primary.Wallet, ownerAddr ids.ShortID, tokenName string, 
 	if err != nil {
 		return ids.Empty, err
 	}
-	return subnetAssetTx.ID(), nil
+	return chainAssetTx.ID(), nil
 }
 
-func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, subnetAssetID ids.ID, maxSupply uint64) error {
+func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, chainAssetID ids.ID, maxSupply uint64) error {
 	xWallet := wallet.X()
 	_, cancel := context.WithTimeout(context.Background(), constants.DefaultWalletCreationTimeout)
 
@@ -232,7 +231,7 @@ func exportToPChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners, subn
 		[]*lux.TransferableOutput{
 			{
 				Asset: lux.Asset{
-					ID: subnetAssetID,
+					ID: chainAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt:          maxSupply,
@@ -257,11 +256,11 @@ func importFromXChain(wallet primary.Wallet, owner *secp256k1fx.OutputOwners) er
 	return err
 }
 
-// IssueTransformSubnetTx transforms a subnet to a permissionless elastic subnet.
-func IssueTransformSubnetTx(
-	elasticSubnetConfig climodels.ElasticChainConfig,
+// IssueTransformChainTx transforms a chain to a permissionless elastic chain.
+func IssueTransformChainTx(
+	elasticChainConfig climodels.ElasticChainConfig,
 	kc keychain.Keychain,
-	_ ids.ID, // subnetID comes from elasticSubnetConfig
+	_ ids.ID, // chainID comes from elasticChainConfig
 	tokenName string,
 	tokenSymbol string,
 	maxSupply uint64,
@@ -292,7 +291,7 @@ func IssueTransformSubnetTx(
 	}
 	ownerAddr := addrs.List()[0]
 
-	subnetAssetID, err := getAssetID(wallet, ownerAddr, tokenName, tokenSymbol, maxSupply)
+	chainAssetID, err := getAssetID(wallet, ownerAddr, tokenName, tokenSymbol, maxSupply)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
@@ -302,7 +301,7 @@ func IssueTransformSubnetTx(
 			ownerAddr,
 		},
 	}
-	err = exportToPChain(wallet, owner, subnetAssetID, maxSupply)
+	err = exportToPChain(wallet, owner, chainAssetID, maxSupply)
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
@@ -312,23 +311,23 @@ func IssueTransformSubnetTx(
 	}
 
 	_, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
-	transformSubnetTxID, err := wallet.P().IssueTransformChainTx(elasticSubnetConfig.SubnetID, subnetAssetID,
-		elasticSubnetConfig.InitialSupply, elasticSubnetConfig.MaxSupply, elasticSubnetConfig.MinConsumptionRate,
-		elasticSubnetConfig.MaxConsumptionRate, elasticSubnetConfig.MinValidatorStake, elasticSubnetConfig.MaxValidatorStake,
-		elasticSubnetConfig.MinStakeDuration, elasticSubnetConfig.MaxStakeDuration, elasticSubnetConfig.MinDelegationFee,
-		elasticSubnetConfig.MinDelegatorStake, elasticSubnetConfig.MaxValidatorWeightFactor, elasticSubnetConfig.UptimeRequirement,
+	transformChainTxID, err := wallet.P().IssueTransformChainTx(elasticChainConfig.ChainID, chainAssetID,
+		elasticChainConfig.InitialSupply, elasticChainConfig.MaxSupply, elasticChainConfig.MinConsumptionRate,
+		elasticChainConfig.MaxConsumptionRate, elasticChainConfig.MinValidatorStake, elasticChainConfig.MaxValidatorStake,
+		elasticChainConfig.MinStakeDuration, elasticChainConfig.MaxStakeDuration, elasticChainConfig.MinDelegationFee,
+		elasticChainConfig.MinDelegatorStake, elasticChainConfig.MaxValidatorWeightFactor, elasticChainConfig.UptimeRequirement,
 	)
 	defer cancel()
 	if err != nil {
 		return ids.Empty, ids.Empty, err
 	}
-	return transformSubnetTxID.ID(), subnetAssetID, err
+	return transformChainTxID.ID(), chainAssetID, err
 }
 
 // IssueAddPermissionlessValidatorTx issues an add permissionless validator transaction.
 func IssueAddPermissionlessValidatorTx(
 	kc keychain.Keychain,
-	subnetID ids.ID,
+	chainID ids.ID,
 	nodeID ids.NodeID,
 	stakeAmount uint64,
 	assetID ids.ID,
@@ -378,7 +377,7 @@ func IssueAddPermissionlessValidatorTx(
 				End:    endTime,
 				Wght:   stakeAmount,
 			},
-			Chain: subnetID,
+			Chain: chainID,
 		},
 		&signer.Empty{},
 		assetID,
@@ -419,13 +418,13 @@ func (d *LocalDeployer) StartServerForNetwork(networkType string) error {
 	return nil
 }
 
-// GetCurrentSupply prints the current supply of a subnet.
-func GetCurrentSupply(subnetID ids.ID) error {
+// GetCurrentSupply prints the current supply of a chain.
+func GetCurrentSupply(chainID ids.ID) error {
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
-	_, _, err := pClient.GetCurrentSupply(ctx, subnetID)
+	_, _, err := pClient.GetCurrentSupply(ctx, chainID)
 	return err
 }
 
@@ -516,12 +515,12 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		return ids.Empty, ids.Empty, nil
 	}
 
-	// Each blockchain gets its own subnet unless explicitly configured to share one.
-	// The netrunner will create a new subnet for this chain.
-	// NOTE: Removed the round-robin logic that incorrectly assigned new chains to existing subnets.
-	// Each chain is independent and needs its own subnet for proper isolation.
+	// Each blockchain gets its own chain unless explicitly configured to share one.
+	// The netrunner will create a new chain for this chain.
+	// NOTE: Removed the round-robin logic that incorrectly assigned new chains to existing chains.
+	// Each chain is independent and needs its own chain for proper isolation.
 	var chainParentID string
-	d.app.Log.Debug("no chain parent specified, netrunner will create a new subnet for this chain")
+	d.app.Log.Debug("no chain parent specified, netrunner will create a new chain for this chain")
 
 	// if a chainConfig has been configured
 	var (
@@ -683,15 +682,15 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 		}
 	}
 
-	// Find the blockchain and subnet IDs from the cluster info
-	var subnetID, blockchainID ids.ID
+	// Find the blockchain and chain IDs from the cluster info
+	var chainID, blockchainID ids.ID
 	for _, info := range clusterInfo.CustomChains {
 		if info.VmId == chainVMID.String() {
 			blockchainID, _ = ids.FromString(info.BlockchainId)
-			subnetID, _ = ids.FromString(info.PchainId)
+			chainID, _ = ids.FromString(info.PchainId)
 		}
 	}
-	return subnetID, blockchainID, nil
+	return chainID, blockchainID, nil
 }
 
 func (d *LocalDeployer) printExtraEvmInfo(chain string, chainGenesis []byte) error {
@@ -733,15 +732,13 @@ func (d *LocalDeployer) SetupLocalEnv() (string, error) {
 		return "", fmt.Errorf("could not create pluginDir %s", pluginDir)
 	}
 
-	exists, err := storage.FolderExists(pluginDir)
-	if !exists || err != nil {
+	if info, err := os.Stat(pluginDir); err != nil || !info.IsDir() {
 		return "", fmt.Errorf("evaluated pluginDir to be %s but it does not exist", pluginDir)
 	}
 
 	// Version management: compare latest to local version
 	// and update if necessary based on compatibility requirements
-	exists, err = storage.FileExists(nodeBinPath)
-	if !exists || err != nil {
+	if _, err := os.Stat(nodeBinPath); err != nil {
 		return "", fmt.Errorf(
 			"evaluated nodeBinPath to be %s but it does not exist", nodeBinPath)
 	}
@@ -875,7 +872,7 @@ func HasEndpoints(clusterInfo *rpcpb.ClusterInfo) bool {
 }
 
 // alreadyDeployedByName returns true if a chain with the given name is already deployed
-// This is the correct check for multi-chain deployments using the same VM (e.g., multiple EVM subnets)
+// This is the correct check for multi-chain deployments using the same VM (e.g., multiple EVM chains)
 func alreadyDeployedByName(chainName string, clusterInfo *rpcpb.ClusterInfo) bool {
 	if clusterInfo != nil {
 		for _, chainInfo := range clusterInfo.CustomChains {
@@ -999,8 +996,8 @@ func SetDefaultSnapshot(snapshotsDir string, force bool) error {
 	return nil
 }
 
-// GetLocallyDeployedSubnets returns the locally deployed subnets. Returns an error if the server cannot be contacted.
-func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
+// GetLocallyDeployedChains returns the locally deployed chains. Returns an error if the server cannot be contacted.
+func GetLocallyDeployedChains() (map[string]struct{}, error) {
 	deployedNames := map[string]struct{}{}
 	// if the server can not be contacted, or there is a problem with the query,
 	// DO NOT FAIL, just print No for deployed status
@@ -1022,8 +1019,8 @@ func GetLocallyDeployedSubnets() (map[string]struct{}, error) {
 	return deployedNames, nil
 }
 
-// IssueRemoveSubnetValidatorTx issues a remove subnet validator transaction.
-func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
+// IssueRemoveChainValidatorTx issues a remove chain validator transaction.
+func IssueRemoveChainValidatorTx(kc keychain.Keychain, chainID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
 	// Create empty EthKeychain if kc doesn't implement it
@@ -1045,25 +1042,25 @@ func IssueRemoveSubnetValidatorTx(kc keychain.Keychain, subnetID ids.ID, nodeID 
 		return ids.Empty, err
 	}
 
-	tx, err := wallet.P().IssueRemoveChainValidatorTx(nodeID, subnetID)
+	tx, err := wallet.P().IssueRemoveChainValidatorTx(nodeID, chainID)
 	if err != nil {
 		return ids.Empty, err
 	}
 	return tx.ID(), nil
 }
 
-// GetSubnetValidators returns the validators for a subnet.
-func GetSubnetValidators(subnetID ids.ID) ([]platformvm.ClientPermissionlessValidator, error) {
+// GetChainValidators returns the validators for a chain.
+func GetChainValidators(chainID ids.ID) ([]platformvm.ClientPermissionlessValidator, error) {
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
 	defer cancel()
 
-	return pClient.GetCurrentValidators(ctx, subnetID, nil)
+	return pClient.GetCurrentValidators(ctx, chainID, nil)
 }
 
-// CheckNodeIsInSubnetPendingValidators checks if a node is in the pending validators for a subnet.
-func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool, error) {
+// CheckNodeIsInChainPendingValidators checks if a node is in the pending validators for a chain.
+func CheckNodeIsInChainPendingValidators(chainID ids.ID, nodeID string) (bool, error) {
 	api := constants.LocalAPIEndpoint
 	pClient := platformvm.NewClient(api)
 	ctx, cancel := context.WithTimeout(context.Background(), constants.E2ERequestTimeout)
@@ -1071,7 +1068,7 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 
 	// Get validators that will be active in the future (pending validators)
 	futureTime := uint64(time.Now().Add(time.Hour).Unix()) //nolint:gosec // G115: Unix time is positive
-	validators, err := pClient.GetValidatorsAt(ctx, subnetID, platformapi.Height(futureTime))
+	validators, err := pClient.GetValidatorsAt(ctx, chainID, platformapi.Height(futureTime))
 	if err != nil {
 		return false, err
 	}
@@ -1083,7 +1080,7 @@ func CheckNodeIsInSubnetPendingValidators(subnetID ids.ID, nodeID string) (bool,
 	}
 
 	// Check current validators
-	currentValidators, err := pClient.GetCurrentValidators(ctx, subnetID, nil)
+	currentValidators, err := pClient.GetCurrentValidators(ctx, chainID, nil)
 	if err != nil {
 		return false, err
 	}

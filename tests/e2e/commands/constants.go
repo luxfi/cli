@@ -5,7 +5,7 @@ package commands
 
 const (
 	CLIBinary           = "./bin/lux"
-	SubnetCmd           = "subnet"
+	ChainCmd            = "chain"
 	NetworkCmd          = "network"
 	KeyCmd              = "key"
 	UpgradeCmd          = "upgrade"

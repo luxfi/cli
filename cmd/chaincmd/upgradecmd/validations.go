@@ -51,7 +51,7 @@ func ensureHaveBalance(
 	}
 	switch sc.VM {
 	case models.EVM:
-		// Currently only checking if admins have balance for subnets deployed in Local Network
+		// Currently only checking if admins have balance for chains deployed in Local Network
 		if networkData, ok := sc.Networks["Local Network"]; ok {
 			blockchainID := networkData.BlockchainID.String()
 			if err := ensureHaveBalanceLocalNetwork(which, addresses, blockchainID); err != nil {
