@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/sdk/models"
 )
 
-func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string, evmVersion string) ([]byte, *models.Sidecar, error) {
+func CreateEvmConfig(app *application.Lux, chainName string, genesisPath string, evmVersion string) ([]byte, *models.Sidecar, error) {
 	var (
 		genesisBytes []byte
 		sc           *models.Sidecar
@@ -32,7 +32,7 @@ func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string
 	)
 
 	if genesisPath == "" {
-		genesisBytes, sc, err = createEvmGenesis(app, subnetName, evmVersion)
+		genesisBytes, sc, err = createEvmGenesis(app, chainName, evmVersion)
 		if err != nil {
 			return nil, &models.Sidecar{}, err
 		}
@@ -54,11 +54,11 @@ func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string
 		}
 
 		sc = &models.Sidecar{
-			Name:       subnetName,
+			Name:       chainName,
 			VM:         models.EVM,
 			VMVersion:  evmVersion,
 			RPCVersion: rpcVersion,
-			Subnet:     subnetName,
+			Chain:      chainName,
 			TokenName:  "",
 		}
 	}
@@ -68,10 +68,10 @@ func CreateEvmConfig(app *application.Lux, subnetName string, genesisPath string
 
 func createEvmGenesis(
 	app *application.Lux,
-	subnetName string,
+	chainName string,
 	evmVersion string,
 ) ([]byte, *models.Sidecar, error) {
-	ux.Logger.PrintToUser("creating net %s", subnetName)
+	ux.Logger.PrintToUser("creating net %s", chainName)
 
 	genesis := core.Genesis{}
 	conf := params.EVMDefaultChainConfig
@@ -165,11 +165,11 @@ func createEvmGenesis(
 	}
 
 	sc := &models.Sidecar{
-		Name:       subnetName,
+		Name:       chainName,
 		VM:         models.EVM,
 		VMVersion:  vmVersion,
 		RPCVersion: rpcVersion,
-		Subnet:     subnetName,
+		Chain:      chainName,
 		TokenName:  tokenName,
 	}
 

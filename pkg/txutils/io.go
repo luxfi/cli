@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/luxfi/formatting"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 )
 
 // SaveToDisk saves a given tx to the specified path.

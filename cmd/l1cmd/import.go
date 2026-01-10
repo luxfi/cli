@@ -23,9 +23,9 @@ var importAsL1 bool
 // Historic L1 configurations for LUX, ZOO, SPC
 var historicL1s = []struct {
 	Name         string
-	SubnetID     string
+	NetworkID    string
 	BlockchainID string
-	ChainID      uint64
+	EVMChainID   uint64
 	TokenName    string
 	TokenSymbol  string
 	VMID         string
@@ -33,9 +33,9 @@ var historicL1s = []struct {
 }{
 	{
 		Name:         "LUX",
-		SubnetID:     "tJqmx13PV8UPQJBbuumANQCKnfPUHCxfahdG29nJa6BHkumCK",
+		NetworkID:    "tJqmx13PV8UPQJBbuumANQCKnfPUHCxfahdG29nJa6BHkumCK",
 		BlockchainID: "dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ",
-		ChainID:      96369,
+		EVMChainID:   96369,
 		TokenName:    "LUX Token",
 		TokenSymbol:  "LUX",
 		VMID:         "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy",
@@ -43,9 +43,9 @@ var historicL1s = []struct {
 	},
 	{
 		Name:         "ZOO",
-		SubnetID:     "xJzemKCLvBNgzYHoBHzXQr9uesR3S3kf3YtZ5mPHTA9LafK6L",
+		NetworkID:    "xJzemKCLvBNgzYHoBHzXQr9uesR3S3kf3YtZ5mPHTA9LafK6L",
 		BlockchainID: "bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM",
-		ChainID:      200200,
+		EVMChainID:   200200,
 		TokenName:    "ZOO Token",
 		TokenSymbol:  "ZOO",
 		VMID:         "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy",
@@ -53,9 +53,9 @@ var historicL1s = []struct {
 	},
 	{
 		Name:         "SPC",
-		SubnetID:     "2hMMhMFfVvpCFrA9LBGS3j5zr5XfARuXdLLYXKpJR3RpnrunH9",
+		NetworkID:    "2hMMhMFfVvpCFrA9LBGS3j5zr5XfARuXdLLYXKpJR3RpnrunH9",
 		BlockchainID: "QFAFyn1hh59mh7kokA55dJq5ywskF5A1yn8dDpLhmKApS6FP1",
-		ChainID:      36911,
+		EVMChainID:   36911,
 		TokenName:    "Sparkle Pony Token",
 		TokenSymbol:  "MEAT",
 		VMID:         "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy",
@@ -69,7 +69,7 @@ func newImportCmd() *cobra.Command {
 		Short: "Import historic blockchains as sovereign L1s",
 		Long: `Import historic blockchain configurations (LUX, ZOO, SPC) as sovereign L1s.
 
-This command transforms existing subnet configurations into modern L1 blockchains
+This command transforms existing chain configurations into modern L1 blockchains
 with validator management capabilities.`,
 		RunE: importHistoricL1s,
 	}
@@ -98,7 +98,7 @@ func importHistoricL1s(_ *cobra.Command, _ []string) error {
 			Name:                l1.Name,
 			VM:                  models.EVM,
 			VMVersion:           l1.VMVersion,
-			ChainID:             fmt.Sprintf("%d", l1.ChainID),
+			EVMChainID:          fmt.Sprintf("%d", l1.EVMChainID),
 			Sovereign:           true,
 			ValidatorManagement: ValidatorManagementPoA, // Default to PoA for historic chains
 			TokenInfo: models.TokenInfo{
@@ -109,11 +109,11 @@ func importHistoricL1s(_ *cobra.Command, _ []string) error {
 		}
 
 		// Set IDs
-		subnetID, err := ids.FromString(l1.SubnetID)
+		networkID, err := ids.FromString(l1.NetworkID)
 		if err != nil {
-			ux.Logger.PrintToUser("   ⚠️  Invalid subnet ID, will generate new")
+			ux.Logger.PrintToUser("   ⚠️  Invalid network ID, will generate new")
 		} else {
-			sc.SubnetID = subnetID
+			sc.ChainID = networkID
 		}
 
 		blockchainID, err := ids.FromString(l1.BlockchainID)
@@ -133,9 +133,9 @@ func importHistoricL1s(_ *cobra.Command, _ []string) error {
 
 		// Create genesis with L1 features
 		genesis := vm.CreateEVMGenesis(
-			big.NewInt(int64(l1.ChainID)), //nolint:gosec // G115: Chain ID is within int64 range
-			nil,                           // allocations
-			nil,                           // timestamps
+			big.NewInt(int64(l1.EVMChainID)), //nolint:gosec // G115: Chain ID is within int64 range
+			nil,                              // allocations
+			nil,                              // timestamps
 		)
 
 		// Add PoA validator manager
@@ -171,7 +171,7 @@ func importHistoricL1s(_ *cobra.Command, _ []string) error {
 		}
 
 		ux.Logger.PrintToUser("   ✅ Imported %s as sovereign L1", l1.Name)
-		ux.Logger.PrintToUser("      Chain ID: %d", l1.ChainID)
+		ux.Logger.PrintToUser("      Chain ID: %d", l1.EVMChainID)
 		ux.Logger.PrintToUser("      Token: %s (%s)", l1.TokenName, l1.TokenSymbol)
 		ux.Logger.PrintToUser("      Blockchain ID: %s", l1.BlockchainID)
 	}

@@ -1,7 +1,7 @@
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package subnet
+package chain
 
 import (
 	"fmt"
@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	subnetName       = "e2eSubnetTest"
-	secondSubnetName = "e2eSecondSubnetTest"
-	confPath         = "tests/e2e/assets/test_lux-cli.json"
+	chainName       = "e2eChainTest"
+	secondChainName = "e2eSecondChainTest"
+	confPath        = "tests/e2e/assets/test_lux-cli.json"
 )
 
 var (
@@ -23,7 +23,7 @@ var (
 	err     error
 )
 
-var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
+var _ = ginkgo.Describe("[Local Chain non SOV]", ginkgo.Ordered, func() {
 	_ = ginkgo.BeforeAll(func() {
 		mapper := utils.NewVersionMapper()
 		mapping, err = utils.GetVersionMapping(mapper)
@@ -32,27 +32,27 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		err := utils.DeleteConfigs(subnetName)
+		err := utils.DeleteConfigs(chainName)
 		if err != nil {
 			fmt.Println("Clean network error:", err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
-		err = utils.DeleteConfigs(secondSubnetName)
+		err = utils.DeleteConfigs(secondChainName)
 		if err != nil {
 			fmt.Println("Delete config error:", err)
 		}
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// delete custom vm
-		utils.DeleteCustomBinary(subnetName)
-		utils.DeleteCustomBinary(secondSubnetName)
+		utils.DeleteCustomBinary(chainName)
+		utils.DeleteCustomBinary(secondChainName)
 	})
 
-	ginkgo.It("can deploy a custom vm subnet to local non SOV", func() {
+	ginkgo.It("can deploy a custom vm chain to local non SOV", func() {
 		customVMPath, err := utils.DownloadCustomVMBin(mapping[utils.SoloEVMKey1])
 		gomega.Expect(err).Should(gomega.BeNil())
-		commands.CreateCustomVMConfigNonSOV(subnetName, utils.EVMGenesisPath, customVMPath)
-		deployOutput := commands.DeploySubnetLocallyWithVersionNonSOV(subnetName, mapping[utils.SoloLuxdKey])
+		commands.CreateCustomVMConfigNonSOV(chainName, utils.EVMGenesisPath, customVMPath)
+		deployOutput := commands.DeployChainLocallyWithVersionNonSOV(chainName, mapping[utils.SoloLuxdKey])
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -67,12 +67,12 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
-	ginkgo.It("can deploy a EVM subnet to local non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+	ginkgo.It("can deploy a EVM chain to local non SOV", func() {
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -87,12 +87,12 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("can load viper config and setup node properties for local deploy non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
-		deployOutput := commands.DeploySubnetLocallyWithViperConfNonSOV(subnetName, confPath)
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
+		deployOutput := commands.DeployChainLocallyWithViperConfNonSOV(chainName, confPath)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -102,13 +102,13 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		rpc := rpcs[0]
 		gomega.Expect(rpc).Should(gomega.HavePrefix("http://127.0.0.1:"))
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
-	ginkgo.It("can't deploy the same subnet twice to local non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
+	ginkgo.It("can't deploy the same chain twice to local non SOV", func() {
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
 
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		fmt.Println(deployOutput)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
@@ -117,7 +117,7 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(rpcs).Should(gomega.HaveLen(1))
 
-		out, err := commands.DeploySubnetLocallyWithArgsAndOutputNonSOV(subnetName, "", "")
+		out, err := commands.DeployChainLocallyWithArgsAndOutputNonSOV(chainName, "", "")
 		gomega.Expect(err).Should(gomega.HaveOccurred())
 		deployOutput = string(out)
 		rpcs, err = utils.ParseRPCsFromOutput(deployOutput)
@@ -129,11 +129,11 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		gomega.Expect(deployOutput).Should(gomega.ContainSubstring("has already been deployed"))
 	})
 
-	ginkgo.It("can deploy multiple subnets to local non SOV", func() {
-		commands.CreateEVMConfigNonSOV(subnetName, utils.EVMGenesisPath, false)
-		commands.CreateEVMConfigNonSOV(secondSubnetName, utils.EVMGenesis2Path, false)
+	ginkgo.It("can deploy multiple chains to local non SOV", func() {
+		commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, false)
+		commands.CreateEVMConfigNonSOV(secondChainName, utils.EVMGenesis2Path, false)
 
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		rpcs1, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -141,7 +141,7 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(rpcs1).Should(gomega.HaveLen(1))
 
-		deployOutput = commands.DeploySubnetLocallyNonSOV(secondSubnetName)
+		deployOutput = commands.DeployChainLocallyNonSOV(secondChainName)
 		rpcs2, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -161,20 +161,20 @@ var _ = ginkgo.Describe("[Local Subnet non SOV]", ginkgo.Ordered, func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.DeleteSubnetConfig(subnetName)
-		commands.DeleteSubnetConfig(secondSubnetName)
+		commands.DeleteChainConfig(chainName)
+		commands.DeleteChainConfig(secondChainName)
 	})
 })
 
-var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
+var _ = ginkgo.Describe("[Chain Compatibility]", func() {
 	ginkgo.AfterEach(func() {
 		commands.CleanNetwork()
-		if err := utils.DeleteConfigs(subnetName); err != nil {
+		if err := utils.DeleteConfigs(chainName); err != nil {
 			fmt.Println("Clean network error:", err)
 			gomega.Expect(err).Should(gomega.BeNil())
 		}
 
-		if err := utils.DeleteConfigs(secondSubnetName); err != nil {
+		if err := utils.DeleteConfigs(secondChainName); err != nil {
 			fmt.Println("Delete config error:", err)
 			gomega.Expect(err).Should(gomega.BeNil())
 		}
@@ -183,8 +183,8 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 	ginkgo.It("can deploy a evm with old version non SOV", func() {
 		evmVersion := "v0.7.1"
 
-		commands.CreateEVMConfigWithVersionNonSOV(subnetName, utils.EVMGenesisPath, evmVersion, false)
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		commands.CreateEVMConfigWithVersionNonSOV(chainName, utils.EVMGenesisPath, evmVersion, false)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -199,7 +199,7 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 		err = utils.RunHardhatTests(utils.BaseTest)
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		commands.DeleteSubnetConfig(subnetName)
+		commands.DeleteChainConfig(chainName)
 	})
 
 	ginkgo.It("can't deploy conflicting vm versions non SOV", func() {
@@ -207,10 +207,10 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 		evmVersion1 := utils.GetLatestEVMVersion()
 		evmVersion2 := utils.GetPreviousEVMVersion()
 
-		commands.CreateEVMConfigWithVersionNonSOV(subnetName, utils.EVMGenesisPath, evmVersion1, false)
-		commands.CreateEVMConfigWithVersionNonSOV(secondSubnetName, utils.EVMGenesis2Path, evmVersion2, false)
+		commands.CreateEVMConfigWithVersionNonSOV(chainName, utils.EVMGenesisPath, evmVersion1, false)
+		commands.CreateEVMConfigWithVersionNonSOV(secondChainName, utils.EVMGenesis2Path, evmVersion2, false)
 
-		deployOutput := commands.DeploySubnetLocallyNonSOV(subnetName)
+		deployOutput := commands.DeployChainLocallyNonSOV(chainName)
 		rpcs, err := utils.ParseRPCsFromOutput(deployOutput)
 		if err != nil {
 			fmt.Println(deployOutput)
@@ -218,9 +218,9 @@ var _ = ginkgo.Describe("[Subnet Compatibility]", func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(rpcs).Should(gomega.HaveLen(1))
 
-		commands.DeploySubnetLocallyExpectErrorNonSOV(secondSubnetName)
+		commands.DeployChainLocallyExpectErrorNonSOV(secondChainName)
 
-		commands.DeleteSubnetConfig(subnetName)
-		commands.DeleteSubnetConfig(secondSubnetName)
+		commands.DeleteChainConfig(chainName)
+		commands.DeleteChainConfig(secondChainName)
 	})
 })

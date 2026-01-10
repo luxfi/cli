@@ -55,12 +55,12 @@ func list(_ *cobra.Command, args []string) error {
 		BlockchainName: blockchainName,
 	}
 
-	subnetID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
+	chainID, err := contract.GetNetworkID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}
 
-	validators, err := validator.GetCurrentValidators(network, subnetID)
+	validators, err := validator.GetCurrentValidators(network, chainID)
 	if err != nil {
 		return err
 	}

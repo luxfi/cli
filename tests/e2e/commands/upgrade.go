@@ -13,13 +13,13 @@ import (
 )
 
 /* #nosec G204 */
-func ImportUpgradeBytes(subnetName, filepath string) (string, error) {
+func ImportUpgradeBytes(chainName, filepath string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"import",
-		subnetName,
+		chainName,
 		"--upgrade-filepath",
 		filepath,
 		"--"+constants.SkipUpdateFlag,
@@ -35,13 +35,13 @@ func ImportUpgradeBytes(subnetName, filepath string) (string, error) {
 }
 
 /* #nosec G204 */
-func UpgradeVMConfig(subnetName string, targetVersion string) (string, error) {
+func UpgradeVMConfig(chainName string, targetVersion string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"vm",
-		subnetName,
+		chainName,
 		"--config",
 		"--version",
 		targetVersion,
@@ -58,13 +58,13 @@ func UpgradeVMConfig(subnetName string, targetVersion string) (string, error) {
 }
 
 /* #nosec G204 */
-func UpgradeCustomVM(subnetName string, binaryPath string) (string, error) {
+func UpgradeCustomVM(chainName string, binaryPath string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"vm",
-		subnetName,
+		chainName,
 		"--config",
 		"--binary",
 		binaryPath,
@@ -81,13 +81,13 @@ func UpgradeCustomVM(subnetName string, binaryPath string) (string, error) {
 }
 
 /* #nosec G204 */
-func UpgradeVMPublic(subnetName string, targetVersion string, pluginDir string) (string, error) {
+func UpgradeVMPublic(chainName string, targetVersion string, pluginDir string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"vm",
-		subnetName,
+		chainName,
 		"--testnet",
 		"--version",
 		targetVersion,
@@ -106,13 +106,13 @@ func UpgradeVMPublic(subnetName string, targetVersion string, pluginDir string) 
 }
 
 /* #nosec G204 */
-func UpgradeVMLocal(subnetName string, targetVersion string) string {
+func UpgradeVMLocal(chainName string, targetVersion string) string {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"vm",
-		subnetName,
+		chainName,
 		"--local",
 		"--version",
 		targetVersion,
@@ -131,13 +131,13 @@ func UpgradeVMLocal(subnetName string, targetVersion string) string {
 }
 
 /* #nosec G204 */
-func UpgradeCustomVMLocal(subnetName string, binaryPath string) string {
+func UpgradeCustomVMLocal(chainName string, binaryPath string) string {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"vm",
-		subnetName,
+		chainName,
 		"--local",
 		"--binary",
 		binaryPath,
@@ -155,13 +155,13 @@ func UpgradeCustomVMLocal(subnetName string, binaryPath string) string {
 }
 
 /* #nosec G204 */
-func ApplyUpgradeLocal(subnetName string) (string, error) {
+func ApplyUpgradeLocal(chainName string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"apply",
-		subnetName,
+		chainName,
 		"--local",
 		"--"+constants.SkipUpdateFlag,
 	)
@@ -176,13 +176,13 @@ func ApplyUpgradeLocal(subnetName string) (string, error) {
 }
 
 /* #nosec G204 */
-func ApplyUpgradeToPublicNode(subnetName, luxChainConfDir string) (string, error) {
+func ApplyUpgradeToPublicNode(chainName, luxChainConfDir string) (string, error) {
 	cmd := exec.Command(
 		CLIBinary,
-		SubnetCmd,
+		ChainCmd,
 		UpgradeCmd,
 		"apply",
-		subnetName,
+		chainName,
 		"--testnet",
 		"--node-chain-config-dir",
 		luxChainConfDir,

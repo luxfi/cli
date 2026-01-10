@@ -168,12 +168,12 @@ func TestSplitKey(t *testing.T) {
 
 	key := "luxfi/plugins-core:wagmi"
 	expectedAlias := "luxfi/plugins-core"
-	expectedSubnet := "wagmi"
+	expectedChain := "wagmi"
 
-	alias, subnet, err := splitKey(key)
+	alias, chain, err := splitKey(key)
 	require.NoError(err)
 	require.Equal(expectedAlias, alias)
-	require.Equal(expectedSubnet, subnet)
+	require.Equal(expectedChain, chain)
 }
 
 func TestSplitKey_Errpr(t *testing.T) {
@@ -182,5 +182,5 @@ func TestSplitKey_Errpr(t *testing.T) {
 	key := "luxfi/plugins-core_wagmi"
 
 	_, _, err := splitKey(key)
-	require.ErrorContains(err, "invalid subnet key:")
+	require.ErrorContains(err, "invalid chain key:")
 }

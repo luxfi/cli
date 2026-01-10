@@ -26,13 +26,13 @@ func TestEVMRenameMigration(t *testing.T) {
 		expectedVM string
 	}
 
-	subnetName := "test"
+	chainName := "test"
 
 	tests := []test{
 		{
 			name: "Convert EVM",
 			sc: &models.Sidecar{
-				Name: subnetName,
+				Name: chainName,
 				VM:   "EVM",
 			},
 			expectedVM: "Lux EVM",
@@ -40,7 +40,7 @@ func TestEVMRenameMigration(t *testing.T) {
 		{
 			name: "Preserve Lux EVM",
 			sc: &models.Sidecar{
-				Name: subnetName,
+				Name: chainName,
 				VM:   "Lux EVM",
 			},
 			expectedVM: "Lux EVM",
@@ -48,7 +48,7 @@ func TestEVMRenameMigration(t *testing.T) {
 		{
 			name: "Ignore unknown",
 			sc: &models.Sidecar{
-				Name: subnetName,
+				Name: chainName,
 				VM:   "unknown",
 			},
 			expectedVM: "unknown",
@@ -93,10 +93,10 @@ func TestEVMRenameMigration_EmptyDir(t *testing.T) {
 	app := application.New()
 	app.Setup(testDir, luxlog.NewNoOpLogger(), config.New(), prompts.NewPrompter(), application.NewDownloader())
 
-	emptySubnetName := "emptySubnet"
+	emptyChainName := "emptyChain"
 
-	subnetDir := filepath.Join(app.GetChainsDir(), emptySubnetName)
-	err := os.MkdirAll(subnetDir, constants.DefaultPerms755)
+	chainDir := filepath.Join(app.GetChainsDir(), emptyChainName)
+	err := os.MkdirAll(chainDir, constants.DefaultPerms755)
 	require.NoError(err)
 
 	runner := migrationRunner{
