@@ -35,7 +35,7 @@ The Lux CLI supports multiple blockchain architectures:
 These flags are available for all commands:
 
 ```bash
---config <file>        # Config file (default: $HOME/.cli.json)
+--config <file>        # Config file (default: $HOME/.lux/cli.json)
 --log-level <level>    # Log level for the application (default: ERROR)
 --skip-update-check    # Skip check for new versions
 ```
@@ -666,7 +666,7 @@ lux migrate [flags]
 
 The CLI uses several configuration files:
 
-1. **CLI Config**: `~/.cli.json` - General CLI settings
+1. **CLI Config**: `~/.lux/cli.json` - General CLI settings
 2. **Sidecar Files**: `~/.cli/subnets/<name>/sidecar.json` - Subnet/L1/L2/L3 configurations
 3. **Genesis Files**: `~/.cli/subnets/<name>/genesis.json` - Genesis configurations
 4. **Node Config**: Custom node configurations for local networks

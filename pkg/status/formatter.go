@@ -32,7 +32,7 @@ func getChainTypeName(chainAlias string) string {
 	case "x":
 		return "exchange"
 	case "c":
-		return "coreth" // C-Chain is Coreth (EVM-compatible)
+		return "evm" // C-Chain is Lux EVM (EVM-compatible)
 	case "a":
 		return "ai"
 	case "b":
