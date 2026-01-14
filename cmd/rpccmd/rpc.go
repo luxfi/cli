@@ -12,11 +12,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/spf13/cobra"
 )
 
 // NewCmd returns the RPC command
-func NewCmd() *cobra.Command {
+func NewCmd(app *application.Lux) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rpc",
 		Short: "Make RPC calls to Lux node",
@@ -38,6 +39,7 @@ Examples:
 	}
 
 	cmd.AddCommand(newCallCmd())
+	cmd.AddCommand(newTransferCmd(app))
 	return cmd
 }
 
