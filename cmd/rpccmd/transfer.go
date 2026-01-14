@@ -337,7 +337,7 @@ func newCChainRPCBackend(
 ) (*c.Context, *rpcCBackend, *ethclient.Client, error) {
 	infoClient := info.NewClient(baseURL)
 	platformClient := platformvm.NewClient(baseURL)
-	luxAssetID, err := platformClient.GetStakingAssetID(ctx, networkID)
+	luxAssetID, err := platformClient.GetXAssetID(ctx, networkID)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get LUX asset ID: %w", err)
 	}
