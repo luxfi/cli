@@ -19,6 +19,7 @@ var (
 	derivePrefix string
 	deriveStart  int
 	deriveShow   bool
+	deriveExport bool
 )
 
 func newDeriveCmd() *cobra.Command {
@@ -42,7 +43,10 @@ Examples:
   lux key derive -n 3 --start 5 --prefix backup
 
   # Show addresses without saving (for verification)
-  lux key derive -n 5 --show`,
+  lux key derive -n 5 --show
+
+  # Show addresses with private keys (DANGER)
+  lux key derive -n 1 --show --export`,
 		RunE: runDerive,
 	}
 
@@ -50,6 +54,7 @@ Examples:
 	cmd.Flags().StringVarP(&derivePrefix, "prefix", "p", "mainnet-key", "Prefix for key names")
 	cmd.Flags().IntVarP(&deriveStart, "start", "s", 0, "Starting account index")
 	cmd.Flags().BoolVar(&deriveShow, "show", false, "Only show addresses, don't save keys")
+	cmd.Flags().BoolVar(&deriveExport, "export", false, "Show private keys in output (DANGER - keep secret!)")
 
 	return cmd
 }
@@ -116,11 +121,13 @@ func runDerive(_ *cobra.Command, _ []string) error {
 
 		info := ValidatorKeyInfo{
 			Index:      accountIndex,
-			PrivateKey: sf.PrivKeyHex(),
 			EthAddress: cAddr,
 			PChain:     pAddr,
 			XChain:     xAddr,
 			ShortID:    shortID,
+		}
+		if deriveExport {
+			info.PrivateKey = sf.PrivKeyHex()
 		}
 		results = append(results, info)
 
@@ -144,6 +151,9 @@ func runDerive(_ *cobra.Command, _ []string) error {
 		ux.Logger.PrintToUser("  Name:      %s", name)
 		ux.Logger.PrintToUser("  C-Chain:   %s", cAddr)
 		ux.Logger.PrintToUser("  P-Chain:   %s", pAddr)
+		if deriveExport {
+			ux.Logger.PrintToUser("  Private:   0x%s", sf.PrivKeyHex())
+		}
 		if !deriveShow {
 			ux.Logger.PrintToUser("  Saved:     ✓")
 		}
