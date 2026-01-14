@@ -168,7 +168,7 @@ For detailed command help, use: lux <command> --help`,
 	rootCmd.AddCommand(gpucmd.NewCmd(app))
 
 	// add rpc command for direct RPC calls
-	rootCmd.AddCommand(rpccmd.NewCmd())
+	rootCmd.AddCommand(rpccmd.NewCmd(app))
 
 	// add hidden backend command (base)
 	rootCmd.AddCommand(backendcmd.NewCmd(app))
