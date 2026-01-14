@@ -75,6 +75,7 @@ NOTES:
 	cmd.AddCommand(newSnapshotCmd())
 	cmd.AddCommand(newBootstrapCmd())
 	cmd.AddCommand(newDescribeCmd()) // Network describe with genesis info
+	cmd.AddCommand(newSendCmd())     // C-Chain send convenience
 
 	return cmd
 }
