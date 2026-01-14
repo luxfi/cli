@@ -29,7 +29,7 @@ done
 echo ""
 echo "=== CONFIGURING LUX-CLI FOR MAINNET ==="
 # Create configuration file for mainnet
-cat > ~/.cli.json <<EOF
+cat > ~/.lux/cli.json <<EOF
 {
   "network-runner": {
     "grpc-gateway": "127.0.0.1:8081",
@@ -63,7 +63,7 @@ cat > ~/.cli.json <<EOF
 }
 EOF
 
-echo "Configuration saved to ~/.cli.json"
+echo "Configuration saved to ~/.lux/cli.json"
 
 echo ""
 echo "=== LAUNCHING MAINNET NETWORK ==="

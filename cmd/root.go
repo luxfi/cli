@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/utils/perms"
+	"github.com/luxfi/filesystem/perms"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -58,7 +58,7 @@ func NewRootCmd() *cobra.Command {
 
 Architecture:
 - L1: Sovereign chains with independent validation
-- L2: Based rollups or OP Stack compatible (formerly subnets)
+- L2: Based rollups or OP Stack compatible (formerly chains)
 - L3: App-specific chains on L2s
 
 Sequencing options:
@@ -87,7 +87,7 @@ Quick start:
 	// Disable printing the completion command
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli.json)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.lux/cli.json)")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "ERROR", "log level for the application")
 	rootCmd.PersistentFlags().BoolVar(&skipCheck, constants.SkipUpdateFlag, false, "skip check for new versions")
 
@@ -274,10 +274,10 @@ func setupEnv() (string, error) {
 		os.Exit(1)
 	}
 
-	// Create subnet dir if it doesn't exist
-	subnetDir := filepath.Join(baseDir, constants.ChainsDir)
-	if err = os.MkdirAll(subnetDir, os.ModePerm); err != nil {
-		fmt.Printf("failed creating the subnet dir %s: %s\n", subnetDir, err)
+	// Create chain dir if it doesn't exist
+	chainDir := filepath.Join(baseDir, constants.ChainsDir)
+	if err = os.MkdirAll(chainDir, os.ModePerm); err != nil {
+		fmt.Printf("failed creating the chain dir %s: %s\n", chainDir, err)
 		os.Exit(1)
 	}
 
