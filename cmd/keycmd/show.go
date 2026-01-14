@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var showExport bool
+
 func newShowCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show <name>",
@@ -24,11 +26,16 @@ Displays:
 - Ringtail public key (ring signatures)
 - ML-DSA public key (post-quantum)
 
+With --export flag, also displays private keys (DANGER - keep secret!).
+
 Example:
-  lux key show validator1`,
+  lux key show validator1
+  lux key show validator1 --export`,
 		Args: cobra.ExactArgs(1),
 		RunE: runShow,
 	}
+
+	cmd.Flags().BoolVar(&showExport, "export", false, "Export private keys (DANGER - keep secret!)")
 
 	return cmd
 }
@@ -56,23 +63,35 @@ func runShow(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("EC (secp256k1) - Transaction Signing:")
 	ux.Logger.PrintToUser("  Address:    %s", keySet.ECAddress)
 	ux.Logger.PrintToUser("  Public Key: %s", hex.EncodeToString(keySet.ECPublicKey))
+	if showExport && len(keySet.ECPrivateKey) > 0 {
+		ux.Logger.PrintToUser("  Private Key: 0x%s", hex.EncodeToString(keySet.ECPrivateKey))
+	}
 	ux.Logger.PrintToUser("")
 
 	// BLS key info
 	ux.Logger.PrintToUser("BLS - Consensus Signatures:")
 	ux.Logger.PrintToUser("  Public Key: %s", hex.EncodeToString(keySet.BLSPublicKey))
 	ux.Logger.PrintToUser("  PoP:        %s", hex.EncodeToString(keySet.BLSPoP))
+	if showExport && len(keySet.BLSPrivateKey) > 0 {
+		ux.Logger.PrintToUser("  Private Key: 0x%s", hex.EncodeToString(keySet.BLSPrivateKey))
+	}
 	ux.Logger.PrintToUser("")
 
 	// Ringtail key info
 	ux.Logger.PrintToUser("Ringtail - Ring Signatures:")
 	ux.Logger.PrintToUser("  Public Key: %s", hex.EncodeToString(keySet.RingtailPublicKey))
+	if showExport && len(keySet.RingtailPrivateKey) > 0 {
+		ux.Logger.PrintToUser("  Private Key: 0x%s", hex.EncodeToString(keySet.RingtailPrivateKey))
+	}
 	ux.Logger.PrintToUser("")
 
 	// ML-DSA key info
 	ux.Logger.PrintToUser("ML-DSA - Post-Quantum Signatures:")
 	ux.Logger.PrintToUser("  Public Key: %s...", hex.EncodeToString(keySet.MLDSAPublicKey[:64]))
 	ux.Logger.PrintToUser("  (truncated, full key is %d bytes)", len(keySet.MLDSAPublicKey))
+	if showExport && len(keySet.MLDSAPrivateKey) > 0 {
+		ux.Logger.PrintToUser("  Private Key: (omitted, %d bytes)", len(keySet.MLDSAPrivateKey))
+	}
 	ux.Logger.PrintToUser("")
 
 	return nil
