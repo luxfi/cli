@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // GetNetwork returns the network model associated with a tx.
@@ -79,7 +79,7 @@ func GetChainOwners(network models.Network, chainID ids.ID) (*ChainOwners, error
 		return nil, err
 	}
 
-	createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
+	createSubnetTx, ok := tx.Unsigned.(*txs.CreateNetworkTx)
 	if !ok {
 		return nil, fmt.Errorf("got unexpected type %T for subnet tx %s", tx.Unsigned, chainID)
 	}

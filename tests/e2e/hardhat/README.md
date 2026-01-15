@@ -4,7 +4,7 @@ CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_relea
 
 ## Introduction
 
-These are sample contracts used to test that subnets are working.
+These are sample contracts used to test that chains are working.
 
 ## Prerequisites
 

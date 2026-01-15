@@ -51,7 +51,7 @@ func commitTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	chainID := sc.Networks[network.String()].SubnetID
+	chainID := sc.Networks[network.String()].ChainID
 	if chainID == ids.Empty {
 		return errNoChainID
 	}
