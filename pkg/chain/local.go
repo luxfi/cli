@@ -34,18 +34,17 @@ import (
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
+	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm"
 	platformapi "github.com/luxfi/node/vms/platformvm/api"
 	"github.com/luxfi/node/vms/platformvm/reward"
-	"github.com/luxfi/vm/vms/platformvm/signer"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/platformvm/signer"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
-	lux "github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
-	"go.uber.org/zap"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Chain deployment constants.
@@ -409,7 +408,7 @@ func (d *LocalDeployer) StartServerForNetwork(networkType string) error {
 		return fmt.Errorf("failed querying if server process is running: %w", err)
 	}
 	if !isRunning {
-		d.app.Log.Debug("gRPC server is not running", zap.String("network", networkType))
+		d.app.Log.Debug("gRPC server is not running", "network", networkType)
 		if err := binutils.StartServerProcessForNetwork(d.app, networkType); err != nil {
 			return fmt.Errorf("failed starting gRPC server for %s: %w", networkType, err)
 		}
@@ -506,7 +505,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	if err != nil {
 		return ids.Empty, ids.Empty, fmt.Errorf("failed to create VM ID from %s: %w", vmName, err)
 	}
-	d.app.Log.Debug("this VM will get ID", zap.String("vm-id", chainVMID.String()), zap.String("vm-name", vmName))
+	d.app.Log.Debug("this VM will get ID", "vm-id", chainVMID.String(), "vm-name", vmName)
 
 	// Check if this specific chain is already deployed (by chain name, not VM ID)
 	// Multiple chains can use the same VM (e.g., multiple EVM chains using Lux EVM)
@@ -900,7 +899,7 @@ func (d *LocalDeployer) checkNetworkHealthQuick(cli client.Client) bool {
 	defer cancel()
 	resp, err := cli.Health(ctx)
 	if err != nil {
-		d.app.Log.Debug("quick health check failed", zap.Error(err))
+		d.app.Log.Debug("quick health check failed", "error", err)
 		return false
 	}
 	if resp == nil || resp.ClusterInfo == nil {
@@ -947,11 +946,7 @@ func (d *LocalDeployer) validateVMBinary(vmBin string, vmID ids.ID) error {
 		return fmt.Errorf("VM binary %s is too small (%d bytes) - may be corrupted\n\nTo fix: rebuild the VM", vmBin, info.Size())
 	}
 
-	d.app.Log.Debug("VM binary validation passed",
-		zap.String("binary", vmBin),
-		zap.String("vmid", vmID.String()),
-		zap.Int64("size", info.Size()),
-	)
+	d.app.Log.Debug("VM binary validation passed", "binary", vmBin, "vmid", vmID.String(), "size", info.Size())
 	return nil
 }
 

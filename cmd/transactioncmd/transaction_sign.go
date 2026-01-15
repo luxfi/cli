@@ -8,11 +8,11 @@ import (
 
 	"github.com/luxfi/cli/pkg/chain"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
+	"github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/txutils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"
 )
 
@@ -76,7 +76,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	switch network {
 	case models.Testnet, models.Local:
 		if !useLedger && keyName == "" {
-			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.Prompt, "sign transaction", app.GetKeyDir())
+			useLedger, keyName, err = prompts.GetTestnetKeyOrLedger(app.CliPrompt, "sign transaction", app.GetKeyDir())
 			if err != nil {
 				return err
 			}
@@ -96,7 +96,7 @@ func signTx(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	chainID := sc.Networks[network.String()].SubnetID
+	chainID := sc.Networks[network.String()].ChainID
 	if chainID == ids.Empty {
 		return errNoChainID
 	}
