@@ -98,7 +98,7 @@ func importHistoricL1s(_ *cobra.Command, _ []string) error {
 			Name:                l1.Name,
 			VM:                  models.EVM,
 			VMVersion:           l1.VMVersion,
-			ChainID:             fmt.Sprintf("%d", l1.EVMChainID),
+			EVMChainID:          fmt.Sprintf("%d", l1.EVMChainID),
 			Sovereign:           true,
 			ValidatorManagement: ValidatorManagementPoA, // Default to PoA for historic chains
 			TokenInfo: models.TokenInfo{
@@ -113,7 +113,7 @@ func importHistoricL1s(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			ux.Logger.PrintToUser("   ⚠️  Invalid network ID, will generate new")
 		} else {
-			sc.NetID = networkID
+			sc.ChainID = networkID
 		}
 
 		blockchainID, err := ids.FromString(l1.BlockchainID)

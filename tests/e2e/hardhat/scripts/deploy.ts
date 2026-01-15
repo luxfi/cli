@@ -26,7 +26,7 @@ async function main() {
   console.log("Current greeting:", await greeter.greet())
   console.log("Updating greeting")
 
-  await greeter.setGreeting("Hello, subnet!")
+  await greeter.setGreeting("Hello, chain!")
   console.log("Updated greeting:", await greeter.greet())
 }
 

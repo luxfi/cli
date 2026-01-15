@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/vm/platformvm/signer"
+	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/p2p/peer"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/models"

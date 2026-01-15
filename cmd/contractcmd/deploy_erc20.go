@@ -109,7 +109,7 @@ func deployERC20(_ *cobra.Command, _ []string) error {
 		}
 		ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), deployERC20Flags.rpcEndpoint)
 	}
-	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMChainPrefundedKey(
 		app.GetSDKApp(),
 		network,
 		deployERC20Flags.chainFlags,

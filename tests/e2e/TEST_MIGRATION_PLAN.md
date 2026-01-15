@@ -99,17 +99,17 @@ var _ = Describe("Prometheus Integration", func() {
 
 ### L2 to L1 Migration Tests
 ```go
-// tests/e2e/testcases/migration/subnet_to_l1_test.go
-var _ = Describe("Subnet to L1 Migration", func() {
-    It("should migrate subnet to sovereign L1", func() {
-        subnet := sdk.CreateSubnet("test-subnet")
+// tests/e2e/testcases/migration/chain_to_l1_test.go
+var _ = Describe("Chain to L1 Migration", func() {
+    It("should migrate chain to sovereign L1", func() {
+        chain := sdk.CreateChain("test-chain")
         
         // Add validators
-        subnet.AddValidator(validator1)
-        subnet.AddValidator(validator2)
+        chain.AddValidator(validator1)
+        chain.AddValidator(validator2)
         
         // Perform migration
-        l1, err := subnet.MigrateToL1()
+        l1, err := chain.MigrateToL1()
         Expect(err).NotTo(HaveOccurred())
         
         // Verify L1 properties
@@ -117,7 +117,7 @@ var _ = Describe("Subnet to L1 Migration", func() {
         Expect(l1.Validators).To(HaveLen(2))
         
         // Verify state preservation
-        originalBalance := subnet.GetBalance(testAddr)
+        originalBalance := chain.GetBalance(testAddr)
         migratedBalance := l1.GetBalance(testAddr)
         Expect(migratedBalance).To(Equal(originalBalance))
     })
