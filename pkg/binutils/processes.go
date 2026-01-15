@@ -21,11 +21,11 @@ import (
 	"github.com/luxfi/cli/pkg/binpaths"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/filesystem/perms"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
-	"github.com/luxfi/filesystem/perms"
 	"github.com/shirou/gopsutil/process"
 	"go.uber.org/zap"
 )
@@ -94,7 +94,7 @@ func NewGRPCClient(opts ...GRPCClientOpOption) (client.Client, error) {
 	}
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
 		DisplayLevel: logLevel,
-		LogLevel:     level.Fatal,
+		LogLevel:     luxlog.Level(level.Fatal),
 	})
 	log, err := logFactory.Make("grpc-client")
 	if err != nil {
@@ -143,8 +143,8 @@ func NewGRPCServer(snapshotsDir string) (server.Server, error) {
 // NewGRPCServerForNetwork creates a gRPC server with network-specific ports
 func NewGRPCServerForNetwork(snapshotsDir, networkType string) (server.Server, error) {
 	logFactory := luxlog.NewFactoryWithConfig(luxlog.Config{
-		DisplayLevel: level.Info,
-		LogLevel:     level.Fatal,
+		DisplayLevel: luxlog.Level(level.Info),
+		LogLevel:     luxlog.Level(level.Fatal),
 	})
 	log, err := logFactory.Make("grpc-server")
 	if err != nil {

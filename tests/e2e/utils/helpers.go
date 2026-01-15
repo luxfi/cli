@@ -36,8 +36,8 @@ import (
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/wallet/primary"
-	lux "github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 const (

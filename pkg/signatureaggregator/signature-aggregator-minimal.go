@@ -22,8 +22,8 @@ func NewSignatureAggregatorLogger(
 	aggregatorLogToStdout bool,
 	logDir string,
 ) (luxlog.Logger, error) {
-	logLevel := level.Info
-	displayLevel := level.Info
+	logLevel := luxlog.Level(level.Info)
+	displayLevel := luxlog.Level(level.Info)
 
 	// Parse log level if provided
 	if aggregatorLogLevel != "" {
