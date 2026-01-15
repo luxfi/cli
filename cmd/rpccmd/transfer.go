@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/evm/plugin/evm/atomic"
+	"github.com/luxfi/coreth/plugin/evm/atomic"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
@@ -121,14 +121,14 @@ func runTransfer(app *application.Lux, flags *transferFlags) error {
 
 func resolveRPCBaseURL(app *application.Lux, override string) (string, error) {
 	if override != "" {
-		return strings.TrimSuffix(override, "/")
+		return strings.TrimSuffix(override, "/"), nil
 	}
 	if env := os.Getenv("LUX_RPC_URL"); env != "" {
-		return strings.TrimSuffix(env, "/")
+		return strings.TrimSuffix(env, "/"), nil
 	}
 	if app != nil {
 		if endpoint := app.GetRunningNetworkEndpoint(); endpoint != "" {
-			return strings.TrimSuffix(endpoint, "/")
+			return strings.TrimSuffix(endpoint, "/"), nil
 		}
 	}
 	return "", fmt.Errorf("rpc base URL not set (use --rpc-url or LUX_RPC_URL)")
@@ -188,9 +188,12 @@ func transferPXToC(baseURL string, networkID uint32, sk *key.SoftKey, source str
 
 	// Export from P/X to C (UTXO in shared memory for C)
 	if source == "P" {
-		_, err = pWallet.P().IssueExportTx(constants.CChainID, []*secp256k1fx.TransferOutput{{
-			Amt:          amountNLUX,
-			OutputOwners: *outputOwner,
+		_, err = pWallet.P().IssueExportTx(constants.CChainID, []*utxo.TransferableOutput{{
+			Asset: utxo.Asset{ID: constants.PrimaryNetworkID},
+			Out: &secp256k1fx.TransferOutput{
+				Amt:          amountNLUX,
+				OutputOwners: *outputOwner,
+			},
 		}})
 		if err != nil {
 			return fmt.Errorf("P->C export failed: %w", err)
@@ -337,7 +340,7 @@ func newCChainRPCBackend(
 ) (*c.Context, *rpcCBackend, *ethclient.Client, error) {
 	infoClient := info.NewClient(baseURL)
 	platformClient := platformvm.NewClient(baseURL)
-	luxAssetID, err := platformClient.GetXAssetID(ctx, networkID)
+	luxAssetID, err := platformClient.GetStakingAssetID(ctx, constants.PrimaryNetworkID)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get LUX asset ID: %w", err)
 	}
@@ -470,7 +473,17 @@ func fetchCChainUTXOs(ctx context.Context, baseURL, sourceChain string, addrs []
 
 	utxos := make([]*utxo.UTXO, 0, len(result.Result.UTXOs))
 	for _, u := range result.Result.UTXOs {
-		raw, err := formatting.Decode(result.Result.Encoding, u)
+		// encoding is expected to be hex or cb58. formatting.Decode expects formatting.Encoding type.
+		// Assuming hex for now or mapping string->Encoding if needed.
+		// Since we can't import utils types easily, and API usually returns hex:
+		var enc formatting.Encoding
+		switch result.Result.Encoding {
+		case "hex":
+			enc = formatting.Hex
+		default:
+			enc = formatting.Hex
+		}
+		raw, err := formatting.Decode(enc, u)
 		if err != nil {
 			return nil, err
 		}
@@ -485,7 +498,7 @@ func fetchCChainUTXOs(ctx context.Context, baseURL, sourceChain string, addrs []
 
 func issueCChainAtomicTx(ctx context.Context, baseURL string, tx *c.Tx) (string, error) {
 	endpoint := fmt.Sprintf("%s/ext/bc/C/lux", baseURL)
-	encoded, err := formatting.Encode("hex", tx.SignedBytes())
+	encoded, err := formatting.Encode(formatting.Hex, tx.SignedBytes())
 	if err != nil {
 		return "", err
 	}

@@ -29,7 +29,7 @@ Testnet or Mainnet.
 
 The L1 has to be a Proof of Authority L1.
 - [`configure`](#lux-blockchain-configure): Luxd nodes support several different configuration files.
-Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
+Each network (a Chain or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
 Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for evm options).
 A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.
@@ -47,7 +47,7 @@ configuration, pass the -f flag.
 - [`delete`](#lux-blockchain-delete): The blockchain delete command deletes an existing blockchain configuration.
 - [`deploy`](#lux-blockchain-deploy): The blockchain deploy command deploys your Blockchain configuration locally, to Testnet, or to Mainnet.
 
-At the end of the call, the command prints the RPC URL you can use to interact with the Subnet.
+At the end of the call, the command prints the RPC URL you can use to interact with the Chain.
 
 Lux-CLI only supports deploying an individual Blockchain once per network. Subsequent
 attempts to deploy the same Blockchain to the same network (local, Testnet, Mainnet) aren't
@@ -66,7 +66,7 @@ the --output flag.
 
 This command suite supports importing from a file created on another computer,
 or importing from blockchains running public networks
-(e.g. created manually or with the deprecated subnet-cli)
+(e.g. created manually or with the deprecated chain-cli)
 - [`join`](#lux-blockchain-join): The blockchain join command configures your validator node to begin validating a new Blockchain.
 
 To complete this process, you must have access to the machine running your validator. If the
@@ -83,12 +83,12 @@ at that path.
 This command currently only supports Blockchains deployed on the Testnet and Mainnet.
 - [`list`](#lux-blockchain-list): The blockchain list command prints the names of all created Blockchain configurations. Without any flags,
 it prints some general, static information about the Blockchain. With the --deployed flag, the command
-shows additional information including the VMID, BlockchainID and SubnetID.
+shows additional information including the VMID, BlockchainID and ChainID.
 - [`publish`](#lux-blockchain-publish): The blockchain publish command publishes the Blockchain's VM to a repository.
 - [`removeValidator`](#lux-blockchain-removevalidator): The blockchain removeValidator command stops a whitelisted blockchain network validator from
 validating your deployed Blockchain.
 
-To remove the validator from the Subnet's allow list, provide the validator's unique NodeID. You can bypass
+To remove the validator from the Chain's allow list, provide the validator's unique NodeID. You can bypass
 these prompts by providing the values with flags.
 - [`stats`](#lux-blockchain-stats): The blockchain stats command prints validator statistics for the given Blockchain.
 - [`upgrade`](#lux-blockchain-upgrade): The blockchain upgrade command suite provides a collection of tools for
@@ -138,9 +138,9 @@ lux blockchain addValidator [subcommand] [flags]
 --bls-public-key string                 set the BLS public key of the validator to add
 --cluster string                        operate on the given cluster
 --create-local-validator                create additional local validator and add it to existing running local node
---default-duration                      (for Subnets, not L1s) set duration so as to validate until primary validator ends its period
---default-start-time                    (for Subnets, not L1s) use default start time for subnet validator (5 minutes later for testnet & mainnet, 30 seconds later for devnet)
---default-validator-params              (for Subnets, not L1s) use default weight/start/duration params for subnet validator
+--default-duration                      (for Chains, not L1s) set duration so as to validate until primary validator ends its period
+--default-start-time                    (for Chains, not L1s) use default start time for chain validator (5 minutes later for testnet & mainnet, 30 seconds later for devnet)
+--default-validator-params              (for Chains, not L1s) use default weight/start/duration params for chain validator
 --delegation-fee uint16                 (PoS only) delegation fee (in bips) (default 100)
 --devnet                                operate on a devnet network
 --disable-owner string                  P-Chain address that will able to disable the validator with a P-Chain transaction
@@ -155,16 +155,16 @@ lux blockchain addValidator [subcommand] [flags]
 -m, --mainnet                           operate on mainnet
 --node-endpoint string                  gather node id/bls from publicly available luxd apis on the given endpoint
 --node-id string                        node-id of the validator to add
---output-tx-path string                 (for Subnets, not L1s) file path of the add validator tx
+--output-tx-path string                 (for Chains, not L1s) file path of the add validator tx
 --partial-sync                          set primary network partial sync for new validators (default true)
---remaining-balance-owner string        P-Chain address that will receive any leftover LUX from the validator when it is removed from Subnet
+--remaining-balance-owner string        P-Chain address that will receive any leftover LUX from the validator when it is removed from Chain
 --rpc string                            connect to validator manager at the given rpc endpoint
 --stake-amount uint                     (PoS only) amount of tokens to stake
 --staking-period duration               how long this validator will be staking
---start-time string                     (for Subnets, not L1s) UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
---subnet-auth-keys strings              (for Subnets, not L1s) control keys that will be used to authenticate add validator tx
+--start-time string                     (for Chains, not L1s) UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
+--chain-auth-keys strings              (for Chains, not L1s) control keys that will be used to authenticate add validator tx
 -t, --testnet                           testnet                         operate on testnet (alias to testnet)
---wait-for-tx-acceptance                (for Subnets, not L1s) just issue the add validator tx, without waiting for its acceptance (default true)
+--wait-for-tx-acceptance                (for Chains, not L1s) just issue the add validator tx, without waiting for its acceptance (default true)
 --weight uint                           set the staking weight of the validator to add (default 20)
 --config string                         config file (default is $HOME/.lux-cli/config.json)
 --log-level string                      log level for the application (default "ERROR")
@@ -245,7 +245,7 @@ lux blockchain changeWeight [subcommand] [flags]
 ### configure
 
 Luxd nodes support several different configuration files.
-Each network (a Subnet or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
+Each network (a Chain or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
 Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for evm options).
 A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
 This command allows you to set all those files.
@@ -262,7 +262,7 @@ lux blockchain configure [subcommand] [flags]
 -h, --help                        help for configure
 --node-config string              path to luxd node configuration
 --per-node-chain-config string    path to per node chain configuration for local network
---subnet-config string            path to the subnet configuration
+--chain-config string            path to the chain configuration
 --config string                   config file (default is $HOME/.lux-cli/config.json)
 --log-level string                log level for the application (default "ERROR")
 --skip-update-check               skip check for new versions
@@ -351,17 +351,17 @@ lux blockchain delete [subcommand] [flags]
 
 The blockchain deploy command deploys your Blockchain configuration to Local Network, to Testnet, DevNet or to Mainnet.
 
-At the end of the call, the command prints the RPC URL you can use to interact with the L1 / Subnet.
+At the end of the call, the command prints the RPC URL you can use to interact with the L1 / Chain.
 
 When deploying an L1, Lux-CLI lets you use your local machine as a bootstrap validator, so you don't need to run separate Lux nodes.
 This is controlled by the --use-local-machine flag (enabled by default on Local Network).
 
 If --use-local-machine is set to true:
-- Lux-CLI will call CreateSubnetTx, CreateChainTx, ConvertSubnetToL1Tx, followed by syncing the local machine bootstrap validator to the L1 and initialize
+- Lux-CLI will call CreateChainTx, CreateChainTx, ConvertChainToL1Tx, followed by syncing the local machine bootstrap validator to the L1 and initialize
   Validator Manager Contract on the L1
 
 If using your own Lux Nodes as bootstrap validators:
-- Lux-CLI will call CreateSubnetTx, CreateChainTx, ConvertSubnetToL1Tx
+- Lux-CLI will call CreateChainTx, CreateChainTx, ConvertChainToL1Tx
 - You will have to sync your bootstrap validators to the L1
 - Next, Initialize Validator Manager contract on the L1 using lux contract initValidatorManager [L1_Name]
 
@@ -388,8 +388,8 @@ lux blockchain deploy [subcommand] [flags]
       --ledger-addrs strings      use the given ledger addresses
       --mainnet-chain-id uint32   use different ChainID for mainnet deployment
       --output-tx-path string     file path of the blockchain creation tx (for multi-sig signing)
-  -u, --subnet-id string          do not create a subnet, deploy the blockchain into the given subnet id
-      --subnet-only               command stops after CreateSubnetTx and returns SubnetID
+  -u, --chain-id string          do not create a chain, deploy the blockchain into the given chain id
+      --chain-only               command stops after CreateChainTx and returns ChainID
 
 Network Flags (Select One):
   --cluster string   operate on the given cluster
@@ -424,7 +424,7 @@ Local Network Flags:
   --luxd-version string  use this version of luxd (ex: v1.17.12)
   --num-nodes uint32            number of nodes to be created on local network deploy
 
-Non Subnet-Only-Validators (Non-SOV) Flags:
+Non Chain-Only-Validators (Non-SOV) Flags:
   --auth-keys stringSlice     control keys that will be used to authenticate chain creation
   --control-keys stringSlice  addresses that may make blockchain changes
   --same-control-key          use the fee-paying key as control key
@@ -517,7 +517,7 @@ Import blockchain configurations into lux-cli.
 
 This command suite supports importing from a file created on another computer,
 or importing from blockchains running public networks
-(e.g. created manually or with the deprecated subnet-cli)
+(e.g. created manually or with the deprecated chain-cli)
 
 **Usage:**
 ```bash
@@ -668,7 +668,7 @@ lux blockchain join [subcommand] [flags]
 
 The blockchain list command prints the names of all created Blockchain configurations. Without any flags,
 it prints some general, static information about the Blockchain. With the --deployed flag, the command
-shows additional information including the VMID, BlockchainID and SubnetID.
+shows additional information including the VMID, BlockchainID and ChainID.
 
 **Usage:**
 ```bash
@@ -703,7 +703,7 @@ lux blockchain publish [subcommand] [flags]
 -h, --help                   help for publish
 --no-repo-path string        Do not let the tool manage file publishing, but have it only generate the files and put them in the location given by this flag.
 --repo-url string            The URL of the repo where we are publishing
---subnet-file-path string    Path to the Blockchain description file. If not given, a prompting sequence will be initiated.
+--chain-file-path string    Path to the Blockchain description file. If not given, a prompting sequence will be initiated.
 --vm-file-path string        Path to the VM description file. If not given, a prompting sequence will be initiated.
 --config string              config file (default is $HOME/.lux-cli/config.json)
 --log-level string           log level for the application (default "ERROR")
@@ -716,7 +716,7 @@ lux blockchain publish [subcommand] [flags]
 The blockchain removeValidator command stops a whitelisted blockchain network validator from
 validating your deployed Blockchain.
 
-To remove the validator from the Subnet's allow list, provide the validator's unique NodeID. You can bypass
+To remove the validator from the Chain's allow list, provide the validator's unique NodeID. You can bypass
 these prompts by providing the values with flags.
 
 **Usage:**
@@ -806,7 +806,7 @@ to upgrade your node manually.
 
 After you update your validator's configuration, you need to restart your validator manually.
 If you provide the --luxd-chain-config-dir flag, this command attempts to write the upgrade file at that path.
-Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs for related documentation.
+Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#chain-chain-configs for related documentation.
 - [`export`](#lux-blockchain-upgrade-export): Export the upgrade bytes file to a location of choice on disk
 - [`generate`](#lux-blockchain-upgrade-generate): The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain. It
 guides the user through the process using an interactive wizard.
@@ -840,7 +840,7 @@ to upgrade your node manually.
 
 After you update your validator's configuration, you need to restart your validator manually.
 If you provide the --luxd-chain-config-dir flag, this command attempts to write the upgrade file at that path.
-Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#subnet-chain-configs for related documentation.
+Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#chain-chain-configs for related documentation.
 
 **Usage:**
 ```bash
@@ -851,7 +851,7 @@ lux blockchain upgrade apply [subcommand] [flags]
 
 ```bash
 --luxd-chain-config-dir string    luxd's chain config file directory (default "/home/runner/.luxd/chains")
---config                                 create upgrade config for future subnet deployments (same as generate)
+--config                                 create upgrade config for future chain deployments (same as generate)
 --force                                  If true, don't prompt for confirmation of timestamps in the past
 --testnet                                   testnet                             apply upgrade existing testnet deployment (alias for `testnet`)
 -h, --help                               help for apply
@@ -961,7 +961,7 @@ lux blockchain upgrade vm [subcommand] [flags]
 
 ```bash
 --binary string        Upgrade to custom binary
---config               upgrade config for future subnet deployments
+--config               upgrade config for future chain deployments
 --testnet                 testnet           upgrade existing testnet deployment (alias for `testnet`)
 -h, --help             help for vm
 --latest               upgrade to latest version
@@ -1352,7 +1352,7 @@ lux warp deploy [subcommand] [flags]
 --messenger-deployer-tx-path string         path to a messenger deployer tx file
 --private-key string                        private key to use to fund Warp deploy
 --registry-bytecode-path string             path to a registry bytecode file
---rpc-url string                            use the given RPC URL to connect to the subnet
+--rpc-url string                            use the given RPC URL to connect to the chain
 -t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --version string                            version to deploy (default "latest")
 --config string                             config file (default is $HOME/.lux-cli/config.json)
@@ -1405,7 +1405,7 @@ lux warp [subcommand] [flags]
 
 **Subcommands:**
 
-- [`deploy`](#lux-warp-deploy): Deploys a Token Transferrer into a given Network and Subnets
+- [`deploy`](#lux-warp-deploy): Deploys a Token Transferrer into a given Network and Chains
 
 **Flags:**
 
@@ -1419,7 +1419,7 @@ lux warp [subcommand] [flags]
 <a id="lux-warp-deploy"></a>
 ### deploy
 
-Deploys a Token Transferrer into a given Network and Subnets
+Deploys a Token Transferrer into a given Network and Chains
 
 **Usage:**
 ```bash
@@ -1551,7 +1551,7 @@ lux interchain messenger deploy [subcommand] [flags]
 --messenger-deployer-tx-path string         path to a messenger deployer tx file
 --private-key string                        private key to use to fund Warp deploy
 --registry-bytecode-path string             path to a registry bytecode file
---rpc-url string                            use the given RPC URL to connect to the subnet
+--rpc-url string                            use the given RPC URL to connect to the chain
 -t, --testnet                               testnet                             operate on testnet (alias to testnet)
 --version string                            version to deploy (default "latest")
 --config string                             config file (default is $HOME/.lux-cli/config.json)
@@ -1742,7 +1742,7 @@ lux interchain tokenTransferrer [subcommand] [flags]
 
 **Subcommands:**
 
-- [`deploy`](#lux-interchain-tokentransferrer-deploy): Deploys a Token Transferrer into a given Network and Subnets
+- [`deploy`](#lux-interchain-tokentransferrer-deploy): Deploys a Token Transferrer into a given Network and Chains
 
 **Flags:**
 
@@ -1756,7 +1756,7 @@ lux interchain tokenTransferrer [subcommand] [flags]
 <a id="lux-interchain-tokentransferrer-deploy"></a>
 #### tokenTransferrer deploy
 
-Deploys a Token Transferrer into a given Network and Subnets
+Deploys a Token Transferrer into a given Network and Chains
 
 **Usage:**
 ```bash
@@ -1802,7 +1802,7 @@ lux interchain tokenTransferrer deploy [subcommand] [flags]
 ## lux key
 
 The key command suite provides a collection of tools for creating and managing
-signing keys. You can use these keys to deploy Subnets to the Testnet,
+signing keys. You can use these keys to deploy Chains to the Testnet,
 but these keys are NOT suitable to use in production environments. DO NOT use
 these keys on Mainnet.
 
@@ -1816,7 +1816,7 @@ lux key [subcommand] [flags]
 **Subcommands:**
 
 - [`create`](#lux-key-create): The key create command generates a new private key to use for creating and controlling
-test Subnets. Keys generated by this command are NOT cryptographically secure enough to
+test Chains. Keys generated by this command are NOT cryptographically secure enough to
 use in production environments. DO NOT use these keys on Mainnet.
 
 The command works by generating a secp256 key and storing it with the provided keyName. You
@@ -1850,7 +1850,7 @@ keys or for the ledger addresses associated to certain indices.
 ### create
 
 The key create command generates a new private key to use for creating and controlling
-test Subnets. Keys generated by this command are NOT cryptographically secure enough to
+test Chains. Keys generated by this command are NOT cryptographically secure enough to
 use in production environments. DO NOT use these keys on Mainnet.
 
 The command works by generating a secp256 key and storing it with the provided keyName. You
@@ -1950,7 +1950,7 @@ lux key list [subcommand] [flags]
 -l, --local              operate on a local network
 -m, --mainnet            operate on mainnet
 --pchain                 list P-Chain addresses (default true)
---subnets strings        subnets to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)
+--chains strings        chains to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)
 -t, --testnet            testnet          operate on testnet (alias to testnet)
 --tokens strings         provide balance information for the given token contract addresses (Evm only) (default [Native])
 --use-gwei               use gwei for EVM balances
@@ -1980,8 +1980,8 @@ lux key transfer [subcommand] [flags]
 --cluster string                            operate on the given cluster
 -a, --destination-addr string               destination address
 --destination-key string                    key associated to a destination address
---destination-subnet string                 subnet where the funds will be sent (token transferrer experimental)
---destination-transferrer-address string    token transferrer address at the destination subnet (token transferrer experimental)
+--destination-chain string                 chain where the funds will be sent (token transferrer experimental)
+--destination-transferrer-address string    token transferrer address at the destination chain (token transferrer experimental)
 --devnet                                    operate on a devnet network
 --endpoint string                           use the given endpoint for network operations
 -f, --testnet                                  testnet                             operate on testnet (alias to testnet
@@ -1990,8 +1990,8 @@ lux key transfer [subcommand] [flags]
 -i, --ledger uint32                         ledger index associated to the sender or receiver address (default 32768)
 -l, --local                                 operate on a local network
 -m, --mainnet                               operate on mainnet
---origin-subnet string                      subnet where the funds belong (token transferrer experimental)
---origin-transferrer-address string         token transferrer address at the origin subnet (token transferrer experimental)
+--origin-chain string                      chain where the funds belong (token transferrer experimental)
+--origin-transferrer-address string         token transferrer address at the origin chain (token transferrer experimental)
 --p-chain-receiver                          receive at P-Chain
 --p-chain-sender                            send from P-Chain
 --receiver-blockchain string                receive at the given CLI blockchain
@@ -2025,8 +2025,8 @@ lux network [subcommand] [flags]
 
 **Subcommands:**
 
-- [`clean`](#lux-network-clean): The network clean command shuts down your local, multi-node network. All deployed Subnets
-shutdown and delete their state. You can restart the network by deploying a new Subnet
+- [`clean`](#lux-network-clean): The network clean command shuts down your local, multi-node network. All deployed Chains
+shutdown and delete their state. You can restart the network by deploying a new Chain
 configuration.
 - [`start`](#lux-network-start): The network start command starts a local, multi-node Lux network on your machine.
 
@@ -2037,7 +2037,7 @@ already running.
 network is running and some basic stats about the network.
 - [`stop`](#lux-network-stop): The network stop command shuts down your local, multi-node network.
 
-All deployed Subnets shutdown gracefully and save their state. If you provide the
+All deployed Chains shutdown gracefully and save their state. If you provide the
 --snapshot-name flag, the network saves its state under this named snapshot. You can
 reload this snapshot with network start --snapshot-name `snapshotName`. Otherwise, the
 network saves to the default snapshot, overwriting any existing state. You can reload the
@@ -2055,8 +2055,8 @@ default snapshot with network start.
 <a id="lux-network-clean"></a>
 ### clean
 
-The network clean command shuts down your local, multi-node network. All deployed Subnets
-shutdown and delete their state. You can restart the network by deploying a new Subnet
+The network clean command shuts down your local, multi-node network. All deployed Chains
+shutdown and delete their state. You can restart the network by deploying a new Chain
 configuration.
 
 **Usage:**
@@ -2127,7 +2127,7 @@ lux network status [subcommand] [flags]
 
 The network stop command shuts down your local, multi-node network.
 
-All deployed Subnets shutdown gracefully and save their state. If you provide the
+All deployed Chains shutdown gracefully and save their state. If you provide the
 --snapshot-name flag, the network saves its state under this named snapshot. You can
 reload this snapshot with network start --snapshot-name `snapshotName`. Otherwise, the
 network saves to the default snapshot, overwriting any existing state. You can reload the
@@ -2157,7 +2157,7 @@ validators on Lux Network.
 
 To get started, use the node create command wizard to walk through the
 configuration to make your node a primary validator on Lux public network. You can use the
-rest of the commands to maintain your node and make your node a Subnet Validator.
+rest of the commands to maintain your node and make your node a Chain Validator.
 
 **Usage:**
 ```bash
@@ -2173,12 +2173,12 @@ cluster.
 - [`create`](#lux-node-create): (ALPHA Warning) This command is currently in experimental mode.
 
 The node create command sets up a validator on a cloud server of your choice.
-The validator will be validating the Lux Primary Network and Subnet
+The validator will be validating the Lux Primary Network and Chain
 of your choice. By default, the command runs an interactive wizard. It
 walks you through all the steps you need to set up a validator.
 Once this command is completed, you will have to wait for the validator
 to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Subnet. You can check the bootstrapping
+commands on it, e.g. validating a Chain. You can check the bootstrapping
 status by running lux node status
 
 The created node will be part of group of validators called `clusterName`
@@ -2267,7 +2267,7 @@ You can check the status after upgrade by calling lux node status
 - [`validate`](#lux-node-validate): (ALPHA Warning) This command is currently in experimental mode.
 
 The node validate command suite provides a collection of commands for nodes to join
-the Primary Network and Subnets as validators.
+the Primary Network and Chains as validators.
 If any of the commands is run before the nodes are bootstrapped on the Primary Network, the command
 will fail. You can check the bootstrap status by calling lux node status `clusterName`
 - [`whitelist`](#lux-node-whitelist): (ALPHA Warning) The whitelist command suite provides a collection of tools for granting access to the cluster.
@@ -2303,7 +2303,7 @@ lux node addDashboard [subcommand] [flags]
 ```bash
 --add-grafana-dashboard string    path to additional grafana dashboard json file
 -h, --help                        help for addDashboard
---subnet string                   subnet that the dasbhoard is intended for (if any)
+--chain string                   chain that the dasbhoard is intended for (if any)
 --config string                   config file (default is $HOME/.lux-cli/config.json)
 --log-level string                log level for the application (default "ERROR")
 --skip-update-check               skip check for new versions
@@ -2315,12 +2315,12 @@ lux node addDashboard [subcommand] [flags]
 (ALPHA Warning) This command is currently in experimental mode.
 
 The node create command sets up a validator on a cloud server of your choice.
-The validator will be validating the Lux Primary Network and Subnet
+The validator will be validating the Lux Primary Network and Chain
 of your choice. By default, the command runs an interactive wizard. It
 walks you through all the steps you need to set up a validator.
 Once this command is completed, you will have to wait for the validator
 to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Subnet. You can check the bootstrapping
+commands on it, e.g. validating a Chain. You can check the bootstrapping
 status by running lux node status
 
 The created node will be part of group of validators called `clusterName`
@@ -2339,7 +2339,7 @@ lux node create [subcommand] [flags]
 --alternative-key-pair-name string          key pair name to use if default one generates conflicts
 --authorize-access                          authorize CLI to create cloud resources
 --auto-replace-keypair                      automatically replaces key pair to access node if previous key pair is not found
---luxd-version-from-subnet string    install latest luxd version, that is compatible with the given subnet, on node/s
+--luxd-version-from-chain string    install latest luxd version, that is compatible with the given chain, on node/s
 --aws                                       create node/s in AWS cloud
 --aws-profile string                        aws profile to use (default "default")
 --aws-volume-iops int                       AWS iops (for gp3, io1, and io2 volume types only) (default 3000)
@@ -2424,11 +2424,11 @@ lux node devnet [subcommand] [flags]
 
 - [`deploy`](#lux-node-devnet-deploy): (ALPHA Warning) This command is currently in experimental mode.
 
-The node devnet deploy command deploys a subnet into a devnet cluster, creating subnet and blockchain txs for it.
+The node devnet deploy command deploys a chain into a devnet cluster, creating chain and blockchain txs for it.
 It saves the deploy info both locally and remotely.
 - [`wiz`](#lux-node-devnet-wiz): (ALPHA Warning) This command is currently in experimental mode.
 
-The node wiz command creates a devnet and deploys, sync and validate a subnet into it. It creates the subnet if so needed.
+The node wiz command creates a devnet and deploys, sync and validate a chain into it. It creates the chain if so needed.
 
 **Flags:**
 
@@ -2444,7 +2444,7 @@ The node wiz command creates a devnet and deploys, sync and validate a subnet in
 
 (ALPHA Warning) This command is currently in experimental mode.
 
-The node devnet deploy command deploys a subnet into a devnet cluster, creating subnet and blockchain txs for it.
+The node devnet deploy command deploys a chain into a devnet cluster, creating chain and blockchain txs for it.
 It saves the deploy info both locally and remotely.
 
 **Usage:**
@@ -2456,9 +2456,9 @@ lux node devnet deploy [subcommand] [flags]
 
 ```bash
 -h, --help                  help for deploy
---no-checks                 do not check for healthy status or rpc compatibility of nodes against subnet
---subnet-aliases strings    additional subnet aliases to be used for RPC calls in addition to subnet blockchain name
---subnet-only               only create a subnet
+--no-checks                 do not check for healthy status or rpc compatibility of nodes against chain
+--chain-aliases strings    additional chain aliases to be used for RPC calls in addition to chain blockchain name
+--chain-only               only create a chain
 --config string             config file (default is $HOME/.lux-cli/config.json)
 --log-level string          log level for the application (default "ERROR")
 --skip-update-check         skip check for new versions
@@ -2469,7 +2469,7 @@ lux node devnet deploy [subcommand] [flags]
 
 (ALPHA Warning) This command is currently in experimental mode.
 
-The node wiz command creates a devnet and deploys, sync and validate a subnet into it. It creates the subnet if so needed.
+The node wiz command creates a devnet and deploys, sync and validate a chain into it. It creates the chain if so needed.
 
 **Usage:**
 ```bash
@@ -2489,13 +2489,13 @@ lux node devnet wiz [subcommand] [flags]
 --aws-volume-size int                                  AWS volume size in GB (default 1000)
 --aws-volume-throughput int                            AWS throughput in MiB/s (for gp3 volume type only) (default 125)
 --aws-volume-type string                               AWS volume type (default "gp3")
---chain-config string                                  path to the chain configuration for subnet
+--chain-config string                                  path to the chain configuration for chain
 --custom-luxd-version string                    install given luxd version on node/s
---custom-subnet                                        use a custom VM as the subnet virtual machine
+--custom-chain                                        use a custom VM as the chain virtual machine
 --custom-vm-branch string                              custom vm branch or commit
 --custom-vm-build-script string                        custom vm build-script
 --custom-vm-repo-url string                            custom vm repository url
---default-validator-params                             use default weight/start/duration params for subnet validator
+--default-validator-params                             use default weight/start/duration params for chain validator
 --deploy-warp-messenger                                 deploy Interchain Messenger (default true)
 --deploy-warp-registry                                  deploy Interchain Registry (default true)
 --deploy-teleporter-messenger                          deploy Interchain Messenger (default true)
@@ -2504,11 +2504,11 @@ lux node devnet wiz [subcommand] [flags]
 --evm-chain-id uint                                    chain ID to use with EVM
 --evm-defaults                                         use default production settings with EVM
 --evm-production-defaults                              use default production settings for your blockchain
---evm-subnet                                           use EVM as the subnet virtual machine
+--evm-chain                                           use EVM as the chain virtual machine
 --evm-test-defaults                                    use default test settings for your blockchain
 --evm-token string                                     token name to use with EVM
 --evm-version string                                   version of EVM to use
---force-subnet-create                                  overwrite the existing subnet configuration if one exists
+--force-chain-create                                  overwrite the existing chain configuration if one exists
 --gcp                                                  create node/s in GCP cloud
 --gcp-credentials string                               use given GCP credentials
 --gcp-project string                                   use given GCP project
@@ -2524,7 +2524,7 @@ lux node devnet wiz [subcommand] [flags]
 --latest-luxd-version                           install latest luxd release version on node/s
 --latest-evm-version                                   use latest EVM released version
 --latest-pre-released-evm-version                      use latest EVM pre-released version
---node-config string                                   path to luxd node configuration for subnet
+--node-config string                                   path to luxd node configuration for chain
 --node-type string                                     cloud instance type. Use 'default' to use recommended default instance type
 --num-apis                                             ints                                       number of API nodes(nodes without stake) to create in the new Devnet
 --num-validators                                       ints                                 number of nodes to create per region(s). Use comma to separate multiple numbers for each region in the same order as --region flag
@@ -2532,9 +2532,9 @@ lux node devnet wiz [subcommand] [flags]
 --region strings                                       create node/s in given region(s). Use comma to separate multiple regions
 --relayer                                              run AWM relayer when deploying the vm
 --ssh-agent-identity string                            use given ssh identity(only for ssh agent). If not set, default will be used.
---subnet-aliases strings                               additional subnet aliases to be used for RPC calls in addition to subnet blockchain name
---subnet-config string                                 path to the subnet configuration for subnet
---subnet-genesis string                                file path of the subnet genesis
+--chain-aliases strings                               additional chain aliases to be used for RPC calls in addition to chain blockchain name
+--chain-config string                                 path to the chain configuration for chain
+--chain-genesis string                                file path of the chain genesis
 --teleporter                                           generate an warp-ready vm
 --teleporter-messenger-contract-address-path string    path to an warp messenger contract address file
 --teleporter-messenger-deployer-address-path string    path to an warp messenger deployer address file
@@ -2543,7 +2543,7 @@ lux node devnet wiz [subcommand] [flags]
 --teleporter-version string                            warp version to deploy (default "latest")
 --use-ssh-agent                                        use ssh agent for ssh
 --use-static-ip                                        attach static Public IP on cloud servers (default true)
---validators strings                                   deploy subnet into given comma separated list of validators. defaults to all cluster nodes
+--validators strings                                   deploy chain into given comma separated list of validators. defaults to all cluster nodes
 --config string                                        config file (default is $HOME/.lux-cli/config.json)
 --log-level string                                     log level for the application (default "ERROR")
 --skip-update-check                                    skip check for new versions
@@ -2740,7 +2740,7 @@ lux node local [subcommand] [flags]
 - [`start`](#lux-node-local-start): The node local start command creates Lux nodes on the local machine.
 Once this command is completed, you will have to wait for the Lux node
 to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Subnet.
+commands on it, e.g. validating a Chain.
 
 You can check the bootstrapping status by running lux node status local.
 - [`status`](#lux-node-local-status): Get status of local node.
@@ -2785,7 +2785,7 @@ lux node local destroy [subcommand] [flags]
 The node local start command creates Lux nodes on the local machine.
 Once this command is completed, you will have to wait for the Lux node
 to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Subnet.
+commands on it, e.g. validating a Chain.
 
 You can check the bootstrapping status by running lux node status local.
 
@@ -2912,7 +2912,7 @@ lux node local validate [subcommand] [flags]
 -h, --help                          help for validate
 --l1 string                         specify the blockchain the node is syncing with
 --minimum-stake-duration uint       minimum stake duration (in seconds) (default 100)
---remaining-balance-owner string    P-Chain address that will receive any leftover LUX from the validator when it is removed from Subnet
+--remaining-balance-owner string    P-Chain address that will receive any leftover LUX from the validator when it is removed from Chain
 --rpc string                        connect to validator manager at the given rpc endpoint
 --stake-amount uint                 amount of tokens to stake
 --config string                     config file (default is $HOME/.lux-cli/config.json)
@@ -3046,7 +3046,7 @@ lux node status [subcommand] [flags]
 ```bash
 --blockchain string    specify the blockchain the node is syncing with
 -h, --help             help for status
---subnet string        specify the blockchain the node is syncing with
+--chain string        specify the blockchain the node is syncing with
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -3069,9 +3069,9 @@ lux node sync [subcommand] [flags]
 
 ```bash
 -h, --help                  help for sync
---no-checks                 do not check for bootstrapped/healthy status or rpc compatibility of nodes against subnet
---subnet-aliases strings    subnet alias to be used for RPC calls. defaults to subnet blockchain ID
---validators strings        sync subnet into given comma separated list of validators. defaults to all cluster nodes
+--no-checks                 do not check for bootstrapped/healthy status or rpc compatibility of nodes against chain
+--chain-aliases strings    chain alias to be used for RPC calls. defaults to chain blockchain ID
+--validators strings        sync chain into given comma separated list of validators. defaults to all cluster nodes
 --config string             config file (default is $HOME/.lux-cli/config.json)
 --log-level string          log level for the application (default "ERROR")
 --skip-update-check         skip check for new versions
@@ -3094,10 +3094,10 @@ lux node update [subcommand] [flags]
 
 **Subcommands:**
 
-- [`subnet`](#lux-node-update-subnet): (ALPHA Warning) This command is currently in experimental mode.
+- [`chain`](#lux-node-update-chain): (ALPHA Warning) This command is currently in experimental mode.
 
-The node update subnet command updates all nodes in a cluster with latest Subnet configuration and VM for custom VM.
-You can check the updated subnet bootstrap status by calling lux node status `clusterName` --subnet `subnetName`
+The node update chain command updates all nodes in a cluster with latest Chain configuration and VM for custom VM.
+You can check the updated chain bootstrap status by calling lux node status `clusterName` --chain `chainName`
 
 **Flags:**
 
@@ -3108,23 +3108,23 @@ You can check the updated subnet bootstrap status by calling lux node status `cl
 --skip-update-check    skip check for new versions
 ```
 
-<a id="lux-node-update-subnet"></a>
-#### update subnet
+<a id="lux-node-update-chain"></a>
+#### update chain
 
 (ALPHA Warning) This command is currently in experimental mode.
 
-The node update subnet command updates all nodes in a cluster with latest Subnet configuration and VM for custom VM.
-You can check the updated subnet bootstrap status by calling lux node status `clusterName` --subnet `subnetName`
+The node update chain command updates all nodes in a cluster with latest Chain configuration and VM for custom VM.
+You can check the updated chain bootstrap status by calling lux node status `clusterName` --chain `chainName`
 
 **Usage:**
 ```bash
-lux node update subnet [subcommand] [flags]
+lux node update chain [subcommand] [flags]
 ```
 
 **Flags:**
 
 ```bash
--h, --help             help for subnet
+-h, --help             help for chain
 --config string        config file (default is $HOME/.lux-cli/config.json)
 --log-level string     log level for the application (default "ERROR")
 --skip-update-check    skip check for new versions
@@ -3160,7 +3160,7 @@ lux node upgrade [subcommand] [flags]
 (ALPHA Warning) This command is currently in experimental mode.
 
 The node validate command suite provides a collection of commands for nodes to join
-the Primary Network and Subnets as validators.
+the Primary Network and Chains as validators.
 If any of the commands is run before the nodes are bootstrapped on the Primary Network, the command
 will fail. You can check the bootstrap status by calling lux node status `clusterName`
 
@@ -3175,15 +3175,15 @@ lux node validate [subcommand] [flags]
 
 The node validate primary command enables all nodes in a cluster to be validators of Primary
 Network.
-- [`subnet`](#lux-node-validate-subnet): (ALPHA Warning) This command is currently in experimental mode.
+- [`chain`](#lux-node-validate-chain): (ALPHA Warning) This command is currently in experimental mode.
 
-The node validate subnet command enables all nodes in a cluster to be validators of a Subnet.
+The node validate chain command enables all nodes in a cluster to be validators of a Chain.
 If the command is run before the nodes are Primary Network validators, the command will first
-make the nodes Primary Network validators before making them Subnet validators.
+make the nodes Primary Network validators before making them Chain validators.
 If The command is run before the nodes are bootstrapped on the Primary Network, the command will fail.
 You can check the bootstrap status by calling lux node status `clusterName`
-If The command is run before the nodes are synced to the subnet, the command will fail.
-You can check the subnet sync status by calling lux node status `clusterName` --subnet `subnetName`
+If The command is run before the nodes are synced to the chain, the command will fail.
+You can check the chain sync status by calling lux node status `clusterName` --chain `chainName`
 
 **Flags:**
 
@@ -3223,39 +3223,39 @@ lux node validate primary [subcommand] [flags]
 --skip-update-check          skip check for new versions
 ```
 
-<a id="lux-node-validate-subnet"></a>
-#### validate subnet
+<a id="lux-node-validate-chain"></a>
+#### validate chain
 
 (ALPHA Warning) This command is currently in experimental mode.
 
-The node validate subnet command enables all nodes in a cluster to be validators of a Subnet.
+The node validate chain command enables all nodes in a cluster to be validators of a Chain.
 If the command is run before the nodes are Primary Network validators, the command will first
-make the nodes Primary Network validators before making them Subnet validators.
+make the nodes Primary Network validators before making them Chain validators.
 If The command is run before the nodes are bootstrapped on the Primary Network, the command will fail.
 You can check the bootstrap status by calling lux node status `clusterName`
-If The command is run before the nodes are synced to the subnet, the command will fail.
-You can check the subnet sync status by calling lux node status `clusterName` --subnet `subnetName`
+If The command is run before the nodes are synced to the chain, the command will fail.
+You can check the chain sync status by calling lux node status `clusterName` --chain `chainName`
 
 **Usage:**
 ```bash
-lux node validate subnet [subcommand] [flags]
+lux node validate chain [subcommand] [flags]
 ```
 
 **Flags:**
 
 ```bash
---default-validator-params    use default weight/start/duration params for subnet validator
+--default-validator-params    use default weight/start/duration params for chain validator
 -e, --ewoq                    use ewoq key [testnet/devnet only]
--h, --help                    help for subnet
+-h, --help                    help for chain
 -k, --key string              select the key to use [testnet/devnet only]
 -g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
 --ledger-addrs strings        use the given ledger addresses
 --no-checks                   do not check for bootstrapped status or healthy status
---no-validation-checks        do not check if subnet is already synced or validated (default true)
+--no-validation-checks        do not check if chain is already synced or validated (default true)
 --stake-amount uint           how many LUX to stake in the validator
 --staking-period duration     how long validator validates for after start time
 --start-time string           UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
---validators strings          validate subnet for the given comma separated list of validators. defaults to all cluster nodes
+--validators strings          validate chain for the given comma separated list of validators. defaults to all cluster nodes
 --config string               config file (default is $HOME/.lux-cli/config.json)
 --log-level string            log level for the application (default "ERROR")
 --skip-update-check           skip check for new versions
@@ -3302,7 +3302,7 @@ lux primary [subcommand] [flags]
 
 - [`addValidator`](#lux-primary-addvalidator): The primary addValidator command adds a node as a validator
 in the Primary Network
-- [`describe`](#lux-primary-describe): The subnet describe command prints details of the primary network configuration to the console.
+- [`describe`](#lux-primary-describe): The chain describe command prints details of the primary network configuration to the console.
 
 **Flags:**
 
@@ -3352,7 +3352,7 @@ lux primary addValidator [subcommand] [flags]
 <a id="lux-primary-describe"></a>
 ### describe
 
-The subnet describe command prints details of the primary network configuration to the console.
+The chain describe command prints details of the primary network configuration to the console.
 
 **Usage:**
 ```bash

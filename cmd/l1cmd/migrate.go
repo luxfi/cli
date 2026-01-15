@@ -292,7 +292,7 @@ func migrateChainToL1(_ *cobra.Command, args []string) error {
 func createMigrationTransaction(sc *models.Sidecar, validatorManagement, rentalPlan string) *models.MigrationTx {
 	// Create migration transaction
 	return &models.MigrationTx{
-		NetID:               sc.NetID,
+		ChainID:             sc.ChainID,
 		BlockchainID:        sc.BlockchainID,
 		ValidatorManagement: validatorManagement,
 		RentalPlan:          rentalPlan,

@@ -38,8 +38,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/filesystem/perms"
+	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -210,14 +210,14 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	// Adjust log level based on flags BEFORE any logging happens
 	// Use only luxlog types to avoid mixing log libraries
 	if cmd.Flags().Changed("debug") {
-		logFactory.SetLogLevel("lux", level.Debug)
-		logFactory.SetDisplayLevel("lux", level.Debug)
+		logFactory.SetLogLevel("lux", luxlog.Level(level.Debug))
+		logFactory.SetDisplayLevel("lux", luxlog.Level(level.Debug))
 	} else if cmd.Flags().Changed("verbose") {
-		logFactory.SetLogLevel("lux", level.Info)
-		logFactory.SetDisplayLevel("lux", level.Info)
+		logFactory.SetLogLevel("lux", luxlog.Level(level.Info))
+		logFactory.SetDisplayLevel("lux", luxlog.Level(level.Info))
 	} else if cmd.Flags().Changed("quiet") {
-		logFactory.SetLogLevel("lux", level.Error)
-		logFactory.SetDisplayLevel("lux", level.Error)
+		logFactory.SetLogLevel("lux", luxlog.Level(level.Error))
+		logFactory.SetDisplayLevel("lux", luxlog.Level(level.Error))
 	} else if logLevel != "" {
 		level, err := luxlog.ToLevel(logLevel)
 		if err == nil {

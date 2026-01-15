@@ -289,10 +289,10 @@ func createChain(cmd *cobra.Command, args []string) error {
 	sc := models.Sidecar{
 		Name:              chainName,
 		VM:                vmType,
-		Net:               chainName, // Network name (not chain)
+		Chain:             chainName, // Network name (not chain)
 		TokenName:         resolvedTokenName,
 		TokenSymbol:       resolvedTokenSymbol,
-		ChainID:           fmt.Sprintf("%d", resolvedChainID),
+		EVMChainID:        fmt.Sprintf("%d", resolvedChainID),
 		Version:           "1.4.0",
 		BasedRollup:       chainType == "l2",
 		Sovereign:         chainType == "l1",

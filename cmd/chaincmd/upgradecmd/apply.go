@@ -177,7 +177,7 @@ func applyLocalNetworkUpgrade(blockchainName, networkKey string, sc *models.Side
 	deployed := false
 	customChains := status.ClusterInfo.GetCustomChains()
 	for _, chainInfo := range customChains {
-		if chainInfo.GetPchainId() == sc.Networks[networkKey].SubnetID.String() {
+		if chainInfo.GetPchainId() == sc.Networks[networkKey].ChainID.String() {
 			deployed = true
 			break
 		}

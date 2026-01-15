@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/lpm v1.0.5 // indirect
 	github.com/luxfi/netrunner v1.14.38
 	github.com/luxfi/sdk v1.16.44
-	github.com/luxfi/vm v1.0.16
+	github.com/luxfi/vm v1.0.18
 	github.com/luxfi/warp v1.18.4
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -108,7 +108,9 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/ferranbt/fastssz v1.0.0 // indirect
+	github.com/fjl/gencodec v0.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -124,7 +126,7 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20251213031049-b05bdaca462f // indirect
-	github.com/google/renameio/v2 v2.0.0 // indirect
+	github.com/google/renameio/v2 v2.0.1 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
@@ -146,6 +148,7 @@ require (
 	github.com/luxfi/concurrent v0.0.2 // indirect
 	github.com/luxfi/consensus v1.22.53 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
+	github.com/luxfi/coreth v1.21.47 // indirect
 	github.com/luxfi/fhe v1.7.6-0.20260106060801-28e308e4c2f8 // indirect
 	github.com/luxfi/gpu v0.30.0 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
@@ -242,7 +245,7 @@ require (
 	github.com/luxfi/genesis v1.5.21
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/log v1.2.5
+	github.com/luxfi/log v1.3.1
 	github.com/luxfi/math v1.2.3
 	github.com/luxfi/net v0.0.1
 	github.com/luxfi/node v1.22.83
@@ -252,8 +255,4 @@ require (
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/utils v1.1.3
 	github.com/luxfi/utxo v0.2.1
-	github.com/mattn/go-isatty v0.0.20
-	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	golang.org/x/sys v0.39.0
-	golang.org/x/term v0.38.0
 )

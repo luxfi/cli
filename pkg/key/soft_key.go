@@ -21,12 +21,11 @@ import (
 	"github.com/luxfi/go-bip32"
 	"github.com/luxfi/go-bip39"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
 	eth_crypto "github.com/luxfi/crypto"
-	"go.uber.org/zap"
 )
 
 var (
@@ -36,11 +35,12 @@ var (
 	ErrInvalidPrivateKeyEncoding = errors.New("invalid private key encoding")
 )
 
-// LUXCoinType is the BIP-44 coin type for LUX (9000')
-const LUXCoinType = 9000
+// EthCoinType is the BIP-44 coin type for Ethereum (60')
+// Using Ethereum standard for compatibility with MetaMask, cast, and other tools
+const EthCoinType = 60
 
 // deriveMnemonicKey derives a private key from a BIP-39 mnemonic using BIP-44 path.
-// Path: m/44'/9000'/0'/0/{accountIndex}
+// Path: m/44'/60'/0'/0/{accountIndex} (Ethereum standard)
 func deriveMnemonicKey(mnemonic string, accountIndex uint32) ([]byte, error) {
 	if !bip39.IsMnemonicValid(mnemonic) {
 		return nil, fmt.Errorf("invalid mnemonic phrase")
@@ -53,32 +53,32 @@ func deriveMnemonicKey(mnemonic string, accountIndex uint32) ([]byte, error) {
 		return nil, fmt.Errorf("failed to create master key: %w", err)
 	}
 
-	// BIP-44 path: m/44'/9000'/0'/0/{accountIndex}
+	// BIP-44 path: m/44'/60'/0'/0/{accountIndex}
 	// m/44' (purpose)
 	key, err := masterKey.NewChildKey(bip32.FirstHardenedChild + 44)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive purpose: %w", err)
 	}
 
-	// m/44'/9000' (coin type for LUX)
-	key, err = key.NewChildKey(bip32.FirstHardenedChild + LUXCoinType)
+	// m/44'/60' (Ethereum coin type - for compatibility with MetaMask/cast)
+	key, err = key.NewChildKey(bip32.FirstHardenedChild + EthCoinType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive coin type: %w", err)
 	}
 
-	// m/44'/9000'/0' (account)
+	// m/44'/60'/0' (account)
 	key, err = key.NewChildKey(bip32.FirstHardenedChild + 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive account: %w", err)
 	}
 
-	// m/44'/9000'/0'/0 (change)
+	// m/44'/60'/0'/0 (change)
 	key, err = key.NewChildKey(0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive change: %w", err)
 	}
 
-	// m/44'/9000'/0'/0/{accountIndex} (address index)
+	// m/44'/60'/0'/0/{accountIndex} (address index)
 	key, err = key.NewChildKey(accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive address index: %w", err)
@@ -382,7 +382,7 @@ func (m *SoftKey) Spends(outputs []*lux.UTXO, opts ...OpOption) (
 	for _, out := range outputs {
 		input, psigners, err := m.spend(out, ret.time)
 		if err != nil {
-			zap.L().Warn("cannot spend with current key", zap.Error(err))
+			// Cannot spend this output with current key, skip it
 			continue
 		}
 		totalBalanceToSpend += input.Amount()
@@ -520,7 +520,7 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 }
 
 // NewSoftFromMnemonic creates a SoftKey from a BIP39 mnemonic phrase.
-// Uses standard BIP44 derivation path: m/44'/9000'/0'/0/0
+// Uses standard Ethereum BIP44 derivation path: m/44'/60'/0'/0/0
 func NewSoftFromMnemonic(networkID uint32, mnemonic string) (*SoftKey, error) {
 	return NewSoftFromMnemonicWithAccount(networkID, mnemonic, 0)
 }
@@ -535,7 +535,7 @@ func NewSoftFromBytes(networkID uint32, privKeyBytes []byte) (*SoftKey, error) {
 }
 
 // NewSoftFromMnemonicWithAccount creates a SoftKey from a BIP39 mnemonic with specific account index.
-// Uses standard BIP44 derivation path: m/44'/9000'/0'/0/{accountIndex}
+// Uses standard Ethereum BIP44 derivation path: m/44'/60'/0'/0/{accountIndex}
 func NewSoftFromMnemonicWithAccount(networkID uint32, mnemonic string, accountIndex uint32) (*SoftKey, error) {
 	keyBytes, err := deriveMnemonicKey(mnemonic, accountIndex)
 	if err != nil {

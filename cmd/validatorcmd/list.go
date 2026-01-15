@@ -55,7 +55,7 @@ func list(_ *cobra.Command, args []string) error {
 		BlockchainName: blockchainName,
 	}
 
-	chainID, err := contract.GetSubnetID(app.GetSDKApp(), network, chainSpec)
+	chainID, err := contract.GetNetworkID(app.GetSDKApp(), network, chainSpec)
 	if err != nil {
 		return err
 	}
