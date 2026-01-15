@@ -107,7 +107,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		}
 	}
 	ux.Logger.PrintToUser(luxlog.Yellow.Wrap("RPC Endpoint: %s"), initValidatorManagerFlags.RPC)
-	_, genesisPrivateKey, err := contract.GetEVMSubnetPrefundedKey(
+	_, genesisPrivateKey, err := contract.GetEVMChainPrefundedKey(
 		app.GetSDKApp(),
 		network,
 		chainSpec,
@@ -161,7 +161,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	chainID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app.GetSDKApp(),
 		network,
 		chainSpec,
@@ -184,7 +184,7 @@ func initValidatorManager(_ *cobra.Command, args []string) error {
 		validators[i] = v
 	}
 	netSDK := blockchainSDK.Net{
-		NetID:               chainID,
+		ChainID:             chainID,
 		BlockchainID:        blockchainID,
 		BootstrapValidators: validators,
 		OwnerAddress:        &ownerAddress,

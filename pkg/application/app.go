@@ -24,8 +24,9 @@ const (
 
 // Lux extends the SDK's application.Lux type with CLI-specific functionality
 type Lux struct {
-	*sdkapp.Lux                // Embed SDK's Lux type
-	Conf        *config.Config // CLI-specific config
+	*sdkapp.Lux                  // Embed SDK's Lux type
+	CliPrompt   prompts.Prompter // CLI-specific prompter
+	Conf        *config.Config   // CLI-specific config
 }
 
 func New() *Lux {
@@ -47,7 +48,8 @@ func (app *Lux) Setup(baseDir string, log luxlog.Logger, conf *config.Config, pr
 	}
 	// SDK config is different from CLI config, so we pass nil for now
 	app.Lux.Setup(baseDir, log, nil, sdkPrompt, sdkDownloader)
-	app.Conf = conf // Store CLI-specific config
+	app.Conf = conf        // Store CLI-specific config
+	app.CliPrompt = prompt // Store CLI-specific prompter
 }
 
 // GetSDKApp returns the embedded SDK application for compatibility with SDK-based functions
