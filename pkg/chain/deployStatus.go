@@ -82,8 +82,8 @@ func GetLocallyDeployedNetIDs(app *application.Lux) ([]string, error) {
 
 		// check if sidecar contains local deployment info with a valid SubnetID
 		if network, ok := sc.Networks[models.Local.String()]; ok {
-			if network.SubnetID.String() != "" && network.SubnetID.String() != PChainID {
-				chainIDs = append(chainIDs, network.SubnetID.String())
+			if network.ChainID.String() != "" && network.ChainID.String() != constants.PlatformChainID.String() {
+				chainIDs = append(chainIDs, network.ChainID.String())
 			}
 		}
 	}

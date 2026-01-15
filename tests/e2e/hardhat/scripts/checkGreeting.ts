@@ -17,7 +17,7 @@ async function main() {
 
   console.log("Greeter found at:", greeter.address)
 
-  const expectedGreeting = "Hello, subnet!"
+  const expectedGreeting = "Hello, chain!"
   let currentGreeting = await greeter.greet()
   console.log("Current greeting:", currentGreeting)
 

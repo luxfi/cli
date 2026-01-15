@@ -30,7 +30,7 @@ import (
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/utils"
 
@@ -406,7 +406,7 @@ func GetChainIDs(endpoint string, chainName string) (string, string, error) {
 		return "", "", err
 	}
 	if chain := Find(blockChains, func(e platformvm.APIBlockchain) bool { return e.Name == chainName }); chain != nil {
-		return chain.NetID.String(), chain.ID.String(), nil
+		return ids.Empty.String(), chain.ID.String(), nil
 	}
 	return "", "", fmt.Errorf("%s not found on primary network blockchains", chainName)
 }
@@ -571,12 +571,12 @@ func NewLogger(
 	logToStdout bool,
 	printFn func(string, ...interface{}),
 ) (luxlog.Logger, error) {
-	logLevel, err := level.ToLevel(logLevelStr)
+	logLevel, err := luxlog.ToLevel(logLevelStr)
 	if err != nil {
 		if logLevelStr != "" {
 			printFn("undefined logLevel %s. Setting %s log to %s", logLevelStr, logName, defaultLogLevelStr)
 		}
-		logLevel, err = level.ToLevel(defaultLogLevelStr)
+		logLevel, err = luxlog.ToLevel(defaultLogLevelStr)
 		if err != nil {
 			return luxlog.NoLog{}, err
 		}

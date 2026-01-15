@@ -17,7 +17,7 @@ if (existsSync("./dynamic_conf.json")) {
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
-    subnet: {
+    chain: {
       //"http://{ip}:{port}/ext/bc/{chainID}/rpc
       url: rpcUrl,
       chainId: parseInt(chainIdStr, 10),
