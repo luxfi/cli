@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	platformvm "github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/models"
+	platformvm "github.com/luxfi/sdk/platformvm"
 )
 
 // GetNetworkBalance returns the balance of an address on the P-chain

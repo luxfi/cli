@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/sdk/api/info"
+	apiinfo "github.com/luxfi/api/info"
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/utils"
 )
@@ -195,7 +195,7 @@ func ParseLuxdOutput(byteValue []byte) (string, uint32, error) {
 		return "", 0, err
 	}
 
-	nodeVersionReply := info.GetNodeVersionReply{}
+	nodeVersionReply := apiinfo.GetNodeVersionReply{}
 	if err := json.Unmarshal(resultJSON, &nodeVersionReply); err != nil {
 		return "", 0, err
 	}
