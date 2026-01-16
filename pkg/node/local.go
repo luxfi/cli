@@ -11,6 +11,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/dependencies"
 
+	apiinfo "github.com/luxfi/api/info"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/utils"
@@ -19,9 +20,9 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/sdk/api/info"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/platformvm"
 )
 
 func setupLuxd(
@@ -280,16 +281,16 @@ func LocalStatus(
 
 func getInfo(uri string, blockchainID string) (
 	ids.NodeID, // nodeID
-	*info.ProofOfPossession, // nodePOP
+	*apiinfo.ProofOfPossession, // nodePOP
 	bool, // isBootstrapped
 	error, // error
 ) {
-	client := info.NewClient(uri)
+	client := sdkinfo.NewClient(uri)
 	ctx, cancel := utils.GetAPILargeContext()
 	defer cancel()
 	nodeID, nodePOP, err := client.GetNodeID(ctx)
 	if err != nil {
-		return ids.EmptyNodeID, &info.ProofOfPossession{}, false, err
+		return ids.EmptyNodeID, &apiinfo.ProofOfPossession{}, false, err
 	}
 	isBootstrapped, err := client.IsBootstrapped(ctx, blockchainID)
 	if err != nil {
