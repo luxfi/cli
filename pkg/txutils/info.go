@@ -11,9 +11,9 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 

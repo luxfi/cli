@@ -8,9 +8,9 @@ import (
 	"fmt"
 
 	"github.com/luxfi/crypto/secp256k1"
-	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 // GetAuthSigners returns all chain auth addresses that are required to sign a given tx.
