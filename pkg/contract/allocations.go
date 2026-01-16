@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/genesis/pkg/genesis"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
 )
 
 // returns information for the blockchain default allocation key
@@ -24,9 +24,9 @@ func GetDefaultBlockchainAirdropKeyInfo(
 	app *application.Lux,
 	blockchainName string,
 ) (string, string, string, error) {
-	keyName := sdkutils.GetDefaultBlockchainAirdropKeyName(blockchainName)
+	keyName := genesis.GetDefaultBlockchainAirdropKeyName(blockchainName)
 	keyPath := app.GetKeyPath(keyName)
-	if sdkutils.FileExists(keyPath) {
+	if utils.FileExists(keyPath) {
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
 		if err != nil {
 			return "", "", "", err
