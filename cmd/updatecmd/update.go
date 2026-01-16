@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 	"golang.org/x/mod/semver"
 )
 
@@ -57,7 +56,11 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 	url := binutils.GetGithubLatestReleaseURL(constants.LuxOrg, constants.CliRepoName)
 	latest, err := app.Downloader.GetLatestReleaseVersion(url)
 	if err != nil {
-		app.Log.Warn("failed to get latest version for cli from repo", zap.Error(err))
+		app.Log.Warn("failed to get latest version for cli from repo", "error", err)
+		// If not user-called, don't block on network errors
+		if !isUserCalled {
+			return nil
+		}
 		return err
 	}
 
@@ -69,7 +72,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 			verFile := "VERSION"
 			bver, err := os.ReadFile(verFile)
 			if err != nil {
-				app.Log.Warn("failed to read version from file on disk", zap.Error(err))
+				app.Log.Warn("failed to read version from file on disk", "error", err)
 				return ErrNoVersion
 			}
 			this = string(bver)
@@ -91,9 +94,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 
 	// If not user-called (e.g., background check), just log and return - never prompt
 	if !isUserCalled {
-		app.Log.Debug("New version available but skipping prompt (not user-called)",
-			zap.String("current", thisVFmt),
-			zap.String("latest", latest))
+		app.Log.Debug("New version available but skipping prompt (not user-called)", "current", thisVFmt, "latest", latest)
 		return nil
 	}
 
@@ -133,7 +134,7 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 		installCmdArgs = append(installCmdArgs, "-b", execPath)
 	}
 
-	app.Log.Debug("installing new version", zap.String("path", execPath))
+	app.Log.Debug("installing new version", "path", execPath)
 
 	installCmd := exec.Command("sh", installCmdArgs...)
 

@@ -17,9 +17,9 @@ import (
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/sdk/api/info"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/evm"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/geth/common"
@@ -127,7 +127,7 @@ func destroyLocalNode() {
 }
 
 func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error) {
-	infoClient := info.NewClient(uri)
+	infoClient := sdkinfo.NewClient(uri)
 	ctx, cancel := utils.GetAPILargeContext()
 	defer cancel()
 	nodeID, proofOfPossession, err := infoClient.GetNodeID(ctx)
@@ -209,7 +209,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		}
 		ownerAddress := common.HexToAddress(ewoqEVMAddress)
 		netSDK := blockchainSDK.Net{
-			NetworkID:           networkID,
+			ChainID:             chainID,
 			BlockchainID:        blockchainID,
 			OwnerAddress:        &ownerAddress,
 			RPC:                 rpcURL,

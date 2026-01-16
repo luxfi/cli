@@ -34,17 +34,17 @@ import (
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/netrunner/server"
 	anrutils "github.com/luxfi/netrunner/utils"
-	"github.com/luxfi/node/vms/components/verify"
-	"github.com/luxfi/node/vms/platformvm"
-	platformapi "github.com/luxfi/node/vms/platformvm/api"
-	"github.com/luxfi/node/vms/platformvm/reward"
-	"github.com/luxfi/node/vms/platformvm/signer"
+	platformapi "github.com/luxfi/protocol/p/api"
+	"github.com/luxfi/protocol/p/reward"
+	"github.com/luxfi/protocol/p/signer"
 	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 // Chain deployment constants.

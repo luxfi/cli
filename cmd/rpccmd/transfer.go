@@ -24,8 +24,8 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/api/info"
-	"github.com/luxfi/sdk/api/platformvm"
+	sdkinfo "github.com/luxfi/sdk/info"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/utxo"
@@ -137,7 +137,7 @@ func resolveRPCBaseURL(app *application.Lux, override string) (string, error) {
 func resolveNetworkID(baseURL string) (uint32, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	infoClient := info.NewClient(baseURL)
+	infoClient := sdkinfo.NewClient(baseURL)
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get network ID: %w", err)
@@ -338,7 +338,7 @@ func newCChainRPCBackend(
 	sk *key.SoftKey,
 	adapter *primary.KeychainAdapter,
 ) (*c.Context, *rpcCBackend, *ethclient.Client, error) {
-	infoClient := info.NewClient(baseURL)
+	infoClient := sdkinfo.NewClient(baseURL)
 	platformClient := platformvm.NewClient(baseURL)
 	luxAssetID, err := platformClient.GetStakingAssetID(ctx, constants.PrimaryNetworkID)
 	if err != nil {

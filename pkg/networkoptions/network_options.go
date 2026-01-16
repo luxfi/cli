@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/sdk/api/info"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/utils"
 )
@@ -434,7 +434,7 @@ func GetNetworkFromCmdLineFlags(
 	case Devnet:
 		// Get network ID from devnet endpoint if provided
 		if networkFlags.Endpoint != "" {
-			infoClient := info.NewClient(networkFlags.Endpoint)
+			infoClient := sdkinfo.NewClient(networkFlags.Endpoint)
 			ctx, cancel := utils.GetAPIContext()
 			defer cancel()
 			networkID, err := infoClient.GetNetworkID(ctx)

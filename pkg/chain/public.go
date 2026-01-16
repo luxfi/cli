@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/vms/components/verify"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/sdk/platformvm"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/vm/components/verify"
 
 	"github.com/luxfi/address"
 	"github.com/luxfi/cli/pkg/application"

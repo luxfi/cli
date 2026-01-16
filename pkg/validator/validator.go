@@ -9,10 +9,10 @@ import (
 
 	luxdjson "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/utils"
 
 	"github.com/luxfi/crypto"
@@ -148,7 +148,7 @@ func GetCurrentValidators(network models.Network, chainID ids.ID) ([]CurrentVali
 		ctx,
 		"platform.getCurrentValidators",
 		&platformvm.GetCurrentValidatorsArgs{
-			NetID:   chainID,
+			ChainID: chainID,
 			NodeIDs: nil,
 		},
 		res,

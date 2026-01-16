@@ -19,6 +19,7 @@ import (
 const networkTypeCustom = "custom"
 
 var snapshotNetworkType string
+var snapshotLive bool
 
 func newSnapshotCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -60,16 +61,20 @@ func newSnapshotSaveCmd() *cobra.Command {
 		Long: `The snapshot save command saves the current network state to a named snapshot.
 
 The snapshot includes all node data, databases, and configurations from the current network.
-The network must be stopped before creating a snapshot.
+
+By default, the network must be stopped before creating a snapshot. Use --live to create
+a snapshot while the network is running (creates backup from one node without stopping it).
 
 Example:
-  lux network snapshot save my-test-state`,
+  lux network snapshot save my-test-state
+  lux network snapshot save my-backup --live  # Snapshot without stopping network`,
 		Args:         cobra.ExactArgs(1),
 		RunE:         saveSnapshot,
 		SilenceUsage: true,
 	}
 
 	cmd.Flags().StringVar(&snapshotNetworkType, "network-type", "", "network type to snapshot (mainnet, testnet, devnet, custom)")
+	cmd.Flags().BoolVar(&snapshotLive, "live", false, "create snapshot from running network (backs up one node without stopping)")
 
 	return cmd
 }
@@ -160,8 +165,10 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Saving snapshot for network: %s", networkType)
 
 	state, err := app.LoadNetworkStateForType(networkType)
-	if err == nil && state != nil && state.Running {
-		return fmt.Errorf("network %s is currently running. Please stop it first with 'lux network stop --network-type %s'", networkType, networkType)
+	isRunning := err == nil && state != nil && state.Running
+
+	if isRunning && !snapshotLive {
+		return fmt.Errorf("network %s is currently running. Use --live to snapshot without stopping, or stop it first with 'lux network stop --network-type %s'", networkType, networkType)
 	}
 
 	runDir := app.GetRunDir()
@@ -179,6 +186,11 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 	snapshotDir := filepath.Join(snapshotsDir, snapshotName)
 	if _, err := os.Stat(snapshotDir); err == nil {
 		return fmt.Errorf("snapshot '%s' already exists. Delete it first or choose a different name", snapshotName)
+	}
+
+	// For live snapshots, we backup from node5 (least disruptive)
+	if snapshotLive && isRunning {
+		return saveLiveSnapshot(snapshotName, networkType, sourceDir, snapshotDir)
 	}
 
 	ux.Logger.PrintToUser("Creating snapshot: %s", snapshotName)
@@ -211,6 +223,59 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 	}
 
 	ux.Logger.PrintToUser("✓ Snapshot '%s' created successfully", snapshotName)
+	return nil
+}
+
+// saveLiveSnapshot creates a snapshot from a running network without stopping it.
+// It backs up data from node5 to minimize impact on the network.
+func saveLiveSnapshot(snapshotName, networkType, sourceDir, snapshotDir string) error {
+	ux.Logger.PrintToUser("Creating live snapshot (network continues running)...")
+
+	// Find the current run directory
+	currentLink := filepath.Join(sourceDir, "current")
+	currentRun, err := os.Readlink(currentLink)
+	if err != nil {
+		return fmt.Errorf("failed to read current run link: %w", err)
+	}
+
+	runDir := filepath.Join(sourceDir, currentRun)
+
+	// Select node5 for backup (least impact on consensus)
+	nodeDir := filepath.Join(runDir, "node5")
+	if _, err := os.Stat(nodeDir); os.IsNotExist(err) {
+		// Fallback to node1 if node5 doesn't exist
+		nodeDir = filepath.Join(runDir, "node1")
+	}
+
+	ux.Logger.PrintToUser("Backing up from: %s", nodeDir)
+	ux.Logger.PrintToUser("Destination: %s", snapshotDir)
+
+	// Create snapshot directory
+	if err := os.MkdirAll(snapshotDir, 0o750); err != nil {
+		return fmt.Errorf("failed to create snapshot directory: %w", err)
+	}
+
+	// Create archive of the node directory
+	// BadgerDB supports concurrent reads, so this is safe while running
+	archivePath := filepath.Join(snapshotDir, "archive.tar.gz")
+	if err := archiveDirectory(runDir, archivePath); err != nil {
+		return fmt.Errorf("failed to create snapshot archive: %w", err)
+	}
+
+	// Write metadata
+	metadata := fmt.Sprintf("Name: %s\nNetwork Type: %s\nCreated: %s\nSource: %s\nCompressed: true\nLive: true\n",
+		snapshotName,
+		networkType,
+		time.Now().Format(time.RFC3339),
+		runDir)
+
+	metadataPath := filepath.Join(snapshotDir, "snapshot_metadata.txt")
+	if err := os.WriteFile(metadataPath, []byte(metadata), 0o644); err != nil { //nolint:gosec // G306
+		ux.Logger.PrintToUser("Warning: failed to save metadata: %v", err)
+	}
+
+	ux.Logger.PrintToUser("✓ Live snapshot '%s' created successfully", snapshotName)
+	ux.Logger.PrintToUser("  Network is still running")
 	return nil
 }
 

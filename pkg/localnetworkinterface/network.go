@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/sdk/api/info"
+	sdkinfo "github.com/luxfi/sdk/info"
 )
 
 // StatusChecker provides network status checking operations.
@@ -46,7 +46,7 @@ func (n *networkStatusChecker) GetCurrentNetworkVersion() (string, int, bool, er
 		endpoint = n.app.GetRunningNetworkEndpoint()
 	}
 
-	infoClient := info.NewClient(endpoint)
+	infoClient := sdkinfo.NewClient(endpoint)
 	versionResponse, err := infoClient.GetNodeVersion(ctx)
 	if err != nil {
 		// not actually an error, network just not running

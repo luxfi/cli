@@ -60,6 +60,9 @@ func archiveDirectory(src string, dst string) error {
 		// Windows compatibility for path separators
 		header.Name = strings.ReplaceAll(header.Name, "\\", "/")
 
+		// Use PAX format to support large files (>8GB)
+		header.Format = tar.FormatPAX
+
 		// Write header
 		if err := tw.WriteHeader(header); err != nil {
 			return err
@@ -70,14 +73,16 @@ func archiveDirectory(src string, dst string) error {
 			return nil
 		}
 
-		// Copy file data
+		// Copy file data (limit to header size for live snapshots where files may be growing)
 		f, err := os.Open(file)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
 
-		if _, err := io.Copy(tw, f); err != nil {
+		// Use LimitReader to only read the size we recorded in the header
+		// This handles the case where BadgerDB vlogs grow during archiving
+		if _, err := io.Copy(tw, io.LimitReader(f, header.Size)); err != nil {
 			return err
 		}
 

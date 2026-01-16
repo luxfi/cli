@@ -22,11 +22,12 @@ const (
 
 func TestUpdateSideCar(t *testing.T) {
 	require := require.New(t)
+	chainID := ids.GenerateTestID()
 	sc := &models.Sidecar{
 		Name:      "TEST",
 		VM:        models.EVM,
 		TokenName: "TEST",
-		ChainID:   "42",
+		ChainID:   chainID,
 	}
 
 	ap := newTestApp(t)
@@ -117,7 +118,7 @@ func Test_createSidecar_success(t *testing.T) {
 		chainName         string
 		tokenName         string
 		expectedTokenName string
-		chainID           string
+		chainID           ids.ID
 	}
 
 	tests := []test{
@@ -126,14 +127,14 @@ func Test_createSidecar_success(t *testing.T) {
 			chainName:         chainName1,
 			tokenName:         "TOKEN",
 			expectedTokenName: "TOKEN",
-			chainID:           "999",
+			chainID:           ids.GenerateTestID(),
 		},
 		{
 			name:              "no token name",
 			chainName:         chainName1,
 			tokenName:         "",
 			expectedTokenName: "TEST",
-			chainID:           "888",
+			chainID:           ids.GenerateTestID(),
 		},
 	}
 
