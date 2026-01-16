@@ -29,9 +29,9 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/protocol/p/txs"
-	"github.com/luxfi/sdk/api/info"
+	sdkinfo "github.com/luxfi/sdk/info"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/utils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -391,7 +391,7 @@ func InsideCodespace() bool {
 }
 
 func GetChainID(endpoint string, chainName string) (ids.ID, error) {
-	client := info.NewClient(endpoint)
+	client := sdkinfo.NewClient(endpoint)
 	ctx, cancel := GetAPIContext()
 	defer cancel()
 	return client.GetBlockchainID(ctx, chainName)
@@ -417,7 +417,7 @@ func GetNodeID(endpoint string) (
 	string, // PoP
 	error,
 ) {
-	infoClient := info.NewClient(endpoint)
+	infoClient := sdkinfo.NewClient(endpoint)
 	ctx, cancel := GetAPILargeContext()
 	defer cancel()
 	nodeID, proofOfPossession, err := infoClient.GetNodeID(ctx)

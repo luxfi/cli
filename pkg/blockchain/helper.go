@@ -12,23 +12,24 @@ import (
 
 	"github.com/luxfi/ids"
 
+	apiinfo "github.com/luxfi/api/info"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/localnet"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/signer"
 	"github.com/luxfi/p2p/peer"
-	"github.com/luxfi/sdk/api/info"
+	"github.com/luxfi/protocol/p/signer"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/platformvm"
 )
 
 // GetAggregatorExtraPeers returns a list of peers for the aggregator from the cluster.
 func GetAggregatorExtraPeers(
 	app *application.Lux,
 	clusterName string,
-) ([]info.Peer, error) {
+) ([]apiinfo.Peer, error) {
 	uris, err := GetAggregatorNetworkUris(app, clusterName)
 	if err != nil {
 		return nil, err
@@ -97,12 +98,12 @@ func parseClusterConfig(clusterData map[string]interface{}, endpoints *[]string)
 }
 
 // UrisToPeers converts a list of node URIs to peer information.
-func UrisToPeers(uris []string) ([]info.Peer, error) {
-	peers := []info.Peer{}
+func UrisToPeers(uris []string) ([]apiinfo.Peer, error) {
+	peers := []apiinfo.Peer{}
 	ctx, cancel := utils.GetANRContext()
 	defer cancel()
 	for _, uri := range uris {
-		client := info.NewClient(uri)
+		client := sdkinfo.NewClient(uri)
 		nodeID, _, err := client.GetNodeID(ctx)
 		if err != nil {
 			return nil, err
@@ -111,7 +112,7 @@ func UrisToPeers(uris []string) ([]info.Peer, error) {
 		if err != nil {
 			return nil, err
 		}
-		peers = append(peers, info.Peer{
+		peers = append(peers, apiinfo.Peer{
 			Info: peer.Info{
 				ID:       nodeID,
 				PublicIP: ip,
