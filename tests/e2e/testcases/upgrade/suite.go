@@ -72,11 +72,11 @@ var _ = ginkgo.Describe("[Upgrade expect network failure]", ginkgo.Ordered, func
 		app.Setup(utils.GetBaseDir(), luxlog.NewNoOpLogger(), nil, nil, nil)
 		sc := models.Sidecar{
 			Name:     chainName,
-			Subnet:   chainName,
+			Chain:    chainName,
 			Networks: make(map[string]models.NetworkData),
 		}
 		sc.Networks[models.Local.String()] = models.NetworkData{
-			SubnetID:     ids.GenerateTestID(),
+			ChainID:      ids.GenerateTestID(),
 			BlockchainID: ids.GenerateTestID(),
 		}
 		err = app.UpdateSidecar(&sc)
@@ -113,7 +113,7 @@ var _ = ginkgo.Describe("[Upgrade public network]", ginkgo.Ordered, func() {
 		blockchainID := ids.GenerateTestID()
 		sc.Networks = make(map[string]models.NetworkData)
 		sc.Networks[models.Testnet.String()] = models.NetworkData{
-			SubnetID:     ids.GenerateTestID(),
+			ChainID:      ids.GenerateTestID(),
 			BlockchainID: blockchainID,
 		}
 		err = app.UpdateSidecar(&sc)

@@ -33,8 +33,8 @@ import (
 	ledger "github.com/luxfi/ledger"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/client"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/sdk/api/info"
+	sdkinfo "github.com/luxfi/sdk/info"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/sdk/wallet/primary"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -589,7 +589,7 @@ func GetNodeVMVersion(nodeURI string, vmid string) (string, error) {
 	rootCtx := context.Background()
 	ctx, cancel := context.WithTimeout(rootCtx, constants.E2ERequestTimeout)
 
-	client := info.NewClient(nodeURI)
+	client := sdkinfo.NewClient(nodeURI)
 	versionInfo, err := client.GetNodeVersion(ctx)
 	cancel()
 	if err != nil {
