@@ -40,7 +40,8 @@ type NodeSetting struct {
 // GetLocalNetworkConnectionInfo returns connection settings for the local network
 func GetLocalNetworkConnectionInfo(app *application.Lux) (ConnectionSettings, error) {
 	// Check for running networks and return the first one found
-	for _, netType := range []string{"mainnet", "testnet", "devnet"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet"} {
 		state, err := app.LoadNetworkStateForType(netType)
 		if err == nil && state != nil && state.Running {
 			network := models.GetNetworkFromSidecarNetworkName(netType)
@@ -66,7 +67,8 @@ func GetLocalClusterNetworkModel(app *application.Lux, clusterName string) (mode
 	// Common cluster names: "local", "local-cluster", or network-based names
 
 	// First check if there's a running network that matches
-	for _, netType := range []string{"mainnet", "testnet", "devnet", "custom"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet", "custom"} {
 		state, err := app.LoadNetworkStateForType(netType)
 		if err == nil && state != nil && state.Running {
 			// Map network type to CLI network model
@@ -75,8 +77,10 @@ func GetLocalClusterNetworkModel(app *application.Lux, clusterName string) (mode
 				return models.NewMainnetNetwork(), nil
 			case "testnet":
 				return models.NewTestnetNetwork(), nil
-			case "devnet", "custom":
-				return models.NewDevnetNetwork(), nil
+			case "devnet":
+				return models.NewDevnetNetwork(), nil // devnet is public (network ID 3)
+			case "dev", "custom":
+				return models.NewLocalNetwork(), nil // dev mode is local (network ID 1337)
 			}
 		}
 	}
@@ -90,7 +94,7 @@ func GetLocalClusterNetworkModel(app *application.Lux, clusterName string) (mode
 
 	// Check if this is a well-known cluster name
 	switch clusterName {
-	case "local", LocalClusterNameConst:
+	case "dev", "local", LocalClusterNameConst:
 		return models.NewLocalNetwork(), nil
 	}
 
@@ -215,7 +219,8 @@ func LocalClusterExists(app *application.Lux, clusterName string) bool {
 	}
 
 	// Also check if any network is running that would serve as the cluster
-	for _, netType := range []string{"mainnet", "testnet", "devnet"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet"} {
 		state, err := app.LoadNetworkStateForType(netType)
 		if err == nil && state != nil && state.Running {
 			// A running network exists
@@ -250,7 +255,8 @@ func LoadLocalCluster(app *application.Lux, clusterName string, binaryPath strin
 // LocalClusterIsRunning checks if a cluster is running
 func LocalClusterIsRunning(app *application.Lux, clusterName string) (bool, error) {
 	// Check all network types for a running process
-	for _, netType := range []string{"mainnet", "testnet", "devnet", "custom"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet", "custom"} {
 		running, err := binutils.IsServerProcessRunningForNetwork(app, netType)
 		if err != nil {
 			continue
@@ -290,7 +296,8 @@ func GetLocalClusters(app *application.Lux) ([]string, error) {
 	}
 
 	// Add running network types as pseudo-clusters
-	for _, netType := range []string{"mainnet", "testnet", "devnet"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet"} {
 		state, err := app.LoadNetworkStateForType(netType)
 		if err == nil && state != nil && state.Running {
 			// Add network type as a cluster name if not already present
@@ -326,7 +333,8 @@ func GetLocalClusterDir(app *application.Lux, clusterName string) string {
 // LocalNetworkIsRunning checks if a local network is running
 func LocalNetworkIsRunning(app *application.Lux) (bool, error) {
 	// Check all network types
-	for _, netType := range []string{"mainnet", "testnet", "devnet", "custom"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet", "custom"} {
 		running, err := binutils.IsServerProcessRunningForNetwork(app, netType)
 		if err != nil {
 			continue
@@ -341,14 +349,16 @@ func LocalNetworkIsRunning(app *application.Lux) (bool, error) {
 // StartLocalNetwork starts a local network
 func StartLocalNetwork(app *application.Lux, clusterName, nodeVersion string) error {
 	// Determine network type from cluster name
-	netType := "devnet" // default
+	netType := "dev" // default to dev mode for local clusters
 	switch clusterName {
 	case "mainnet":
 		netType = "mainnet"
 	case "testnet":
 		netType = "testnet"
-	case "devnet", "local", LocalClusterNameConst:
-		netType = "devnet"
+	case "devnet":
+		netType = "devnet" // devnet is a public network (network ID 3)
+	case "dev", "local", LocalClusterNameConst:
+		netType = "dev" // dev mode is for local development (network ID 1337)
 	}
 
 	// Check if already running
@@ -474,7 +484,8 @@ func NewStatusCheckerWithApp(app *application.Lux) StatusChecker {
 // GetCurrentNetworkVersion returns the current network version
 func (s *statusChecker) GetCurrentNetworkVersion() (string, int, bool, error) {
 	// Try to find a running network
-	for _, netType := range []string{"mainnet", "testnet", "devnet"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet"} {
 		var app *application.Lux
 		if s.app != nil {
 			app = s.app
@@ -600,7 +611,8 @@ var ErrNetworkNotRunning = fmt.Errorf("network not running")
 // LocalNetworkStop stops the local network
 func LocalNetworkStop(app *application.Lux, snapshotName ...string) error {
 	// Find running network and stop it
-	for _, netType := range []string{"mainnet", "testnet", "devnet", "custom"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet", "custom"} {
 		running, err := binutils.IsServerProcessRunningForNetwork(app, netType)
 		if err != nil || !running {
 			continue
@@ -655,7 +667,8 @@ func RefreshLocalClusterAliases(app *application.Lux, clusterName string) error 
 // GetRunningLocalClustersConnectedToLocalNetwork returns running clusters
 func GetRunningLocalClustersConnectedToLocalNetwork(app *application.Lux) ([]string, error) {
 	var running []string
-	for _, netType := range []string{"mainnet", "testnet", "devnet", "custom"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet", "custom"} {
 		isRunning, err := binutils.IsServerProcessRunningForNetwork(app, netType)
 		if err == nil && isRunning {
 			running = append(running, netType)
@@ -734,7 +747,8 @@ func GetLocalNetworkLuxdVersion(app *application.Lux) (string, int, bool, error)
 
 // findRunningNetworkType finds the first running network type
 func findRunningNetworkType(app *application.Lux) (string, error) {
-	for _, netType := range []string{"mainnet", "testnet", "devnet", "custom"} {
+	// "dev" is multi-validator dev mode (network ID 1337)
+	for _, netType := range []string{"dev", "mainnet", "testnet", "devnet", "custom"} {
 		running, err := binutils.IsServerProcessRunningForNetwork(app, netType)
 		if err != nil {
 			continue
@@ -755,6 +769,8 @@ func getPortBaseForNetwork(netType string) int {
 		return 9640
 	case "devnet":
 		return 9650
+	case "dev":
+		return 8545 // anvil/hardhat compatible
 	default:
 		return 9650
 	}
