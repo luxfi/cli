@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/lpm v1.0.5 // indirect
 	github.com/luxfi/netrunner v1.14.38
 	github.com/luxfi/sdk v1.16.44
-	github.com/luxfi/vm v1.0.18
+	github.com/luxfi/vm v1.0.20
 	github.com/luxfi/warp v1.18.4
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -140,7 +140,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/luxfi/cache v1.2.0 // indirect
-	github.com/luxfi/compress v0.0.3 // indirect
+	github.com/luxfi/compress v0.0.4 // indirect
 	github.com/luxfi/concurrent v0.0.2 // indirect
 	github.com/luxfi/consensus v1.22.53 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
@@ -229,10 +229,10 @@ require (
 	github.com/luxfi/codec v1.1.3
 	github.com/luxfi/constants v1.4.3
 	github.com/luxfi/coreth v1.21.47
-	github.com/luxfi/database v1.17.38
+	github.com/luxfi/database v1.17.39
 	github.com/luxfi/filesystem v0.0.1
 	github.com/luxfi/formatting v1.0.1
-	github.com/luxfi/genesis v1.5.22
+	github.com/luxfi/genesis v1.5.23
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/log v1.3.1
