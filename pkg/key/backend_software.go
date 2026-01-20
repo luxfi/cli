@@ -24,9 +24,10 @@ import (
 
 // SoftwareBackend implements encrypted file-based key storage
 type SoftwareBackend struct {
-	dataDir   string
-	sessions  map[string]*keySession
-	sessionMu sync.RWMutex
+	dataDir        string
+	sessions       map[string]*keySession
+	sessionMu      sync.RWMutex
+	sessionTimeout time.Duration // Configurable session timeout
 }
 
 type keySession struct {
@@ -34,6 +35,7 @@ type keySession struct {
 	key        []byte
 	unlockedAt time.Time
 	expiresAt  time.Time
+	mlocked    bool // Whether the key memory is locked
 }
 
 // Argon2id parameters (OWASP recommended for password hashing)
@@ -43,13 +45,39 @@ const (
 	argon2Threads = 4
 	argon2KeyLen  = 32
 
-	sessionTimeout = 15 * time.Minute
+	// DefaultSessionTimeout is the inactivity timeout for unlocked keys.
+	// After this duration without access, the key is automatically locked.
+	// Can be overridden via LUX_KEY_SESSION_TIMEOUT environment variable.
+	DefaultSessionTimeout = 30 * time.Second
 )
 
 // NewSoftwareBackend creates a new software-based key backend
 func NewSoftwareBackend() *SoftwareBackend {
 	return &SoftwareBackend{
-		sessions: make(map[string]*keySession),
+		sessions:       make(map[string]*keySession),
+		sessionTimeout: GetSessionTimeout(),
+	}
+}
+
+// GetSessionTimeout returns the configured session timeout.
+// Checks LUX_KEY_SESSION_TIMEOUT environment variable first,
+// otherwise returns DefaultSessionTimeout (30 seconds).
+func GetSessionTimeout() time.Duration {
+	if envTimeout := os.Getenv(EnvKeySessionTimeout); envTimeout != "" {
+		if d, err := time.ParseDuration(envTimeout); err == nil && d > 0 {
+			return d
+		}
+	}
+	return DefaultSessionTimeout
+}
+
+// SetSessionTimeout sets the session timeout for this backend.
+// The timeout resets on each key access (sliding window).
+func (b *SoftwareBackend) SetSessionTimeout(d time.Duration) {
+	b.sessionMu.Lock()
+	defer b.sessionMu.Unlock()
+	if d > 0 {
+		b.sessionTimeout = d
 	}
 }
 
@@ -92,11 +120,9 @@ func (b *SoftwareBackend) Close() error {
 	b.sessionMu.Lock()
 	defer b.sessionMu.Unlock()
 
-	// Zero out all session keys
+	// Securely clear all session keys
 	for _, s := range b.sessions {
-		for i := range s.key {
-			s.key[i] = 0
-		}
+		clearSession(s)
 	}
 	b.sessions = make(map[string]*keySession)
 	return nil
@@ -268,9 +294,7 @@ func (b *SoftwareBackend) DeleteKey(ctx context.Context, name string) error {
 	// Remove session
 	b.sessionMu.Lock()
 	if s, ok := b.sessions[name]; ok {
-		for i := range s.key {
-			s.key[i] = 0
-		}
+		clearSession(s)
 		delete(b.sessions, name)
 	}
 	b.sessionMu.Unlock()
@@ -330,9 +354,7 @@ func (b *SoftwareBackend) Lock(ctx context.Context, name string) error {
 	defer b.sessionMu.Unlock()
 
 	if s, ok := b.sessions[name]; ok {
-		for i := range s.key {
-			s.key[i] = 0
-		}
+		clearSession(s)
 		delete(b.sessions, name)
 	}
 	return nil
@@ -374,8 +396,8 @@ func (b *SoftwareBackend) Sign(ctx context.Context, name string, request SignReq
 // Helper methods
 
 func (b *SoftwareBackend) getSession(name string) *keySession {
-	b.sessionMu.RLock()
-	defer b.sessionMu.RUnlock()
+	b.sessionMu.Lock()
+	defer b.sessionMu.Unlock()
 
 	s, ok := b.sessions[name]
 	if !ok {
@@ -383,11 +405,14 @@ func (b *SoftwareBackend) getSession(name string) *keySession {
 	}
 
 	if time.Now().After(s.expiresAt) {
+		// Session expired - clear it securely
+		clearSession(s)
+		delete(b.sessions, name)
 		return nil
 	}
 
-	// Extend on access
-	s.expiresAt = time.Now().Add(sessionTimeout)
+	// Extend on access (sliding window)
+	s.expiresAt = time.Now().Add(b.sessionTimeout)
 	return s
 }
 
@@ -395,11 +420,38 @@ func (b *SoftwareBackend) setSession(name string, key []byte) {
 	b.sessionMu.Lock()
 	defer b.sessionMu.Unlock()
 
+	// Clear existing session if present
+	if existing, ok := b.sessions[name]; ok {
+		clearSession(existing)
+	}
+
+	// Attempt to lock the key memory to prevent swapping
+	mlocked := false
+	if err := mlock(key); err == nil {
+		mlocked = true
+	}
+
 	b.sessions[name] = &keySession{
 		name:       name,
 		key:        key,
 		unlockedAt: time.Now(),
-		expiresAt:  time.Now().Add(sessionTimeout),
+		expiresAt:  time.Now().Add(b.sessionTimeout),
+		mlocked:    mlocked,
+	}
+}
+
+// clearSession securely clears a session, zeroing the key and unlocking memory.
+func clearSession(s *keySession) {
+	if s == nil {
+		return
+	}
+	// Unlock memory before zeroing
+	if s.mlocked {
+		_ = munlock(s.key)
+	}
+	// Zero out the key
+	for i := range s.key {
+		s.key[i] = 0
 	}
 }
 

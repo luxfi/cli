@@ -12,7 +12,8 @@ import (
 )
 
 func TestSessionTimeout(t *testing.T) {
-	assert.Equal(t, 15*time.Minute, SessionTimeout)
+	// Default session timeout is 30 seconds
+	assert.Equal(t, 30*time.Second, SessionTimeout)
 }
 
 func TestGetPasswordFromEnv(t *testing.T) {
