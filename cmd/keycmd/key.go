@@ -25,6 +25,7 @@ var app *application.Lux
 //   - lux key unlock <name>     - Unlock a key for use
 //   - lux key backend           - Manage key storage backends
 //   - lux key kchain            - K-Chain distributed key management
+//   - lux key migrate           - Migrate plaintext keys to encrypted storage
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 	cmd := &cobra.Command{
@@ -88,6 +89,9 @@ Examples:
 
 	// Ring signatures for anonymous signing
 	cmd.AddCommand(newRingCmd())
+
+	// Migration from plaintext to encrypted storage
+	cmd.AddCommand(newMigrateCmd())
 
 	return cmd
 }

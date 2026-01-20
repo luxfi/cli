@@ -1,7 +1,7 @@
 # Lux CLI Documentation
 
 **Version**: 1.22.5
-**Last Updated**: 2024-10-15
+**Last Updated**: 2026-01-19
 
 ## Quick Reference
 
@@ -9,8 +9,9 @@
 
 ```bash
 # Network Management (5-node local network)
-lux network start              # Start local network
-lux network start --mainnet    # Start with mainnet genesis (ID: 96369)
+lux network start --mainnet    # Start mainnet (5 validators, port 9630)
+lux network start --testnet    # Start testnet (5 validators, port 9640)
+lux network start --dev        # Single-node dev mode (port 8545, anvil-compatible)
 lux network stop               # Stop local network
 lux network status             # Check network status
 lux network clean              # Remove all network data
@@ -61,17 +62,55 @@ The CLI is organized into these main command groups:
 | `lux contract` | Smart contract tools | deploy, verify |
 | `lux config` | CLI configuration | |
 
-## Network Start Options
+## Network Modes
+
+| Mode | Network ID | C-Chain ID | Base Port | Validators | Status |
+|------|------------|------------|-----------|------------|--------|
+| `--mainnet` | 1 | 96369 | 9630 | 5 | ✅ Production |
+| `--testnet` | 2 | 96368 | 9640 | 5 | ✅ Testing |
+| `--devnet` | 3 | - | 9650 | 5 | ⚠️ Missing genesis |
+| `--dev` | 1337 | 1337 | 8545 | 1 | ✅ Rapid dev |
 
 ```bash
-# Default: starts with Lux mainnet genesis
+# Start mainnet with 5 validators
 lux network start --mainnet
 
-# Testnet genesis
+# Start testnet
 lux network start --testnet
 
-# From snapshot
+# Single-node dev mode (anvil/hardhat compatible port)
+lux network start --dev
+
+# Resume from snapshot
 lux network start --snapshot-name=mybackup
+```
+
+## Core Network Chains
+
+All validators on mainnet/testnet run these **11 core chains** natively:
+
+| Chain | Name | Purpose |
+|-------|------|---------|
+| P | Platform | Staking, validator management |
+| C | Contract | EVM smart contracts |
+| X | Exchange | UTXO asset transfers |
+| Q | Quantum | Post-quantum cryptography |
+| A | AI | Artificial intelligence |
+| B | Bridge | Cross-chain bridging |
+| T | Threshold | Threshold FHE |
+| Z | ZK | Zero-knowledge proofs |
+| G | Graph | Graph database |
+| K | KMS | Key management |
+| D | DEX | Decentralized exchange |
+
+**Endpoints** (mainnet on port 9630):
+```
+P-Chain:  http://localhost:9630/ext/bc/P
+C-Chain:  http://localhost:9630/ext/bc/C/rpc
+X-Chain:  http://localhost:9630/ext/bc/X
+Q-Chain:  http://localhost:9630/ext/bc/Q/rpc
+A-Chain:  http://localhost:9630/ext/bc/A/rpc
+...
 ```
 
 ## Historic Chains
@@ -334,9 +373,15 @@ If you see `invalid gas limit: have 12000000, want 10000000`, the Fortuna upgrad
 
 The value `253399622400` is year 9999, effectively disabling these upgrades.
 
-### Port 9650 vs 9630
-- **9650**: Public API port (external)
-- **9630**: Internal admin API port (use this for admin_importChain)
+### Port Configuration
+| Network | Base Port | Range |
+|---------|-----------|-------|
+| mainnet | 9630 | 9630-9638 |
+| testnet | 9640 | 9640-9648 |
+| devnet | 9650 | 9650-9658 |
+| dev | 8545 | 8545 only |
+
+Each 5-validator network uses 5 ports (one per validator): base, base+2, base+4, base+6, base+8
 
 ### Import hangs or timeouts
 The `admin_importChain` RPC may timeout for large imports (>10k blocks), but the import continues in the background. Monitor progress via logs:

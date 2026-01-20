@@ -162,10 +162,11 @@ func (cw *chunkWriter) Close() ([]Part, error) {
 func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool) error {
 	ux.Logger.PrintToUser("Creating snapshot '%s' (incremental=%v)...", snapshotName, incremental)
 
-	networksDir := filepath.Join(sm.baseDir, "networks")
-	netEntries, err := os.ReadDir(networksDir)
+	// Look in ~/.lux/runs/<network>/ for network data
+	runsDir := filepath.Join(sm.baseDir, "runs")
+	netEntries, err := os.ReadDir(runsDir)
 	if err != nil {
-		return fmt.Errorf("failed to read networks dir: %w", err)
+		return fmt.Errorf("failed to read runs dir: %w", err)
 	}
 
 	for _, netEntry := range netEntries {
@@ -173,9 +174,31 @@ func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool)
 			continue
 		}
 		networkName := netEntry.Name()
+		// Skip server directory and backup directories
+		if networkName == "server" || strings.Contains(networkName, ".backup") {
+			continue
+		}
 
-		netDir := filepath.Join(networksDir, networkName)
-		nodeEntries, err := os.ReadDir(netDir)
+		// Find current run directory (via symlink or most recent)
+		netDir := filepath.Join(runsDir, networkName)
+		currentLink := filepath.Join(netDir, "current")
+		runDir := ""
+		if target, err := os.Readlink(currentLink); err == nil {
+			runDir = filepath.Join(netDir, target)
+		} else {
+			// No symlink, find most recent run_* directory
+			runEntries, _ := os.ReadDir(netDir)
+			for _, re := range runEntries {
+				if re.IsDir() && strings.HasPrefix(re.Name(), "run_") {
+					runDir = filepath.Join(netDir, re.Name())
+				}
+			}
+		}
+		if runDir == "" {
+			continue
+		}
+
+		nodeEntries, err := os.ReadDir(runDir)
 		if err != nil {
 			continue
 		}
@@ -186,11 +209,11 @@ func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool)
 			}
 			nodeName := nodeEntry.Name()
 
-			// Find DB
-			dbPattern := filepath.Join(netDir, nodeName, "db", "*", "db")
+			// Find DB in run directory structure: runs/<net>/run_*/node*/db/<network>/db
+			dbPattern := filepath.Join(runDir, nodeName, "db", "*", "db")
 			dbMatches, _ := filepath.Glob(dbPattern)
 			if len(dbMatches) == 0 {
-				dbMatches, _ = filepath.Glob(filepath.Join(netDir, nodeName, "db"))
+				dbMatches, _ = filepath.Glob(filepath.Join(runDir, nodeName, "db"))
 			}
 
 			if len(dbMatches) == 0 {
@@ -336,25 +359,33 @@ func (sm *SnapshotManager) CreateIncrementalSnapshot(
 	}
 	parentChunksDir := filepath.Join(parentDir, "chunks")
 
-	linkParts := func(parts []Part) error {
-		for _, part := range parts {
-			src := filepath.Join(parentChunksDir, part.Name)
-			dst := filepath.Join(chunksDir, part.Name)
-			if err := os.Link(src, dst); err != nil {
-				if err := copyFile(src, dst); err != nil {
-					return err
+	// Only copy/link parts if we're writing to a different directory
+	// If same directory, parts already exist
+	if parentChunksDir != chunksDir {
+		linkParts := func(parts []Part) error {
+			for _, part := range parts {
+				src := filepath.Join(parentChunksDir, part.Name)
+				dst := filepath.Join(chunksDir, part.Name)
+				// Skip if already exists
+				if _, err := os.Stat(dst); err == nil {
+					continue
+				}
+				if err := os.Link(src, dst); err != nil {
+					if err := copyFile(src, dst); err != nil {
+						return err
+					}
 				}
 			}
+			return nil
 		}
-		return nil
-	}
 
-	if err := linkParts(parent.Base.Parts); err != nil {
-		return nil, err
-	}
-	for _, inc := range parent.Incrementals {
-		if err := linkParts(inc.Parts); err != nil {
+		if err := linkParts(parent.Base.Parts); err != nil {
 			return nil, err
+		}
+		for _, inc := range parent.Incrementals {
+			if err := linkParts(inc.Parts); err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -721,4 +752,95 @@ func (sm *SnapshotManager) RestoreSnapshot(snapshotName string) error {
 		}
 	}
 	return nil
+}
+
+// SnapshotInfo contains metadata about a snapshot
+type SnapshotInfo struct {
+	Name        string
+	Path        string
+	Size        int64
+	Incremental bool
+	Created     time.Time
+}
+
+// GetSnapshotInfo returns information about a specific snapshot
+func (sm *SnapshotManager) GetSnapshotInfo(snapshotName string) (*SnapshotInfo, error) {
+	snapshotRoot := filepath.Join(sm.baseDir, "snapshots", snapshotName)
+	if _, err := os.Stat(snapshotRoot); os.IsNotExist(err) {
+		// Try lux-snapshot- prefix
+		snapshotRoot = filepath.Join(sm.baseDir, "snapshots", "lux-snapshot-"+snapshotName)
+		if _, err := os.Stat(snapshotRoot); os.IsNotExist(err) {
+			return nil, fmt.Errorf("snapshot not found: %s", snapshotName)
+		}
+	}
+
+	info := &SnapshotInfo{
+		Name: snapshotName,
+		Path: snapshotRoot,
+	}
+
+	// Calculate total size
+	filepath.WalkDir(snapshotRoot, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		fi, err := d.Info()
+		if err == nil {
+			info.Size += fi.Size()
+		}
+		return nil
+	})
+
+	// Get creation time from directory
+	fi, err := os.Stat(snapshotRoot)
+	if err == nil {
+		info.Created = fi.ModTime()
+	}
+
+	// Check if incremental by looking for manifest
+	manifestPath := filepath.Join(snapshotRoot, "manifest.json")
+	if data, err := os.ReadFile(manifestPath); err == nil {
+		var manifest SnapshotManifest
+		if json.Unmarshal(data, &manifest) == nil {
+			info.Incremental = len(manifest.Incrementals) > 0
+		}
+	}
+
+	return info, nil
+}
+
+// ListSnapshots returns a list of all available snapshots
+func (sm *SnapshotManager) ListSnapshots() ([]*SnapshotInfo, error) {
+	snapshotsDir := filepath.Join(sm.baseDir, "snapshots")
+	if _, err := os.Stat(snapshotsDir); os.IsNotExist(err) {
+		return nil, nil
+	}
+
+	entries, err := os.ReadDir(snapshotsDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var snapshots []*SnapshotInfo
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		// Skip internal directories
+		if strings.HasPrefix(name, ".") {
+			continue
+		}
+
+		// Strip lux-snapshot- prefix for display
+		displayName := strings.TrimPrefix(name, "lux-snapshot-")
+
+		info, err := sm.GetSnapshotInfo(displayName)
+		if err == nil {
+			info.Name = displayName
+			snapshots = append(snapshots, info)
+		}
+	}
+
+	return snapshots, nil
 }
