@@ -211,11 +211,13 @@ NETWORK TYPES (choose one, required):
                    - HTTP API: ports 9650-9658
                    - Use for rapid local development
 
-  --dev            Single-node dev mode with K=1 consensus
-                   - Instant block finality
-                   - No validator sampling
-                   - All chains enabled (C/P/X, DEX, G-Chain)
-                   - Ideal for unit testing and rapid iteration
+  --dev            Single-node dev mode with K=1 consensus (port 8545)
+                   - Instant block finality, no validator sampling
+                   - Primary chains: C/P/X (Contract/Platform/Exchange)
+                   - Deploy L2s via: lux chain deploy <name> --dev
+                   - L2 VMs: A(AI) B(Bridge) D(DEX) G(Graph) I(Identity)
+                             K(Key) O(Oracle) Q(Quantum) R(Relay) T(Threshold) Z(ZK)
+                   - Anvil/Hardhat compatible port for tooling
 
 OPTIONS:
 
@@ -643,10 +645,10 @@ func StartDevMode() error {
 		return err
 	}
 
-	// Dev mode uses port 9650 by default (standard devnet port)
+	// Dev mode uses port 8545 by default (anvil/hardhat compatible)
 	effectivePortBase := portBase
 	if effectivePortBase == 9630 && !isPortBaseFlagSet() {
-		effectivePortBase = 9650 // devnet default
+		effectivePortBase = 8545 // anvil/hardhat default for dev tooling compatibility
 	}
 
 	// Set up data directory
@@ -707,7 +709,7 @@ func StartDevMode() error {
 
 	// Wait for health endpoint to respond with explicit timeout
 	healthURL := fmt.Sprintf("http://localhost:%d/ext/health", effectivePortBase)
-	healthTimeout := 30 * time.Second
+	healthTimeout := 90 * time.Second // Dev mode can take longer to initialize all chains
 	healthCtx, healthCancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer healthCancel()
 

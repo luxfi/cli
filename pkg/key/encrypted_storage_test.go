@@ -229,9 +229,37 @@ func TestGlobalLockFunctions(t *testing.T) {
 }
 
 func TestSessionTimeoutConstant(t *testing.T) {
-	t.Run("session timeout matches internal constant", func(t *testing.T) {
-		// Verify public and internal constants match
-		assert.Equal(t, 15*time.Minute, sessionTimeout)
+	t.Run("session timeout defaults to 30 seconds", func(t *testing.T) {
+		// Verify default timeout is 30 seconds
+		assert.Equal(t, 30*time.Second, DefaultSessionTimeout)
+		// SessionTimeout var should match default
+		assert.Equal(t, DefaultSessionTimeout, SessionTimeout)
+	})
+
+	t.Run("session timeout configurable via env", func(t *testing.T) {
+		originalValue := os.Getenv(EnvKeySessionTimeout)
+		defer func() {
+			if originalValue != "" {
+				_ = os.Setenv(EnvKeySessionTimeout, originalValue)
+			} else {
+				_ = os.Unsetenv(EnvKeySessionTimeout)
+			}
+		}()
+
+		// Test custom timeout
+		_ = os.Setenv(EnvKeySessionTimeout, "5m")
+		timeout := GetSessionTimeout()
+		assert.Equal(t, 5*time.Minute, timeout)
+
+		// Test invalid duration falls back to default
+		_ = os.Setenv(EnvKeySessionTimeout, "invalid")
+		timeout = GetSessionTimeout()
+		assert.Equal(t, DefaultSessionTimeout, timeout)
+
+		// Test negative duration falls back to default
+		_ = os.Setenv(EnvKeySessionTimeout, "-1s")
+		timeout = GetSessionTimeout()
+		assert.Equal(t, DefaultSessionTimeout, timeout)
 	})
 }
 
