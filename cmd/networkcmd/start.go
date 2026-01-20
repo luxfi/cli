@@ -211,21 +211,23 @@ NETWORK TYPES (choose one, required):
                    - HTTP API: ports 9650-9658
                    - Use for rapid local development
 
-  --dev            Single-node dev mode with K=1 consensus (port 8545)
-                   - Instant block finality, no validator sampling
+  --dev            Dev mode (port 8545) - Anvil/Hardhat compatible
+                   - Single-node: K=1 consensus, instant finality
+                   - Multi-node: --dev --num-validators=5 (turbo profile)
                    - Primary chains: C/P/X (Contract/Platform/Exchange)
-                   - Deploy L2s via: lux chain deploy <name> --dev
                    - L2 VMs: A(AI) B(Bridge) D(DEX) G(Graph) I(Identity)
                              K(Key) O(Oracle) Q(Quantum) R(Relay) T(Threshold) Z(ZK)
-                   - Anvil/Hardhat compatible port for tooling
+                   - Set LUX_MNEMONIC to auto-fund derived accounts
 
 OPTIONS:
 
   --num-validators    Number of validator nodes (default: 5)
+                      With --dev: 1 = K=1 single-node, >1 = turbo multi-node
   --node-path         Path to custom luxd binary
   --node-version      luxd version to use (default: latest)
   --snapshot-name     Resume from named snapshot
   --port              Base port for APIs (overrides defaults)
+  --profile           Consensus profile: standard, fast, turbo (default: auto)
 
 EXAMPLES:
 
@@ -239,8 +241,15 @@ EXAMPLES:
   # Start devnet (most common for development)
   lux network start --devnet
 
-  # Start single-node dev mode for rapid testing
+  # Start single-node dev mode for rapid testing (K=1)
   lux network start --dev
+
+  # Start 5-validator dev mode with turbo consensus
+  lux network start --dev --num-validators=5
+
+  # 5-node dev with mnemonic-funded accounts
+  export LUX_MNEMONIC="light light light light light light light light light light light energy"
+  lux network start --dev --num-validators=5
 
   # Use custom luxd binary
   lux network start --devnet --node-path ~/work/lux/node/build/luxd
@@ -307,8 +316,13 @@ func StartNetwork(*cobra.Command, []string) error {
 		return fmt.Errorf("cannot use multiple network flags together (--mainnet, --testnet, --devnet, --dev)")
 	}
 
-	// Dev mode - single node with K=1 consensus and all chains
+	// Dev mode - single node or multi-node development network
 	if devMode {
+		// If num-validators > 1, use multi-node dev network with turbo profile
+		if numValidators > 1 {
+			return StartDevNetwork()
+		}
+		// Single node dev mode with K=1 consensus
 		return StartDevMode()
 	}
 
@@ -629,6 +643,56 @@ func StartDevnet() error {
 	return startPublicNetwork(networkConfig{
 		networkID:   constants.DevnetID, // P-Chain network ID (3)
 		networkName: "devnet",
+		portBase:    pb,
+	})
+}
+
+// StartDevNetwork starts a multi-node development network with turbo profile
+// This is the hybrid mode: multiple validators with fast consensus (K=3, 2/3 quorum)
+// Use this when you need to test multi-validator scenarios with fast finality
+// The network uses LUX_MNEMONIC to fund derived accounts automatically
+func StartDevNetwork() error {
+	ux.Logger.PrintToUser("Starting Lux dev network (%d validators, turbo consensus)...", numValidators)
+
+	// Use dev mode port base (8545) if not explicitly set
+	pb := portBase
+	if pb == 9630 && !isPortBaseFlagSet() {
+		pb = 8545 // anvil/hardhat compatible for dev tooling
+	}
+
+	// Force turbo profile for multi-node dev (K=3, 2/3 quorum for 5 nodes)
+	// ultra profile is only for single-node K=1 mode
+	if profile == "" {
+		profile = "turbo"
+	}
+
+	// Display mnemonic-derived addresses that will be funded
+	mnemonic := key.GetMnemonicFromEnv()
+	if mnemonic != "" {
+		ux.Logger.PrintToUser("\n💰 Funded Accounts (derived from LUX_MNEMONIC):")
+		for i := 0; i < numValidators; i++ {
+			sf, err := key.NewSoftFromMnemonicWithAccount(1337, mnemonic, uint32(i))
+			if err != nil {
+				continue
+			}
+			if i == 0 {
+				ux.Logger.PrintToUser("  [%d] %s (primary)", i, sf.C())
+			} else {
+				ux.Logger.PrintToUser("  [%d] %s", i, sf.C())
+			}
+		}
+		ux.Logger.PrintToUser("")
+	} else {
+		ux.Logger.PrintToUser("\n💡 Tip: Set LUX_MNEMONIC to fund derived accounts")
+		ux.Logger.PrintToUser("   Example: export LUX_MNEMONIC=\"light light light light light light light light light light light energy\"")
+		ux.Logger.PrintToUser("")
+	}
+
+	// Start the network using dev-mode configuration
+	// This uses the turbo profile for fast consensus but with multiple validators
+	return startPublicNetwork(networkConfig{
+		networkID:   1337, // Dev network ID
+		networkName: "dev",
 		portBase:    pb,
 	})
 }
