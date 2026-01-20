@@ -24,9 +24,10 @@ import (
 
 // KeychainBackend uses macOS Keychain with optional TouchID/biometrics
 type KeychainBackend struct {
-	dataDir   string
-	sessions  map[string]*keySession
-	sessionMu sync.RWMutex
+	dataDir        string
+	sessions       map[string]*keySession
+	sessionMu      sync.RWMutex
+	sessionTimeout time.Duration
 }
 
 const (
@@ -37,7 +38,8 @@ const (
 // NewKeychainBackend creates a macOS Keychain backend
 func NewKeychainBackend() *KeychainBackend {
 	return &KeychainBackend{
-		sessions: make(map[string]*keySession),
+		sessions:       make(map[string]*keySession),
+		sessionTimeout: GetSessionTimeout(),
 	}
 }
 
@@ -156,7 +158,7 @@ func (b *KeychainBackend) LoadKey(ctx context.Context, name, password string) (*
 		name:       name,
 		key:        data,
 		unlockedAt: time.Now(),
-		expiresAt:  time.Now().Add(sessionTimeout),
+		expiresAt:  time.Now().Add(b.sessionTimeout),
 	}
 	b.sessionMu.Unlock()
 

@@ -24,16 +24,18 @@ import (
 
 // SecretServiceBackend uses Linux Secret Service API (GNOME Keyring, KWallet)
 type SecretServiceBackend struct {
-	dataDir   string
-	sessions  map[string]*keySession
-	sessionMu sync.RWMutex
-	tool      string // "secret-tool" or "kwallet-query"
+	dataDir        string
+	sessions       map[string]*keySession
+	sessionMu      sync.RWMutex
+	tool           string        // "secret-tool" or "kwallet-query"
+	sessionTimeout time.Duration // Configurable session timeout
 }
 
 // NewSecretServiceBackend creates a Linux Secret Service backend
 func NewSecretServiceBackend() *SecretServiceBackend {
 	return &SecretServiceBackend{
-		sessions: make(map[string]*keySession),
+		sessions:       make(map[string]*keySession),
+		sessionTimeout: GetSessionTimeout(),
 	}
 }
 
@@ -156,7 +158,7 @@ func (b *SecretServiceBackend) LoadKey(ctx context.Context, name, password strin
 		name:       name,
 		key:        data,
 		unlockedAt: time.Now(),
-		expiresAt:  time.Now().Add(sessionTimeout),
+		expiresAt:  time.Now().Add(b.sessionTimeout),
 	}
 	b.sessionMu.Unlock()
 
