@@ -26,6 +26,7 @@ import (
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
+	"github.com/luxfi/cli/cmd/snapshotcmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
 	"github.com/luxfi/cli/cmd/vmcmd"
@@ -132,6 +133,7 @@ For detailed command help, use: lux <command> --help`,
 	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (local dev environment)
 	rootCmd.AddCommand(networkcmd.NewCmd(app))    // network (local network management)
 	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias (new version)
+	rootCmd.AddCommand(snapshotcmd.NewCmd(app))   // snapshot (native incremental backups)
 	rootCmd.AddCommand(primarycmd.NewCmd(app))
 	rootCmd.AddCommand(chaincmd.NewCmd(app)) // unified chain command (l1/l2/l3)
 

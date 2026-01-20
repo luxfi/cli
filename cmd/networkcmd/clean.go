@@ -5,10 +5,12 @@ package networkcmd
 
 import (
 	"errors"
+	"time"
 
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/localnet"
+	"github.com/luxfi/cli/pkg/snapshot"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/cli/pkg/warp/relayer"
 	"github.com/luxfi/cli/pkg/warp/signatureaggregator"
@@ -19,7 +21,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var resetPlugins bool
+var (
+	resetPlugins   bool
+	cleanLogs      bool   // Clean up large log files
+	cleanBackups   bool   // Clean up old backup directories
+	cleanStaleRuns bool   // Clean up stale run directories
+	cleanAll       bool   // Clean all of the above
+	cleanDryRun    bool   // Show what would be deleted without deleting
+	cleanMaxLogMB  int    // Maximum log file size in MB
+	cleanMaxAgeDays int   // Maximum age for backups/logs in days
+)
 
 func newCleanCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -79,12 +90,31 @@ CLEAN vs STOP:
   lux network clean    - Deletes runtime data, preserves chain configs
   lux chain delete     - Deletes a specific chain configuration
 
+STORAGE CLEANUP:
+
+  The CLI can accumulate significant storage over time:
+  - netrunner-server.log files (can grow to 100GB+)
+  - .backup.* directories from snapshot loads
+  - Stale run directories from previous sessions
+
+  Use --logs, --backups, --stale-runs, or --all to clean these:
+    lux network clean --all              # Clean everything
+    lux network clean --logs             # Clean large logs only
+    lux network clean --all --dry-run    # Preview what would be deleted
+
 NOTE: Chain configurations are explicitly preserved. To delete a chain
 configuration, use: lux chain delete <chainName>`,
 		RunE: clean,
 		Args: cobrautils.ExactArgs(0),
 	}
 	cmd.Flags().BoolVar(&resetPlugins, "reset-plugins", false, "also reset the plugins directory (removes user-installed VMs)")
+	cmd.Flags().BoolVar(&cleanLogs, "logs", false, "clean up large netrunner-server.log files")
+	cmd.Flags().BoolVar(&cleanBackups, "backups", false, "clean up old .backup.* directories")
+	cmd.Flags().BoolVar(&cleanStaleRuns, "stale-runs", false, "clean up stale run directories from previous sessions")
+	cmd.Flags().BoolVar(&cleanAll, "all", false, "clean all: logs, backups, and stale runs")
+	cmd.Flags().BoolVar(&cleanDryRun, "dry-run", false, "show what would be deleted without actually deleting")
+	cmd.Flags().IntVar(&cleanMaxLogMB, "max-log-mb", 100, "maximum log file size in MB before cleanup")
+	cmd.Flags().IntVar(&cleanMaxAgeDays, "max-age-days", 7, "maximum age in days for backups and stale runs")
 
 	return cmd
 }
@@ -143,8 +173,79 @@ func clean(*cobra.Command, []string) error {
 		}
 	}
 
+	// Storage cleanup: logs, backups, stale runs
+	if cleanAll || cleanLogs || cleanBackups || cleanStaleRuns {
+		if err := performStorageCleanup(); err != nil {
+			ux.Logger.PrintToUser("Warning: storage cleanup encountered errors: %v", err)
+		}
+	}
+
 	// Explicitly note that chain configs are preserved
 	ux.Logger.PrintToUser("Note: Chain configurations in %s are preserved. Use 'lux chain delete <name>' to remove individual chains.", app.GetChainsDir())
+
+	return nil
+}
+
+// performStorageCleanup cleans up logs, backups, and stale runs based on flags
+func performStorageCleanup() error {
+	sm := snapshot.NewSnapshotManager(app.GetBaseDir())
+
+	cfg := snapshot.CleanupConfig{
+		MaxLogSize:     int64(cleanMaxLogMB) * 1024 * 1024,
+		MaxLogAge:      time.Duration(cleanMaxAgeDays) * 24 * time.Hour,
+		MaxBackupAge:   time.Duration(cleanMaxAgeDays) * 24 * time.Hour,
+		MaxStaleRunAge: time.Duration(cleanMaxAgeDays) * 24 * time.Hour,
+		DryRun:         cleanDryRun,
+		Verbose:        true,
+	}
+
+	// If specific flags are set, only clean those categories
+	// Otherwise, if --all is set, clean everything
+	if !cleanAll {
+		// Disable categories not explicitly requested
+		if !cleanLogs {
+			cfg.MaxLogSize = 0 // Skip log cleanup
+		}
+		if !cleanBackups {
+			cfg.MaxBackupAge = 0 // Skip backup cleanup
+		}
+		if !cleanStaleRuns {
+			cfg.MaxStaleRunAge = 0 // Skip stale run cleanup
+		}
+	}
+
+	if cleanDryRun {
+		ux.Logger.PrintToUser("Dry run - showing what would be cleaned:")
+	} else {
+		ux.Logger.PrintToUser("Cleaning up storage...")
+	}
+
+	result := sm.Cleanup(cfg)
+
+	// Report results
+	if result.LogsDeleted > 0 || result.BackupsDeleted > 0 || result.StaleRunsDeleted > 0 {
+		action := "Would free"
+		if !cleanDryRun {
+			action = "Freed"
+		}
+		ux.Logger.PrintToUser("%s %s total:", action, snapshot.FormatBytes(result.TotalBytesFreed()))
+		if result.LogsDeleted > 0 {
+			ux.Logger.PrintToUser("  - %d log files (%s)", result.LogsDeleted, snapshot.FormatBytes(result.LogBytesFreed))
+		}
+		if result.BackupsDeleted > 0 {
+			ux.Logger.PrintToUser("  - %d backup directories (%s)", result.BackupsDeleted, snapshot.FormatBytes(result.BackupBytesFreed))
+		}
+		if result.StaleRunsDeleted > 0 {
+			ux.Logger.PrintToUser("  - %d stale run directories (%s)", result.StaleRunsDeleted, snapshot.FormatBytes(result.StaleRunBytesFreed))
+		}
+	} else {
+		ux.Logger.PrintToUser("No items found to clean.")
+	}
+
+	// Report errors
+	for _, err := range result.Errors {
+		ux.Logger.PrintToUser("Warning: %v", err)
+	}
 
 	return nil
 }

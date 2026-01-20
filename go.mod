@@ -108,9 +108,7 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/ferranbt/fastssz v1.0.0 // indirect
-	github.com/fjl/gencodec v0.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -122,7 +120,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/mock v1.7.0-rc.1 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
-	github.com/google/btree v1.1.3 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20251213031049-b05bdaca462f // indirect
@@ -131,7 +128,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.15.0 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/rpc v1.2.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
@@ -148,9 +144,7 @@ require (
 	github.com/luxfi/concurrent v0.0.2 // indirect
 	github.com/luxfi/consensus v1.22.53 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
-	github.com/luxfi/coreth v1.21.47 // indirect
 	github.com/luxfi/fhe v1.7.6-0.20260106060801-28e308e4c2f8 // indirect
-	github.com/luxfi/gpu v0.30.0 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.7 // indirect
 	github.com/luxfi/lattice/v7 v7.0.0 // indirect
@@ -158,11 +152,9 @@ require (
 	github.com/luxfi/math/safe v0.0.1 // indirect
 	github.com/luxfi/metric v1.4.10 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
-	github.com/luxfi/precompile v0.4.4 // indirect
-	github.com/luxfi/pubsub v1.0.0 // indirect
+	github.com/luxfi/precompile v0.4.5 // indirect
 	github.com/luxfi/ringtail v0.2.0 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
-	github.com/luxfi/staking v1.1.0 // indirect
 	github.com/luxfi/timer v1.0.1 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/upgrade v1.0.0 // indirect
@@ -179,7 +171,6 @@ require (
 	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
-	github.com/pires/go-proxyproto v0.8.1 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.13.5 // indirect
@@ -189,11 +180,9 @@ require (
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rs/cors v1.11.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -239,20 +228,25 @@ require (
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/codec v1.1.3
 	github.com/luxfi/constants v1.4.3
+	github.com/luxfi/coreth v1.21.47
 	github.com/luxfi/database v1.17.38
 	github.com/luxfi/filesystem v0.0.1
 	github.com/luxfi/formatting v1.0.1
-	github.com/luxfi/genesis v1.5.21
+	github.com/luxfi/genesis v1.5.22
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/log v1.3.1
 	github.com/luxfi/math v1.2.3
 	github.com/luxfi/net v0.0.1
-	github.com/luxfi/node v1.22.83
 	github.com/luxfi/p2p v1.18.7
+	github.com/luxfi/protocol v0.0.1
 	github.com/luxfi/rpc v1.0.0
 	github.com/luxfi/sdk/api v0.0.2
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/utils v1.1.3
 	github.com/luxfi/utxo v0.2.1
+	github.com/mattn/go-isatty v0.0.20
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+	golang.org/x/sys v0.39.0
+	golang.org/x/term v0.38.0
 )

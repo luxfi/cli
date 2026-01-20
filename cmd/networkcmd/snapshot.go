@@ -18,8 +18,11 @@ import (
 
 const networkTypeCustom = "custom"
 
-var snapshotNetworkType string
-var snapshotLive bool
+var (
+	snapshotNetworkType  string
+	snapshotLive         bool
+	snapshotIncremental  bool
+)
 
 func newSnapshotCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -65,9 +68,13 @@ The snapshot includes all node data, databases, and configurations from the curr
 By default, the network must be stopped before creating a snapshot. Use --live to create
 a snapshot while the network is running (creates backup from one node without stopping it).
 
+Use --incremental to create a smaller incremental backup if a previous backup exists.
+Incremental backups only store changes since the last backup, saving significant space.
+
 Example:
   lux network snapshot save my-test-state
-  lux network snapshot save my-backup --live  # Snapshot without stopping network`,
+  lux network snapshot save my-backup --live         # Snapshot without stopping network
+  lux network snapshot save my-backup --incremental  # Incremental backup (smaller, faster)`,
 		Args:         cobra.ExactArgs(1),
 		RunE:         saveSnapshot,
 		SilenceUsage: true,
@@ -75,6 +82,7 @@ Example:
 
 	cmd.Flags().StringVar(&snapshotNetworkType, "network-type", "", "network type to snapshot (mainnet, testnet, devnet, custom)")
 	cmd.Flags().BoolVar(&snapshotLive, "live", false, "create snapshot from running network (backs up one node without stopping)")
+	cmd.Flags().BoolVar(&snapshotIncremental, "incremental", false, "create incremental backup (smaller, faster if previous backup exists)")
 
 	return cmd
 }
@@ -193,6 +201,11 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 		return saveLiveSnapshot(snapshotName, networkType, sourceDir, snapshotDir)
 	}
 
+	// For incremental snapshots, use native database backup API
+	if snapshotIncremental {
+		return saveIncrementalSnapshot(snapshotName, networkType)
+	}
+
 	ux.Logger.PrintToUser("Creating snapshot: %s", snapshotName)
 	ux.Logger.PrintToUser("Source: %s", sourceDir)
 	ux.Logger.PrintToUser("Destination: %s", snapshotDir)
@@ -276,6 +289,21 @@ func saveLiveSnapshot(snapshotName, networkType, sourceDir, snapshotDir string) 
 
 	ux.Logger.PrintToUser("✓ Live snapshot '%s' created successfully", snapshotName)
 	ux.Logger.PrintToUser("  Network is still running")
+	return nil
+}
+
+// saveIncrementalSnapshot creates a snapshot using native database backup API.
+// This supports incremental backups which only store changes since the last backup.
+func saveIncrementalSnapshot(snapshotName, networkType string) error {
+	ux.Logger.PrintToUser("Creating incremental snapshot using native backup API...")
+	ux.Logger.PrintToUser("Note: Network must be stopped for native backup to access databases.")
+
+	sm := snapshot.NewSnapshotManager(app.GetBaseDir())
+	if err := sm.CreateSnapshot(snapshotName, true); err != nil {
+		return fmt.Errorf("failed to create incremental snapshot: %w", err)
+	}
+
+	ux.Logger.PrintToUser("✓ Incremental snapshot '%s' created successfully", snapshotName)
 	return nil
 }
 

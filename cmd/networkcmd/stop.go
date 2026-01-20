@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/snapshot"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/netrunner/local"
@@ -21,9 +22,12 @@ import (
 const networkTypeLocal = "local"
 
 var (
-	stopNetworkType string
-	stopNetworkID   uint32 // Custom network ID for non-standard networks
-	forceStop       bool
+	stopNetworkType   string
+	stopNetworkID     uint32 // Custom network ID for non-standard networks
+	forceStop         bool
+	stopIncremental   bool   // Use incremental backup when stopping (default: true)
+	stopFullBackup    bool   // Force full backup instead of incremental
+	stopCleanupLogs   bool   // Clean up old logs when stopping
 	// Network type flags (same as start command for consistency)
 	stopMainnet bool
 	stopTestnet bool
@@ -98,6 +102,9 @@ SNAPSHOT vs CLEAN:
 	}
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to save network state into")
 	cmd.Flags().BoolVar(&forceStop, "force", false, "force stop without confirmation (use with caution for mainnet/testnet)")
+	cmd.Flags().BoolVar(&stopIncremental, "incremental", true, "use incremental backup (default: true)")
+	cmd.Flags().BoolVar(&stopFullBackup, "full", false, "force full backup instead of incremental")
+	cmd.Flags().BoolVar(&stopCleanupLogs, "cleanup", false, "clean up old log files and stale run directories")
 	// Network type flags (same pattern as start command for consistency)
 	cmd.Flags().BoolVar(&stopMainnet, "mainnet", false, "stop mainnet network (network-id=1)")
 	cmd.Flags().BoolVar(&stopTestnet, "testnet", false, "stop testnet network (network-id=2)")
@@ -202,7 +209,14 @@ func StopNetwork(*cobra.Command, []string) error {
 
 	ux.Logger.PrintToUser("Stopping network: %s", stopNetworkType)
 
-	err := saveNetworkForType(stopNetworkType)
+	// Use native incremental backup by default (--full overrides --incremental)
+	useIncremental := stopIncremental && !stopFullBackup
+	if err := saveNetworkNative(stopNetworkType, snapshotName, useIncremental); err != nil {
+		ux.Logger.PrintToUser("Native backup failed, falling back to standard: %v", err)
+		if err := saveNetworkForType(stopNetworkType); err != nil {
+			ux.Logger.PrintToUser("Warning: failed to save snapshot: %v", err)
+		}
+	}
 
 	if killErr := binutils.KillgRPCServerProcessForNetwork(app, stopNetworkType); killErr != nil {
 		app.Log.Warn("failed killing server process", "error", killErr)
@@ -216,7 +230,24 @@ func StopNetwork(*cobra.Command, []string) error {
 		app.Log.Warn("failed to clear network state", "error", clearErr)
 	}
 
-	return err
+	// Cleanup old logs and stale runs if requested
+	if stopCleanupLogs {
+		ux.Logger.PrintToUser("Cleaning up old logs and stale run directories...")
+		sm := snapshot.NewSnapshotManager(app.GetBaseDir())
+		cfg := snapshot.DefaultCleanupConfig()
+		cfg.Verbose = true
+		result := sm.Cleanup(cfg)
+		if result.TotalBytesFreed() > 0 {
+			ux.Logger.PrintToUser("Freed %s (%d logs, %d backups, %d stale runs)",
+				snapshot.FormatBytes(result.TotalBytesFreed()),
+				result.LogsDeleted, result.BackupsDeleted, result.StaleRunsDeleted)
+		}
+		for _, err := range result.Errors {
+			ux.Logger.PrintToUser("Warning: %v", err)
+		}
+	}
+
+	return nil
 }
 
 // isDevModeRunning checks if a dev mode node is currently running
@@ -267,4 +298,19 @@ func saveNetworkForType(networkType string) error {
 	ux.Logger.PrintToUser("Network stopped successfully.")
 
 	return nil
+}
+
+// saveNetworkNative creates a snapshot using the native database backup API.
+// This supports incremental backups which are significantly smaller and faster
+// when a previous backup exists.
+func saveNetworkNative(networkType, snapshotNameArg string, incremental bool) error {
+	ux.Logger.PrintToUser("Creating native %s backup...", func() string {
+		if incremental {
+			return "incremental"
+		}
+		return "base"
+	}())
+
+	sm := snapshot.NewSnapshotManager(app.GetBaseDir())
+	return sm.CreateSnapshot(snapshotNameArg, incremental)
 }
