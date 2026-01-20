@@ -28,6 +28,11 @@ const (
 
 	// EnvKeyPassword for encrypted key files
 	EnvKeyPassword = "LUX_KEY_PASSWORD"
+
+	// EnvKeySessionTimeout configures the session timeout duration.
+	// Format: Go duration string (e.g., "30s", "5m", "1h").
+	// Default: 30s (30 seconds of inactivity before auto-lock).
+	EnvKeySessionTimeout = "LUX_KEY_SESSION_TIMEOUT"
 )
 
 // EnvBackend loads keys from environment variables

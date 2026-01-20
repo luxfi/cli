@@ -25,9 +25,12 @@ func newUnlockCmd() *cobra.Command {
 		Short: "Unlock a key for use",
 		Long: `Unlock a key by providing the password.
 
-The key remains unlocked for the session duration (default 15 minutes).
-After the timeout, the key is automatically locked and requires
-re-authentication.
+The key remains unlocked for the session duration (default 30 seconds).
+After the timeout without access, the key is automatically locked and
+requires re-authentication. The timeout resets on each key access.
+
+Session timeout can be configured via:
+  LUX_KEY_SESSION_TIMEOUT environment variable (e.g., "30s", "5m", "1h")
 
 Password can be provided via:
   --password flag
@@ -36,14 +39,14 @@ Password can be provided via:
 
 Examples:
   lux key unlock validator1                    # Prompts for password
-  lux key unlock validator1 --timeout 30m      # 30 minute session
-  lux key unlock validator1 --password secret  # Password via flag (less secure)`,
+  lux key unlock validator1 --password secret  # Password via flag (less secure)
+  LUX_KEY_SESSION_TIMEOUT=5m lux key unlock validator1  # 5 minute session`,
 		Args: cobra.ExactArgs(1),
 		RunE: runUnlock,
 	}
 
 	cmd.Flags().StringVarP(&unlockPassword, "password", "p", "", "Password for the key")
-	cmd.Flags().DurationVarP(&unlockTimeout, "timeout", "t", key.SessionTimeout, "Session timeout duration")
+	// Note: timeout flag removed - use LUX_KEY_SESSION_TIMEOUT env var instead
 
 	return cmd
 }
@@ -103,6 +106,7 @@ func runUnlock(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to unlock key: %w", err)
 	}
 
-	ux.Logger.PrintToUser("Key '%s' unlocked (session expires in %s).", name, unlockTimeout)
+	timeout := key.GetSessionTimeout()
+	ux.Logger.PrintToUser("Key '%s' unlocked (session expires after %s of inactivity).", name, timeout)
 	return nil
 }

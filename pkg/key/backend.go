@@ -297,8 +297,10 @@ func CloseBackends() {
 	activeBackends = make(map[BackendType]KeyBackend)
 }
 
-// SessionTimeout is the default session timeout for unlocked keys
-const SessionTimeout = 15 * time.Minute
+// SessionTimeout is the default session timeout for unlocked keys.
+// This is exported for use in CLI commands to display the timeout value.
+// The actual timeout is configurable via LUX_KEY_SESSION_TIMEOUT env var.
+var SessionTimeout = DefaultSessionTimeout
 
 // LockKey locks a key using the default backend
 func LockKey(name string) error {
