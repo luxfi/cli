@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
+	genesiscfg "github.com/luxfi/genesis/configs"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ripemd160" //nolint:gosec // G507: Required for legacy address derivation
 )
@@ -678,6 +679,34 @@ func bech32Polymod(values []byte) uint32 {
 	return chk
 }
 
-func getDefaultCChainGenesis(chainID uint32) string {
-	return fmt.Sprintf(`{"config":{"chainId":%d,"homesteadBlock":0,"eip150Block":0,"eip150Hash":"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0","eip155Block":0,"eip158Block":0,"byzantiumBlock":0,"constantinopleBlock":0,"petersburgBlock":0,"istanbulBlock":0,"muirGlacierBlock":0,"berlinBlock":0,"londonBlock":0,"apricotPhase1BlockTimestamp":0,"apricotPhase2BlockTimestamp":0,"apricotPhase3BlockTimestamp":0,"apricotPhase4BlockTimestamp":0,"apricotPhase5BlockTimestamp":0,"durangoBlockTimestamp":0,"etnaTimestamp":1800000000,"feeConfig":{"gasLimit":30000000,"minBaseFee":25000000000,"targetGas":100000000,"baseFeeChangeDenominator":36,"minBlockGasCost":0,"maxBlockGasCost":10000000,"targetBlockRate":2,"blockGasCostStep":500000}},"alloc":{},"nonce":"0x0","timestamp":"0x0","extraData":"0x00","gasLimit":"0x1C9C380","difficulty":"0x0","mixHash":"0x0000000000000000000000000000000000000000000000000000000000000000","coinbase":"0x0000000000000000000000000000000000000000","number":"0x0","gasUsed":"0x0","parentHash":"0x0000000000000000000000000000000000000000000000000000000000000000"}`, chainID)
+// getDefaultCChainGenesis returns the canonical C-chain genesis from the genesis repo.
+// Falls back to a minimal genesis only if canonical config is not available.
+func getDefaultCChainGenesis(networkID uint32) string {
+	// Try to get canonical genesis from github.com/luxfi/genesis/configs
+	genesisBytes, err := genesiscfg.GetCanonicalGenesisBytes(networkID)
+	if err == nil {
+		// Parse and extract cChainGenesis
+		var fullGenesis struct {
+			CChainGenesis string `json:"cChainGenesis"`
+		}
+		if err := json.Unmarshal(genesisBytes, &fullGenesis); err == nil && fullGenesis.CChainGenesis != "" {
+			return fullGenesis.CChainGenesis
+		}
+	}
+
+	// Fallback: try GetGenesis
+	genesisBytes, err = genesiscfg.GetGenesis(networkID)
+	if err == nil {
+		var fullGenesis struct {
+			CChainGenesis string `json:"cChainGenesis"`
+		}
+		if err := json.Unmarshal(genesisBytes, &fullGenesis); err == nil && fullGenesis.CChainGenesis != "" {
+			return fullGenesis.CChainGenesis
+		}
+	}
+
+	// Final fallback: minimal genesis (should rarely be used)
+	// This is only for truly custom networks with no canonical config
+	ux.Logger.Info("Warning: Using minimal C-chain genesis for network %d (no canonical config found)", networkID)
+	return fmt.Sprintf(`{"config":{"chainId":%d,"homesteadBlock":0,"eip150Block":0,"eip150Hash":"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0","eip155Block":0,"eip158Block":0,"byzantiumBlock":0,"constantinopleBlock":0,"petersburgBlock":0,"istanbulBlock":0,"muirGlacierBlock":0,"berlinBlock":0,"londonBlock":0,"apricotPhase1BlockTimestamp":0,"apricotPhase2BlockTimestamp":0,"apricotPhase3BlockTimestamp":0,"apricotPhase4BlockTimestamp":0,"apricotPhase5BlockTimestamp":0,"durangoBlockTimestamp":0,"etnaTimestamp":1800000000,"feeConfig":{"gasLimit":30000000,"minBaseFee":25000000000,"targetGas":100000000,"baseFeeChangeDenominator":36,"minBlockGasCost":0,"maxBlockGasCost":10000000,"targetBlockRate":2,"blockGasCostStep":500000}},"alloc":{},"nonce":"0x0","timestamp":"0x0","extraData":"0x00","gasLimit":"0x1C9C380","difficulty":"0x0","mixHash":"0x0000000000000000000000000000000000000000000000000000000000000000","coinbase":"0x0000000000000000000000000000000000000000","number":"0x0","gasUsed":"0x0","parentHash":"0x0000000000000000000000000000000000000000000000000000000000000000"}`, networkID)
 }
