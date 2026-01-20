@@ -151,7 +151,9 @@ func determineNetworkType() string {
 	}
 
 	// Check for running networks in priority order
-	for _, netType := range []string{networkTypeCustom, "devnet", "testnet", "mainnet"} {
+	// "dev" is the multi-validator dev mode (network ID 1337)
+	// "custom" is for arbitrary local networks
+	for _, netType := range []string{"dev", networkTypeCustom, "devnet", "testnet", "mainnet"} {
 		state, err := app.LoadNetworkStateForType(netType)
 		if err == nil && state != nil && state.Running {
 			return netType
