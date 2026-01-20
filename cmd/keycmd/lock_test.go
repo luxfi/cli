@@ -26,6 +26,7 @@ func TestNewLockCmd(t *testing.T) {
 func TestNewUnlockCmd(t *testing.T) {
 	cmd := newUnlockCmd()
 
+	assert.NotNil(t, cmd, "newUnlockCmd should return a non-nil command")
 	assert.Equal(t, "unlock <name>", cmd.Use)
 	assert.NotEmpty(t, cmd.Short)
 	assert.NotEmpty(t, cmd.Long)
@@ -36,10 +37,7 @@ func TestNewUnlockCmd(t *testing.T) {
 	assert.NotNil(t, passwordFlag)
 	assert.Equal(t, "p", passwordFlag.Shorthand)
 
-	// Check --timeout flag exists
-	timeoutFlag := cmd.Flags().Lookup("timeout")
-	assert.NotNil(t, timeoutFlag)
-	assert.Equal(t, "t", timeoutFlag.Shorthand)
+	// Note: --timeout flag was removed - now configured via LUX_KEY_SESSION_TIMEOUT env var
 }
 
 func TestNewBackendCmd(t *testing.T) {
