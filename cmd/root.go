@@ -23,9 +23,13 @@ import (
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/gpucmd"
 	"github.com/luxfi/cli/cmd/keycmd"
+	"github.com/luxfi/cli/cmd/linkcmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
+	"github.com/luxfi/cli/cmd/netrunnercmd"
+	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
+	"github.com/luxfi/cli/cmd/selfcmd"
 	"github.com/luxfi/cli/cmd/snapshotcmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
@@ -145,6 +149,12 @@ For detailed command help, use: lux <command> --help`,
 	// add update command
 	rootCmd.AddCommand(updatecmd.NewCmd(app, Version))
 
+	// add self management command (version management like nvm)
+	rootCmd.AddCommand(selfcmd.NewCmd(app, Version))
+
+	// add link command (unified binary linking)
+	rootCmd.AddCommand(linkcmd.NewCmd())
+
 	// add warp command (cross-chain messaging)
 	rootCmd.AddCommand(warpcmd.NewCmd(app))
 
@@ -165,6 +175,12 @@ For detailed command help, use: lux <command> --help`,
 
 	// add vm management command
 	rootCmd.AddCommand(vmcmd.NewCmd(app))
+
+	// add node management command
+	rootCmd.AddCommand(nodecmd.NewCmd(app))
+
+	// add netrunner management command
+	rootCmd.AddCommand(netrunnercmd.NewCmd(app))
 
 	// add gpu management command
 	rootCmd.AddCommand(gpucmd.NewCmd(app))
