@@ -7,7 +7,7 @@ usage() {
 $this: download go binaries for luxfi/cli
 
 Usage: $this [-b] bindir [-d] [tag] [-c]
-  -b sets bindir or installation directory, Defaults to ~/bin
+  -b sets bindir or installation directory, Defaults to ~/.lux/bin
   -c run the shell completions setup 
   -d turns on debug logging
    [tag] is a tag from
@@ -21,10 +21,10 @@ EOF
 RUN_COMPLETIONS=true
 
 parse_args() {
-  #BINDIR is ./bin unless set be ENV
+  #BINDIR is ~/.lux/bin unless set by ENV
   # over-ridden by flag below
 
-  BINDIR=${BINDIR:-~/bin}
+  BINDIR=${BINDIR:-~/.lux/bin}
   while getopts "b:ndh?x" arg; do
     case "$arg" in
       b) BINDIR="$OPTARG" ;;
@@ -385,6 +385,25 @@ sed_in_place() {
   fi
 }
 
+setup_path() {
+  # Add ~/.lux/bin to PATH if not already present
+  LUX_BIN_DIR="$HOME/.lux/bin"
+
+  # Setup for bash
+  BASHRC=~/.bashrc
+  touch "$BASHRC"
+  sed_in_place "/.*# lux path/d" "$BASHRC"
+  echo "export PATH=\"$LUX_BIN_DIR:\$PATH\" # lux path" >> "$BASHRC"
+
+  # Setup for zsh
+  ZSHRC=~/.zshrc
+  touch "$ZSHRC"
+  sed_in_place "/.*# lux path/d" "$ZSHRC"
+  echo "export PATH=\"$LUX_BIN_DIR:\$PATH\" # lux path" >> "$ZSHRC"
+
+  log_info "Added $LUX_BIN_DIR to PATH in ~/.bashrc and ~/.zshrc"
+}
+
 completions() {
   BASH_COMPLETION_MAIN=~/.bash_completion
   BASH_COMPLETION_SCRIPTS_DIR=~/.local/share/bash-completion/completions
@@ -404,7 +423,7 @@ completions() {
           touch $BASHRC
           sed_in_place "/.*# lux completion/d" $BASHRC
           echo "source $(brew --prefix)/etc/bash_completion # lux completion" >> $BASHRC
-      else 
+      else
           echo "warning: brew not found on macos. bash lux command completion not installed"
       fi
   fi
@@ -420,7 +439,11 @@ completions() {
   echo "rm -f ~/.zcompdump; compinit # lux completion" >> "$ZSH_COMPLETION_MAIN"
 }
 
+setup_path
+
 if [ "$RUN_COMPLETIONS" = true ]; then
   completions
 fi
+
+log_info "Installation complete! Run 'source ~/.zshrc' or 'source ~/.bashrc' to update PATH"
 

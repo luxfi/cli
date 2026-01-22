@@ -253,3 +253,7 @@ require (
 	golang.org/x/sys v0.39.0
 	golang.org/x/term v0.38.0
 )
+
+replace github.com/luxfi/genesis => /Users/z/work/lux/genesis
+replace github.com/luxfi/netrunner => ../netrunner
+replace github.com/luxfi/consensus => ../consensus
