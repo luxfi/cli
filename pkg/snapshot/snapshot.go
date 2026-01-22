@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/klauspost/compress/zstd"
@@ -30,6 +31,8 @@ const ChunkSize = int64(99 * 1024 * 1024)
 type SnapshotManifest struct {
 	Network            string          `json:"network"`
 	ChainID            uint64          `json:"chain_id"`
+	NodeID             uint64          `json:"node_id,omitempty"`            // Node ID (1-5)
+	ChainDataID        string          `json:"chain_data_id,omitempty"`      // If set, this is chainData not main DB
 	Base               SnapshotEntry   `json:"base"`
 	Incrementals       []SnapshotEntry `json:"incrementals"`
 	StateRoot          string          `json:"state_root"`
@@ -158,11 +161,32 @@ func (cw *chunkWriter) Close() ([]Part, error) {
 	return cw.parts, nil
 }
 
+// snapshotTask represents a single snapshot operation
+type snapshotTask struct {
+	network     string
+	nodeName    string
+	nodeID      uint64
+	dbPath      string
+	chainDataID string // empty for main DB, set for chainData
+	incremental bool
+}
+
+// snapshotResult represents the result of a snapshot operation
+type snapshotResult struct {
+	task    snapshotTask
+	err     error
+	mode    string // "base", "incremental", or "skipped"
+}
+
 // CreateSnapshot creates a snapshot of all discovered local networks and nodes
+// Captures BOTH main database AND all chainData databases for complete state
+// Operations run in parallel for speed
 func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool) error {
 	ux.Logger.PrintToUser("Creating snapshot '%s' (incremental=%v)...", snapshotName, incremental)
 
-	// Look in ~/.lux/runs/<network>/ for network data
+	// Collect all snapshot tasks
+	var tasks []snapshotTask
+
 	runsDir := filepath.Join(sm.baseDir, "runs")
 	netEntries, err := os.ReadDir(runsDir)
 	if err != nil {
@@ -174,19 +198,16 @@ func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool)
 			continue
 		}
 		networkName := netEntry.Name()
-		// Skip server directory and backup directories
 		if networkName == "server" || strings.Contains(networkName, ".backup") {
 			continue
 		}
 
-		// Find current run directory (via symlink or most recent)
 		netDir := filepath.Join(runsDir, networkName)
 		currentLink := filepath.Join(netDir, "current")
 		runDir := ""
 		if target, err := os.Readlink(currentLink); err == nil {
 			runDir = filepath.Join(netDir, target)
 		} else {
-			// No symlink, find most recent run_* directory
 			runEntries, _ := os.ReadDir(netDir)
 			for _, re := range runEntries {
 				if re.IsDir() && strings.HasPrefix(re.Name(), "run_") {
@@ -208,56 +229,139 @@ func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool)
 				continue
 			}
 			nodeName := nodeEntry.Name()
+			nodeIDStr := strings.TrimPrefix(nodeName, "node")
+			nodeID, _ := strconv.ParseUint(nodeIDStr, 10, 64)
 
-			// Find DB in run directory structure: runs/<net>/run_*/node*/db/<network>/db
+			// Main DB task
 			dbPattern := filepath.Join(runDir, nodeName, "db", "*", "db")
 			dbMatches, _ := filepath.Glob(dbPattern)
 			if len(dbMatches) == 0 {
 				dbMatches, _ = filepath.Glob(filepath.Join(runDir, nodeName, "db"))
 			}
-
-			if len(dbMatches) == 0 {
-				continue
-			}
-			dbPath := dbMatches[0]
-
-			db, err := badgerdb.New(dbPath, nil, "", nil)
-			if err != nil {
-				ux.Logger.PrintToUser("Skipping %s/%s: DB locked or invalid (%v). Stop network first.", networkName, nodeName, err)
-				continue
-			}
-
-			nodeIDStr := strings.TrimPrefix(nodeName, "node")
-			nodeID, _ := strconv.ParseUint(nodeIDStr, 10, 64)
-
-			var parentManifest *SnapshotManifest
-			if incremental {
-				parentManifest, _ = sm.GetLatestManifest(networkName, nodeID)
+			if len(dbMatches) > 0 {
+				tasks = append(tasks, snapshotTask{
+					network:     networkName,
+					nodeName:    nodeName,
+					nodeID:      nodeID,
+					dbPath:      dbMatches[0],
+					chainDataID: "",
+					incremental: incremental,
+				})
 			}
 
-			if parentManifest != nil {
-				_, err = sm.CreateIncrementalSnapshot(networkName, nodeID, db, parentManifest, snapshotName)
-				if err != nil {
-					ux.Logger.PrintToUser("Warning: Failed to create incremental snapshot for %s/%s: %v. Falling back to base.", networkName, nodeName, err)
-					_, err = sm.CreateBaseSnapshot(networkName, nodeID, db, 0, "", snapshotName)
+			// ChainData tasks
+			chainDataPattern := filepath.Join(runDir, nodeName, "chainData", "network-*", "*", "db", "badgerdb")
+			chainDBMatches, _ := filepath.Glob(chainDataPattern)
+			for _, chainDBPath := range chainDBMatches {
+				parts := strings.Split(chainDBPath, string(os.PathSeparator))
+				var chainDataID string
+				for i, p := range parts {
+					if p == "db" && i > 0 {
+						chainDataID = parts[i-1]
+						break
+					}
 				}
-			} else {
-				_, err = sm.CreateBaseSnapshot(networkName, nodeID, db, 0, "", snapshotName)
-			}
-
-			db.Close()
-			if err != nil {
-				ux.Logger.PrintToUser("Warning: Failed to snapshot %s/%s: %v", networkName, nodeName, err)
-			} else {
-				mode := "base"
-				if parentManifest != nil && err == nil {
-					mode = "incremental"
+				if chainDataID == "" {
+					continue
 				}
-				ux.Logger.PrintToUser("✓ Snapshotted %s/%s (%s)", networkName, nodeName, mode)
+				tasks = append(tasks, snapshotTask{
+					network:     networkName,
+					nodeName:    nodeName,
+					nodeID:      nodeID,
+					dbPath:      chainDBPath,
+					chainDataID: chainDataID,
+					incremental: incremental,
+				})
 			}
 		}
 	}
+
+	// Execute tasks in parallel
+	var wg sync.WaitGroup
+	results := make(chan snapshotResult, len(tasks))
+
+	for _, task := range tasks {
+		wg.Add(1)
+		go func(t snapshotTask) {
+			defer wg.Done()
+			result := sm.executeSnapshotTask(t, snapshotName)
+			results <- result
+		}(task)
+	}
+
+	// Wait for all tasks to complete
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Collect and report results
+	for result := range results {
+		if result.mode == "skipped" {
+			if result.task.chainDataID == "" {
+				ux.Logger.PrintToUser("Skipping %s/%s main DB: locked", result.task.network, result.task.nodeName)
+			} else {
+				ux.Logger.PrintToUser("Skipping %s/%s chain %s: locked", result.task.network, result.task.nodeName, result.task.chainDataID[:8])
+			}
+		} else if result.err != nil {
+			if result.task.chainDataID == "" {
+				ux.Logger.PrintToUser("Warning: Failed %s/%s main DB: %v", result.task.network, result.task.nodeName, result.err)
+			} else {
+				ux.Logger.PrintToUser("Warning: Failed %s/%s chain %s: %v", result.task.network, result.task.nodeName, result.task.chainDataID[:8], result.err)
+			}
+		} else {
+			if result.task.chainDataID == "" {
+				ux.Logger.PrintToUser("✓ Snapshotted %s/%s main DB (%s)", result.task.network, result.task.nodeName, result.mode)
+			} else {
+				ux.Logger.PrintToUser("✓ Snapshotted %s/%s chain %s (%s)", result.task.network, result.task.nodeName, result.task.chainDataID[:8], result.mode)
+			}
+		}
+	}
+
 	return nil
+}
+
+// executeSnapshotTask executes a single snapshot task
+func (sm *SnapshotManager) executeSnapshotTask(task snapshotTask, snapshotName string) snapshotResult {
+	db, err := badgerdb.New(task.dbPath, nil, "", nil)
+	if err != nil {
+		return snapshotResult{task: task, mode: "skipped"}
+	}
+	defer db.Close()
+
+	if task.chainDataID == "" {
+		// Main DB snapshot
+		var parentManifest *SnapshotManifest
+		if task.incremental {
+			parentManifest, _ = sm.GetLatestManifest(task.network, task.nodeID)
+		}
+
+		if parentManifest != nil {
+			_, err = sm.CreateIncrementalSnapshot(task.network, task.nodeID, db, parentManifest, snapshotName)
+			if err == nil {
+				return snapshotResult{task: task, mode: "incremental"}
+			}
+			// Fall back to base
+		}
+		_, err = sm.CreateBaseSnapshot(task.network, task.nodeID, db, 0, "", snapshotName)
+		return snapshotResult{task: task, err: err, mode: "base"}
+	} else {
+		// ChainData snapshot - also supports incremental
+		var parentManifest *SnapshotManifest
+		if task.incremental {
+			parentManifest, _ = sm.GetLatestChainDataManifest(task.network, task.nodeID, task.chainDataID)
+		}
+
+		if parentManifest != nil {
+			_, err = sm.CreateIncrementalChainDataSnapshot(task.network, task.nodeID, task.chainDataID, db, parentManifest, snapshotName)
+			if err == nil {
+				return snapshotResult{task: task, mode: "incremental"}
+			}
+			// Fall back to base
+		}
+		_, err = sm.CreateChainDataSnapshot(task.network, task.nodeID, task.chainDataID, db, snapshotName)
+		return snapshotResult{task: task, err: err, mode: "base"}
+	}
 }
 
 // CreateBaseSnapshot creates a full base snapshot using streaming chunking
@@ -442,6 +546,225 @@ func (sm *SnapshotManager) CreateIncrementalSnapshot(
 	return manifest, nil
 }
 
+// CreateChainDataSnapshot creates a snapshot for a specific chain's data directory
+func (sm *SnapshotManager) CreateChainDataSnapshot(
+	network string,
+	nodeID uint64,
+	chainDataID string,
+	db database.Database,
+	snapshotID string,
+) (*SnapshotManifest, error) {
+	if snapshotID == "" {
+		snapshotID = time.Now().Format("2006-01-02")
+	}
+
+	// Store chainData snapshots with pattern: chaindata_<nodeID>_<chainDataID[:16]>
+	dirName := fmt.Sprintf("chaindata_%d_%s", nodeID, chainDataID[:16])
+	snapshotDir := filepath.Join(sm.baseDir, "snapshots", snapshotID, network, dirName)
+	chunksDir := filepath.Join(snapshotDir, "chunks")
+
+	if err := os.MkdirAll(chunksDir, 0o755); err != nil {
+		return nil, fmt.Errorf("failed to create chunks directory: %w", err)
+	}
+
+	backupPrefix := fmt.Sprintf("chaindata_%d", nodeID)
+
+	chunkWriter, err := newChunkWriter(chunksDir, backupPrefix, ChunkSize)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create chunk writer: %w", err)
+	}
+
+	zstdWriter, err := zstd.NewWriter(chunkWriter, zstd.WithEncoderLevel(zstd.SpeedBetterCompression))
+	if err != nil {
+		chunkWriter.Close()
+		return nil, fmt.Errorf("failed to create zstd writer: %w", err)
+	}
+
+	lastVersion, err := db.Backup(zstdWriter, 0)
+	if err != nil {
+		zstdWriter.Close()
+		chunkWriter.Close()
+		return nil, fmt.Errorf("failed to stream backup: %w", err)
+	}
+
+	if err := zstdWriter.Close(); err != nil {
+		chunkWriter.Close()
+		return nil, fmt.Errorf("failed to close zstd writer: %w", err)
+	}
+
+	parts, err := chunkWriter.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close chunk writer: %w", err)
+	}
+
+	manifest := &SnapshotManifest{
+		Network:     network,
+		NodeID:      nodeID,
+		ChainDataID: chainDataID, // Full chain ID for restore
+		Base: SnapshotEntry{
+			Height: 0,
+			Since:  0,
+			Parts:  parts,
+		},
+		Incrementals: []SnapshotEntry{},
+		CreatedAt:    time.Now().UTC().Format(time.RFC3339),
+		LastVersion:  lastVersion,
+	}
+
+	if err := sm.writeManifest(snapshotDir, manifest); err != nil {
+		return nil, err
+	}
+
+	return manifest, nil
+}
+
+// CreateIncrementalChainDataSnapshot creates an incremental snapshot for chainData
+func (sm *SnapshotManager) CreateIncrementalChainDataSnapshot(
+	network string,
+	nodeID uint64,
+	chainDataID string,
+	db database.Database,
+	parent *SnapshotManifest,
+	snapshotID string,
+) (*SnapshotManifest, error) {
+	if snapshotID == "" {
+		snapshotID = time.Now().Format("2006-01-02")
+	}
+
+	dirName := fmt.Sprintf("chaindata_%d_%s", nodeID, chainDataID[:16])
+	snapshotDir := filepath.Join(sm.baseDir, "snapshots", snapshotID, network, dirName)
+	chunksDir := filepath.Join(snapshotDir, "chunks")
+
+	if err := os.MkdirAll(chunksDir, 0o755); err != nil {
+		return nil, fmt.Errorf("failed to create chunks directory: %w", err)
+	}
+
+	// Link parent parts if different directory
+	parentDir, err := sm.GetLatestChainDataSnapshotDir(network, nodeID, chainDataID)
+	if err == nil {
+		parentChunksDir := filepath.Join(parentDir, "chunks")
+		if parentChunksDir != chunksDir {
+			linkParts := func(parts []Part) error {
+				for _, part := range parts {
+					src := filepath.Join(parentChunksDir, part.Name)
+					dst := filepath.Join(chunksDir, part.Name)
+					if _, err := os.Stat(dst); err == nil {
+						continue
+					}
+					if err := os.Link(src, dst); err != nil {
+						if err := copyFile(src, dst); err != nil {
+							return err
+						}
+					}
+				}
+				return nil
+			}
+			linkParts(parent.Base.Parts)
+			for _, inc := range parent.Incrementals {
+				linkParts(inc.Parts)
+			}
+		}
+	}
+
+	incPrefix := fmt.Sprintf("chaindata_%d_inc_%d", nodeID, time.Now().Unix())
+
+	chunkWriter, err := newChunkWriter(chunksDir, incPrefix, ChunkSize)
+	if err != nil {
+		return nil, err
+	}
+
+	zstdWriter, err := zstd.NewWriter(chunkWriter, zstd.WithEncoderLevel(zstd.SpeedBetterCompression))
+	if err != nil {
+		chunkWriter.Close()
+		return nil, err
+	}
+
+	newVersion, err := db.Backup(zstdWriter, parent.LastVersion)
+	if err != nil {
+		zstdWriter.Close()
+		chunkWriter.Close()
+		return nil, fmt.Errorf("failed to stream incremental backup: %w", err)
+	}
+
+	if err := zstdWriter.Close(); err != nil {
+		chunkWriter.Close()
+		return nil, err
+	}
+
+	parts, err := chunkWriter.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	manifest := &SnapshotManifest{
+		Network:     network,
+		NodeID:      nodeID,
+		ChainDataID: chainDataID,
+		Base:        parent.Base,
+		Incrementals: append(parent.Incrementals, SnapshotEntry{
+			Height: 0,
+			Since:  parent.LastVersion,
+			Parts:  parts,
+		}),
+		CreatedAt:   time.Now().UTC().Format(time.RFC3339),
+		LastVersion: newVersion,
+	}
+
+	if err := sm.writeManifest(snapshotDir, manifest); err != nil {
+		return nil, err
+	}
+
+	return manifest, nil
+}
+
+// GetLatestChainDataManifest finds the most recent manifest for a chainData snapshot
+func (sm *SnapshotManager) GetLatestChainDataManifest(network string, nodeID uint64, chainDataID string) (*SnapshotManifest, error) {
+	snapshotRoot := filepath.Join(sm.baseDir, "snapshots")
+	entries, err := os.ReadDir(snapshotRoot)
+	if err != nil {
+		return nil, err
+	}
+	dirName := fmt.Sprintf("chaindata_%d_%s", nodeID, chainDataID[:16])
+	for i := len(entries) - 1; i >= 0; i-- {
+		entry := entries[i]
+		if !entry.IsDir() {
+			continue
+		}
+		manifestPath := filepath.Join(snapshotRoot, entry.Name(), network, dirName, "manifest.json")
+		if _, err := os.Stat(manifestPath); err == nil {
+			data, err := os.ReadFile(manifestPath)
+			if err == nil {
+				var m SnapshotManifest
+				if err := json.Unmarshal(data, &m); err == nil {
+					return &m, nil
+				}
+			}
+		}
+	}
+	return nil, fmt.Errorf("no chaindata manifest found")
+}
+
+// GetLatestChainDataSnapshotDir finds the most recent snapshot directory for chainData
+func (sm *SnapshotManager) GetLatestChainDataSnapshotDir(network string, nodeID uint64, chainDataID string) (string, error) {
+	snapshotRoot := filepath.Join(sm.baseDir, "snapshots")
+	entries, err := os.ReadDir(snapshotRoot)
+	if err != nil {
+		return "", err
+	}
+	dirName := fmt.Sprintf("chaindata_%d_%s", nodeID, chainDataID[:16])
+	for i := len(entries) - 1; i >= 0; i-- {
+		entry := entries[i]
+		if !entry.IsDir() {
+			continue
+		}
+		path := filepath.Join(snapshotRoot, entry.Name(), network, dirName)
+		if _, err := os.Stat(filepath.Join(path, "manifest.json")); err == nil {
+			return path, nil
+		}
+	}
+	return "", fmt.Errorf("no chaindata snapshot found")
+}
+
 // RestoreChainSnapshot restores a snapshot using streaming from chunks
 func (sm *SnapshotManager) RestoreChainSnapshot(
 	network string,
@@ -450,6 +773,13 @@ func (sm *SnapshotManager) RestoreChainSnapshot(
 	dbDir string,
 	snapshotID string,
 ) error {
+
+	// Clear existing database - BadgerDB Load requires empty database
+	if _, err := os.Stat(dbDir); err == nil {
+		if err := os.RemoveAll(dbDir); err != nil {
+			return fmt.Errorf("failed to clear existing db: %w", err)
+		}
+	}
 
 	if err := os.MkdirAll(dbDir, 0o755); err != nil {
 		return fmt.Errorf("failed to create db directory: %w", err)
@@ -703,6 +1033,7 @@ func copyFile(src, dst string) error {
 }
 
 // RestoreSnapshot restores a full snapshot (all networks/nodes)
+// Handles both main DB (chain_*) and chainData (chaindata_*) directories
 func (sm *SnapshotManager) RestoreSnapshot(snapshotName string) error {
 	ux.Logger.PrintToUser("Restoring snapshot '%s'...", snapshotName)
 	snapshotRoot := filepath.Join(sm.baseDir, "snapshots", snapshotName)
@@ -719,38 +1050,131 @@ func (sm *SnapshotManager) RestoreSnapshot(snapshotName string) error {
 		}
 		networkName := netEntry.Name()
 		netDir := filepath.Join(snapshotRoot, networkName)
-		chainEntries, _ := os.ReadDir(netDir)
-		for _, chainEntry := range chainEntries {
-			if !strings.HasPrefix(chainEntry.Name(), "chain_") {
+
+		// Find current run directory (shared by all restores)
+		runsDir := filepath.Join(sm.baseDir, "runs", networkName)
+		currentLink := filepath.Join(runsDir, "current")
+		runDir := ""
+		if target, err := os.Readlink(currentLink); err == nil {
+			runDir = filepath.Join(runsDir, target)
+		} else {
+			runEntries, _ := os.ReadDir(runsDir)
+			for _, re := range runEntries {
+				if re.IsDir() && strings.HasPrefix(re.Name(), "run_") {
+					runDir = filepath.Join(runsDir, re.Name())
+				}
+			}
+		}
+		if runDir == "" {
+			ux.Logger.PrintToUser("Skipping %s: no run directory found", networkName)
+			continue
+		}
+
+		entries, _ := os.ReadDir(netDir)
+		for _, entry := range entries {
+			if !entry.IsDir() {
 				continue
 			}
-			nodeIDStr := strings.TrimPrefix(chainEntry.Name(), "chain_")
-			nodeID, _ := strconv.ParseUint(nodeIDStr, 10, 64)
+			entryName := entry.Name()
 
-			// Target DB path
-			targetNodeDir := filepath.Join(sm.baseDir, "networks", networkName, fmt.Sprintf("node%d", nodeID))
-			targetDBPath := filepath.Join(targetNodeDir, "db", networkName, "db") // Default assumption
-			// Check if exists
-			dbPattern := filepath.Join(targetNodeDir, "db", "*", "db")
-			matches, _ := filepath.Glob(dbPattern)
-			if len(matches) > 0 {
-				targetDBPath = matches[0]
-			}
-
-			manifestPath := filepath.Join(netDir, chainEntry.Name(), "manifest.json")
+			manifestPath := filepath.Join(netDir, entryName, "manifest.json")
 			data, err := os.ReadFile(manifestPath)
 			if err != nil {
 				continue
 			}
 			var manifest SnapshotManifest
-			json.Unmarshal(data, &manifest)
-
-			if err := sm.RestoreChainSnapshot(networkName, nodeID, &manifest, targetDBPath, snapshotName); err != nil {
-				return err
+			if err := json.Unmarshal(data, &manifest); err != nil {
+				continue
 			}
-			ux.Logger.PrintToUser("✓ Restored %s/node%d", networkName, nodeID)
+
+			// === Restore Main DB (chain_<nodeID>) ===
+			if strings.HasPrefix(entryName, "chain_") {
+				nodeIDStr := strings.TrimPrefix(entryName, "chain_")
+				nodeID, _ := strconv.ParseUint(nodeIDStr, 10, 64)
+
+				targetNodeDir := filepath.Join(runDir, fmt.Sprintf("node%d", nodeID))
+				targetDBPath := filepath.Join(targetNodeDir, "db", networkName, "db")
+				dbPattern := filepath.Join(targetNodeDir, "db", "*", "db")
+				matches, _ := filepath.Glob(dbPattern)
+				if len(matches) > 0 {
+					targetDBPath = matches[0]
+				}
+
+				if err := sm.RestoreChainSnapshot(networkName, nodeID, &manifest, targetDBPath, snapshotName); err != nil {
+					return fmt.Errorf("failed to restore %s/node%d main DB: %w", networkName, nodeID, err)
+				}
+				ux.Logger.PrintToUser("✓ Restored %s/node%d main DB", networkName, nodeID)
+			}
+
+			// === Restore ChainData (chaindata_<nodeID>_<chainID>) ===
+			if strings.HasPrefix(entryName, "chaindata_") && manifest.ChainDataID != "" {
+				nodeID := manifest.NodeID
+				chainDataID := manifest.ChainDataID
+
+				// Target: runs/<net>/run_*/node<N>/chainData/network-<N>/<chainID>/db/badgerdb
+				targetNodeDir := filepath.Join(runDir, fmt.Sprintf("node%d", nodeID))
+
+				// Find network-* subdirectory
+				chainDataBase := filepath.Join(targetNodeDir, "chainData")
+				networkDirs, _ := filepath.Glob(filepath.Join(chainDataBase, "network-*"))
+				if len(networkDirs) == 0 {
+					ux.Logger.PrintToUser("Skipping chaindata %s: no network-* dir", chainDataID[:8])
+					continue
+				}
+
+				// Use first network dir (should only be one)
+				networkDir := networkDirs[0]
+				targetDBPath := filepath.Join(networkDir, chainDataID, "db", "badgerdb")
+
+				if err := sm.RestoreChainDataSnapshot(&manifest, targetDBPath, snapshotName, entryName); err != nil {
+					return fmt.Errorf("failed to restore chaindata %s: %w", chainDataID[:8], err)
+				}
+				ux.Logger.PrintToUser("✓ Restored %s/node%d chain %s", networkName, nodeID, chainDataID[:8])
+			}
 		}
 	}
+	return nil
+}
+
+// RestoreChainDataSnapshot restores a chainData snapshot
+func (sm *SnapshotManager) RestoreChainDataSnapshot(
+	manifest *SnapshotManifest,
+	dbDir string,
+	snapshotID string,
+	entryName string,
+) error {
+	// Clear existing database
+	if _, err := os.Stat(dbDir); err == nil {
+		if err := os.RemoveAll(dbDir); err != nil {
+			return fmt.Errorf("failed to clear existing db: %w", err)
+		}
+	}
+
+	if err := os.MkdirAll(dbDir, 0o755); err != nil {
+		return fmt.Errorf("failed to create db directory: %w", err)
+	}
+
+	db, err := badgerdb.New(dbDir, nil, "", nil)
+	if err != nil {
+		return fmt.Errorf("failed to open badger db: %w", err)
+	}
+	defer db.Close()
+
+	chainDir := filepath.Join(sm.baseDir, "snapshots", snapshotID, manifest.Network, entryName)
+	chunksDir := filepath.Join(chainDir, "chunks")
+
+	// Restore base
+	if err := sm.loadFromParts(db, chunksDir, manifest.Base.Parts); err != nil {
+		return fmt.Errorf("failed to restore base: %w", err)
+	}
+
+	// Restore incrementals
+	for _, inc := range manifest.Incrementals {
+		if err := sm.loadFromParts(db, chunksDir, inc.Parts); err != nil {
+			return fmt.Errorf("failed to restore incremental: %w", err)
+		}
+	}
+
 	return nil
 }
 
