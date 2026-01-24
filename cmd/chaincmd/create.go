@@ -30,6 +30,7 @@ var (
 	customVMBin      string
 	useEVM           bool
 	useCustomVM      bool
+	useParsVM        bool
 	vmVersion        string
 	useLatestVM      bool
 	enablePreconfirm bool
@@ -70,6 +71,7 @@ SEQUENCER OPTIONS (for L2):
 VM OPTIONS:
 
   --evm          Use Lux EVM (default)
+  --pars         Use Pars VM (post-quantum messaging)
   --custom-vm    Use custom VM binary
   --vm           Path to custom VM binary
   --vm-version   Specific VM version (default: latest)
@@ -162,6 +164,7 @@ NOTES:
 	cmd.Flags().StringVar(&genesisFile, "genesis", "", "Path to custom genesis file")
 	cmd.Flags().StringVar(&customVMBin, "vm", "", "Path to custom VM binary")
 	cmd.Flags().BoolVar(&useEVM, "evm", false, "Use Lux EVM")
+	cmd.Flags().BoolVar(&useParsVM, "pars", false, "Use Pars VM (post-quantum messaging)")
 	cmd.Flags().BoolVar(&useCustomVM, "custom-vm", false, "Use custom VM")
 	cmd.Flags().StringVar(&vmVersion, "vm-version", "", "VM version to use")
 	cmd.Flags().BoolVar(&useLatestVM, "latest", false, "Use latest VM version")
@@ -195,6 +198,8 @@ func createChain(cmd *cobra.Command, args []string) error {
 	switch {
 	case useEVM:
 		vmType = models.EVM
+	case useParsVM:
+		vmType = models.ParsVM
 	case useCustomVM:
 		vmType = models.CustomVM
 	default:
@@ -212,8 +217,13 @@ func createChain(cmd *cobra.Command, args []string) error {
 		}
 		ux.Logger.PrintToUser("Importing genesis")
 	} else {
-		// Generate default genesis
-		chainGenesis, err = generateDefaultGenesis(chainName, chainType)
+		// Generate default genesis based on VM type
+		switch vmType {
+		case models.ParsVM:
+			chainGenesis, err = generateParsGenesis(chainName)
+		default:
+			chainGenesis, err = generateDefaultGenesis(chainName, chainType)
+		}
 		if err != nil {
 			return fmt.Errorf("failed to generate genesis: %w", err)
 		}
@@ -229,16 +239,20 @@ func createChain(cmd *cobra.Command, args []string) error {
 
 	// Resolve chain ID - prompt if not provided and interactive
 	resolvedChainID := evmChainID
+	defaultChainID := uint64(200200)
+	if vmType == models.ParsVM {
+		defaultChainID = vm.ParsDefaultChainID // 7070 for Pars
+	}
 	if resolvedChainID == 0 {
 		if !prompts.IsInteractive() {
-			resolvedChainID = 200200 // default
+			resolvedChainID = defaultChainID
 		} else {
-			chainIDStr, err := app.Prompt.CaptureString("Enter EVM chain ID (default: 200200)")
+			chainIDStr, err := app.Prompt.CaptureString(fmt.Sprintf("Enter chain ID (default: %d)", defaultChainID))
 			if err != nil {
 				return err
 			}
 			if chainIDStr == "" {
-				resolvedChainID = 200200
+				resolvedChainID = defaultChainID
 			} else {
 				parsed, err := strconv.ParseUint(chainIDStr, 10, 64)
 				if err != nil {
@@ -251,16 +265,20 @@ func createChain(cmd *cobra.Command, args []string) error {
 
 	// Resolve token name - prompt if not provided and interactive
 	resolvedTokenName := tokenName
+	defaultTokenName := "TOKEN"
+	if vmType == models.ParsVM {
+		defaultTokenName = "PARS"
+	}
 	if resolvedTokenName == "" {
 		if !prompts.IsInteractive() {
-			resolvedTokenName = "TOKEN" // default
+			resolvedTokenName = defaultTokenName
 		} else {
-			name, err := app.Prompt.CaptureString("Enter token name (default: TOKEN)")
+			name, err := app.Prompt.CaptureString(fmt.Sprintf("Enter token name (default: %s)", defaultTokenName))
 			if err != nil {
 				return err
 			}
 			if name == "" {
-				resolvedTokenName = "TOKEN"
+				resolvedTokenName = defaultTokenName
 			} else {
 				resolvedTokenName = name
 			}
@@ -486,6 +504,63 @@ func generateDefaultGenesis(_, _ string) ([]byte, error) {
 		"difficulty": "0x0",
 		"mixHash":    "0x0000000000000000000000000000000000000000000000000000000000000000",
 		"coinbase":   "0x0000000000000000000000000000000000000000",
+	}
+
+	return json.MarshalIndent(genesis, "", "  ")
+}
+
+// generateParsGenesis generates a default genesis for Pars VM
+func generateParsGenesis(chainName string) ([]byte, error) {
+	params := getGenesisParams()
+	if params.chainID == 200200 {
+		params.chainID = vm.ParsDefaultChainID // Use Pars default
+	}
+
+	genesis := map[string]interface{}{
+		"chainId": params.chainID,
+		"network": map[string]interface{}{
+			"rpcAddr":   "127.0.0.1:9650",
+			"p2pAddr":   "0.0.0.0:9651",
+			"chainId":   params.chainID,
+			"networkId": params.chainID,
+		},
+		"evm": map[string]interface{}{
+			"enabled": true,
+			"precompiles": map[string]interface{}{
+				"mldsa":    "0x0601",
+				"mlkem":    "0x0603",
+				"bls":      "0x0B00",
+				"ringtail": "0x0700",
+				"fhe":      "0x0800",
+			},
+		},
+		"pars": map[string]interface{}{
+			"enabled": true,
+			"storage": map[string]interface{}{
+				"maxSize":       10737418240, // 10GB
+				"retentionDays": 30,
+			},
+			"onion": map[string]interface{}{
+				"hopCount": 3,
+			},
+			"session": map[string]interface{}{
+				"idPrefix": "07", // Post-quantum prefix
+			},
+		},
+		"warp": map[string]interface{}{
+			"enabled":     true,
+			"luxEndpoint": "https://api.lux.network",
+		},
+		"crypto": map[string]interface{}{
+			"gpuEnabled":      true,
+			"signatureScheme": "ML-DSA-65",
+			"kemScheme":       "ML-KEM-768",
+			"thresholdScheme": "Ringtail",
+		},
+		"consensus": map[string]interface{}{
+			"engine":      "quasar",
+			"blockTimeMs": 2000,
+		},
 	}
 
 	return json.MarshalIndent(genesis, "", "  ")
