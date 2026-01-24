@@ -27,9 +27,12 @@ type EVMGenesisParams struct {
 }
 
 // PromptVMType prompts the user to select a VM type
-func PromptVMType(app *application.Lux, useEVM bool, useCustom bool, usePars bool) (models.VMType, error) {
+func PromptVMType(app *application.Lux, useEVM bool, useCustom bool, usePars bool, useSession bool) (models.VMType, error) {
 	if useEVM {
 		return models.EVM, nil
+	}
+	if useSession {
+		return models.SessionVM, nil
 	}
 	if usePars {
 		return models.ParsVM, nil
@@ -41,7 +44,8 @@ func PromptVMType(app *application.Lux, useEVM bool, useCustom bool, usePars boo
 	// Prompt user to select VM type
 	vmOptions := []string{
 		"Lux EVM - Standard EVM with precompiles",
-		"Pars VM - Post-quantum secure messaging",
+		"Session VM - Post-quantum secure messaging",
+		"Pars VM - Pars network (EVM + SessionVM)",
 		"Custom - Use your own VM binary",
 	}
 
@@ -54,8 +58,10 @@ func PromptVMType(app *application.Lux, useEVM bool, useCustom bool, usePars boo
 	case vmOptions[0]:
 		return models.EVM, nil
 	case vmOptions[1]:
-		return models.ParsVM, nil
+		return models.SessionVM, nil
 	case vmOptions[2]:
+		return models.ParsVM, nil
+	case vmOptions[3]:
 		return models.CustomVM, nil
 	default:
 		return models.EVM, nil
