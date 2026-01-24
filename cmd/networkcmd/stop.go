@@ -22,12 +22,10 @@ import (
 const networkTypeLocal = "local"
 
 var (
-	stopNetworkType   string
-	stopNetworkID     uint32 // Custom network ID for non-standard networks
-	forceStop         bool
-	stopIncremental   bool   // Use incremental backup when stopping (default: true)
-	stopFullBackup    bool   // Force full backup instead of incremental
-	stopCleanupLogs   bool   // Clean up old logs when stopping
+	stopNetworkType string
+	stopNetworkID   uint32 // Custom network ID for non-standard networks
+	forceStop       bool
+	stopCleanupLogs bool // Clean up old logs when stopping
 	// Network type flags (same as start command for consistency)
 	stopMainnet bool
 	stopTestnet bool
@@ -102,8 +100,6 @@ SNAPSHOT vs CLEAN:
 	}
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to save network state into")
 	cmd.Flags().BoolVar(&forceStop, "force", false, "force stop without confirmation (use with caution for mainnet/testnet)")
-	cmd.Flags().BoolVar(&stopIncremental, "incremental", true, "use incremental backup (default: true)")
-	cmd.Flags().BoolVar(&stopFullBackup, "full", false, "force full backup instead of incremental")
 	cmd.Flags().BoolVar(&stopCleanupLogs, "cleanup", false, "clean up old log files and stale run directories")
 	// Network type flags (same pattern as start command for consistency)
 	cmd.Flags().BoolVar(&stopMainnet, "mainnet", false, "stop mainnet network (network-id=1)")
@@ -209,13 +205,10 @@ func StopNetwork(*cobra.Command, []string) error {
 
 	ux.Logger.PrintToUser("Stopping network: %s", stopNetworkType)
 
-	// Use native incremental backup by default (--full overrides --incremental)
-	useIncremental := stopIncremental && !stopFullBackup
-	if err := saveNetworkNative(stopNetworkType, snapshotName, useIncremental); err != nil {
-		ux.Logger.PrintToUser("Native backup failed, falling back to standard: %v", err)
-		if err := saveNetworkForType(stopNetworkType); err != nil {
-			ux.Logger.PrintToUser("Warning: failed to save snapshot: %v", err)
-		}
+	// Create hot snapshot via gRPC → admin.snapshot API while network is still running
+	// This is the primary method - uses native BadgerDB incremental backup
+	if err := saveNetworkForType(stopNetworkType); err != nil {
+		ux.Logger.PrintToUser("Warning: failed to save snapshot: %v", err)
 	}
 
 	if killErr := binutils.KillgRPCServerProcessForNetwork(app, stopNetworkType); killErr != nil {
@@ -298,19 +291,4 @@ func saveNetworkForType(networkType string) error {
 	ux.Logger.PrintToUser("Network stopped successfully.")
 
 	return nil
-}
-
-// saveNetworkNative creates a snapshot using the native database backup API.
-// This supports incremental backups which are significantly smaller and faster
-// when a previous backup exists.
-func saveNetworkNative(networkType, snapshotNameArg string, incremental bool) error {
-	ux.Logger.PrintToUser("Creating native %s backup...", func() string {
-		if incremental {
-			return "incremental"
-		}
-		return "base"
-	}())
-
-	sm := snapshot.NewSnapshotManager(app.GetBaseDir())
-	return sm.CreateSnapshot(snapshotNameArg, incremental)
 }

@@ -1,7 +1,36 @@
 # Lux CLI Documentation
 
 **Version**: 1.22.5
-**Last Updated**: 2026-01-19
+**Last Updated**: 2026-01-23
+
+## DigitalOcean Production Nodes
+
+| Network | IP | Network ID | C-Chain ID | Port | Status |
+|---------|-----|------------|------------|------|--------|
+| Mainnet | 164.92.101.46 | 1 | 96369 | 9630 | Running |
+| Testnet | 24.144.93.58 | 2 | 96368 | 9640 | Running |
+| Devnet | 143.110.230.60 | 1337 | 1337 | 9650 | Dev mode |
+
+### RPC Endpoints
+
+```bash
+# Mainnet C-Chain RPC
+http://164.92.101.46:9630/ext/bc/C/rpc
+
+# Testnet C-Chain RPC
+http://24.144.93.58:9640/ext/bc/C/rpc
+
+# Devnet C-Chain RPC
+http://143.110.230.60:9650/ext/bc/C/rpc
+```
+
+### DNS Records (pending setup)
+
+| Subdomain | Domain | IP |
+|-----------|--------|-----|
+| api, rpc, explorer | lux.network | 164.92.101.46 |
+| @, api, rpc | lux-test.network | 24.144.93.58 |
+| @, api, rpc | lux-dev.network | 143.110.230.60 |
 
 ## Quick Reference
 
@@ -155,18 +184,38 @@ A-Chain:  http://localhost:9630/ext/bc/A/rpc
 Save and restore network state:
 
 ```bash
+# Hot snapshot while network is running (zero downtime)
+lux network snapshot save my-backup --network-type=mainnet
+
 # Stop network with snapshot
 lux network stop --snapshot-name=my_snapshot
 
 # Start from snapshot
 lux network start --snapshot-name=my_snapshot
 
-# Manual snapshot (while network running)
-tar -czf ~/.lux/snapshots/backup.tar.gz -C ~/.lux/runs/mainnet run_*
+# Resume from hot snapshot
+lux network start --mainnet --snapshot-name=my-backup
+```
+
+### Hot Snapshots (Zero Downtime)
+
+As of 2026-01-22, the CLI supports zero-downtime hot snapshots:
+
+- **Running network**: Uses gRPC `SaveHotSnapshot` via admin.snapshot API
+- **Stopped network**: Uses direct BadgerDB access
+
+Hot snapshots work even during active operations like block imports. The snapshot captures consistent state without interrupting the network.
+
+```bash
+# Create hot snapshot for each network type
+lux network snapshot save mainnet-backup --network-type=mainnet
+lux network snapshot save testnet-backup --network-type=testnet
+lux network snapshot save devnet-backup --network-type=devnet
+```
 
 Notes:
-- Advanced snapshots (base/incremental/squash) live under `lux network snapshot advanced` and require nodes to be stopped.
-```
+- Hot snapshots use BadgerDB native incremental backups (~100KB vs 75GB for directory copies)
+- Advanced snapshots (base/incremental/squash) live under `lux network snapshot advanced`
 
 ## Development
 
