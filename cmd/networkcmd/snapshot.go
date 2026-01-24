@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/snapshot"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
@@ -181,14 +182,36 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create snapshots directory: %w", err)
 	}
 
+	// Check if network is running - use gRPC hot snapshot if so
+	isRunning, _ := binutils.IsServerProcessRunningForNetwork(app, networkType)
+	if isRunning {
+		// Use gRPC SaveHotSnapshot for zero-downtime backup
+		ux.Logger.PrintToUser("Network is running - creating hot snapshot via gRPC...")
+		cli, err := binutils.NewGRPCClient(binutils.WithAvoidRPCVersionCheck(true), binutils.WithNetworkType(networkType))
+		if err != nil {
+			return fmt.Errorf("failed to connect to network: %w", err)
+		}
+		defer func() { _ = cli.Close() }()
+
+		ctx := binutils.GetAsyncContext()
+		resp, err := cli.SaveHotSnapshot(ctx, snapshotName)
+		if err != nil {
+			return fmt.Errorf("failed to create hot snapshot: %w", err)
+		}
+		ux.Logger.PrintToUser("✓ Hot snapshot '%s' created successfully", snapshotName)
+		if resp != nil && resp.SnapshotPath != "" {
+			ux.Logger.PrintToUser("  Path: %s", resp.SnapshotPath)
+		}
+		return nil
+	}
+
+	// Network is stopped - use direct DB access for snapshot
 	snapshotDir := filepath.Join(snapshotsDir, snapshotName)
 	if _, err := os.Stat(snapshotDir); err == nil {
 		return fmt.Errorf("snapshot '%s' already exists. Delete it first or choose a different name", snapshotName)
 	}
 
-	// Use native BadgerDB backup API - works on both running and stopped networks
-	// BadgerDB supports concurrent reads, so we can backup without stopping
-	ux.Logger.PrintToUser("Creating snapshot: %s", snapshotName)
+	ux.Logger.PrintToUser("Network is stopped - creating snapshot via direct DB access...")
 
 	sm := snapshot.NewSnapshotManager(app.GetBaseDir())
 	if err := sm.CreateSnapshot(snapshotName, snapshotIncremental); err != nil {
