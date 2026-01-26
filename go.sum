@@ -421,8 +421,8 @@ github.com/luxfi/constants v1.4.4 h1:R5MaZkQs70eHceZx+2LS9G2gmG7OcLF98BSkJol3OJE
 github.com/luxfi/constants v1.4.4/go.mod h1:ENkJ121cmDEkwQPDiKK4QhnTnW9u37PGpepbrdVcAmc=
 github.com/luxfi/container v0.0.4 h1:BXhF82WyfqVP5mjlNcr7tP0Fcnvl0Ap1rkiu+rq5XuM=
 github.com/luxfi/container v0.0.4/go.mod h1:Z3SpmMF5d4t77MM0nHYXURpn+EMVaeu1fhbd/3BGaek=
-github.com/luxfi/coreth v1.21.47 h1:dbbwN+taDC+XlplNWi5opfFlHbbDC7lp4H/PbKQdnOY=
-github.com/luxfi/coreth v1.21.47/go.mod h1:8Q0SI0bhD9gVCL65/9ZWuhKi+wNjP+ddM5UZsmmYz5g=
+github.com/luxfi/coreth v1.21.48 h1:l7b26Dl+SrwOEHWEaI0j0rJE1P6JTCWQlqt3ZqovYn0=
+github.com/luxfi/coreth v1.21.48/go.mod h1:OJsnRVyfRVDqHuwb8xd5w5Eo75Ik4VrIEKLST1yuvAw=
 github.com/luxfi/crypto v1.17.40 h1:+hDkGKuzYPac2vpbenFN+gKcPvFv3fXQ4ZAEHYDDt/Y=
 github.com/luxfi/crypto v1.17.40/go.mod h1:yz/86mgfby+aaf9hsHg8KIhHENueDsZpI9nnV+G4nW8=
 github.com/luxfi/database v1.17.40 h1:RPtRLbKu5yBM5fCSjR7CWzNqR0N1fg8r9y73hUww5sM=
@@ -507,8 +507,8 @@ github.com/luxfi/validators v1.0.0 h1:zE1HJM1lfvC+v1Lalg+MUgkKBGFWnwTfOOmXraiNnp
 github.com/luxfi/validators v1.0.0/go.mod h1:QGppjtI/gqprbplWc10J+4OIK8UYWpv+53mfH2aKhy4=
 github.com/luxfi/version v1.0.1 h1:T/1KYWEMmsrNQk7pN7PFPAwh/7XbeX7cFAKLBqI37Sk=
 github.com/luxfi/version v1.0.1/go.mod h1:Y5fPkQ2DB0XRBCxgSPXp4ISzL1/jptKnmFknShRJCyg=
-github.com/luxfi/vm v1.0.29 h1:QvQyptrzgyjAt/5l6A179w5BswDCaMcXxvcSgLpsU3E=
-github.com/luxfi/vm v1.0.29/go.mod h1:6p/iZP4xtNPpqysB8/ITkSZs86a1VSeqNRIm+eOL6Rk=
+github.com/luxfi/vm v1.0.30 h1:Tz01z6RYzNnqbiIa5nb/Ro3Vq18Vd1Uavx4HuuACev8=
+github.com/luxfi/vm v1.0.30/go.mod h1:6p/iZP4xtNPpqysB8/ITkSZs86a1VSeqNRIm+eOL6Rk=
 github.com/luxfi/warp v1.18.5 h1:yXFCT+lnvzJHs8nVvfUCQ9wNvhtgbDGaXJkJeiwgKf4=
 github.com/luxfi/warp v1.18.5/go.mod h1:SFyC529HDvbP/TWRAdYQSyJUliMa5JKFRtBrTLEElp4=
 github.com/manifoldco/promptui v0.9.0 h1:3V4HzJk1TtXW1MTZMP7mdlwbBpIinw3HztaIlYthEiA=
