@@ -23,7 +23,9 @@ import (
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/gpucmd"
 	"github.com/luxfi/cli/cmd/keycmd"
+	"github.com/luxfi/cli/cmd/kmscmd"
 	"github.com/luxfi/cli/cmd/linkcmd"
+	"github.com/luxfi/cli/cmd/mpccmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/netrunnercmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
@@ -178,6 +180,12 @@ For detailed command help, use: lux <command> --help`,
 
 	// add node management command
 	rootCmd.AddCommand(nodecmd.NewCmd(app))
+
+	// add mpc management command (threshold signing wallets)
+	rootCmd.AddCommand(mpccmd.NewCmd())
+
+	// add kms management command (key management service)
+	rootCmd.AddCommand(kmscmd.NewCmd())
 
 	// add netrunner management command
 	rootCmd.AddCommand(netrunnercmd.NewCmd(app))
