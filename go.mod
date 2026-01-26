@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/lpm v1.9.4 // indirect
 	github.com/luxfi/netrunner v1.15.7
 	github.com/luxfi/sdk v1.16.46
-	github.com/luxfi/vm v1.0.29
+	github.com/luxfi/vm v1.0.30
 	github.com/luxfi/warp v1.18.5
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -262,7 +262,7 @@ require (
 	github.com/luxfi/api v1.0.1
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.4.4
-	github.com/luxfi/coreth v1.21.47
+	github.com/luxfi/coreth v1.21.48
 	github.com/luxfi/database v1.17.40
 	github.com/luxfi/filesystem v0.0.1
 	github.com/luxfi/formatting v1.0.1
