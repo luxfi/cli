@@ -35,9 +35,10 @@ func DefaultEVMConfig() map[string]interface{} {
 		"eth-apis": []string{
 			"eth", "eth-filter", "net", "web3",
 			"internal-eth", "internal-blockchain", "internal-transaction", "internal-account",
-			"admin",
+			"admin", "debug",
 		},
 		"admin-api-enabled": true,
+		"pruning-enabled":   false,
 		"log-level":         "info",
 	}
 }
