@@ -170,7 +170,7 @@ require (
 	github.com/luxfi/keys v1.0.8 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/math/safe v0.0.1 // indirect
-	github.com/luxfi/metric v1.4.11 // indirect
+	github.com/luxfi/metric v1.4.12 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/node v1.23.2 // indirect
 	github.com/luxfi/precompile v0.4.7 // indirect
