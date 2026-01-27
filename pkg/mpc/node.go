@@ -13,7 +13,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"syscall"
 	"time"
 )
 
@@ -287,9 +286,7 @@ func (m *NodeManager) StartNode(ctx context.Context, cfg *NodeConfig) error {
 	cmd := exec.Command(mpcBinary, args...)
 	cmd.Stdout = logF
 	cmd.Stderr = logF
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
+	setSysProcAttr(cmd)
 
 	if err := cmd.Start(); err != nil {
 		logF.Close()
@@ -321,9 +318,7 @@ func (m *NodeManager) startPlaceholderNode(cfg *NodeConfig, logFile, pidFile str
 		cfg.NodeName, time.Now().Format(time.RFC3339), logFile,
 	))
 
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
+	setSysProcAttr(cmd)
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start placeholder process: %w", err)
@@ -403,8 +398,8 @@ func (m *NodeManager) StopNode(ctx context.Context, nodeName string) error {
 		return fmt.Errorf("failed to find process: %w", err)
 	}
 
-	// Send SIGTERM for graceful shutdown
-	if err := process.Signal(syscall.SIGTERM); err != nil {
+	// Send termination signal for graceful shutdown
+	if err := signalTerm(process); err != nil {
 		// Process might already be dead
 		if err.Error() != "os: process already finished" {
 			return fmt.Errorf("failed to stop process: %w", err)
@@ -440,7 +435,7 @@ func (m *NodeManager) GetNodeStatus(nodeName string) (*NodeInfo, error) {
 			process, err := os.FindProcess(pid)
 			if err == nil {
 				// Check if process is still alive
-				err = process.Signal(syscall.Signal(0))
+				err = checkProcessAlive(process)
 				if err == nil {
 					info.Status = NodeStatusRunning
 					info.PID = pid
