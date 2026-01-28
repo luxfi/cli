@@ -22,14 +22,14 @@ import (
 )
 
 var (
-	resetPlugins   bool
-	cleanLogs      bool   // Clean up large log files
-	cleanBackups   bool   // Clean up old backup directories
-	cleanStaleRuns bool   // Clean up stale run directories
-	cleanAll       bool   // Clean all of the above
-	cleanDryRun    bool   // Show what would be deleted without deleting
-	cleanMaxLogMB  int    // Maximum log file size in MB
-	cleanMaxAgeDays int   // Maximum age for backups/logs in days
+	resetPlugins    bool
+	cleanLogs       bool // Clean up large log files
+	cleanBackups    bool // Clean up old backup directories
+	cleanStaleRuns  bool // Clean up stale run directories
+	cleanAll        bool // Clean all of the above
+	cleanDryRun     bool // Show what would be deleted without deleting
+	cleanMaxLogMB   int  // Maximum log file size in MB
+	cleanMaxAgeDays int  // Maximum age for backups/logs in days
 )
 
 func newCleanCmd() *cobra.Command {

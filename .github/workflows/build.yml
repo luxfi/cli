@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  GOWORK: off
+  CGO_ENABLED: "0"
+
 jobs:
   build:
     runs-on: ubuntu-latest

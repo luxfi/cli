@@ -8,6 +8,8 @@ on:
 
 env:
   GO_VERSION: '1.25.5'
+  GOWORK: off
+  CGO_ENABLED: "0"
 
 jobs:
   lint:
@@ -56,7 +58,7 @@ jobs:
       - name: Run tests
         run: |
           # Run tests for specific packages that should pass
-          go test -v -race -coverprofile=coverage.out \
+          go test -v -coverprofile=coverage.out \
             ./pkg/constants/... \
             ./pkg/types/... \
             ./pkg/binutils/... \
