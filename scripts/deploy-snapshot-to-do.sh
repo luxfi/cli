@@ -45,6 +45,7 @@ echo "Uploading to $IP..."
 scp /tmp/$SNAPSHOT_NAME.tar.zst root@$IP:/tmp/
 
 echo "Restoring on remote..."
+# shellcheck disable=SC2087 # Intentional: local vars ($SNAPSHOT_NAME, $NETWORK) must expand client-side
 ssh root@$IP << REMOTE
     set -e
     systemctl stop luxd || true
