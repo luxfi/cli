@@ -202,7 +202,7 @@ type KmsKey struct {
 	OrgID               string `json:"orgId"`
 	Name                string `json:"name"`
 	ProjectID           string `json:"projectId"`
-	KeyUsage            string `json:"keyUsage"`            // "sign-verify" or "encrypt-decrypt"
+	KeyUsage            string `json:"keyUsage"` // "sign-verify" or "encrypt-decrypt"
 	Version             int    `json:"version"`
 	EncryptionAlgorithm string `json:"encryptionAlgorithm"` // "rsa-4096", "ecc-nist-p256", "aes-256-gcm", "aes-128-gcm"
 }
@@ -262,7 +262,7 @@ func (s *Server) handleKmsKeys(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		// KmsCreateKeyV1Request format
 		var req struct {
-			KeyUsage            string `json:"keyUsage"`            // "sign-verify" or "encrypt-decrypt"
+			KeyUsage            string `json:"keyUsage"` // "sign-verify" or "encrypt-decrypt"
 			Description         string `json:"description"`
 			Name                string `json:"name"`
 			EncryptionAlgorithm string `json:"encryptionAlgorithm"` // "rsa-4096", "ecc-nist-p256", "aes-256-gcm", "aes-128-gcm"
@@ -560,8 +560,8 @@ func (s *Server) handleKeyVerify(w http.ResponseWriter, r *http.Request, keyID s
 
 	// KmsVerifyDataV1Request format
 	var req struct {
-		Data             string `json:"data"`             // Base64 encoded
-		Signature        string `json:"signature"`        // Base64 encoded
+		Data             string `json:"data"`      // Base64 encoded
+		Signature        string `json:"signature"` // Base64 encoded
 		SigningAlgorithm string `json:"signingAlgorithm"`
 		IsDigest         bool   `json:"isDigest"`
 	}
