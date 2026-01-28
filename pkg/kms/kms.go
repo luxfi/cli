@@ -28,12 +28,12 @@ import (
 type KeyType string
 
 const (
-	KeyTypeAES256   KeyType = "aes-256-gcm"
-	KeyTypeRSA3072  KeyType = "rsa-3072"
-	KeyTypeRSA4096  KeyType = "rsa-4096"
+	KeyTypeAES256    KeyType = "aes-256-gcm"
+	KeyTypeRSA3072   KeyType = "rsa-3072"
+	KeyTypeRSA4096   KeyType = "rsa-4096"
 	KeyTypeECDSAP256 KeyType = "ecdsa-p256"
 	KeyTypeECDSAP384 KeyType = "ecdsa-p384"
-	KeyTypeEdDSA    KeyType = "ed25519"
+	KeyTypeEdDSA     KeyType = "ed25519"
 )
 
 // KeyUsage represents what a key can be used for.
@@ -72,19 +72,19 @@ type Key struct {
 	Metadata    map[string]string `json:"metadata,omitempty"`
 
 	// For MPC keys
-	Threshold   int      `json:"threshold,omitempty"`
-	TotalShares int      `json:"totalShares,omitempty"`
+	Threshold    int      `json:"threshold,omitempty"`
+	TotalShares  int      `json:"totalShares,omitempty"`
 	ShareHolders []string `json:"shareHolders,omitempty"`
 }
 
 // KeyMaterial holds the encrypted key material.
 type KeyMaterial struct {
-	KeyID            string `json:"keyId"`
-	Version          int    `json:"version"`
-	EncryptedKey     []byte `json:"encryptedKey"`     // Encrypted with root key
-	EncryptedPrivate []byte `json:"encryptedPrivate"` // For asymmetric keys
-	PublicKey        []byte `json:"publicKey"`        // Public key (if asymmetric)
-	Nonce            []byte `json:"nonce"`
+	KeyID            string    `json:"keyId"`
+	Version          int       `json:"version"`
+	EncryptedKey     []byte    `json:"encryptedKey"`     // Encrypted with root key
+	EncryptedPrivate []byte    `json:"encryptedPrivate"` // For asymmetric keys
+	PublicKey        []byte    `json:"publicKey"`        // Public key (if asymmetric)
+	Nonce            []byte    `json:"nonce"`
 	Created          time.Time `json:"created"`
 }
 
@@ -633,13 +633,13 @@ func (k *KMS) CreateSecret(ctx context.Context, name string, value []byte, opts 
 	}
 
 	secret := &Secret{
-		ID:          secretID,
-		Name:        name,
-		Version:     1,
-		KeyID:       keyID,
-		Value:       encrypted,
-		Created:     now,
-		Updated:     now,
+		ID:      secretID,
+		Name:    name,
+		Version: 1,
+		KeyID:   keyID,
+		Value:   encrypted,
+		Created: now,
+		Updated: now,
 	}
 
 	if opts != nil {

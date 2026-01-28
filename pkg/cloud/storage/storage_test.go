@@ -13,13 +13,13 @@ import (
 
 func TestParseURI(t *testing.T) {
 	tests := []struct {
-		name          string
-		uri           string
-		wantProvider  Provider
-		wantBucket    string
-		wantBasePath  string
-		wantKey       string
-		wantErr       bool
+		name         string
+		uri          string
+		wantProvider Provider
+		wantBucket   string
+		wantBasePath string
+		wantKey      string
+		wantErr      bool
 	}{
 		{
 			name:         "s3 uri",
