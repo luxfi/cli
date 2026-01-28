@@ -32,7 +32,7 @@ require (
 	github.com/onsi/gomega v1.38.3
 	github.com/pborman/ansi v1.0.0
 	github.com/posthog/posthog-go v1.8.2
-	github.com/schollz/progressbar/v3 v3.18.0
+	github.com/schollz/progressbar/v3 v3.19.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cobra v1.10.2
