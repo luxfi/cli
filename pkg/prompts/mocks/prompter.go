@@ -1,3 +1,6 @@
+// Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
 // Code generated manually for testing. Update as needed.
 //
 //nolint:revive // Mock methods don't need doc comments
