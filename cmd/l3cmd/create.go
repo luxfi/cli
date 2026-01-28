@@ -142,7 +142,7 @@ func createL3(cmd *cobra.Command, args []string) error {
 
 	// Create L3 configuration
 	sc := &models.Sidecar{
-		Name:   l3Name,
+		Name:  l3Name,
 		Chain: l3Name,
 
 		// L3 specific

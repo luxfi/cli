@@ -54,10 +54,10 @@ type BadgerStore struct {
 
 // BadgerConfig holds BadgerDB configuration options.
 type BadgerConfig struct {
-	Dir          string
-	InMemory     bool
-	SyncWrites   bool
-	Compression  bool
+	Dir           string
+	InMemory      bool
+	SyncWrites    bool
+	Compression   bool
 	EncryptionKey []byte // 16, 24, or 32 bytes for AES-128, AES-192, AES-256
 }
 

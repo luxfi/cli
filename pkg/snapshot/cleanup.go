@@ -53,13 +53,13 @@ func DefaultCleanupConfig() CleanupConfig {
 
 // CleanupResult contains statistics from cleanup operation
 type CleanupResult struct {
-	LogsDeleted       int
-	LogBytesFreed     int64
-	BackupsDeleted    int
-	BackupBytesFreed  int64
-	StaleRunsDeleted  int
+	LogsDeleted        int
+	LogBytesFreed      int64
+	BackupsDeleted     int
+	BackupBytesFreed   int64
+	StaleRunsDeleted   int
 	StaleRunBytesFreed int64
-	Errors            []error
+	Errors             []error
 }
 
 // TotalBytesFreed returns total bytes freed

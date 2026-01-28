@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_call:
 
+env:
+  GOWORK: off
+  CGO_ENABLED: "0"
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}

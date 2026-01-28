@@ -56,24 +56,24 @@ type DeploymentConfig struct {
 
 // RemoteNode represents a deployed MPC node.
 type RemoteNode struct {
-	NodeConfig   *NodeConfig       `json:"nodeConfig"`
-	Host         *models.Host      `json:"host"`
-	Provider     CloudProvider     `json:"provider"`
-	InstanceID   string            `json:"instanceId"`
-	PublicIP     string            `json:"publicIp"`
-	PrivateIP    string            `json:"privateIp"`
-	Region       string            `json:"region"`
-	DeployedAt   time.Time         `json:"deployedAt"`
-	Status       NodeStatus        `json:"status"`
-	KeyEncrypted bool              `json:"keyEncrypted"`
+	NodeConfig   *NodeConfig   `json:"nodeConfig"`
+	Host         *models.Host  `json:"host"`
+	Provider     CloudProvider `json:"provider"`
+	InstanceID   string        `json:"instanceId"`
+	PublicIP     string        `json:"publicIp"`
+	PrivateIP    string        `json:"privateIp"`
+	Region       string        `json:"region"`
+	DeployedAt   time.Time     `json:"deployedAt"`
+	Status       NodeStatus    `json:"status"`
+	KeyEncrypted bool          `json:"keyEncrypted"`
 }
 
 // RemoteNetworkConfig holds configuration for a deployed MPC network.
 type RemoteNetworkConfig struct {
-	NetworkConfig *NetworkConfig  `json:"networkConfig"`
+	NetworkConfig *NetworkConfig    `json:"networkConfig"`
 	Deployment    *DeploymentConfig `json:"deployment"`
-	Nodes         []*RemoteNode   `json:"nodes"`
-	DeployedAt    time.Time       `json:"deployedAt"`
+	Nodes         []*RemoteNode     `json:"nodes"`
+	DeployedAt    time.Time         `json:"deployedAt"`
 }
 
 // DeploymentManager manages MPC node deployments to cloud providers.
@@ -365,10 +365,10 @@ func (d *DeploymentManager) deployToDigitalOcean(ctx context.Context, networkCfg
 // DefaultInstanceTypes returns recommended instance types per provider.
 func DefaultInstanceTypes() map[CloudProvider]string {
 	return map[CloudProvider]string{
-		CloudProviderAWS:          "t3.medium",     // 2 vCPU, 4GB RAM
-		CloudProviderGCP:          "e2-medium",     // 2 vCPU, 4GB RAM
-		CloudProviderAzure:        "Standard_B2s",  // 2 vCPU, 4GB RAM
-		CloudProviderDigitalOcean: "s-2vcpu-4gb",   // 2 vCPU, 4GB RAM
+		CloudProviderAWS:          "t3.medium",    // 2 vCPU, 4GB RAM
+		CloudProviderGCP:          "e2-medium",    // 2 vCPU, 4GB RAM
+		CloudProviderAzure:        "Standard_B2s", // 2 vCPU, 4GB RAM
+		CloudProviderDigitalOcean: "s-2vcpu-4gb",  // 2 vCPU, 4GB RAM
 	}
 }
 

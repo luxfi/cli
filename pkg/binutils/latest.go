@@ -12,8 +12,8 @@ import (
 	"runtime"
 
 	"github.com/luxfi/constants"
-	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/filesystem/perms"
+	luxlog "github.com/luxfi/log"
 	"go.uber.org/zap"
 )
 

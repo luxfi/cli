@@ -139,11 +139,11 @@ type Config struct {
 	Endpoint string // Custom endpoint for S3-compatible stores (MinIO, R2, etc.)
 
 	// AWS-specific
-	AWSProfile        string
-	AWSAccessKey      string
-	AWSSecretKey      string
-	AWSSessionToken   string
-	AWSAssumeRoleARN  string
+	AWSProfile       string
+	AWSAccessKey     string
+	AWSSecretKey     string
+	AWSSessionToken  string
+	AWSAssumeRoleARN string
 
 	// GCS-specific
 	GCSCredentialsFile string
@@ -165,10 +165,10 @@ type Config struct {
 	LocalBasePath string
 
 	// Common options
-	PathStyle    bool // Use path-style URLs (for MinIO, etc.)
-	DisableSSL   bool
-	MaxRetries   int
-	Timeout      time.Duration
+	PathStyle  bool // Use path-style URLs (for MinIO, etc.)
+	DisableSSL bool
+	MaxRetries int
+	Timeout    time.Duration
 }
 
 // New creates a new Storage instance based on the config.

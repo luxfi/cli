@@ -9,13 +9,13 @@ import (
 	"sync"
 	"time"
 
+	apiinfo "github.com/luxfi/api/info"
 	"github.com/luxfi/cli/pkg/ansible"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/ssh"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
-	apiinfo "github.com/luxfi/api/info"
 	"github.com/luxfi/sdk/models"
 	sdkutils "github.com/luxfi/utils"
 )

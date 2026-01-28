@@ -222,7 +222,6 @@ func saveSnapshot(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-
 func loadSnapshot(_ *cobra.Command, args []string) error {
 	snapshotName := args[0]
 	networkType := determineNetworkType()

@@ -23,34 +23,34 @@ const (
 type MPCChain string
 
 const (
-	MPCChainEthereum MPCChain = "ethereum"
-	MPCChainPolygon  MPCChain = "polygon"
-	MPCChainArbitrum MPCChain = "arbitrum"
-	MPCChainOptimism MPCChain = "optimism"
-	MPCChainBase     MPCChain = "base"
+	MPCChainEthereum  MPCChain = "ethereum"
+	MPCChainPolygon   MPCChain = "polygon"
+	MPCChainArbitrum  MPCChain = "arbitrum"
+	MPCChainOptimism  MPCChain = "optimism"
+	MPCChainBase      MPCChain = "base"
 	MPCChainAvalanche MPCChain = "avalanche"
-	MPCChainBNB      MPCChain = "bnb"
-	MPCChainBitcoin  MPCChain = "bitcoin"
-	MPCChainSolana   MPCChain = "solana"
-	MPCChainLux      MPCChain = "lux"
+	MPCChainBNB       MPCChain = "bnb"
+	MPCChainBitcoin   MPCChain = "bitcoin"
+	MPCChainSolana    MPCChain = "solana"
+	MPCChainLux       MPCChain = "lux"
 )
 
 // MPCWallet represents a multi-party computation wallet.
 type MPCWallet struct {
-	ID              string            `json:"id"`
-	Name            string            `json:"name"`
-	KeyType         MPCKeyType        `json:"keyType"`
-	Threshold       int               `json:"threshold"`  // t in t-of-n
-	TotalParties    int               `json:"totalParties"` // n in t-of-n
-	ParticipantIDs  []string          `json:"participantIds"`
-	PublicKey       []byte            `json:"publicKey"`
-	ChainAddresses  map[MPCChain]string `json:"chainAddresses"`
-	Status          KeyStatus         `json:"status"`
-	OrgID           string            `json:"orgId,omitempty"`
-	ProjectID       string            `json:"projectId,omitempty"`
-	Metadata        map[string]string `json:"metadata,omitempty"`
-	Created         time.Time         `json:"created"`
-	Updated         time.Time         `json:"updated"`
+	ID             string              `json:"id"`
+	Name           string              `json:"name"`
+	KeyType        MPCKeyType          `json:"keyType"`
+	Threshold      int                 `json:"threshold"`    // t in t-of-n
+	TotalParties   int                 `json:"totalParties"` // n in t-of-n
+	ParticipantIDs []string            `json:"participantIds"`
+	PublicKey      []byte              `json:"publicKey"`
+	ChainAddresses map[MPCChain]string `json:"chainAddresses"`
+	Status         KeyStatus           `json:"status"`
+	OrgID          string              `json:"orgId,omitempty"`
+	ProjectID      string              `json:"projectId,omitempty"`
+	Metadata       map[string]string   `json:"metadata,omitempty"`
+	Created        time.Time           `json:"created"`
+	Updated        time.Time           `json:"updated"`
 }
 
 // MPCNode represents a participant node in MPC operations.
@@ -88,11 +88,11 @@ type MPCSigningRequest struct {
 type SigningStatus string
 
 const (
-	SigningStatusPending   SigningStatus = "pending"
+	SigningStatusPending    SigningStatus = "pending"
 	SigningStatusCollecting SigningStatus = "collecting"
-	SigningStatusComplete  SigningStatus = "complete"
-	SigningStatusFailed    SigningStatus = "failed"
-	SigningStatusExpired   SigningStatus = "expired"
+	SigningStatusComplete   SigningStatus = "complete"
+	SigningStatusFailed     SigningStatus = "failed"
+	SigningStatusExpired    SigningStatus = "expired"
 )
 
 // Key prefixes for MPC storage

@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 // Binary definitions
 type binaryDef struct {
 	name     string

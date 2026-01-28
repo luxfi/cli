@@ -28,20 +28,20 @@ const (
 
 // NodeConfig holds configuration for an MPC node.
 type NodeConfig struct {
-	NodeID      string   `json:"nodeId"`
-	NodeName    string   `json:"nodeName"`
-	NodeIndex   int      `json:"nodeIndex"`   // 0-based index in the MPC network
-	Threshold   int      `json:"threshold"`   // t in t-of-n threshold signing
-	TotalNodes  int      `json:"totalNodes"`  // n in t-of-n
-	Network     string   `json:"network"`     // mainnet, testnet, devnet
-	ListenAddr  string   `json:"listenAddr"`  // gRPC listen address
-	P2PPort     int      `json:"p2pPort"`     // P2P communication port
-	APIPort     int      `json:"apiPort"`     // API/gRPC port
-	Peers       []string `json:"peers"`       // Other MPC node addresses
-	DataDir     string   `json:"dataDir"`     // Data directory
-	KeysDir     string   `json:"keysDir"`     // Encrypted keys directory
-	LogLevel    string   `json:"logLevel"`
-	Created     time.Time `json:"created"`
+	NodeID     string    `json:"nodeId"`
+	NodeName   string    `json:"nodeName"`
+	NodeIndex  int       `json:"nodeIndex"`  // 0-based index in the MPC network
+	Threshold  int       `json:"threshold"`  // t in t-of-n threshold signing
+	TotalNodes int       `json:"totalNodes"` // n in t-of-n
+	Network    string    `json:"network"`    // mainnet, testnet, devnet
+	ListenAddr string    `json:"listenAddr"` // gRPC listen address
+	P2PPort    int       `json:"p2pPort"`    // P2P communication port
+	APIPort    int       `json:"apiPort"`    // API/gRPC port
+	Peers      []string  `json:"peers"`      // Other MPC node addresses
+	DataDir    string    `json:"dataDir"`    // Data directory
+	KeysDir    string    `json:"keysDir"`    // Encrypted keys directory
+	LogLevel   string    `json:"logLevel"`
+	Created    time.Time `json:"created"`
 }
 
 // NodeInfo contains runtime information about an MPC node.
