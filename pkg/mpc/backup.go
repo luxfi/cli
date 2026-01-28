@@ -38,8 +38,8 @@ type BackupManifest struct {
 
 // EncryptionInfo describes how the backup is encrypted.
 type EncryptionInfo struct {
-	Algorithm string `json:"algorithm"` // age, gpg, aes-256-gcm
-	KeyID     string `json:"keyId,omitempty"`
+	Algorithm  string   `json:"algorithm"` // age, gpg, aes-256-gcm
+	KeyID      string   `json:"keyId,omitempty"`
 	Recipients []string `json:"recipients,omitempty"`
 }
 
@@ -79,11 +79,11 @@ type RestoreOptions struct {
 
 // BackupManager handles MPC node backups.
 type BackupManager struct {
-	storage   storage.Storage
-	basePath  string
-	nodeID    string
-	nodeName  string
-	network   string
+	storage  storage.Storage
+	basePath string
+	nodeID   string
+	nodeName string
+	network  string
 }
 
 // NewBackupManager creates a new backup manager.
