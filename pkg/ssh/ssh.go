@@ -595,7 +595,7 @@ func RunSSHRenderLuxNodeConfig(
 		if err != nil {
 			return "", err
 		}
-			return sc.Networks[network.String()].ChainID.String(), nil
+		return sc.Networks[network.String()].ChainID.String(), nil
 	})
 	if err != nil {
 		return err

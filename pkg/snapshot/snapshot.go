@@ -31,8 +31,8 @@ const ChunkSize = int64(99 * 1024 * 1024)
 type SnapshotManifest struct {
 	Network            string          `json:"network"`
 	ChainID            uint64          `json:"chain_id"`
-	NodeID             uint64          `json:"node_id,omitempty"`            // Node ID (1-5)
-	ChainDataID        string          `json:"chain_data_id,omitempty"`      // If set, this is chainData not main DB
+	NodeID             uint64          `json:"node_id,omitempty"`       // Node ID (1-5)
+	ChainDataID        string          `json:"chain_data_id,omitempty"` // If set, this is chainData not main DB
 	Base               SnapshotEntry   `json:"base"`
 	Incrementals       []SnapshotEntry `json:"incrementals"`
 	StateRoot          string          `json:"state_root"`
@@ -173,9 +173,9 @@ type snapshotTask struct {
 
 // snapshotResult represents the result of a snapshot operation
 type snapshotResult struct {
-	task    snapshotTask
-	err     error
-	mode    string // "base", "incremental", or "skipped"
+	task snapshotTask
+	err  error
+	mode string // "base", "incremental", or "skipped"
 }
 
 // CreateSnapshot creates a snapshot of all discovered local networks and nodes
