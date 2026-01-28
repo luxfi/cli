@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  GOWORK: off
+
 jobs:
   lint:
     name: Lint
@@ -19,6 +22,8 @@ jobs:
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@latest
           staticcheck ./... || true
+        env:
+          CGO_ENABLED: "0"
       - name: Install license check
         run: go install github.com/google/addlicense@v1.0.0
       - name: Check license
@@ -39,6 +44,7 @@ jobs:
       - run: scripts/build.sh
       - run: go test -v -coverprofile=coverage.out $(go list ./... | grep -v /tests/)
         env:
+          CGO_ENABLED: "0"
           CGO_CFLAGS: "-O -D__BLST_PORTABLE__"
       - run: go tool cover -func=coverage.out
 

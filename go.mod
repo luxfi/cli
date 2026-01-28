@@ -40,13 +40,13 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
-	golang.org/x/crypto v0.46.0
-	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93 // indirect
-	golang.org/x/mod v0.31.0
-	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/crypto v0.47.0
+	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
+	golang.org/x/mod v0.32.0
+	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sync v0.19.0
-	golang.org/x/text v0.32.0
+	golang.org/x/text v0.33.0
 	google.golang.org/api v0.256.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v2 v2.4.0
@@ -97,7 +97,7 @@ require (
 	github.com/clipperhouse/displaywidth v0.6.2 // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
-	github.com/cloudflare/circl v1.6.2 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cncf/xds/go v0.0.0-20251022180443-0feb69152e9f // indirect
 	github.com/cockroachdb/errors v1.12.0 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
@@ -112,7 +112,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
-	github.com/dgraph-io/ristretto/v2 v2.3.0 // indirect
+	github.com/dgraph-io/ristretto/v2 v2.4.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.10.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
@@ -133,7 +133,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
-	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/gofrs/flock v0.13.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
@@ -236,7 +236,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/tools v0.41.0 // indirect
 	gonum.org/v1/gonum v0.16.0 // indirect
 	google.golang.org/genproto v0.0.0-20250922171735-9219d122eba9 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect
@@ -283,8 +283,8 @@ require (
 	github.com/luxfi/utxo v0.2.4
 	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	golang.org/x/sys v0.39.0
-	golang.org/x/term v0.38.0
+	golang.org/x/sys v0.40.0
+	golang.org/x/term v0.39.0
 )
 
 // Replace directives removed - using published versions for reproducibility
