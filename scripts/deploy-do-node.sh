@@ -19,9 +19,9 @@ if [ -z "$NETWORK" ] || [ -z "$MNEMONIC" ]; then
 fi
 
 case $NETWORK in
-    mainnet) IP=$MAINNET_IP; NETWORK_ID=1; PORT=9630 ;;
-    testnet) IP=$TESTNET_IP; NETWORK_ID=2; PORT=9640 ;;
-    devnet) IP=$DEVNET_IP; NETWORK_ID=3; PORT=9650 ;;
+    mainnet) IP=$MAINNET_IP; NETWORK_ID=1 ;;
+    testnet) IP=$TESTNET_IP; NETWORK_ID=2 ;;
+    devnet) IP=$DEVNET_IP; NETWORK_ID=3 ;;
     *) echo "Invalid network: $NETWORK"; exit 1 ;;
 esac
 
@@ -34,6 +34,7 @@ scp /Users/z/work/lux/genesis/configs/$NETWORK/cchain.json root@$IP:/data/lux/co
 
 # Create encrypted mnemonic file and setup on remote
 echo "Setting up node with mnemonic..."
+# shellcheck disable=SC2087 # Intentional: local vars ($MNEMONIC, $NETWORK, $NETWORK_ID) must expand client-side
 ssh root@$IP << REMOTE
 set -e
 

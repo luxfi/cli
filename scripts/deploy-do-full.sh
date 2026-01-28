@@ -62,6 +62,7 @@ scp "$GENESIS_DIR/cchain.json" root@$IP:/data/lux/config/ 2>/dev/null || true
 
 # Create systemd service
 echo "Creating systemd service..."
+# shellcheck disable=SC2087 # Intentional: local vars ($NETWORK, $NETWORK_ID) must expand client-side
 ssh root@$IP << REMOTE
 cat > /etc/systemd/system/luxd.service << 'SYSTEMD'
 [Unit]
