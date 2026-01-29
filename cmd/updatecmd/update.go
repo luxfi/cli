@@ -78,7 +78,10 @@ func Update(cmd *cobra.Command, isUserCalled bool, version string) error {
 			this = string(bver)
 		}
 	}
-	thisVFmt := "v" + this
+	thisVFmt := this
+	if !strings.HasPrefix(thisVFmt, "v") {
+		thisVFmt = "v" + thisVFmt
+	}
 
 	// check this version needs update
 	// we skip if compare returns -1 (latest < this)
