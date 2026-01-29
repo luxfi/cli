@@ -287,4 +287,5 @@ require (
 	golang.org/x/term v0.39.0
 )
 
-// Replace directives removed - using published versions for reproducibility
+// Force luxfi/node to v1.22.81 for compatibility with luxfi/node v1.22.81
+replace github.com/luxfi/node => github.com/luxfi/node v1.22.81
