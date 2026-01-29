@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/lpm v1.9.4 // indirect
 	github.com/luxfi/netrunner v1.15.7
 	github.com/luxfi/sdk v1.16.46
-	github.com/luxfi/vm v1.0.30
+	github.com/luxfi/vm v1.0.33
 	github.com/luxfi/warp v1.18.5
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
