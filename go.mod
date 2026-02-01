@@ -15,7 +15,7 @@ require (
 	github.com/luxfi/config v1.1.1
 	github.com/luxfi/crypto v1.17.40
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.8.34
+	github.com/luxfi/evm v0.8.35
 	github.com/luxfi/geth v1.16.75
 	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/keychain v1.0.2
@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/lpm v1.9.4 // indirect
 	github.com/luxfi/netrunner v1.15.7
 	github.com/luxfi/sdk v1.16.46
-	github.com/luxfi/vm v1.0.30
+	github.com/luxfi/vm v1.0.33
 	github.com/luxfi/warp v1.18.5
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -142,7 +142,7 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20251213031049-b05bdaca462f // indirect
-	github.com/google/renameio/v2 v2.0.1 // indirect
+	github.com/google/renameio/v2 v2.0.2 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.7 // indirect
@@ -171,9 +171,9 @@ require (
 	github.com/luxfi/keys v1.0.8 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/math/safe v0.0.1 // indirect
-	github.com/luxfi/metric v1.4.12 // indirect
+	github.com/luxfi/metric v1.5.0 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
-	github.com/luxfi/node v1.23.2 // indirect
+	github.com/luxfi/node v1.23.4 // indirect
 	github.com/luxfi/precompile v0.4.7 // indirect
 	github.com/luxfi/runtime v1.0.1 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
@@ -274,7 +274,7 @@ require (
 	github.com/luxfi/log v1.4.1
 	github.com/luxfi/math v1.2.3
 	github.com/luxfi/net v0.0.2
-	github.com/luxfi/p2p v1.18.9
+	github.com/luxfi/p2p v1.19.2-zap
 	github.com/luxfi/protocol v0.0.3
 	github.com/luxfi/rpc v1.0.0
 	github.com/luxfi/sdk/api v0.0.2
@@ -286,6 +286,3 @@ require (
 	golang.org/x/sys v0.40.0
 	golang.org/x/term v0.39.0
 )
-
-// Force luxfi/node to v1.22.81 for compatibility with luxfi/node v1.22.81
-replace github.com/luxfi/node => github.com/luxfi/node v1.22.81
