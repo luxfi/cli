@@ -3,34 +3,34 @@
 **Version**: 1.22.5
 **Last Updated**: 2026-01-23
 
-## DigitalOcean Production Nodes
+## DigitalOcean Production Nodes (SFO3)
 
-| Network | IP | Network ID | C-Chain ID | Port | Status |
-|---------|-----|------------|------------|------|--------|
-| Mainnet | 164.92.101.46 | 1 | 96369 | 9630 | Running |
-| Testnet | 24.144.93.58 | 2 | 96368 | 9640 | Running |
-| Devnet | 143.110.230.60 | 1337 | 1337 | 9650 | Dev mode |
+| Network | Reserved IP | Network ID | C-Chain ID | Port | Status |
+|---------|-------------|------------|------------|------|--------|
+| Mainnet | 209.38.175.130 | 1337 | 1337 | 9630 | Running (dev) |
+| Testnet | 24.199.70.106 | 1337 | 1337 | 9640 | Running (dev) |
+| Devnet | 24.199.74.128 | 1337 | 1337 | 9650 | Running (dev) |
 
 ### RPC Endpoints
 
 ```bash
 # Mainnet C-Chain RPC
-http://164.92.101.46:9630/ext/bc/C/rpc
+http://209.38.175.130:9630/ext/bc/C/rpc
 
 # Testnet C-Chain RPC
-http://24.144.93.58:9640/ext/bc/C/rpc
+http://24.199.70.106:9640/ext/bc/C/rpc
 
 # Devnet C-Chain RPC
-http://143.110.230.60:9650/ext/bc/C/rpc
+http://24.199.74.128:9650/ext/bc/C/rpc
 ```
 
 ### DNS Records (pending setup)
 
 | Subdomain | Domain | IP |
 |-----------|--------|-----|
-| api, rpc, explorer | lux.network | 164.92.101.46 |
-| @, api, rpc | lux-test.network | 24.144.93.58 |
-| @, api, rpc | lux-dev.network | 143.110.230.60 |
+| api, rpc, explorer | lux.network | 209.38.175.130 |
+| @, api, rpc | lux-test.network | 24.199.70.106 |
+| @, api, rpc | lux-dev.network | 24.199.74.128 |
 
 ## Quick Reference
 
