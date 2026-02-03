@@ -3,34 +3,48 @@
 **Version**: 1.22.5
 **Last Updated**: 2026-01-23
 
-## DigitalOcean Production Nodes (SFO3)
+## Kubernetes Production Networks (DOKS SFO3)
 
-| Network | Reserved IP | Network ID | C-Chain ID | Port | Status |
-|---------|-------------|------------|------------|------|--------|
-| Mainnet | 209.38.175.130 | 1337 | 1337 | 9630 | Running (dev) |
-| Testnet | 24.199.70.106 | 1337 | 1337 | 9640 | Running (dev) |
-| Devnet | 24.199.74.128 | 1337 | 1337 | 9650 | Running (dev) |
+| Network | LoadBalancer IP | Network ID | C-Chain ID | Port | Replicas |
+|---------|-----------------|------------|------------|------|----------|
+| Mainnet | 137.184.246.34 | 1 | 96369 | 9630 | 5 |
+| Testnet | 134.199.185.177 | 2 | 96368 | 9640 | 5 |
+| Devnet | 134.199.185.177 | 3 | 96369 | 9650 | 5 |
 
 ### RPC Endpoints
 
 ```bash
 # Mainnet C-Chain RPC
-http://209.38.175.130:9630/ext/bc/C/rpc
+http://137.184.246.34:9630/ext/bc/C/rpc
 
 # Testnet C-Chain RPC
-http://24.199.70.106:9640/ext/bc/C/rpc
+http://134.199.185.177:9640/ext/bc/C/rpc
 
 # Devnet C-Chain RPC
-http://24.199.74.128:9650/ext/bc/C/rpc
+http://134.199.185.177:9650/ext/bc/C/rpc
+```
+
+### K8s Deployment Commands
+
+```bash
+# Deploy to Kubernetes (uses kubeconfig context)
+lux network start --mainnet --k8s do-sfo3-hanzo-k8s
+lux network start --testnet --k8s do-sfo3-hanzo-k8s
+lux network start --devnet --k8s do-sfo3-hanzo-k8s
+
+# Check deployment status
+kubectl get pods -n lux-mainnet
+kubectl get pods -n lux-testnet
+kubectl get pods -n lux-devnet
 ```
 
 ### DNS Records (pending setup)
 
 | Subdomain | Domain | IP |
 |-----------|--------|-----|
-| api, rpc, explorer | lux.network | 209.38.175.130 |
-| @, api, rpc | lux-test.network | 24.199.70.106 |
-| @, api, rpc | lux-dev.network | 24.199.74.128 |
+| api, rpc, explorer | lux.network | 137.184.246.34 |
+| @, api, rpc | lux-test.network | 134.199.185.177 |
+| @, api, rpc | lux-dev.network | 134.199.185.177 |
 
 ## Quick Reference
 
@@ -97,7 +111,7 @@ The CLI is organized into these main command groups:
 |------|------------|------------|-----------|------------|--------|
 | `--mainnet` | 1 | 96369 | 9630 | 5 | ✅ Production |
 | `--testnet` | 2 | 96368 | 9640 | 5 | ✅ Testing |
-| `--devnet` | 3 | - | 9650 | 5 | ⚠️ Missing genesis |
+| `--devnet` | 3 | 96369 | 9650 | 5 | ✅ Development |
 | `--dev` | 1337 | 1337 | 8545 | 1 | ✅ Rapid dev |
 
 ```bash
