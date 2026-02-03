@@ -41,6 +41,9 @@ var (
 	dbEngine      string
 	archiveDir    string
 	archiveShared bool
+	// K8s deployment flags
+	k8sCluster string // K8s cluster context name (enables K8s deployment)
+	k8sImage   string // Docker image for K8s deployment
 )
 
 // StartFlags contains configuration for starting a network
@@ -301,6 +304,10 @@ TYPICAL WORKFLOW:
 	// Add state loading flags
 	AddStateFlags(cmd)
 
+	// K8s deployment flags
+	cmd.Flags().StringVar(&k8sCluster, "k8s", "", "deploy to Kubernetes cluster (use kubeconfig context name)")
+	cmd.Flags().StringVar(&k8sImage, "k8s-image", "ghcr.io/luxfi/node:latest", "Docker image for K8s deployment")
+
 	return cmd
 }
 
@@ -322,6 +329,23 @@ func StartNetwork(*cobra.Command, []string) error {
 	}
 	if flagCount > 1 {
 		return fmt.Errorf("cannot use multiple network flags together (--mainnet, --testnet, --devnet, --dev)")
+	}
+
+	// K8s deployment mode
+	if k8sCluster != "" {
+		if devMode {
+			return fmt.Errorf("--dev mode is not supported with --k8s, use --devnet instead")
+		}
+		if mainnet {
+			return StartK8sMainnet()
+		}
+		if testnet {
+			return StartK8sTestnet()
+		}
+		if devnet {
+			return StartK8sDevnet()
+		}
+		return fmt.Errorf("please specify --mainnet, --testnet, or --devnet with --k8s")
 	}
 
 	// Dev mode - single node or multi-node development network
