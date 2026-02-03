@@ -282,6 +282,7 @@ func createStatefulSet(ctx context.Context, client *kubernetes.Clientset, cfg K8
 								"--network-id=%d "+
 								"--http-host=0.0.0.0 "+
 								"--http-port=%d "+
+								"--http-allowed-hosts=* "+
 								"--staking-port=%d "+
 								"--data-dir=/data "+
 								"--genesis-file=/genesis/genesis.json "+
