@@ -244,6 +244,9 @@ require (
 	google.golang.org/grpc v1.78.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
+	k8s.io/api v0.35.0 // indirect
+	k8s.io/apimachinery v0.35.0 // indirect
+	k8s.io/client-go v0.35.0 // indirect
 )
 
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
