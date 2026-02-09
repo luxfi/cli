@@ -190,6 +190,7 @@ require (
 	github.com/luxfi/upgrade v1.0.0 // indirect
 	github.com/luxfi/validators v1.0.0 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
+	github.com/luxfi/zapdb/v4 v4.9.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
@@ -289,7 +290,7 @@ require (
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.4.4
 	github.com/luxfi/coreth v1.21.48
-	github.com/luxfi/database v1.17.40
+	github.com/luxfi/database v1.17.42
 	github.com/luxfi/filesystem v0.0.1
 	github.com/luxfi/formatting v1.0.1
 	github.com/luxfi/genesis v1.6.1
