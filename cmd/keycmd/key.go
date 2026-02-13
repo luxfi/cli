@@ -76,6 +76,7 @@ Examples:
 	cmd.AddCommand(newGenerateCmd())
 	cmd.AddCommand(newDeriveCmd())
 	cmd.AddCommand(newGenesisCmd())
+	cmd.AddCommand(newExportSignerCmd())
 
 	// Session management
 	cmd.AddCommand(newLockCmd())
