@@ -53,3 +53,4 @@ GROK.md
 !pkg/contract/contracts/bin/
 !pkg/contract/contracts/bin/Token.bin
 cli
+bin/
