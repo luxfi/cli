@@ -350,14 +350,14 @@ Connect and use Ledger hardware wallets.
 lux key ledger list
 
 # Import from Ledger
-lux key import my-ledger --ledger --path="m/44'/9000'/0'/0/0"
+lux key import my-ledger --ledger --path="m/44'/60'/0'/0/0"
 
 # Sign with Ledger
 lux key sign my-ledger --message="Sign this" --ledger
 ```
 
 **Derivation Paths:**
-- Lux default: `m/44'/9000'/0'/0/0`
+- Lux default: `m/44'/60'/0'/0/0`
 - Ethereum compatible: `m/44'/60'/0'/0/0`
 - Custom paths supported
 
@@ -456,13 +456,13 @@ Derive multiple keys from a seed.
 # Derive child keys
 lux key derive \
   --master=master-key \
-  --path="m/44'/9000'/0'/0/0" \
+  --path="m/44'/60'/0'/0/0" \
   --count=10
 
 # HD wallet creation
 lux key hd create my-wallet \
   --mnemonic \
-  --derivation="m/44'/9000'/0'" \
+  --derivation="m/44'/60'/0'" \
   --accounts=5
 ```
 
