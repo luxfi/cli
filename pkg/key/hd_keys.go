@@ -7,7 +7,6 @@ package key
 
 import (
 	"context"
-	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -190,24 +189,13 @@ func deriveECAddress(publicKey []byte) string {
 }
 
 // deriveBLSPublicKey derives BLS public key and proof of possession
-func deriveBLSPublicKey(privateKey []byte) ([]byte, []byte, error) {
-	// Use the existing BLS infrastructure
-	signer, err := localsigner.FromBytes(privateKey)
+func deriveBLSPublicKey(seed []byte) ([]byte, []byte, error) {
+	// Use FromSeed to properly derive a valid BLS key from HKDF seed material.
+	// FromSeed uses BLS KeyGen internally, which maps any 32+ byte seed
+	// to a valid scalar in the BLS field.
+	signer, err := localsigner.FromSeed(seed)
 	if err != nil {
-		// If the key format doesn't work, try creating new with seed
-		// This ensures compatibility with BLS library requirements
-		h := hmac.New(sha256.New, privateKey)
-		h.Write([]byte("bls-key-expand"))
-		expandedKey := h.Sum(nil)
-
-		signer, err = localsigner.FromBytes(expandedKey)
-		if err != nil {
-			// Fall back to generating new key
-			signer, err = localsigner.New()
-			if err != nil {
-				return nil, nil, err
-			}
-		}
+		return nil, nil, fmt.Errorf("failed to derive BLS key from seed: %w", err)
 	}
 
 	pk := signer.PublicKey()
@@ -218,6 +206,16 @@ func deriveBLSPublicKey(privateKey []byte) ([]byte, []byte, error) {
 	}
 	sigBytes := bls.SignatureToBytes(sig)
 	return pkBytes, sigBytes, nil
+}
+
+// DeriveBLSSignerBytes derives a BLS signer from HKDF seed and returns the
+// serialized private key bytes suitable for luxd's signer.key file.
+func DeriveBLSSignerBytes(seed []byte) ([]byte, error) {
+	signer, err := localsigner.FromSeed(seed)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive BLS signer from seed: %w", err)
+	}
+	return signer.ToBytes(), nil
 }
 
 // deriveRingtailPublicKey derives secp256k1 public key (Ringtail placeholder)

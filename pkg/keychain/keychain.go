@@ -181,7 +181,7 @@ func GetKeychain(
 	// This allows automated deployment without interactive key selection
 	if mnemonic := key.GetMnemonicFromEnv(); mnemonic != "" && !useLedger && !useLocalKey && keyName == "" {
 		ux.Logger.PrintToUser("Using key from LUX_MNEMONIC environment variable (BIP-44 derivation)")
-		// Use BIP-44 standard derivation path: m/44'/9000'/0'/0/0
+		// Use BIP-44 standard derivation path: m/44'/60'/0'/0/0
 		sf, err := key.NewSoftFromMnemonic(network.ID(), mnemonic)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create soft key from mnemonic: %w", err)
