@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	follow   bool
+	follow    bool
 	tailLines int64
 )
 

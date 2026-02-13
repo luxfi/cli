@@ -18,12 +18,12 @@ import (
 )
 
 var (
-	upgradeImage     string
-	upgradeEvmVer    string
-	stabilityWait    time.Duration
-	healthTimeout    time.Duration
-	dryRun           bool
-	forceUpgrade     bool
+	upgradeImage  string
+	upgradeEvmVer string
+	stabilityWait time.Duration
+	healthTimeout time.Duration
+	dryRun        bool
+	forceUpgrade  bool
 )
 
 func newUpgradeCmd() *cobra.Command {
