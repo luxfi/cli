@@ -619,6 +619,9 @@ func RunSSHRenderLuxNodeConfig(
 			return err
 		}
 		// ignore errors if bootstrap configuration is not present - it's fine
+		bootstrapNodes, _ := utils.StringValue(remoteLuxdConf, "bootstrap-nodes")
+		luxdConf.BootstrapNodes = bootstrapNodes
+		// Legacy fallback
 		bootstrapIDs, _ := utils.StringValue(remoteLuxdConf, "bootstrap-ids")
 		bootstrapIPs, _ := utils.StringValue(remoteLuxdConf, "bootstrap-ips")
 		luxdConf.BootstrapIDs = bootstrapIDs
