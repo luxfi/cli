@@ -5,11 +5,15 @@
 	"proposervm-use-current-height-bool": {{.ProposerVMUseCurrentHeight}},
 	"network-id": "{{if .NetworkID}}{{.NetworkID}}{{else}}testnet{{end}}",
 	"partial-sync-primary-network": "{{ .PartialSync }}",
+{{- if .BootstrapNodes }}
+	"bootstrap-nodes": "{{ .BootstrapNodes }}",
+{{- else }}
 {{- if .BootstrapIDs }}
 	"bootstrap-ids": "{{ .BootstrapIDs }}",
 {{- end }}
 {{- if .BootstrapIPs }}
 	"bootstrap-ips": "{{ .BootstrapIPs }}",
+{{- end }}
 {{- end }}
 {{- if .GenesisPath }}
 	"genesis-file": "{{ .GenesisPath }}",

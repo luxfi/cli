@@ -16,8 +16,9 @@ import (
 
 // LuxdConfigOptions contains configuration options for Luxd node.
 type LuxdConfigOptions struct {
-	BootstrapIPs      []string
-	BootstrapIDs      []string
+	BootstrapNodes    []string // Endpoint-only bootstrap (NodeID discovered from TLS cert)
+	BootstrapIPs      []string // Deprecated: use BootstrapNodes
+	BootstrapIDs      []string // Deprecated: use BootstrapNodes
 	PartialSync       bool
 	GenesisPath       string
 	UpgradePath       string
@@ -34,8 +35,12 @@ func prepareLuxgoConfig(
 		luxdConf.HTTPHost = "0.0.0.0"
 	}
 	luxdConf.PartialSync = luxdConfig.PartialSync
-	luxdConf.BootstrapIPs = strings.Join(luxdConfig.BootstrapIPs, ",")
-	luxdConf.BootstrapIDs = strings.Join(luxdConfig.BootstrapIDs, ",")
+	if len(luxdConfig.BootstrapNodes) > 0 {
+		luxdConf.BootstrapNodes = strings.Join(luxdConfig.BootstrapNodes, ",")
+	} else {
+		luxdConf.BootstrapIPs = strings.Join(luxdConfig.BootstrapIPs, ",")
+		luxdConf.BootstrapIDs = strings.Join(luxdConfig.BootstrapIDs, ",")
+	}
 	if luxdConfig.GenesisPath != "" {
 		luxdConf.GenesisPath = filepath.Join(constants.DockerNodeConfigPath, constants.GenesisFileName)
 	}

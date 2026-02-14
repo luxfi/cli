@@ -25,6 +25,7 @@ type LuxConfigInputs struct {
 	Aliases                    []string
 	BlockChainID               string
 	TrackChains                string
+	BootstrapNodes             string
 	BootstrapIDs               string
 	BootstrapIPs               string
 	PartialSync                bool
