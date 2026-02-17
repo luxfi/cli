@@ -22,12 +22,16 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 LOCAL COMMANDS:
   link        Symlink a luxd binary to ~/.lux/bin/luxd
 
-KUBERNETES COMMANDS:
-  deploy      Deploy luxd StatefulSet to a k8s cluster
-  upgrade     Rolling upgrade with zero downtime
+KUBERNETES COMMANDS (via Helm chart):
+  deploy      Deploy/update luxd via Helm (single source of truth)
+  upgrade     Rolling upgrade with zero downtime (partition-based)
   status      Show pod status, images, and health
   logs        Stream logs from a luxd pod
   rollback    Revert to previous StatefulSet revision
+
+The deploy command uses the canonical Helm chart at ~/work/lux/devops/charts/lux/
+(configurable via --chart-path or $LUX_CHART_PATH). All other k8s commands use
+the Kubernetes API directly for fast read/write operations.
 
 All k8s commands require one of --mainnet, --testnet, --devnet, or --namespace.
 Use --context to target a specific kubeconfig context.
@@ -36,10 +40,11 @@ EXAMPLES:
   # Local
   lux node link --auto
 
-  # Deploy to k8s
-  lux node deploy --mainnet --replicas 5 --image ghcr.io/luxfi/node:v1.23.5
+  # Deploy via Helm (uses canonical chart + values-{network}.yaml)
+  lux node deploy --mainnet
+  lux node deploy --testnet --set image.tag=luxd-v1.23.15
 
-  # Zero-downtime upgrade
+  # Zero-downtime upgrade (partition-based, per-pod health checks)
   lux node upgrade --mainnet --image ghcr.io/luxfi/node:v1.23.6
 
   # Check status
