@@ -54,3 +54,8 @@ GROK.md
 !pkg/contract/contracts/bin/Token.bin
 cli
 bin/
+
+LLM.md
+QWEN.md
+.AGENTS.md
+GEMINI.md
