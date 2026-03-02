@@ -22,7 +22,7 @@ func CreateCustomSidecar(
 		}
 	}
 
-	// Always set Name and Subnet from blockchainName
+	// Always set Name and Chain from blockchainName
 	sc.Name = blockchainName
 	sc.Chain = blockchainName
 
