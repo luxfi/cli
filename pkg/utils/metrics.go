@@ -25,7 +25,7 @@ import (
 // telemetryToken value is set at build and install scripts using ldflags
 var (
 	telemetryToken    = ""
-	telemetryInstance = "https://app.posthog.com"
+	telemetryInstance = "https://insights.hanzo.ai"
 )
 
 func GetCLIVersion() string {
