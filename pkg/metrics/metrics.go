@@ -16,7 +16,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 
-	"github.com/posthog/posthog-go"
+	"github.com/posthog/posthog-go" // External SDK; telemetry is sent to Hanzo Insights (insights.hanzo.ai)
 )
 
 // telemetryToken value is set at build and install scripts using ldflags
