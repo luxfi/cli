@@ -4,14 +4,16 @@
 package chaincmd
 
 import (
+	"bytes"
 	"context"
+	"crypto/tls"
+	"net"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
@@ -37,7 +39,7 @@ const (
 	// LuxEVMName is the canonical name for the Lux EVM
 	LuxEVMName = "Lux EVM"
 	// RemoteProbeTimeout is the timeout for probing a remote network endpoint
-	RemoteProbeTimeout = 10 * time.Second
+	RemoteProbeTimeout = 30 * time.Second
 )
 
 var (
@@ -316,20 +318,32 @@ func getRemoteEndpoint(network models.Network) string {
 }
 
 // probeRemoteEndpoint checks if a remote network endpoint is alive by hitting /ext/info.
-// Returns true if the endpoint responds with HTTP 200.
+// Returns true if the endpoint responds to a JSON-RPC request.
 func probeRemoteEndpoint(endpoint string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), RemoteProbeTimeout)
 	defer cancel()
 
 	url := endpoint + "/ext/info"
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+	body := []byte(`{"jsonrpc":"2.0","method":"info.getNodeVersion","params":{},"id":1}`)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return false
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	// Use a client with short per-IP dial timeout and skip TLS verify.
+	// DNS may return multiple IPs where some are unreachable.
+	dialer := &net.Dialer{Timeout: 5 * time.Second}
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+			DialContext:        dialer.DialContext,
+			ForceAttemptHTTP2:  true,
+		},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
+		ux.Logger.PrintToUser("  probe error: %v", err)
 		return false
 	}
 	defer resp.Body.Close()
@@ -377,26 +391,17 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	// 2. Local state exists but has a remote API endpoint (e.g., https://...), OR
 	// 3. Local state claims running but the state file is stale (gRPC server dead)
 	if isRemoteCapableNetwork(network) {
-		useRemote := false
-		var remoteEndpoint string
-
-		if networkState == nil || !networkState.Running {
-			// No local state or not running -- try remote
-			useRemote = true
-			remoteEndpoint = getRemoteEndpoint(network)
-		} else if networkState.APIEndpoint != "" && strings.HasPrefix(networkState.APIEndpoint, "https://") {
-			// State file points to a remote endpoint already
-			useRemote = true
-			remoteEndpoint = networkState.APIEndpoint
-		}
-
-		if useRemote && remoteEndpoint != "" {
+		// For devnet/testnet/mainnet, ALWAYS try the remote endpoint first.
+		// These are real networks at api.lux-dev.network, api.lux-test.network,
+		// api.lux.network — not local. Local state is irrelevant.
+		remoteEndpoint := getRemoteEndpoint(network)
+		if remoteEndpoint != "" {
 			ux.Logger.PrintToUser("Probing remote %s endpoint: %s", targetType, remoteEndpoint)
 			if probeRemoteEndpoint(remoteEndpoint) {
 				ux.Logger.PrintToUser("Remote %s is alive at %s", targetType, remoteEndpoint)
 				return deployToRemoteNetwork(chainName, chainGenesis, sc, network, remoteEndpoint)
 			}
-			ux.Logger.PrintToUser("Remote endpoint %s is not reachable", remoteEndpoint)
+			ux.Logger.PrintToUser("Remote endpoint %s is not reachable, falling back to local network", remoteEndpoint)
 		}
 	}
 

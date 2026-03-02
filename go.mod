@@ -22,8 +22,8 @@ require (
 	github.com/luxfi/keychain v1.0.2
 	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/lpm v1.9.4 // indirect
-	github.com/luxfi/netrunner v1.15.7
-	github.com/luxfi/sdk v1.16.46
+	github.com/luxfi/netrunner v1.15.11
+	github.com/luxfi/sdk v1.16.47
 	github.com/luxfi/vm v1.0.39
 	github.com/luxfi/warp v1.18.5
 	github.com/manifoldco/promptui v0.9.0
@@ -297,7 +297,7 @@ require (
 	github.com/luxfi/net v0.0.4
 	github.com/luxfi/p2p v1.19.2-zap
 	github.com/luxfi/protocol v0.0.3
-	github.com/luxfi/rpc v1.0.0
+	github.com/luxfi/rpc v1.0.1
 	github.com/luxfi/sdk/api v0.0.2
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/utils v1.1.4
