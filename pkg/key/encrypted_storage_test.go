@@ -322,7 +322,7 @@ func TestErrorConstants(t *testing.T) {
 
 func TestBackendConstants(t *testing.T) {
 	t.Run("EnvKeyPassword constant", func(t *testing.T) {
-		assert.Equal(t, "LUX_KEY_PASSWORD", EnvKeyPassword)
+		assert.Equal(t, "KEY_PASSWORD", EnvKeyPassword)
 	})
 
 	t.Run("Argon2 parameters are reasonable", func(t *testing.T) {

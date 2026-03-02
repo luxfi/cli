@@ -37,7 +37,7 @@ Examples:
   lux key create validator1                           # Generate new mnemonic
   lux key create validator1 --mnemonic                # Prompt for existing mnemonic
   lux key create validator1 --phrase "word1 word2..." # Use provided mnemonic
-  lux key create mainnet-key-01 --phrase "$LUX_MNEMONIC" --account 1  # Derive account 1`,
+  lux key create mainnet-key-01 --phrase "$MNEMONIC" --account 1  # Derive account 1`,
 		Args: cobra.ExactArgs(1),
 		RunE: runCreate,
 	}

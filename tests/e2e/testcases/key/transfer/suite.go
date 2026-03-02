@@ -15,10 +15,10 @@ import (
 )
 
 const (
-	keyName        = "e2eKey"
-	ewoqKeyName    = "ewoq"
-	chainName      = "e2eChainTest"
-	ewoqEVMAddress = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
+	keyName            = "e2eKey"
+	treasuryKeyName    = "treasury"
+	chainName          = "e2eChainTest"
+	treasuryEVMAddress = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
 )
 
 var _ = ginkgo.Describe("[Key] transfer", func() {
@@ -42,14 +42,14 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			utils.DeleteCustomBinary(chainName)
 		})
 
-		ginkgo.It("can transfer from P-chain to P-chain with ewoq key and local key", func() {
+		ginkgo.It("can transfer from P-chain to P-chain with treasury key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
 			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--p-chain-sender",
@@ -62,7 +62,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, treasuryKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err = commands.KeyTransferSend(commandArguments)
@@ -75,21 +75,21 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, treasuryKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(feeNLux + amountNLux).
-				Should(gomega.Equal(ewoqKeyBalance1 - ewoqKeyBalance2))
+				Should(gomega.Equal(treasuryKeyBalance1 - treasuryKeyBalance2))
 			gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(amountNLux))
 		})
 
-		ginkgo.It("can transfer from P-chain to C-chain with ewoq key and local key", func() {
+		ginkgo.It("can transfer from P-chain to C-chain with treasury key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
 			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--p-chain-sender",
@@ -102,7 +102,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, treasuryKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err = commands.KeyTransferSend(commandArguments)
@@ -118,21 +118,21 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, treasuryKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(pChainFee + amountNLux).
-				Should(gomega.Equal(ewoqKeyBalance1 - ewoqKeyBalance2))
+				Should(gomega.Equal(treasuryKeyBalance1 - treasuryKeyBalance2))
 			gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(amountNLux - cChainFee))
 		})
 
-		ginkgo.It("can transfer from C-chain to P-chain with ewoq key and local key", func() {
+		ginkgo.It("can transfer from C-chain to P-chain with treasury key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
 			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--c-chain-sender",
@@ -144,9 +144,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			// send/receive without recovery
 			output, err := commands.ListKeys("local", true, "", "")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "C-Chain")
+			_, treasuryKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err = commands.KeyTransferSend(commandArguments)
@@ -160,23 +160,23 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 
 			output, err = commands.ListKeys("local", true, "", "")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "C-Chain")
+			_, treasuryKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(cChainFee + amountNLux).
-				Should(gomega.Equal(ewoqKeyBalance1 - ewoqKeyBalance2))
+				Should(gomega.Equal(treasuryKeyBalance1 - treasuryKeyBalance2))
 			gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(amountNLux - pChainFee))
 		})
 
-		ginkgo.It("can transfer from P-chain to X-chain with ewoq key", func() {
+		ginkgo.It("can transfer from P-chain to X-chain with treasury key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
 			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--p-chain-sender",
@@ -188,9 +188,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			// send/receive without recovery
 			output, err := commands.ListKeys("local", true, "", "")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "X-Chain")
+			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "X-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, treasuryKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err = commands.KeyTransferSend(commandArguments)
@@ -204,23 +204,23 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 
 			output, err = commands.ListKeys("local", true, "", "")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "X-Chain")
+			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "X-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "P-Chain")
+			_, treasuryKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "P-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(pChainFee + amountNLux).
-				Should(gomega.Equal(ewoqKeyBalance1 - ewoqKeyBalance2))
+				Should(gomega.Equal(treasuryKeyBalance1 - treasuryKeyBalance2))
 			gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(amountNLux - xChainFee))
 		})
 
-		ginkgo.It("can transfer from C-chain to C-chain with ewoq key and local key", func() {
+		ginkgo.It("can transfer from C-chain to C-chain with treasury key and local key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
 			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--c-chain-sender",
@@ -233,7 +233,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "C-Chain")
+			_, treasuryKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err = commands.KeyTransferSend(commandArguments)
@@ -246,21 +246,21 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "C-Chain")
+			_, treasuryKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(feeNLux + amountNLux).
-				Should(gomega.Equal(ewoqKeyBalance1 - ewoqKeyBalance2))
+				Should(gomega.Equal(treasuryKeyBalance1 - treasuryKeyBalance2))
 			gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(amountNLux))
 		})
 
-		ginkgo.It("can transfer from Chain to Chain with ewoq key", func() {
+		ginkgo.It("can transfer from Chain to Chain with treasury key", func() {
 			amount := 0.2
 			amountStr := fmt.Sprintf("%.2f", amount)
 			amountNLux := uint64(amount * float64(constants.Lux))
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--sender-blockchain",
@@ -278,7 +278,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, chainName)
+			_, treasuryKeyBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			output, err = commands.KeyTransferSend(commandArguments)
@@ -291,19 +291,19 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, chainName)
+			_, treasuryKeyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(feeNLux + amountNLux).
-				Should(gomega.Equal(ewoqKeyBalance1 - ewoqKeyBalance2))
+				Should(gomega.Equal(treasuryKeyBalance1 - treasuryKeyBalance2))
 			gomega.Expect(keyBalance2 - keyBalance1).Should(gomega.Equal(amountNLux))
 		})
 
-		ginkgo.It("can transfer from C-Chain to Chain with ewoq key and local key", func() {
+		ginkgo.It("can transfer from C-Chain to Chain with treasury key and local key", func() {
 			commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, true)
 			commands.DeployChainLocallyNonSOV(chainName)
-			_, err := commands.SendWarpMessage([]string{"cchain", chainName, "hello world"}, utils.TestFlags{"key": ewoqKeyName})
+			_, err := commands.SendWarpMessage([]string{"cchain", chainName, "hello world"}, utils.TestFlags{"key": treasuryKeyName})
 			gomega.Expect(err).Should(gomega.BeNil())
-			output := commands.DeployERC20Contract("--local", ewoqKeyName, "TEST", "100000", ewoqEVMAddress, "--c-chain")
+			output := commands.DeployERC20Contract("--local", treasuryKeyName, "TEST", "100000", treasuryEVMAddress, "--c-chain")
 			erc20Address, err := utils.GetERC20TokenAddress(output)
 			gomega.Expect(err).Should(gomega.BeNil())
 			icctArgs := []string{
@@ -327,7 +327,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyERCBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyERCBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "C-Chain")
+			_, treasuryKeyERCBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			amount := uint64(500)
@@ -335,7 +335,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			transferArgs := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--c-chain-sender",
@@ -358,18 +358,18 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyERCBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, "C-Chain")
+			_, treasuryKeyERCBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(amount).
-				Should(gomega.Equal(ewoqKeyERCBalance1 - ewoqKeyERCBalance2))
+				Should(gomega.Equal(treasuryKeyERCBalance1 - treasuryKeyERCBalance2))
 			gomega.Expect(keyBalance2 - keyERCBalance1).Should(gomega.Equal(amount))
 		})
 
-		ginkgo.It("can transfer from Chain to C-chain with ewoq key and local key", func() {
+		ginkgo.It("can transfer from Chain to C-chain with treasury key and local key", func() {
 			commands.CreateEVMConfigNonSOV(chainName, utils.EVMGenesisPath, true)
 			commands.DeployChainLocallyNonSOV(chainName)
-			// commands.SendWarpMessage("--local", "cchain", chainName, "hello world", ewoqKeyName)
-			output := commands.DeployERC20Contract("--local", ewoqKeyName, "TEST", "100000", ewoqEVMAddress, chainName)
+			// commands.SendWarpMessage("--local", "cchain", chainName, "hello world", treasuryKeyName)
+			output := commands.DeployERC20Contract("--local", treasuryKeyName, "TEST", "100000", treasuryEVMAddress, chainName)
 			erc20Address, err := utils.GetERC20TokenAddress(output)
 			gomega.Expect(err).Should(gomega.BeNil())
 			icctArgs := []string{
@@ -393,7 +393,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyERCBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyERCBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, chainName)
+			_, treasuryKeyERCBalance1, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			amount := uint64(500)
@@ -401,7 +401,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			transferArgs := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
 				keyName,
 				"--c-chain-receiver",
@@ -424,10 +424,10 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			gomega.Expect(err).Should(gomega.BeNil())
 			_, keyBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, keyName, "C-Chain")
 			gomega.Expect(err).Should(gomega.BeNil())
-			_, ewoqKeyERCBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, ewoqKeyName, chainName)
+			_, treasuryKeyERCBalance2, err := utils.ParseAddrBalanceFromKeyListOutput(output, treasuryKeyName, chainName)
 			gomega.Expect(err).Should(gomega.BeNil())
 			gomega.Expect(amount).
-				Should(gomega.Equal(ewoqKeyERCBalance1 - ewoqKeyERCBalance2))
+				Should(gomega.Equal(treasuryKeyERCBalance1 - treasuryKeyERCBalance2))
 			gomega.Expect(keyBalance2 - keyERCBalance1).Should(gomega.Equal(amount))
 		})
 	})
@@ -452,7 +452,7 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 		})
 
 		ginkgo.Context("Within intraEvmSend", func() {
-			ginkgo.It("should fail when keyName (not ewoq) is provided but no key is found", func() {
+			ginkgo.It("should fail when keyName (not treasury) is provided but no key is found", func() {
 				keyName := "nokey"
 				commandArguments := []string{
 					"--local",
@@ -470,12 +470,12 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 					Should(gomega.ContainSubstring(fmt.Sprintf(".lux-cli/e2e/key/%s.pk: no such file or directory", keyName)))
 			})
 
-			ginkgo.It("should fail when destinationKeyName (not ewoq) is provided but no key is found", func() {
+			ginkgo.It("should fail when destinationKeyName (not treasury) is provided but no key is found", func() {
 				keyName := "nokey"
 				commandArguments := []string{
 					"--local",
 					"--key",
-					ewoqKeyName,
+					treasuryKeyName,
 					"--destination-key",
 					keyName,
 					"--amount",
@@ -495,9 +495,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 				commandArguments := []string{
 					"--local",
 					"--key",
-					ewoqKeyName,
+					treasuryKeyName,
 					"--destination-key",
-					ewoqKeyName,
+					treasuryKeyName,
 					"--amount",
 					"-0.1",
 					"--c-chain-sender",
@@ -515,9 +515,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 				commandArguments := []string{
 					"--local",
 					"--key",
-					ewoqKeyName,
+					treasuryKeyName,
 					"--destination-key",
-					ewoqKeyName,
+					treasuryKeyName,
 					"--amount",
 					"0.1",
 					"--sender-blockchain",
@@ -537,9 +537,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--x-chain-sender",
@@ -556,9 +556,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--x-chain-sender",
@@ -575,9 +575,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--x-chain-sender",
@@ -594,9 +594,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--x-chain-sender",
@@ -614,9 +614,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--x-chain-receiver",
@@ -634,9 +634,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--p-chain-receiver",
@@ -654,9 +654,9 @@ var _ = ginkgo.Describe("[Key] transfer", func() {
 			commandArguments := []string{
 				"--local",
 				"--key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--destination-key",
-				ewoqKeyName,
+				treasuryKeyName,
 				"--amount",
 				"0.1",
 				"--p-chain-sender",

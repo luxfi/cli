@@ -316,7 +316,7 @@ func promptNativeMintParams(
 			"Add an address to amount pair",
 			"Address-Amount",
 			"Hex-formatted address and it's initial amount value, "+
-				"for example: 0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC (address) and 1000000000000000000 (value)",
+				"for example: 0x9011E888251AB053B7bD1cdB598Db4f9DEd94714 (address) and 1000000000000000000 (value)",
 		)
 		if err != nil {
 			return false, err

@@ -35,8 +35,8 @@ Supported networks:
   - lux-testnet (Lux Testnet, chain ID 96368)
 
 Wallet access via:
-  - LUX_MNEMONIC environment variable (BIP39 mnemonic)
-  - LUX_PRIVATE_KEY environment variable (hex private key)
+  - MNEMONIC environment variable (BIP39 mnemonic)
+  - PRIVATE_KEY environment variable (hex private key)
   - --private-key flag (hex private key)
 
 Example usage:

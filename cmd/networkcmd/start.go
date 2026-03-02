@@ -207,32 +207,32 @@ func newStartCmd() *cobra.Command {
 
 NETWORK TYPES (choose one, required):
 
-  --mainnet, -m    Production mainnet with 5 validators (port 9630)
+  --mainnet, -m    Production mainnet with 3 validators (port 9630)
                    - Network ID: 1
                    - HTTP API: ports 9630-9638
                    - Use for mainnet testing and development
 
-  --testnet, -t    Test network with 5 validators (port 9640)
+  --testnet, -t    Test network with 3 validators (port 9640)
                    - Network ID: 2
                    - HTTP API: ports 9640-9648
                    - Use for testnet deployment testing
 
-  --devnet, -d     Development network with 5 validators (port 9650)
+  --devnet, -d     Development network with 3 validators (port 9650)
                    - Network ID: 3
                    - HTTP API: ports 9650-9658
                    - Use for rapid local development
 
   --dev            Dev mode (port 8545) - Anvil/Hardhat compatible
                    - Single-node: K=1 consensus, instant finality
-                   - Multi-node: --dev --num-validators=5 (turbo profile)
+                   - Multi-node: --dev --num-validators=3 (turbo profile)
                    - Primary chains: C/P/X (Contract/Platform/Exchange)
                    - L2 VMs: A(AI) B(Bridge) D(DEX) G(Graph) I(Identity)
                              K(Key) O(Oracle) Q(Quantum) R(Relay) T(Threshold) Z(ZK)
-                   - Set LUX_MNEMONIC to auto-fund derived accounts
+                   - Set MNEMONIC to auto-fund derived accounts
 
 OPTIONS:
 
-  --num-validators    Number of validator nodes (default: 5)
+  --num-validators    Number of validator nodes (default: 3)
                       With --dev: 1 = K=1 single-node, >1 = turbo multi-node
   --node-path         Path to custom luxd binary
   --node-version      luxd version to use (default: latest)
@@ -242,12 +242,12 @@ OPTIONS:
 
 EXAMPLES:
 
-  # Start mainnet (5 validators, port 9630)
+  # Start mainnet (3 validators, port 9630)
   lux network start --mainnet
   lux network start -m
 
   # Start testnet with custom validator count
-  lux network start --testnet --num-validators 3
+  lux network start --testnet --num-validators 2
 
   # Start devnet (most common for development)
   lux network start --devnet
@@ -255,12 +255,12 @@ EXAMPLES:
   # Start single-node dev mode for rapid testing (K=1)
   lux network start --dev
 
-  # Start 5-validator dev mode with turbo consensus
-  lux network start --dev --num-validators=5
+  # Start 3-validator dev mode with turbo consensus
+  lux network start --dev --num-validators=3
 
-  # 5-node dev with mnemonic-funded accounts
-  export LUX_MNEMONIC="light light light light light light light light light light light energy"
-  lux network start --dev --num-validators=5
+  # 3-node dev with mnemonic-funded accounts
+  export LIGHT_MNEMONIC="light light light light light light light light light light light energy"
+  lux network start --dev --num-validators=3
 
   # Use custom luxd binary
   lux network start --devnet --node-path ~/work/lux/node/build/luxd
@@ -289,9 +289,9 @@ TYPICAL WORKFLOW:
 	cmd.Flags().StringVar(&userProvidedLuxVersion, "node-version", "latest", "use this version of node (ex: v1.17.12)")
 	cmd.Flags().StringVar(&nodePath, "node-path", "", "path to local luxd binary (overrides --node-version)")
 	cmd.Flags().StringVar(&snapshotName, "snapshot-name", constants.DefaultSnapshotName, "name of snapshot to use to start the network from")
-	cmd.Flags().BoolVarP(&mainnet, "mainnet", "m", false, "start mainnet with 5 validators (port 9630)")
-	cmd.Flags().BoolVarP(&testnet, "testnet", "t", false, "start testnet with 5 validators (port 9640)")
-	cmd.Flags().BoolVarP(&devnet, "devnet", "d", false, "start devnet with 5 validators (port 9650)")
+	cmd.Flags().BoolVarP(&mainnet, "mainnet", "m", false, "start mainnet with 3 validators (port 9630)")
+	cmd.Flags().BoolVarP(&testnet, "testnet", "t", false, "start testnet with 3 validators (port 9640)")
+	cmd.Flags().BoolVarP(&devnet, "devnet", "d", false, "start devnet with 3 validators (port 9650)")
 	cmd.Flags().BoolVar(&devMode, "dev", false, "single-node dev mode with K=1 consensus")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
 	cmd.Flags().IntVar(&portBase, "port", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
@@ -518,7 +518,7 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 
 	opts := []client.OpOption{
-		client.WithNumNodes(uint32(numValidators)), //nolint:gosec // G115: numValidators is bounded (1-5)
+		client.WithNumNodes(uint32(numValidators)), //nolint:gosec // G115: numValidators is bounded (1-3)
 		client.WithGlobalNodeConfig(globalNodeConfig),
 		client.WithRootDataDir(rootDataDir),
 		client.WithReassignPortsIfUsed(true),
@@ -549,7 +549,7 @@ func startPublicNetwork(cfg networkConfig) error {
 	opts = append(opts, client.WithPluginDir(pluginDir))
 
 	// Use a longer timeout for network start (nodes need time to bootstrap)
-	// 2 minutes is enough for 5 nodes on local machine
+	// 2 minutes is enough for 3 nodes on local machine
 	startCtx, startCancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer startCancel()
 
@@ -668,7 +668,7 @@ func StartDevnet() error {
 // StartDevNetwork starts a multi-node development network with turbo profile
 // This is the hybrid mode: multiple validators with fast consensus (K=3, 2/3 quorum)
 // Use this when you need to test multi-validator scenarios with fast finality
-// The network uses LUX_MNEMONIC to fund derived accounts automatically
+// The network uses MNEMONIC to fund derived accounts automatically
 func StartDevNetwork() error {
 	ux.Logger.PrintToUser("Starting Lux dev network (%d validators, turbo consensus)...", numValidators)
 
@@ -678,7 +678,7 @@ func StartDevNetwork() error {
 		pb = 8545 // anvil/hardhat compatible for dev tooling
 	}
 
-	// Force turbo profile for multi-node dev (K=3, 2/3 quorum for 5 nodes)
+	// Force turbo profile for multi-node dev (K=3, 2/3 quorum for 3 nodes)
 	// ultra profile is only for single-node K=1 mode
 	if profile == "" {
 		profile = "turbo"
@@ -687,7 +687,7 @@ func StartDevNetwork() error {
 	// Display mnemonic-derived addresses that will be funded
 	mnemonic := key.GetMnemonicFromEnv()
 	if mnemonic != "" {
-		ux.Logger.PrintToUser("\n💰 Funded Accounts (derived from LUX_MNEMONIC):")
+		ux.Logger.PrintToUser("\n💰 Funded Accounts (derived from LIGHT_MNEMONIC):")
 		for i := 0; i < numValidators; i++ {
 			sf, err := key.NewSoftFromMnemonicWithAccount(1337, mnemonic, uint32(i))
 			if err != nil {
@@ -701,8 +701,8 @@ func StartDevNetwork() error {
 		}
 		ux.Logger.PrintToUser("")
 	} else {
-		ux.Logger.PrintToUser("\n💡 Tip: Set LUX_MNEMONIC to fund derived accounts")
-		ux.Logger.PrintToUser("   Example: export LUX_MNEMONIC=\"light light light light light light light light light light light energy\"")
+		ux.Logger.PrintToUser("\n💡 Tip: Set LIGHT_MNEMONIC to fund derived accounts")
+		ux.Logger.PrintToUser("   Example: export LIGHT_MNEMONIC=\"light light light light light light light light light light light energy\"")
 		ux.Logger.PrintToUser("")
 	}
 
@@ -841,13 +841,13 @@ func isPortBaseFlagSet() bool {
 }
 
 // displayValidatorKeys displays validator keys from configured sources
-// Priority: LUX_MNEMONIC > LUX_PRIVATE_KEY > ~/.lux/keys/
+// Priority: MNEMONIC > PRIVATE_KEY > ~/.lux/keys/
 func displayValidatorKeys(networkID uint32, numValidators int) {
 	var validators []ux.ValidatorKeyInfo
 
 	// Check for mnemonic-based derivation first (allows deriving N validators)
 	if mnemonic := key.GetMnemonicFromEnv(); mnemonic != "" {
-		ux.Logger.PrintToUser("\n🔑 Validator Keys (derived from LUX_MNEMONIC):")
+		ux.Logger.PrintToUser("\n🔑 Validator Keys (derived from MNEMONIC):")
 		for i := 0; i < numValidators; i++ {
 			keySet, err := key.DeriveAllKeysWithAccount(fmt.Sprintf("validator%d", i+1), mnemonic, uint32(i))
 			if err != nil {
@@ -865,9 +865,9 @@ func displayValidatorKeys(networkID uint32, numValidators int) {
 				CChainAddr: sf.C(),
 			})
 		}
-	} else if privKey := os.Getenv("LUX_PRIVATE_KEY"); privKey != "" {
-		// Single key from LUX_PRIVATE_KEY
-		ux.Logger.PrintToUser("\n🔑 Key (from LUX_PRIVATE_KEY):")
+	} else if privKey := os.Getenv("PRIVATE_KEY"); privKey != "" {
+		// Single key from PRIVATE_KEY
+		ux.Logger.PrintToUser("\n🔑 Key (from PRIVATE_KEY):")
 		sf, err := key.NewSoft(networkID, key.WithPrivateKeyEncoded(privKey))
 		if err == nil {
 			validators = append(validators, ux.ValidatorKeyInfo{
@@ -879,7 +879,7 @@ func displayValidatorKeys(networkID uint32, numValidators int) {
 		}
 	} else {
 		// Show tip about setting keys
-		ux.Logger.PrintToUser("\n💡 Tip: Set LUX_MNEMONIC to display validator keys for testing")
+		ux.Logger.PrintToUser("\n💡 Tip: Set MNEMONIC to display validator keys for testing")
 		return // No validators to display
 	}
 
@@ -894,7 +894,7 @@ func displayValidatorKeys(networkID uint32, numValidators int) {
 }
 
 // deriveValidatorAddresses derives and returns validator addresses for storing in network state
-// Priority: LUX_MNEMONIC > LUX_PRIVATE_KEY
+// Priority: MNEMONIC > PRIVATE_KEY
 func deriveValidatorAddresses(networkID uint32, numValidators int) []application.ValidatorInfo {
 	var validators []application.ValidatorInfo
 
@@ -917,8 +917,8 @@ func deriveValidatorAddresses(networkID uint32, numValidators int) []application
 				CChainAddress: sf.C(),
 			})
 		}
-	} else if privKey := os.Getenv("LUX_PRIVATE_KEY"); privKey != "" {
-		// Single key from LUX_PRIVATE_KEY
+	} else if privKey := os.Getenv("PRIVATE_KEY"); privKey != "" {
+		// Single key from PRIVATE_KEY
 		sf, err := key.NewSoft(networkID, key.WithPrivateKeyEncoded(privKey))
 		if err == nil {
 			validators = append(validators, application.ValidatorInfo{

@@ -35,9 +35,9 @@ COMMANDS:
 
 NETWORK TYPES:
 
-  mainnet   Production network (5 validators, port 9630)
-  testnet   Test network (5 validators, port 9640)
-  devnet    Development network (5 validators, port 9650)
+  mainnet   Production network (3 validators, port 9630)
+  testnet   Test network (3 validators, port 9640)
+  devnet    Development network (3 validators, port 9650)
   dev       Single-node dev mode with K=1 consensus
 
 TYPICAL WORKFLOW:

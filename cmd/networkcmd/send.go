@@ -36,11 +36,11 @@ func newSendCmd() *cobra.Command {
 		Short: "Send funds on the C-Chain of the running local network",
 		Long: `Send funds on the C-Chain of the running local network.
 
-This command uses a local key (LUX_MNEMONIC or --from) to sign a C-Chain
+This command uses a local key (MNEMONIC or --from) to sign a C-Chain
 transfer and submit it to the running network's C-Chain RPC.
 
 Examples:
-  # Send 100 LUX to a C-Chain address (uses LUX_MNEMONIC account 0)
+  # Send 100 LUX to a C-Chain address (uses MNEMONIC account 0)
   lux network send --amount 100 --to 0x9011E888251AB053B7bD1cdB598Db4f9DEd94714
 
   # Send with a specific stored key
@@ -55,7 +55,7 @@ Notes:
 
 	cmd.Flags().Float64Var(&sendAmount, "amount", 0, "Amount to send in LUX (required)")
 	cmd.Flags().StringVar(&sendTo, "to", "", "Destination address (C-Chain hex address)")
-	cmd.Flags().StringVar(&sendFromKey, "from", "", "Key name to use for signing (default: LUX_MNEMONIC account 0)")
+	cmd.Flags().StringVar(&sendFromKey, "from", "", "Key name to use for signing (default: MNEMONIC account 0)")
 	cmd.Flags().StringVar(&sendSourceChain, "source", "C", "Source chain (only C supported)")
 	cmd.Flags().StringVar(&sendDestChain, "dest", "C", "Destination chain (only C supported)")
 
@@ -178,7 +178,7 @@ func loadSoftKey(networkID uint32) (*key.SoftKey, error) {
 
 	mnemonic := key.GetMnemonicFromEnv()
 	if mnemonic == "" {
-		return nil, fmt.Errorf("no key specified and LUX_MNEMONIC not set")
+		return nil, fmt.Errorf("no key specified and MNEMONIC not set")
 	}
 	softKey, err := key.NewSoftFromMnemonic(networkID, mnemonic)
 	if err != nil {

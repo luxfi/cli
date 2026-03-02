@@ -90,7 +90,7 @@ GENESIS OPTIONS:
 NON-INTERACTIVE MODE:
 
   Non-interactive mode is automatically enabled when:
-    - LUX_NON_INTERACTIVE=1 environment variable is set
+    - NON_INTERACTIVE=1 environment variable is set
     - CI=1 environment variable is set (common in CI/CD pipelines)
     - stdin is not a TTY (piped input, scripts, etc.)
 
@@ -129,7 +129,7 @@ EXAMPLES:
   CI=1 lux chain create mychain
 
   # Non-interactive with custom chain ID
-  LUX_NON_INTERACTIVE=1 lux chain create mychain --evm-chain-id=12345
+  NON_INTERACTIVE=1 lux chain create mychain --evm-chain-id=12345
 
   # Piped input also triggers non-interactive mode
   echo "" | lux chain create mychain --evm-chain-id=12345
