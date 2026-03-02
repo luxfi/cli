@@ -315,9 +315,22 @@ func runDeployDestroy(cmd *cobra.Command, args []string) error {
 
 	ux.Logger.PrintToUser("Destroying deployment %s...", networkName)
 
-	// TODO: Implement actual cloud resource cleanup
-	ux.Logger.PrintToUser("Cloud resource cleanup not yet implemented")
+	mgr := getNodeManager()
 
+	// Stop nodes and remove local network data
+	if err := mgr.DeleteNetwork(cmd.Context(), networkName, true); err != nil {
+		return fmt.Errorf("delete network: %w", err)
+	}
+
+	// Remove deployment config
+	homeDir, _ := os.UserHomeDir()
+	baseDir := filepath.Join(homeDir, ".lux", "mpc")
+	deployDir := filepath.Join(baseDir, "deployments", networkName)
+	if err := os.RemoveAll(deployDir); err != nil {
+		ux.Logger.PrintToUser("Warning: failed to remove deployment config: %v", err)
+	}
+
+	ux.Logger.PrintToUser("Deployment %s destroyed", networkName)
 	return nil
 }
 
