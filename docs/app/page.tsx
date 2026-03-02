@@ -40,7 +40,7 @@ const features = [
 ];
 
 const commands = [
-  { cmd: 'lux network start', desc: 'Start local 5-node network' },
+  { cmd: 'lux network start', desc: 'Start local 3-node network' },
   { cmd: 'lux blockchain create mychain', desc: 'Create new blockchain' },
   { cmd: 'lux blockchain deploy mychain', desc: 'Deploy to network' },
   { cmd: 'lux validator add', desc: 'Add validator node' },

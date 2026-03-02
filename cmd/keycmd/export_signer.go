@@ -23,7 +23,7 @@ func newExportSignerCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export-signer",
 		Short: "Export BLS signer keys for luxd nodes",
-		Long: `Export BLS signer keys derived from LUX_MNEMONIC for use as luxd
+		Long: `Export BLS signer keys derived from MNEMONIC for use as luxd
 staking signer keys. Each key is written as a raw 32-byte file.
 
 This is needed when starting luxd nodes manually (outside of netrunner)
@@ -31,7 +31,7 @@ that need to use mnemonic-derived BLS keys for consensus.
 
 Examples:
   # Export signer keys for accounts 5-9
-  export LUX_MNEMONIC="your mnemonic here"
+  export MNEMONIC="your mnemonic here"
   lux key export-signer -n 5 --start 5 --output ~/.lux/local-validators
 
   # This creates:
@@ -53,7 +53,7 @@ Examples:
 func exportSignerKeys(_ *cobra.Command, _ []string) error {
 	mnemonic := key.GetMnemonicFromEnv()
 	if mnemonic == "" {
-		return fmt.Errorf("LUX_MNEMONIC environment variable not set")
+		return fmt.Errorf("MNEMONIC environment variable not set")
 	}
 
 	ux.Logger.PrintToUser("Exporting %d BLS signer keys (indices %d-%d)...",

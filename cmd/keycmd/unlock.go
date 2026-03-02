@@ -30,23 +30,23 @@ After the timeout without access, the key is automatically locked and
 requires re-authentication. The timeout resets on each key access.
 
 Session timeout can be configured via:
-  LUX_KEY_SESSION_TIMEOUT environment variable (e.g., "30s", "5m", "1h")
+  KEY_SESSION_TIMEOUT environment variable (e.g., "30s", "5m", "1h")
 
 Password can be provided via:
   --password flag
-  LUX_KEY_PASSWORD environment variable
+  KEY_PASSWORD environment variable
   Interactive prompt (most secure)
 
 Examples:
   lux key unlock validator1                    # Prompts for password
   lux key unlock validator1 --password secret  # Password via flag (less secure)
-  LUX_KEY_SESSION_TIMEOUT=5m lux key unlock validator1  # 5 minute session`,
+  KEY_SESSION_TIMEOUT=5m lux key unlock validator1  # 5 minute session`,
 		Args: cobra.ExactArgs(1),
 		RunE: runUnlock,
 	}
 
 	cmd.Flags().StringVarP(&unlockPassword, "password", "p", "", "Password for the key")
-	// Note: timeout flag removed - use LUX_KEY_SESSION_TIMEOUT env var instead
+	// Note: timeout flag removed - use KEY_SESSION_TIMEOUT env var instead
 
 	return cmd
 }
@@ -85,7 +85,7 @@ func runUnlock(_ *cobra.Command, args []string) error {
 	if password == "" {
 		// Prompt for password - requires interactive mode
 		if !prompts.IsInteractive() {
-			return fmt.Errorf("password required: use --password or set LUX_KEY_PASSWORD environment variable")
+			return fmt.Errorf("password required: use --password or set KEY_PASSWORD environment variable")
 		}
 		var err error
 		password, err = app.Prompt.CaptureString("Password")

@@ -25,7 +25,7 @@ func GetWarpInfo(app *application.Lux) (*WarpInfo, error) {
 
 	return &WarpInfo{
 		Version:       "v2.0.0",
-		FundedAddress: "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC",
+		FundedAddress: "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714",
 		FundedBalance: balance,
 	}, nil
 }

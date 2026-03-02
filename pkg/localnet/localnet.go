@@ -409,7 +409,7 @@ func StartLocalNetwork(app *application.Lux, clusterName, nodeVersion string) er
 	defer cancel()
 
 	_, err = cli.Start(ctx, nodeVersion,
-		client.WithNumNodes(5),
+		client.WithNumNodes(3),
 		client.WithGlobalNodeConfig(fmt.Sprintf(`{"network-id": %d}`, networkID)),
 	)
 	if err != nil {

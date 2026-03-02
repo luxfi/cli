@@ -18,7 +18,7 @@ const (
 	chainName = "testChain"
 )
 
-const ewoqEVMAddress = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
+const treasuryEVMAddress = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
 
 func checkConvertOnlyOutput(output string, generateNodeID bool) {
 	gomega.Expect(output).Should(gomega.ContainSubstring("Converted blockchain successfully generated"))
@@ -65,10 +65,10 @@ var _ = ginkgo.Describe("[Blockchain Convert]", ginkgo.Ordered, func() {
 		"skip-update-check":         true,
 		"local":                     true,
 		"verify-input":              false,
-		"validator-manager-owner":   "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC",
+		"validator-manager-owner":   "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714",
 		"validator-manager-address": "0x0FEEDC0DE0000000000000000000000000000000",
 		"proof-of-authority":        true,
-		"key":                       "ewoq",
+		"key":                       "treasury",
 	}
 	ginkgo.It("HAPPY PATH: local convert default", func() {
 		testFlags := utils.TestFlags{}
@@ -262,7 +262,7 @@ var _ = ginkgo.Describe("[Blockchain Convert]", ginkgo.Ordered, func() {
 
 	ginkgo.It("ERROR PATH: invalid change owner address format", func() {
 		testFlags := utils.TestFlags{
-			"change-owner-address": ewoqEVMAddress,
+			"change-owner-address": treasuryEVMAddress,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "convert", blockchainCmdArgs, globalFlags, testFlags)
 		gomega.Expect(err).Should(gomega.HaveOccurred())

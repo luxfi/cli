@@ -82,7 +82,7 @@ PREREQUISITES:
      lux network start --devnet
 
   3. For remote networks (devnet, testnet, mainnet), a funded key is needed:
-     Set LUX_MNEMONIC or LUX_PRIVATE_KEY env var, or use --key flag
+     Set MNEMONIC or PRIVATE_KEY env var, or use --key flag
 
   4. VM must be installed (for custom VMs):
      lux vm link "Lux EVM" --path ~/work/lux/evm/build/evm
@@ -527,7 +527,7 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 	networkID := network.ID()
 	kc, err := getDeployKeychain(network, networkID)
 	if err != nil {
-		return fmt.Errorf("failed to get keychain for deployment: %w\n\nTo fix, set LUX_MNEMONIC or LUX_PRIVATE_KEY env var, or use --key flag", err)
+		return fmt.Errorf("failed to get keychain for deployment: %w\n\nTo fix, set MNEMONIC or PRIVATE_KEY env var, or use --key flag", err)
 	}
 
 	// Show the deployer address
@@ -586,8 +586,8 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 // getDeployKeychain obtains a keychain for remote network deployment.
 // Priority:
 //  1. --key flag (explicit key name)
-//  2. LUX_PRIVATE_KEY env var
-//  3. LUX_MNEMONIC env var
+//  2. PRIVATE_KEY env var
+//  3. MNEMONIC env var
 //  4. Interactive prompt (if terminal available)
 func getDeployKeychain(network models.Network, networkID uint32) (*keychain.Keychain, error) {
 	// If --key flag specified, use that key
@@ -595,7 +595,7 @@ func getDeployKeychain(network models.Network, networkID uint32) (*keychain.Keyc
 		return keychain.GetKeychain(app, false, false, nil, deployKeyName, network, 0)
 	}
 
-	// Try environment variables (LUX_PRIVATE_KEY, LUX_MNEMONIC)
+	// Try environment variables (PRIVATE_KEY, MNEMONIC)
 	sf, err := key.GetOrCreateLocalKey(networkID)
 	if err == nil && sf != nil {
 		kc := sf.KeyChain()

@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	CLIBinary         = "./bin/lux"
-	keyName           = "ewoq"
-	ewoqEVMAddress    = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
-	ewoqPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+	CLIBinary             = "./bin/lux"
+	keyName               = "treasury"
+	treasuryEVMAddress    = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
+	treasuryPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 )
 
 var luxdVersion string
@@ -25,7 +25,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 	ginkgo.It("Create Etna Chain Config", func() {
 		_, luxdVersion = commands.CreateEtnaEVMConfig(
 			utils.BlockchainName,
-			ewoqEVMAddress,
+			treasuryEVMAddress,
 			commands.PoS,
 		)
 	})
@@ -36,7 +36,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 			utils.BlockchainName,
 			"",
 			nil,
-			ewoqPChainAddress,
+			treasuryPChainAddress,
 			false, // convertOnly
 		)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -45,7 +45,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 			"",
 			utils.BlockchainName,
 			"",
-			ewoqPChainAddress,
+			treasuryPChainAddress,
 			1,
 			true,
 		)

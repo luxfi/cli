@@ -3,7 +3,7 @@
     {
       "txAllowListConfig": {
         "adminAddresses": [
-          "0x8db97c7cece249c2b98bdc0226cc4c2a57bf52fc",
+          "0x9011e888251ab053b7bd1cdb598db4f9ded94714",
           "0xab5801a7d398351b8be11c439e05c5b3259aec9b"
         ],
         "blockTimestamp": 2526843696
@@ -12,7 +12,7 @@
     {
       "contractNativeMinterConfig": {
         "adminAddresses": [
-          "0x8db97c7cece249c2b98bdc0226cc4c2a57bf52fc"
+          "0x9011e888251ab053b7bd1cdb598db4f9ded94714"
         ],
         "blockTimestamp": 2526849999,
         "initialMint": {
