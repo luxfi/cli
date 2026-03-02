@@ -1,6 +1,6 @@
 # Lux CLI
 
-Lux CLI is a command line tool that gives developers access to everything Lux. This release specializes in helping developers develop and test subnets.
+Lux CLI is a command line tool that gives developers access to everything Lux. This release specializes in helping developers develop and test L2 chains.
 
 ## Installation
 
@@ -36,9 +36,9 @@ curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh |
 
 ## Quickstart
 
-### Subnet Management
+### Chain Management
 
-After installing, launch your own custom subnet:
+After installing, launch your own custom chain:
 
 ```bash
 lux chain create <chainName>
@@ -77,14 +77,14 @@ lux network start
 
 ## Notable Features
 
-- Creation of Lux EVM, and custom virtual machine subnet configurations
+- Creation of Lux EVM, and custom virtual machine chain configurations
 - Precompile integration and configuration
-- Local deployment of subnets for development and rapid prototyping
-- Testnet and Lux Mainnet deployment of subnets
+- Local deployment of chains for development and rapid prototyping
+- Testnet and Lux Mainnet deployment of chains
 - Ledger support
 - Lux Package Manager Integration
 
-## Modifying your Subnet Deployment
+## Modifying your Chain Deployment
 
 You can provide a global node config to edit the way your local node nodes perform under the hood. To provide such a config, you need to create an cli config file. By default, a config file is read in from $HOME/.lux/cli.json. If none exists, no error will occur. To provide a config from a custom location, run any command with the flag `--config <pathToConfig>`.
 
@@ -102,9 +102,9 @@ To specify the global node config, provide it as a body for the `node-config` ke
 }
 ```
 
-### Accessing your local subnet remotely
+### Accessing your local chain remotely
 
-You may wish to deploy your subnet on a cloud instance and access it remotely. If you'd like to do so, use this as your node config:
+You may wish to deploy your chain on a cloud instance and access it remotely. If you'd like to do so, use this as your node config:
 
 ```json
 {
@@ -153,7 +153,7 @@ To run the tests, execute the following command from the repo's root directory:
 
 Network snapshots are used by the CLI in order to keep track of blockchain state, and to improve performance of local deployments.
 
-They are the main way to persist subnets, blockchains, and blockchain operations, among different executions of the tool.
+They are the main way to persist chains, blockchains, and blockchain operations, among different executions of the tool.
 
 Three different kinds of snapshots are used:
 - The `bootstrap snapshot` is provided as the starting network state. It is never modified by CLI usage.
@@ -205,4 +205,4 @@ continue saving/restoring to it, if not, `default snapshot will be used`.
 
 ## Detailed Usage
 
-More detailed information on how to use Lux CLI can be found at [here](https://docs.lux.network/subnets/create-a-local-subnet#subnet).
+More detailed information on how to use Lux CLI can be found at [here](https://docs.lux.network/chains).

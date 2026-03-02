@@ -7,7 +7,7 @@ The Lux CLI v2 is a unified toolchain for creating and managing sovereign L1s, b
 1. [Overview](#overview)
 2. [Global Flags](#global-flags)
 3. [L1 Commands](#l1-commands)
-4. [L2 Commands (Subnet)](#l2-commands-subnet)
+4. [L2 Commands](#l2-commands)
 5. [L3 Commands](#l3-commands)
 6. [Network Commands](#network-commands)
 7. [Node Commands](#node-commands)
@@ -21,7 +21,7 @@ The Lux CLI v2 is a unified toolchain for creating and managing sovereign L1s, b
 
 The Lux CLI supports multiple blockchain architectures:
 - **L1**: Sovereign chains with independent validation
-- **L2**: Based rollups or OP Stack compatible (formerly subnets)
+- **L2**: Based rollups or OP Stack compatible
 - **L3**: App-specific chains on L2s
 
 ### Features
@@ -146,17 +146,17 @@ Migrate L1 data between networks.
 lux l1 migrate [l1Name] [flags]
 ```
 
-## L2 Commands (Subnet)
+## L2 Commands
 
-Create and manage L2s (formerly subnets) with multiple sequencing models. The `l2` command has an alias `subnet` for backward compatibility.
+Create and manage L2s with multiple sequencing models. The `l2` command has aliases `chain` and `subnet` for backward compatibility.
 
-### lux l2 create (subnet create)
+### lux l2 create
 
-Create a new L2/subnet configuration.
+Create a new L2 chain configuration.
 
 ```bash
-lux l2 create [subnetName] [flags]
-lux subnet create [subnetName] [flags]  # alias
+lux l2 create [chainName] [flags]
+lux chain create [chainName] [flags]  # alias
 ```
 
 **Flags:**
@@ -189,67 +189,67 @@ lux l2 create myL2 --evm --sequencer ethereum --enable-preconfirm
 lux l2 create myL2 --genesis ./genesis.json --force
 ```
 
-### lux l2 deploy (subnet deploy)
+### lux l2 deploy
 
-Deploy an L2/subnet.
+Deploy an L2 chain.
 
 ```bash
-lux l2 deploy [subnetName] [flags]
+lux l2 deploy [chainName] [flags]
 ```
 
 **Similar flags to L1 deploy**
 
-### lux l2 list (subnet list)
+### lux l2 list
 
-List all configured L2s/subnets.
+List all configured L2 chains.
 
 ```bash
 lux l2 list
 ```
 
-### lux l2 describe (subnet describe)
+### lux l2 describe
 
-Show detailed information about an L2/subnet.
-
-```bash
-lux l2 describe [subnetName]
-```
-
-### lux l2 join (subnet join)
-
-Join a validator to an L2/subnet.
+Show detailed information about an L2 chain.
 
 ```bash
-lux l2 join [subnetName] [flags]
+lux l2 describe [chainName]
 ```
 
-### lux l2 addValidator (subnet addValidator)
+### lux l2 join
 
-Add a validator to an L2/subnet.
+Join a validator to an L2 chain.
 
 ```bash
-lux l2 addValidator [subnetName] [flags]
+lux l2 join [chainName] [flags]
 ```
 
-### lux l2 removeValidator (subnet removeValidator)
+### lux l2 addValidator
 
-Remove a validator from an L2/subnet.
+Add a validator to an L2 chain.
 
 ```bash
-lux l2 removeValidator [subnetName] [flags]
+lux l2 addValidator [chainName] [flags]
 ```
 
-### lux l2 export (subnet export)
+### lux l2 removeValidator
 
-Export L2/subnet configuration.
+Remove a validator from an L2 chain.
 
 ```bash
-lux l2 export [subnetName] [flags]
+lux l2 removeValidator [chainName] [flags]
 ```
 
-### lux l2 import (subnet import)
+### lux l2 export
 
-Import L2/subnet configuration.
+Export L2 chain configuration.
+
+```bash
+lux l2 export [chainName] [flags]
+```
+
+### lux l2 import
+
+Import L2 chain configuration.
 
 ```bash
 lux l2 import [flags]
@@ -258,19 +258,19 @@ lux l2 import [flags]
 **Subcommands:**
 - `file`: Import from a file
 - `running`: Import from a running network
-- `historic`: Import historic subnet data
+- `historic`: Import historic chain data
 
-### lux l2 publish (subnet publish)
+### lux l2 publish
 
-Publish L2/subnet to a repository.
+Publish L2 chain to a repository.
 
 ```bash
-lux l2 publish [subnetName] [flags]
+lux l2 publish [chainName] [flags]
 ```
 
-### lux l2 upgrade (subnet upgrade)
+### lux l2 upgrade
 
-Upgrade L2/subnet VM or configuration.
+Upgrade L2 chain VM or configuration.
 
 ```bash
 lux l2 upgrade [subcommand]
@@ -284,44 +284,44 @@ lux l2 upgrade [subcommand]
 - `print`: Print upgrade information
 - `vm`: Upgrade the VM
 
-### lux l2 stats (subnet stats)
+### lux l2 stats
 
-Show statistics for an L2/subnet.
+Show statistics for an L2 chain.
 
 ```bash
-lux l2 stats [subnetName]
+lux l2 stats [chainName]
 ```
 
-### lux l2 configure (subnet configure)
+### lux l2 configure
 
-Configure L2/subnet parameters.
+Configure L2 chain parameters.
 
 ```bash
-lux l2 configure [subnetName] [flags]
+lux l2 configure [chainName] [flags]
 ```
 
-### lux l2 elastic (subnet elastic)
+### lux l2 elastic
 
-Manage elastic subnets (dynamic validator sets).
+Manage elastic chains (dynamic validator sets).
 
 ```bash
-lux l2 elastic [subcommand] [subnetName]
+lux l2 elastic [subcommand] [chainName]
 ```
 
-### lux l2 validators (subnet validators)
+### lux l2 validators
 
-List all validators for an L2/subnet.
+List all validators for an L2 chain.
 
 ```bash
-lux l2 validators [subnetName]
+lux l2 validators [chainName]
 ```
 
-### lux l2 vmid (subnet vmid)
+### lux l2 vmid
 
-Get the VMID of an L2/subnet.
+Get the VMID of an L2 chain.
 
 ```bash
-lux l2 vmid [subnetName]
+lux l2 vmid [chainName]
 ```
 
 ## L3 Commands
@@ -597,7 +597,7 @@ Sign and execute multisig transactions.
 Sign a multisig transaction.
 
 ```bash
-lux transaction sign [subnetName] [flags]
+lux transaction sign [chainName] [flags]
 ```
 
 **Flags:**
@@ -609,10 +609,10 @@ lux transaction sign [subnetName] [flags]
 **Examples:**
 ```bash
 # Sign with key
-lux transaction sign mySubnet --key myKey --input-tx-filepath tx.json
+lux transaction sign myChain --key myKey --input-tx-filepath tx.json
 
 # Sign with ledger
-lux transaction sign mySubnet --ledger --ledger-addrs addr1,addr2
+lux transaction sign myChain --ledger --ledger-addrs addr1,addr2
 ```
 
 ### lux transaction commit
@@ -620,7 +620,7 @@ lux transaction sign mySubnet --ledger --ledger-addrs addr1,addr2
 Commit a signed transaction.
 
 ```bash
-lux transaction commit [subnetName] [flags]
+lux transaction commit [chainName] [flags]
 ```
 
 ## Configuration Commands
@@ -667,8 +667,8 @@ lux migrate [flags]
 The CLI uses several configuration files:
 
 1. **CLI Config**: `~/.lux/cli.json` - General CLI settings
-2. **Sidecar Files**: `~/.cli/subnets/<name>/sidecar.json` - Subnet/L1/L2/L3 configurations
-3. **Genesis Files**: `~/.cli/subnets/<name>/genesis.json` - Genesis configurations
+2. **Sidecar Files**: `~/.cli/chains/<name>/sidecar.json` - L1/L2/L3 chain configurations
+3. **Genesis Files**: `~/.cli/chains/<name>/genesis.json` - Genesis configurations
 4. **Node Config**: Custom node configurations for local networks
 
 ## Environment Variables
@@ -722,7 +722,7 @@ lux node automine status
 1. **Key Management**: Never use CLI-generated keys on mainnet
 2. **Network Selection**: Always verify the target network before deployment
 3. **Backups**: Keep backups of important configurations and genesis files
-4. **Version Control**: Track subnet configurations in version control
+4. **Version Control**: Track chain configurations in version control
 5. **Testing**: Always test on local network before deploying to testnet/mainnet
 
 ## Troubleshooting

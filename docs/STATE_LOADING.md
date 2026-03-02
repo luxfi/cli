@@ -24,9 +24,9 @@ The CLI will look for the database at:
 You can also explicitly specify the database path:
 
 ```bash
-# Load specific subnet database
+# Load specific chain database
 ./bin/lux network start \
-  --subnet-state-path="/path/to/database/db" \
+  --chain-state-path="/path/to/database/db" \
   --blockchain-id="2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 
 # Load from chaindata directory
@@ -40,9 +40,9 @@ The following flags are available for state loading:
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `--subnet-state-path` | Path to existing subnet database | `/path/to/chains/blockchainID/db` |
+| `--chain-state-path` | Path to existing chain database | `/path/to/chains/blockchainID/db` |
 | `--state-path` | Path to existing state directory | `~/work/lux/state/chaindata/lux-mainnet-96369` |
-| `--subnet-id` | Subnet ID for the loaded state | `subnet-1234...` |
+| `--chain-id` | Chain ID for the loaded state | `chain-1234...` |
 | `--blockchain-id` | Blockchain ID for the loaded state | `2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB` |
 
 ## Database Locations
@@ -51,14 +51,14 @@ The CLI looks for databases in these locations:
 
 1. **Default mainnet-regenesis**: `~/.lux-cli/runs/mainnet-regenesis/node1/chains/[blockchainID]/db`
 2. **State chaindata**: `~/work/lux/state/chaindata/[network]/db`
-3. **Custom path**: Any path you specify with `--subnet-state-path`
+3. **Custom path**: Any path you specify with `--chain-state-path`
 
 ## Known Blockchain IDs
 
 | Network | Blockchain ID | Description |
 |---------|--------------|-------------|
-| LUX Mainnet Subnet | 2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB | Primary subnet with 1M+ blocks |
-| LUX Testnet Subnet | 2sdADEgBC3NjLM4inKc1hY1PQpCT3JVyGVJxdmcq6sqrDndjFG | Test subnet |
+| LUX Mainnet | 2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB | Primary chain with 1M+ blocks |
+| LUX Testnet | 2sdADEgBC3NjLM4inKc1hY1PQpCT3JVyGVJxdmcq6sqrDndjFG | Test chain |
 
 ## Verification
 
@@ -67,7 +67,7 @@ After starting the network with existing state, you can verify the database was 
 1. Check the logs for confirmation messages:
    ```
    Found existing mainnet-regenesis database at default location
-   Successfully loaded existing subnet state for blockchain 2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB
+   Successfully loaded existing chain state for blockchain 2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB
    ```
 
 2. Query the blockchain to check block height:
@@ -92,7 +92,7 @@ After starting the network with existing state, you can verify the database was 
 If the database is not automatically detected:
 1. Verify the path exists: `ls -la /path/to/database`
 2. Check permissions: `ls -ld /path/to/database`
-3. Use explicit path with `--subnet-state-path`
+3. Use explicit path with `--chain-state-path`
 
 ### Wrong Blockchain ID
 
@@ -128,7 +128,7 @@ The state loading feature:
 ```bash
 # Load a production database snapshot for testing
 ./bin/lux network start \
-  --subnet-state-path="/backup/production-snapshot/db" \
+  --chain-state-path="/backup/production-snapshot/db" \
   --blockchain-id="2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 ```
 
