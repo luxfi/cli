@@ -59,7 +59,6 @@ func StartLocal() error {
 	ux.Logger.PrintToUser("")
 
 	home, _ := os.UserHomeDir()
-	universeDir := filepath.Join(home, "work", "lux", "universe")
 
 	// Apply operator CRDs + deployment
 	ux.Logger.PrintToUser("-> Operator CRDs")
