@@ -80,7 +80,7 @@ lux chain create mychain --token-name=MYTOKEN --token-symbol=MTK
 
 # Import/Export
 lux chain import --chain=c --path=/path/to/blocks.rlp  # Import RLP blocks to C-Chain
-lux chain import --chain=zoo --path=/path/to/zoo.rlp   # Import to subnet
+lux chain import --chain=zoo --path=/path/to/zoo.rlp   # Import to chain
 
 # AMM Trading (LUX_MNEMONIC supported)
 lux amm balance                # Check token balances
@@ -169,8 +169,8 @@ A-Chain:  http://localhost:9630/ext/bc/A/rpc
 | Chain | Chain ID | Blockchain ID | Status |
 |-------|----------|---------------|--------|
 | LUX (C-Chain) | 96369 | dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ | Active |
-| ZOO | 200200 | bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM | Subnet |
-| SPC | 36911 | QFAFyn1hh59mh7kokA55dJq5ywskF5A1yn8dDpLhmKApS6FP1 | Subnet |
+| ZOO | 200200 | bXe2MhhAnXg6WGj6G8oDk55AKT1dMMsN72S8te7JdvzfZX1zM | L2 Chain |
+| SPC | 36911 | QFAFyn1hh59mh7kokA55dJq5ywskF5A1yn8dDpLhmKApS6FP1 | L2 Chain |
 
 ## Data Locations
 
@@ -418,14 +418,14 @@ DEX configuration is stored in `~/.lux-cli/dex/config.json`:
 
 ## Troubleshooting
 
-### "404 page not found" on subnet RPC
-The subnet is not tracked or deployed. Ensure:
+### "404 page not found" on chain RPC
+The chain is not tracked or deployed. Ensure:
 1. Network is running: `lux network status`
-2. Subnet is deployed: `lux chain deploy <name> --local`
+2. Chain is deployed: `lux chain deploy <name> --local`
 3. Using correct blockchain ID in RPC path
 
 ### "ErrPrunedAncestor" during import
-The genesis state is not accessible. This is a known issue with fresh subnet deployments. The genesis state trie must be properly committed before imports can work.
+The genesis state is not accessible. This is a known issue with fresh chain deployments. The genesis state trie must be properly committed before imports can work.
 
 ### "invalid gas limit" during import
 If you see `invalid gas limit: have 12000000, want 10000000`, the Fortuna upgrade is activated prematurely.
