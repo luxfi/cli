@@ -94,12 +94,11 @@ func deriveMnemonicKeyWithCoinType(mnemonic string, coinType, accountIndex uint3
 	return key.Key, nil
 }
 
-// deriveMnemonicKey derives using Ethereum coin type (60) for all chains.
-// Lux uses the same key (secp256k1) across P/X/C chains — the key is the same,
-// only the address encoding differs (bech32 for P/X, hex for C).
-// This matches the genesis allocation derivation at m/44'/60'/0'/0/{index}.
+// deriveMnemonicKey derives using Lux coin type (9000) for P/X-Chain operations.
+// Path: m/44'/9000'/0'/0/{index}
+// For C-Chain/EVM, use deriveMnemonicKeyEth which uses coin type 60.
 func deriveMnemonicKey(mnemonic string, accountIndex uint32) ([]byte, error) {
-	return deriveMnemonicKeyWithCoinType(mnemonic, EthCoinType, accountIndex)
+	return deriveMnemonicKeyWithCoinType(mnemonic, LuxCoinType, accountIndex)
 }
 
 // deriveMnemonicKeyEth derives using Ethereum coin type (60) for C-chain/EVM compatibility.
@@ -540,7 +539,7 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 }
 
 // NewSoftFromMnemonic creates a SoftKey from a BIP39 mnemonic phrase.
-// Uses standard Ethereum BIP44 derivation path: m/44'/60'/0'/0/0
+// Uses Lux P/X-Chain BIP44 derivation path: m/44'/9000'/0'/0/0
 func NewSoftFromMnemonic(networkID uint32, mnemonic string) (*SoftKey, error) {
 	return NewSoftFromMnemonicWithAccount(networkID, mnemonic, 0)
 }
@@ -555,7 +554,7 @@ func NewSoftFromBytes(networkID uint32, privKeyBytes []byte) (*SoftKey, error) {
 }
 
 // NewSoftFromMnemonicWithAccount creates a SoftKey from a BIP39 mnemonic with specific account index.
-// Uses standard Ethereum BIP44 derivation path: m/44'/60'/0'/0/{accountIndex}
+// Uses Lux P/X-Chain BIP44 derivation path: m/44'/9000'/0'/0/{accountIndex}
 func NewSoftFromMnemonicWithAccount(networkID uint32, mnemonic string, accountIndex uint32) (*SoftKey, error) {
 	keyBytes, err := deriveMnemonicKey(mnemonic, accountIndex)
 	if err != nil {
