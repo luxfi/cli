@@ -25,10 +25,10 @@ var (
 func newDeriveCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "derive",
-		Short: "Derive keys from LUX_MNEMONIC environment variable",
+		Short: "Derive keys from MNEMONIC environment variable",
 		Long: `Derive multiple key sets from a single mnemonic phrase.
 
-Uses the LUX_MNEMONIC environment variable to derive keys deterministically.
+Uses the MNEMONIC environment variable to derive keys deterministically.
 Each key uses Lux P/X-Chain BIP-44 path: m/44'/9000'/0'/0/{index}
 
 This ensures compatibility with MetaMask, cast, and other Ethereum tools.
@@ -36,7 +36,7 @@ The same mnemonic always produces the same keys across all tools.
 
 Examples:
   # Derive 5 validator keys from mnemonic
-  export LUX_MNEMONIC="your 24 words here"
+  export MNEMONIC="your 24 words here"
   lux key derive -n 5 --prefix validator
 
   # Derive keys starting at index 5
@@ -73,7 +73,7 @@ func runDerive(_ *cobra.Command, _ []string) error {
 	// Get mnemonic from environment
 	mnemonic := key.GetMnemonicFromEnv()
 	if mnemonic == "" {
-		return fmt.Errorf("LUX_MNEMONIC environment variable not set or invalid")
+		return fmt.Errorf("MNEMONIC environment variable not set or invalid")
 	}
 
 	// Mask the mnemonic in output (show first and last word)

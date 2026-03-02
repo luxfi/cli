@@ -37,7 +37,7 @@ func TestNewUnlockCmd(t *testing.T) {
 	assert.NotNil(t, passwordFlag)
 	assert.Equal(t, "p", passwordFlag.Shorthand)
 
-	// Note: --timeout flag was removed - now configured via LUX_KEY_SESSION_TIMEOUT env var
+	// Note: --timeout flag was removed - now configured via KEY_SESSION_TIMEOUT env var
 }
 
 func TestNewBackendCmd(t *testing.T) {
