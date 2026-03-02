@@ -27,7 +27,7 @@ lux network start [flags]
 ```
 
 **Flags:**
-- `--num-nodes` - Number of nodes to start (default: 5)
+- `--num-nodes` - Number of nodes to start (default: 3)
 - `--blockchain-specs` - Deploy blockchains on start
 - `--custom-luxgo` - Path to custom node binary
 - `--latest-luxgo-version` - Use latest node version
@@ -39,7 +39,7 @@ lux network start [flags]
 **Examples:**
 
 ```bash
-# Start default 5-node network
+# Start default 3-node network
 lux network start
 
 # Start with 10 nodes
@@ -197,7 +197,7 @@ Create a network configuration file for advanced setups.
 **network-config.json:**
 ```json
 {
-  "numNodes": 5,
+  "numNodes": 3,
   "nodeConfig": {
     "log-level": "debug",
     "api-admin-enabled": true,

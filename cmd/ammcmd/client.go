@@ -200,7 +200,7 @@ func NewAMM(config *NetworkConfig) (*AMM, error) {
 }
 
 // LoadWallet loads wallet from private key or mnemonic
-// Priority: privateKey param > LUX_PRIVATE_KEY env > LUX_MNEMONIC env
+// Priority: privateKey param > PRIVATE_KEY env > MNEMONIC env
 func (a *AMM) LoadWallet() error {
 	return a.LoadWalletWithKey("")
 }
@@ -218,21 +218,21 @@ func (a *AMM) LoadWalletWithKey(privateKey string) error {
 		}
 	}
 
-	// Priority 2: LUX_PRIVATE_KEY environment variable
+	// Priority 2: PRIVATE_KEY environment variable
 	if key == nil {
-		if envKey := os.Getenv("LUX_PRIVATE_KEY"); envKey != "" {
+		if envKey := os.Getenv("PRIVATE_KEY"); envKey != "" {
 			key, err = crypto.HexToECDSA(strings.TrimPrefix(envKey, "0x"))
 			if err != nil {
-				return fmt.Errorf("invalid LUX_PRIVATE_KEY: %w", err)
+				return fmt.Errorf("invalid PRIVATE_KEY: %w", err)
 			}
 		}
 	}
 
-	// Priority 3: LUX_MNEMONIC environment variable
+	// Priority 3: MNEMONIC environment variable
 	if key == nil {
-		mnemonic := os.Getenv("LUX_MNEMONIC")
+		mnemonic := os.Getenv("MNEMONIC")
 		if mnemonic == "" {
-			return fmt.Errorf("no wallet credentials provided: use --private-key, LUX_PRIVATE_KEY, or LUX_MNEMONIC")
+			return fmt.Errorf("no wallet credentials provided: use --private-key, PRIVATE_KEY, or MNEMONIC")
 		}
 
 		// Derive key from mnemonic using BIP39/BIP44

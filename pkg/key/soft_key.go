@@ -129,18 +129,23 @@ const (
 	LocalKeyPath = "~/.lux/keys/" + LocalKeyName + ".pk"
 
 	// Environment variables for key configuration are defined in backend_env.go:
-	// - EnvMnemonic (LUX_MNEMONIC) - BIP39 mnemonic phrase for deterministic key generation
-	// - EnvPrivateKey (LUX_PRIVATE_KEY) - CB58 encoded private key (PrivateKey-xxx format)
+	// - EnvMnemonic (MNEMONIC) - BIP39 mnemonic phrase for deterministic key generation
+	// - EnvPrivateKey (PRIVATE_KEY) - CB58 encoded private key (PrivateKey-xxx format)
 )
 
-// GetMnemonicFromEnv returns the mnemonic from LUX_MNEMONIC environment variable.
+// GetMnemonicFromEnv returns a mnemonic from environment variables.
+// Priority: MNEMONIC > MNEMONIC > LIGHT_MNEMONIC.
 // Returns empty string if not set or invalid.
 func GetMnemonicFromEnv() string {
-	mnemonic := os.Getenv(EnvMnemonic)
+	// Check MNEMONIC first (production) — getEnv checks MNEMONIC then MNEMONIC
+	mnemonic := getEnv(EnvMnemonic)
+	if mnemonic == "" {
+		// Fall back to LIGHT_MNEMONIC (dev)
+		mnemonic = os.Getenv(EnvLightMnemonic)
+	}
 	if mnemonic == "" {
 		return ""
 	}
-	// Validate the mnemonic
 	if !bip39.IsMnemonicValid(mnemonic) {
 		return ""
 	}
@@ -493,17 +498,17 @@ func GetLocalKeyPath() string {
 }
 
 // GetOrCreateLocalKey loads a key with the following priority:
-// 1. LUX_PRIVATE_KEY environment variable (CB58 encoded)
-// 2. LUX_MNEMONIC environment variable (BIP39 mnemonic)
+// 1. PRIVATE_KEY environment variable (CB58 encoded)
+// 2. MNEMONIC environment variable (BIP39 mnemonic)
 // 3. Local key file at ~/.lux/keys/local-key.pk (generated if not exists)
 // This ensures no hardcoded keys - all keys are either from environment or generated locally.
 func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
-	// Priority 1: PRIVATE_KEY / LUX_PRIVATE_KEY
+	// Priority 1: PRIVATE_KEY / PRIVATE_KEY
 	if privKeyEnc := getEnv(EnvPrivateKey); privKeyEnc != "" {
 		return NewSoft(networkID, WithPrivateKeyEncoded(privKeyEnc))
 	}
 
-	// Priority 2: MNEMONIC / LUX_MNEMONIC
+	// Priority 2: MNEMONIC / MNEMONIC
 	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
 		// MNEMONIC_ACCOUNT (or LUX_KEY_INDEX) selects BIP-44 address index.
 		// Derivation: m/44'/9000'/0'/0/{account} for P/X-Chain

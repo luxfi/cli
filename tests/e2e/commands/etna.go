@@ -266,7 +266,7 @@ func AddEtnaChainValidatorToCluster(
 		"--delegation-fee",
 		"100",
 		"--rewards-recipient",
-		utils.LocalTestEVMAddress,
+		utils.TreasuryEVMAddress,
 		"--staking-period",
 		"100s",
 		"--weight",

@@ -28,10 +28,10 @@ import (
 )
 
 const (
-	CLIBinary            = "./bin/lux"
-	keyName              = "ewoq"
-	ewoqEVMAddress       = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
-	ewoqPChainAddress    = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+	CLIBinary                = "./bin/lux"
+	keyName                  = "treasury"
+	treasuryEVMAddress       = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
+	treasuryPChainAddress    = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 	ProxyContractAddress = "0xFEEDC0DE0000000000000000000000000000000"
 )
 
@@ -53,9 +53,9 @@ func createEtnaEVMConfig() error {
 		"--evm",
 		"--proof-of-authority",
 		"--validator-manager-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--proxy-contract-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
@@ -82,10 +82,10 @@ func createSovereignChain() (string, string, error) {
 		utils.BlockchainName,
 		"--local",
 		"--num-bootstrap-validators=1",
-		"--ewoq",
+		"--treasury",
 		"--convert-only",
 		"--change-owner-address",
-		ewoqPChainAddress,
+		treasuryPChainAddress,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -143,7 +143,7 @@ func getBootstrapValidator(uri string) ([]*txs.ConvertChainToL1Validator, error)
 		Balance:              constants.BootstrapValidatorBalanceNanoLUX,
 		BLSPublicKey:         publicKey,
 		BLSProofOfPossession: pop,
-		ChangeOwnerAddr:      ewoqPChainAddress,
+		ChangeOwnerAddr:      treasuryPChainAddress,
 	}
 	luxdBootstrapValidators, err := chainvalidators.ToL1Validators([]models.ChainValidator{bootstrapValidator})
 	if err != nil {
@@ -207,7 +207,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		for _, v := range luxdBootstrapValidators {
 			validators = append(validators, v)
 		}
-		ownerAddress := common.HexToAddress(ewoqEVMAddress)
+		ownerAddress := common.HexToAddress(treasuryEVMAddress)
 		netSDK := blockchainSDK.Net{
 			ChainID:             chainID,
 			BlockchainID:        blockchainID,

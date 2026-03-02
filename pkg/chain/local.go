@@ -51,13 +51,13 @@ import (
 const (
 	WriteReadReadPerms = 0o644
 	// ChainHealthTimeout is the maximum time to wait for a newly deployed chain to become healthy
-	// For local networks (5 nodes on localhost), chains should be healthy in <10s
+	// For local networks (3 nodes on localhost), chains should be healthy in <10s
 	ChainHealthTimeout = 10 * time.Second
 	// LocalNetworkHealthTimeout is for checking if the network itself is running
 	LocalNetworkHealthTimeout = 5 * time.Second
 	// BlockchainCreationTimeout is the maximum time to wait for CreateChains RPC call
 	// This involves a P-chain transaction, chain creation, chain creation, node restarts,
-	// and P-chain height sync across all 5 validators. Needs 90s minimum for stability.
+	// and P-chain height sync across all 3 validators. Needs 90s minimum for stability.
 	BlockchainCreationTimeout = 90 * time.Second
 )
 
