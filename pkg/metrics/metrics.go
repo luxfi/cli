@@ -16,7 +16,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/spf13/cobra"
 
-	"github.com/posthog/posthog-go" // External SDK; telemetry is sent to Hanzo Insights (insights.hanzo.ai)
+	insights "github.com/hanzoai/insights-go"
 )
 
 // telemetryToken value is set at build and install scripts using ldflags
@@ -93,7 +93,7 @@ func trackMetrics(app *application.Lux, flags map[string]string, cmdErr error) {
 	if telemetryToken == "" || utils.IsE2E() {
 		return
 	}
-	client, err := posthog.NewWithConfig(telemetryToken, posthog.Config{Endpoint: telemetryInstance})
+	client, err := insights.NewWithConfig(telemetryToken, insights.Config{Endpoint: telemetryInstance})
 	if err != nil {
 		app.Log.Warn(fmt.Sprintf("failure creating metrics client: %s", err))
 	}
@@ -123,7 +123,7 @@ func trackMetrics(app *application.Lux, flags map[string]string, cmdErr error) {
 	for propertyKey, propertyValue := range flags {
 		telemetryProperties[propertyKey] = propertyValue
 	}
-	event := posthog.Capture{
+	event := insights.Capture{
 		DistinctId: userID,
 		Event:      "cli-command",
 		Properties: telemetryProperties,
