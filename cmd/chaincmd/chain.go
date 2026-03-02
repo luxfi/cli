@@ -163,5 +163,9 @@ NOTES:
 	// Upgrade
 	cmd.AddCommand(upgradecmd.NewCmd(app))
 
+	// Launch — full ecosystem deployment from chain.yaml
+	launchCmd := newLaunchCmd()
+	cmd.AddCommand(launchCmd)
+
 	return cmd
 }
