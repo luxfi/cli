@@ -189,7 +189,6 @@ require (
 	github.com/luxfi/upgrade v1.0.0 // indirect
 	github.com/luxfi/validators v1.0.0 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
-	github.com/luxfi/zapdb/v4 v4.9.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
@@ -281,7 +280,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.6
 	github.com/btcsuite/btcd v0.25.0
 	github.com/btcsuite/btcd/btcutil v1.1.6
-	github.com/dgraph-io/badger/v4 v4.9.0
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/klauspost/compress v1.18.3
 	github.com/luxfi/address v1.0.1
@@ -305,6 +303,7 @@ require (
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/utils v1.1.4
 	github.com/luxfi/utxo v0.2.4
+	github.com/luxfi/zapdb/v4 v4.9.3
 	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	golang.org/x/sys v0.40.0
