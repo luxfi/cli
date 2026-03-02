@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
@@ -20,6 +21,8 @@ var (
 	evmPort        int
 	evmChainConfig string
 	evmSkipBuild   bool
+	evmBackend     string // gevm, revm, cevm, auto
+	evmGPU         bool   // enable GPU acceleration
 )
 
 var evmCmd = &cobra.Command{
@@ -51,6 +54,8 @@ func NewEVMCmd() *cobra.Command {
 	evmDeployCmd.Flags().IntVar(&evmPort, "port", 9630, "Port for the node RPC")
 	evmDeployCmd.Flags().StringVar(&evmChainConfig, "chain-config", "", "Path to chain configuration JSON")
 	evmDeployCmd.Flags().BoolVar(&evmSkipBuild, "skip-build", false, "Skip building the EVM plugin")
+	evmDeployCmd.Flags().StringVar(&evmBackend, "backend", "gevm", "EVM backend: gevm (Go), revm (Rust), cevm (C++), auto")
+	evmDeployCmd.Flags().BoolVar(&evmGPU, "gpu", false, "Enable GPU acceleration (Metal/CUDA)")
 
 	return evmCmd
 }
@@ -109,9 +114,31 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 
 	// Build EVM plugin if needed
 	if !evmSkipBuild {
-		fmt.Println("\n🔨 Building EVM plugin...")
-		buildCmd := exec.Command("bash", "-c",
-			"cd /home/z/work/lux/evm && ./scripts/build.sh")
+		// Compute build tags from --backend and --gpu flags
+		var tags []string
+		switch evmBackend {
+		case "revm":
+			tags = append(tags, "revm")
+		case "cevm":
+			tags = append(tags, "cevm")
+		case "auto":
+			tags = append(tags, "revm", "cevm") // link all, select at runtime
+		}
+		if evmGPU {
+			tags = append(tags, "gpu")
+		}
+
+		tagStr := ""
+		if len(tags) > 0 {
+			tagStr = "-tags " + strings.Join(tags, ",")
+		}
+
+		fmt.Printf("\n  Building EVM plugin (backend=%s, gpu=%v)...\n", evmBackend, evmGPU)
+		buildScript := fmt.Sprintf("cd %s && CGO_ENABLED=1 go build %s -o %s/plugins/evm ./plugin",
+			filepath.Join(os.Getenv("HOME"), "work", "lux", "evm"),
+			tagStr,
+			evmDataDir)
+		buildCmd := exec.Command("bash", "-c", buildScript)
 		buildCmd.Stdout = os.Stdout
 		buildCmd.Stderr = os.Stderr
 		if err := buildCmd.Run(); err != nil {
