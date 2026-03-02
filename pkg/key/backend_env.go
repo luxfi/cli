@@ -15,30 +15,59 @@ import (
 	"github.com/luxfi/crypto/secp256k1"
 )
 
-// Environment variable names for key loading
+// Environment variable names for key loading.
+// Each variable supports two forms: generic (MNEMONIC) and prefixed (LUX_MNEMONIC).
+// Generic form takes priority so the same mnemonic/key works across tools.
 const (
-	// EnvMnemonic contains a BIP39 mnemonic phrase
+	// EnvMnemonic contains a BIP39 mnemonic phrase.
+	// Env: MNEMONIC or LUX_MNEMONIC
 	EnvMnemonic = "LUX_MNEMONIC"
 
-	// EnvPrivateKey contains a hex-encoded secp256k1 private key
+	// EnvPrivateKey contains a hex-encoded secp256k1 private key.
+	// Env: PRIVATE_KEY or LUX_PRIVATE_KEY
 	EnvPrivateKey = "LUX_PRIVATE_KEY"
 
-	// EnvBLSKey contains a hex-encoded BLS private key
+	// EnvBLSKey contains a hex-encoded BLS private key.
+	// Env: BLS_KEY or LUX_BLS_KEY
 	EnvBLSKey = "LUX_BLS_KEY"
 
-	// EnvKeyPassword for encrypted key files
+	// EnvKeyPassword for encrypted key files.
+	// Env: KEY_PASSWORD or LUX_KEY_PASSWORD
 	EnvKeyPassword = "LUX_KEY_PASSWORD"
 
 	// EnvKeySessionTimeout configures the session timeout duration.
 	// Format: Go duration string (e.g., "30s", "5m", "1h").
 	// Default: 30s (30 seconds of inactivity before auto-lock).
+	// Env: KEY_SESSION_TIMEOUT or LUX_KEY_SESSION_TIMEOUT
 	EnvKeySessionTimeout = "LUX_KEY_SESSION_TIMEOUT"
 
 	// EnvKeyIndex selects the BIP-44 address index for mnemonic derivation.
 	// Path: m/44'/9000'/0'/0/{index} for P/X-Chain.
-	// Default: 0. Set to 1 for Liquidity deployer key.
+	// Default: "auto" — scans indices 0-99 to find the first funded account.
+	// Set to a specific number (e.g., "1") to use that index directly.
+	// Env: MNEMONIC_ACCOUNT or LUX_KEY_INDEX
 	EnvKeyIndex = "LUX_KEY_INDEX"
 )
+
+// getEnv returns the value of an environment variable, checking the generic
+// (unprefixed) form first, then the LUX_ prefixed form.
+// e.g., getEnv("LUX_MNEMONIC") checks MNEMONIC first, then LUX_MNEMONIC.
+func getEnv(luxPrefixed string) string {
+	// Try generic form: strip LUX_ prefix
+	generic := strings.TrimPrefix(luxPrefixed, "LUX_")
+	if v := os.Getenv(generic); v != "" {
+		return v
+	}
+	return os.Getenv(luxPrefixed)
+}
+
+// getKeyIndex returns the configured key index from MNEMONIC_ACCOUNT or LUX_KEY_INDEX.
+func getKeyIndex() string {
+	if v := os.Getenv("MNEMONIC_ACCOUNT"); v != "" {
+		return v
+	}
+	return os.Getenv(EnvKeyIndex)
+}
 
 // EnvBackend loads keys from environment variables
 // This is useful for CI/CD, containers, and automation
@@ -63,10 +92,9 @@ func (*EnvBackend) Name() string {
 }
 
 func (*EnvBackend) Available() bool {
-	// Available if any key env vars are set
-	return os.Getenv(EnvMnemonic) != "" ||
-		os.Getenv(EnvPrivateKey) != "" ||
-		os.Getenv(EnvBLSKey) != ""
+	return getEnv(EnvMnemonic) != "" ||
+		getEnv(EnvPrivateKey) != "" ||
+		getEnv(EnvBLSKey) != ""
 }
 
 func (*EnvBackend) RequiresPassword() bool {
@@ -123,16 +151,16 @@ func (b *EnvBackend) LoadKey(ctx context.Context, name, password string) (*HDKey
 }
 
 func (*EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
-	// Priority 1: LUX_MNEMONIC
-	if mnemonic := os.Getenv(EnvMnemonic); mnemonic != "" {
+	// Priority 1: MNEMONIC / LUX_MNEMONIC
+	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
 		if !ValidateMnemonic(mnemonic) {
-			return nil, errors.New("invalid mnemonic in LUX_MNEMONIC")
+			return nil, errors.New("invalid mnemonic in MNEMONIC / LUX_MNEMONIC")
 		}
 		return DeriveAllKeys(name, mnemonic)
 	}
 
-	// Priority 2: LUX_PRIVATE_KEY (hex-encoded EC key)
-	if privKeyHex := os.Getenv(EnvPrivateKey); privKeyHex != "" {
+	// Priority 2: PRIVATE_KEY / LUX_PRIVATE_KEY (hex-encoded EC key)
+	if privKeyHex := getEnv(EnvPrivateKey); privKeyHex != "" {
 		privKeyHex = strings.TrimPrefix(privKeyHex, "0x")
 		privKeyBytes, err := hex.DecodeString(privKeyHex)
 		if err != nil {
@@ -153,7 +181,7 @@ func (*EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
 		}
 
 		// Also load BLS key if provided
-		if blsHex := os.Getenv(EnvBLSKey); blsHex != "" {
+		if blsHex := getEnv(EnvBLSKey); blsHex != "" {
 			blsHex = strings.TrimPrefix(blsHex, "0x")
 			blsBytes, err := hex.DecodeString(blsHex)
 			if err == nil {
@@ -165,7 +193,7 @@ func (*EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
 		return ks, nil
 	}
 
-	return nil, errors.New("no key found in environment (set LUX_MNEMONIC or LUX_PRIVATE_KEY)")
+	return nil, errors.New("no key found in environment (set MNEMONIC or PRIVATE_KEY)")
 }
 
 func (*EnvBackend) SaveKey(_ context.Context, _ *HDKeySet, _ string) error {
@@ -186,7 +214,7 @@ func (b *EnvBackend) ListKeys(ctx context.Context) ([]KeyInfo, error) {
 	var keys []KeyInfo
 
 	// Check if env vars are set
-	if os.Getenv(EnvMnemonic) != "" || os.Getenv(EnvPrivateKey) != "" {
+	if getEnv(EnvMnemonic) != "" || getEnv(EnvPrivateKey) != "" {
 		// Load the key to get address info
 		ks, err := b.LoadKey(ctx, "env", "")
 		if err == nil {
