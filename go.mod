@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.200.0
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/go-git/go-git/v5 v5.16.4
+	github.com/hanzoai/insights-go v1.8.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.1.2
@@ -31,7 +32,6 @@ require (
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/pborman/ansi v1.0.0
-	github.com/hanzoai/insights-go v1.8.2
 	github.com/schollz/progressbar/v3 v3.19.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/afero v1.15.0 // indirect
@@ -313,3 +313,5 @@ require (
 	k8s.io/apimachinery v0.35.1
 	k8s.io/client-go v0.35.1
 )
+
+replace github.com/hanzoai/insights-go => github.com/posthog/posthog-go v1.2.24
