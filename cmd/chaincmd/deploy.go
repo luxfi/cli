@@ -587,7 +587,7 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 func getDeployKeychain(network models.Network, networkID uint32) (*keychain.Keychain, error) {
 	// If --key flag specified, use that key
 	if deployKeyName != "" {
-		return keychain.GetKeychain(app, true, false, nil, deployKeyName, network, 0)
+		return keychain.GetKeychain(app, false, false, nil, deployKeyName, network, 0)
 	}
 
 	// Try environment variables (LUX_PRIVATE_KEY, LUX_MNEMONIC)
