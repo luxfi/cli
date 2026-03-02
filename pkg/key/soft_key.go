@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"path/filepath"
 	"strings"
 
@@ -504,7 +505,16 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 
 	// Priority 2: Check for LUX_MNEMONIC environment variable
 	if mnemonic := os.Getenv(EnvMnemonic); mnemonic != "" {
-		return NewSoftFromMnemonic(networkID, mnemonic)
+		// Support LUX_KEY_INDEX for selecting BIP-44 address index.
+		// Path: m/44'/9000'/0'/0/{index} for P/X-Chain.
+		// Default: 0 (C-Chain compatible). Index 1+ for P/X-Chain deployer keys.
+		accountIndex := uint32(0)
+		if idxStr := os.Getenv(EnvKeyIndex); idxStr != "" {
+			if idx, err := strconv.ParseUint(idxStr, 10, 32); err == nil {
+				accountIndex = uint32(idx)
+			}
+		}
+		return NewSoftFromMnemonicWithAccount(networkID, mnemonic, accountIndex)
 	}
 
 	// Priority 3: Use local key file (generate if not exists)
