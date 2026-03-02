@@ -29,7 +29,7 @@ func newDeriveCmd() *cobra.Command {
 		Long: `Derive multiple key sets from a single mnemonic phrase.
 
 Uses the LUX_MNEMONIC environment variable to derive keys deterministically.
-Each key uses standard Ethereum BIP-44 path: m/44'/60'/0'/0/{index}
+Each key uses Lux P/X-Chain BIP-44 path: m/44'/9000'/0'/0/{index}
 
 This ensures compatibility with MetaMask, cast, and other Ethereum tools.
 The same mnemonic always produces the same keys across all tools.
@@ -82,7 +82,7 @@ func runDerive(_ *cobra.Command, _ []string) error {
 
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Deriving %d keys from mnemonic: %s", deriveCount, maskedMnemonic)
-	ux.Logger.PrintToUser("BIP-44 path: m/44'/60'/0'/0/{index} (Ethereum standard)")
+	ux.Logger.PrintToUser("BIP-44 path: m/44'/9000'/0'/0/{index} (Lux P/X-Chain)")
 	ux.Logger.PrintToUser("")
 
 	// Use mainnet network ID for address formatting
