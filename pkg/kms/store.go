@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 
 // Package kms provides a unified Key Management Service with support for
-// both embedded (BadgerDB) and distributed (PostgreSQL) storage backends.
+// both embedded (ZapDB) and distributed (PostgreSQL) storage backends.
 package kms
 
 import (
@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dgraph-io/badger/v4"
-	"github.com/dgraph-io/badger/v4/options"
+	badger "github.com/luxfi/zapdb/v4"
+	"github.com/luxfi/zapdb/v4/options"
 )
 
 // StorageBackend defines the storage interface for KMS operations.
