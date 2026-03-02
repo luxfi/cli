@@ -26,8 +26,8 @@
 {{- else }}
     "public-ip-resolution-service": "opendns",
 {{- end }}
-{{- if .TrackSubnets }}
-	"track-chains": "{{ .TrackSubnets }}",
+{{- if .TrackChains }}
+	"track-chains": "{{ .TrackChains }}",
 {{- end }}
 	"db-dir": "{{.DBDir}}",
 	"log-dir": "{{.LogDir}}"
