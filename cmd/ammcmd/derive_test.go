@@ -14,7 +14,7 @@ import (
 )
 
 func TestDerive(t *testing.T) {
-	mnemonic := "REDACTED_USE_KMS"
+	mnemonic := "REDACTED_MNEMONIC_USE_KMS"
 
 	// Generate seed with empty passphrase
 	seed := bip39.NewSeed(mnemonic, "")
