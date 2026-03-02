@@ -16,4 +16,5 @@ jobs:
     with:
       image: ghcr.io/luxfi/cli
 
+      runner-amd64: lux-build
     secrets: inherit
