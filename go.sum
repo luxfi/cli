@@ -437,8 +437,8 @@ github.com/luxfi/container v0.0.4 h1:BXhF82WyfqVP5mjlNcr7tP0Fcnvl0Ap1rkiu+rq5XuM
 github.com/luxfi/container v0.0.4/go.mod h1:Z3SpmMF5d4t77MM0nHYXURpn+EMVaeu1fhbd/3BGaek=
 github.com/luxfi/coreth v1.21.48 h1:l7b26Dl+SrwOEHWEaI0j0rJE1P6JTCWQlqt3ZqovYn0=
 github.com/luxfi/coreth v1.21.48/go.mod h1:OJsnRVyfRVDqHuwb8xd5w5Eo75Ik4VrIEKLST1yuvAw=
-github.com/luxfi/crypto v1.17.42 h1:RQDN9dSBN7wWXND/XO56pQfneMvtlEA8Ngb6OpVBgY4=
-github.com/luxfi/crypto v1.17.42/go.mod h1:yz/86mgfby+aaf9hsHg8KIhHENueDsZpI9nnV+G4nW8=
+github.com/luxfi/crypto v1.17.44 h1:uLyp7S9Lob8aP4m+gua8wbx4tfYK0cDPhv1rv7+YR2s=
+github.com/luxfi/crypto v1.17.44/go.mod h1:3ahTd4kNZT5WtEiVWbzGtd05wUjjrlA7eSkqeDNL8U4=
 github.com/luxfi/database v1.17.43 h1:AuW2IDc/nofuqfdspqCn0P6FsP6uBcx8RMgJr2bDRU8=
 github.com/luxfi/database v1.17.43/go.mod h1:87bOpi6u0WAiHzBxPyxS/+pN1LJGqOY7QkyEZcI+7Kk=
 github.com/luxfi/erc20-go v0.2.1 h1:7fRBaXnMLHuIVCrxCh5zkTBMZVP4n/M6j2uvY5A2Ivc=
