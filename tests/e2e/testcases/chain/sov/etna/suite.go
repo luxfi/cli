@@ -18,10 +18,10 @@ import (
 
 // Test constants.
 const (
-	CLIBinary         = "./bin/lux"
-	keyName           = "ewoq"
-	ewoqEVMAddress    = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
-	ewoqPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+	CLIBinary             = "./bin/lux"
+	keyName               = "treasury"
+	treasuryEVMAddress    = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
+	treasuryPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 )
 
 func createEtnaEVMConfig(poa, pos bool) string {
@@ -36,9 +36,9 @@ func createEtnaEVMConfig(poa, pos bool) string {
 		utils.BlockchainName,
 		"--evm",
 		"--validator-manager-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--proxy-contract-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
@@ -84,7 +84,7 @@ func createEtnaEVMConfigWithoutProxyOwner(poa, pos bool) {
 		utils.BlockchainName,
 		"--evm",
 		"--validator-manager-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
@@ -124,9 +124,9 @@ func createEtnaEVMConfigValidatorManagerFlagKeyname(poa, pos bool) {
 		utils.BlockchainName,
 		"--evm",
 		"--validator-manager-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--proxy-contract-owner",
-		ewoqEVMAddress,
+		treasuryEVMAddress,
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
@@ -166,9 +166,9 @@ func createEtnaEVMConfigValidatorManagerFlagPChain(poa, pos bool) {
 		utils.BlockchainName,
 		"--evm",
 		"--validator-manager-owner",
-		ewoqPChainAddress,
+		treasuryPChainAddress,
 		"--proxy-contract-owner",
-		ewoqPChainAddress,
+		treasuryPChainAddress,
 		"--production-defaults",
 		"--evm-chain-id=99999",
 		"--evm-token=TOK",
@@ -227,9 +227,9 @@ func deployEtnaChainEtnaFlag() {
 		utils.BlockchainName,
 		"--local",
 		"--num-bootstrap-validators=1",
-		"--ewoq",
+		"--treasury",
 		"--change-owner-address",
-		ewoqPChainAddress,
+		treasuryPChainAddress,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -256,9 +256,9 @@ func deployEtnaChainEtnaFlagConvertOnly() {
 		"--local",
 		"--num-bootstrap-validators=1",
 		"--convert-only",
-		"--ewoq",
+		"--treasury",
 		"--change-owner-address",
-		ewoqPChainAddress,
+		treasuryPChainAddress,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()
@@ -284,9 +284,9 @@ func deployEtnaChainClusterFlagConvertOnly(clusterName string) {
 		utils.BlockchainName,
 		fmt.Sprintf("--cluster=%s", clusterName),
 		"--convert-only",
-		"--ewoq",
+		"--treasury",
 		"--change-owner-address",
-		ewoqPChainAddress,
+		treasuryPChainAddress,
 		"--"+constants.SkipUpdateFlag,
 	)
 	output, err := cmd.CombinedOutput()

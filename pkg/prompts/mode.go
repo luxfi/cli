@@ -14,7 +14,7 @@ import (
 const (
 	// EnvNonInteractive forces non-interactive mode.
 	// Set to "1", "true", "yes", or "on" to enable.
-	EnvNonInteractive = "LUX_NON_INTERACTIVE"
+	EnvNonInteractive = "NON_INTERACTIVE"
 
 	// EnvCI is a common CI environment variable.
 	// When truthy, implies non-interactive.
@@ -46,7 +46,7 @@ func stdinIsTTY() bool {
 //
 // Interactive mode is enabled when ALL of:
 //   - stdin is a TTY (not piped/redirected)
-//   - LUX_NON_INTERACTIVE is not truthy
+//   - NON_INTERACTIVE is not truthy
 //   - CI is not truthy
 //
 // This follows UNIX conventions:

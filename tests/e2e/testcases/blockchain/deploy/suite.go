@@ -22,7 +22,7 @@ const (
 	chainName = "testChain"
 )
 
-const ewoqEVMAddress = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
+const treasuryEVMAddress = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
 
 func checkConvertOnlyOutput(output string, generateNodeID bool, chainName string) {
 	gomega.Expect(output).Should(gomega.ContainSubstring("Converted blockchain successfully generated"))
@@ -40,7 +40,7 @@ func checkConvertOnlyOutput(output string, generateNodeID bool, chainName string
 var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	_ = ginkgo.BeforeEach(func() {
 		// Create test chain config
-		commands.CreateEtnaEVMConfig(chainName, ewoqEVMAddress, commands.PoA)
+		commands.CreateEtnaEVMConfig(chainName, treasuryEVMAddress, commands.PoA)
 	})
 
 	ginkgo.AfterEach(func() {
@@ -306,7 +306,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 
 	ginkgo.It("ERROR PATH: invalid change owner address format", func() {
 		testFlags := utils.TestFlags{
-			"change-owner-address": ewoqEVMAddress,
+			"change-owner-address": treasuryEVMAddress,
 		}
 		output, err := utils.TestCommand(cmd.BlockchainCmd, "deploy", blockchainCmdArgs, globalFlags, testFlags)
 		gomega.Expect(err).Should(gomega.HaveOccurred())

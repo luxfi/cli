@@ -40,7 +40,7 @@ func NewNonInteractivePrompterWithMessage(msg string) *NonInteractivePrompter {
 func (p *NonInteractivePrompter) fail(operation string) error {
 	msg := p.FailMessage
 	if msg == "" {
-		msg = "use flags to provide required values, or unset LUX_NON_INTERACTIVE"
+		msg = "use flags to provide required values, or unset NON_INTERACTIVE"
 	}
 	return fmt.Errorf("%w: %s - %s", ErrNonInteractive, operation, msg)
 }

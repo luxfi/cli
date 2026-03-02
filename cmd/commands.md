@@ -145,7 +145,7 @@ lux blockchain addValidator [subcommand] [flags]
 --devnet                                operate on a devnet network
 --disable-owner string                  P-Chain address that will able to disable the validator with a P-Chain transaction
 --endpoint string                       use the given endpoint for network operations
--e, --ewoq                              use ewoq key [testnet/devnet only]
+-e, --treasury                          use treasury key [testnet/devnet only]
 -f, --testnet                              testnet                         operate on testnet (alias to testnet
 -h, --help                              help for addValidator
 -k, --key string                        select the key to use [testnet/devnet only]
@@ -189,7 +189,7 @@ lux blockchain changeOwner [subcommand] [flags]
 --control-keys strings     addresses that may make blockchain changes
 --devnet                   operate on a devnet network
 --endpoint string          use the given endpoint for network operations
--e, --ewoq                 use ewoq key [testnet/devnet]
+-e, --treasury             use treasury key [testnet/devnet]
 -f, --testnet                 testnet            operate on testnet (alias to testnet
 -h, --help                 help for changeOwner
 -k, --key string           select the key to use [testnet/devnet]
@@ -224,7 +224,7 @@ lux blockchain changeWeight [subcommand] [flags]
 --cluster string          operate on the given cluster
 --devnet                  operate on a devnet network
 --endpoint string         use the given endpoint for network operations
--e, --ewoq                use ewoq key [testnet/devnet only]
+-e, --treasury            use treasury key [testnet/devnet only]
 -f, --testnet                testnet           operate on testnet (alias to testnet
 -h, --help                help for changeWeight
 -k, --key string          select the key to use [testnet/devnet only]
@@ -381,7 +381,7 @@ lux blockchain deploy [subcommand] [flags]
 
 ```bash
  --convert-only              avoid node track, restart and poa manager setup
-  -e, --ewoq                      use ewoq key [local/devnet deploy only]
+  -e, --treasury                   use treasury key [local/devnet deploy only]
   -h, --help                      help for deploy
   -k, --key string                select the key to use [testnet/devnet deploy only]
   -g, --ledger                    use ledger instead of key
@@ -3210,7 +3210,7 @@ lux node validate primary [subcommand] [flags]
 **Flags:**
 
 ```bash
--e, --ewoq                   use ewoq key [testnet/devnet only]
+-e, --treasury               use treasury key [testnet/devnet only]
 -h, --help                   help for primary
 -k, --key string             select the key to use [testnet only]
 -g, --ledger                 use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
@@ -3245,7 +3245,7 @@ lux node validate chain [subcommand] [flags]
 
 ```bash
 --default-validator-params    use default weight/start/duration params for chain validator
--e, --ewoq                    use ewoq key [testnet/devnet only]
+-e, --treasury                use treasury key [testnet/devnet only]
 -h, --help                    help for chain
 -k, --key string              select the key to use [testnet/devnet only]
 -g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)

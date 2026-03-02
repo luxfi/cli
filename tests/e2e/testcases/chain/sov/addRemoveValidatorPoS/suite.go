@@ -18,10 +18,10 @@ import (
 
 // Test constants.
 const (
-	CLIBinary         = "./bin/lux"
-	keyName           = "ewoq"
-	ewoqEVMAddress    = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
-	ewoqPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+	CLIBinary             = "./bin/lux"
+	keyName               = "treasury"
+	treasuryEVMAddress    = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
+	treasuryPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
 )
 
 var (
@@ -34,7 +34,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoS]", func() {
 	ginkgo.It("Create Etna Chain Config", func() {
 		_, luxdVersion = commands.CreateEtnaEVMConfig(
 			utils.BlockchainName,
-			ewoqEVMAddress,
+			treasuryEVMAddress,
 			commands.PoS,
 		)
 	})
@@ -68,7 +68,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoS]", func() {
 				localClusterUris[3],
 				localClusterUris[4],
 			},
-			ewoqPChainAddress,
+			treasuryPChainAddress,
 			true, // convertOnly
 		)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -107,7 +107,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoS]", func() {
 			utils.TestLocalNodeName,
 			utils.BlockchainName,
 			localClusterUris[5],
-			ewoqPChainAddress,
+			treasuryPChainAddress,
 			1,
 			false, // use existing
 		)
@@ -120,7 +120,7 @@ var _ = ginkgo.Describe("[Etna AddRemove Validator SOV PoS]", func() {
 			utils.TestLocalNodeName,
 			utils.BlockchainName,
 			localClusterUris[6],
-			ewoqPChainAddress,
+			treasuryPChainAddress,
 			1,
 			false, // use existing
 		)

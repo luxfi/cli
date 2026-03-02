@@ -177,10 +177,10 @@ func GetKeychain(
 	network models.Network,
 	requiredFunds uint64,
 ) (*Keychain, error) {
-	// Check for LUX_MNEMONIC environment variable first
+	// Check for MNEMONIC environment variable first
 	// This allows automated deployment without interactive key selection
 	if mnemonic := key.GetMnemonicFromEnv(); mnemonic != "" && !useLedger && !useLocalKey && keyName == "" {
-		ux.Logger.PrintToUser("Using key from LUX_MNEMONIC environment variable (BIP-44 derivation)")
+		ux.Logger.PrintToUser("Using key from MNEMONIC environment variable (BIP-44 derivation)")
 		// Use BIP-44 standard derivation path: m/44'/9000'/0'/0/0 (Lux P/X-Chain)
 		sf, err := key.NewSoftFromMnemonic(network.ID(), mnemonic)
 		if err != nil {
@@ -200,7 +200,7 @@ func GetKeychain(
 	}
 
 	if !useLocalKey && !useLedger && keyName == "" {
-		return nil, fmt.Errorf("one of the options local-key/ledger/keyName must be provided (or set LUX_MNEMONIC env)")
+		return nil, fmt.Errorf("one of the options local-key/ledger/keyName must be provided (or set MNEMONIC env)")
 	}
 	// get keychain accessor
 	if useLedger {
