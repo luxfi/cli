@@ -498,21 +498,24 @@ func GetLocalKeyPath() string {
 // 3. Local key file at ~/.lux/keys/local-key.pk (generated if not exists)
 // This ensures no hardcoded keys - all keys are either from environment or generated locally.
 func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
-	// Priority 1: Check for LUX_PRIVATE_KEY environment variable
-	if privKeyEnc := os.Getenv(EnvPrivateKey); privKeyEnc != "" {
+	// Priority 1: PRIVATE_KEY / LUX_PRIVATE_KEY
+	if privKeyEnc := getEnv(EnvPrivateKey); privKeyEnc != "" {
 		return NewSoft(networkID, WithPrivateKeyEncoded(privKeyEnc))
 	}
 
-	// Priority 2: Check for LUX_MNEMONIC environment variable
-	if mnemonic := os.Getenv(EnvMnemonic); mnemonic != "" {
-		// Support LUX_KEY_INDEX for selecting BIP-44 address index.
-		// Path: m/44'/9000'/0'/0/{index} for P/X-Chain.
-		// Default: 0 (C-Chain compatible). Index 1+ for P/X-Chain deployer keys.
+	// Priority 2: MNEMONIC / LUX_MNEMONIC
+	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
+		// MNEMONIC_ACCOUNT (or LUX_KEY_INDEX) selects BIP-44 address index.
+		// Derivation: m/44'/9000'/0'/0/{account} for P/X-Chain
+		//             m/44'/60'/0'/0/{account}   for C-Chain/EVM
+		// Default: 0
 		accountIndex := uint32(0)
-		if idxStr := os.Getenv(EnvKeyIndex); idxStr != "" {
-			if idx, err := strconv.ParseUint(idxStr, 10, 32); err == nil {
-				accountIndex = uint32(idx)
+		if idxStr := getKeyIndex(); idxStr != "" {
+			idx, err := strconv.ParseUint(idxStr, 10, 32)
+			if err != nil {
+				return nil, fmt.Errorf("invalid MNEMONIC_ACCOUNT=%q: must be 0-99", idxStr)
 			}
+			accountIndex = uint32(idx)
 		}
 		return NewSoftFromMnemonicWithAccount(networkID, mnemonic, accountIndex)
 	}
