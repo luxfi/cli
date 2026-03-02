@@ -769,8 +769,15 @@ func (s *StatusService) getNetworkConfigurations() ([]Network, error) {
 			nodeDirs, _ = filepath.Glob(filepath.Join(networkDir, "node*"))
 		}
 
+		// Limit discovered node dirs to the validator count from state file.
+		// Stale directories from previous runs with more nodes must be ignored.
+		maxNodes := len(nodeDirs)
+		if len(state.Validators) > 0 && len(state.Validators) < maxNodes {
+			maxNodes = len(state.Validators)
+		}
+
 		var nodes []Node
-		for _, nodeDir := range nodeDirs {
+		for _, nodeDir := range nodeDirs[:maxNodes] {
 			nodeName := filepath.Base(nodeDir)
 			nodeID := strings.TrimPrefix(nodeName, "node")
 
