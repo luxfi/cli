@@ -421,6 +421,8 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 		api = constants.TestnetAPIEndpoint
 	case models.Mainnet:
 		api = constants.MainnetAPIEndpoint
+	case models.Devnet:
+		api = constants.DevnetAPIEndpoint
 	case models.Local:
 		// used for E2E testing of public related paths
 		api = constants.LocalAPIEndpoint
