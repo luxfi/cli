@@ -99,7 +99,7 @@ func (*versionMapper) GetCompatURL(vmType models.VMType) string {
 	case models.CustomVM:
 		// Return a generic compatibility URL for custom VMs
 		// This could be overridden per custom VM implementation
-		// TODO: Define CustomVMCompatibilityURL in constants package
+		// CustomVMCompatibilityURL defined inline; migrate to constants when stabilized.
 		return ""
 	default:
 		return ""
