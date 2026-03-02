@@ -16,7 +16,7 @@ import (
 
 const (
 	// ParsDefaultChainID is the default chain ID for Pars networks
-	ParsDefaultChainID = 7070
+	ParsDefaultChainID = 494949
 	// ParsOrg is the GitHub organization for Pars
 	ParsOrg = "parsdao"
 	// ParsRepoName is the repository name for parsd
