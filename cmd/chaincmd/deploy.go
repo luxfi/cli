@@ -547,18 +547,18 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 	}
 	ux.Logger.PrintToUser("Control keys: %v", controlKeys)
 
-	subnetID, err := deployer.DeployChain(controlKeys, uint32(len(controlKeys)))
+	chainID, err := deployer.DeployChain(controlKeys, uint32(len(controlKeys)))
 	if err != nil {
 		return fmt.Errorf("failed to create chain: %w", err)
 	}
-	ux.Logger.PrintToUser("Chain created: %s", subnetID.String())
+	ux.Logger.PrintToUser("Chain created: %s", chainID.String())
 
 	// Step 2: Create blockchain (P-chain transaction)
-	ux.Logger.PrintToUser("Creating blockchain on chain %s...", subnetID.String())
+	ux.Logger.PrintToUser("Creating blockchain on chain %s...", chainID.String())
 	isFullySigned, blockchainID, _, _, err := deployer.DeployBlockchain(
 		controlKeys,
 		controlKeys,
-		subnetID,
+		chainID,
 		chainName,
 		chainGenesis,
 	)
@@ -571,13 +571,13 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Blockchain deployed successfully!")
-	ux.Logger.PrintToUser("  Chain ID:      %s", subnetID.String())
+	ux.Logger.PrintToUser("  Chain ID:      %s", chainID.String())
 	ux.Logger.PrintToUser("  Blockchain ID: %s", blockchainID.String())
 	ux.Logger.PrintToUser("  RPC Endpoint:  %s/ext/bc/%s/rpc", endpoint, blockchainID.String())
 	ux.Logger.PrintToUser("")
 
 	// Update sidecar with deployment info
-	if err := app.UpdateSidecarNetworks(sc, network, subnetID, blockchainID); err != nil {
+	if err := app.UpdateSidecarNetworks(sc, network, chainID, blockchainID); err != nil {
 		return fmt.Errorf("failed to update sidecar: %w", err)
 	}
 	return nil
