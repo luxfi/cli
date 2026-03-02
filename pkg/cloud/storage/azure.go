@@ -17,8 +17,7 @@ type AzureStorage struct {
 
 // NewAzureStorage creates a new Azure Blob storage backend.
 func NewAzureStorage(ctx context.Context, cfg *Config) (*AzureStorage, error) {
-	// TODO: Implement Azure Blob Storage client
-	return nil, fmt.Errorf("Azure storage not yet implemented")
+	return nil, fmt.Errorf("azure storage backend is not supported")
 }
 
 // Upload uploads data from a reader to Azure.
