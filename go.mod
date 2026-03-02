@@ -14,17 +14,17 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.1.2
-	github.com/luxfi/crypto v1.17.40
+	github.com/luxfi/crypto v1.17.42
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.8.35
-	github.com/luxfi/geth v1.16.75
+	github.com/luxfi/geth v1.16.76
 	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/keychain v1.0.2
 	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/lpm v1.9.4 // indirect
 	github.com/luxfi/netrunner v1.15.7
 	github.com/luxfi/sdk v1.16.46
-	github.com/luxfi/vm v1.0.38
+	github.com/luxfi/vm v1.0.39
 	github.com/luxfi/warp v1.18.5
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0
@@ -70,7 +70,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20260311194731-d5b7577c683d // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
-	github.com/VictoriaMetrics/fastcache v1.13.2 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.17 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.17 // indirect
@@ -139,7 +138,6 @@ require (
 	github.com/go-openapi/swag v0.23.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
-	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/gofrs/flock v0.13.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
@@ -168,12 +166,12 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/accel v1.0.1 // indirect
+	github.com/luxfi/accel v1.0.6 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.2.1 // indirect
 	github.com/luxfi/compress v0.0.5 // indirect
 	github.com/luxfi/concurrent v0.0.3 // indirect
-	github.com/luxfi/consensus v1.22.69 // indirect
+	github.com/luxfi/consensus v1.22.70 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.8 // indirect
@@ -181,8 +179,8 @@ require (
 	github.com/luxfi/math/safe v0.0.1 // indirect
 	github.com/luxfi/metric v1.5.0 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
-	github.com/luxfi/node v1.23.6 // indirect
-	github.com/luxfi/precompile v0.4.7 // indirect
+	github.com/luxfi/node v1.23.31 // indirect
+	github.com/luxfi/precompile v0.4.10 // indirect
 	github.com/luxfi/runtime v1.0.1 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/timer v1.0.2 // indirect
@@ -284,14 +282,14 @@ require (
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/klauspost/compress v1.18.4
 	github.com/luxfi/address v1.0.1
-	github.com/luxfi/api v1.0.3
+	github.com/luxfi/api v1.0.4
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.4.4
 	github.com/luxfi/coreth v1.21.48
 	github.com/luxfi/database v1.17.43
 	github.com/luxfi/filesystem v0.0.1
 	github.com/luxfi/formatting v1.0.1
-	github.com/luxfi/genesis v1.6.1
+	github.com/luxfi/genesis v1.6.2
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/log v1.4.1
