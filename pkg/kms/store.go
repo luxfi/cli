@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	badger "github.com/luxfi/zapdb/v4"
-	"github.com/luxfi/zapdb/v4/options"
+	badger "github.com/luxfi/zapdb"
+	"github.com/luxfi/zapdb/options"
 )
 
 // StorageBackend defines the storage interface for KMS operations.
