@@ -34,6 +34,7 @@ Features:
 
 	cmd.AddCommand(newStartCmd())
 	cmd.AddCommand(newStopCmd())
+	cmd.AddCommand(newStackCmd())
 
 	return cmd
 }

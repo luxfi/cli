@@ -64,4 +64,28 @@ const (
 
 	// DevCmd is the dev command name (for local development)
 	DevCmd = "dev"
+
+	// ZKCmd is the zk command name (for zero-knowledge proof tools)
+	ZKCmd = "zk"
+
+	// FHECmd is the fhe command name (for fully homomorphic encryption)
+	FHECmd = "fhe"
+
+	// RTCmd is the rt command name (for ringtail threshold signing)
+	RTCmd = "rt"
+
+	// MPCCmd is the mpc command name (for multi-party computation)
+	MPCCmd = "mpc"
+
+	// KMSCmd is the kms command name (for key management service)
+	KMSCmd = "kms"
+
+	// ExploreCmd is the explore command name (for block explorer)
+	ExploreCmd = "explore"
+
+	// AICmd is the ai command name (for AI operations)
+	AICmd = "ai"
+
+	// TUICmd is the tui command name (for interactive terminal UI)
+	TUICmd = "tui"
 )

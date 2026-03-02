@@ -20,6 +20,7 @@ import (
 	"github.com/luxfi/cli/cmd/chaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/devcmd"
+	"github.com/luxfi/cli/cmd/explorecmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/gpucmd"
 	"github.com/luxfi/cli/cmd/keycmd"
@@ -31,12 +32,17 @@ import (
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
+	aicli "github.com/luxfi/ai/cli"
+	fhecli "github.com/luxfi/fhe/cli"
+	rtcli "github.com/luxfi/ringtail/cli"
+	tuicli "github.com/luxfi/tui/cli"
 	"github.com/luxfi/cli/cmd/selfcmd"
 	"github.com/luxfi/cli/cmd/snapshotcmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
 	"github.com/luxfi/cli/cmd/validatorcmd"
 	"github.com/luxfi/cli/cmd/vmcmd"
 	"github.com/luxfi/cli/cmd/warpcmd"
+	"github.com/luxfi/cli/cmd/zkcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
@@ -137,6 +143,7 @@ For detailed command help, use: lux <command> --help`,
 
 	// add sub commands
 	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (local dev environment)
+	rootCmd.AddCommand(explorecmd.NewCmd(app))   // explore (block explorer)
 	rootCmd.AddCommand(networkcmd.NewCmd(app))    // network (local network management)
 	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias (new version)
 	rootCmd.AddCommand(snapshotcmd.NewCmd(app))   // snapshot (native incremental backups)
@@ -192,6 +199,21 @@ For detailed command help, use: lux <command> --help`,
 
 	// add gpu management command
 	rootCmd.AddCommand(gpucmd.NewCmd(app))
+
+	// add zk command (ceremony, prove, verify, SRS)
+	rootCmd.AddCommand(zkcmd.NewCmd(app))
+
+	// add ai command (chat, agents, models) — from github.com/luxfi/ai/cli
+	rootCmd.AddCommand(aicli.NewCmd())
+
+	// add tui command (interactive terminal UI) — from github.com/luxfi/tui/cli
+	rootCmd.AddCommand(tuicli.NewCmd())
+
+	// add fhe command (fully homomorphic encryption) — from github.com/luxfi/fhe/cli
+	rootCmd.AddCommand(fhecli.NewCmd())
+
+	// add rt command (ringtail threshold signing) — from github.com/luxfi/ringtail/cli
+	rootCmd.AddCommand(rtcli.NewCmd())
 
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd(app))
