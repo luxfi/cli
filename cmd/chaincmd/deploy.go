@@ -4,15 +4,21 @@
 package chaincmd
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
+	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnetworkinterface"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
@@ -30,6 +36,8 @@ const (
 	MaxConsecutiveHealthFailures = 10
 	// LuxEVMName is the canonical name for the Lux EVM
 	LuxEVMName = "Lux EVM"
+	// RemoteProbeTimeout is the timeout for probing a remote network endpoint
+	RemoteProbeTimeout = 10 * time.Second
 )
 
 var (
@@ -39,6 +47,7 @@ var (
 	deployDevnet  bool
 	nodeVersion   string
 	deployTimeout time.Duration
+	deployKeyName string
 )
 
 func newDeployCmd() *cobra.Command {
@@ -67,21 +76,30 @@ PREREQUISITES:
   1. Chain must be created:
      lux chain create mychain
 
-  2. Network must be running:
+  2. For local networks, network must be running:
      lux network start --devnet
 
-  3. VM must be installed (for custom VMs):
+  3. For remote networks (devnet, testnet, mainnet), a funded key is needed:
+     Set LUX_MNEMONIC or LUX_PRIVATE_KEY env var, or use --key flag
+
+  4. VM must be installed (for custom VMs):
      lux vm link "Lux EVM" --path ~/work/lux/evm/build/evm
 
 OPTIONS:
 
   --node-version   Specific luxd version to use (default: latest)
+  --key            Key name for remote network deployment (from ~/.lux/keys/)
 
 EXAMPLES:
 
-  # Deploy to local devnet (most common)
+  # Deploy to remote devnet (auto-detects remote endpoint)
   lux chain deploy mychain --devnet
-  lux chain deploy mychain -d
+
+  # Deploy to remote devnet with specific key
+  lux chain deploy mychain --devnet --key mykey
+
+  # Deploy to local devnet (if local network is running)
+  lux chain deploy mychain --devnet
 
   # Deploy to testnet
   lux chain deploy mychain --testnet
@@ -96,19 +114,26 @@ EXAMPLES:
 
 DEPLOYMENT PROCESS:
 
+  Local network:
   1. Validates chain configuration exists
-  2. Verifies network is running
+  2. Verifies local gRPC network is running
   3. Checks VM plugin is installed
-  4. Creates blockchain on the network
-  5. Updates sidecar with deployment info (chain ID, blockchain ID)
-  6. Returns endpoints for the deployed chain
+  4. Creates blockchain via netrunner gRPC
+  5. Updates sidecar with deployment info
+
+  Remote network:
+  1. Validates chain configuration exists
+  2. Probes remote endpoint (e.g., https://api.lux-dev.network)
+  3. Creates subnet on P-chain via wallet transaction
+  4. Creates blockchain on P-chain via wallet transaction
+  5. Updates sidecar with deployment info
 
 OUTPUT:
 
   On success, displays:
   - Blockchain ID
   - Chain ID
-  - RPC endpoints for each validator node
+  - RPC endpoints
 
 TROUBLESHOOTING:
 
@@ -140,6 +165,7 @@ NOTES:
 	cmd.Flags().BoolVarP(&deployDevnet, "devnet", "d", false, "Deploy to devnet")
 	cmd.Flags().StringVar(&nodeVersion, "node-version", "latest", "Node version to use")
 	cmd.Flags().DurationVar(&deployTimeout, "timeout", DefaultDeployTimeout, "Maximum time to wait for chain deployment (e.g., 60s, 2m)")
+	cmd.Flags().StringVar(&deployKeyName, "key", "", "Key name for remote network deployment (from ~/.lux/keys/)")
 
 	return cmd
 }
@@ -283,6 +309,40 @@ func getVMDisplayName(vm models.VMType) string {
 	}
 }
 
+// getRemoteEndpoint returns the well-known remote API endpoint for a network type.
+// Returns empty string for local/custom networks that have no remote endpoint.
+func getRemoteEndpoint(network models.Network) string {
+	return network.Endpoint()
+}
+
+// probeRemoteEndpoint checks if a remote network endpoint is alive by hitting /ext/info.
+// Returns true if the endpoint responds with HTTP 200.
+func probeRemoteEndpoint(endpoint string) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), RemoteProbeTimeout)
+	defer cancel()
+
+	url := endpoint + "/ext/info"
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	// Any response (even 4xx for missing method) means the node is alive
+	return resp.StatusCode < 500
+}
+
+// isRemoteCapableNetwork returns true if the network can be deployed to via remote P-chain API
+func isRemoteCapableNetwork(network models.Network) bool {
+	return network == models.Devnet || network == models.Testnet || network == models.Mainnet
+}
+
 func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network) error {
 	app.Log.Debug("Deploy to network", "network", network.String())
 
@@ -304,8 +364,43 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 	// Each network type (custom, testnet, mainnet) has its own state file
 	networkState, stateErr := app.LoadNetworkStateForType(targetType)
 	if stateErr != nil {
-		return fmt.Errorf("failed to load network state: %w\nIs the network running? Start with: lux network start", stateErr)
+		// State file read error (not just missing) - only fail if no remote fallback
+		if !isRemoteCapableNetwork(network) {
+			return fmt.Errorf("failed to load network state: %w\nIs the network running? Start with: lux network start", stateErr)
+		}
+		app.Log.Debug("Failed to load network state, will try remote endpoint", "error", stateErr)
+		networkState = nil
 	}
+
+	// For remote-capable networks, try the remote endpoint if:
+	// 1. No local state exists, OR
+	// 2. Local state exists but has a remote API endpoint (e.g., https://...), OR
+	// 3. Local state claims running but the state file is stale (gRPC server dead)
+	if isRemoteCapableNetwork(network) {
+		useRemote := false
+		var remoteEndpoint string
+
+		if networkState == nil || !networkState.Running {
+			// No local state or not running -- try remote
+			useRemote = true
+			remoteEndpoint = getRemoteEndpoint(network)
+		} else if networkState.APIEndpoint != "" && strings.HasPrefix(networkState.APIEndpoint, "https://") {
+			// State file points to a remote endpoint already
+			useRemote = true
+			remoteEndpoint = networkState.APIEndpoint
+		}
+
+		if useRemote && remoteEndpoint != "" {
+			ux.Logger.PrintToUser("Probing remote %s endpoint: %s", targetType, remoteEndpoint)
+			if probeRemoteEndpoint(remoteEndpoint) {
+				ux.Logger.PrintToUser("Remote %s is alive at %s", targetType, remoteEndpoint)
+				return deployToRemoteNetwork(chainName, chainGenesis, sc, network, remoteEndpoint)
+			}
+			ux.Logger.PrintToUser("Remote endpoint %s is not reachable", remoteEndpoint)
+		}
+	}
+
+	// Local network path - requires running gRPC netrunner
 	if networkState == nil || !networkState.Running {
 		startHint := "lux network start"
 		switch targetType {
@@ -319,6 +414,11 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		return fmt.Errorf("no %s network running. Start the network first with: %s", targetType, startHint)
 	}
 
+	return deployToLocalNetwork(chainName, chainGenesis, sc, network, networkState)
+}
+
+// deployToLocalNetwork deploys a chain to a locally-running network managed by the CLI's gRPC netrunner.
+func deployToLocalNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network, networkState *application.NetworkState) error {
 	// Log gRPC port being used
 	app.Log.Debug("Using gRPC port from network state", "port", networkState.GRPCPort, "network", networkState.NetworkType)
 
@@ -411,6 +511,99 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		return fmt.Errorf("failed to update sidecar: %w", err)
 	}
 	return nil
+}
+
+// deployToRemoteNetwork deploys a chain to a remote network via P-chain API transactions.
+// This is used when no local gRPC netrunner is running but the remote network is reachable.
+func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, network models.Network, endpoint string) error {
+	ux.Logger.PrintToUser("Deploying to remote %s via P-chain API at %s", network.String(), endpoint)
+
+	// Get keychain for signing P-chain transactions
+	networkID := network.ID()
+	kc, err := getDeployKeychain(network, networkID)
+	if err != nil {
+		return fmt.Errorf("failed to get keychain for deployment: %w\n\nTo fix, set LUX_MNEMONIC or LUX_PRIVATE_KEY env var, or use --key flag", err)
+	}
+
+	// Show the deployer address
+	addrs := kc.Keychain.Addresses().List()
+	if len(addrs) == 0 {
+		return fmt.Errorf("keychain has no addresses")
+	}
+
+	// Create the public deployer
+	deployer := chain.NewPublicDeployer(app, kc.UsesLedger, kc.Keychain, network)
+
+	// Step 1: Create subnet (P-chain transaction)
+	ux.Logger.PrintToUser("Creating subnet on P-chain...")
+	controlKeys, err := kc.PChainFormattedStrAddresses()
+	if err != nil {
+		return fmt.Errorf("failed to get P-chain addresses: %w", err)
+	}
+	ux.Logger.PrintToUser("Control keys: %v", controlKeys)
+
+	subnetID, err := deployer.DeployChain(controlKeys, uint32(len(controlKeys)))
+	if err != nil {
+		return fmt.Errorf("failed to create subnet: %w", err)
+	}
+	ux.Logger.PrintToUser("Subnet created: %s", subnetID.String())
+
+	// Step 2: Create blockchain (P-chain transaction)
+	ux.Logger.PrintToUser("Creating blockchain on subnet %s...", subnetID.String())
+	isFullySigned, blockchainID, _, _, err := deployer.DeployBlockchain(
+		controlKeys,
+		controlKeys,
+		subnetID,
+		chainName,
+		chainGenesis,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create blockchain: %w", err)
+	}
+	if !isFullySigned {
+		return fmt.Errorf("blockchain transaction requires additional signatures (multisig not yet supported for remote deploy)")
+	}
+
+	ux.Logger.PrintToUser("")
+	ux.Logger.PrintToUser("Blockchain deployed successfully!")
+	ux.Logger.PrintToUser("  Subnet ID:     %s", subnetID.String())
+	ux.Logger.PrintToUser("  Blockchain ID: %s", blockchainID.String())
+	ux.Logger.PrintToUser("  RPC Endpoint:  %s/ext/bc/%s/rpc", endpoint, blockchainID.String())
+	ux.Logger.PrintToUser("")
+
+	// Update sidecar with deployment info
+	if err := app.UpdateSidecarNetworks(sc, network, subnetID, blockchainID); err != nil {
+		return fmt.Errorf("failed to update sidecar: %w", err)
+	}
+	return nil
+}
+
+// getDeployKeychain obtains a keychain for remote network deployment.
+// Priority:
+//  1. --key flag (explicit key name)
+//  2. LUX_PRIVATE_KEY env var
+//  3. LUX_MNEMONIC env var
+//  4. Interactive prompt (if terminal available)
+func getDeployKeychain(network models.Network, networkID uint32) (*keychain.Keychain, error) {
+	// If --key flag specified, use that key
+	if deployKeyName != "" {
+		return keychain.GetKeychain(app, true, false, nil, deployKeyName, network, 0)
+	}
+
+	// Try environment variables (LUX_PRIVATE_KEY, LUX_MNEMONIC)
+	sf, err := key.GetOrCreateLocalKey(networkID)
+	if err == nil && sf != nil {
+		kc := sf.KeyChain()
+		wrappedKc := keychain.WrapSecp256k1fxKeychain(kc)
+		pAddrs := sf.P()
+		if len(pAddrs) > 0 {
+			ux.Logger.PrintToUser("Using key with P-Chain address: %s", pAddrs[0])
+		}
+		return keychain.NewKeychain(network, wrappedKc, nil, nil), nil
+	}
+
+	// Fall back to interactive prompt via GetKeychainFromCmdLineFlags
+	return keychain.GetKeychainFromCmdLineFlags(app, "deploy chain to "+network.String(), network, "", false, false, nil, 0)
 }
 
 func checkDeployCompatibility(network localnetworkinterface.StatusChecker, configuredRPCVersion int) (string, error) {
