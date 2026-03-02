@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   docker:
-    uses: luxfi/.github/.github/workflows/docker-build.yml@main
+    uses: hanzoai/.github/.github/workflows/docker-build.yml@main
     with:
       image: ghcr.io/luxfi/cli
 
