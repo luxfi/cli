@@ -33,6 +33,11 @@ const (
 	// Format: Go duration string (e.g., "30s", "5m", "1h").
 	// Default: 30s (30 seconds of inactivity before auto-lock).
 	EnvKeySessionTimeout = "LUX_KEY_SESSION_TIMEOUT"
+
+	// EnvKeyIndex selects the BIP-44 address index for mnemonic derivation.
+	// Path: m/44'/9000'/0'/0/{index} for P/X-Chain.
+	// Default: 0. Set to 1 for Liquidity deployer key.
+	EnvKeyIndex = "LUX_KEY_INDEX"
 )
 
 // EnvBackend loads keys from environment variables
