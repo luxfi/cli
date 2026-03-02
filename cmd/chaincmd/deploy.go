@@ -124,7 +124,7 @@ DEPLOYMENT PROCESS:
   Remote network:
   1. Validates chain configuration exists
   2. Probes remote endpoint (e.g., https://api.lux-dev.network)
-  3. Creates subnet on P-chain via wallet transaction
+  3. Creates chain on P-chain via wallet transaction
   4. Creates blockchain on P-chain via wallet transaction
   5. Updates sidecar with deployment info
 
@@ -534,8 +534,8 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 	// Create the public deployer
 	deployer := chain.NewPublicDeployer(app, kc.UsesLedger, kc.Keychain, network)
 
-	// Step 1: Create subnet (P-chain transaction)
-	ux.Logger.PrintToUser("Creating subnet on P-chain...")
+	// Step 1: Create chain (P-chain transaction)
+	ux.Logger.PrintToUser("Creating chain on P-chain...")
 	controlKeys, err := kc.PChainFormattedStrAddresses()
 	if err != nil {
 		return fmt.Errorf("failed to get P-chain addresses: %w", err)
@@ -544,12 +544,12 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 
 	subnetID, err := deployer.DeployChain(controlKeys, uint32(len(controlKeys)))
 	if err != nil {
-		return fmt.Errorf("failed to create subnet: %w", err)
+		return fmt.Errorf("failed to create chain: %w", err)
 	}
-	ux.Logger.PrintToUser("Subnet created: %s", subnetID.String())
+	ux.Logger.PrintToUser("Chain created: %s", subnetID.String())
 
 	// Step 2: Create blockchain (P-chain transaction)
-	ux.Logger.PrintToUser("Creating blockchain on subnet %s...", subnetID.String())
+	ux.Logger.PrintToUser("Creating blockchain on chain %s...", subnetID.String())
 	isFullySigned, blockchainID, _, _, err := deployer.DeployBlockchain(
 		controlKeys,
 		controlKeys,
@@ -566,7 +566,7 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Blockchain deployed successfully!")
-	ux.Logger.PrintToUser("  Subnet ID:     %s", subnetID.String())
+	ux.Logger.PrintToUser("  Chain ID:      %s", subnetID.String())
 	ux.Logger.PrintToUser("  Blockchain ID: %s", blockchainID.String())
 	ux.Logger.PrintToUser("  RPC Endpoint:  %s/ext/bc/%s/rpc", endpoint, blockchainID.String())
 	ux.Logger.PrintToUser("")

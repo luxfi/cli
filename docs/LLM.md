@@ -67,7 +67,7 @@ cd /Users/z/work/lux/cli/docs && pnpm build
 - Examples: 85% (practical code examples throughout)
 
 ### Remaining 15%:
-- Additional command modules (l3cmd, subnetcmd, migratecmd)
+- Additional command modules (l3cmd, chaincmd, migratecmd)
 - Advanced integration examples (monitoring stacks, analytics)
 - Video tutorials and interactive examples
 - Community contribution guide
@@ -97,7 +97,7 @@ cd /Users/z/work/lux/cli/docs && pnpm build
 - ❌ local
 - ❌ migrate
 - ❌ primary
-- ❌ subnet
+- ❌ chain (l2/subnet alias)
 - ❌ update
 - ❌ messenger
 - ❌ relayer
