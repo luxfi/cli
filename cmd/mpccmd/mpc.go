@@ -525,10 +525,10 @@ func newWalletCreateCmd() *cobra.Command {
 		Use:   "create",
 		Short: "Create a new wallet",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO: Implement wallet creation with DKG
+			// Wallet creation requires a running MPC network with DKG ceremony.
 			ux.Logger.PrintToUser("Wallet creation requires running MPC nodes")
 			ux.Logger.PrintToUser("Start nodes first with 'lux mpc node start'")
-			return nil
+			return fmt.Errorf("no running MPC network found")
 		},
 	}
 }

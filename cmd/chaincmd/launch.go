@@ -6,6 +6,7 @@ package chaincmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -199,7 +200,12 @@ func runLaunch(_ *cobra.Command, args []string) error {
 		ux.Logger.PrintToUser("Applying manifests to cluster...")
 		for _, f := range writtenFiles {
 			ux.Logger.PrintToUser("  kubectl apply -f %s", f)
-			// TODO: exec kubectl apply -f <file>
+			cmd := exec.Command("kubectl", "apply", "-f", f)
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("kubectl apply -f %s: %w", f, err)
+			}
 		}
 		ux.Logger.PrintToUser("")
 		ux.Logger.PrintToUser("Monitor with:")

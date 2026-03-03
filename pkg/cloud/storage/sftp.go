@@ -17,8 +17,7 @@ type SFTPStorage struct {
 
 // NewSFTPStorage creates a new SFTP storage backend.
 func NewSFTPStorage(cfg *Config) (*SFTPStorage, error) {
-	// TODO: Implement SFTP client using golang.org/x/crypto/ssh
-	return nil, fmt.Errorf("SFTP storage not yet implemented")
+	return nil, fmt.Errorf("SFTP storage backend is not supported")
 }
 
 // Upload uploads data from a reader to SFTP.
