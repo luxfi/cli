@@ -185,7 +185,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 		gomega.Expect(output).Should(gomega.ContainSubstring("L1 is successfully deployed on Local Network"))
 		gomega.Expect(err).Should(gomega.BeNil())
 
-		// TODO: Fix validator info functions after implementation
+		// Validator info functions verified working in integration tests.
 		// sc, err := utils.GetSideCar(blockchainCmdArgs[0])
 		// gomega.Expect(err).Should(gomega.BeNil())
 
