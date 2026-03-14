@@ -18,7 +18,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/ux"
 
-	"github.com/posthog/posthog-go" // External SDK; telemetry is sent to Hanzo Insights (insights.hanzo.ai)
+	insights "github.com/hanzoai/insights-go"
 	"github.com/spf13/cobra"
 )
 
@@ -139,7 +139,7 @@ func TrackMetrics(command *cobra.Command, flags map[string]string) {
 		return
 	}
 
-	client, _ := posthog.NewWithConfig(telemetryToken, posthog.Config{Endpoint: telemetryInstance})
+	client, _ := insights.NewWithConfig(telemetryToken, insights.Config{Endpoint: telemetryInstance})
 
 	defer func() { _ = client.Close() }()
 
@@ -153,7 +153,7 @@ func TrackMetrics(command *cobra.Command, flags map[string]string) {
 	for propertyKey, propertyValue := range flags {
 		telemetryProperties[propertyKey] = propertyValue
 	}
-	_ = client.Enqueue(posthog.Capture{
+	_ = client.Enqueue(insights.Capture{
 		DistinctId: userID,
 		Event:      "cli-command",
 		Properties: telemetryProperties,
