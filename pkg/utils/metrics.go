@@ -18,7 +18,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/ux"
 
-	"github.com/posthog/posthog-go"
+	"github.com/posthog/posthog-go" // External SDK; telemetry is sent to Hanzo Insights (insights.hanzo.ai)
 	"github.com/spf13/cobra"
 )
 
