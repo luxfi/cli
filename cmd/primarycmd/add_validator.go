@@ -151,9 +151,9 @@ func addValidator(_ *cobra.Command, _ []string) error {
 			}
 		}
 	case models.Mainnet:
-		useLedger = true
-		if keyName != "" {
-			return ErrStoredKeyOnMainnet
+		// Lux POA network: allow key-based mainnet operations
+		if keyName == "" && !useLedger {
+			useLedger = true
 		}
 	default:
 		return errors.New("unsupported network")
@@ -258,6 +258,9 @@ func estimateAddValidatorFee(network models.Network) uint64 {
 	const baseFee = 1_000_000 // 0.001 LUX base fee
 	switch network.Kind() {
 	case models.Mainnet:
+		if keyName == "" && !useLedger {
+			useLedger = true
+		}
 		return baseFee * 2 // Higher fee for mainnet
 	case models.Testnet:
 		return baseFee

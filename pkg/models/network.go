@@ -49,6 +49,8 @@ func (s Network) NetworkID() (uint32, error) {
 		return constants.MainnetID, nil
 	case Testnet:
 		return constants.TestnetID, nil
+	case Devnet:
+		return constants.DevnetID, nil
 	case Local:
 		return constants.LocalNetworkID, nil
 	}

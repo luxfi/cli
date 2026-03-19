@@ -88,6 +88,8 @@ func GetHRP(networkID uint32) string {
 		return constants.TestnetHRP
 	case constants.MainnetID:
 		return constants.MainnetHRP
+	case constants.DevnetID:
+		return constants.DevnetHRP
 	default:
 		return constants.CustomHRP
 	}
