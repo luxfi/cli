@@ -35,56 +35,76 @@ var (
 	ErrInvalidPrivateKeyEncoding = errors.New("invalid private key encoding")
 )
 
-// EthCoinType is the BIP-44 coin type for Ethereum (60')
-// Using Ethereum standard for compatibility with MetaMask, cast, and other tools
-const EthCoinType = 60
+// BIP-44 coin types
+const (
+	// LuxCoinType is the BIP-44 coin type for Lux P-Chain and X-Chain (9000')
+	// Used for: P-chain validators, X-chain UTXOs, subnet creation
+	// Path: m/44'/9000'/0'/0/{index}
+	LuxCoinType = 9000
 
-// deriveMnemonicKey derives a private key from a BIP-39 mnemonic using BIP-44 path.
-// Path: m/44'/60'/0'/0/{accountIndex} (Ethereum standard)
-func deriveMnemonicKey(mnemonic string, accountIndex uint32) ([]byte, error) {
+	// EthCoinType is the BIP-44 coin type for Ethereum/C-Chain (60')
+	// Used for: C-chain transactions, EVM compatibility, MetaMask
+	// Path: m/44'/60'/0'/0/{index}
+	EthCoinType = 60
+)
+
+// deriveMnemonicKeyWithCoinType derives a private key from a BIP-39 mnemonic using BIP-44 path.
+// coinType=9000 for P/X chain, coinType=60 for C-chain/EVM
+func deriveMnemonicKeyWithCoinType(mnemonic string, coinType, accountIndex uint32) ([]byte, error) {
 	if !bip39.IsMnemonicValid(mnemonic) {
 		return nil, fmt.Errorf("invalid mnemonic phrase")
 	}
 	seed := bip39.NewSeed(mnemonic, "")
 
-	// Create master key from seed
 	masterKey, err := bip32.NewMasterKey(seed)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create master key: %w", err)
 	}
 
-	// BIP-44 path: m/44'/60'/0'/0/{accountIndex}
-	// m/44' (purpose)
+	// m/44'
 	key, err := masterKey.NewChildKey(bip32.FirstHardenedChild + 44)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive purpose: %w", err)
 	}
 
-	// m/44'/60' (Ethereum coin type - for compatibility with MetaMask/cast)
-	key, err = key.NewChildKey(bip32.FirstHardenedChild + EthCoinType)
+	// m/44'/{coinType}' (9000 for Lux P/X, 60 for C-chain/EVM)
+	key, err = key.NewChildKey(bip32.FirstHardenedChild + coinType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive coin type: %w", err)
 	}
 
-	// m/44'/60'/0' (account)
+	// m/44'/{coinType}'/0'
 	key, err = key.NewChildKey(bip32.FirstHardenedChild + 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive account: %w", err)
 	}
 
-	// m/44'/60'/0'/0 (change)
+	// m/44'/{coinType}'/0'/0
 	key, err = key.NewChildKey(0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive change: %w", err)
 	}
 
-	// m/44'/60'/0'/0/{accountIndex} (address index)
+	// m/44'/{coinType}'/0'/0/{accountIndex}
 	key, err = key.NewChildKey(accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive address index: %w", err)
 	}
 
 	return key.Key, nil
+}
+
+// deriveMnemonicKey derives using Ethereum coin type (60) for all chains.
+// Lux uses the same key (secp256k1) across P/X/C chains — the key is the same,
+// only the address encoding differs (bech32 for P/X, hex for C).
+// This matches the genesis allocation derivation at m/44'/60'/0'/0/{index}.
+func deriveMnemonicKey(mnemonic string, accountIndex uint32) ([]byte, error) {
+	return deriveMnemonicKeyWithCoinType(mnemonic, EthCoinType, accountIndex)
+}
+
+// deriveMnemonicKeyEth derives using Ethereum coin type (60) for C-chain/EVM compatibility.
+func deriveMnemonicKeyEth(mnemonic string, accountIndex uint32) ([]byte, error) {
+	return deriveMnemonicKeyWithCoinType(mnemonic, EthCoinType, accountIndex)
 }
 
 var _ Key = &SoftKey{}
