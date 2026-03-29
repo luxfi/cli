@@ -38,7 +38,7 @@ var (
 // BIP-44 coin types
 const (
 	// LuxCoinType is the BIP-44 coin type for Lux P-Chain and X-Chain (9000')
-	// Used for: P-chain validators, X-chain UTXOs, subnet creation
+	// Used for: P-chain validators, X-chain UTXOs, chain creation
 	// Path: m/44'/9000'/0'/0/{index}
 	LuxCoinType = 9000
 
