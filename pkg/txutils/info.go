@@ -79,12 +79,12 @@ func GetChainOwners(network models.Network, chainID ids.ID) (*ChainOwners, error
 		return nil, err
 	}
 
-	createSubnetTx, ok := tx.Unsigned.(*txs.CreateNetworkTx)
+	createChainTx, ok := tx.Unsigned.(*txs.CreateNetworkTx)
 	if !ok {
 		return nil, fmt.Errorf("got unexpected type %T for chain tx %s", tx.Unsigned, chainID)
 	}
 
-	owner, ok := createSubnetTx.Owner.(*secp256k1fx.OutputOwners)
+	owner, ok := createChainTx.Owner.(*secp256k1fx.OutputOwners)
 	if !ok {
 		// If not a standard OutputOwners, it might be a different owner type
 		// For now, treat as non-permissioned
