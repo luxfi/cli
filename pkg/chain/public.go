@@ -6,6 +6,9 @@ package chain
 
 import (
 	"context"
+	"crypto/tls"
+	"net"
+	"net/http"
 	"errors"
 	"fmt"
 	"time"
@@ -447,6 +450,14 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 		pChainTxsToFetch.Add(txID)
 	}
 
+	// Set short dial timeouts on the default HTTP transport to handle DNS
+	// entries with mixed live/dead IPs. Without this, the Go HTTP client
+	// waits the full timeout on each dead IP before trying the next one.
+	if t, ok := http.DefaultTransport.(*http.Transport); ok {
+		t.DialContext = (&net.Dialer{Timeout: 5 * time.Second}).DialContext
+		t.TLSHandshakeTimeout = 10 * time.Second
+		t.TLSClientConfig = &tls.Config{InsecureSkipVerify: false} // Keep TLS verification
+	}
 	ux.Logger.PrintToUser("loadWallet: creating P-Chain wallet...")
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
 	// support standard AVM API methods.
