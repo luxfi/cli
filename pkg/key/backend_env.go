@@ -16,30 +16,30 @@ import (
 )
 
 // Environment variable names for key loading.
-// Each variable supports two forms: generic (MNEMONIC) and prefixed (LUX_MNEMONIC).
+// Each variable supports two forms: generic (MNEMONIC) and prefixed (MNEMONIC).
 // Generic form takes priority so the same mnemonic/key works across tools.
 const (
 	// EnvMnemonic contains a BIP39 mnemonic phrase.
-	// Env: MNEMONIC or LUX_MNEMONIC
-	EnvMnemonic = "LUX_MNEMONIC"
+	// Env: MNEMONIC or MNEMONIC
+	EnvMnemonic = "MNEMONIC"
 
 	// EnvPrivateKey contains a hex-encoded secp256k1 private key.
-	// Env: PRIVATE_KEY or LUX_PRIVATE_KEY
-	EnvPrivateKey = "LUX_PRIVATE_KEY"
+	// Env: PRIVATE_KEY or PRIVATE_KEY
+	EnvPrivateKey = "PRIVATE_KEY"
 
 	// EnvBLSKey contains a hex-encoded BLS private key.
 	// Env: BLS_KEY or LUX_BLS_KEY
 	EnvBLSKey = "LUX_BLS_KEY"
 
 	// EnvKeyPassword for encrypted key files.
-	// Env: KEY_PASSWORD or LUX_KEY_PASSWORD
-	EnvKeyPassword = "LUX_KEY_PASSWORD"
+	// Env: KEY_PASSWORD or KEY_PASSWORD
+	EnvKeyPassword = "KEY_PASSWORD"
 
 	// EnvKeySessionTimeout configures the session timeout duration.
 	// Format: Go duration string (e.g., "30s", "5m", "1h").
 	// Default: 30s (30 seconds of inactivity before auto-lock).
-	// Env: KEY_SESSION_TIMEOUT or LUX_KEY_SESSION_TIMEOUT
-	EnvKeySessionTimeout = "LUX_KEY_SESSION_TIMEOUT"
+	// Env: KEY_SESSION_TIMEOUT or KEY_SESSION_TIMEOUT
+	EnvKeySessionTimeout = "KEY_SESSION_TIMEOUT"
 
 	// EnvKeyIndex selects the BIP-44 address index for mnemonic derivation.
 	// Path: m/44'/9000'/0'/0/{index} for P/X-Chain.
@@ -47,11 +47,20 @@ const (
 	// Set to a specific number (e.g., "1") to use that index directly.
 	// Env: MNEMONIC_ACCOUNT or LUX_KEY_INDEX
 	EnvKeyIndex = "LUX_KEY_INDEX"
+
+	// EnvLightMnemonic is the well-known dev/local mnemonic for local development.
+	// This mnemonic is PUBLIC and safe to commit — it is NOT used for production.
+	// Env: LIGHT_MNEMONIC
+	EnvLightMnemonic = "LIGHT_MNEMONIC"
+
+	// LightMnemonic is the default mnemonic for local development networks.
+	// Intentionally public: "light light light light light light light light light light light energy"
+	LightMnemonic = "light light light light light light light light light light light energy"
 )
 
 // getEnv returns the value of an environment variable, checking the generic
 // (unprefixed) form first, then the LUX_ prefixed form.
-// e.g., getEnv("LUX_MNEMONIC") checks MNEMONIC first, then LUX_MNEMONIC.
+// e.g., getEnv("MNEMONIC") checks MNEMONIC first, then MNEMONIC.
 func getEnv(luxPrefixed string) string {
 	// Try generic form: strip LUX_ prefix
 	generic := strings.TrimPrefix(luxPrefixed, "LUX_")
@@ -130,7 +139,7 @@ func (b *EnvBackend) Close() error {
 }
 
 func (*EnvBackend) CreateKey(_ context.Context, _ string, _ CreateKeyOptions) (*HDKeySet, error) {
-	return nil, errors.New("cannot create keys in environment backend - set LUX_MNEMONIC or LUX_PRIVATE_KEY")
+	return nil, errors.New("cannot create keys in environment backend - set MNEMONIC or PRIVATE_KEY")
 }
 
 func (b *EnvBackend) LoadKey(ctx context.Context, name, password string) (*HDKeySet, error) {
@@ -151,25 +160,25 @@ func (b *EnvBackend) LoadKey(ctx context.Context, name, password string) (*HDKey
 }
 
 func (*EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
-	// Priority 1: MNEMONIC / LUX_MNEMONIC
+	// Priority 1: MNEMONIC / MNEMONIC
 	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
 		if !ValidateMnemonic(mnemonic) {
-			return nil, errors.New("invalid mnemonic in MNEMONIC / LUX_MNEMONIC")
+			return nil, errors.New("invalid mnemonic in MNEMONIC / MNEMONIC")
 		}
 		return DeriveAllKeys(name, mnemonic)
 	}
 
-	// Priority 2: PRIVATE_KEY / LUX_PRIVATE_KEY (hex-encoded EC key)
+	// Priority 2: PRIVATE_KEY / PRIVATE_KEY (hex-encoded EC key)
 	if privKeyHex := getEnv(EnvPrivateKey); privKeyHex != "" {
 		privKeyHex = strings.TrimPrefix(privKeyHex, "0x")
 		privKeyBytes, err := hex.DecodeString(privKeyHex)
 		if err != nil {
-			return nil, fmt.Errorf("invalid hex in LUX_PRIVATE_KEY: %w", err)
+			return nil, fmt.Errorf("invalid hex in PRIVATE_KEY: %w", err)
 		}
 
 		privKey, err := secp256k1.ToPrivateKey(privKeyBytes)
 		if err != nil {
-			return nil, fmt.Errorf("invalid private key in LUX_PRIVATE_KEY: %w", err)
+			return nil, fmt.Errorf("invalid private key in PRIVATE_KEY: %w", err)
 		}
 
 		// Create minimal key set with just EC key
@@ -283,6 +292,16 @@ func (b *EnvBackend) GetKeyChecksum(name string) (string, error) {
 	h.Write(ks.ECPrivateKey)
 	h.Write(ks.BLSPrivateKey)
 	return hex.EncodeToString(h.Sum(nil)[:8]), nil
+}
+
+// GetLightMnemonic returns the light mnemonic from LIGHT_MNEMONIC env var,
+// or the default "light light light...energy" if not set.
+// This is the well-known dev mnemonic for local networks.
+func GetLightMnemonic() string {
+	if v := os.Getenv(EnvLightMnemonic); v != "" {
+		return v
+	}
+	return LightMnemonic
 }
 
 func init() {

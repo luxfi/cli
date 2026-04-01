@@ -65,7 +65,7 @@ Example:
 	}
 
 	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "", "Base RPC URL (default: LUX_RPC_URL or running network endpoint)")
-	cmd.Flags().StringVar(&flags.from, "from", "", "Key name to use (default: LUX_MNEMONIC account 0)")
+	cmd.Flags().StringVar(&flags.from, "from", "", "Key name to use (default: MNEMONIC account 0)")
 	cmd.Flags().StringVar(&flags.fromChain, "from-chain", "P", "Source chain: P, X, or C")
 	cmd.Flags().StringVar(&flags.toChain, "to-chain", "C", "Destination chain: P, X, or C")
 	cmd.Flags().StringVar(&flags.to, "to", "", "Destination address (C-Chain hex for C, bech32 for P/X)")
@@ -158,7 +158,7 @@ func loadSoftKeyForTransfer(networkID uint32, from string) (*key.SoftKey, error)
 	}
 	mnemonic := key.GetMnemonicFromEnv()
 	if mnemonic == "" {
-		return nil, fmt.Errorf("no key specified and LUX_MNEMONIC not set")
+		return nil, fmt.Errorf("no key specified and MNEMONIC not set")
 	}
 	return key.NewSoftFromMnemonic(networkID, mnemonic)
 }

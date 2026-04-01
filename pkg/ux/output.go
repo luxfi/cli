@@ -292,7 +292,7 @@ func PrintValidatorKeys(validators []ValidatorKeyInfo, networkHRP string) {
 		return
 	}
 
-	Logger.PrintToUser("\n🔑 Validator Keys (derived from LUX_MNEMONIC):")
+	Logger.PrintToUser("\n🔑 Validator Keys (derived from MNEMONIC):")
 	Logger.PrintToUser("  ╔═══════╤════════════════════════════════════════════════════════════════╗")
 	Logger.PrintToUser("  ║  #    │ Validator Details                                              ║")
 	Logger.PrintToUser("  ╠═══════╪════════════════════════════════════════════════════════════════╣")
@@ -315,7 +315,7 @@ func PrintValidatorKeysCompact(validators []ValidatorKeyInfo) {
 		return
 	}
 
-	Logger.PrintToUser("\n🔑 Validator Keys (from LUX_MNEMONIC):")
+	Logger.PrintToUser("\n🔑 Validator Keys (from MNEMONIC):")
 	for _, v := range validators {
 		Logger.PrintToUser("  [%d] %s | C: %s", v.Index, v.NodeID, v.CChainAddr)
 	}

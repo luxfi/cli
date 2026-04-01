@@ -299,7 +299,7 @@ func CloseBackends() {
 
 // SessionTimeout is the default session timeout for unlocked keys.
 // This is exported for use in CLI commands to display the timeout value.
-// The actual timeout is configurable via LUX_KEY_SESSION_TIMEOUT env var.
+// The actual timeout is configurable via KEY_SESSION_TIMEOUT env var.
 var SessionTimeout = DefaultSessionTimeout
 
 // LockKey locks a key using the default backend
@@ -345,7 +345,7 @@ func IsKeyLocked(name string) bool {
 	return backend.IsLocked(name)
 }
 
-// GetPasswordFromEnv returns the password from the LUX_KEY_PASSWORD environment variable
+// GetPasswordFromEnv returns the password from the KEY_PASSWORD environment variable
 func GetPasswordFromEnv() string {
 	return os.Getenv(EnvKeyPassword)
 }

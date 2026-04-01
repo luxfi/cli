@@ -97,9 +97,9 @@ SEQUENCING OPTIONS:
 
 NETWORK TYPES:
 
-  --mainnet   Production network (5 validators, port 9630)
-  --testnet   Test network (5 validators, port 9640)
-  --devnet    Development network (5 validators, port 9650)
+  --mainnet   Production network (3 validators, port 9630)
+  --testnet   Test network (3 validators, port 9640)
+  --devnet    Development network (3 validators, port 9650)
   --dev       Single-node dev mode with K=1 consensus
 
 QUICK START:
@@ -259,7 +259,7 @@ func createApp(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Interactive by default on TTY, non-interactive when:
-	// LUX_NON_INTERACTIVE=1, CI=1, --non-interactive flag, or stdin is piped
+	// NON_INTERACTIVE=1, CI=1, --non-interactive flag, or stdin is piped
 	prompter := prompts.NewPrompterForMode(nonInteractive)
 	app.Setup(baseDir, log, cf, prompter, application.NewDownloader())
 

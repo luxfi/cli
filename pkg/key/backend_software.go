@@ -47,7 +47,7 @@ const (
 
 	// DefaultSessionTimeout is the inactivity timeout for unlocked keys.
 	// After this duration without access, the key is automatically locked.
-	// Can be overridden via LUX_KEY_SESSION_TIMEOUT environment variable.
+	// Can be overridden via KEY_SESSION_TIMEOUT environment variable.
 	DefaultSessionTimeout = 30 * time.Second
 )
 
@@ -60,7 +60,7 @@ func NewSoftwareBackend() *SoftwareBackend {
 }
 
 // GetSessionTimeout returns the configured session timeout.
-// Checks LUX_KEY_SESSION_TIMEOUT environment variable first,
+// Checks KEY_SESSION_TIMEOUT environment variable first,
 // otherwise returns DefaultSessionTimeout (30 seconds).
 func GetSessionTimeout() time.Duration {
 	if envTimeout := os.Getenv(EnvKeySessionTimeout); envTimeout != "" {

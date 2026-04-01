@@ -489,7 +489,7 @@ lux node automine start [flags]
 
 **Flags:**
 - `--rpc-url <string>`: RPC URL of the node (default: "http://localhost:9630/ext/bc/C/rpc")
-- `--account <string>`: Mining account address (default: "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC")
+- `--account <string>`: Mining account address (default: "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714")
 - `--private-key <string>`: Private key for the mining account
 - `--threads <int>`: Number of mining threads (default: 1)
 - `--monitor`: Monitor block production

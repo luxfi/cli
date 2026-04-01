@@ -291,7 +291,7 @@ var _ = ginkgo.Describe("[Local Chain]", ginkgo.Ordered, func() {
 	ginkgo.It("can deploy custom chain config", func() {
 		commands.CreateEVMConfig(chainName, utils.EVMAllowFeeRecpPath)
 
-		addr := "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
+		addr := "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
 
 		chainConfig := "{\"feeRecipient\": \"" + addr + "\"}"
 
