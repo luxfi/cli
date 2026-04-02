@@ -32,6 +32,7 @@ var (
 	mainnet                bool
 	testnet                bool
 	devnet                 bool // Multi-validator devnet (port 9650)
+	localMode              bool // 3-node localnet with light mnemonic + operator (K8s native)
 	devMode                bool // Single-node dev mode with K=1 consensus
 	numValidators          int
 	nodePath               string // Path to custom luxd binary
@@ -292,6 +293,7 @@ TYPICAL WORKFLOW:
 	cmd.Flags().BoolVarP(&mainnet, "mainnet", "m", false, "start mainnet with 3 validators (port 9630)")
 	cmd.Flags().BoolVarP(&testnet, "testnet", "t", false, "start testnet with 3 validators (port 9640)")
 	cmd.Flags().BoolVarP(&devnet, "devnet", "d", false, "start devnet with 3 validators (port 9650)")
+	cmd.Flags().BoolVarP(&localMode, "local", "l", false, "start 3-node localnet on K8s (operator-native, light mnemonic)")
 	cmd.Flags().BoolVar(&devMode, "dev", false, "single-node dev mode with K=1 consensus")
 	cmd.Flags().IntVar(&numValidators, "num-validators", constants.LocalNetworkNumNodes, "number of validators to start")
 	cmd.Flags().IntVar(&portBase, "port", 9630, "base port for node APIs (each node uses 2 ports: HTTP and staking)")
@@ -324,14 +326,22 @@ func StartNetwork(*cobra.Command, []string) error {
 	if devnet {
 		flagCount++
 	}
+	if localMode {
+		flagCount++
+	}
 	if devMode {
 		flagCount++
 	}
 	if flagCount > 1 {
-		return fmt.Errorf("cannot use multiple network flags together (--mainnet, --testnet, --devnet, --dev)")
+		return fmt.Errorf("cannot use multiple network flags together (--mainnet, --testnet, --devnet, --local, --dev)")
 	}
 
-	// K8s deployment mode
+	// --local: K8s operator-native localnet (no netrunner)
+	if localMode {
+		return StartLocal()
+	}
+
+	// K8s deployment mode (netrunner not used — operator manages everything)
 	if k8sCluster != "" {
 		if devMode {
 			return fmt.Errorf("--dev mode is not supported with --k8s, use --devnet instead")
