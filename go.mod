@@ -301,7 +301,7 @@ require (
 	github.com/luxfi/sdk/api v0.0.2
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/utils v1.1.4
-	github.com/luxfi/utxo v0.2.4
+	github.com/luxfi/utxo v0.2.5
 	github.com/luxfi/zapdb/v4 v4.9.3
 	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
