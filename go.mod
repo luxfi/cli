@@ -289,7 +289,7 @@ require (
 	github.com/luxfi/database v1.17.43
 	github.com/luxfi/filesystem v0.0.1
 	github.com/luxfi/formatting v1.0.1
-	github.com/luxfi/genesis v1.6.2
+	github.com/luxfi/genesis v1.7.1
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/log v1.4.1
