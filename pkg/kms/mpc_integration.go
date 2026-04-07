@@ -28,11 +28,10 @@ const (
 	MPCChainArbitrum  MPCChain = "arbitrum"
 	MPCChainOptimism  MPCChain = "optimism"
 	MPCChainBase      MPCChain = "base"
-	MPCChainLux MPCChain = "lux"
+	MPCChainLux       MPCChain = "lux"
 	MPCChainBNB       MPCChain = "bnb"
 	MPCChainBitcoin   MPCChain = "bitcoin"
 	MPCChainSolana    MPCChain = "solana"
-	MPCChainLux       MPCChain = "lux"
 )
 
 // MPCWallet represents a multi-party computation wallet.
