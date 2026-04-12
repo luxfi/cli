@@ -20,6 +20,7 @@ import (
 	"github.com/luxfi/cli/cmd/chaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/devcmd"
+	"github.com/luxfi/cli/cmd/explorecmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/gpucmd"
 	"github.com/luxfi/cli/cmd/keycmd"
@@ -137,6 +138,7 @@ For detailed command help, use: lux <command> --help`,
 
 	// add sub commands
 	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (local dev environment)
+	rootCmd.AddCommand(explorecmd.NewCmd(app))   // explore (block explorer)
 	rootCmd.AddCommand(networkcmd.NewCmd(app))    // network (local network management)
 	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias (new version)
 	rootCmd.AddCommand(snapshotcmd.NewCmd(app))   // snapshot (native incremental backups)
