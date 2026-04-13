@@ -38,6 +38,7 @@ import (
 	"github.com/luxfi/cli/cmd/validatorcmd"
 	"github.com/luxfi/cli/cmd/vmcmd"
 	"github.com/luxfi/cli/cmd/warpcmd"
+	"github.com/luxfi/cli/cmd/zkcmd"
 	"github.com/luxfi/cli/internal/migrations"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/config"
@@ -194,6 +195,9 @@ For detailed command help, use: lux <command> --help`,
 
 	// add gpu management command
 	rootCmd.AddCommand(gpucmd.NewCmd(app))
+
+	// add zk command (ceremony, prove, verify, SRS)
+	rootCmd.AddCommand(zkcmd.NewCmd(app))
 
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd(app))

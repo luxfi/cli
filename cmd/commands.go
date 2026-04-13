@@ -64,4 +64,7 @@ const (
 
 	// DevCmd is the dev command name (for local development)
 	DevCmd = "dev"
+
+	// ZKCmd is the zk command name (for zero-knowledge proof tools)
+	ZKCmd = "zk"
 )
