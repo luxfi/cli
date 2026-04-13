@@ -32,6 +32,8 @@ import (
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
+	fhecli "github.com/luxfi/fhe/cli"
+	rtcli "github.com/luxfi/ringtail/cli"
 	"github.com/luxfi/cli/cmd/selfcmd"
 	"github.com/luxfi/cli/cmd/snapshotcmd"
 	"github.com/luxfi/cli/cmd/updatecmd"
@@ -198,6 +200,12 @@ For detailed command help, use: lux <command> --help`,
 
 	// add zk command (ceremony, prove, verify, SRS)
 	rootCmd.AddCommand(zkcmd.NewCmd(app))
+
+	// add fhe command (fully homomorphic encryption) — from github.com/luxfi/fhe/cli
+	rootCmd.AddCommand(fhecli.NewCmd())
+
+	// add rt command (ringtail threshold signing) — from github.com/luxfi/ringtail/cli
+	rootCmd.AddCommand(rtcli.NewCmd())
 
 	// add rpc command for direct RPC calls
 	rootCmd.AddCommand(rpccmd.NewCmd(app))
