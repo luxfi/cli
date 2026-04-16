@@ -297,7 +297,6 @@ require (
 )
 
 // Local replacements (zapdb v1.0.0 has broken badger/protos import, local has fix)
-replace github.com/luxfi/zapdb => ../zapdb
 
 // Don't replace crate-crypto/go-ipa to avoid verkle compatibility issues
 // replace github.com/crate-crypto/go-ipa => github.com/luxfi/crypto/ipa v0.0.1
