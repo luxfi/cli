@@ -1,7 +1,6 @@
 # Lux CLI Documentation
 
 **Version**: 1.22.5
-**Last Updated**: 2026-01-23
 
 ## Kubernetes Production Networks (DOKS SFO3)
 
