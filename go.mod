@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.26.1
+go 1.26.2
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -14,7 +14,7 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.1.2
-	github.com/luxfi/crypto v1.17.45
+	github.com/luxfi/crypto v1.18.3
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.8.35
 	github.com/luxfi/geth v1.16.76
@@ -40,13 +40,13 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
-	golang.org/x/crypto v0.49.0
+	golang.org/x/crypto v0.50.0
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
 	golang.org/x/mod v0.34.0
 	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0
-	golang.org/x/text v0.35.0
+	golang.org/x/text v0.36.0
 	google.golang.org/api v0.256.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v2 v2.4.0
@@ -181,13 +181,13 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/luxfi/accel v1.0.6 // indirect
+	github.com/luxfi/accel v1.0.7 // indirect
 	github.com/luxfi/age v1.4.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.2.1 // indirect
 	github.com/luxfi/compress v0.0.5 // indirect
 	github.com/luxfi/concurrent v0.0.3 // indirect
-	github.com/luxfi/consensus v1.22.70 // indirect
+	github.com/luxfi/consensus v1.22.85 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.8 // indirect
@@ -206,6 +206,7 @@ require (
 	github.com/luxfi/validators v1.0.0 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
 	github.com/luxfi/zapdb/v4 v4.9.3 // indirect
+	github.com/luxfi/zwing v0.5.2 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
@@ -316,7 +317,7 @@ require (
 	github.com/klauspost/compress v1.18.4
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/ai v0.2.0
-	github.com/luxfi/api v1.0.4
+	github.com/luxfi/api v1.0.10
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.4.6
 	github.com/luxfi/coreth v1.21.48
@@ -330,7 +331,7 @@ require (
 	github.com/luxfi/log v1.4.1
 	github.com/luxfi/math v1.4.0
 	github.com/luxfi/net v0.0.4
-	github.com/luxfi/p2p v1.19.2-zap
+	github.com/luxfi/p2p v1.19.2
 	github.com/luxfi/protocol v0.0.3
 	github.com/luxfi/ringtail v0.4.0
 	github.com/luxfi/rpc v1.0.2
@@ -342,8 +343,8 @@ require (
 	github.com/luxfi/zapdb v1.0.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	golang.org/x/sys v0.42.0
-	golang.org/x/term v0.41.0
+	golang.org/x/sys v0.43.0
+	golang.org/x/term v0.42.0
 	k8s.io/api v0.35.1
 	k8s.io/apimachinery v0.35.1
 	k8s.io/client-go v0.35.1
