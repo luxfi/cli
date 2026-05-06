@@ -38,7 +38,7 @@ var historicL1s = []struct {
 		EVMChainID:   96369,
 		TokenName:    "LUX Token",
 		TokenSymbol:  "LUX",
-		VMID:         "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy",
+		VMID:         "mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6",
 		VMVersion:    "v0.6.12",
 	},
 	{
@@ -48,7 +48,7 @@ var historicL1s = []struct {
 		EVMChainID:   200200,
 		TokenName:    "ZOO Token",
 		TokenSymbol:  "ZOO",
-		VMID:         "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy",
+		VMID:         "mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6",
 		VMVersion:    "v0.6.12",
 	},
 	{
@@ -58,7 +58,7 @@ var historicL1s = []struct {
 		EVMChainID:   36911,
 		TokenName:    "Sparkle Pony Token",
 		TokenSymbol:  "MEAT",
-		VMID:         "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy",
+		VMID:         "mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6",
 		VMVersion:    "v0.6.12",
 	},
 }
