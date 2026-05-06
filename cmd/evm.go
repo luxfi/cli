@@ -147,12 +147,12 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	}
 
 	// Copy EVM plugin from build location
-	pluginSrc := "/home/z/work/lux/evm/build/srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
+	pluginSrc := "/home/z/work/lux/evm/build/mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6"
 	// If build location doesn't exist, try lux-cli plugins directory
 	if _, err := os.Stat(pluginSrc); os.IsNotExist(err) {
-		pluginSrc = filepath.Join(os.Getenv("HOME"), ".lux-cli", "plugins", "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy")
+		pluginSrc = filepath.Join(os.Getenv("HOME"), ".lux-cli", "plugins", "mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6")
 	}
-	pluginDst := filepath.Join(evmDataDir, "plugins", "srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy")
+	pluginDst := filepath.Join(evmDataDir, "plugins", "mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6")
 
 	if _, err := os.Stat(pluginSrc); err == nil {
 		copyCmd := exec.Command("cp", pluginSrc, pluginDst) //nolint:gosec // G204: Known command
