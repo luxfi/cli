@@ -140,16 +140,32 @@ var networkConfigs = map[string]NetworkConfig{
 		VestingPercent: 100.0,
 		Message:        "Lux Devnet Genesis - Development Only",
 	},
+	"local": {
+		NetworkID:      constants.LocalID,      // 1337 (P-Chain network identifier)
+		ChainID:        constants.LocalChainID, // 31337 (C-Chain EVM identifier)
+		KeyPrefix:      "local-key",
+		NumPChainKeys:  1,
+		NumXChainKeys:  0,
+		HRP:            constants.LocalHRP, // "local"
+		VestingYears:   0,
+		VestingPercent: 100.0,
+		Message:        "Lux Local Genesis - Single Node Development",
+	},
 	"custom": {
-		NetworkID:      constants.CustomID,      // 1337 (P-Chain network identifier)
-		ChainID:        constants.CustomChainID, // 1337 (C-Chain EVM identifier)
+		// CustomID (0) is the explicit "user-defined" sentinel; the
+		// real network ID is supplied via `--genesis-file` or by the
+		// caller setting Config.NetworkID before generation. Addresses
+		// here use the "custom" HRP so they are visually distinct from
+		// the canonical local-net "X-local1..." form.
+		NetworkID:      constants.CustomID, // 0 (sentinel for user-defined networks)
+		ChainID:        constants.CustomID, // matches NetworkID by default; override per chain
 		KeyPrefix:      "custom-key",
 		NumPChainKeys:  1,
 		NumXChainKeys:  0,
 		HRP:            constants.CustomHRP, // "custom"
 		VestingYears:   0,
 		VestingPercent: 100.0,
-		Message:        "Lux Custom Genesis - Single Node Development",
+		Message:        "Lux Custom Genesis - User-Defined Network",
 	},
 }
 
