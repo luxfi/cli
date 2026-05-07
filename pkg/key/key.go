@@ -82,15 +82,21 @@ func WithFeeDeduct(fee uint64) OpOption {
 
 func GetHRP(networkID uint32) string {
 	switch networkID {
-	case constants.CustomID:
-		return constants.CustomHRP
-	case constants.TestnetID:
-		return constants.TestnetHRP
 	case constants.MainnetID:
 		return constants.MainnetHRP
+	case constants.TestnetID:
+		return constants.TestnetHRP
 	case constants.DevnetID:
 		return constants.DevnetHRP
+	case constants.LocalID:
+		return constants.LocalHRP
+	case constants.CustomID:
+		return constants.CustomHRP
 	default:
+		// Any other (user-defined) network ID falls back to the
+		// "custom" HRP — addresses look like P-custom1...,
+		// X-custom1... See luxfi/constants.IsCustom for the
+		// canonical classification.
 		return constants.CustomHRP
 	}
 }
