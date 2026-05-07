@@ -1066,7 +1066,7 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 // CaptureAddresses prompts for multiple addresses
 func (*realPrompter) CaptureAddresses(promptStr string) ([]common.Address, error) {
 	for {
-		result, err := utilsReadLongString(promptui.IconGood + " " + promptStr + " ")
+		result, err := utilsReadLongString("%s", promptui.IconGood+" "+promptStr+" ")
 		if err != nil {
 			return nil, err
 		}
