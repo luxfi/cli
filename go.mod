@@ -325,7 +325,7 @@ require (
 	github.com/luxfi/ai v0.2.0
 	github.com/luxfi/api v1.0.10
 	github.com/luxfi/codec v1.1.4
-	github.com/luxfi/constants v1.5.2
+	github.com/luxfi/constants v1.5.3
 	github.com/luxfi/coreth v1.21.48
 	github.com/luxfi/database v1.18.3
 	github.com/luxfi/fhe v1.8.0
