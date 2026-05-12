@@ -212,7 +212,7 @@ For detailed command help, use: lux <command> --help`,
 	// add fhe command (fully homomorphic encryption) — from github.com/luxfi/fhe/cli
 	rootCmd.AddCommand(fhecli.NewCmd())
 
-	// add rt command (corona threshold signing) — from github.com/luxfi/corona/cli
+	// add rt command (Corona threshold signing) — from github.com/luxfi/corona/cli
 	rootCmd.AddCommand(rtcli.NewCmd())
 
 	// add rpc command for direct RPC calls

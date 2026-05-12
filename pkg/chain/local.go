@@ -344,7 +344,7 @@ func IssueAddPermissionlessValidatorTx(
 		ethKc = &emptyEthKeychain{}
 	}
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
-	// support standard AVM API methods.
+	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
@@ -1027,7 +1027,7 @@ func IssueRemoveChainValidatorTx(kc keychain.Keychain, chainID ids.ID, nodeID id
 		ethKc = &emptyEthKeychain{}
 	}
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
-	// support standard AVM API methods.
+	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),

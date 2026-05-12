@@ -87,7 +87,7 @@ func runExport(_ *cobra.Command, args []string) error {
     "public_key": "%s",
     "proof_of_possession": "%s"
   },
-  "corona": {
+  "ringsig": {
     "public_key": "%s"
   },
   "mldsa": {
@@ -99,7 +99,7 @@ func runExport(_ *cobra.Command, args []string) error {
 			hex.EncodeToString(keySet.ECPublicKey),
 			hex.EncodeToString(keySet.BLSPublicKey),
 			hex.EncodeToString(keySet.BLSPoP),
-			hex.EncodeToString(keySet.CoronaPublicKey),
+			hex.EncodeToString(keySet.RingSigPublicKey),
 			hex.EncodeToString(keySet.MLDSAPublicKey),
 		)
 	}

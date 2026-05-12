@@ -170,9 +170,9 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
 }
 
-// NewCoronaKeyBytes generates a new secp256k1 private key and returns it as bytes
-// Note: "Corona" is a placeholder name - we use standard secp256k1 for now
-func NewCoronaKeyBytes() ([]byte, error) {
+// NewRingSigKeyBytes generates a new secp256k1 private key and returns it as bytes
+// Note: "Ring-signature" key derivation name - we use standard secp256k1 for now
+func NewRingSigKeyBytes() ([]byte, error) {
 	privKey, err := secp256k1.NewPrivateKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate secp256k1 key: %w", err)
@@ -180,8 +180,8 @@ func NewCoronaKeyBytes() ([]byte, error) {
 	return privKey.Bytes(), nil
 }
 
-// ToCoronaPublicKey converts secp256k1 private key bytes to public key bytes
-func ToCoronaPublicKey(keyBytes []byte) ([]byte, error) {
+// ToRingSigPublicKey converts secp256k1 private key bytes to public key bytes
+func ToRingSigPublicKey(keyBytes []byte) ([]byte, error) {
 	privKey, err := secp256k1.ToPrivateKey(keyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse secp256k1 private key: %w", err)
@@ -214,7 +214,7 @@ type QuantumKeys struct {
 	BLSPublicKey      []byte
 	BLSPoP            []byte
 	CoronaSecretKey []byte
-	CoronaPublicKey []byte
+	RingSigPublicKey []byte
 	MLDSASecretKey    []byte
 	MLDSAPublicKey    []byte
 }
@@ -235,11 +235,11 @@ func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 	}
 
 	// Generate Corona key
-	keys.CoronaSecretKey, err = NewCoronaKeyBytes()
+	keys.CoronaSecretKey, err = NewRingSigKeyBytes()
 	if err != nil {
 		return nil, fmt.Errorf("corona key generation failed: %w", err)
 	}
-	keys.CoronaPublicKey, err = ToCoronaPublicKey(keys.CoronaSecretKey)
+	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.CoronaSecretKey)
 	if err != nil {
 		return nil, fmt.Errorf("corona public key derivation failed: %w", err)
 	}
@@ -308,7 +308,7 @@ func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode Corona key: %w", err)
 	}
-	keys.CoronaPublicKey, err = ToCoronaPublicKey(keys.CoronaSecretKey)
+	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.CoronaSecretKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive Corona public key: %w", err)
 	}

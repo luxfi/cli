@@ -23,7 +23,7 @@ func newShowCmd() *cobra.Command {
 Displays:
 - EC (secp256k1) address (Ethereum format)
 - BLS public key (consensus)
-- Corona public key (ring signatures)
+- Ring-signature public key (LSAG over secp256k1)
 - ML-DSA public key (post-quantum)
 
 With --export flag, also displays private keys (DANGER - keep secret!).
@@ -77,11 +77,11 @@ func runShow(_ *cobra.Command, args []string) error {
 	}
 	ux.Logger.PrintToUser("")
 
-	// Corona key info
-	ux.Logger.PrintToUser("Corona - Ring Signatures:")
-	ux.Logger.PrintToUser("  Public Key: %s", hex.EncodeToString(keySet.CoronaPublicKey))
-	if showExport && len(keySet.CoronaPrivateKey) > 0 {
-		ux.Logger.PrintToUser("  Private Key: 0x%s", hex.EncodeToString(keySet.CoronaPrivateKey))
+	// Ring-signature key info
+	ux.Logger.PrintToUser("Ring Signatures (LSAG over secp256k1):")
+	ux.Logger.PrintToUser("  Public Key: %s", hex.EncodeToString(keySet.RingSigPublicKey))
+	if showExport && len(keySet.RingSigPrivateKey) > 0 {
+		ux.Logger.PrintToUser("  Private Key: 0x%s", hex.EncodeToString(keySet.RingSigPrivateKey))
 	}
 	ux.Logger.PrintToUser("")
 

@@ -901,7 +901,7 @@ func TestSerializeParseKeySet(t *testing.T) {
 		assert.Equal(t, original.ECAddress, parsed.ECAddress)
 		assert.Equal(t, original.BLSPrivateKey, parsed.BLSPrivateKey)
 		assert.Equal(t, original.BLSPublicKey, parsed.BLSPublicKey)
-		assert.Equal(t, original.CoronaPrivateKey, parsed.CoronaPrivateKey)
+		assert.Equal(t, original.RingSigPrivateKey, parsed.RingSigPrivateKey)
 		assert.Equal(t, original.MLDSAPrivateKey, parsed.MLDSAPrivateKey)
 		assert.Equal(t, original.NodeID, parsed.NodeID)
 	})

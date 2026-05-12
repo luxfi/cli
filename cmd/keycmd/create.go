@@ -28,7 +28,7 @@ func newCreateCmd() *cobra.Command {
 Generates a BIP39 mnemonic phrase and derives:
 - EC (secp256k1) key for transactions
 - BLS key for consensus
-- Corona key for ring signatures
+- Ring-signature (LSAG) key over secp256k1
 - ML-DSA key for post-quantum signatures
 
 Keys are stored in ~/.lux/keys/<name>/
@@ -129,7 +129,7 @@ func runCreate(_ *cobra.Command, args []string) error {
 	ux.Logger.PrintToUser("Key types generated:")
 	ux.Logger.PrintToUser("  - EC (secp256k1): Transaction signing")
 	ux.Logger.PrintToUser("  - BLS: Consensus signatures")
-	ux.Logger.PrintToUser("  - Corona: Ring signatures")
+	ux.Logger.PrintToUser("  - Ring-sig (LSAG over secp256k1)")
 	ux.Logger.PrintToUser("  - ML-DSA: Post-quantum signatures")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Use 'lux key show %s' to view public keys and addresses.", name)
