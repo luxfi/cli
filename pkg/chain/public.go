@@ -460,7 +460,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	}
 	ux.Logger.PrintToUser("loadWallet: creating P-Chain wallet...")
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
-	// support standard AVM API methods.
+	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:              api,
 		LUXKeychain:      keychainwrapper.WrapCryptoKeychain(d.kc),

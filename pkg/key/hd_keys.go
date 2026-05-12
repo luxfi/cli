@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 
 // Package key provides hierarchical deterministic key derivation for
-// all key types used in the Lux network: secp256k1 (EC), BLS, Ringtail, and ML-DSA.
+// all key types used in the Lux network: secp256k1 (EC), BLS, Corona, and ML-DSA.
 package key
 
 import (
@@ -29,7 +29,7 @@ const (
 	// Key type subdirectories
 	ECKeyDir       = "ec"    // secp256k1 keys for transaction signing
 	BLSKeyDir      = "bls"   // BLS keys for consensus
-	RingtailKeyDir = "rt"    // Ringtail keys for ring signatures
+	RingtailKeyDir = "rt"    // Corona keys for ring signatures
 	MLDSAKeyDir    = "mldsa" // ML-DSA keys for post-quantum signatures
 
 	// Key file names
@@ -40,7 +40,7 @@ const (
 	// Domain separation strings for HKDF
 	DomainEC       = "lux-ec-key"
 	DomainBLS      = "lux-bls-key"
-	DomainRingtail = "lux-ringtail-key"
+	DomainRingSig = "lux-corona-key"
 	DomainMLDSA    = "lux-mldsa-key"
 )
 
@@ -59,9 +59,9 @@ type HDKeySet struct {
 	BLSPublicKey  []byte
 	BLSPoP        []byte
 
-	// Ringtail keys
-	RingtailPrivateKey []byte
-	RingtailPublicKey  []byte
+	// Corona keys
+	RingSigPrivateKey []byte
+	RingSigPublicKey  []byte
 
 	// ML-DSA keys
 	MLDSAPrivateKey []byte
@@ -135,14 +135,14 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	nodeIDHash := sha256.Sum256(keySet.BLSPublicKey)
 	keySet.NodeID = fmt.Sprintf("NodeID-%s", hex.EncodeToString(nodeIDHash[:20]))
 
-	// Derive Ringtail key with account index
-	keySet.RingtailPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainRingtail, accountIndex)
+	// Derive Corona key with account index
+	keySet.RingSigPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainRingSig, accountIndex)
 	if err != nil {
-		return nil, fmt.Errorf("failed to derive Ringtail key: %w", err)
+		return nil, fmt.Errorf("failed to derive Corona key: %w", err)
 	}
-	keySet.RingtailPublicKey, err = deriveRingtailPublicKey(keySet.RingtailPrivateKey)
+	keySet.RingSigPublicKey, err = deriveRingSigPublicKey(keySet.RingSigPrivateKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to derive Ringtail public key: %w", err)
+		return nil, fmt.Errorf("failed to derive Corona public key: %w", err)
 	}
 
 	// Derive ML-DSA key with account index (needs more entropy - 32 bytes seed for deterministic generation)
@@ -218,8 +218,8 @@ func DeriveBLSSignerBytes(seed []byte) ([]byte, error) {
 	return signer.ToBytes(), nil
 }
 
-// deriveRingtailPublicKey derives secp256k1 public key (Ringtail placeholder)
-func deriveRingtailPublicKey(privateKey []byte) ([]byte, error) {
+// deriveRingSigPublicKey derives secp256k1 (ring-signature key))
+func deriveRingSigPublicKey(privateKey []byte) ([]byte, error) {
 	privKey, err := secp256k1.ToPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
@@ -310,13 +310,13 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 		return fmt.Errorf("failed to save BLS proof of possession: %w", err)
 	}
 
-	// Save Ringtail public key
+	// Save Corona public key
 	rtDir := filepath.Join(baseDir, RingtailKeyDir)
 	if err := os.MkdirAll(rtDir, constants.DefaultPerms755); err != nil {
-		return fmt.Errorf("failed to create Ringtail directory: %w", err)
+		return fmt.Errorf("failed to create Corona directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingtailPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
-		return fmt.Errorf("failed to save Ringtail public key: %w", err)
+	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingSigPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
+		return fmt.Errorf("failed to save Corona public key: %w", err)
 	}
 
 	// Save ML-DSA public key
@@ -384,11 +384,11 @@ func LoadKeySetPublicOnly(name string) (*HDKeySet, error) {
 		keySet.BLSPoP, _ = hex.DecodeString(string(blsPoPHex))
 	}
 
-	// Load Ringtail public key
+	// Load Corona public key
 	rtDir := filepath.Join(baseDir, RingtailKeyDir)
 	rtPubHex, err := os.ReadFile(filepath.Join(rtDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
-		keySet.RingtailPublicKey, _ = hex.DecodeString(string(rtPubHex))
+		keySet.RingSigPublicKey, _ = hex.DecodeString(string(rtPubHex))
 	}
 
 	// Load ML-DSA public key

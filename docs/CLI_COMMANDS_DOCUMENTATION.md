@@ -28,7 +28,7 @@ The Lux CLI supports multiple blockchain architectures:
 - EIP-4844 blob support
 - Pre-confirmations (<100ms acknowledgment)
 - IBC/Teleport cross-chain messaging
-- Ringtail post-quantum signatures
+- Corona post-quantum signatures
 
 ## Global Flags
 

@@ -527,11 +527,11 @@ func generateParsGenesis(chainName string) ([]byte, error) {
 		"evm": map[string]interface{}{
 			"enabled": true,
 			"precompiles": map[string]interface{}{
-				"mldsa":    "0x0601",
-				"mlkem":    "0x0603",
-				"bls":      "0x0B00",
-				"ringtail": "0x0700",
-				"fhe":      "0x0800",
+				"mldsa":  "0x0601",
+				"mlkem":  "0x0603",
+				"bls":    "0x0B00",
+				"corona": "0x0700",
+				"fhe":    "0x0800",
 			},
 		},
 		"pars": map[string]interface{}{
@@ -555,7 +555,7 @@ func generateParsGenesis(chainName string) ([]byte, error) {
 			"gpuEnabled":      true,
 			"signatureScheme": "ML-DSA-65",
 			"kemScheme":       "ML-KEM-768",
-			"thresholdScheme": "Ringtail",
+			"thresholdScheme": "Corona",
 		},
 		"consensus": map[string]interface{}{
 			"engine":      "quasar",
