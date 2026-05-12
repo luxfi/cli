@@ -18,7 +18,7 @@ func newImportCmd() *cobra.Command {
 		Short: "Import key set from mnemonic",
 		Long: `Import a key set by recovering from a mnemonic phrase.
 
-Derives all key types (EC, BLS, Corona, ML-DSA) from the mnemonic.
+Derives all key types (EC, BLS, ring-sig, ML-DSA) from the mnemonic.
 
 Example:
   lux key import validator1`,

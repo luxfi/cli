@@ -28,7 +28,7 @@ func newGenerateCmd() *cobra.Command {
 		Long: `Generate multiple key sets with indexed names.
 
 Creates keys with names like: prefix-0, prefix-1, prefix-2, etc.
-Each key set contains EC, BLS, Corona, and ML-DSA keys.
+Each key set contains EC, BLS, ring-sig, and ML-DSA keys.
 
 Examples:
   lux key generate -n 5                    # Creates key-0 through key-4

@@ -21,7 +21,7 @@ var Domains = map[string]bool{
 	"mpc":      true,
 	"kms":      true,
 	"rt":       true,
-	"corona": true,
+	"ringsig": true,
 	"explore":  true,
 }
 

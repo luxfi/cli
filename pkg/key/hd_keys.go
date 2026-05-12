@@ -40,7 +40,7 @@ const (
 	// Domain separation strings for HKDF
 	DomainEC       = "lux-ec-key"
 	DomainBLS      = "lux-bls-key"
-	DomainCorona = "lux-corona-key"
+	DomainRingSig = "lux-corona-key"
 	DomainMLDSA    = "lux-mldsa-key"
 )
 
@@ -60,8 +60,8 @@ type HDKeySet struct {
 	BLSPoP        []byte
 
 	// Corona keys
-	CoronaPrivateKey []byte
-	CoronaPublicKey  []byte
+	RingSigPrivateKey []byte
+	RingSigPublicKey  []byte
 
 	// ML-DSA keys
 	MLDSAPrivateKey []byte
@@ -136,11 +136,11 @@ func DeriveAllKeysWithAccount(name, mnemonic string, accountIndex uint32) (*HDKe
 	keySet.NodeID = fmt.Sprintf("NodeID-%s", hex.EncodeToString(nodeIDHash[:20]))
 
 	// Derive Corona key with account index
-	keySet.CoronaPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainCorona, accountIndex)
+	keySet.RingSigPrivateKey, err = deriveKeyFromSeedWithAccount(seed, DomainRingSig, accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive Corona key: %w", err)
 	}
-	keySet.CoronaPublicKey, err = deriveCoronaPublicKey(keySet.CoronaPrivateKey)
+	keySet.RingSigPublicKey, err = deriveRingSigPublicKey(keySet.RingSigPrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive Corona public key: %w", err)
 	}
@@ -218,8 +218,8 @@ func DeriveBLSSignerBytes(seed []byte) ([]byte, error) {
 	return signer.ToBytes(), nil
 }
 
-// deriveCoronaPublicKey derives secp256k1 public key (Corona placeholder)
-func deriveCoronaPublicKey(privateKey []byte) ([]byte, error) {
+// deriveRingSigPublicKey derives secp256k1 (ring-signature key))
+func deriveRingSigPublicKey(privateKey []byte) ([]byte, error) {
 	privKey, err := secp256k1.ToPrivateKey(privateKey)
 	if err != nil {
 		return nil, err
@@ -315,7 +315,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	if err := os.MkdirAll(rtDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create Corona directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.CoronaPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
+	if err := os.WriteFile(filepath.Join(rtDir, PublicKeyFile), []byte(hex.EncodeToString(keySet.RingSigPublicKey)), 0o644); err != nil { //nolint:gosec // G306: Public key file needs to be readable
 		return fmt.Errorf("failed to save Corona public key: %w", err)
 	}
 
@@ -388,7 +388,7 @@ func LoadKeySetPublicOnly(name string) (*HDKeySet, error) {
 	rtDir := filepath.Join(baseDir, CoronaKeyDir)
 	rtPubHex, err := os.ReadFile(filepath.Join(rtDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
-		keySet.CoronaPublicKey, _ = hex.DecodeString(string(rtPubHex))
+		keySet.RingSigPublicKey, _ = hex.DecodeString(string(rtPubHex))
 	}
 
 	// Load ML-DSA public key

@@ -536,6 +536,8 @@ github.com/luxfi/container v0.0.4 h1:BXhF82WyfqVP5mjlNcr7tP0Fcnvl0Ap1rkiu+rq5XuM
 github.com/luxfi/container v0.0.4/go.mod h1:Z3SpmMF5d4t77MM0nHYXURpn+EMVaeu1fhbd/3BGaek=
 github.com/luxfi/coreth v1.21.48 h1:l7b26Dl+SrwOEHWEaI0j0rJE1P6JTCWQlqt3ZqovYn0=
 github.com/luxfi/coreth v1.21.48/go.mod h1:OJsnRVyfRVDqHuwb8xd5w5Eo75Ik4VrIEKLST1yuvAw=
+github.com/luxfi/corona v0.2.1 h1:1G0veMNT6yAupzktXuHRsR1kGswWJkfy1amIYkw0IyE=
+github.com/luxfi/corona v0.2.1/go.mod h1:ggyyXItOMyv14pvfr/9CINBCMbRkqk1Y8njK705AcD8=
 github.com/luxfi/crypto v1.17.45 h1:uGK0y4+aLipE/M0YIQ5hcsWv0ZG0E4cPv03a94K/eLE=
 github.com/luxfi/crypto v1.17.45/go.mod h1:GnAkhQ7HNs3X0Tzx5nOONS3kl0yRmWHbDcRO5ffILsg=
 github.com/luxfi/crypto v1.18.3 h1:f6mBUHNjZl9/9nXPSqjq+oJttrPl8slvcZ49Vi7jKw4=

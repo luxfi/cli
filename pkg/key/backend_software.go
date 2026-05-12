@@ -530,8 +530,8 @@ func serializeKeySet(ks *HDKeySet) ([]byte, error) {
 		BLSPrivateKey      string `json:"bls_private_key"`
 		BLSPublicKey       string `json:"bls_public_key"`
 		BLSPoP             string `json:"bls_pop"`
-		CoronaPrivateKey string `json:"corona_private_key"`
-		CoronaPublicKey  string `json:"corona_public_key"`
+		RingSigPrivateKey string `json:"ringsig_private_key"`
+		RingSigPublicKey  string `json:"ringsig_public_key"`
 		MLDSAPrivateKey    string `json:"mldsa_private_key"`
 		MLDSAPublicKey     string `json:"mldsa_public_key"`
 		StakingKeyPEM      string `json:"staking_key_pem"`
@@ -545,8 +545,8 @@ func serializeKeySet(ks *HDKeySet) ([]byte, error) {
 		BLSPrivateKey:      hex.EncodeToString(ks.BLSPrivateKey),
 		BLSPublicKey:       hex.EncodeToString(ks.BLSPublicKey),
 		BLSPoP:             hex.EncodeToString(ks.BLSPoP),
-		CoronaPrivateKey: hex.EncodeToString(ks.CoronaPrivateKey),
-		CoronaPublicKey:  hex.EncodeToString(ks.CoronaPublicKey),
+		RingSigPrivateKey: hex.EncodeToString(ks.RingSigPrivateKey),
+		RingSigPublicKey:  hex.EncodeToString(ks.RingSigPublicKey),
 		MLDSAPrivateKey:    hex.EncodeToString(ks.MLDSAPrivateKey),
 		MLDSAPublicKey:     hex.EncodeToString(ks.MLDSAPublicKey),
 		StakingKeyPEM:      string(ks.StakingKeyPEM),
@@ -571,8 +571,8 @@ func parseKeySetJSON(data []byte) (*HDKeySet, error) {
 		BLSPrivateKey      string `json:"bls_private_key"`
 		BLSPublicKey       string `json:"bls_public_key"`
 		BLSPoP             string `json:"bls_pop"`
-		CoronaPrivateKey string `json:"corona_private_key"`
-		CoronaPublicKey  string `json:"corona_public_key"`
+		RingSigPrivateKey string `json:"ringsig_private_key"`
+		RingSigPublicKey  string `json:"ringsig_public_key"`
 		MLDSAPrivateKey    string `json:"mldsa_private_key"`
 		MLDSAPublicKey     string `json:"mldsa_public_key"`
 		StakingKeyPEM      string `json:"staking_key_pem"`
@@ -613,11 +613,11 @@ func parseKeySetJSON(data []byte) (*HDKeySet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decode bls pop: %w", err)
 	}
-	ks.CoronaPrivateKey, err = hex.DecodeString(raw.CoronaPrivateKey)
+	ks.RingSigPrivateKey, err = hex.DecodeString(raw.RingSigPrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("decode corona private key: %w", err)
 	}
-	ks.CoronaPublicKey, err = hex.DecodeString(raw.CoronaPublicKey)
+	ks.RingSigPublicKey, err = hex.DecodeString(raw.RingSigPublicKey)
 	if err != nil {
 		return nil, fmt.Errorf("decode corona public key: %w", err)
 	}
