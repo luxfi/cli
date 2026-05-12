@@ -213,7 +213,7 @@ type QuantumKeys struct {
 	BLSSecretKey      []byte
 	BLSPublicKey      []byte
 	BLSPoP            []byte
-	CoronaSecretKey []byte
+	RingSigSecretKey []byte
 	RingSigPublicKey []byte
 	MLDSASecretKey    []byte
 	MLDSAPublicKey    []byte
@@ -235,11 +235,11 @@ func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 	}
 
 	// Generate Corona key
-	keys.CoronaSecretKey, err = NewRingSigKeyBytes()
+	keys.RingSigSecretKey, err = NewRingSigKeyBytes()
 	if err != nil {
 		return nil, fmt.Errorf("corona key generation failed: %w", err)
 	}
-	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.CoronaSecretKey)
+	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.RingSigSecretKey)
 	if err != nil {
 		return nil, fmt.Errorf("corona public key derivation failed: %w", err)
 	}
@@ -266,9 +266,9 @@ func SaveQuantumKeys(nodeDir string, keys *QuantumKeys) error {
 	}
 
 	// Save Corona key (hex encoded)
-	coronaPath := filepath.Join(nodeDir, constants.CoronaKeyFileName)
-	coronaHex := hex.EncodeToString(keys.CoronaSecretKey)
-	if err := os.WriteFile(coronaPath, []byte(coronaHex), 0o600); err != nil {
+	ringSigPath := filepath.Join(nodeDir, constants.RingSigKeyFileName)
+	ringSigHex := hex.EncodeToString(keys.RingSigSecretKey)
+	if err := os.WriteFile(ringSigPath, []byte(ringSigHex), 0o600); err != nil {
 		return fmt.Errorf("failed to save Corona key: %w", err)
 	}
 
@@ -299,16 +299,16 @@ func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
 	}
 
 	// Load Corona key
-	coronaPath := filepath.Join(nodeDir, constants.CoronaKeyFileName)
-	coronaHex, err := os.ReadFile(coronaPath) //nolint:gosec // G304: Reading from node's key directory
+	ringSigPath := filepath.Join(nodeDir, constants.RingSigKeyFileName)
+	ringSigHex, err := os.ReadFile(ringSigPath) //nolint:gosec // G304: Reading from node's key directory
 	if err != nil {
 		return nil, fmt.Errorf("failed to load Corona key: %w", err)
 	}
-	keys.CoronaSecretKey, err = hex.DecodeString(string(coronaHex))
+	keys.RingSigSecretKey, err = hex.DecodeString(string(ringSigHex))
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode Corona key: %w", err)
 	}
-	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.CoronaSecretKey)
+	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.RingSigSecretKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive Corona public key: %w", err)
 	}
