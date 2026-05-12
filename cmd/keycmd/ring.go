@@ -48,7 +48,7 @@ Features:
   - Lattice-based ring signatures for post-quantum security
   - Key images for linkability (double-spend detection)
 
-The ring signature uses your Ringtail key (secp256k1) from ~/.lux/keys/<name>/rt/
+The ring signature uses your ring-signature key (LSAG over secp256k1) from ~/.lux/keys/<name>/rt/
 
 Examples:
   lux key ring sign mykey "message" --ring key1,key2,key3
@@ -143,7 +143,7 @@ func runRingSign(_ *cobra.Command, args []string) error {
 	var signer ring.Signer
 	switch scheme {
 	case ring.LSAG:
-		signer, err = ring.NewLSAGSignerFromPrivateKey(keySet.RingtailPrivateKey)
+		signer, err = ring.NewLSAGSignerFromPrivateKey(keySet.RingSigPrivateKey)
 	case ring.LatticeLSAG:
 		signer, err = ring.NewLatticeSignerFromPrivateKey(keySet.MLDSAPrivateKey)
 	default:
@@ -340,7 +340,7 @@ func runRingKeyImage(_ *cobra.Command, args []string) error {
 	var signer ring.Signer
 	switch scheme {
 	case ring.LSAG:
-		signer, err = ring.NewLSAGSignerFromPrivateKey(keySet.RingtailPrivateKey)
+		signer, err = ring.NewLSAGSignerFromPrivateKey(keySet.RingSigPrivateKey)
 	case ring.LatticeLSAG:
 		signer, err = ring.NewLatticeSignerFromPrivateKey(keySet.MLDSAPrivateKey)
 	}
@@ -374,7 +374,7 @@ func runRingSchemes(_ *cobra.Command, _ []string) error {
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("  LSAG (Linkable Spontaneous Anonymous Group)")
 	ux.Logger.PrintToUser("    - Based on secp256k1 elliptic curves")
-	ux.Logger.PrintToUser("    - Uses Ringtail keys from ~/.lux/keys/<name>/rt/")
+	ux.Logger.PrintToUser("    - Uses ring-signature keys (LSAG) from ~/.lux/keys/<name>/rt/")
 	ux.Logger.PrintToUser("    - Compact signatures, fast verification")
 	ux.Logger.PrintToUser("    - Standard: Use '--scheme lsag' (default)")
 	ux.Logger.PrintToUser("")
@@ -469,7 +469,7 @@ func buildRing(signerName string, ringNames []string, scheme ring.Scheme, signer
 			signerIndex = i
 			switch scheme {
 			case ring.LSAG:
-				pubKey = signerKeySet.RingtailPublicKey
+				pubKey = signerKeySet.RingSigPublicKey
 			case ring.LatticeLSAG:
 				pubKey = signerKeySet.MLDSAPublicKey
 			}
@@ -480,7 +480,7 @@ func buildRing(signerName string, ringNames []string, scheme ring.Scheme, signer
 			}
 			switch scheme {
 			case ring.LSAG:
-				pubKey = ks.RingtailPublicKey
+				pubKey = ks.RingSigPublicKey
 			case ring.LatticeLSAG:
 				pubKey = ks.MLDSAPublicKey
 			}
@@ -506,7 +506,7 @@ func buildRingFromNames(ringNames []string, scheme ring.Scheme) ([][]byte, error
 		}
 		switch scheme {
 		case ring.LSAG:
-			ringPubKeys[i] = ks.RingtailPublicKey
+			ringPubKeys[i] = ks.RingSigPublicKey
 		case ring.LatticeLSAG:
 			ringPubKeys[i] = ks.MLDSAPublicKey
 		}

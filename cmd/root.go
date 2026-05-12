@@ -34,7 +34,7 @@ import (
 	"github.com/luxfi/cli/cmd/rpccmd"
 	aicli "github.com/luxfi/ai/cli"
 	fhecli "github.com/luxfi/fhe/cli"
-	rtcli "github.com/luxfi/ringtail/cli"
+	rtcli "github.com/luxfi/corona/cli"
 	tuicli "github.com/luxfi/tui/cli"
 	"github.com/luxfi/cli/cmd/selfcmd"
 	"github.com/luxfi/cli/cmd/snapshotcmd"
@@ -212,7 +212,7 @@ For detailed command help, use: lux <command> --help`,
 	// add fhe command (fully homomorphic encryption) — from github.com/luxfi/fhe/cli
 	rootCmd.AddCommand(fhecli.NewCmd())
 
-	// add rt command (ringtail threshold signing) — from github.com/luxfi/ringtail/cli
+	// add rt command (Corona threshold signing) — from github.com/luxfi/corona/cli
 	rootCmd.AddCommand(rtcli.NewCmd())
 
 	// add rpc command for direct RPC calls

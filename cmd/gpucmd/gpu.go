@@ -19,7 +19,7 @@ in the Lux node. Use subcommands to check GPU status, availability,
 and configuration.
 
 GPU acceleration is used for:
-  - NTT operations in Ringtail consensus
+  - NTT operations in Corona consensus
   - FHE operations in ThresholdVM
   - Lattice cryptography operations`,
 		RunE: cobrautils.CommandSuiteUsage,
