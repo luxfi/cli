@@ -170,9 +170,9 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
 }
 
-// NewRingtailKeyBytes generates a new secp256k1 private key and returns it as bytes
-// Note: "Ringtail" is a placeholder name - we use standard secp256k1 for now
-func NewRingtailKeyBytes() ([]byte, error) {
+// NewRingSigKeyBytes generates a new secp256k1 private key and returns it as bytes
+// Note: "Ring-signature" key derivation name - we use standard secp256k1 for now
+func NewRingSigKeyBytes() ([]byte, error) {
 	privKey, err := secp256k1.NewPrivateKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate secp256k1 key: %w", err)
@@ -180,8 +180,8 @@ func NewRingtailKeyBytes() ([]byte, error) {
 	return privKey.Bytes(), nil
 }
 
-// ToRingtailPublicKey converts secp256k1 private key bytes to public key bytes
-func ToRingtailPublicKey(keyBytes []byte) ([]byte, error) {
+// ToRingSigPublicKey converts secp256k1 private key bytes to public key bytes
+func ToRingSigPublicKey(keyBytes []byte) ([]byte, error) {
 	privKey, err := secp256k1.ToPrivateKey(keyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse secp256k1 private key: %w", err)
@@ -214,12 +214,12 @@ type QuantumKeys struct {
 	BLSPublicKey      []byte
 	BLSPoP            []byte
 	RingtailSecretKey []byte
-	RingtailPublicKey []byte
+	RingSigPublicKey []byte
 	MLDSASecretKey    []byte
 	MLDSAPublicKey    []byte
 }
 
-// GenerateAllQuantumKeys generates BLS, Ringtail, and ML-DSA keys for a validator
+// GenerateAllQuantumKeys generates BLS, Corona, and ML-DSA keys for a validator
 func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 	keys := &QuantumKeys{}
 	var err error
@@ -234,14 +234,14 @@ func GenerateAllQuantumKeys() (*QuantumKeys, error) {
 		return nil, fmt.Errorf("BLS public key derivation failed: %w", err)
 	}
 
-	// Generate Ringtail key
-	keys.RingtailSecretKey, err = NewRingtailKeyBytes()
+	// Generate Corona key
+	keys.RingtailSecretKey, err = NewRingSigKeyBytes()
 	if err != nil {
-		return nil, fmt.Errorf("ringtail key generation failed: %w", err)
+		return nil, fmt.Errorf("corona key generation failed: %w", err)
 	}
-	keys.RingtailPublicKey, err = ToRingtailPublicKey(keys.RingtailSecretKey)
+	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.RingtailSecretKey)
 	if err != nil {
-		return nil, fmt.Errorf("ringtail public key derivation failed: %w", err)
+		return nil, fmt.Errorf("corona public key derivation failed: %w", err)
 	}
 
 	// Generate ML-DSA key
@@ -265,11 +265,11 @@ func SaveQuantumKeys(nodeDir string, keys *QuantumKeys) error {
 		return fmt.Errorf("failed to save BLS key: %w", err)
 	}
 
-	// Save Ringtail key (hex encoded)
+	// Save Corona key (hex encoded)
 	ringtailPath := filepath.Join(nodeDir, constants.RingtailKeyFileName)
 	ringtailHex := hex.EncodeToString(keys.RingtailSecretKey)
 	if err := os.WriteFile(ringtailPath, []byte(ringtailHex), 0o600); err != nil {
-		return fmt.Errorf("failed to save Ringtail key: %w", err)
+		return fmt.Errorf("failed to save Corona key: %w", err)
 	}
 
 	// Save ML-DSA key (hex encoded)
@@ -298,19 +298,19 @@ func LoadQuantumKeys(nodeDir string) (*QuantumKeys, error) {
 		return nil, fmt.Errorf("failed to derive BLS public key: %w", err)
 	}
 
-	// Load Ringtail key
+	// Load Corona key
 	ringtailPath := filepath.Join(nodeDir, constants.RingtailKeyFileName)
 	ringtailHex, err := os.ReadFile(ringtailPath) //nolint:gosec // G304: Reading from node's key directory
 	if err != nil {
-		return nil, fmt.Errorf("failed to load Ringtail key: %w", err)
+		return nil, fmt.Errorf("failed to load Corona key: %w", err)
 	}
 	keys.RingtailSecretKey, err = hex.DecodeString(string(ringtailHex))
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode Ringtail key: %w", err)
+		return nil, fmt.Errorf("failed to decode Corona key: %w", err)
 	}
-	keys.RingtailPublicKey, err = ToRingtailPublicKey(keys.RingtailSecretKey)
+	keys.RingSigPublicKey, err = ToRingSigPublicKey(keys.RingtailSecretKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to derive Ringtail public key: %w", err)
+		return nil, fmt.Errorf("failed to derive Corona public key: %w", err)
 	}
 
 	// Load ML-DSA key

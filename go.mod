@@ -192,6 +192,7 @@ require (
 	github.com/luxfi/concurrent v0.0.3 // indirect
 	github.com/luxfi/consensus v1.23.2 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
+	github.com/luxfi/corona v0.2.1 // indirect
 	github.com/luxfi/gpu v1.0.1 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.8 // indirect

@@ -71,7 +71,7 @@ const (
 	// FHECmd is the fhe command name (for fully homomorphic encryption)
 	FHECmd = "fhe"
 
-	// RTCmd is the rt command name (for ringtail threshold signing)
+	// RTCmd is the rt command name (for Corona threshold signing)
 	RTCmd = "rt"
 
 	// MPCCmd is the mpc command name (for multi-party computation)

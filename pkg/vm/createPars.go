@@ -38,7 +38,7 @@ type ParsGenesisConfig struct {
 			MLDSA    string `json:"mldsa"`
 			MLKEM    string `json:"mlkem"`
 			BLS      string `json:"bls"`
-			Ringtail string `json:"ringtail"`
+			Corona string `json:"corona"`
 			FHE      string `json:"fhe"`
 		} `json:"precompiles"`
 	} `json:"evm"`
@@ -88,7 +88,7 @@ func DefaultParsGenesis(chainID uint64) *ParsGenesisConfig {
 	cfg.EVM.Precompiles.MLDSA = "0x0601"
 	cfg.EVM.Precompiles.MLKEM = "0x0603"
 	cfg.EVM.Precompiles.BLS = "0x0B00"
-	cfg.EVM.Precompiles.Ringtail = "0x0700"
+	cfg.EVM.Precompiles.Corona = "0x0700"
 	cfg.EVM.Precompiles.FHE = "0x0800"
 
 	// Pars messaging
@@ -106,7 +106,7 @@ func DefaultParsGenesis(chainID uint64) *ParsGenesisConfig {
 	cfg.Crypto.GPUEnabled = true
 	cfg.Crypto.SignatureScheme = "ML-DSA-65"
 	cfg.Crypto.KEMScheme = "ML-KEM-768"
-	cfg.Crypto.ThresholdScheme = "Ringtail"
+	cfg.Crypto.ThresholdScheme = "Corona"
 
 	// Quasar consensus
 	cfg.Consensus.Engine = "quasar"

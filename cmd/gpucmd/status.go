@@ -129,7 +129,7 @@ func printStatusTable(status GPUStatus) {
 
 	// Features
 	fmt.Println("Accelerated Features:")
-	fmt.Printf("  NTT (Ringtail consensus): %v\n", status.Features.NTTAcceleration)
+	fmt.Printf("  NTT (Corona consensus): %v\n", status.Features.NTTAcceleration)
 	fmt.Printf("  FHE (ThresholdVM):        %v\n", status.Features.FHEAcceleration)
 	fmt.Println()
 

@@ -38,7 +38,7 @@ used in the Lux network.
 Key types managed:
 - EC (secp256k1): Transaction signing, Ethereum compatibility
 - BLS: Consensus participation, aggregated signatures
-- Ringtail: Ring signatures for privacy
+- Ring-sig (LSAG over secp256k1) for privacy
 - ML-DSA: Post-quantum digital signatures (NIST Level 3)
 
 All keys are derived from a single BIP39 mnemonic phrase using HKDF,
