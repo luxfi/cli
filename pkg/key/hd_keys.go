@@ -29,7 +29,7 @@ const (
 	// Key type subdirectories
 	ECKeyDir       = "ec"    // secp256k1 keys for transaction signing
 	BLSKeyDir      = "bls"   // BLS keys for consensus
-	RingtailKeyDir = "rt"    // Corona keys for ring signatures
+	RingSigKeyDir = "rt"    // Corona keys for ring signatures
 	MLDSAKeyDir    = "mldsa" // ML-DSA keys for post-quantum signatures
 
 	// Key file names
@@ -311,7 +311,7 @@ func savePublicKeyInfo(keySet *HDKeySet) error {
 	}
 
 	// Save Corona public key
-	rtDir := filepath.Join(baseDir, RingtailKeyDir)
+	rtDir := filepath.Join(baseDir, RingSigKeyDir)
 	if err := os.MkdirAll(rtDir, constants.DefaultPerms755); err != nil {
 		return fmt.Errorf("failed to create Corona directory: %w", err)
 	}
@@ -385,7 +385,7 @@ func LoadKeySetPublicOnly(name string) (*HDKeySet, error) {
 	}
 
 	// Load Corona public key
-	rtDir := filepath.Join(baseDir, RingtailKeyDir)
+	rtDir := filepath.Join(baseDir, RingSigKeyDir)
 	rtPubHex, err := os.ReadFile(filepath.Join(rtDir, PublicKeyFile)) //nolint:gosec // G304: Reading from user's key directory
 	if err == nil {
 		keySet.RingSigPublicKey, _ = hex.DecodeString(string(rtPubHex))
