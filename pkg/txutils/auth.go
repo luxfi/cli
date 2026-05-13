@@ -31,7 +31,7 @@ func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 		chainAuth = unsignedTx.ChainAuth
 	case *txs.CreateChainTx:
 		chainAuth = unsignedTx.ChainAuth
-	case *txs.ConvertChainToL1Tx:
+	case *txs.ConvertNetworkToL1Tx:
 		chainAuth = unsignedTx.ChainAuth
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
