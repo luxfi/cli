@@ -40,8 +40,8 @@ func FromModels(vs []models.Validator) ([]ChainValidator, error) {
 
 // ToL1Validators converts SDK validators to node L1 validator format.
 // This is the format required for P-Chain transactions.
-func ToL1Validators(vs []models.Validator) ([]*txs.ConvertChainToL1Validator, error) {
-	result := make([]*txs.ConvertChainToL1Validator, len(vs))
+func ToL1Validators(vs []models.Validator) ([]*txs.ConvertNetworkToL1Validator, error) {
+	result := make([]*txs.ConvertNetworkToL1Validator, len(vs))
 	for i, v := range vs {
 		nodeID, err := ids.NodeIDFromString(v.NodeID)
 		if err != nil {
@@ -64,7 +64,7 @@ func ToL1Validators(vs []models.Validator) ([]*txs.ConvertChainToL1Validator, er
 		var popBytes [96]byte
 		copy(popBytes[:], pop)
 
-		result[i] = &txs.ConvertChainToL1Validator{
+		result[i] = &txs.ConvertNetworkToL1Validator{
 			NodeID:  nodeID[:],
 			Weight:  v.Weight,
 			Balance: v.Balance,
