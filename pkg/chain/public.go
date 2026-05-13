@@ -592,9 +592,9 @@ func (d *PublicDeployer) ConvertL1(
 	chainID ids.ID,
 	blockchainID ids.ID,
 	managerAddress ethcommon.Address,
-	validators []interface{}, // []*txs.ConvertChainToL1Validator
+	validators []interface{}, // []*txs.ConvertNetworkToL1Validator
 ) (bool, ids.ID, *txs.Tx, []string, error) {
-	ux.Logger.PrintToUser("Now calling ConvertChainToL1Tx...")
+	ux.Logger.PrintToUser("Now calling ConvertNetworkToL1Tx...")
 
 	// Get wallet
 	wallet, err := d.loadWallet(chainID)
@@ -607,20 +607,20 @@ func (d *PublicDeployer) ConvertL1(
 		return false, ids.Empty, nil, nil, fmt.Errorf("failure parsing auth keys: %w", err)
 	}
 
-	// Convert []interface{} to []*txs.ConvertChainToL1Validator
-	convertValidators := make([]*txs.ConvertChainToL1Validator, 0, len(validators))
+	// Convert []interface{} to []*txs.ConvertNetworkToL1Validator
+	convertValidators := make([]*txs.ConvertNetworkToL1Validator, 0, len(validators))
 	for _, v := range validators {
-		validator, ok := v.(*txs.ConvertChainToL1Validator)
+		validator, ok := v.(*txs.ConvertNetworkToL1Validator)
 		if !ok {
-			return false, ids.Empty, nil, nil, fmt.Errorf("invalid validator type: expected *txs.ConvertChainToL1Validator, got %T", v)
+			return false, ids.Empty, nil, nil, fmt.Errorf("invalid validator type: expected *txs.ConvertNetworkToL1Validator, got %T", v)
 		}
 		convertValidators = append(convertValidators, validator)
 	}
 
-	// Build ConvertChainToL1Tx using the wallet builder
+	// Build ConvertNetworkToL1Tx using the wallet builder
 	options := d.getMultisigTxOptions(chainAuthKeys)
 
-	unsignedTx, err := wallet.P().Builder().NewConvertChainToL1Tx(
+	unsignedTx, err := wallet.P().Builder().NewConvertNetworkToL1Tx(
 		chainID,
 		blockchainID,
 		managerAddress.Bytes(),
@@ -628,7 +628,7 @@ func (d *PublicDeployer) ConvertL1(
 		options...,
 	)
 	if err != nil {
-		return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertChainToL1Tx: %w", err)
+		return false, ids.Empty, nil, nil, fmt.Errorf("error building ConvertNetworkToL1Tx: %w", err)
 	}
 
 	tx := txs.Tx{Unsigned: unsignedTx}

@@ -29,7 +29,7 @@ func GetNetwork(tx *txs.Tx) (models.Network, error) {
 		networkID = unsignedTx.BaseTx.NetworkID
 	case *txs.CreateChainTx:
 		networkID = unsignedTx.BaseTx.NetworkID
-	case *txs.ConvertChainToL1Tx:
+	case *txs.ConvertNetworkToL1Tx:
 		networkID = unsignedTx.BaseTx.NetworkID
 	default:
 		return models.Undefined, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
