@@ -224,13 +224,13 @@ func runServerStart(cmd *cobra.Command, args []string) error {
 // getRootKey gets or generates the root encryption key.
 func getRootKey(dataDir string) ([]byte, error) {
 	// Check environment variable first
-	if envKey := os.Getenv("LUX_KMS_ROOT_KEY"); envKey != "" {
+	if envKey := os.Getenv("KMS_ROOT_KEY"); envKey != "" {
 		key, err := hex.DecodeString(envKey)
 		if err != nil {
-			return nil, fmt.Errorf("invalid LUX_KMS_ROOT_KEY: %w", err)
+			return nil, fmt.Errorf("invalid KMS_ROOT_KEY: %w", err)
 		}
 		if len(key) != 32 {
-			return nil, fmt.Errorf("LUX_KMS_ROOT_KEY must be 32 bytes (64 hex chars)")
+			return nil, fmt.Errorf("KMS_ROOT_KEY must be 32 bytes (64 hex chars)")
 		}
 		return key, nil
 	}

@@ -52,7 +52,7 @@ var (
 	ErrWCUserRejected    = errors.New("walletconnect: user rejected request")
 	ErrWCTimeout         = errors.New("walletconnect: request timed out")
 	ErrWCDisconnected    = errors.New("walletconnect: disconnected from relay")
-	ErrWCNoProjectID     = errors.New("walletconnect: project ID required (set LUX_WC_PROJECT_ID)")
+	ErrWCNoProjectID     = errors.New("walletconnect: project ID required (set WC_PROJECT_ID)")
 	ErrWCInvalidResponse = errors.New("walletconnect: invalid response from wallet")
 )
 
@@ -135,7 +135,7 @@ func (*WalletConnectBackend) SupportsRemoteSigning() bool {
 
 func (b *WalletConnectBackend) Initialize(ctx context.Context) error {
 	// Get project ID from environment
-	b.projectID = os.Getenv("LUX_WC_PROJECT_ID")
+	b.projectID = os.Getenv("WC_PROJECT_ID")
 	if b.projectID == "" {
 		// WalletConnect Cloud project ID is optional but recommended
 		// Public fallback for development
