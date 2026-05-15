@@ -25,9 +25,9 @@ var (
 )
 
 // defaultChartPath returns the default Helm chart path.
-// Searches: 1) $LUX_CHART_PATH, 2) ~/work/lux/devops/charts/lux
+// Searches: 1) $CHART_PATH, 2) ~/work/lux/devops/charts/lux
 func defaultChartPath() string {
-	if p := os.Getenv("LUX_CHART_PATH"); p != "" {
+	if p := os.Getenv("CHART_PATH"); p != "" {
 		return p
 	}
 	home, _ := os.UserHomeDir()
@@ -47,7 +47,7 @@ nodes, upgrade-file-content, chain configs, and per-pod services.
 
 CHART DISCOVERY (in order):
   1. --chart-path flag
-  2. $LUX_CHART_PATH environment variable
+  2. $CHART_PATH environment variable
   3. ~/work/lux/devops/charts/lux/
 
 EXAMPLES:
@@ -83,7 +83,7 @@ func runDeploy(_ *cobra.Command, _ []string) error {
 
 	// Validate chart exists
 	if _, err := os.Stat(filepath.Join(chart, "Chart.yaml")); err != nil {
-		return fmt.Errorf("Helm chart not found at %s (set --chart-path or $LUX_CHART_PATH)", chart)
+		return fmt.Errorf("Helm chart not found at %s (set --chart-path or $CHART_PATH)", chart)
 	}
 
 	// Validate values file exists

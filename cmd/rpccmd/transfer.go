@@ -64,7 +64,7 @@ Example:
 		},
 	}
 
-	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "", "Base RPC URL (default: LUX_RPC_URL or running network endpoint)")
+	cmd.Flags().StringVar(&flags.rpcURL, "rpc-url", "", "Base RPC URL (default: RPC_URL or running network endpoint)")
 	cmd.Flags().StringVar(&flags.from, "from", "", "Key name to use (default: MNEMONIC account 0)")
 	cmd.Flags().StringVar(&flags.fromChain, "from-chain", "P", "Source chain: P, X, or C")
 	cmd.Flags().StringVar(&flags.toChain, "to-chain", "C", "Destination chain: P, X, or C")
@@ -123,7 +123,7 @@ func resolveRPCBaseURL(app *application.Lux, override string) (string, error) {
 	if override != "" {
 		return strings.TrimSuffix(override, "/"), nil
 	}
-	if env := os.Getenv("LUX_RPC_URL"); env != "" {
+	if env := os.Getenv("RPC_URL"); env != "" {
 		return strings.TrimSuffix(env, "/"), nil
 	}
 	if app != nil {
@@ -131,7 +131,7 @@ func resolveRPCBaseURL(app *application.Lux, override string) (string, error) {
 			return strings.TrimSuffix(endpoint, "/"), nil
 		}
 	}
-	return "", fmt.Errorf("rpc base URL not set (use --rpc-url or LUX_RPC_URL)")
+	return "", fmt.Errorf("rpc base URL not set (use --rpc-url or RPC_URL)")
 }
 
 func resolveNetworkID(baseURL string) (uint32, error) {

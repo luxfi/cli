@@ -12,7 +12,7 @@ import (
 // MissingOpt describes a required option that was not provided.
 type MissingOpt struct {
 	Flag    string // e.g., "--chain-id"
-	Env     string // e.g., "LUX_CHAIN_ID" (optional)
+	Env     string // e.g., "CHAIN_ID" (optional)
 	Prompt  string // e.g., "EVM chain ID" - used for interactive prompts
 	Note    string // optional additional context
 	Default string // optional default value hint
@@ -53,7 +53,7 @@ func MissingError(cmd string, missing []MissingOpt) error {
 //
 //	missing := []prompts.MissingOpt{}
 //	if chainID == "" {
-//	    missing = append(missing, prompts.MissingOpt{Flag: "--chain-id", Env: "LUX_CHAIN_ID", Prompt: "EVM chain ID"})
+//	    missing = append(missing, prompts.MissingOpt{Flag: "--chain-id", Env: "CHAIN_ID", Prompt: "EVM chain ID"})
 //	}
 //	if err := prompts.PromptOrFail("lux chain create", missing, func(m MissingOpt) (string, error) {
 //	    return app.Prompt.CaptureString(m.Prompt)

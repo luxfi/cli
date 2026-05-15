@@ -50,7 +50,7 @@ Helm chart at `~/work/lux/devops/charts/lux/`. This ensures:
 - Identical deployments to deploy-all.sh
 - startup.sh with bootstrap, staking keys, upgrade-file-content, chain configs
 - Per-pod LoadBalancer services for external access
-- Configurable via `$LUX_CHART_PATH` or `--chart-path`
+- Configurable via `$CHART_PATH` or `--chart-path`
 
 ## Quick Reference
 
@@ -81,7 +81,7 @@ lux chain create mychain --token-name=MYTOKEN --token-symbol=MTK
 lux chain import --chain=c --path=/path/to/blocks.rlp  # Import RLP blocks to C-Chain
 lux chain import --chain=zoo --path=/path/to/zoo.rlp   # Import to chain
 
-# AMM Trading (LUX_MNEMONIC supported)
+# AMM Trading (MNEMONIC supported)
 lux amm balance                # Check token balances
 lux amm status                 # Show AMM contract status
 lux amm pools                  # List liquidity pools
@@ -259,16 +259,16 @@ The AMM CLI supports Uniswap V2/V3 style DEX trading on Lux and Zoo networks.
 ### Wallet Access (Priority Order)
 
 1. `--private-key` flag (hex private key)
-2. `LUX_PRIVATE_KEY` environment variable
-3. `LUX_MNEMONIC` environment variable (BIP39 mnemonic)
+2. `PRIVATE_KEY` environment variable
+3. `MNEMONIC` environment variable (BIP39 mnemonic)
 
 ```bash
 # Using mnemonic
-export LUX_MNEMONIC="word1 word2 ... word12"
+export MNEMONIC="word1 word2 ... word12"
 lux amm balance --network lux-testnet
 
 # Using private key
-export LUX_PRIVATE_KEY="0x..."
+export PRIVATE_KEY="0x..."
 lux amm balance --network zoo
 ```
 
