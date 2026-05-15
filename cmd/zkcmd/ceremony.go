@@ -14,12 +14,12 @@ import (
 )
 
 // findCeremonyBinary locates the ceremony binary.
-// Search order: PATH, $LUX_NODE_ROOT/build/ceremony, /usr/local/bin/ceremony.
+// Search order: PATH, $NODE_ROOT/build/ceremony, /usr/local/bin/ceremony.
 func findCeremonyBinary() (string, error) {
 	if p, err := exec.LookPath("ceremony"); err == nil {
 		return p, nil
 	}
-	if root := os.Getenv("LUX_NODE_ROOT"); root != "" {
+	if root := os.Getenv("NODE_ROOT"); root != "" {
 		p := filepath.Join(root, "build", "ceremony")
 		if _, err := os.Stat(p); err == nil {
 			return p, nil

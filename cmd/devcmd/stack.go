@@ -273,8 +273,8 @@ func stackUp(*cobra.Command, []string) error {
 			ux.Logger.PrintToUser("Starting %s on port %d...", name, port)
 			if _, err := spawnProcessWithEnv(binary, appArgs, logFile, pidDir, name, []string{
 				fmt.Sprintf("PORT=%d", port),
-				fmt.Sprintf("LUX_CHAINS_FILE=%s", filepath.Join(baseDir, stackChainsFile)),
-				fmt.Sprintf("LUX_RPC_URL=http://127.0.0.1:%d", luxdEntry.PortBase+i*portStride),
+				fmt.Sprintf("CHAINS_FILE=%s", filepath.Join(baseDir, stackChainsFile)),
+				fmt.Sprintf("RPC_URL=http://127.0.0.1:%d", luxdEntry.PortBase+i*portStride),
 			}); err != nil {
 				_ = logFile.Close()
 				ux.Logger.PrintToUser("Warning: failed to start %s: %v", name, err)
