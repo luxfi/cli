@@ -30,7 +30,7 @@ KUBERNETES COMMANDS (via Helm chart):
   rollback    Revert to previous StatefulSet revision
 
 The deploy command uses the canonical Helm chart at ~/work/lux/devops/charts/lux/
-(configurable via --chart-path or $LUX_CHART_PATH). All other k8s commands use
+(configurable via --chart-path or $CHART_PATH). All other k8s commands use
 the Kubernetes API directly for fast read/write operations.
 
 All k8s commands require one of --mainnet, --testnet, --devnet, or --namespace.

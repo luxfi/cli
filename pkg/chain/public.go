@@ -419,7 +419,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	ctx := context.Background()
 	ux.Logger.PrintToUser("loadWallet: starting...")
 
-	api := os.Getenv("LUX_NODE_ENDPOINT")
+	api := os.Getenv("NODE_ENDPOINT")
 	if api == "" {
 		switch d.network {
 		case models.Testnet:
