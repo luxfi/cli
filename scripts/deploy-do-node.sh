@@ -9,12 +9,12 @@ TESTNET_IP="24.144.93.58"
 DEVNET_IP="143.110.230.60"
 
 NETWORK=$1
-MNEMONIC="${2:-$LUX_MNEMONIC}"
+MNEMONIC="${2:-$MNEMONIC}"
 
 if [ -z "$NETWORK" ] || [ -z "$MNEMONIC" ]; then
     echo "Usage: $0 <network> [mnemonic]"
     echo "  network: mainnet, testnet, or devnet"
-    echo "  mnemonic: optional, uses LUX_MNEMONIC env var if not provided"
+    echo "  mnemonic: optional, uses MNEMONIC env var if not provided"
     exit 1
 fi
 
@@ -52,7 +52,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-Environment="LUX_MNEMONIC_FILE=/run/lux/mnemonic"
+Environment="MNEMONIC_FILE=/run/lux/mnemonic"
 Environment="NETWORK_ID=$NETWORK_ID"
 ExecStartPre=/usr/local/bin/luxd-keygen --mnemonic-file=/run/lux/mnemonic --output=/data/lux/staking
 ExecStart=/usr/local/bin/luxd \
