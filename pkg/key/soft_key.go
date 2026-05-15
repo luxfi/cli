@@ -510,7 +510,7 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 
 	// Priority 2: MNEMONIC / MNEMONIC
 	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
-		// MNEMONIC_ACCOUNT (or LUX_KEY_INDEX) selects BIP-44 address index.
+		// MNEMONIC_ACCOUNT (or KEY_INDEX) selects BIP-44 address index.
 		// Derivation: m/44'/9000'/0'/0/{account} for P/X-Chain
 		//             m/44'/60'/0'/0/{account}   for C-Chain/EVM
 		// Default: 0
