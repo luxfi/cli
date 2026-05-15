@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/luxfi/protocol/p/txs"
@@ -418,19 +419,21 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	ctx := context.Background()
 	ux.Logger.PrintToUser("loadWallet: starting...")
 
-	var api string
-	switch d.network {
-	case models.Testnet:
-		api = constants.TestnetAPIEndpoint
-	case models.Mainnet:
-		api = constants.MainnetAPIEndpoint
-	case models.Devnet:
-		api = constants.DevnetAPIEndpoint
-	case models.Local:
-		// used for E2E testing of public related paths
-		api = constants.LocalAPIEndpoint
-	default:
-		return nil, fmt.Errorf("unsupported public network")
+	api := os.Getenv("LUX_NODE_ENDPOINT")
+	if api == "" {
+		switch d.network {
+		case models.Testnet:
+			api = constants.TestnetAPIEndpoint
+		case models.Mainnet:
+			api = constants.MainnetAPIEndpoint
+		case models.Devnet:
+			api = constants.DevnetAPIEndpoint
+		case models.Local:
+			// used for E2E testing of public related paths
+			api = constants.LocalAPIEndpoint
+		default:
+			return nil, fmt.Errorf("unsupported public network")
+		}
 	}
 	ux.Logger.PrintToUser("loadWallet: using API endpoint %s", api)
 

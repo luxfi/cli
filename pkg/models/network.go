@@ -7,6 +7,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/luxfi/constants"
@@ -139,8 +140,14 @@ func (Network) BootstrappingContext() (context.Context, func()) {
 	return ctx, cancel
 }
 
-// Endpoint returns the RPC endpoint for the network
+// Endpoint returns the RPC endpoint for the network.
+// LUX_NODE_ENDPOINT env var overrides the canonical api.lux*.network DNS
+// for ops paths where the public endpoint isn't reachable (cross-cluster
+// deploys, captive testnets, etc).
 func (s Network) Endpoint() string {
+	if ovr := os.Getenv("LUX_NODE_ENDPOINT"); ovr != "" {
+		return ovr
+	}
 	switch s {
 	case Mainnet:
 		return constants.MainnetAPIEndpoint
