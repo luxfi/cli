@@ -23,7 +23,7 @@ type K8sNetworkConfig struct {
 // This delegates to `helm upgrade --install` to ensure a single source of truth.
 func StartK8sNetwork(cfg K8sNetworkConfig) error {
 	// Resolve chart path
-	chartPath := os.Getenv("LUX_CHART_PATH")
+	chartPath := os.Getenv("CHART_PATH")
 	if chartPath == "" {
 		home, _ := os.UserHomeDir()
 		chartPath = filepath.Join(home, "work", "lux", "devops", "charts", "lux")
@@ -31,7 +31,7 @@ func StartK8sNetwork(cfg K8sNetworkConfig) error {
 
 	// Validate chart exists
 	if _, err := os.Stat(filepath.Join(chartPath, "Chart.yaml")); err != nil {
-		return fmt.Errorf("Helm chart not found at %s (set $LUX_CHART_PATH)", chartPath)
+		return fmt.Errorf("Helm chart not found at %s (set $CHART_PATH)", chartPath)
 	}
 
 	// Validate values file
