@@ -127,14 +127,14 @@ func TestResolveNetwork(t *testing.T) {
 
 func TestDefaultChartPath(t *testing.T) {
 	// Without env var, should return ~/work/lux/devops/charts/lux
-	t.Setenv("LUX_CHART_PATH", "")
+	t.Setenv("CHART_PATH", "")
 	p := defaultChartPath()
 	if p == "" {
 		t.Error("defaultChartPath() returned empty string")
 	}
 
 	// With env var, should return the env value
-	t.Setenv("LUX_CHART_PATH", "/custom/chart")
+	t.Setenv("CHART_PATH", "/custom/chart")
 	p = defaultChartPath()
 	if p != "/custom/chart" {
 		t.Errorf("defaultChartPath() = %q, want /custom/chart", p)

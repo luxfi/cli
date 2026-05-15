@@ -285,7 +285,7 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 	}
 
 	cmd := exec.Command(netrunnerPath, args...) //nolint:gosec // G204: Running our netrunner binary
-	cmd.Env = append(os.Environ(), fmt.Sprintf("LUX_NETWORK_TYPE=%s", networkType))
+	cmd.Env = append(os.Environ(), fmt.Sprintf("NETWORK_TYPE=%s", networkType))
 	cmd.Stdout = outputFile
 	cmd.Stderr = outputFile
 
