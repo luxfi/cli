@@ -15,42 +15,35 @@ import (
 	"github.com/luxfi/crypto/secp256k1"
 )
 
-// Environment variable names for key loading.
-// Each variable supports two forms: generic (MNEMONIC) and prefixed (MNEMONIC).
-// Generic form takes priority so the same mnemonic/key works across tools.
+// Environment variable names for key loading. Brand prefix dropped — these
+// are the canonical (unprefixed) names every tool reads.
 const (
 	// EnvMnemonic contains a BIP39 mnemonic phrase.
-	// Env: MNEMONIC or MNEMONIC
 	EnvMnemonic = "MNEMONIC"
 
 	// EnvPrivateKey contains a hex-encoded secp256k1 private key.
-	// Env: PRIVATE_KEY or PRIVATE_KEY
 	EnvPrivateKey = "PRIVATE_KEY"
 
 	// EnvBLSKey contains a hex-encoded BLS private key.
-	// Env: BLS_KEY or LUX_BLS_KEY
-	EnvBLSKey = "LUX_BLS_KEY"
+	EnvBLSKey = "BLS_KEY"
 
 	// EnvKeyPassword for encrypted key files.
-	// Env: KEY_PASSWORD or KEY_PASSWORD
 	EnvKeyPassword = "KEY_PASSWORD"
 
 	// EnvKeySessionTimeout configures the session timeout duration.
 	// Format: Go duration string (e.g., "30s", "5m", "1h").
 	// Default: 30s (30 seconds of inactivity before auto-lock).
-	// Env: KEY_SESSION_TIMEOUT or KEY_SESSION_TIMEOUT
 	EnvKeySessionTimeout = "KEY_SESSION_TIMEOUT"
 
 	// EnvKeyIndex selects the BIP-44 address index for mnemonic derivation.
 	// Path: m/44'/9000'/0'/0/{index} for P/X-Chain.
 	// Default: "auto" — scans indices 0-99 to find the first funded account.
 	// Set to a specific number (e.g., "1") to use that index directly.
-	// Env: MNEMONIC_ACCOUNT or LUX_KEY_INDEX
-	EnvKeyIndex = "LUX_KEY_INDEX"
+	// MNEMONIC_ACCOUNT takes priority for backward compatibility with other tools.
+	EnvKeyIndex = "KEY_INDEX"
 
 	// EnvLightMnemonic is the well-known dev/local mnemonic for local development.
 	// This mnemonic is PUBLIC and safe to commit — it is NOT used for production.
-	// Env: LIGHT_MNEMONIC
 	EnvLightMnemonic = "LIGHT_MNEMONIC"
 
 	// LightMnemonic is the default mnemonic for local development networks.
@@ -58,19 +51,13 @@ const (
 	LightMnemonic = "light light light light light light light light light light light energy"
 )
 
-// getEnv returns the value of an environment variable, checking the generic
-// (unprefixed) form first, then the LUX_ prefixed form.
-// e.g., getEnv("MNEMONIC") checks MNEMONIC first, then MNEMONIC.
-func getEnv(luxPrefixed string) string {
-	// Try generic form: strip LUX_ prefix
-	generic := strings.TrimPrefix(luxPrefixed, "LUX_")
-	if v := os.Getenv(generic); v != "" {
-		return v
-	}
-	return os.Getenv(luxPrefixed)
+// getEnv returns the value of the named environment variable.
+func getEnv(name string) string {
+	return os.Getenv(name)
 }
 
-// getKeyIndex returns the configured key index from MNEMONIC_ACCOUNT or LUX_KEY_INDEX.
+// getKeyIndex returns the configured key index from MNEMONIC_ACCOUNT or KEY_INDEX.
+// MNEMONIC_ACCOUNT (industry-standard name) takes priority.
 func getKeyIndex() string {
 	if v := os.Getenv("MNEMONIC_ACCOUNT"); v != "" {
 		return v
@@ -160,15 +147,15 @@ func (b *EnvBackend) LoadKey(ctx context.Context, name, password string) (*HDKey
 }
 
 func (*EnvBackend) loadFromEnv(name string) (*HDKeySet, error) {
-	// Priority 1: MNEMONIC / MNEMONIC
+	// Priority 1: MNEMONIC
 	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
 		if !ValidateMnemonic(mnemonic) {
-			return nil, errors.New("invalid mnemonic in MNEMONIC / MNEMONIC")
+			return nil, errors.New("invalid mnemonic in MNEMONIC")
 		}
 		return DeriveAllKeys(name, mnemonic)
 	}
 
-	// Priority 2: PRIVATE_KEY / PRIVATE_KEY (hex-encoded EC key)
+	// Priority 2: PRIVATE_KEY (hex-encoded EC key)
 	if privKeyHex := getEnv(EnvPrivateKey); privKeyHex != "" {
 		privKeyHex = strings.TrimPrefix(privKeyHex, "0x")
 		privKeyBytes, err := hex.DecodeString(privKeyHex)

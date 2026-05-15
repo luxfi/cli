@@ -20,8 +20,8 @@ func init() {
 	// Go's default dialer waits 30s per dead IP before trying the next.
 	// Allow skipping TLS verification for devnet/internal endpoints
 	// that may use self-signed or staging certificates.
-	// Set LUX_INSECURE_TLS=1 to skip verification.
-	skipTLS := os.Getenv("LUX_INSECURE_TLS") == "1"
+	// Set INSECURE_TLS=1 to skip verification.
+	skipTLS := os.Getenv("INSECURE_TLS") == "1"
 	http.DefaultTransport = &http.Transport{
 		DialContext:           (&net.Dialer{Timeout: 5 * time.Second}).DialContext,
 		TLSHandshakeTimeout:  10 * time.Second,

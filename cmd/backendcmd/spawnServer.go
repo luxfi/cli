@@ -18,7 +18,7 @@ var app *application.Lux
 
 // NewCmd creates the lux-server command (formerly cli-backend).
 // This is the gRPC server that manages local network nodes.
-// The network type is determined by LUX_NETWORK_TYPE environment variable.
+// The network type is determined by NETWORK_TYPE environment variable.
 func NewCmd(injectedApp *application.Lux) *cobra.Command {
 	app = injectedApp
 
@@ -34,7 +34,7 @@ Each network type (mainnet, testnet, local) runs its own server on a dedicated p
   - testnet: 8098
   - local:   8099
 
-The network type is determined by the LUX_NETWORK_TYPE environment variable.`,
+The network type is determined by the NETWORK_TYPE environment variable.`,
 		RunE:   startBackend,
 		Args:   cobra.ExactArgs(0),
 		Hidden: true,
@@ -55,7 +55,7 @@ func NewNetworkCmd(injectedApp *application.Lux, networkType string) *cobra.Comm
 		Long:  fmt.Sprintf("The Lux gRPC server for %s network. Invoked automatically by 'lux network start'.", networkType),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Override the environment variable with the command's network type
-			_ = os.Setenv("LUX_NETWORK_TYPE", networkType)
+			_ = os.Setenv("NETWORK_TYPE", networkType)
 			return startBackend(cmd, args)
 		},
 		Args:   cobra.ExactArgs(0),
@@ -77,7 +77,7 @@ func NewAllNetworkCmds(injectedApp *application.Lux) []*cobra.Command {
 func startBackend(_ *cobra.Command, _ []string) error {
 	// Get network type from environment variable (set by StartServerProcessForNetwork)
 	// Defaults to "mainnet" for backward compatibility
-	networkType := os.Getenv("LUX_NETWORK_TYPE")
+	networkType := os.Getenv("NETWORK_TYPE")
 	if networkType == "" {
 		networkType = "mainnet"
 	}
