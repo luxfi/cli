@@ -133,7 +133,7 @@ const nodeBinaryName = "luxd"
 // findNodeBinary locates the node binary using the following priority:
 // 1. User-provided --node-path flag
 // 2. ~/.lux/bin/luxd (symlinked via 'lux node link')
-// 3. LUX_NODE_PATH environment variable
+// 3. NODE_PATH environment variable
 // 4. Config file node-path setting (~/.lux/cli.json)
 // 5. Node binary in PATH
 // 6. Relative to CLI binary: ../node/build/<nodeBinaryName>
@@ -154,7 +154,7 @@ func findNodeBinary() (string, error) {
 	}
 
 	// Priority 3 & 4: Check viper (handles both env var and config file)
-	// viper automatically checks LUX_NODE_PATH env var first, then config file
+	// viper automatically checks NODE_PATH env var first, then config file
 	if configPath := viper.GetString(constants.ConfigNodePath); configPath != "" {
 		// Expand ~ to home directory
 		if strings.HasPrefix(configPath, "~") {
@@ -193,7 +193,7 @@ func findNodeBinary() (string, error) {
 	return "", fmt.Errorf("%s binary not found. Please either:\n"+
 		"  1. Use --node-path flag to specify the path\n"+
 		"  2. Run 'lux node link' to symlink a binary to ~/.lux/bin/luxd\n"+
-		"  3. Set LUX_NODE_PATH environment variable\n"+
+		"  3. Set NODE_PATH environment variable\n"+
 		"  4. Set node-path in ~/.lux/cli.json config file\n"+
 		"  5. Add %s to your PATH\n"+
 		"  6. Build %s in the sibling node directory (../node/build/%s)",
