@@ -489,7 +489,7 @@ func initConfig() {
 	}
 
 	// Bind environment variables for binary paths
-	// LUX_NODE_PATH -> node-path, etc.
+	// NODE_PATH -> node-path, etc.
 	_ = viper.BindEnv(constants.ConfigNodePath, constants.EnvNodePath)
 	_ = viper.BindEnv(constants.ConfigNetrunnerPath, constants.EnvNetrunnerPath)
 	_ = viper.BindEnv(constants.ConfigEVMPath, constants.EnvEVMPath)
