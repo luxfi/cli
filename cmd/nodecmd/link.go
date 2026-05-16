@@ -27,7 +27,7 @@ Creates ~/.lux/bin directory if needed and symlinks the luxd binary.
 PRIORITY ORDER for binary lookup:
   1. Command-line flags (--node-path)
   2. ~/.lux/bin/luxd (this symlink)
-  3. Environment variable (LUX_NODE_PATH)
+  3. Environment variable (NODE_PATH)
   4. Config file settings
   5. PATH lookup
   6. Relative paths from CLI location
