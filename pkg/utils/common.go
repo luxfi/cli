@@ -29,7 +29,7 @@ import (
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/log/level"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/proto/p/txs"
+	"github.com/luxfi/protocol/p/txs"
 	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/utils"
