@@ -68,7 +68,7 @@ func EditConfigFile(
 		}
 	}
 
-	// Banff.10: "track-chains" instead of "whitelisted-chains"
+	// Migrated key name: "track-chains" replaces legacy "whitelisted-chains"
 	oldVal := luxdConfig["track-chains"]
 	if oldVal == nil {
 		// check the old key in the config file for tracked-chains

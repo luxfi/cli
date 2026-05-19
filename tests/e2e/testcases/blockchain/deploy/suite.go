@@ -40,7 +40,7 @@ func checkConvertOnlyOutput(output string, generateNodeID bool, chainName string
 var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 	_ = ginkgo.BeforeEach(func() {
 		// Create test chain config
-		commands.CreateEtnaEVMConfig(chainName, treasuryEVMAddress, commands.PoA)
+		commands.CreateSovEVMConfig(chainName, treasuryEVMAddress, commands.PoA)
 	})
 
 	ginkgo.AfterEach(func() {
