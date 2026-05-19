@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   create-release:
-    runs-on: hanzo-build-linux-amd64
+    runs-on: lux-build
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
     steps:
