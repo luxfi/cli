@@ -330,7 +330,7 @@ require (
 	github.com/luxfi/math v1.4.0
 	github.com/luxfi/net v0.0.4
 	github.com/luxfi/p2p v1.19.2
-	github.com/luxfi/protocol v0.0.3
+	github.com/luxfi/proto v0.0.0-proto-rename
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/sdk/api v0.0.2
 	github.com/luxfi/tls v1.0.3
@@ -346,3 +346,7 @@ require (
 	k8s.io/apimachinery v0.35.1
 	k8s.io/client-go v0.35.1
 )
+
+// Local-dev overlay for the protocol → proto rename.
+// Strip once GitHub admin renames luxfi/protocol → luxfi/proto and a real tag exists.
+replace github.com/luxfi/proto => ../protocol
