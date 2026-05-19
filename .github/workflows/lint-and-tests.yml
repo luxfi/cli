@@ -35,7 +35,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-14]
+        # GH-hosted arm64 macos forbidden; tests run on amd64 only.
+        # Cross-compiled darwin/arm64 binaries are validated in release-binaries.yml.
+        os: [ubuntu-22.04, macos-13]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
@@ -54,7 +56,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # `macos-latest` currently resolves to GH-hosted arm64 macos (forbidden).
+        # Pin to `macos-13` (amd64) until self-hosted darwin/arm64 is available.
+        os: [ubuntu-latest, macos-13]
     steps:
       - name: Git checkout
         uses: actions/checkout@v5
