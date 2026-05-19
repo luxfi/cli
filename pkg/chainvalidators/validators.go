@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/signer"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/signer"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/sdk/models"
 )
 
