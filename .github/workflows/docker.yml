@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-amd64:
-    runs-on: hanzo-build-linux-amd64
+    runs-on: lux-build
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
