@@ -1037,7 +1037,7 @@ func (s *StatusService) mapBlockchainIDToAlias(blockchainID string) string {
 		return "c"
 	case "2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8SvgU1s": // Mainnet C-Chain
 		return "c"
-	case "2oYMBNV4eNHyqk2fjjV5nP2rB8kJLnN57D7D77D7D7D7D7D7D": // Fuji C-Chain
+	case "2oYMBNV4eNHyqk2fjjV5nP2rB8kJLnN57D7D77D7D7D7D7D7D": // Testnet C-Chain
 		return "c"
 	case "yH8D7ThNJkxmtkuv2jgBa4P1Rn3Qpr4pPrRJU1J1U1J1U1J1J": // Devnet C-Chain
 		return "c"
