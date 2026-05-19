@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/crypto/secp256k1"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
 )
