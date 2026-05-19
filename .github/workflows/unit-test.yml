@@ -16,7 +16,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-14]
+        # GH-hosted arm64 macos forbidden; tests run on amd64 only.
+        # Cross-compiled darwin/arm64 binaries are validated in release-binaries.yml.
+        os: [ubuntu-22.04, macos-13]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
