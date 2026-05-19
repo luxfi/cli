@@ -237,9 +237,7 @@ func GetLuxdVersion(app *application.Lux, luxdVersion LuxdVersionSettings, netwo
 // version or using the latest Lux Go version that is still compatible with the chain that user
 // wants the cloud server to track
 func promptLuxdVersionChoice(app *application.Lux, latestReleaseVersion string, latestPreReleaseVersion string) (LuxdVersionSettings, error) {
-	versionComments := map[string]string{
-		"v1.11.0-testnet": " (recommended for testnet durango)",
-	}
+	versionComments := map[string]string{}
 	latestReleaseVersionOption := "Use latest Lux Go Release Version" + versionComments[latestReleaseVersion]
 	latestPreReleaseVersionOption := "Use latest Lux Go Pre-release Version" + versionComments[latestPreReleaseVersion]
 	chainBasedVersionOption := "Use the deployed Chain's VM version that the node will be validating"

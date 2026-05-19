@@ -37,7 +37,7 @@ const (
 
 var err error
 
-func createEtnaEVMConfig() error {
+func createSovEVMConfig() error {
 	// Check config does not already exist
 	_, err = utils.ChainConfigExists(utils.BlockchainName)
 	if err != nil {
@@ -71,10 +71,10 @@ func createEtnaEVMConfig() error {
 }
 
 func createSovereignChain() (string, string, error) {
-	if err := createEtnaEVMConfig(); err != nil {
+	if err := createSovEVMConfig(); err != nil {
 		return "", "", err
 	}
-	// Deploy chain on etna local network with local machine as bootstrap validator
+	// Deploy chain on sov local network with local machine as bootstrap validator
 	cmd := exec.Command( //nolint:gosec // G204: Running our own CLI binary in tests
 		CLIBinary,
 		"blockchain",
@@ -181,7 +181,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		uris, err := utils.GetLocalClusterUris()
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(len(uris)).Should(gomega.Equal(1))
-		_, err = commands.TrackLocalEtnaChain(utils.TestLocalNodeName, utils.BlockchainName)
+		_, err = commands.TrackLocalSovChain(utils.TestLocalNodeName, utils.BlockchainName)
 		gomega.Expect(err).Should(gomega.BeNil())
 		keyPath := path.Join(utils.GetBaseDir(), constants.KeyDir, fmt.Sprintf("chain_%s_airdrop", utils.BlockchainName)+constants.KeySuffix)
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
