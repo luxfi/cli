@@ -21,9 +21,9 @@ const (
 
 var luxdVersion string
 
-var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
-	ginkgo.It("Create Etna Chain Config", func() {
-		_, luxdVersion = commands.CreateEtnaEVMConfig(
+var _ = ginkgo.Describe("[Sov Add Validator SOV Local]", func() {
+	ginkgo.It("Create Sov Chain Config", func() {
+		_, luxdVersion = commands.CreateSovEVMConfig(
 			utils.BlockchainName,
 			treasuryEVMAddress,
 			commands.PoS,
@@ -32,7 +32,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 	ginkgo.It("Can deploy blockchain to localhost and upsize it", func() {
 		output := commands.StartNetworkWithVersion(luxdVersion)
 		fmt.Println(output)
-		output, err := commands.DeployEtnaBlockchain(
+		output, err := commands.DeploySovBlockchain(
 			utils.BlockchainName,
 			"",
 			nil,
@@ -41,7 +41,7 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 		)
 		gomega.Expect(err).Should(gomega.BeNil())
 		fmt.Println(output)
-		output, err = commands.AddEtnaChainValidatorToCluster(
+		output, err = commands.AddSovChainValidatorToCluster(
 			"",
 			utils.BlockchainName,
 			"",
@@ -59,11 +59,11 @@ var _ = ginkgo.Describe("[Etna Add Validator SOV Local]", func() {
 		fmt.Println(output)
 	})
 
-	ginkgo.It("Can destroy Etna Local Network", func() {
+	ginkgo.It("Can destroy Sov Local Network", func() {
 		commands.CleanNetwork()
 	})
 
-	ginkgo.It("Can remove Etna Chain Config", func() {
+	ginkgo.It("Can remove Sov Chain Config", func() {
 		commands.DeleteChainConfig(utils.BlockchainName)
 	})
 })
