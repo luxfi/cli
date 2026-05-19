@@ -27,7 +27,7 @@ const (
 	PoAString = "proof-of-authority"
 )
 
-func CreateEtnaEVMConfig(
+func CreateSovEVMConfig(
 	chainName string,
 	ewoqEVMAddress string,
 	chainManagementType ChainManagementType,
@@ -85,7 +85,7 @@ func CreateEtnaEVMConfig(
 	return mapping[utils.LatestEVM2LuxdKey], mapping[utils.LatestLuxd2EVMKey]
 }
 
-func CreateLocalEtnaNode(
+func CreateLocalSovNode(
 	luxdVersion string,
 	clusterName string,
 	numNodes int,
@@ -135,7 +135,7 @@ func DestroyLocalNode(
 	return string(output), err
 }
 
-func DeployEtnaBlockchain(
+func DeploySovBlockchain(
 	chainName string,
 	clusterName string,
 	bootstrapEndpoints []string,
@@ -155,7 +155,7 @@ func DeployEtnaBlockchain(
 	gomega.Expect(err).Should(gomega.BeNil())
 	gomega.Expect(exists).Should(gomega.BeTrue())
 
-	// Deploy chain on etna devnet with local machine as bootstrap validator
+	// Deploy chain on sov local network with local machine as bootstrap validator
 	args := []string{
 		"blockchain",
 		"deploy",
@@ -188,7 +188,7 @@ func DeployEtnaBlockchain(
 	return string(output), err
 }
 
-func TrackLocalEtnaChain(
+func TrackLocalSovChain(
 	clusterName string,
 	chainName string,
 ) (string, error) {
@@ -243,7 +243,7 @@ func InitValidatorManager(
 	return string(output), err
 }
 
-func AddEtnaChainValidatorToCluster(
+func AddSovChainValidatorToCluster(
 	clusterName string,
 	chainName string,
 	nodeEndpoint string,
@@ -295,7 +295,7 @@ func AddEtnaChainValidatorToCluster(
 	return string(output), err
 }
 
-func RemoveEtnaChainValidatorFromCluster(
+func RemoveSovChainValidatorFromCluster(
 	clusterName string,
 	chainName string,
 	nodeEndpoint string,
