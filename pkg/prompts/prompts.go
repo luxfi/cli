@@ -1198,7 +1198,7 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 	return uint8(val), nil //nolint:gosec // G115: Value validated to be within uint8 range
 }
 
-// CaptureFujiDuration prompts for a staking duration on Fuji testnet
+// CaptureFujiDuration prompts for a staking duration on Testnet testnet
 func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
