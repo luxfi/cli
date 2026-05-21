@@ -49,8 +49,9 @@ func stopDevNode(*cobra.Command, []string) error {
 		}
 	}
 
-	// Fallback: use pkill (only for luxd, and only in dev context)
-	cmd := exec.Command("pkill", "-f", "luxd.*--dev")
+	// Fallback: use pkill (only for luxd, and only in dev context — the dev
+	// profile is identified by the K=1 quorum-size flag we set in start.go)
+	cmd := exec.Command("pkill", "-f", "luxd.*--consensus-quorum-size=1")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// pkill returns error if no process found - that's ok
