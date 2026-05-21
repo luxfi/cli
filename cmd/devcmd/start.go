@@ -143,17 +143,18 @@ func startDevNode(*cobra.Command, []string) error {
 	ux.Logger.PrintToUser("Binary: %s", localNodePath)
 	ux.Logger.PrintToUser("Port: %d (staking: %d)", port, stakingPort)
 
-	// Build luxd command with --dev flag
-	// The --dev flag configures K=1 consensus automatically:
-	// - consensus-sample-size=1, consensus-quorum-size=1
-	// - skip-bootstrap=true
-	// - sybil-protection-enabled=false
-	// - ephemeral staking certs
-	// Chain config dir - luxd's --chain-config-dir points here
+	// Build luxd command. luxd has no `--dev` shortcut, so we spell out the
+	// K=1, no-bootstrap, no-sybil-protection profile explicitly. --automine
+	// supplies single-validator-quorum consensus and instant finality.
+	// Chain config dir - luxd's --chain-config-dir points here.
 	// Uses ~/.lux/chains/ for all chain configs (genesis, config.json, etc.)
 	chainConfigDir := filepath.Join(baseDir, constants.ChainsDir)
 	args := []string{
-		"--dev",
+		"--automine",
+		"--consensus-sample-size=1",
+		"--consensus-quorum-size=1",
+		"--sybil-protection-enabled=false",
+		"--skip-bootstrap=true",
 		fmt.Sprintf("--network-id=%d", 1337),
 		fmt.Sprintf("--http-host=%s", "0.0.0.0"),
 		fmt.Sprintf("--http-port=%d", port),

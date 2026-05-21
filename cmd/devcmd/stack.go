@@ -189,7 +189,11 @@ func stackUp(*cobra.Command, []string) error {
 		}
 
 		args := []string{
-			"--dev",
+			"--automine",
+			"--consensus-sample-size=1",
+			"--consensus-quorum-size=1",
+			"--sybil-protection-enabled=false",
+			"--skip-bootstrap=true",
 			fmt.Sprintf("--network-id=%d", 1337),
 			"--http-host=0.0.0.0",
 			fmt.Sprintf("--http-port=%d", httpPort),
