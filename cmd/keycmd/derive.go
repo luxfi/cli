@@ -11,15 +11,17 @@ import (
 
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 )
 
 var (
-	deriveCount  int
-	derivePrefix string
-	deriveStart  int
-	deriveShow   bool
-	deriveExport bool
+	deriveCount   int
+	derivePrefix  string
+	deriveStart   int
+	deriveShow    bool
+	deriveExport  bool
+	deriveNetwork string
 )
 
 func newDeriveCmd() *cobra.Command {
@@ -55,6 +57,9 @@ Examples:
 	cmd.Flags().IntVarP(&deriveStart, "start", "s", 0, "Starting account index")
 	cmd.Flags().BoolVar(&deriveShow, "show", false, "Only show addresses, don't save keys")
 	cmd.Flags().BoolVar(&deriveExport, "export", false, "Show private keys in output (DANGER - keep secret!)")
+	cmd.Flags().StringVar(&deriveNetwork, "network", "mainnet",
+		"Network for P/X address HRP: mainnet (P-lux1…) | testnet (P-test1…) | "+
+			"devnet (P-dev1…) | local (P-local1…) | custom (P-custom1…)")
 
 	return cmd
 }
@@ -85,8 +90,25 @@ func runDerive(_ *cobra.Command, _ []string) error {
 	ux.Logger.PrintToUser("BIP-44 path: m/44'/9000'/0'/0/{index} (Lux P/X-Chain)")
 	ux.Logger.PrintToUser("")
 
-	// Use mainnet network ID for address formatting
-	networkID := uint32(96369) // Lux mainnet
+	// Resolve network ID for HRP-based address formatting. Pass the
+	// PRIMARY-NETWORK ID (1/2/3/1337), NOT the EVM chainID (96369).
+	// Avalanche/Lux HRP is keyed off the P-Chain network ID; EVM
+	// chain ID is a different namespace.
+	var networkID uint32
+	switch deriveNetwork {
+	case "mainnet":
+		networkID = constants.MainnetID
+	case "testnet", "fuji":
+		networkID = constants.TestnetID
+	case "devnet":
+		networkID = constants.DevnetID
+	case "local":
+		networkID = constants.LocalID
+	case "custom":
+		networkID = constants.CustomID
+	default:
+		return fmt.Errorf("unknown --network %q (want mainnet|testnet|devnet|local|custom)", deriveNetwork)
+	}
 
 	var results []ValidatorKeyInfo
 
