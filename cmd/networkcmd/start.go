@@ -764,16 +764,15 @@ func StartDevMode() error {
 	ux.Logger.PrintToUser("Using luxd binary: %s", localNodePath)
 	ux.Logger.PrintToUser("Data directory: %s", dataDir)
 
-	// Build luxd command with --dev flag
-	// The --dev flag automatically configures:
-	// - consensus-sample-size=1 and consensus-quorum-size=1
-	// - poa-single-node-mode=true
-	// - skip-bootstrap=true
-	// - sybil-protection-enabled=false
-	// - enable-automining=true
-	// - ephemeral staking certs
+	// luxd has no `--dev` shortcut; spell out the K=1, no-bootstrap,
+	// no-sybil-protection profile explicitly. --automine supplies
+	// single-validator-quorum consensus and instant finality.
 	args := []string{
-		"--dev",
+		"--automine",
+		"--consensus-sample-size=1",
+		"--consensus-quorum-size=1",
+		"--sybil-protection-enabled=false",
+		"--skip-bootstrap=true",
 		fmt.Sprintf("--network-id=%d", 1337),
 		fmt.Sprintf("--http-host=%s", "0.0.0.0"),
 		fmt.Sprintf("--http-port=%d", effectivePortBase),

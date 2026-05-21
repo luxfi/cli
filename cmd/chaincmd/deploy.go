@@ -314,6 +314,7 @@ func getVMDisplayName(vm models.VMType) string {
 // getRemoteEndpoint returns the well-known remote API endpoint for a network type.
 // Returns empty string for local/custom networks that have no remote endpoint.
 func getRemoteEndpoint(network models.Network) string {
+	if ovr := os.Getenv("NODE_ENDPOINT"); ovr != "" { return ovr }
 	return network.Endpoint()
 }
 
@@ -384,6 +385,15 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		}
 		app.Log.Debug("Failed to load network state, will try remote endpoint", "error", stateErr)
 		networkState = nil
+	}
+	// "custom" (= models.Local, network-id 1337) and "dev" (`lux network start
+	// --dev`, also network-id 1337) are the same concept: a local-only network
+	// keyed by LIGHT_MNEMONIC. If the operator started a --dev network, accept
+	// it for `lux chain deploy --local`.
+	if targetType == "custom" && (networkState == nil || !networkState.Running) {
+		if devState, _ := app.LoadNetworkStateForType("dev"); devState != nil && devState.Running {
+			networkState = devState
+		}
 	}
 
 	// For remote-capable networks, try the remote endpoint if:
