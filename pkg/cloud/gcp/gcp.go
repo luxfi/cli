@@ -1,7 +1,15 @@
+//go:build gcs
+
 // Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Package gcp provides Google Cloud Platform integration for Lux CLI.
+//
+// google.golang.org/api/compute/v1 pulls grpc + googleapis/gax-go + the
+// rest of the Google Cloud SDK transitive chain. grpc is opt-in only
+// across the Lux/Hanzo stack, so GCP integration follows the same
+// discipline: enable with `-tags gcs`. Without the tag, this package
+// contains only the empty doc.go stub.
 package gcp
 
 import (
