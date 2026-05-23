@@ -23,8 +23,8 @@ import (
 
 // GenesisAllocation represents a genesis allocation entry in genesis.json.
 type GenesisAllocation struct {
-	EthAddr        string           `json:"ethAddr"`
-	LuxAddr        string           `json:"luxAddr"`
+	EthAddr        string           `json:"evmAddr"`
+	LuxAddr        string           `json:"utxoAddr"`
 	InitialAmount  uint64           `json:"initialAmount"`
 	UnlockSchedule []UnlockSchedule `json:"unlockSchedule"`
 }
