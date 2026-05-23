@@ -32,8 +32,8 @@ Network must be one of: mainnet, testnet, devnet, local`,
 
 // Genesis structures
 type GenesisAllocation struct {
-	EthAddr        string `json:"ethAddr"`
-	LuxAddr        string `json:"luxAddr"`
+	EthAddr        string `json:"evmAddr"`
+	LuxAddr        string `json:"utxoAddr"`
 	InitialAmount  uint64 `json:"initialAmount"`
 	UnlockSchedule []struct {
 		Amount   uint64 `json:"amount"`
