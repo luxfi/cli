@@ -99,7 +99,7 @@ var _ = ginkgo.Describe("[Node devnet]", func() {
 	})
 	ginkgo.It("provides luxd with genesis", func() {
 		genesisFile := commands.NodeSSH(constants.E2EClusterName, "cat /home/ubuntu/.luxd/configs/genesis.json")
-		gomega.Expect(genesisFile).To(gomega.ContainSubstring("luxAddr"))
+		gomega.Expect(genesisFile).To(gomega.ContainSubstring("utxoAddr"))
 		gomega.Expect(genesisFile).To(gomega.ContainSubstring("initialStakers"))
 		gomega.Expect(genesisFile).To(gomega.ContainSubstring("cChainGenesis"))
 		gomega.Expect(genesisFile).To(gomega.ContainSubstring(NodeID))
