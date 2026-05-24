@@ -8,7 +8,11 @@ import (
 	"github.com/luxfi/crypto"
 )
 
-func GenerateEthAddrs(count int) ([]crypto.Address, error) {
+// GenerateKeccakAddrs returns `count` test 20-byte addresses derived
+// as Keccak256(uncompressed_secp256k1_pubkey)[12:] — the EVM-runtime
+// address format. Naming: the derivation primitive (Keccak) is what
+// determines the value, not the brand of any chain that consumes it.
+func GenerateKeccakAddrs(count int) ([]crypto.Address, error) {
 	addrs := make([]crypto.Address, count)
 	for i := 0; i < count; i++ {
 		pk, err := crypto.GenerateKey()
@@ -18,4 +22,11 @@ func GenerateEthAddrs(count int) ([]crypto.Address, error) {
 		addrs[i] = crypto.PubkeyToAddress(pk.PublicKey)
 	}
 	return addrs, nil
+}
+
+// GenerateEthAddrs is the deprecated alias for GenerateKeccakAddrs.
+//
+// Deprecated: use GenerateKeccakAddrs.
+func GenerateEthAddrs(count int) ([]crypto.Address, error) {
+	return GenerateKeccakAddrs(count)
 }
