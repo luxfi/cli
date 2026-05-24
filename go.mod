@@ -14,10 +14,10 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.1.2
-	github.com/luxfi/crypto v1.19.0
+	github.com/luxfi/crypto v1.19.13
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.8.49
-	github.com/luxfi/geth v1.16.90
+	github.com/luxfi/geth v1.16.98
 	github.com/luxfi/ids v1.2.10
 	github.com/luxfi/keychain v1.0.2
 	github.com/luxfi/ledger v1.1.6
@@ -70,7 +70,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.54.0 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20260311194731-d5b7577c683d // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.21 // indirect
@@ -179,7 +178,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/luxfi/accel v1.0.9 // indirect
+	github.com/luxfi/accel v1.1.4 // indirect
 	github.com/luxfi/age v1.5.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.2.1 // indirect
@@ -198,7 +197,8 @@ require (
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/node v1.26.25-0.20260513030709-7f00b94dbae1 // indirect
 	github.com/luxfi/pq v1.0.3 // indirect
-	github.com/luxfi/precompile v0.5.16 // indirect
+	github.com/luxfi/precompile v0.5.27 // indirect
+	github.com/luxfi/protocol v0.0.5 // indirect
 	github.com/luxfi/runtime v1.0.1 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/timer v1.0.2 // indirect
@@ -319,7 +319,7 @@ require (
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.5.4
 	github.com/luxfi/coreth v1.21.48
-	github.com/luxfi/corona v0.3.0
+	github.com/luxfi/corona v0.4.1
 	github.com/luxfi/database v1.18.3
 	github.com/luxfi/fhe v1.8.0
 	github.com/luxfi/filesystem v0.0.1
@@ -331,13 +331,13 @@ require (
 	github.com/luxfi/math v1.4.0
 	github.com/luxfi/net v0.0.4
 	github.com/luxfi/p2p v1.19.2
-	github.com/luxfi/protocol v0.0.5
+	github.com/luxfi/proto v1.0.1
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/sdk/api v0.0.2
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/tui v0.1.0
 	github.com/luxfi/utils v1.1.4
-	github.com/luxfi/utxo v0.3.0
+	github.com/luxfi/utxo v0.3.1
 	github.com/luxfi/zapdb v1.10.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
