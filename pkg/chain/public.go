@@ -437,13 +437,13 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	}
 	ux.Logger.PrintToUser("loadWallet: using API endpoint %s", api)
 
-	// Create empty EthKeychain if kc doesn't implement it
-	var ethKc c.EthKeychain
-	if ekc, ok := d.kc.(c.EthKeychain); ok {
-		ethKc = ekc
+	// Create empty EVMKeychain if kc does not implement it
+	var evmKc c.EVMKeychain
+	if ekc, ok := d.kc.(c.EVMKeychain); ok {
+		evmKc = ekc
 	} else {
-		// Create a minimal EthKeychain implementation
-		ethKc = &emptyEthKeychain{}
+		// Create a minimal EVMKeychain implementation
+		evmKc = &emptyEVMKeychain{}
 	}
 
 	// Build the set of P-Chain transactions to fetch (e.g., chain creation txs)
@@ -467,7 +467,7 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:              api,
 		LUXKeychain:      keychainwrapper.WrapCryptoKeychain(d.kc),
-		EthKeychain:      ethKc,
+		EVMKeychain:      evmKc,
 		PChainTxsToFetch: pChainTxsToFetch,
 	})
 	if err != nil {

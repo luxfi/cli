@@ -267,7 +267,7 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 	}
 
 	if verbose {
-		fmt.Fprintf(&buf, "\nVerbose output:\n%s\n", status.String())
+		fmt.Fprintf(&buf, "\nVerbose output:\n%+v\n", status)
 	}
 
 	return buf.String(), nil

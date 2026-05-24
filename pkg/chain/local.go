@@ -101,14 +101,15 @@ func NewRecoverableDeploymentError(chainName string, cause error, suggestion str
 	}
 }
 
-// emptyEthKeychain is a minimal implementation of EthKeychain for cases where ETH keys are not needed
-type emptyEthKeychain struct{}
+// emptyEVMKeychain is a minimal implementation of c.EVMKeychain for
+// cases where EVM-runtime account keys are not needed.
+type emptyEVMKeychain struct{}
 
-func (*emptyEthKeychain) GetEth(_ common.Address) (walletkeychain.Signer, bool) {
+func (*emptyEVMKeychain) GetByEVM(_ common.Address) (walletkeychain.Signer, bool) {
 	return nil, false
 }
 
-func (*emptyEthKeychain) EthAddresses() set.Set[common.Address] {
+func (*emptyEVMKeychain) EVMAddresses() set.Set[common.Address] {
 	return set.NewSet[common.Address](0)
 }
 
@@ -266,18 +267,18 @@ func IssueTransformChainTx(
 ) (ids.ID, ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	// Create empty EthKeychain if kc doesn't implement it
-	var ethKc c.EthKeychain
-	if ekc, ok := kc.(c.EthKeychain); ok {
-		ethKc = ekc
+	// Create empty EVMKeychain if kc does not implement it
+	var evmKc c.EVMKeychain
+	if ekc, ok := kc.(c.EVMKeychain); ok {
+		evmKc = ekc
 	} else {
-		// Create a minimal EthKeychain implementation
-		ethKc = &emptyEthKeychain{}
+		// Create a minimal EVMKeychain implementation
+		evmKc = &emptyEVMKeychain{}
 	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
-		EthKeychain: ethKc,
+		EVMKeychain: evmKc,
 	})
 	if err != nil {
 		return ids.Empty, ids.Empty, err
@@ -335,20 +336,20 @@ func IssueAddPermissionlessValidatorTx(
 ) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	// Create empty EthKeychain if kc doesn't implement it
-	var ethKc c.EthKeychain
-	if ekc, ok := kc.(c.EthKeychain); ok {
-		ethKc = ekc
+	// Create empty EVMKeychain if kc does not implement it
+	var evmKc c.EVMKeychain
+	if ekc, ok := kc.(c.EVMKeychain); ok {
+		evmKc = ekc
 	} else {
-		// Create a minimal EthKeychain implementation
-		ethKc = &emptyEthKeychain{}
+		// Create a minimal EVMKeychain implementation
+		evmKc = &emptyEVMKeychain{}
 	}
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
 	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
-		EthKeychain: ethKc,
+		EVMKeychain: evmKc,
 	})
 	if err != nil {
 		return ids.Empty, err
@@ -653,7 +654,7 @@ func (d *LocalDeployer) doDeploy(chain string, chainGenesis []byte, genesisPath 
 	close(healthDone)
 	tracker.CompleteSuccess()
 
-	d.app.Log.Debug(deployBlockchainsInfo.String())
+	d.app.Log.Debug(fmt.Sprintf("%+v", deployBlockchainsInfo))
 
 	fmt.Println()
 	ux.Logger.GreenCheckmarkToUser("Blockchain deployed successfully")
@@ -1007,7 +1008,7 @@ func GetLocallyDeployedChains() (map[string]struct{}, error) {
 		return nil, err
 	}
 
-	for _, chain := range resp.GetClusterInfo().CustomChains {
+	for _, chain := range resp.ClusterInfo.CustomChains {
 		deployedNames[chain.ChainName] = struct{}{}
 	}
 
@@ -1018,20 +1019,20 @@ func GetLocallyDeployedChains() (map[string]struct{}, error) {
 func IssueRemoveChainValidatorTx(kc keychain.Keychain, chainID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	// Create empty EthKeychain if kc doesn't implement it
-	var ethKc c.EthKeychain
-	if ekc, ok := kc.(c.EthKeychain); ok {
-		ethKc = ekc
+	// Create empty EVMKeychain if kc does not implement it
+	var evmKc c.EVMKeychain
+	if ekc, ok := kc.(c.EVMKeychain); ok {
+		evmKc = ekc
 	} else {
-		// Create a minimal EthKeychain implementation
-		ethKc = &emptyEthKeychain{}
+		// Create a minimal EVMKeychain implementation
+		evmKc = &emptyEVMKeychain{}
 	}
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
 	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
-		EthKeychain: ethKc,
+		EVMKeychain: evmKc,
 	})
 	if err != nil {
 		return ids.Empty, err

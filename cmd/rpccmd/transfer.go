@@ -225,7 +225,7 @@ func transferPXToC(baseURL string, networkID uint32, sk *key.SoftKey, source str
 		return err
 	}
 
-	builder := c.NewBuilder(kcAdapter.Addresses(), kcAdapter.EthAddresses(), cCtx, cBackend)
+	builder := c.NewBuilder(kcAdapter.Addresses(), kcAdapter.EVMAddresses(), cCtx, cBackend)
 	importTx, err := builder.NewImportTx(chainIDFromAlias(source), common.HexToAddress(toAddr), baseFee)
 	if err != nil {
 		return fmt.Errorf("C import tx build failed: %w", err)
@@ -275,7 +275,7 @@ func transferCToPX(baseURL string, networkID uint32, sk *key.SoftKey, dest strin
 	}
 
 	destChainID := chainIDFromAlias(dest)
-	builder := c.NewBuilder(kcAdapter.Addresses(), kcAdapter.EthAddresses(), cCtx, cBackend)
+	builder := c.NewBuilder(kcAdapter.Addresses(), kcAdapter.EVMAddresses(), cCtx, cBackend)
 	exportTx, err := builder.NewExportTx(destChainID, []*secp256k1fx.TransferOutput{{
 		Amt:          amountNLUX,
 		OutputOwners: *outputOwner,
@@ -323,7 +323,7 @@ func makePrimaryWallet(ctx context.Context, baseURL string, sk *key.SoftKey) (pr
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         baseURL,
 		LUXKeychain: adapter,
-		EthKeychain: adapter,
+		EVMKeychain: adapter,
 	})
 	if err != nil {
 		return nil, nil, err
