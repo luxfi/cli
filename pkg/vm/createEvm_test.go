@@ -16,7 +16,7 @@ import (
 )
 
 func Test_ensureAdminsFunded(t *testing.T) {
-	cryptoAddrs, err := testutils.GenerateEthAddrs(5)
+	cryptoAddrs, err := testutils.GenerateEVMAddrs(5)
 	require.NoError(t, err)
 
 	// Convert crypto.Address to common.Address for GenesisAlloc

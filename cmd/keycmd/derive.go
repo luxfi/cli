@@ -66,20 +66,17 @@ Examples:
 
 // ValidatorKeyInfo represents exported validator key information.
 //
-// KeccakAddress is the canonical 20-byte address derived from the
-// secp256k1 pubkey via Keccak256 — the EVM-runtime address format.
-// EthAddress holds the same value and is retained as a deprecated
-// JSON alias for downstream tooling that hasn't migrated yet; both
-// fields receive the same string on Marshal. New consumers should
-// read `keccak_address`.
+// EVMAddress is the canonical 20-byte account address used by every
+// EVM-runtime chain (Lux C-Chain, Liquid EVM, Hanzo EVM, and so on).
+// The derivation hashes the secp256k1 pubkey with Keccak256 — that's
+// HOW. The value IS "EVM-runtime account address" — that's WHAT.
 type ValidatorKeyInfo struct {
-	Index         uint32 `json:"index"`
-	PrivateKey    string `json:"private_key,omitempty"`
-	KeccakAddress string `json:"keccak_address"`
-	EthAddress    string `json:"eth_address"` // Deprecated: use keccak_address
-	PChain        string `json:"p_chain"`
-	XChain        string `json:"x_chain"`
-	ShortID       string `json:"short_id"`
+	Index      uint32 `json:"index"`
+	PrivateKey string `json:"private_key,omitempty"`
+	EVMAddress string `json:"evm_address"`
+	PChain     string `json:"p_chain"`
+	XChain     string `json:"x_chain"`
+	ShortID    string `json:"short_id"`
 }
 
 func runDerive(_ *cobra.Command, _ []string) error {
@@ -150,12 +147,11 @@ func runDerive(_ *cobra.Command, _ []string) error {
 		}
 
 		info := ValidatorKeyInfo{
-			Index:         accountIndex,
-			KeccakAddress: cAddr,
-			EthAddress:    cAddr, // Deprecated alias; populated with the same value
-			PChain:        pAddr,
-			XChain:        xAddr,
-			ShortID:       shortID,
+			Index:      accountIndex,
+			EVMAddress: cAddr,
+			PChain:     pAddr,
+			XChain:     xAddr,
+			ShortID:    shortID,
 		}
 		if deriveExport {
 			info.PrivateKey = sf.PrivKeyHex()

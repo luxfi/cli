@@ -732,7 +732,7 @@ func FundLedgerAddress(amount uint64) error {
 	wallet, err := primary.MakeWallet(context.Background(), &primary.WalletConfig{
 		URI:         constants.LocalAPIEndpoint,
 		LUXKeychain: walletKC,
-		EthKeychain: nil,
+		EVMKeychain: nil,
 	})
 	if err != nil {
 		return err
@@ -771,7 +771,7 @@ func FundLedgerAddress(amount uint64) error {
 	wallet, err = primary.MakeWallet(context.Background(), &primary.WalletConfig{
 		URI:         constants.LocalAPIEndpoint,
 		LUXKeychain: walletKC,
-		EthKeychain: nil,
+		EVMKeychain: nil,
 	})
 	if err != nil {
 		return err
@@ -951,7 +951,7 @@ func FundAddress(addr ids.ShortID, amount uint64) error {
 	wallet, err := primary.MakeWallet(context.Background(), &primary.WalletConfig{
 		URI:         constants.LocalAPIEndpoint,
 		LUXKeychain: walletKC,
-		EthKeychain: nil,
+		EVMKeychain: nil,
 	})
 	if err != nil {
 		return err
