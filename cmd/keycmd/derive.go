@@ -67,7 +67,7 @@ Examples:
 // ValidatorKeyInfo represents exported validator key information.
 //
 // EVMAddress is the canonical 20-byte account address used by every
-// EVM-runtime chain (Lux C-Chain, Liquid EVM, Hanzo EVM, and so on).
+// EVM-runtime chain (Lux C-Chain, Hanzo EVM, downstream EVM L1s, and so on).
 // The derivation hashes the secp256k1 pubkey with Keccak256 — that's
 // HOW. The value IS "EVM-runtime account address" — that's WHAT.
 type ValidatorKeyInfo struct {
