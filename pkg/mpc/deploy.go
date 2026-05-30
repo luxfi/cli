@@ -38,7 +38,7 @@ type DeploymentConfig struct {
 	AWSProfile       string `json:"awsProfile,omitempty"`
 	AWSSecurityGroup string `json:"awsSecurityGroup,omitempty"`
 	AWSVPC           string `json:"awsVpc,omitempty"`
-	AWSSubnet        string `json:"awsSubnet,omitempty"`
+	AWSNet           string `json:"awsNet,omitempty"`
 
 	// GCP specific
 	GCPProject string `json:"gcpProject,omitempty"`
