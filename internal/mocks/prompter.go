@@ -216,7 +216,7 @@ func (m *Prompter) CaptureUint32(promptStr string) (uint32, error) {
 	return args.Get(0).(uint32), args.Error(1)
 }
 
-func (m *Prompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
+func (m *Prompter) CaptureTestnetDuration(promptStr string) (time.Duration, error) {
 	args := m.Called(promptStr)
 	return args.Get(0).(time.Duration), args.Error(1)
 }
