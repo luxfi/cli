@@ -23,7 +23,7 @@ const (
 	chainName1 = "TEST_chain"
 	chainName2 = "TEST_copied_chain"
 
-	chainID   = "testSubNet"
+	chainID   = "testChain"
 	networkID = uint32(67443)
 )
 
@@ -47,7 +47,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	defer func() { _ = os.Remove(configPath) }()
 
 	// testing backward compatibility
-	configBytes := []byte("{\"whitelisted-chains\": \"subNetId000\"}")
+	configBytes := []byte("{\"whitelisted-chains\": \"chainId000\"}")
 	err = os.MkdirAll(filepath.Dir(configPath), constants.DefaultPerms755)
 	require.NoError(err)
 	err = os.WriteFile(configPath, configBytes, 0o600)
@@ -63,7 +63,7 @@ func TestEditConfigFileWithOldPattern(t *testing.T) {
 	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", luxConfig["track-chains"])
+	require.Equal("chainId000,testChain", luxConfig["track-chains"])
 
 	// ensure that the old setting has been deleted
 	require.Equal(nil, luxConfig["whitelisted-chains"])
@@ -89,7 +89,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	defer func() { _ = os.Remove(configPath) }()
 
 	// testing backward compatibility
-	configBytes := []byte("{\"track-chains\": \"subNetId000\"}")
+	configBytes := []byte("{\"track-chains\": \"chainId000\"}")
 	err = os.MkdirAll(filepath.Dir(configPath), constants.DefaultPerms755)
 	require.NoError(err)
 	err = os.WriteFile(configPath, configBytes, 0o600)
@@ -105,7 +105,7 @@ func TestEditConfigFileWithNewPattern(t *testing.T) {
 	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("subNetId000,testSubNet", luxConfig["track-chains"])
+	require.Equal("chainId000,testChain", luxConfig["track-chains"])
 
 	// ensure that the old setting wont be applied at all
 	require.Equal(nil, luxConfig["whitelisted-chains"])
@@ -146,7 +146,7 @@ func TestEditConfigFileWithNoSettings(t *testing.T) {
 	err = json.Unmarshal(fileBytes, &luxConfig)
 	require.NoError(err)
 
-	require.Equal("testSubNet", luxConfig["track-chains"])
+	require.Equal("testChain", luxConfig["track-chains"])
 
 	// ensure that the old setting wont be applied at all
 	require.Equal(nil, luxConfig["whitelisted-chains"])
