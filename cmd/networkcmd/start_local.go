@@ -21,7 +21,7 @@ const (
 )
 
 // StartLocal starts a 3-node localnet on K8s via the operator.
-// No netrunner — the operator manages StatefulSets, subnet creation, chain deployment.
+// No netrunner — the operator manages StatefulSets, chain creation and deployment.
 //
 //   lux network start --local
 //   lux network start --local --k8s colima
