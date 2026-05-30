@@ -185,7 +185,7 @@ func (p *NonInteractivePrompter) CaptureUint8(promptStr string) (uint8, error) {
 	return 0, p.fail(promptStr)
 }
 
-func (p *NonInteractivePrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
+func (p *NonInteractivePrompter) CaptureTestnetDuration(promptStr string) (time.Duration, error) {
 	return 0, p.fail(promptStr)
 }
 
