@@ -750,7 +750,7 @@ func FundLedgerAddress(amount uint64) error {
 		Addrs:     []ids.ShortID{ledgerAddr},
 	}
 	output := &lux.TransferableOutput{
-		Asset: lux.Asset{ID: wallet.X().Builder().Context().XAssetID},
+		Asset: lux.Asset{ID: wallet.X().Builder().Context().UTXOAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          transferAmount,
 			OutputOwners: to,
@@ -963,7 +963,7 @@ func FundAddress(addr ids.ShortID, amount uint64) error {
 		Addrs:     []ids.ShortID{addr},
 	}
 	output := &lux.TransferableOutput{
-		Asset: lux.Asset{ID: wallet.X().Builder().Context().XAssetID},
+		Asset: lux.Asset{ID: wallet.X().Builder().Context().UTXOAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          amount,
 			OutputOwners: to,
