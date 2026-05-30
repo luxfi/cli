@@ -200,7 +200,7 @@ func transferPXToC(baseURL string, networkID uint32, sk *key.SoftKey, source str
 		}
 	} else {
 		_, err = pWallet.X().IssueExportTx(constants.CChainID, []*utxo.TransferableOutput{{
-			Asset: utxo.Asset{ID: pWallet.X().Builder().Context().XAssetID},
+			Asset: utxo.Asset{ID: pWallet.X().Builder().Context().UTXOAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt:          amountNLUX,
 				OutputOwners: *outputOwner,
