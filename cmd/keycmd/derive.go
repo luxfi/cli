@@ -103,7 +103,7 @@ func runDerive(_ *cobra.Command, _ []string) error {
 	switch deriveNetwork {
 	case "mainnet":
 		networkID = constants.MainnetID
-	case "testnet", "fuji":
+	case "testnet":
 		networkID = constants.TestnetID
 	case "devnet":
 		networkID = constants.DevnetID
