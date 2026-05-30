@@ -89,7 +89,7 @@ func TestNonInteractivePrompter_AllMethods(t *testing.T) {
 		{"CaptureRepoFile", func() error { _, err := p.CaptureRepoFile("", "", ""); return err }},
 		{"CaptureInt", func() error { _, err := p.CaptureInt("", nil); return err }},
 		{"CaptureUint8", func() error { _, err := p.CaptureUint8(""); return err }},
-		{"CaptureFujiDuration", func() error { _, err := p.CaptureFujiDuration(""); return err }},
+		{"CaptureTestnetDuration", func() error { _, err := p.CaptureTestnetDuration(""); return err }},
 		{"CaptureMainnetDuration", func() error { _, err := p.CaptureMainnetDuration(""); return err }},
 		{"CaptureMainnetL1StakingDuration", func() error { _, err := p.CaptureMainnetL1StakingDuration(""); return err }},
 	}
