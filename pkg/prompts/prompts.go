@@ -129,7 +129,7 @@ type Prompter interface {
 	CaptureRepoFile(promptStr string, repo string, branch string) (string, error)
 	CaptureInt(promptStr string, validator func(int) error) (int, error)
 	CaptureUint8(promptStr string) (uint8, error)
-	CaptureFujiDuration(promptStr string) (time.Duration, error)
+	CaptureTestnetDuration(promptStr string) (time.Duration, error)
 	CaptureMainnetDuration(promptStr string) (time.Duration, error)
 	CaptureMainnetL1StakingDuration(promptStr string) (time.Duration, error)
 }
@@ -1198,8 +1198,8 @@ func (*realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 	return uint8(val), nil //nolint:gosec // G115: Value validated to be within uint8 range
 }
 
-// CaptureFujiDuration prompts for a staking duration on Testnet testnet
-func (*realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
+// CaptureTestnetDuration prompts for a staking duration on testnet
+func (*realPrompter) CaptureTestnetDuration(promptStr string) (time.Duration, error) {
 	prompt := promptui.Prompt{
 		Label:    promptStr,
 		Validate: validateTestnetStakingDuration,
