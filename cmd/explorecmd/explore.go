@@ -46,7 +46,7 @@ ENDPOINTS:
 	}
 
 	cmd.Flags().String("rpc", "", "RPC endpoint (auto-detected from running network if not set)")
-	cmd.Flags().String("chain", "cchain", "Chain to index (cchain, xchain, pchain, or subnet name)")
+	cmd.Flags().String("chain", "cchain", "Chain to index (cchain, xchain, pchain, or chain name)")
 	cmd.Flags().Int("port", 8090, "HTTP port for explorer API")
 	cmd.Flags().String("data", "", "Data directory (default: ~/.lux/explorer/)")
 	cmd.Flags().Bool("open", true, "Open browser after starting")
