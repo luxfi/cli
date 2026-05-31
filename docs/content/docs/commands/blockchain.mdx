@@ -31,18 +31,18 @@ lux blockchain create <name> [flags]
 
 **Flags:**
 - `--genesis` - Path to custom genesis file
-- `--vm` - VM type: `Subnet-EVM`, `Custom`
+- `--vm` - VM type: `EVM chain`, `Custom`
 - `--evm-chain-id` - Chain ID for EVM chains
 - `--evm-token` - Token name for native gas token
-- `--evm-version` - Version of Subnet-EVM to use
+- `--evm-version` - Version of EVM chain to use
 - `--from-github-repo` - Import VM from a GitHub repository
 - `--force` - Overwrite existing configuration
 
 **Examples:**
 
 ```bash
-# Create a Subnet-EVM blockchain
-lux blockchain create mychain --vm=Subnet-EVM --evm-chain-id=99999
+# Create a EVM chain blockchain
+lux blockchain create mychain --vm=EVM chain --evm-chain-id=99999
 
 # Create with custom genesis
 lux blockchain create customchain --genesis=/path/to/genesis.json --vm=Custom
@@ -286,7 +286,7 @@ lux blockchain configure <name> [flags]
 - `--config` - Path to config file
 - `--chain-config` - Path to chain config
 - `--per-node-config` - Per-node configuration
-- `--subnet-config` - Subnet-level configuration
+- `--chain-config-per-chain` - Chain-level configuration
 
 **Examples:**
 
@@ -295,9 +295,9 @@ lux blockchain configure <name> [flags]
 lux blockchain configure mychain \
   --chain-config=/path/to/chain.json
 
-# Apply subnet configuration
+# Apply chain configuration
 lux blockchain configure mychain \
-  --subnet-config=/path/to/subnet.json
+  --chain-config-per-chain=/path/to/chain.json
 ```
 
 ### blockchain export
@@ -516,7 +516,7 @@ lux blockchain vmid mychain
 
 ## Blockchain Types
 
-### Subnet-EVM
+### EVM chain
 
 EVM-compatible blockchain with Ethereum tooling support.
 

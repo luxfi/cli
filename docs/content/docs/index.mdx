@@ -13,7 +13,7 @@ The official command-line interface for interacting with the Lux network, managi
 - **Validator Operations**: Add, remove, and query validators
 - **Chain Management**: Create and manage blockchains
 - **Wallet Operations**: Key management and transactions
-- **Subnet/L1 Management**: Create and configure sovereign L1 chains
+- **Chain Management**: Create and configure sovereign L1 chains
 - **Testing Tools**: Local network simulation and testing
 
 ## Installation
@@ -164,21 +164,21 @@ lux wallet send \
   --amount=<amount>
 ```
 
-### Subnet/L1 Commands
+### Chain Commands
 
 ```bash
-# Create subnet
-lux subnet create <name>
+# Create chain
+lux chain create <name>
 
-# Add validators to subnet
-lux subnet addValidator <name> \
+# Add validators to chain
+lux chain addValidator <name> \
   --node-id=<node-id>
 
-# Deploy subnet
-lux subnet deploy <name> [--local|--testnet|--mainnet]
+# Deploy chain
+lux chain deploy <name> [--local|--testnet|--mainnet]
 
-# Subnet info
-lux subnet info <name>
+# Chain info
+lux chain info <name>
 ```
 
 ## Configuration
@@ -251,16 +251,16 @@ lux validator list --net=mainnet
 
 ```bash
 # Create L1 with Quasar Protocol
-lux subnet create my-quantum-l1 \
+lux chain create my-quantum-l1 \
   --quantum-safe \
   --consensus=quasar
 
 # Configure validators
-lux subnet addValidator my-quantum-l1 \
+lux chain addValidator my-quantum-l1 \
   --node-id=NodeID-...
 
 # Deploy
-lux subnet deploy my-quantum-l1 --mainnet
+lux chain deploy my-quantum-l1 --mainnet
 ```
 
 ## Troubleshooting

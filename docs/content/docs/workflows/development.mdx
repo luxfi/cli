@@ -54,7 +54,7 @@ Define your blockchain requirements:
 ```yaml
 # blockchain-spec.yaml
 name: my-defi-chain
-vm_type: subnet-evm
+vm_type: evm
 consensus: bft
 token:
   name: DeFi Token
@@ -83,7 +83,7 @@ lux blockchain create my-defi-chain
 
 # Or from specification
 lux blockchain create my-defi-chain \
-  --vm=subnet-evm \
+  --vm=evm \
   --evm-chain-id=99999 \
   --evm-token=DFT
 ```
@@ -230,11 +230,11 @@ Enable cross-chain communication:
 
 ```bash
 # 1. Deploy source chain
-lux blockchain create source-chain --vm=subnet-evm
+lux blockchain create source-chain --vm=evm
 lux blockchain deploy source-chain --local
 
 # 2. Deploy destination chain
-lux blockchain create dest-chain --vm=subnet-evm
+lux blockchain create dest-chain --vm=evm
 lux blockchain deploy dest-chain --local
 
 # 3. Configure warp messaging

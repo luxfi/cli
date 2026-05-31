@@ -116,7 +116,7 @@
             "type": "prometheus"
           },
           "exemplar": true,
-          "expr": "round(increase(lux_${subnet}_blks_accepted_count{job=\"luxd\"}[1m]))>0",
+          "expr": "round(increase(lux_${chain}_blks_accepted_count{job=\"luxd\"}[1m]))>0",
           "interval": "",
           "legendFormat": "Accepted",
           "refId": "A"
@@ -209,7 +209,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "round(increase(lux_${subnet}_blks_rejected_count{job=\"luxd\"}[1m]))>0",
+          "expr": "round(increase(lux_${chain}_blks_rejected_count{job=\"luxd\"}[1m]))>0",
           "interval": "",
           "legendFormat": "Rejected",
           "refId": "A"
@@ -297,7 +297,7 @@
       "pluginVersion": "8.0.4",
       "targets": [
         {
-          "expr": "rate(lux_${subnet}_blks_accepted_sum{job=\"luxd\"}[5m]) / rate(lux_${subnet}_blks_accepted_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_blks_accepted_sum{job=\"luxd\"}[5m]) / rate(lux_${chain}_blks_accepted_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "Avg Acceptance Latency",
           "refId": "A"
@@ -388,7 +388,7 @@
       "pluginVersion": "8.0.4",
       "targets": [
         {
-          "expr": "rate(lux_${subnet}_blks_rejected_sum{job=\"luxd\"}[5m]) / rate(lux_${subnet}_blks_rejected_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_blks_rejected_sum{job=\"luxd\"}[5m]) / rate(lux_${chain}_blks_rejected_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "Avg Rejection Latency",
           "refId": "A"
@@ -475,7 +475,7 @@
             "type": "prometheus"
           },
           "exemplar": true,
-          "expr": "lux_${subnet}_blks_processing{job=\"luxd\"}>0",
+          "expr": "lux_${chain}_blks_processing{job=\"luxd\"}>0",
           "interval": "",
           "legendFormat": "Transactions",
           "refId": "A"
@@ -561,7 +561,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "lux_${subnet}_polls > 0",
+          "expr": "lux_${chain}_polls > 0",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -651,91 +651,91 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_pull_query_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_pull_query_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "pull query",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_push_query_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_push_query_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "push query",
           "refId": "B"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_chits_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_chits_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "chits",
           "refId": "C"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_accepted_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_accepted_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "accepted",
           "refId": "D"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get",
           "refId": "E"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_put_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_put_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "put",
           "refId": "F"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_multiput_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_multiput_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "multiput",
           "refId": "G"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_ancestors_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_ancestors_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get ancestors",
           "refId": "H"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_failed_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_failed_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get failed",
           "refId": "I"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_query_failed_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_query_failed_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "query failed",
           "refId": "J"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_accepted_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_accepted_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get accepted",
           "refId": "K"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_ancestors_failed_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_ancestors_failed_sum{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get ancestors failed",
           "refId": "L"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_request_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_request_sum{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app request",
@@ -743,7 +743,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_request_failed_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_request_failed_sum{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app request failed",
@@ -751,7 +751,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_response_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_response_sum{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app response",
@@ -759,7 +759,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_gossip_sum{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_gossip_sum{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app gossip",
@@ -854,7 +854,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "(increase(lux_${subnet}_handler_chits_count{job=\"luxd\"}[5m]) + 1) / (increase(lux_${subnet}_handler_chits_count{job=\"luxd\"}[5m]) + increase(lux_${subnet}_handler_query_failed_count{job=\"luxd\"}[5m]) + 1)",
+          "expr": "(increase(lux_${chain}_handler_chits_count{job=\"luxd\"}[5m]) + 1) / (increase(lux_${chain}_handler_chits_count{job=\"luxd\"}[5m]) + increase(lux_${chain}_handler_query_failed_count{job=\"luxd\"}[5m]) + 1)",
           "instant": false,
           "interval": "",
           "legendFormat": "% Successful",
@@ -945,91 +945,91 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_pull_query_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_pull_query_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_pull_query_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_pull_query_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "pull query",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_push_query_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_push_query_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_push_query_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_push_query_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "push query",
           "refId": "B"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_chits_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_chits_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_chits_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_chits_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "chits",
           "refId": "C"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_accepted_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_accepted_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_accepted_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_accepted_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "accepted",
           "refId": "D"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_get_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_get_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get",
           "refId": "E"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_put_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_put_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_put_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_put_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "put",
           "refId": "F"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_multiput_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_multi_put_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_multiput_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_multi_put_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "multiput",
           "refId": "G"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_ancestors_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_get_ancestors_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_ancestors_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_get_ancestors_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get ancestors",
           "refId": "H"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_failed_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_get_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_failed_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_get_failed_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get failed",
           "refId": "I"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_query_failed_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_query_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_query_failed_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_query_failed_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "query failed",
           "refId": "J"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_accepted_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_get_accepted_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_accepted_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_get_accepted_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get accepted",
           "refId": "K"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_ancestors_failed_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_get_ancestors_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_ancestors_failed_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_get_ancestors_failed_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get ancestors failed",
           "refId": "L"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_request_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_app_request_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_request_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_app_request_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app request",
@@ -1037,7 +1037,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_request_failed_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_app_request_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_request_failed_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_app_request_failed_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app request failed",
@@ -1045,7 +1045,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_response_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_app_response_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_response_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_app_response_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app response",
@@ -1053,7 +1053,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_gossip_sum{job=\"luxd\"}[5m])/rate(lux_${subnet}_handler_app_gossip_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_gossip_sum{job=\"luxd\"}[5m])/rate(lux_${chain}_handler_app_gossip_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app gossip",
@@ -1146,13 +1146,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "avg_over_time(lux_${subnet}_benchlist_benched_weight{job=\"luxd\"}[15m]) / 10^9",
+          "expr": "avg_over_time(lux_${chain}_benchlist_benched_weight{job=\"luxd\"}[15m]) / 10^9",
           "interval": "",
           "legendFormat": "LUX Benched",
           "refId": "A"
         }
       ],
-      "title": "Subnet weight benched",
+      "title": "Chain weight benched",
       "type": "timeseries"
     },
     {
@@ -1236,91 +1236,91 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_pull_query_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_pull_query_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "pull query",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_push_query_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_push_query_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "push query",
           "refId": "B"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_chits_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_chits_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "chits",
           "refId": "C"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_accepted_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_accepted_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "accepted",
           "refId": "D"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get",
           "refId": "E"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_put_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_put_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "put",
           "refId": "F"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_multi_put_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_multi_put_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "multiput",
           "refId": "G"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_ancestors_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_ancestors_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get ancestors",
           "refId": "H"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_failed_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get failed",
           "refId": "I"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_query_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_query_failed_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "query failed",
           "refId": "J"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_accepted_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_accepted_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get accepted",
           "refId": "K"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_get_ancestors_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_get_ancestors_failed_count{job=\"luxd\"}[5m])",
           "interval": "",
           "legendFormat": "get ancestors failed",
           "refId": "L"
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_request_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_request_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app request",
@@ -1328,7 +1328,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_request_failed_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_request_failed_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app request failed",
@@ -1336,7 +1336,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_response_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_response_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app response",
@@ -1344,7 +1344,7 @@
         },
         {
           "exemplar": true,
-          "expr": "rate(lux_${subnet}_handler_app_gossip_count{job=\"luxd\"}[5m])",
+          "expr": "rate(lux_${chain}_handler_app_gossip_count{job=\"luxd\"}[5m])",
           "hide": false,
           "interval": "",
           "legendFormat": "app gossip",
@@ -1428,7 +1428,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "increase(lux_${subnet}_vm_rpcchainvm_bytes_to_id_cache_hit[5m])/(increase(lux_${subnet}_vm_rpcchainvm_bytes_to_id_cache_hit[5m])+increase(lux_${subnet}_vm_rpcchainvm_bytes_to_id_cache_miss[5m]))",
+          "expr": "increase(lux_${chain}_vm_rpcchainvm_bytes_to_id_cache_hit[5m])/(increase(lux_${chain}_vm_rpcchainvm_bytes_to_id_cache_hit[5m])+increase(lux_${chain}_vm_rpcchainvm_bytes_to_id_cache_miss[5m]))",
           "interval": "",
           "legendFormat": "Hit Rate",
           "refId": "A"
@@ -1512,7 +1512,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "increase(lux_${subnet}_vm_rpcchainvm_missing_cache_hit[5m])/(increase(lux_${subnet}_vm_rpcchainvm_missing_cache_hit[5m])+increase(lux_${subnet}_vm_rpcchainvm_missing_cache_miss[5m]))",
+          "expr": "increase(lux_${chain}_vm_rpcchainvm_missing_cache_hit[5m])/(increase(lux_${chain}_vm_rpcchainvm_missing_cache_hit[5m])+increase(lux_${chain}_vm_rpcchainvm_missing_cache_miss[5m]))",
           "interval": "",
           "legendFormat": "Hit Rate",
           "refId": "A"
@@ -1595,7 +1595,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "increase(lux_${subnet}_vm_rpcchainvm_decided_cache_hit[5m])/(increase(lux_${subnet}_vm_rpcchainvm_decided_cache_hit[5m])+increase(lux_${subnet}_vm_rpcchainvm_decided_cache_miss[5m]))",
+          "expr": "increase(lux_${chain}_vm_rpcchainvm_decided_cache_hit[5m])/(increase(lux_${chain}_vm_rpcchainvm_decided_cache_hit[5m])+increase(lux_${chain}_vm_rpcchainvm_decided_cache_miss[5m]))",
           "interval": "",
           "legendFormat": "Hit Rate",
           "refId": "A"
@@ -1678,7 +1678,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "increase(lux_${subnet}_vm_rpcchainvm_unverified_cache_hit[5m])/(increase(lux_${subnet}_vm_rpcchainvm_unverified_cache_hit[5m])+increase(lux_${subnet}_vm_rpcchainvm_unverified_cache_miss[5m]))",
+          "expr": "increase(lux_${chain}_vm_rpcchainvm_unverified_cache_hit[5m])/(increase(lux_${chain}_vm_rpcchainvm_unverified_cache_hit[5m])+increase(lux_${chain}_vm_rpcchainvm_unverified_cache_miss[5m]))",
           "interval": "",
           "legendFormat": "Hit Rate",
           "refId": "A"
@@ -1768,7 +1768,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "lux_${subnet}_handler_unprocessed_msgs_len",
+          "expr": "lux_${chain}_handler_unprocessed_msgs_len",
           "interval": "",
           "legendFormat": "Pending Messages",
           "refId": "A"
@@ -1855,7 +1855,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "increase(lux_${subnet}_handler_expired[1m])",
+          "expr": "increase(lux_${chain}_handler_expired[1m])",
           "interval": "",
           "legendFormat": "Expired",
           "refId": "A"
@@ -1879,12 +1879,12 @@
           "text": "Spaces (Testnet)",
           "value": "2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt"
         },
-        "description": "This is a list of popular/known subnets. Your node may not be syncing these subnets in which case you will se no data.",
+        "description": "This is a list of popular/known chains. Your node may not be syncing these chains in which case you will se no data.",
         "hide": 0,
         "includeAll": false,
-        "label": "Subnet",
+        "label": "Chain",
         "multi": false,
-        "name": "subnet",
+        "name": "chain",
         "options": [
           {
             "selected": true,
@@ -1923,7 +1923,7 @@
     ]
   },
   "timezone": "",
-  "title": "Subnets",
+  "title": "Chains",
   "uid": "Gl1I21mnk",
   "version": 5,
   "weekStart": ""
