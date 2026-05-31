@@ -192,6 +192,7 @@ require (
 	github.com/luxfi/gpu v1.0.1 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.8 // indirect
+	github.com/luxfi/kms v1.9.12 // indirect
 	github.com/luxfi/lattice/v7 v7.1.0 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/math/safe v0.0.1 // indirect
