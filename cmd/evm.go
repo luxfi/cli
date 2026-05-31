@@ -27,17 +27,17 @@ var (
 
 var evmCmd = &cobra.Command{
 	Use:   "evm",
-	Short: "Manage EVM L2 deployments",
-	Long: `Deploy and manage EVM L2s with existing state.
+	Short: "Manage EVM chain deployments",
+	Long: `Deploy and manage EVM chains with existing state.
 
-This command allows you to deploy a new EVM L2 using an existing PebbleDB database,
+This command allows you to deploy a new EVM chain using an existing PebbleDB database,
 enabling easy migration and state preservation across network deployments.`,
 }
 
 var evmDeployCmd = &cobra.Command{
 	Use:   "deploy",
-	Short: "Deploy EVM L2",
-	Long: `Deploy a new EVM L2, optionally reusing an existing data directory.
+	Short: "Deploy EVM chain",
+	Long: `Deploy a new EVM chain, optionally reusing an existing data directory.
 
 Example:
   lux evm deploy                         # Uses default ~/.lux/evm/
@@ -91,7 +91,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Printf("\n📦 Deploying EVM L2\n")
+	fmt.Printf("\nDeploying EVM chain\n")
 	fmt.Printf("   Network ID: %d\n", evmNetworkID)
 	fmt.Printf("   Data Directory: %s\n", evmDataDir)
 	fmt.Printf("   RPC Port: %d\n", evmPort)
@@ -242,7 +242,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	// Create launch script
 	launchScript := filepath.Join(evmDataDir, "launch.sh")
 	script := fmt.Sprintf(`#!/bin/bash
-echo "🚀 Starting EVM L2 node..."
+echo "Starting EVM chain node..."
 echo "   Data directory: %s"
 echo "   RPC endpoint: http://localhost:%d/ext/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc"
 echo ""
@@ -265,7 +265,7 @@ exec /home/z/work/lux/node/build/luxd --config-file=%s
 		fmt.Println("   State: All accounts, balances, and contracts preserved")
 	}
 
-	fmt.Println("\n🚀 To start the EVM L2:")
+	fmt.Println("\nTo start the EVM chain:")
 	fmt.Printf("   %s\n", launchScript)
 
 	fmt.Println("\n📡 Once running, access via:")

@@ -28,7 +28,7 @@ const features = [
   {
     title: 'Sovereign L1s',
     description: 'Create quantum-safe sovereign L1 chains',
-    href: '/docs/subnet',
+    href: '/docs/commands/l1',
     icon: '🛡️',
   },
   {
