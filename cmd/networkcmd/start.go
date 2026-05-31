@@ -227,7 +227,7 @@ NETWORK TYPES (choose one, required):
                    - Single-node: K=1 consensus, instant finality
                    - Multi-node: --dev --num-validators=3 (turbo profile)
                    - Primary chains: C/P/X (Contract/Platform/Exchange)
-                   - L2 VMs: A(AI) B(Bridge) D(DEX) G(Graph) I(Identity)
+                   - App chain VMs: A(AI) B(Bridge) D(DEX) G(Graph) I(Identity)
                              K(Key) O(Oracle) Q(Quantum) R(Relay) T(Threshold) Z(ZK)
                    - Set MNEMONIC to auto-fund derived accounts
 

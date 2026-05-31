@@ -97,7 +97,7 @@ cd /Users/z/work/lux/cli/docs && pnpm build
 - ❌ local
 - ❌ migrate
 - ❌ primary
-- ❌ chain (l2/subnet alias)
+- ❌ chain (canonical chain command)
 - ❌ update
 - ❌ messenger
 - ❌ relayer

@@ -49,7 +49,7 @@ scrape_configs:
     - targets:
         - localhost
       labels:
-        job: subnet
+        job: chain
         host: {{ .Host }}
         nodeID: {{ .NodeID }}
         __path__: /logs/{{ .ChainID }}.log
