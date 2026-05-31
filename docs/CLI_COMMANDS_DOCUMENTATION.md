@@ -146,16 +146,17 @@ Migrate L1 data between networks.
 lux l1 migrate [l1Name] [flags]
 ```
 
-## L2 Commands
+## Chain Commands
 
-Create and manage L2s with multiple sequencing models. The `l2` command has aliases `chain` and `subnet` for backward compatibility.
+Create and manage chains. The `chain` command is the canonical entry point;
+no aliases exist.
 
-### lux l2 create
+### lux chain create
 
-Create a new L2 chain configuration.
+Create a new chain configuration.
 
 ```bash
-lux l2 create [chainName] [flags]
+lux chain create [chainName] [flags]
 lux chain create [chainName] [flags]  # alias
 ```
 
@@ -180,39 +181,39 @@ lux chain create [chainName] [flags]  # alias
 **Examples:**
 ```bash
 # Create L2 with interactive wizard
-lux l2 create myL2
+lux chain create myL2
 
 # Create L2 with Ethereum-based sequencing
-lux l2 create myL2 --evm --sequencer ethereum --enable-preconfirm
+lux chain create myL2 --evm --sequencer ethereum --enable-preconfirm
 
 # Create L2 with custom genesis
-lux l2 create myL2 --genesis ./genesis.json --force
+lux chain create myL2 --genesis ./genesis.json --force
 ```
 
-### lux l2 deploy
+### lux chain deploy
 
 Deploy an L2 chain.
 
 ```bash
-lux l2 deploy [chainName] [flags]
+lux chain deploy [chainName] [flags]
 ```
 
 **Similar flags to L1 deploy**
 
-### lux l2 list
+### lux chain list
 
 List all configured L2 chains.
 
 ```bash
-lux l2 list
+lux chain list
 ```
 
-### lux l2 describe
+### lux chain describe
 
 Show detailed information about an L2 chain.
 
 ```bash
-lux l2 describe [chainName]
+lux chain describe [chainName]
 ```
 
 ### lux l2 join
@@ -695,10 +696,10 @@ lux l1 validator add myL1 --node-id NodeID-...
 
 ```bash
 # 1. Create L2 with Ethereum-based sequencing
-lux l2 create myL2 --evm --sequencer ethereum
+lux chain create myL2 --evm --sequencer ethereum
 
 # 2. Deploy to testnet
-lux l2 deploy myL2 --testnet
+lux chain deploy myL2 --testnet
 
 # 3. Add validators
 lux l2 addValidator myL2

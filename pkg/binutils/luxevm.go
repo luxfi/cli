@@ -14,7 +14,7 @@ import (
 
 // SetupEVM downloads and installs the EVM binary.
 func SetupEVM(app *application.Lux, evmVersion string) (string, error) {
-	// Setup EVM for L1 or L2 chains
+	// Setup EVM for any chain type
 	binDir := filepath.Join(app.GetBaseDir(), constants.EVMInstallDir)
 	subDir := filepath.Join(binDir, evmBinPrefix+evmVersion)
 

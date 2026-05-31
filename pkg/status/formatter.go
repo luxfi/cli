@@ -50,11 +50,11 @@ func getChainTypeName(chainAlias string) string {
 	case "z":
 		return "zk"
 	case "zoo":
-		return "zoo" // Zoo L2
+		return "zoo" // Zoo app chain
 	case "hanzo":
-		return "hanzo" // Hanzo L2
+		return "hanzo" // Hanzo app chain
 	case "spc":
-		return "spc" // SPC L2
+		return "spc" // SPC app chain
 	default:
 		return "custom"
 	}
