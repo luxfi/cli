@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/go-bip39"
-	"github.com/luxfi/kms/pkg/zapclient"
+	"github.com/luxfi/keys"
 )
 
 // ABI strings for contract interactions
@@ -213,7 +213,7 @@ func (a *AMM) LoadWallet() error {
 //  2. PRIVATE_KEY env var (hex)
 //  3. MNEMONIC env var (BIP-39)
 //  4. KMS_ADDR + KMS_ENV + KMS_MNEMONIC_PATH (native ZAP) — uses the
-//     canonical luxfi/kms zapclient.LoadMnemonicFromKMS so every
+//     canonical luxfi/kms keys.LoadMnemonicFromKMS so every
 //     Lux-derived service resolves keys the same way.
 func (a *AMM) LoadWalletWithKey(privateKey string) error {
 	var key *ecdsa.PrivateKey
@@ -238,10 +238,10 @@ func (a *AMM) LoadWalletWithKey(privateKey string) error {
 	}
 
 	// Priority 3 + 4: MNEMONIC env (3) or KMS via ZAP (4). The shared
-	// luxfi/kms zapclient.LoadMnemonic handles the env-vs-KMS split
+	// luxfi/kms keys.LoadMnemonic handles the env-vs-KMS split
 	// itself, so we get one canonical flow.
 	if key == nil {
-		mnemonic, mErr := zapclient.LoadMnemonic(context.Background(),
+		mnemonic, mErr := keys.LoadMnemonic(context.Background(),
 			os.Getenv("KMS_ADDR"),
 			os.Getenv("KMS_ENV"),
 			envOr("KMS_MNEMONIC_PATH", "/mnemonic"))
