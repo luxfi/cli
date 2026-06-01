@@ -240,11 +240,26 @@ func (a *AMM) LoadWalletWithKey(privateKey string) error {
 	// Priority 3 + 4: MNEMONIC env (3) or KMS via ZAP (4). The shared
 	// luxfi/kms keys.LoadMnemonic handles the env-vs-KMS split
 	// itself, so we get one canonical flow.
+	//
+	// Consensus-native auth (KMS-side gate flipped 2026-05-30): when
+	// the env-win short-circuit DOESN'T fire and the dial reaches KMS,
+	// the envelope MUST carry a signed identity. The dial derives a
+	// *keys.ServiceIdentity from KMS_BOOTSTRAP_MNEMONIC (or MNEMONIC
+	// as the dev fallback) under the well-known servicePath
+	// "lux-cli/ammcmd". When MNEMONIC is set the env-win short-circuit
+	// returns the mnemonic and the dial is never reached, so identity
+	// derivation only runs in the KMS-dial branch.
 	if key == nil {
+		identity, idErr := bootstrapIdentity("lux-cli/ammcmd")
+		if idErr != nil {
+			return fmt.Errorf("derive KMS dial identity: %w", idErr)
+		}
+		defer identity.Wipe()
 		mnemonic, mErr := keys.LoadMnemonic(context.Background(),
 			os.Getenv("KMS_ADDR"),
 			os.Getenv("KMS_ENV"),
-			envOr("KMS_MNEMONIC_PATH", "/mnemonic"))
+			envOr("KMS_MNEMONIC_PATH", "/mnemonic"),
+			identity)
 		if mErr != nil {
 			return fmt.Errorf("no wallet credentials provided: use --private-key, PRIVATE_KEY, MNEMONIC env, or KMS_ADDR+KMS_ENV+KMS_MNEMONIC_PATH (%w)", mErr)
 		}
@@ -642,4 +657,22 @@ func envOr(name, def string) string {
 		return v
 	}
 	return def
+}
+
+// bootstrapIdentity derives the *keys.ServiceIdentity used to sign the
+// KMS dial envelope. Bootstrap mnemonic source order:
+//   1. KMS_BOOTSTRAP_MNEMONIC env var — explicit operator override.
+//   2. MNEMONIC env var — local dev + CI test seam.
+//
+// At least one MUST be set so the dial carries identity. Without an
+// identity the consensus-auth gate rejects the secret-opcode envelope.
+func bootstrapIdentity(servicePath string) (*keys.ServiceIdentity, error) {
+	m := strings.TrimSpace(os.Getenv("KMS_BOOTSTRAP_MNEMONIC"))
+	if m == "" {
+		m = strings.TrimSpace(os.Getenv("MNEMONIC"))
+	}
+	if m == "" {
+		return nil, fmt.Errorf("KMS_BOOTSTRAP_MNEMONIC (or MNEMONIC) must be set to dial KMS")
+	}
+	return keys.NewServiceIdentity(m, servicePath)
 }
