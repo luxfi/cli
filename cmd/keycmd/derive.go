@@ -97,8 +97,8 @@ func runDerive(_ *cobra.Command, _ []string) error {
 
 	// Resolve network ID for HRP-based address formatting. Pass the
 	// PRIMARY-NETWORK ID (1/2/3/1337), NOT the EVM chainID (96369).
-	// Avalanche/Lux HRP is keyed off the P-Chain network ID; EVM
-	// chain ID is a different namespace.
+	// Lux HRP is keyed off the P-Chain network ID (coin type 9000
+	// canonical convention); EVM chain ID is a different namespace.
 	var networkID uint32
 	switch deriveNetwork {
 	case "mainnet":
