@@ -480,8 +480,8 @@ github.com/luxfi/crypto/ipa v1.2.4 h1:6xfwhI9/HrcDkF3Ti5/NxsNQIWbwYDJmRSNIHRQ/xf
 github.com/luxfi/crypto/ipa v1.2.4/go.mod h1:43J6f6rcfUMrZt4cQectMOZb6Ps+fAEj8ZTPC3Kk+gE=
 github.com/luxfi/database v1.18.3 h1:gg+xwhKUxXa7fDoOD8IS91E71QqoEtcDCl2nfS61Jgg=
 github.com/luxfi/database v1.18.3/go.mod h1:sv0pYCGKlK1aNJTICxFUDpVWCJTigoLlshHmV/1pg7c=
-github.com/luxfi/erc20-go v0.2.1 h1:7fRBaXnMLHuIVCrxCh5zkTBMZVP4n/M6j2uvY5A2Ivc=
-github.com/luxfi/erc20-go v0.2.1/go.mod h1:MbUKY0menhmKos+0hBlozP0OJXejdpRH9q7GA0/r8kA=
+github.com/luxfi/erc20-go v0.2.2 h1:dhcXrpcCUk0ZnKf5AzrpGeq5jhIUYDjFGy36v58Jf/M=
+github.com/luxfi/erc20-go v0.2.2/go.mod h1:qso6l0s7fWPxzMlJGqt8D0cbMO1CZ7/4kdcGi89KgfQ=
 github.com/luxfi/evm v0.8.49 h1:xBiGibL6v1Gm02EIHVtvGvAIGVdPUY0kgsX8MDynApI=
 github.com/luxfi/evm v0.8.49/go.mod h1:fgtQq7WGR5EpaqJTdYn//EqzAZDvBH9OKkPYS7s4oMI=
 github.com/luxfi/fhe v1.8.0 h1:JUCXmUH+NA/puFS4IKz7kfYb5H1WMiwxVA2hDwM1aPI=
