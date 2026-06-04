@@ -14,7 +14,7 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.1.2
-	github.com/luxfi/crypto v1.19.16
+	github.com/luxfi/crypto v1.19.17
 	github.com/luxfi/erc20-go v0.2.2
 	github.com/luxfi/evm v0.8.49
 	github.com/luxfi/geth v1.16.98
@@ -40,9 +40,9 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
-	golang.org/x/mod v0.35.0
+	golang.org/x/mod v0.36.0
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0
@@ -180,7 +180,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
-	github.com/luxfi/accel v1.1.4 // indirect
+	github.com/luxfi/accel v1.1.9 // indirect
 	github.com/luxfi/age v1.5.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.2.1 // indirect
@@ -195,7 +195,7 @@ require (
 	github.com/luxfi/lattice/v7 v7.1.0 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/math/safe v0.0.1 // indirect
-	github.com/luxfi/mdns v0.1.0 // indirect
+	github.com/luxfi/mdns v0.1.1 // indirect
 	github.com/luxfi/metric v1.5.5 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/node v1.27.24 // indirect
@@ -208,7 +208,7 @@ require (
 	github.com/luxfi/upgrade v1.0.0 // indirect
 	github.com/luxfi/validators v1.2.0 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
-	github.com/luxfi/zap v0.2.0 // indirect
+	github.com/luxfi/zap v0.7.2 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
@@ -280,7 +280,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	golang.org/x/tools v0.44.0 // indirect
+	golang.org/x/tools v0.45.0 // indirect
 	gonum.org/v1/gonum v0.17.0 // indirect
 	google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
@@ -319,7 +319,7 @@ require (
 	github.com/klauspost/compress v1.18.5
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/ai v0.2.0
-	github.com/luxfi/api v1.0.11
+	github.com/luxfi/api v1.0.12
 	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.5.7
 	github.com/luxfi/coreth v1.23.0
@@ -342,7 +342,7 @@ require (
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/tui v0.1.0
 	github.com/luxfi/utils v1.1.4
-	github.com/luxfi/utxo v0.3.3
+	github.com/luxfi/utxo v0.3.5
 	github.com/luxfi/zapdb v1.10.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
