@@ -30,7 +30,7 @@ require (
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/onsi/ginkgo/v2 v2.28.1
-	github.com/onsi/gomega v1.39.1
+	github.com/onsi/gomega v1.41.0
 	github.com/pborman/ansi v1.0.0
 	github.com/schollz/progressbar/v3 v3.19.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
