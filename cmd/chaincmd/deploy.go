@@ -396,6 +396,14 @@ func deployToNetwork(chainName string, chainGenesis []byte, sc *models.Sidecar, 
 		}
 	}
 
+	// If NODE_ENDPOINT is set for --local, bypass gRPC and deploy directly via P-chain API.
+	if !isRemoteCapableNetwork(network) {
+		if ovr := os.Getenv("NODE_ENDPOINT"); ovr != "" {
+			ux.Logger.PrintToUser("NODE_ENDPOINT override: deploying directly to %s", ovr)
+			return deployToRemoteNetwork(chainName, chainGenesis, sc, network, ovr)
+		}
+	}
+
 	// For remote-capable networks, try the remote endpoint if:
 	// 1. No local state exists, OR
 	// 2. Local state exists but has a remote API endpoint (e.g., https://...), OR
@@ -563,7 +571,16 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 	}
 	ux.Logger.PrintToUser("Chain created: %s", chainID.String())
 
+	// Resolve the VM name for VMID computation. The VMID is derived from the
+	// VM name, not the blockchain name. For EVM chains the canonical VM name
+	// is "Lux EVM"; for custom VMs it is the chain name itself.
+	vmName := chainName
+	if sc.VM == models.EVM {
+		vmName = LuxEVMName
+	}
+
 	// Step 2: Create blockchain (P-chain transaction)
+	// Pass chainName as the display name and vmName as the VMID source.
 	ux.Logger.PrintToUser("Creating blockchain on chain %s...", chainID.String())
 	isFullySigned, blockchainID, _, _, err := deployer.DeployBlockchain(
 		controlKeys,
@@ -571,6 +588,7 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 		chainID,
 		chainName,
 		chainGenesis,
+		vmName,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create blockchain: %w", err)
