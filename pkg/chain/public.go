@@ -319,12 +319,16 @@ func (d *PublicDeployer) DeployChain(
 // DeployBlockchain creates a blockchain for the given chain.
 // It creates a create blockchain tx and sets the change output owner
 // to be a wallet address (if not, it may go to any other chain auth address).
+// chain is the display name stored in the CreateChainTx.
+// vmName, if non-empty, overrides the string used for VMID derivation; when
+// empty it falls back to chain (preserving legacy behaviour for custom VMs).
 func (d *PublicDeployer) DeployBlockchain(
 	controlKeys []string,
 	chainAuthKeysStrs []string,
 	chainID ids.ID,
 	chain string,
 	genesis []byte,
+	vmName ...string, // optional: VM name for VMID; defaults to chain
 ) (bool, ids.ID, *txs.Tx, []string, error) {
 	ux.Logger.PrintToUser("Now creating blockchain...")
 
@@ -333,9 +337,14 @@ func (d *PublicDeployer) DeployBlockchain(
 		return false, ids.Empty, nil, nil, err
 	}
 
-	vmID, err := utils.VMID(chain)
+	// Use explicit vmName when provided (EVM chains: "Lux EVM" ≠ chain name).
+	resolvedVMName := chain
+	if len(vmName) > 0 && vmName[0] != "" {
+		resolvedVMName = vmName[0]
+	}
+	vmID, err := utils.VMID(resolvedVMName)
 	if err != nil {
-		return false, ids.Empty, nil, nil, fmt.Errorf("failed to create VM ID from %s: %w", chain, err)
+		return false, ids.Empty, nil, nil, fmt.Errorf("failed to create VM ID from %s: %w", resolvedVMName, err)
 	}
 
 	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
