@@ -9,12 +9,13 @@ import (
 
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/proto/p/txs"
+	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 )
 
 // SaveToDisk saves a given tx to the specified path.
 func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
 	// Serialize the signed tx
-	txBytes, err := txs.Codec.Marshal(txs.CodecVersion, tx)
+	txBytes, err := pwallet.Codec.Marshal(txs.CodecVersion, tx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal signed tx: %w", err)
 	}
@@ -51,10 +52,10 @@ func LoadFromDisk(txPath string) (*txs.Tx, error) {
 		return nil, fmt.Errorf("couldn't decode signed tx: %w", err)
 	}
 	var tx txs.Tx
-	if _, err := txs.Codec.Unmarshal(txBytes, &tx); err != nil {
+	if _, err := pwallet.Codec.Unmarshal(txBytes, &tx); err != nil {
 		return nil, fmt.Errorf("error unmarshaling signed tx: %w", err)
 	}
-	if err := tx.Initialize(txs.Codec); err != nil {
+	if err := tx.Initialize(pwallet.Codec); err != nil {
 		return nil, fmt.Errorf("error initializing signed tx: %w", err)
 	}
 	return &tx, nil
