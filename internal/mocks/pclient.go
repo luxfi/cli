@@ -6,10 +6,8 @@ package mocks
 import (
 	"context"
 
-	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
-	"github.com/luxfi/sdk/api"
 	"github.com/luxfi/sdk/platformvm"
 	"github.com/stretchr/testify/mock"
 )
@@ -39,33 +37,6 @@ func (m *PClient) GetCurrentValidators(ctx context.Context, chainID ids.ID, node
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, ids.ID, []ids.NodeID) error); ok {
 		r1 = rf(ctx, chainID, nodeIDs)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ExportKey provides a mock function with given fields: ctx, user, address, options
-func (m *PClient) ExportKey(ctx context.Context, user api.UserPass, address ids.ShortID, options ...rpc.Option) (*secp256k1.PrivateKey, error) {
-	args := []interface{}{ctx, user, address}
-	for _, opt := range options {
-		args = append(args, opt)
-	}
-	ret := m.Called(args...)
-
-	var r0 *secp256k1.PrivateKey
-	if rf, ok := ret.Get(0).(func(context.Context, api.UserPass, ids.ShortID) *secp256k1.PrivateKey); ok {
-		r0 = rf(ctx, user, address)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*secp256k1.PrivateKey)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, api.UserPass, ids.ShortID) error); ok {
-		r1 = rf(ctx, user, address)
 	} else {
 		r1 = ret.Error(1)
 	}
