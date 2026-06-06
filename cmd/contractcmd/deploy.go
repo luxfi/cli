@@ -19,5 +19,7 @@ smart contracts on Lux networks.`,
 	}
 	// contract deploy erc20
 	cmd.AddCommand(newDeployERC20Cmd())
+	// contract deploy l2 — port of lux/standard/script/deploy_l2.sh
+	cmd.AddCommand(newDeployL2Cmd())
 	return cmd
 }
