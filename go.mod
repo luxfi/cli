@@ -14,7 +14,7 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/luxfi/config v1.1.2
-	github.com/luxfi/crypto v1.19.16
+	github.com/luxfi/crypto v1.19.17
 	github.com/luxfi/erc20-go v0.2.1
 	github.com/luxfi/evm v0.8.49
 	github.com/luxfi/geth v1.16.98
@@ -184,6 +184,7 @@ require (
 	github.com/luxfi/age v1.5.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.2.1 // indirect
+	github.com/luxfi/codec v1.1.4 // indirect
 	github.com/luxfi/compress v0.0.5 // indirect
 	github.com/luxfi/concurrent v0.0.3 // indirect
 	github.com/luxfi/consensus v1.25.0 // indirect
@@ -321,7 +322,6 @@ require (
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/ai v0.2.0
 	github.com/luxfi/api v1.0.11
-	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/constants v1.5.7
 	github.com/luxfi/coreth v1.23.0
 	github.com/luxfi/corona v0.7.5
@@ -341,7 +341,7 @@ require (
 	github.com/luxfi/sdk/api v0.0.2
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/tui v0.1.0
-	github.com/luxfi/utils v1.1.4
+	github.com/luxfi/utils v1.1.5
 	github.com/luxfi/utxo v0.3.3
 	github.com/luxfi/zapdb v1.10.0
 	github.com/mattn/go-isatty v0.0.20
