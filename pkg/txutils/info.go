@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/platformvm"
+	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 
@@ -138,7 +139,7 @@ func getChainTx(pClient *platformvm.Client, chainID ids.ID) (*txs.Tx, error) {
 	}
 
 	var tx txs.Tx
-	if _, err := txs.Codec.Unmarshal(txBytes, &tx); err != nil {
+	if _, err := pwallet.Codec.Unmarshal(txBytes, &tx); err != nil {
 		return nil, fmt.Errorf("couldn't unmarshal tx %s: %w", chainID, err)
 	}
 	return &tx, nil
