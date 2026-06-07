@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/lpm v1.9.4 // indirect
 	github.com/luxfi/netrunner v1.19.1
-	github.com/luxfi/sdk v1.17.6
+	github.com/luxfi/sdk v1.17.7
 	github.com/luxfi/vm v1.2.0
 	github.com/luxfi/warp v1.18.6
 	github.com/manifoldco/promptui v0.9.0
@@ -200,7 +200,6 @@ require (
 	github.com/luxfi/metric v1.5.8 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/node v1.29.4 // indirect
-	github.com/luxfi/p2p v1.21.1 // indirect
 	github.com/luxfi/pq v1.0.3 // indirect
 	github.com/luxfi/precompile v0.5.37 // indirect
 	github.com/luxfi/runtime v1.1.0 // indirect
@@ -337,6 +336,7 @@ require (
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.4.1
 	github.com/luxfi/net v0.0.4
+	github.com/luxfi/p2p v1.21.1
 	github.com/luxfi/proto v1.3.0
 	github.com/luxfi/rpc v1.0.3
 	github.com/luxfi/tls v1.0.3
@@ -352,10 +352,3 @@ require (
 	k8s.io/apimachinery v0.36.1
 	k8s.io/client-go v0.36.1
 )
-
-// Local SDK pickup until the X-Chain P-only fallback (this fix) ships
-// in a tagged release. The fix lives in wallet/primary/api.go so that
-// `lux chain deploy` works against the Quasar-era mainnet P-Chain
-// (P + C only, no X registered). Remove this replace once the SDK is
-// tagged and the require above is bumped.
-replace github.com/luxfi/sdk => ../sdk
