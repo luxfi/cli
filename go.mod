@@ -332,7 +332,7 @@ require (
 	github.com/luxfi/genesis v1.13.9
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/keys v1.1.0
+	github.com/luxfi/keys v1.2.0
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.4.1
 	github.com/luxfi/net v0.0.4
