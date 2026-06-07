@@ -482,8 +482,8 @@ github.com/luxfi/database v1.19.0 h1:sySH5eS8ihJtyc+yb0LgTignGwJ9H4W9bv+nboCuIm0
 github.com/luxfi/database v1.19.0/go.mod h1:o1ccjgVKMYbVBfi+6+sDvx4swGFgGnCGFQ4gL/oJ+kY=
 github.com/luxfi/erc20-go v0.2.1 h1:7fRBaXnMLHuIVCrxCh5zkTBMZVP4n/M6j2uvY5A2Ivc=
 github.com/luxfi/erc20-go v0.2.1/go.mod h1:MbUKY0menhmKos+0hBlozP0OJXejdpRH9q7GA0/r8kA=
-github.com/luxfi/evm v0.19.4 h1:i/wQ2CUglykV212xHnn8sK+EmwdlJwT7xFJnBXVHq88=
-github.com/luxfi/evm v0.19.4/go.mod h1:rkoXr5mq7xFK1Icwv9be6CMOjPHdpU+vzGIrpFO+rB8=
+github.com/luxfi/evm v1.99.19 h1:x7sM4NVsRsqkLyVhBIjI5nTSDnmXwywO1obNEQcAz/8=
+github.com/luxfi/evm v1.99.19/go.mod h1:nsumMqAGMSuGHCcf2uVfmL6/ipQcU5Z5iwgKkAbA5cw=
 github.com/luxfi/fhe v1.8.2 h1:QllnObNFbi6D4mvFI6uQkepW8HgLtdy4RMR1TKYAInA=
 github.com/luxfi/fhe v1.8.2/go.mod h1:16yxwhcnCez/rNcd/C9JjH9IjbEz73X+0tvlsONyLeA=
 github.com/luxfi/filesystem v0.0.1 h1:VZ6xMFKaAPBW/ddlMsDnI2G0VU1lV5rYaVcW5d+KwEY=

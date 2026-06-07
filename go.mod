@@ -16,7 +16,7 @@ require (
 	github.com/luxfi/config v1.1.2
 	github.com/luxfi/crypto v1.19.17
 	github.com/luxfi/erc20-go v0.2.1
-	github.com/luxfi/evm v0.19.4
+	github.com/luxfi/evm v1.99.19
 	github.com/luxfi/geth v1.16.99
 	github.com/luxfi/ids v1.2.14
 	github.com/luxfi/keychain v1.0.2
