@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/lpm v1.9.4 // indirect
 	github.com/luxfi/netrunner v1.19.1
-	github.com/luxfi/sdk v1.17.7
+	github.com/luxfi/sdk v1.17.8
 	github.com/luxfi/vm v1.2.0
 	github.com/luxfi/warp v1.18.6
 	github.com/manifoldco/promptui v0.9.0
