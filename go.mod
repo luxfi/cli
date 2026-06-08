@@ -318,7 +318,7 @@ require (
 	github.com/btcsuite/btcd v0.25.0
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
-	github.com/klauspost/compress v1.18.5
+	github.com/klauspost/compress v1.18.6
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/ai v0.2.0
 	github.com/luxfi/api v1.0.12
