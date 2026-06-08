@@ -13,14 +13,16 @@ import (
 	"github.com/luxfi/vm/components/verify"
 )
 
-// GetAuthSigners returns all chain auth addresses that are required to sign a given tx.
-// It gets chain control keys as string slice using P-Chain API (GetOwners),
-// gets chain auth indices from the tx (field tx.UnsignedTx.ChainAuth),
-// and creates the string slice of required chain auth addresses by applying
-// the indices to the control keys slice.
+// GetAuthSigners returns all network/chain auth addresses required to sign a tx.
+// It reads the auth-indices on the tx and resolves them against controlKeys
+// (the network's or chain's owner key set, as returned by GetOwners).
 //
-// Expected tx.Unsigned types: txs.CreateChainTx, txs.AddChainValidatorTx, txs.RemoveChainValidatorTx.
-// controlKeys must be in the same order as in the chain creation tx (as obtained by GetOwners).
+// Expected tx.Unsigned types are the chain-owner-authorized forms:
+// CreateChainTx, ConvertNetworkToL1Tx, plus the legacy AddChainValidatorTx
+// and RemoveChainValidatorTx (kept here for one release cycle while the
+// sovereign-L1 model phases in; new validator adds use AddValidatorTx which
+// is NOT chain-owner-authorized and therefore never appears here).
+// controlKeys must be in the same order as in the owning tx (per GetOwners).
 func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	unsignedTx := tx.Unsigned
 	var chainAuth verify.Verifiable
@@ -28,6 +30,7 @@ func GetAuthSigners(tx *txs.Tx, controlKeys []string) ([]string, error) {
 	case *txs.RemoveChainValidatorTx:
 		chainAuth = unsignedTx.ChainAuth
 	case *txs.AddChainValidatorTx:
+		// Deprecated path — see AddValidatorTx for the network-level form.
 		chainAuth = unsignedTx.ChainAuth
 	case *txs.CreateChainTx:
 		chainAuth = unsignedTx.ChainAuth
