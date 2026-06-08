@@ -212,10 +212,22 @@ func addValidator(_ *cobra.Command, _ []string) error {
 			return fmt.Errorf("delegation fee has to be larger than %d", defaultFee)
 		}
 	}
-	// For primary network, use AddValidator with empty chain ID
-	// AddValidator returns (bool, *txs.Tx, []string, error)
-	// The popBytes and recipientAddr are used for PoS validators, but primary network uses the simpler model
-	_, _, _, err = deployer.AddValidator(nil, nil, ids.Empty, nodeID, weight, start, duration)
+	// Validators validate networks (not chains). Under the sovereign-L1 model,
+	// a primary-network add doesn't reference any chain — pass ids.Empty for
+	// the legacy chainID slot. Rewards owner defaults to the wallet's first
+	// address inside AddValidator when nil. delegationShares is the fraction
+	// (out of 1,000,000) the validator takes from delegation rewards.
+	_, _, _, err = deployer.AddValidator(
+		nil,                  // controlKeys (unused for primary-network adds)
+		nil,                  // chainAuthKeysStrs (unused for primary-network adds)
+		ids.Empty,            // legacy chainID (unused)
+		nodeID,
+		weight,
+		start,
+		duration,
+		nil,                  // rewardsOwner: default to first wallet addr
+		delegationFee,        // delegation shares
+	)
 	return err
 }
 

@@ -19,7 +19,10 @@ import (
 )
 
 // GetNetwork returns the network model associated with a tx.
-// Expected tx.Unsigned types: txs.AddChainValidatorTx, txs.CreateChainTx, etc.
+// Handles the chain-owner-authorized forms (CreateChainTx,
+// ConvertNetworkToL1Tx) and the legacy AddChainValidatorTx /
+// RemoveChainValidatorTx — kept here for one release cycle while the
+// sovereign-L1 model phases in.
 func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	unsignedTx := tx.Unsigned
 	var networkID uint32
@@ -27,6 +30,7 @@ func GetNetwork(tx *txs.Tx) (models.Network, error) {
 	case *txs.RemoveChainValidatorTx:
 		networkID = unsignedTx.BaseTx.NetworkID
 	case *txs.AddChainValidatorTx:
+		// Deprecated path — AddValidatorTx (primary network) is preferred.
 		networkID = unsignedTx.BaseTx.NetworkID
 	case *txs.CreateChainTx:
 		networkID = unsignedTx.BaseTx.NetworkID
@@ -47,7 +51,8 @@ func GetLedgerDisplayName(tx *txs.Tx) string {
 	unsignedTx := tx.Unsigned
 	switch unsignedTx.(type) {
 	case *txs.AddChainValidatorTx:
-		return "ChainValidator"
+		// Deprecated tx type — kept for one release cycle.
+		return "AddChainValidator"
 	case *txs.CreateChainTx:
 		return "CreateChain"
 	default:

@@ -61,61 +61,67 @@ func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keych
 	}
 }
 
-// AddValidator adds a chain validator to the given chainID.
-// It creates an add chain validator tx, signs it with the wallet,
-// and if fully signed, issues it. If partially signed, returns the tx for additional signatures.
+// AddValidator adds a primary-network validator. Under the
+// "validators validate networks, chains live on networks" model, a sovereign
+// L1 IS a primary network at its own networkID — so adding a validator to
+// any network (mainnet, testnet, devnet, or a sovereign L1) goes through
+// AddValidatorTx, not the deprecated AddChainValidatorTx.
+//
+// rewardsOwner names where stake rewards are sent; nil falls back to the
+// first wallet address. delegationShares is the fraction (out of 1,000,000)
+// the validator takes from delegation rewards.
+//
+// The legacy chainID, controlKeys, and chainAuthKeysStrs parameters are
+// retained for source-level compatibility with older call sites — under the
+// new model they are not used (primary-network adds are not chain-owner
+// authorized).
 func (d *PublicDeployer) AddValidator(
-	controlKeys []string,
-	chainAuthKeysStrs []string,
-	chainID ids.ID,
+	_ []string, // legacy controlKeys (unused for primary-network adds)
+	_ []string, // legacy chainAuthKeysStrs (unused for primary-network adds)
+	_ ids.ID, // legacy chainID argument (AddValidatorTx doesn't reference a chain)
 	nodeID ids.NodeID,
 	weight uint64,
 	startTime time.Time,
 	duration time.Duration,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	delegationShares uint32,
 ) (bool, *txs.Tx, []string, error) {
-	wallet, err := d.loadWallet(chainID)
+	wallet, err := d.loadWallet()
 	if err != nil {
 		return false, nil, nil, err
 	}
-	chainAuthKeys, err := address.ParseToIDs(chainAuthKeysStrs)
-	if err != nil {
-		return false, nil, nil, fmt.Errorf("failure parsing chain auth keys: %w", err)
+	validator := &txs.Validator{
+		NodeID: nodeID,
+		Start:  uint64(startTime.Unix()),               //nolint:gosec // G115: Unix time is positive
+		End:    uint64(startTime.Add(duration).Unix()), //nolint:gosec // G115: Unix time is positive
+		Wght:   weight,
 	}
-	validator := &txs.ChainValidator{
-		Validator: txs.Validator{
-			NodeID: nodeID,
-			Start:  uint64(startTime.Unix()),               //nolint:gosec // G115: Unix time is positive
-			End:    uint64(startTime.Add(duration).Unix()), //nolint:gosec // G115: Unix time is positive
-			Wght:   weight,
-		},
-		Chain: chainID,
+	// Default rewards owner: first wallet address with threshold 1.
+	if rewardsOwner == nil {
+		walletAddrs := d.kc.Addresses().List()
+		if len(walletAddrs) == 0 {
+			return false, nil, nil, fmt.Errorf("wallet has no addresses to use as rewards owner")
+		}
+		rewardsOwner = &secp256k1fx.OutputOwners{
+			Threshold: 1,
+			Addrs:     []ids.ShortID{walletAddrs[0]},
+		}
 	}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign ChainValidator transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign AddValidator transaction on the ledger device *** ")
 	}
 
-	tx, err := d.createAddChainValidatorTx(chainAuthKeys, validator, wallet)
+	tx, err := d.createAddValidatorTx(validator, rewardsOwner, delegationShares, wallet)
 	if err != nil {
 		return false, nil, nil, err
 	}
 
-	_, remainingChainAuthKeys, err := txutils.GetRemainingSigners(tx, controlKeys)
+	id, err := d.Commit(tx)
 	if err != nil {
 		return false, nil, nil, err
 	}
-	isFullySigned := len(remainingChainAuthKeys) == 0
-
-	if isFullySigned {
-		id, err := d.Commit(tx)
-		if err != nil {
-			return false, nil, nil, err
-		}
-		ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", id)
-		return true, nil, nil, nil
-	}
-
-	ux.Logger.PrintToUser("Partial tx created")
-	return false, tx, remainingChainAuthKeys, nil
+	ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", id)
+	return true, nil, nil, nil
 }
 
 // CreateAssetTx creates a new asset on the X-Chain.
@@ -248,10 +254,12 @@ func (d *PublicDeployer) TransformChainTx(
 	return false, ids.Empty, tx, remainingChainAuthKeys, nil
 }
 
-// RemoveValidator removes a chain validator from the given chain.
+// RemoveValidator removes a validator from the network identified by chainID
+// (still expressed as a chainID here because RemoveChainValidatorTx is kept
+// for one release cycle while the sovereign-L1 model phases in).
 // It verifies that the wallet is one of the chain auth keys (so as to sign the tx).
-// If operation is multisig (len(chainAuthKeysStrs) > 1), it creates a remove
-// chain validator tx and sets the change output owner to be a wallet address.
+// If operation is multisig (len(chainAuthKeysStrs) > 1), it creates a remove-
+// validator tx and sets the change output owner to be a wallet address.
 func (d *PublicDeployer) RemoveValidator(
 	controlKeys []string,
 	chainAuthKeysStrs []string,
@@ -534,14 +542,21 @@ func (d *PublicDeployer) createBlockchainTx(
 	return &tx, nil
 }
 
-func (d *PublicDeployer) createAddChainValidatorTx(
-	chainAuthKeys []ids.ShortID,
-	validator *txs.ChainValidator,
+func (d *PublicDeployer) createAddValidatorTx(
+	validator *txs.Validator,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	delegationShares uint32,
 	wallet primary.Wallet,
 ) (*txs.Tx, error) {
-	options := d.getMultisigTxOptions(chainAuthKeys)
-	// create tx
-	unsignedTx, err := wallet.P().Builder().NewAddChainValidatorTx(validator, options...)
+	// AddValidatorTx is a primary-network tx — no chain-auth options needed.
+	// The builder synthesizes StakeOuts from validator.Wght via its UTXO spend
+	// logic, so callers only supply the validator definition, rewards owner,
+	// and delegation shares.
+	unsignedTx, err := wallet.P().Builder().NewAddValidatorTx(
+		validator,
+		rewardsOwner,
+		delegationShares,
+	)
 	if err != nil {
 		return nil, err
 	}
