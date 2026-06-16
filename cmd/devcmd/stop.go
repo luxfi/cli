@@ -15,31 +15,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Deprecated. New code uses `lux down <brand>/<env>` (cmd/downcmd) which
+// identifies the node by service (port + networkID handshake) rather
+// than by PID file. This subcommand stays as the anvil-compat shortcut
+// for `lux dev start` — it stops a node booted with that default
+// dataDir (~/.lux/devnet) only.
 func newStopCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stop",
-		Short: "Stop local dev node",
-		Long: `Stop the running Lux dev node.
-
-This gracefully terminates the luxd process started by 'lux dev start'.`,
+		Short: "Stop the anvil-compat dev node started by `lux dev start`",
+		Long: `Stops the dev node that `+"`lux dev start`"+` writes to its default
+data-dir (~/.lux/devnet). For sovereign-L1 nodes booted via
+`+"`lux up <brand>/<env>`"+`, use `+"`lux down <brand>/<env>`"+` instead.`,
 		RunE:         stopDevNode,
 		Args:         cobra.ExactArgs(0),
 		SilenceUsage: true,
 	}
-
 	return cmd
 }
 
 func stopDevNode(*cobra.Command, []string) error {
 	ux.Logger.PrintToUser("Stopping Lux dev node...")
 
-	// Try to find PID file first
-	pidFile := filepath.Join(os.Getenv("HOME"), ".lux", "dev", "luxd.pid")
-	if pidData, err := os.ReadFile(pidFile); err == nil { //nolint:gosec // G304: Reading from app's data directory
+	// dev start writes its PID into ~/.lux/devnet/luxd.pid.
+	pidFile := filepath.Join(os.Getenv("HOME"), ".lux", "devnet", "luxd.pid")
+	if pidData, err := os.ReadFile(pidFile); err == nil { //nolint:gosec
 		pid, err := strconv.Atoi(strings.TrimSpace(string(pidData)))
 		if err == nil {
-			process, err := os.FindProcess(pid)
-			if err == nil {
+			if process, err := os.FindProcess(pid); err == nil {
 				if err := process.Signal(os.Interrupt); err == nil {
 					ux.Logger.PrintToUser("Sent interrupt signal to PID %d", pid)
 					_ = os.Remove(pidFile)
@@ -49,19 +52,16 @@ func stopDevNode(*cobra.Command, []string) error {
 		}
 	}
 
-	// Fallback: use pkill (only for luxd, and only in dev context — the dev
-	// profile is identified by the K=1 quorum-size flag we set in start.go)
+	// Fallback: identify dev profile by its K=1 quorum flag.
 	cmd := exec.Command("pkill", "-f", "luxd.*--consensus-quorum-size=1")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		// pkill returns error if no process found - that's ok
 		if strings.Contains(string(output), "no process found") || cmd.ProcessState.ExitCode() == 1 {
 			ux.Logger.PrintToUser("No dev node running")
 			return nil
 		}
 		return fmt.Errorf("failed to stop dev node: %w", err)
 	}
-
 	ux.Logger.PrintToUser("Dev node stopped")
 	return nil
 }

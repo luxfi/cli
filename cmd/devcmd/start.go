@@ -21,11 +21,14 @@ import (
 )
 
 var (
-	port       int    // HTTP port (default 8545, Anvil-compatible)
-	automine   string // Automine delay (empty = instant, "1s" = 1 block per second, etc.)
-	nodePath   string // Path to custom luxd binary
-	logLevel   string // Log level (info, debug, warn, error)
-	cleanState bool   // Clean state before starting
+	port        int
+	automine    string
+	nodePath    string
+	logLevel    string
+	cleanState  bool
+	networkID   uint32
+	genesisFile string
+	dataDir     string
 )
 
 const nodeBinaryName = "luxd"
@@ -65,6 +68,9 @@ Examples:
 	cmd.Flags().StringVar(&nodePath, "node-path", "", "path to luxd binary (auto-detected if not set)")
 	cmd.Flags().StringVar(&logLevel, "log-level", "info", "log level (debug, info, warn, error)")
 	cmd.Flags().BoolVar(&cleanState, "clean", false, "clean state before starting (fresh genesis)")
+	cmd.Flags().Uint32Var(&networkID, "network-id", 1337, "sovereign-L1 networkID (override 1337 default)")
+	cmd.Flags().StringVar(&genesisFile, "genesis-file", "", "genesis file path (uses luxd embedded if empty)")
+	cmd.Flags().StringVar(&dataDir, "data-dir", "", "luxd data-dir (default ~/.lux/devnet)")
 
 	return cmd
 }
@@ -121,7 +127,9 @@ func startDevNode(*cobra.Command, []string) error {
 
 	// Data directories - use constants for consistent paths
 	baseDir := filepath.Join(os.Getenv("HOME"), constants.BaseDirName)
-	dataDir := filepath.Join(baseDir, constants.DevDir)
+	if dataDir == "" {
+		dataDir = filepath.Join(baseDir, constants.DevDir)
+	}
 	dbDir := filepath.Join(dataDir, "db")
 	logDir := filepath.Join(dataDir, "logs")
 
@@ -155,18 +163,21 @@ func startDevNode(*cobra.Command, []string) error {
 		"--consensus-quorum-size=1",
 		"--sybil-protection-enabled=false",
 		"--skip-bootstrap=true",
-		fmt.Sprintf("--network-id=%d", 1337),
+		fmt.Sprintf("--network-id=%d", networkID),
 		fmt.Sprintf("--http-host=%s", "0.0.0.0"),
 		fmt.Sprintf("--http-port=%d", port),
 		fmt.Sprintf("--staking-port=%d", stakingPort),
 		fmt.Sprintf("--data-dir=%s", dataDir),
 		fmt.Sprintf("--log-dir=%s", logDir),
 		fmt.Sprintf("--log-level=%s", logLevel),
-		fmt.Sprintf("--chain-config-dir=%s", chainConfigDir), // Read chain configs (dexConfig, etc.)
+		fmt.Sprintf("--chain-config-dir=%s", chainConfigDir),
 		"--api-admin-enabled=true",
 		"--api-keystore-enabled=true",
 		"--index-enabled=true",
-		"--track-all-chains=true", // Enable ALL chains: A,B,C,D,G,K,P,Q,T,X,Z
+		"--track-all-chains=true",
+	}
+	if genesisFile != "" {
+		args = append(args, fmt.Sprintf("--genesis-file=%s", genesisFile))
 	}
 
 	// Add automine configuration if specified
@@ -265,6 +276,6 @@ healthy:
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Stop with: lux dev stop")
 
-	// Wait for process
+	// Wait for process (foreground mode — user backgrounds with shell `&` if needed)
 	return cmd.Wait()
 }
