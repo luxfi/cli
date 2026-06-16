@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/pkg/brand"
+	"github.com/luxfi/cli/pkg/network"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +31,7 @@ func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cycle <network>/<env>",
 		Short: "Boot → deploy → stop → snapshot in one pipeline",
-		Long: `Atomically boots the brand's L1, deploys the standard contract
+		Long: `Atomically boots the network's L1, deploys the standard contract
 suite, stops the node cleanly, and writes a tar.zst snapshot.
 
 Pipeline:
@@ -57,7 +57,7 @@ Examples:
 }
 
 func cycle(ref string) error {
-	prof, err := brand.Resolve(ref)
+	prof, err := network.Resolve(ref)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func cycle(ref string) error {
 	var genesisHash string
 	if prof.GenesisFile != "" {
 		if data, err := os.ReadFile(prof.GenesisFile); err == nil { //nolint:gosec
-			genesisHash = brand.HashGenesis(data)
+			genesisHash = network.HashGenesis(data)
 		}
 	}
 	if err := prof.VerifyOrCreate(genesisHash); err != nil {
@@ -156,7 +156,7 @@ func cycle(ref string) error {
 	return nil
 }
 
-func runDeploy(p *brand.RuntimeProfile) error {
+func runDeploy(p *network.Profile) error {
 	// Compose: invoke the standard deploy script in lux/standard via
 	// forge, using the local RPC. Reuses lux/standard's Deploy.s.sol —
 	// no script duplication here.
@@ -187,7 +187,7 @@ func runDeploy(p *brand.RuntimeProfile) error {
 	return cmd.Run()
 }
 
-func runTarSnap(p *brand.RuntimeProfile) error {
+func runTarSnap(p *network.Profile) error {
 	if err := os.MkdirAll(p.SnapshotDir, 0o750); err != nil {
 		return err
 	}

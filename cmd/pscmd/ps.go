@@ -1,4 +1,4 @@
-// Package pscmd implements `lux ps` — for every brand/env in the
+// Package pscmd implements `lux ps` — for every name/env in the
 // registry, probe the local port and report whether a matching node is
 // up.
 package pscmd
@@ -11,7 +11,7 @@ import (
 
 	"os"
 
-	"github.com/luxfi/cli/pkg/brand"
+	"github.com/luxfi/cli/pkg/network"
 	"github.com/spf13/cobra"
 )
 
@@ -23,20 +23,24 @@ func NewCmd() *cobra.Command {
 registry and reports up/down + networkID match.`,
 		Args: cobra.ExactArgs(0),
 		RunE: func(*cobra.Command, []string) error {
-			reg, err := brand.Discover()
+			reg, err := network.Discover()
 			if err != nil {
 				return err
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "NETWORK\tNETID\tPORT\tSTATE\tPID")
+			fmt.Fprintln(w, "NETWORK\tNETWORK_ID\tEVM_CHAIN_ID\tPORT\tSTATE\tPID")
 			for _, ref := range reg.Refs() {
-				prof, err := brand.Resolve(ref)
+				prof, err := network.Resolve(ref)
 				if err != nil {
 					continue
 				}
 				state, pid := probe(prof)
-				fmt.Fprintf(w, "%s\t%d\t%d\t%s\t%d\n",
-					ref, prof.NetworkID, prof.HTTPPort, state, pid)
+				cid := "-"
+				if prof.PrimaryEvmChainID != 0 {
+					cid = fmt.Sprintf("%d", prof.PrimaryEvmChainID)
+				}
+				fmt.Fprintf(w, "%s\t%d\t%s\t%d\t%s\t%d\n",
+					ref, prof.NetworkID, cid, prof.HTTPPort, state, pid)
 			}
 			return w.Flush()
 		},
@@ -44,7 +48,7 @@ registry and reports up/down + networkID match.`,
 	}
 }
 
-func probe(p *brand.RuntimeProfile) (state string, pid int) {
+func probe(p *network.Profile) (state string, pid int) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	matches, found, err := p.Probe(ctx)
@@ -54,6 +58,6 @@ func probe(p *brand.RuntimeProfile) (state string, pid int) {
 	if !matches {
 		return fmt.Sprintf("FOREIGN(nid=%d)", found), 0
 	}
-	pid, _ = brand.PIDOnPort(p.HTTPPort)
+	pid, _ = network.PIDOnPort(p.HTTPPort)
 	return "up", pid
 }

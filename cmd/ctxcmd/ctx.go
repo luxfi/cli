@@ -1,11 +1,11 @@
-// Package ctxcmd implements `lux ctx` — list discoverable brand/env
-// tuples from $LUX_BRAND_PATH.
+// Package ctxcmd implements `lux ctx` — list discoverable name/env
+// tuples from $LUX_NETWORK_PATH.
 package ctxcmd
 
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/pkg/brand"
+	"github.com/luxfi/cli/pkg/network"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ func NewCmd() *cobra.Command {
 for chain.yaml files and prints every (network, env) tuple they declare.`,
 		Args: cobra.ExactArgs(0),
 		RunE: func(*cobra.Command, []string) error {
-			reg, err := brand.Discover()
+			reg, err := network.Discover()
 			if err != nil {
 				return err
 			}

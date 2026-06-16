@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/pkg/brand"
+	"github.com/luxfi/cli/pkg/network"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -48,7 +48,7 @@ Examples:
 }
 
 func snap(ref string) error {
-	prof, err := brand.Resolve(ref)
+	prof, err := network.Resolve(ref)
 	if err != nil {
 		return err
 	}

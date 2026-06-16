@@ -1,7 +1,7 @@
 // Package upcmd implements `lux up <network>/<env>` — the one boot verb.
 //
-// Boots a sovereign-L1 luxd node identified by (brand,env). Reads
-// chain.yaml under $LUX_BRAND_PATH, applies the runtime template,
+// Boots a sovereign-L1 luxd node identified by (name, env). Reads
+// chain.yaml under $LUX_NETWORK_PATH, applies the runtime template,
 // verifies/writes a chain.lock manifest in the data-dir, then exec's
 // luxd in K=1 PoA mode bound to the resolved httpPort/stakingPort.
 //
@@ -21,7 +21,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luxfi/cli/pkg/brand"
+	"github.com/luxfi/cli/pkg/network"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -61,7 +61,7 @@ Stop with: lux down <network>/<env>`,
 }
 
 func runUp(cmd *cobra.Command, args []string) error {
-	prof, err := brand.Resolve(args[0])
+	prof, err := network.Resolve(args[0])
 	if err != nil {
 		return err
 	}
@@ -82,11 +82,11 @@ func runUp(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Lock the dir to this (brand, env) — refuses to mount foreign state.
+	// Lock the dir to this (name, env) — refuses to mount foreign state.
 	var genesisHash string
 	if prof.GenesisFile != "" {
 		if data, err := os.ReadFile(prof.GenesisFile); err == nil { //nolint:gosec
-			genesisHash = brand.HashGenesis(data)
+			genesisHash = network.HashGenesis(data)
 		}
 	}
 	if err := prof.VerifyOrCreate(genesisHash); err != nil {
@@ -177,10 +177,10 @@ func findLuxd(explicit string) (string, error) {
 	return "", fmt.Errorf("luxd not in PATH; pass --node-path or build at ~/work/lux/node/build/luxd")
 }
 
-// Profile resolves brand/env once, used by sibling commands that share
+// Profile resolves name/env once, used by sibling commands that share
 // a parent (cycle, snap-after-up). Not currently used externally — kept
 // exported for that case.
-func Profile(ctx context.Context, ref string) (*brand.RuntimeProfile, error) {
+func Profile(ctx context.Context, ref string) (*network.Profile, error) {
 	_ = ctx
-	return brand.Resolve(ref)
+	return network.Resolve(ref)
 }
