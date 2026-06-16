@@ -78,11 +78,8 @@ func runUp(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if err := os.MkdirAll(prof.LogDir, 0o750); err != nil {
-		return err
-	}
-
-	// Lock the dir to this (name, env) — refuses to mount foreign state.
+	// Write/verify chain.lock BEFORE any other dir entries so the
+	// "orphan dataDir" check sees an empty dir on first boot.
 	var genesisHash string
 	if prof.GenesisFile != "" {
 		if data, err := os.ReadFile(prof.GenesisFile); err == nil { //nolint:gosec
@@ -90,6 +87,10 @@ func runUp(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if err := prof.VerifyOrCreate(genesisHash); err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(prof.LogDir, 0o750); err != nil {
 		return err
 	}
 

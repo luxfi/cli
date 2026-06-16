@@ -63,9 +63,8 @@ func cycle(ref string) error {
 	}
 	ux.Logger.PrintToUser("cycle %s — networkID=%d port=%d", prof, prof.NetworkID, prof.HTTPPort)
 
-	if err := os.MkdirAll(prof.LogDir, 0o750); err != nil {
-		return err
-	}
+	// Lock first, then logs (avoids the orphan-dir check tripping on
+	// our own logs/ subdir).
 	var genesisHash string
 	if prof.GenesisFile != "" {
 		if data, err := os.ReadFile(prof.GenesisFile); err == nil { //nolint:gosec
@@ -73,6 +72,9 @@ func cycle(ref string) error {
 		}
 	}
 	if err := prof.VerifyOrCreate(genesisHash); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(prof.LogDir, 0o750); err != nil {
 		return err
 	}
 
