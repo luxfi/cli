@@ -2,7 +2,7 @@
 // service identity, never by stored path.
 //
 // Stop probes the resolved httpPort with info.getNetworkID and verifies
-// the responder is OUR (brand,env). Only then does it locate the
+// the responder is OUR (name, env). Only then does it locate the
 // listening PID and SIGTERM it. If the verifier fails we refuse —
 // killing the wrong process is the worst outcome.
 package downcmd
@@ -11,7 +11,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/luxfi/cli/pkg/brand"
+	"github.com/luxfi/cli/pkg/network"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ Examples:
   lux down lux/devnet`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			prof, err := brand.Resolve(args[0])
+			prof, err := network.Resolve(args[0])
 			if err != nil {
 				return err
 			}

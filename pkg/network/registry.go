@@ -1,4 +1,4 @@
-package brand
+package network
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 // for chain.yaml — same shape as $PATH.
 const EnvVar = "LUX_NETWORK_PATH"
 
-// DefaultPath is the workspace convention: ~/work/<brand>/universe.
+// DefaultPath is the workspace convention: ~/work/<name>/universe.
 func DefaultPath() string {
 	home, _ := os.UserHomeDir()
 	return strings.Join([]string{
@@ -25,20 +25,20 @@ func DefaultPath() string {
 	}, ":")
 }
 
-// Registry holds brands discovered from $LUX_BRAND_PATH.
+// Registry holds networks discovered from $LUX_NETWORK_PATH.
 type Registry struct {
-	brands map[string]*Brand // slug → Brand
+	specs map[string]*Spec // slug → Spec
 }
 
-// Discover scans $LUX_NETWORK_PATH for chain.yaml files. Networks later
-// in the path do NOT override earlier ones — first-wins, like $PATH.
-// Unreadable / malformed chain.yaml files are skipped with a warning.
+// Discover scans $LUX_NETWORK_PATH for chain.yaml files. Networks
+// later in the path do NOT override earlier ones — first-wins, like
+// $PATH. Unreadable / malformed files are skipped with a warning.
 func Discover() (*Registry, error) {
 	pathStr := os.Getenv(EnvVar)
 	if pathStr == "" {
 		pathStr = DefaultPath()
 	}
-	r := &Registry{brands: map[string]*Brand{}}
+	r := &Registry{specs: map[string]*Spec{}}
 	for _, dir := range strings.Split(pathStr, ":") {
 		if dir == "" {
 			continue
@@ -48,45 +48,45 @@ func Discover() (*Registry, error) {
 		if err != nil || st.IsDir() {
 			continue
 		}
-		b, err := ParseFile(yaml)
+		s, err := ParseFile(yaml)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "warn: %s: %v\n", yaml, err)
 			continue
 		}
-		slug := b.Network.Slug
-		if _, dup := r.brands[slug]; !dup {
-			r.brands[slug] = b
+		name := s.Network.Slug
+		if _, dup := r.specs[name]; !dup {
+			r.specs[name] = s
 		}
 	}
 	return r, nil
 }
 
-// Lookup returns the network by slug; nil error means found.
-func (r *Registry) Lookup(slug string) (*Brand, error) {
-	b, ok := r.brands[slug]
+// Lookup returns the network spec by name slug.
+func (r *Registry) Lookup(name string) (*Spec, error) {
+	s, ok := r.specs[name]
 	if !ok {
-		known := r.Slugs()
-		return nil, fmt.Errorf("network %q not discovered under $%s (known: %v)", slug, EnvVar, known)
+		known := r.Names()
+		return nil, fmt.Errorf("network %q not discovered under $%s (known: %v)", name, EnvVar, known)
 	}
-	return b, nil
+	return s, nil
 }
 
-// Slugs returns all discovered brand slugs, sorted.
-func (r *Registry) Slugs() []string {
-	out := make([]string, 0, len(r.brands))
-	for s := range r.brands {
-		out = append(out, s)
+// Names returns all discovered network slugs, sorted.
+func (r *Registry) Names() []string {
+	out := make([]string, 0, len(r.specs))
+	for n := range r.specs {
+		out = append(out, n)
 	}
 	sort.Strings(out)
 	return out
 }
 
-// Refs returns all (brand/env) pairs in the registry, sorted.
+// Refs returns all (name/env) pairs in the registry, sorted.
 func (r *Registry) Refs() []string {
 	var out []string
-	for _, b := range r.brands {
-		for env := range b.Networks {
-			out = append(out, b.Network.Slug+"/"+env)
+	for _, s := range r.specs {
+		for env := range s.Networks {
+			out = append(out, s.Network.Slug+"/"+env)
 		}
 	}
 	sort.Strings(out)

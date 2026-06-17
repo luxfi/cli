@@ -1,4 +1,4 @@
-package brand
+package network
 
 import (
 	"bytes"
@@ -16,10 +16,10 @@ import (
 	"time"
 )
 
-// Probe asks the local node at p.HTTPPort what its networkID is.
+// Probe asks the local node at p.HTTPPort what its NetworkID is.
 // Returns (matches=true) only if the response equals p.NetworkID.
 // A nil error with matches=false means a node is up but it isn't ours.
-func (p *RuntimeProfile) Probe(ctx context.Context) (matches bool, foundID uint32, err error) {
+func (p *Profile) Probe(ctx context.Context) (matches bool, foundID uint32, err error) {
 	url := fmt.Sprintf("http://127.0.0.1:%d/ext/info", p.HTTPPort)
 	body := []byte(`{"jsonrpc":"2.0","id":1,"method":"info.getNetworkID","params":{}}`)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
@@ -45,8 +45,8 @@ func (p *RuntimeProfile) Probe(ctx context.Context) (matches bool, foundID uint3
 }
 
 // WaitHealthy polls /ext/health and /ext/info until the C-chain
-// responds with the expected networkID, or timeout elapses.
-func (p *RuntimeProfile) WaitHealthy(ctx context.Context, timeout time.Duration) error {
+// responds with the expected NetworkID, or timeout elapses.
+func (p *Profile) WaitHealthy(ctx context.Context, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	tick := time.NewTicker(1 * time.Second)
 	defer tick.Stop()
@@ -67,7 +67,6 @@ func (p *RuntimeProfile) WaitHealthy(ctx context.Context, timeout time.Duration)
 			return fmt.Errorf("%s: port %d serving foreign networkID %d (expected %d)",
 				p, p.HTTPPort, found, p.NetworkID)
 		}
-		// C-chain responsiveness check.
 		cchain := fmt.Sprintf("http://127.0.0.1:%d/ext/bc/C/rpc", p.HTTPPort)
 		body := []byte(`{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}`)
 		req, _ := http.NewRequestWithContext(ctx, http.MethodPost, cchain, bytes.NewReader(body))
@@ -84,12 +83,9 @@ func (p *RuntimeProfile) WaitHealthy(ctx context.Context, timeout time.Duration)
 }
 
 // PIDOnPort returns the PID listening on TCP <port>, or 0 if none.
-// Uses lsof -ti on darwin/linux. Stop callers use this AFTER Probe
-// confirms the listener is our brand+env (i.e. networkID matches).
 func PIDOnPort(port int) (int, error) {
 	out, err := exec.Command("lsof", "-ti", fmt.Sprintf(":%d", port), "-sTCP:LISTEN").Output()
 	if err != nil {
-		// lsof exits 1 when nothing matches — that's "no PID", not an error.
 		var ee *exec.ExitError
 		if errors.As(err, &ee) {
 			return 0, nil
@@ -110,15 +106,12 @@ func PIDOnPort(port int) (int, error) {
 }
 
 // Stop signals the node owning p.HTTPPort, but only after verifying
-// (via Probe) that the responder is OUR (brand,env). On verification
+// (via Probe) that the responder is OUR (name, env). On verification
 // failure we refuse — better to leave a stranger alone than to murder
 // the wrong process.
-func (p *RuntimeProfile) Stop(ctx context.Context, gracePeriod time.Duration) error {
+func (p *Profile) Stop(ctx context.Context, gracePeriod time.Duration) error {
 	matches, found, err := p.Probe(ctx)
 	if err != nil {
-		// Port not responding — node isn't up under our identity.
-		// Still try the PID file as a fallback, so we can clean up
-		// a node that's hung mid-bootstrap.
 		return p.stopViaPIDFile()
 	}
 	if !matches {
@@ -139,7 +132,6 @@ func (p *RuntimeProfile) Stop(ctx context.Context, gracePeriod time.Duration) er
 	if err := proc.Signal(syscall.SIGTERM); err != nil {
 		return err
 	}
-	// Wait for drain — RPC returns connection-refused, then snapshot is safe.
 	deadline := time.Now().Add(gracePeriod)
 	for time.Now().Before(deadline) {
 		c, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", p.HTTPPort), 500*time.Millisecond)
@@ -149,16 +141,15 @@ func (p *RuntimeProfile) Stop(ctx context.Context, gracePeriod time.Duration) er
 		_ = c.Close()
 		time.Sleep(500 * time.Millisecond)
 	}
-	// Last resort: SIGKILL.
 	_ = proc.Signal(syscall.SIGKILL)
 	return nil
 }
 
-func (p *RuntimeProfile) stopViaPIDFile() error {
+func (p *Profile) stopViaPIDFile() error {
 	pidFile := p.PIDFilePath()
 	b, err := os.ReadFile(pidFile) //nolint:gosec
 	if err != nil {
-		return nil // nothing to stop
+		return nil
 	}
 	pid, err := strconv.Atoi(strings.TrimSpace(string(b)))
 	if err != nil {
@@ -171,6 +162,6 @@ func (p *RuntimeProfile) stopViaPIDFile() error {
 }
 
 // PIDFilePath is <DataDir>/luxd.pid (fallback identity record).
-func (p *RuntimeProfile) PIDFilePath() string {
+func (p *Profile) PIDFilePath() string {
 	return p.DataDir + "/luxd.pid"
 }
