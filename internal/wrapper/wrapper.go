@@ -14,15 +14,16 @@ import (
 
 // Domains lists subcommands that can be invoked via symlink.
 var Domains = map[string]bool{
-	"ai":       true,
-	"tui":      true,
-	"zk":       true,
-	"fhe":      true,
-	"mpc":      true,
-	"kms":      true,
-	"rt":       true,
+	"ai":      true,
+	"tui":     true,
+	"zk":      true,
+	"fhe":     true,
+	"mpc":     true,
+	"kms":     true,
+	"rt":      true,
+	"corona":  true,
 	"ringsig": true,
-	"explore":  true,
+	"explore": true,
 }
 
 // platformSuffixes are stripped from the executable name before matching.
