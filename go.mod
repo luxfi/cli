@@ -190,7 +190,7 @@ require (
 	github.com/luxfi/consensus v1.25.14 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
 	github.com/luxfi/crypto/ipa v1.2.4 // indirect
-	github.com/luxfi/gpu v1.0.4 // indirect
+	github.com/luxfi/gpu v1.0.2 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/kms v1.11.3 // indirect
 	github.com/luxfi/lattice/v7 v7.1.4 // indirect
