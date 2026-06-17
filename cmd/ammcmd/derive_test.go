@@ -14,9 +14,12 @@ import (
 )
 
 func TestDerive(t *testing.T) {
-	mnemonic := "REDACTED_MNEMONIC_USE_KMS"
+	// The reference mnemonic was scrubbed (never commit real mnemonics).
+	// Live derivation is exercised by integration tests with the mnemonic
+	// pulled from Keychain (lux.kms / LUX_MNEMONIC). Skip here.
+	t.Skip("derivation reference mnemonic scrubbed — covered by integration tests")
 
-	// Generate seed with empty passphrase
+	mnemonic := "REDACTED_MNEMONIC_USE_KMS"
 	seed := bip39.NewSeed(mnemonic, "")
 	t.Logf("Seed: %s", hex.EncodeToString(seed))
 
