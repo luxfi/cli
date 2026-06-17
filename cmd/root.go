@@ -19,7 +19,10 @@ import (
 	"github.com/luxfi/cli/cmd/backendcmd"
 	"github.com/luxfi/cli/cmd/chaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
+	"github.com/luxfi/cli/cmd/ctxcmd"
+	"github.com/luxfi/cli/cmd/cyclecmd"
 	"github.com/luxfi/cli/cmd/devcmd"
+	"github.com/luxfi/cli/cmd/downcmd"
 	"github.com/luxfi/cli/cmd/explorecmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/gpucmd"
@@ -31,7 +34,10 @@ import (
 	"github.com/luxfi/cli/cmd/networkcmd"
 	"github.com/luxfi/cli/cmd/nodecmd"
 	"github.com/luxfi/cli/cmd/primarycmd"
+	"github.com/luxfi/cli/cmd/pscmd"
 	"github.com/luxfi/cli/cmd/rpccmd"
+	"github.com/luxfi/cli/cmd/snapcmd"
+	"github.com/luxfi/cli/cmd/upcmd"
 	aicli "github.com/luxfi/ai/cli"
 	fhecli "github.com/luxfi/fhe/cli"
 	rtcli "github.com/luxfi/corona/cli"
@@ -142,7 +148,16 @@ For detailed command help, use: lux <command> --help`,
 	rootCmd.PersistentFlags().Bool("quiet", false, "Show only errors (quiet mode)")
 
 	// add sub commands
-	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (local dev environment)
+	// Sovereign-L1 verbs — the canonical multi-brand control plane.
+	// Read $LUX_BRAND_PATH (default ~/work/{lux,zoo,hanzo,pars}/universe).
+	rootCmd.AddCommand(upcmd.NewCmd())    // lux up <brand>/<env>
+	rootCmd.AddCommand(downcmd.NewCmd())  // lux down <brand>/<env>
+	rootCmd.AddCommand(snapcmd.NewCmd())  // lux snap <brand>/<env>
+	rootCmd.AddCommand(cyclecmd.NewCmd()) // lux cycle <brand>/<env>
+	rootCmd.AddCommand(pscmd.NewCmd())    // lux ps
+	rootCmd.AddCommand(ctxcmd.NewCmd())   // lux ctx
+
+	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (legacy: anvil-compat shortcut for lux/localnet)
 	rootCmd.AddCommand(explorecmd.NewCmd(app))   // explore (block explorer)
 	rootCmd.AddCommand(networkcmd.NewCmd(app))    // network (local network management)
 	rootCmd.AddCommand(networkcmd.NewStatusCmd()) // status alias (new version)
