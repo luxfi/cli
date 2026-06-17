@@ -23,6 +23,7 @@ import (
 	"github.com/luxfi/cli/cmd/cyclecmd"
 	"github.com/luxfi/cli/cmd/devcmd"
 	"github.com/luxfi/cli/cmd/downcmd"
+	"github.com/luxfi/cli/cmd/infocmd"
 	"github.com/luxfi/cli/cmd/explorecmd"
 	"github.com/luxfi/cli/cmd/dexcmd"
 	"github.com/luxfi/cli/cmd/gpucmd"
@@ -150,10 +151,11 @@ For detailed command help, use: lux <command> --help`,
 	// add sub commands
 	// Sovereign-L1 verbs — the canonical multi-brand control plane.
 	// Read $LUX_BRAND_PATH (default ~/work/{lux,zoo,hanzo,pars}/universe).
-	rootCmd.AddCommand(upcmd.NewCmd())    // lux up <brand>/<env>
-	rootCmd.AddCommand(downcmd.NewCmd())  // lux down <brand>/<env>
-	rootCmd.AddCommand(snapcmd.NewCmd())  // lux snap <brand>/<env>
-	rootCmd.AddCommand(cyclecmd.NewCmd()) // lux cycle <brand>/<env>
+	rootCmd.AddCommand(upcmd.NewCmd())    // lux up    <name>/<env>
+	rootCmd.AddCommand(downcmd.NewCmd())  // lux down  <name>/<env>
+	rootCmd.AddCommand(snapcmd.NewCmd())  // lux snap  <name>/<env>
+	rootCmd.AddCommand(cyclecmd.NewCmd()) // lux cycle <name>/<env>
+	rootCmd.AddCommand(infocmd.NewCmd())  // lux info  <name>/<env>
 	rootCmd.AddCommand(pscmd.NewCmd())    // lux ps
 	rootCmd.AddCommand(ctxcmd.NewCmd())   // lux ctx
 
