@@ -116,8 +116,6 @@ func applyTokens(s string, p *Profile) string {
 		"{primaryEvmChainID}", fmt.Sprintf("%d", p.PrimaryEvmChainID),
 		"{httpPort}", fmt.Sprintf("%d", p.HTTPPort),
 		"{stakingPort}", fmt.Sprintf("%d", p.StakingPort),
-		// Legacy alias for template files written before the rename.
-		"{brand}", p.Name,
 	)
 	return r.Replace(s)
 }
