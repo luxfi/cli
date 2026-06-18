@@ -21,7 +21,7 @@ import (
 	"github.com/klauspost/compress/zstd"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/database"
-	"github.com/luxfi/database/badgerdb"
+	"github.com/luxfi/database/zapdb"
 )
 
 // ChunkSize is the maximum size for a backup chunk (99MB to fit GitHub limits)
@@ -323,7 +323,7 @@ func (sm *SnapshotManager) CreateSnapshot(snapshotName string, incremental bool)
 
 // executeSnapshotTask executes a single snapshot task
 func (sm *SnapshotManager) executeSnapshotTask(task snapshotTask, snapshotName string) snapshotResult {
-	db, err := badgerdb.New(task.dbPath, nil, "", nil)
+	db, err := zapdb.New(task.dbPath, nil, "", nil)
 	if err != nil {
 		return snapshotResult{task: task, mode: "skipped"}
 	}
@@ -785,9 +785,9 @@ func (sm *SnapshotManager) RestoreChainSnapshot(
 		return fmt.Errorf("failed to create db directory: %w", err)
 	}
 
-	db, err := badgerdb.New(dbDir, nil, "", nil)
+	db, err := zapdb.New(dbDir, nil, "", nil)
 	if err != nil {
-		return fmt.Errorf("failed to open badger db: %w", err)
+		return fmt.Errorf("failed to open db: %w", err)
 	}
 	defer db.Close()
 
@@ -892,7 +892,7 @@ func (sm *SnapshotManager) Squash(network string, chainID uint64, snapshotName s
 	}
 	defer os.RemoveAll(tempDir)
 
-	db, err := badgerdb.New(tempDir, nil, "", nil)
+	db, err := zapdb.New(tempDir, nil, "", nil)
 	if err != nil {
 		return fmt.Errorf("failed to open temp db: %w", err)
 	}
@@ -1154,9 +1154,9 @@ func (sm *SnapshotManager) RestoreChainDataSnapshot(
 		return fmt.Errorf("failed to create db directory: %w", err)
 	}
 
-	db, err := badgerdb.New(dbDir, nil, "", nil)
+	db, err := zapdb.New(dbDir, nil, "", nil)
 	if err != nil {
-		return fmt.Errorf("failed to open badger db: %w", err)
+		return fmt.Errorf("failed to open db: %w", err)
 	}
 	defer db.Close()
 
