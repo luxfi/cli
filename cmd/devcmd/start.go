@@ -29,9 +29,44 @@ var (
 	networkID   uint32
 	genesisFile string
 	dataDir     string
+	buildTags   string
+	pluginDir   string
 )
 
 const nodeBinaryName = "luxd"
+
+// dchainBuildTag is the build tag that selects a luxd built WITH the D-Chain
+// (dexvm) linked in. The public default luxd is built without it; passing
+// --build-tags dchain tells `lux dev start` to launch the dchain-tagged binary
+// (which bakes D-Chain on localnet 1337) and to resolve the plugin dir
+// explicitly so the EVM plugin subprocess is found deterministically.
+const dchainBuildTag = "dchain"
+
+// hasBuildTag reports whether the comma-separated --build-tags value contains
+// tag (space-insensitive on each element).
+func hasBuildTag(tags, tag string) bool {
+	for _, t := range strings.Split(tags, ",") {
+		if strings.TrimSpace(t) == tag {
+			return true
+		}
+	}
+	return false
+}
+
+// resolvePluginDir picks the VM plugin directory to pass to luxd. An explicit
+// --plugin-dir (explicit) always wins. For a dchain launch with no explicit
+// value it defaults to <baseDir>/plugins/current (luxd's own default) so the EVM
+// plugin subprocess is found deterministically. For a non-dchain launch with no
+// explicit value it returns "" — luxd then uses its own default unchanged.
+func resolvePluginDir(explicit, baseDir string, dchain bool) string {
+	if explicit != "" {
+		return explicit
+	}
+	if dchain {
+		return filepath.Join(baseDir, constants.PluginsDir, "current")
+	}
+	return ""
+}
 
 func newStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -53,11 +88,19 @@ FHE Support:
   The T-Chain provides threshold homomorphic encryption for confidential
   smart contracts. Use FHE precompiles at 0x0200...0080 or the @luxfi/fhe SDK.
 
+DEX / D-Chain:
+  The public default luxd does NOT include the DEX D-Chain. To launch the
+  dchain-tagged luxd (which bakes D-Chain on localnet 1337) pass:
+    lux dev start --build-tags dchain
+  This resolves the dchain-tagged binary and points --plugin-dir at the plugin
+  directory so the EVM plugin subprocess is found deterministically.
+
 Examples:
   lux dev start                    # Start on default port 8545
   lux dev start --port 9650        # Start on custom port
   lux dev start --automine 1s      # Mine blocks every 1 second
-  lux dev start --automine 500ms   # Mine blocks every 500ms`,
+  lux dev start --automine 500ms   # Mine blocks every 500ms
+  lux dev start --build-tags dchain # Start the D-Chain-enabled (dexvm) node`,
 		RunE:         startDevNode,
 		Args:         cobra.ExactArgs(0),
 		SilenceUsage: true,
@@ -71,18 +114,53 @@ Examples:
 	cmd.Flags().Uint32Var(&networkID, "network-id", 1337, "sovereign-L1 networkID (override 1337 default)")
 	cmd.Flags().StringVar(&genesisFile, "genesis-file", "", "genesis file path (uses luxd embedded if empty)")
 	cmd.Flags().StringVar(&dataDir, "data-dir", "", "luxd data-dir (default ~/.lux/devnet)")
+	cmd.Flags().StringVar(&buildTags, "build-tags", "", "luxd build-tag selector; 'dchain' launches the D-Chain-enabled (dexvm) node")
+	cmd.Flags().StringVar(&pluginDir, "plugin-dir", "", "VM plugin directory passed to luxd (default: luxd's own ~/.lux/plugins/current)")
 
 	return cmd
 }
 
-// findNodeBinary locates the luxd binary
-func findNodeBinary() (string, error) {
-	// Priority 1: User-provided path
+// findNodeBinary locates the luxd binary. An explicit --node-path always wins.
+// When dchain is true, auto-detection prefers the dchain build output
+// (node/build/luxd) over a luxd on PATH, because the public PATH luxd is built
+// without the D-Chain — silently launching it would yield a node with no
+// D-Chain. The default (dchain=false) search order is unchanged.
+func findNodeBinary(dchain bool) (string, error) {
+	// Priority 1: User-provided path (explicit choice always wins).
 	if nodePath != "" {
 		if _, err := os.Stat(nodePath); os.IsNotExist(err) {
 			return "", fmt.Errorf("%s not found at: %s", nodeBinaryName, nodePath)
 		}
 		return nodePath, nil
+	}
+
+	// nodeBuildDir is the standard dchain build output: <repo>/node/build/luxd,
+	// resolved relative to this CLI binary. The dchain-tagged luxd is built here.
+	nodeBuildBinary := func() (string, bool) {
+		execPath, err := os.Executable()
+		if err != nil {
+			return "", false
+		}
+		if execPath, err = filepath.EvalSymlinks(execPath); err != nil {
+			return "", false
+		}
+		cliDir := filepath.Dir(filepath.Dir(execPath))
+		absPath, err := filepath.Abs(filepath.Join(cliDir, "..", "node", "build", nodeBinaryName))
+		if err != nil {
+			return "", false
+		}
+		if _, err := os.Stat(absPath); err != nil {
+			return "", false
+		}
+		return absPath, true
+	}
+
+	// For a dchain launch, prefer the dchain build output BEFORE PATH/config so a
+	// public PATH luxd (no D-Chain) is never picked silently.
+	if dchain {
+		if p, ok := nodeBuildBinary(); ok {
+			return p, nil
+		}
 	}
 
 	// Priority 2: Environment/config
@@ -101,26 +179,23 @@ func findNodeBinary() (string, error) {
 		return binaryPath, nil
 	}
 
-	// Priority 4: Relative to CLI
-	if execPath, err := os.Executable(); err == nil {
-		if execPath, err = filepath.EvalSymlinks(execPath); err == nil {
-			cliDir := filepath.Dir(filepath.Dir(execPath))
-			relativePath := filepath.Join(cliDir, "..", "node", "build", nodeBinaryName)
-			if absPath, err := filepath.Abs(relativePath); err == nil {
-				if _, err := os.Stat(absPath); err == nil {
-					return absPath, nil
-				}
-			}
-		}
+	// Priority 4: Relative to CLI (node/build/luxd).
+	if p, ok := nodeBuildBinary(); ok {
+		return p, nil
 	}
 
+	if dchain {
+		return "", fmt.Errorf("dchain-tagged %s not found. Build it (cd node && go build -tags dchain -o build/luxd ./main) or set --node-path", nodeBinaryName)
+	}
 	return "", fmt.Errorf("%s not found. Set --node-path or add to PATH", nodeBinaryName)
 }
 
 func startDevNode(*cobra.Command, []string) error {
 	ux.Logger.PrintToUser("Starting Lux dev node (K=1 consensus)...")
 
-	localNodePath, err := findNodeBinary()
+	dchain := hasBuildTag(buildTags, dchainBuildTag)
+
+	localNodePath, err := findNodeBinary(dchain)
 	if err != nil {
 		return err
 	}
@@ -148,7 +223,16 @@ func startDevNode(*cobra.Command, []string) error {
 
 	stakingPort := port + 1
 
+	// Resolve the VM plugin directory (the capstone's missing --plugin-dir
+	// blocker): explicit wins; a dchain launch defaults to ~/.lux/plugins/current
+	// so the EVM plugin subprocess is found; a non-dchain launch stays empty and
+	// lets luxd use its own default unchanged.
+	effPluginDir := resolvePluginDir(pluginDir, baseDir, dchain)
+
 	ux.Logger.PrintToUser("Binary: %s", localNodePath)
+	if dchain {
+		ux.Logger.PrintToUser("Build tags: dchain (D-Chain / dexvm enabled)")
+	}
 	ux.Logger.PrintToUser("Port: %d (staking: %d)", port, stakingPort)
 
 	// Build luxd command. luxd has no `--dev` shortcut, so we spell out the
@@ -178,6 +262,10 @@ func startDevNode(*cobra.Command, []string) error {
 	}
 	if genesisFile != "" {
 		args = append(args, fmt.Sprintf("--genesis-file=%s", genesisFile))
+	}
+	if effPluginDir != "" {
+		args = append(args, fmt.Sprintf("--plugin-dir=%s", effPluginDir))
+		ux.Logger.PrintToUser("Plugin dir: %s", effPluginDir)
 	}
 
 	// Add automine configuration if specified
@@ -257,6 +345,9 @@ healthy:
 	ux.Logger.PrintToUser("  P-Chain:      http://localhost:%d/ext/bc/P", port)
 	ux.Logger.PrintToUser("  X-Chain:      http://localhost:%d/ext/bc/X", port)
 	ux.Logger.PrintToUser("  T-Chain:      http://localhost:%d/ext/bc/T", port)
+	if dchain {
+		ux.Logger.PrintToUser("  D-Chain:      http://localhost:%d/ext/bc/D", port)
+	}
 	ux.Logger.PrintToUser("  Health:       http://localhost:%d/ext/health", port)
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Features:")
