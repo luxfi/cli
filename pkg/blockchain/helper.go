@@ -18,7 +18,6 @@ import (
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/p2p/peer"
 	"github.com/luxfi/proto/p/signer"
 	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
@@ -113,7 +112,7 @@ func UrisToPeers(uris []string) ([]apiinfo.Peer, error) {
 			return nil, err
 		}
 		peers = append(peers, apiinfo.Peer{
-			Info: peer.Info{
+			PeerInfo: apiinfo.PeerInfo{
 				ID:       nodeID,
 				PublicIP: ip,
 			},
