@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="cli" width="880"></p>
+
 # Lux CLI
 
 Lux CLI is a command line tool that gives developers access to everything Lux. This release specializes in helping developers develop and test L2 chains.
