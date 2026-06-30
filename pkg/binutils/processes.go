@@ -275,11 +275,12 @@ func StartServerProcessForNetwork(app *application.Lux, networkType string) erro
 		return fmt.Errorf("failed to create log file: %w", err)
 	}
 
-	// Build command args for netrunner server
+	// Build command args for netrunner server. Transport is native ZAP (zaprpc) —
+	// the gRPC gateway is gone; the optional ZIP HTTP edge is --gateway-port.
 	args := []string{
 		"server",
 		"--port", fmt.Sprintf(":%d", ports.Server),
-		"--grpc-gateway-port", fmt.Sprintf(":%d", ports.Gateway),
+		"--gateway-port", fmt.Sprintf(":%d", ports.Gateway),
 		"--log-dir", outputDir,
 		"--snapshots-dir", app.GetSnapshotsDir(),
 	}
