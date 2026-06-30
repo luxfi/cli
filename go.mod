@@ -321,7 +321,7 @@ require (
 	github.com/luxfi/api v1.0.14
 	github.com/luxfi/constants v1.5.8
 	github.com/luxfi/coreth v1.23.3
-	github.com/luxfi/corona v0.10.2
+	github.com/luxfi/corona v0.10.3
 	github.com/luxfi/database v1.19.2
 	github.com/luxfi/fhe v1.8.2
 	github.com/luxfi/filesystem v0.0.1
