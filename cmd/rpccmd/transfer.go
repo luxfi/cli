@@ -176,7 +176,7 @@ func transferPXToC(baseURL string, networkID uint32, sk *key.SoftKey, source str
 		return err
 	}
 
-	amountNLUX, err := luxToNLUX(amount)
+	amountMicroLux, err := luxToMicroLux(amount)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func transferPXToC(baseURL string, networkID uint32, sk *key.SoftKey, source str
 		_, err = pWallet.P().IssueExportTx(constants.CChainID, []*utxo.TransferableOutput{{
 			Asset: utxo.Asset{ID: constants.PrimaryNetworkID},
 			Out: &secp256k1fx.TransferOutput{
-				Amt:          amountNLUX,
+				Amt:          amountMicroLux,
 				OutputOwners: *outputOwner,
 			},
 		}})
@@ -202,7 +202,7 @@ func transferPXToC(baseURL string, networkID uint32, sk *key.SoftKey, source str
 		_, err = pWallet.X().IssueExportTx(constants.CChainID, []*utxo.TransferableOutput{{
 			Asset: utxo.Asset{ID: pWallet.X().Builder().Context().UTXOAssetID},
 			Out: &secp256k1fx.TransferOutput{
-				Amt:          amountNLUX,
+				Amt:          amountMicroLux,
 				OutputOwners: *outputOwner,
 			},
 		}})
@@ -269,7 +269,7 @@ func transferCToPX(baseURL string, networkID uint32, sk *key.SoftKey, dest strin
 	if err != nil {
 		return err
 	}
-	amountNLUX, err := luxToNLUX(amount)
+	amountMicroLux, err := luxToMicroLux(amount)
 	if err != nil {
 		return err
 	}
@@ -277,7 +277,7 @@ func transferCToPX(baseURL string, networkID uint32, sk *key.SoftKey, dest strin
 	destChainID := chainIDFromAlias(dest)
 	builder := c.NewBuilder(kcAdapter.Addresses(), kcAdapter.EVMAddresses(), cCtx, cBackend)
 	exportTx, err := builder.NewExportTx(destChainID, []*secp256k1fx.TransferOutput{{
-		Amt:          amountNLUX,
+		Amt:          amountMicroLux,
 		OutputOwners: *outputOwner,
 	}}, baseFee)
 	if err != nil {
@@ -631,15 +631,17 @@ func getBaseFee(ctx context.Context, client *ethclient.Client) (*big.Int, error)
 	return client.SuggestGasPrice(ctx)
 }
 
-func luxToNLUX(amount float64) (uint64, error) {
+// luxToMicroLux converts whole LUX to the P/X-Chain base unit (microLUX, 6
+// decimals — NOT the legacy 9-decimal nanoLUX). 1 LUX = 1e6 microLUX.
+func luxToMicroLux(amount float64) (uint64, error) {
 	if amount <= 0 {
 		return 0, fmt.Errorf("amount must be positive")
 	}
-	value := new(big.Float).Mul(new(big.Float).SetFloat64(amount), big.NewFloat(1e9))
-	nlux := new(big.Int)
-	value.Int(nlux)
-	if !nlux.IsUint64() {
+	value := new(big.Float).Mul(new(big.Float).SetFloat64(amount), big.NewFloat(1e6))
+	microlux := new(big.Int)
+	value.Int(microlux)
+	if !microlux.IsUint64() {
 		return 0, fmt.Errorf("amount too large")
 	}
-	return nlux.Uint64(), nil
+	return microlux.Uint64(), nil
 }
