@@ -279,7 +279,7 @@ TYPICAL WORKFLOW:
 
   1. Start network:    lux network start --devnet
   2. Deploy chain:     lux chain deploy mychain
-  3. Test your dapp:   (connect to http://localhost:9650/ext/bc/C/rpc)
+  3. Test your dapp:   (connect to http://localhost:9650/v1/bc/C/rpc)
   4. Stop network:     lux network stop`,
 
 		RunE:         StartNetwork,
@@ -799,7 +799,7 @@ func StartDevMode() error {
 	ux.Logger.PrintToUser("Waiting for node to become healthy...")
 
 	// Wait for health endpoint to respond with explicit timeout
-	healthURL := fmt.Sprintf("http://localhost:%d/ext/health", effectivePortBase)
+	healthURL := fmt.Sprintf("http://localhost:%d/v1/health", effectivePortBase)
 	healthTimeout := 90 * time.Second // Dev mode can take longer to initialize all chains
 	healthCtx, healthCancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer healthCancel()

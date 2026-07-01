@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	defaultSRSURL = "https://api.lux.network/mainnet/ext/bc/Z/srs"
+	defaultSRSURL = "https://api.lux.network/mainnet/v1/bc/Z/srs"
 )
 
 func newSRSCmd() *cobra.Command {

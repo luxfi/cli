@@ -127,8 +127,8 @@ func runStatus(_ *cobra.Command, _ []string) error {
 		for _, ingress := range svc.Status.LoadBalancer.Ingress {
 			if ingress.IP != "" {
 				ux.Logger.PrintToUser("\nLoadBalancer: %s", ingress.IP)
-				ux.Logger.PrintToUser("  RPC:     http://%s:9630/ext/bc/C/rpc", ingress.IP)
-				ux.Logger.PrintToUser("  Health:  http://%s:9630/ext/health", ingress.IP)
+				ux.Logger.PrintToUser("  RPC:     http://%s:9630/v1/bc/C/rpc", ingress.IP)
+				ux.Logger.PrintToUser("  Health:  http://%s:9630/v1/health", ingress.IP)
 			}
 		}
 	}

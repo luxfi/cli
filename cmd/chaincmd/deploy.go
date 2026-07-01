@@ -318,13 +318,13 @@ func getRemoteEndpoint(network models.Network) string {
 	return network.Endpoint()
 }
 
-// probeRemoteEndpoint checks if a remote network endpoint is alive by hitting /ext/info.
+// probeRemoteEndpoint checks if a remote network endpoint is alive by hitting /v1/info.
 // Returns true if the endpoint responds to a JSON-RPC request.
 func probeRemoteEndpoint(endpoint string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), RemoteProbeTimeout)
 	defer cancel()
 
-	url := endpoint + "/ext/info"
+	url := endpoint + "/v1/info"
 	body := []byte(`{"jsonrpc":"2.0","method":"info.getNodeVersion","params":{},"id":1}`)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
@@ -601,7 +601,7 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 	ux.Logger.PrintToUser("Blockchain deployed successfully!")
 	ux.Logger.PrintToUser("  Chain ID:      %s", chainID.String())
 	ux.Logger.PrintToUser("  Blockchain ID: %s", blockchainID.String())
-	ux.Logger.PrintToUser("  RPC Endpoint:  %s/ext/bc/%s/rpc", endpoint, blockchainID.String())
+	ux.Logger.PrintToUser("  RPC Endpoint:  %s/v1/bc/%s/rpc", endpoint, blockchainID.String())
 	ux.Logger.PrintToUser("")
 
 	// Update sidecar with deployment info

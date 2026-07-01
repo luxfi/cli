@@ -20,7 +20,7 @@ import (
 // Returns (matches=true) only if the response equals p.NetworkID.
 // A nil error with matches=false means a node is up but it isn't ours.
 func (p *Profile) Probe(ctx context.Context) (matches bool, foundID uint32, err error) {
-	url := fmt.Sprintf("http://127.0.0.1:%d/ext/info", p.HTTPPort)
+	url := fmt.Sprintf("http://127.0.0.1:%d/v1/info", p.HTTPPort)
 	body := []byte(`{"jsonrpc":"2.0","id":1,"method":"info.getNetworkID","params":{}}`)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
@@ -44,7 +44,7 @@ func (p *Profile) Probe(ctx context.Context) (matches bool, foundID uint32, err 
 	return r.Result.NetworkID == p.NetworkID, r.Result.NetworkID, nil
 }
 
-// WaitHealthy polls /ext/health and /ext/info until the C-chain
+// WaitHealthy polls /v1/health and /v1/info until the C-chain
 // responds with the expected NetworkID, or timeout elapses.
 func (p *Profile) WaitHealthy(ctx context.Context, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
@@ -67,7 +67,7 @@ func (p *Profile) WaitHealthy(ctx context.Context, timeout time.Duration) error 
 			return fmt.Errorf("%s: port %d serving foreign networkID %d (expected %d)",
 				p, p.HTTPPort, found, p.NetworkID)
 		}
-		cchain := fmt.Sprintf("http://127.0.0.1:%d/ext/bc/C/rpc", p.HTTPPort)
+		cchain := fmt.Sprintf("http://127.0.0.1:%d/v1/bc/C/rpc", p.HTTPPort)
 		body := []byte(`{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}`)
 		req, _ := http.NewRequestWithContext(ctx, http.MethodPost, cchain, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")

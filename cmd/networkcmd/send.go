@@ -115,7 +115,7 @@ func runSend(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	rpcURL := fmt.Sprintf("%s/ext/bc/C/rpc", endpoint)
+	rpcURL := fmt.Sprintf("%s/v1/bc/C/rpc", endpoint)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 

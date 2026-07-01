@@ -244,7 +244,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	script := fmt.Sprintf(`#!/bin/bash
 echo "Starting EVM chain node..."
 echo "   Data directory: %s"
-echo "   RPC endpoint: http://localhost:%d/ext/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc"
+echo "   RPC endpoint: http://localhost:%d/v1/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc"
 echo ""
 
 exec /home/z/work/lux/node/build/luxd --config-file=%s
@@ -269,7 +269,7 @@ exec /home/z/work/lux/node/build/luxd --config-file=%s
 	fmt.Printf("   %s\n", launchScript)
 
 	fmt.Println("\n📡 Once running, access via:")
-	fmt.Printf("   RPC: http://localhost:%d/ext/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc\n", evmPort)
+	fmt.Printf("   RPC: http://localhost:%d/v1/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc\n", evmPort)
 
 	return nil
 }

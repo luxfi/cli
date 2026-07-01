@@ -142,7 +142,7 @@ func GetValidatorKind(
 func GetCurrentValidators(network models.Network, chainID ids.ID) ([]CurrentValidatorInfo, error) {
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
-	requester := rpc.NewEndpointRequester(network.Endpoint() + "/ext/P")
+	requester := rpc.NewEndpointRequester(network.Endpoint() + "/v1/P")
 	res := &platformvm.GetCurrentValidatorsReply{}
 	if err := requester.SendRequest(
 		ctx,

@@ -77,7 +77,7 @@ After starting the network with existing state, you can verify the database was 
      "method": "eth_blockNumber",
      "params": [],
      "id": 1
-   }' -H "Content-Type: application/json" http://localhost:9630/ext/bc/C/rpc
+   }' -H "Content-Type: application/json" http://localhost:9630/v1/bc/C/rpc
    ```
 
 3. Check database size in the running network:

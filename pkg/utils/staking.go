@@ -26,7 +26,7 @@ import (
 	luxtls "github.com/luxfi/tls"
 )
 
-// SplitRPCURI parses an RPC URL like "http://127.0.0.1:9650/ext/bc/C/rpc"
+// SplitRPCURI parses an RPC URL like "http://127.0.0.1:9650/v1/bc/C/rpc"
 // into network endpoint ("http://127.0.0.1:9650") and blockchain ID ("C")
 func SplitRPCURI(rpcURL string) (string, string, error) {
 	u, err := url.Parse(rpcURL)
@@ -35,7 +35,7 @@ func SplitRPCURI(rpcURL string) (string, string, error) {
 	}
 
 	// Extract the path components
-	// Expected format: /ext/bc/<chainID>/rpc
+	// Expected format: /v1/bc/<chainID>/rpc
 	path := strings.TrimPrefix(u.Path, "/")
 	parts := strings.Split(path, "/")
 

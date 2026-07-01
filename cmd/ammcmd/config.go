@@ -74,7 +74,7 @@ var (
 	// Zoo Testnet (local testnet deployment)
 	ZooTestnet = NetworkConfig{
 		ChainID:     200201,
-		RPC:         "http://localhost:9640/ext/bc/zoo-testnet/rpc",
+		RPC:         "http://localhost:9640/v1/bc/zoo-testnet/rpc",
 		Name:        "Zoo Testnet",
 		V2Factory:   common.HexToAddress("0xD173926A10A0C4eCd3A51B1422270b65Df0551c1"),
 		V2Router:    common.HexToAddress("0xAe2cf1E403aAFE6C05A5b8Ef63EB19ba591d8511"),

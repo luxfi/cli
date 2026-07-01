@@ -16,7 +16,7 @@ import (
 )
 
 func getCClient(apiEndpoint string, blockchainID string) (*ethclient.Client, error) {
-	cClient, err := ethclient.Dial(fmt.Sprintf("%s/ext/bc/%s/rpc", apiEndpoint, blockchainID))
+	cClient, err := ethclient.Dial(fmt.Sprintf("%s/v1/bc/%s/rpc", apiEndpoint, blockchainID))
 	if err != nil {
 		return nil, err
 	}

@@ -481,7 +481,7 @@ spec:
             - name: CHAIN_ID
               value: "{{.NetSpec.ChainID}}"
             - name: RPC_URL
-              value: "http://{{.Config.Chain.Slug}}d-0.{{.Config.Chain.Slug}}d:9650/ext/bc/C/rpc"
+              value: "http://{{.Config.Chain.Slug}}d-0.{{.Config.Chain.Slug}}d:9650/v1/bc/C/rpc"
             - name: DRIP_AMOUNT
               value: "{{.Config.Services.Faucet.DripAmount}}"
             - name: RATE_LIMIT

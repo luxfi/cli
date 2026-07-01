@@ -155,11 +155,11 @@ All validators on mainnet/testnet run these **11 core chains** natively:
 
 **Endpoints** (mainnet on port 9630):
 ```
-P-Chain:  http://localhost:9630/ext/bc/P
-C-Chain:  http://localhost:9630/ext/bc/C/rpc
-X-Chain:  http://localhost:9630/ext/bc/X
-Q-Chain:  http://localhost:9630/ext/bc/Q/rpc
-A-Chain:  http://localhost:9630/ext/bc/A/rpc
+P-Chain:  http://localhost:9630/v1/bc/P
+C-Chain:  http://localhost:9630/v1/bc/C/rpc
+X-Chain:  http://localhost:9630/v1/bc/X
+Q-Chain:  http://localhost:9630/v1/bc/Q/rpc
+A-Chain:  http://localhost:9630/v1/bc/A/rpc
 ...
 ```
 
@@ -283,7 +283,7 @@ lux amm balance --network zoo
 
 Override RPC with `--rpc` flag:
 ```bash
-lux amm status --network lux-testnet --rpc "http://127.0.0.1:9642/ext/bc/C/rpc"
+lux amm status --network lux-testnet --rpc "http://127.0.0.1:9642/v1/bc/C/rpc"
 ```
 
 ### AMM Contract Addresses

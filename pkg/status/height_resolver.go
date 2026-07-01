@@ -82,7 +82,7 @@ func (r *PChainHeightResolver) Height(ctx context.Context, url string) (uint64, 
 	meta := make(map[string]any)
 
 	// Implement actual P-Chain height resolution using Lux P-Chain API
-	// The P-Chain API endpoint is at /ext/bc/P (no /rpc suffix)
+	// The P-Chain API endpoint is at /v1/bc/P (no /rpc suffix)
 
 	// Create HTTP client with timeout
 	client := &http.Client{
@@ -166,7 +166,7 @@ func (r *XChainHeightResolver) Height(ctx context.Context, url string) (uint64, 
 	meta := make(map[string]any)
 
 	// Implement actual X-Chain height resolution using Lux X-Chain API
-	// The X-Chain API endpoint is at /ext/bc/X (no /rpc suffix)
+	// The X-Chain API endpoint is at /v1/bc/X (no /rpc suffix)
 	// Lux X-chain uses xvm.getHeight (not avm.getHeight)
 
 	// Create HTTP client with timeout

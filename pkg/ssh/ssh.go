@@ -98,7 +98,7 @@ func RunOverSSH(
 // PostOverSSH sends a POST request over SSH to the specified path.
 func PostOverSSH(host *models.Host, path string, requestBody string) ([]byte, error) {
 	if path == "" {
-		path = "/ext/info"
+		path = "/v1/info"
 	}
 	localhost, err := url.Parse(constants.LocalAPIEndpoint)
 	if err != nil {
@@ -874,7 +874,7 @@ func RunSSHCheckBootstrapped(host *models.Host) ([]byte, error) {
 func RunSSHCheckHealthy(host *models.Host) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := "{\"jsonrpc\":\"2.0\", \"id\":1,\"method\":\"health.health\",\"params\": {\"tags\": [\"P\"]}}"
-	return PostOverSSH(host, "/ext/health", requestBody)
+	return PostOverSSH(host, "/v1/health", requestBody)
 }
 
 // RunSSHGetNodeID reads nodeID from luxd
@@ -888,7 +888,7 @@ func RunSSHGetNodeID(host *models.Host) ([]byte, error) {
 func RunSSHChainSyncStatus(host *models.Host, blockchainID string) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := fmt.Sprintf("{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"platform.getBlockchainStatus\", \"params\": {\"blockchainID\":\"%s\"}}", blockchainID)
-	return PostOverSSH(host, "/ext/bc/P", requestBody)
+	return PostOverSSH(host, "/v1/bc/P", requestBody)
 }
 
 // StreamOverSSH runs provided script path over ssh.

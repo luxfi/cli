@@ -59,7 +59,7 @@ ssh root@$IP << REMOTE
     ls -la
     systemctl start luxd
     sleep 10
-    curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' -H 'content-type:application/json;' http://localhost:9630/ext/bc/C/rpc | jq
+    curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' -H 'content-type:application/json;' http://localhost:9630/v1/bc/C/rpc | jq
 REMOTE
 
 echo "Done! $NETWORK node deployed"

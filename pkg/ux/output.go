@@ -175,7 +175,7 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	for _, nodeName := range clusterInfo.NodeNames {
 		nodeInfo := nodeInfos[nodeName]
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			_ = table.Append([]string{nodeInfo.Name, chainInfo.GetChainName(), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.GetChainName())})
+			_ = table.Append([]string{nodeInfo.Name, chainInfo.GetChainName(), fmt.Sprintf("%s/v1/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/v1/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.GetChainName())})
 		}
 	}
 	_ = table.Render()
@@ -206,18 +206,18 @@ type NativeChainInfo struct {
 // GetNativeChains returns all native chain definitions for RPC display
 func GetNativeChains() []NativeChainInfo {
 	return []NativeChainInfo{
-		{Letter: "P", Name: "Platform", Type: "RPC", Path: "/ext/bc/P"},
-		{Letter: "C", Name: "Contract (EVM)", Type: "RPC", Path: "/ext/bc/C/rpc"},
-		{Letter: "C", Name: "Contract (EVM)", Type: "WS", Path: "/ext/bc/C/ws"},
-		{Letter: "X", Name: "Exchange (DAG)", Type: "RPC", Path: "/ext/bc/X"},
-		{Letter: "Q", Name: "Quantum", Type: "RPC", Path: "/ext/bc/Q/rpc"},
-		{Letter: "A", Name: "AI", Type: "RPC", Path: "/ext/bc/A/rpc"},
-		{Letter: "B", Name: "Bridge", Type: "RPC", Path: "/ext/bc/B/rpc"},
-		{Letter: "T", Name: "Threshold", Type: "RPC", Path: "/ext/bc/T/rpc"},
-		{Letter: "Z", Name: "Zero-knowledge", Type: "RPC", Path: "/ext/bc/Z/rpc"},
-		{Letter: "G", Name: "Graph", Type: "RPC", Path: "/ext/bc/G/rpc"},
-		{Letter: "K", Name: "KMS", Type: "RPC", Path: "/ext/bc/K/rpc"},
-		{Letter: "D", Name: "DEX", Type: "RPC", Path: "/ext/bc/D/rpc"},
+		{Letter: "P", Name: "Platform", Type: "RPC", Path: "/v1/bc/P"},
+		{Letter: "C", Name: "Contract (EVM)", Type: "RPC", Path: "/v1/bc/C/rpc"},
+		{Letter: "C", Name: "Contract (EVM)", Type: "WS", Path: "/v1/bc/C/ws"},
+		{Letter: "X", Name: "Exchange (DAG)", Type: "RPC", Path: "/v1/bc/X"},
+		{Letter: "Q", Name: "Quantum", Type: "RPC", Path: "/v1/bc/Q/rpc"},
+		{Letter: "A", Name: "AI", Type: "RPC", Path: "/v1/bc/A/rpc"},
+		{Letter: "B", Name: "Bridge", Type: "RPC", Path: "/v1/bc/B/rpc"},
+		{Letter: "T", Name: "Threshold", Type: "RPC", Path: "/v1/bc/T/rpc"},
+		{Letter: "Z", Name: "Zero-knowledge", Type: "RPC", Path: "/v1/bc/Z/rpc"},
+		{Letter: "G", Name: "Graph", Type: "RPC", Path: "/v1/bc/G/rpc"},
+		{Letter: "K", Name: "KMS", Type: "RPC", Path: "/v1/bc/K/rpc"},
+		{Letter: "D", Name: "DEX", Type: "RPC", Path: "/v1/bc/D/rpc"},
 	}
 }
 
@@ -246,9 +246,9 @@ func PrintNativeChainEndpoints(baseURL string, portBase int, includeUtility bool
 
 	if includeUtility {
 		Logger.PrintToUser("╠═════════╪═══════════════════╪══════╪═════════════════════════════════╣")
-		Logger.PrintToUser("║ UTILITY │ Health            │ HTTP │ http://localhost:%d/ext/health  ║", portBase)
-		Logger.PrintToUser("║ UTILITY │ Info              │ HTTP │ http://localhost:%d/ext/info    ║", portBase)
-		Logger.PrintToUser("║ UTILITY │ Admin             │ HTTP │ http://localhost:%d/ext/admin   ║", portBase)
+		Logger.PrintToUser("║ UTILITY │ Health            │ HTTP │ http://localhost:%d/v1/health  ║", portBase)
+		Logger.PrintToUser("║ UTILITY │ Info              │ HTTP │ http://localhost:%d/v1/info    ║", portBase)
+		Logger.PrintToUser("║ UTILITY │ Admin             │ HTTP │ http://localhost:%d/v1/admin   ║", portBase)
 	}
 	Logger.PrintToUser("╚══════════════════════════════════════════════════════════════════════╝")
 }
@@ -257,23 +257,23 @@ func PrintNativeChainEndpoints(baseURL string, portBase int, includeUtility bool
 func PrintCompactChainEndpoints(portBase int) {
 	Logger.PrintToUser("\n📡 Native Chain RPC Endpoints:")
 	Logger.PrintToUser("  ┌─────────────────────────────────────────────────────────────────┐")
-	Logger.PrintToUser("  │ P-Chain (Platform):     http://localhost:%d/ext/bc/P            │", portBase)
-	Logger.PrintToUser("  │ C-Chain (EVM) RPC:      http://localhost:%d/ext/bc/C/rpc        │", portBase)
-	Logger.PrintToUser("  │ C-Chain (EVM) WS:       ws://localhost:%d/ext/bc/C/ws           │", portBase)
-	Logger.PrintToUser("  │ X-Chain (Exchange):     http://localhost:%d/ext/bc/X            │", portBase)
-	Logger.PrintToUser("  │ Q-Chain (Quantum):      http://localhost:%d/ext/bc/Q/rpc        │", portBase)
-	Logger.PrintToUser("  │ A-Chain (AI):           http://localhost:%d/ext/bc/A/rpc        │", portBase)
-	Logger.PrintToUser("  │ B-Chain (Bridge):       http://localhost:%d/ext/bc/B/rpc        │", portBase)
-	Logger.PrintToUser("  │ T-Chain (Threshold):    http://localhost:%d/ext/bc/T/rpc        │", portBase)
-	Logger.PrintToUser("  │ Z-Chain (ZK):           http://localhost:%d/ext/bc/Z/rpc        │", portBase)
-	Logger.PrintToUser("  │ G-Chain (Graph):        http://localhost:%d/ext/bc/G/rpc        │", portBase)
-	Logger.PrintToUser("  │ K-Chain (KMS):          http://localhost:%d/ext/bc/K/rpc        │", portBase)
-	Logger.PrintToUser("  │ D-Chain (DEX):          http://localhost:%d/ext/bc/D/rpc        │", portBase)
+	Logger.PrintToUser("  │ P-Chain (Platform):     http://localhost:%d/v1/bc/P            │", portBase)
+	Logger.PrintToUser("  │ C-Chain (EVM) RPC:      http://localhost:%d/v1/bc/C/rpc        │", portBase)
+	Logger.PrintToUser("  │ C-Chain (EVM) WS:       ws://localhost:%d/v1/bc/C/ws           │", portBase)
+	Logger.PrintToUser("  │ X-Chain (Exchange):     http://localhost:%d/v1/bc/X            │", portBase)
+	Logger.PrintToUser("  │ Q-Chain (Quantum):      http://localhost:%d/v1/bc/Q/rpc        │", portBase)
+	Logger.PrintToUser("  │ A-Chain (AI):           http://localhost:%d/v1/bc/A/rpc        │", portBase)
+	Logger.PrintToUser("  │ B-Chain (Bridge):       http://localhost:%d/v1/bc/B/rpc        │", portBase)
+	Logger.PrintToUser("  │ T-Chain (Threshold):    http://localhost:%d/v1/bc/T/rpc        │", portBase)
+	Logger.PrintToUser("  │ Z-Chain (ZK):           http://localhost:%d/v1/bc/Z/rpc        │", portBase)
+	Logger.PrintToUser("  │ G-Chain (Graph):        http://localhost:%d/v1/bc/G/rpc        │", portBase)
+	Logger.PrintToUser("  │ K-Chain (KMS):          http://localhost:%d/v1/bc/K/rpc        │", portBase)
+	Logger.PrintToUser("  │ D-Chain (DEX):          http://localhost:%d/v1/bc/D/rpc        │", portBase)
 	Logger.PrintToUser("  └─────────────────────────────────────────────────────────────────┘")
 	Logger.PrintToUser("\n🔧 Utility Endpoints:")
-	Logger.PrintToUser("  Health:  http://localhost:%d/ext/health", portBase)
-	Logger.PrintToUser("  Info:    http://localhost:%d/ext/info", portBase)
-	Logger.PrintToUser("  Admin:   http://localhost:%d/ext/admin", portBase)
+	Logger.PrintToUser("  Health:  http://localhost:%d/v1/health", portBase)
+	Logger.PrintToUser("  Info:    http://localhost:%d/v1/info", portBase)
+	Logger.PrintToUser("  Admin:   http://localhost:%d/v1/admin", portBase)
 }
 
 // ValidatorKeyInfo holds derived key info for a validator

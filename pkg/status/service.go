@@ -167,7 +167,7 @@ func (s *StatusService) probeTrackedEVMs(ctx context.Context, networks []Network
 				// Match by name (case-insensitive) or check the chain ID via RPC
 				if strings.EqualFold(bcName, chainName+"-chain") || strings.Contains(strings.ToLower(bcName), chainName) {
 					// Found a potential L1 chain, probe it
-					rpcURL := fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, bcID)
+					rpcURL := fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, bcID)
 
 					evmStatus := s.probeL1Chain(ctx, chainName, networkType, rpcURL, expectedChainID)
 					if evmStatus != nil {
@@ -186,7 +186,7 @@ func (s *StatusService) probeTrackedEVMs(ctx context.Context, networks []Network
 func (s *StatusService) getBlockchainsFromNode(ctx context.Context, baseURL string) ([]map[string]interface{}, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/ext/bc/P", baseURL)
+	requestURL := fmt.Sprintf("%s/v1/bc/P", baseURL)
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -374,7 +374,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 	startTime := time.Now()
 
 	// 1. Get Node Version
-	versionURL := fmt.Sprintf("%s/ext/info", node.HTTPURL)
+	versionURL := fmt.Sprintf("%s/v1/info", node.HTTPURL)
 	versionBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -469,7 +469,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 	}
 
 	// 5. Check GPU acceleration (via health check or custom endpoint)
-	healthURL := fmt.Sprintf("%s/ext/health", node.HTTPURL)
+	healthURL := fmt.Sprintf("%s/v1/health", node.HTTPURL)
 	healthReq, _ := http.NewRequestWithContext(ctx, "GET", healthURL, nil)
 	if healthResp, err := client.Do(healthReq); err == nil {
 		defer healthResp.Body.Close()
@@ -504,7 +504,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 			},
 		}
 		validatorsJson, _ := json.Marshal(validatorsBody)
-		pChainURL := fmt.Sprintf("%s/ext/bc/P", node.HTTPURL)
+		pChainURL := fmt.Sprintf("%s/v1/bc/P", node.HTTPURL)
 		reqValidators, _ := http.NewRequestWithContext(ctx, "POST", pChainURL, bytes.NewBuffer(validatorsJson))
 		reqValidators.Header.Set("Content-Type", "application/json")
 		if respValidators, err := client.Do(reqValidators); err == nil {
@@ -548,7 +548,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 			"params":  []interface{}{},
 		}
 		cChainJson, _ := json.Marshal(cChainBody)
-		cChainURL := fmt.Sprintf("%s/ext/bc/C/rpc", node.HTTPURL)
+		cChainURL := fmt.Sprintf("%s/v1/bc/C/rpc", node.HTTPURL)
 		reqCChain, _ := http.NewRequestWithContext(ctx, "POST", cChainURL, bytes.NewBuffer(cChainJson))
 		reqCChain.Header.Set("Content-Type", "application/json")
 		if respCChain, err := client.Do(reqCChain); err == nil {
@@ -922,17 +922,17 @@ func (s *StatusService) getChainEndpoints(network Network) ([]EndpointStatus, er
 // EVM chains (C, Q, A, B, T, Z, G, K, D) use /rpc suffix
 func (s *StatusService) getAllNativeChainEndpoints(baseURL string) []EndpointStatus {
 	return []EndpointStatus{
-		{ChainAlias: "p", URL: fmt.Sprintf("%s/ext/bc/P", baseURL)},     // Platform chain (JSON-RPC)
-		{ChainAlias: "x", URL: fmt.Sprintf("%s/ext/bc/X", baseURL)},     // Exchange chain (JSON-RPC)
-		{ChainAlias: "c", URL: fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)}, // Coreth (EVM)
-		{ChainAlias: "q", URL: fmt.Sprintf("%s/ext/bc/Q/rpc", baseURL)}, // Quantum (EVM)
-		{ChainAlias: "a", URL: fmt.Sprintf("%s/ext/bc/A/rpc", baseURL)}, // AI (EVM)
-		{ChainAlias: "b", URL: fmt.Sprintf("%s/ext/bc/B/rpc", baseURL)}, // Bridge (EVM)
-		{ChainAlias: "t", URL: fmt.Sprintf("%s/ext/bc/T/rpc", baseURL)}, // Threshold (EVM)
-		{ChainAlias: "z", URL: fmt.Sprintf("%s/ext/bc/Z/rpc", baseURL)}, // ZK (EVM)
-		{ChainAlias: "g", URL: fmt.Sprintf("%s/ext/bc/G/rpc", baseURL)}, // Graph (EVM)
-		{ChainAlias: "k", URL: fmt.Sprintf("%s/ext/bc/K/rpc", baseURL)}, // KMS (EVM)
-		{ChainAlias: "d", URL: fmt.Sprintf("%s/ext/bc/D/rpc", baseURL)}, // DEX (EVM)
+		{ChainAlias: "p", URL: fmt.Sprintf("%s/v1/bc/P", baseURL)},     // Platform chain (JSON-RPC)
+		{ChainAlias: "x", URL: fmt.Sprintf("%s/v1/bc/X", baseURL)},     // Exchange chain (JSON-RPC)
+		{ChainAlias: "c", URL: fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)}, // Coreth (EVM)
+		{ChainAlias: "q", URL: fmt.Sprintf("%s/v1/bc/Q/rpc", baseURL)}, // Quantum (EVM)
+		{ChainAlias: "a", URL: fmt.Sprintf("%s/v1/bc/A/rpc", baseURL)}, // AI (EVM)
+		{ChainAlias: "b", URL: fmt.Sprintf("%s/v1/bc/B/rpc", baseURL)}, // Bridge (EVM)
+		{ChainAlias: "t", URL: fmt.Sprintf("%s/v1/bc/T/rpc", baseURL)}, // Threshold (EVM)
+		{ChainAlias: "z", URL: fmt.Sprintf("%s/v1/bc/Z/rpc", baseURL)}, // ZK (EVM)
+		{ChainAlias: "g", URL: fmt.Sprintf("%s/v1/bc/G/rpc", baseURL)}, // Graph (EVM)
+		{ChainAlias: "k", URL: fmt.Sprintf("%s/v1/bc/K/rpc", baseURL)}, // KMS (EVM)
+		{ChainAlias: "d", URL: fmt.Sprintf("%s/v1/bc/D/rpc", baseURL)}, // DEX (EVM)
 	}
 }
 
@@ -944,7 +944,7 @@ func (s *StatusService) discoverChainEndpointsFromNode(baseURL string) ([]Endpoi
 	}
 
 	// Build the request URL for platform.getBlockchains
-	requestURL := fmt.Sprintf("%s/ext/bc/P/rpc", baseURL)
+	requestURL := fmt.Sprintf("%s/v1/bc/P/rpc", baseURL)
 
 	// Create JSON-RPC request
 	requestBody := map[string]interface{}{
@@ -992,10 +992,10 @@ func (s *StatusService) discoverChainEndpointsFromNode(baseURL string) ([]Endpoi
 						// Map blockchain ID to chain alias
 						chainAlias := s.mapBlockchainIDToAlias(id)
 						if chainAlias != "" {
-							url := fmt.Sprintf("%s/ext/bc/%s", baseURL, id)
+							url := fmt.Sprintf("%s/v1/bc/%s", baseURL, id)
 							// Special case for C-Chain (EVM) which uses /rpc endpoint
 							if chainAlias == "c" {
-								url = fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)
+								url = fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)
 							}
 							endpoints = append(endpoints, EndpointStatus{
 								ChainAlias: chainAlias,
@@ -1054,7 +1054,7 @@ func (s *StatusService) mapBlockchainIDToAlias(blockchainID string) string {
 func (s *StatusService) QueryPChainBalance(ctx context.Context, baseURL, address string) (uint64, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/ext/bc/P", baseURL)
+	requestURL := fmt.Sprintf("%s/v1/bc/P", baseURL)
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -1103,7 +1103,7 @@ func (s *StatusService) QueryPChainBalance(ctx context.Context, baseURL, address
 func (s *StatusService) QueryXChainBalance(ctx context.Context, baseURL, address string) (uint64, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/ext/bc/X", baseURL)
+	requestURL := fmt.Sprintf("%s/v1/bc/X", baseURL)
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -1153,7 +1153,7 @@ func (s *StatusService) QueryXChainBalance(ctx context.Context, baseURL, address
 func (s *StatusService) QueryCChainBalance(ctx context.Context, baseURL, address string) (string, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/ext/bc/C/rpc", baseURL)
+	requestURL := fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,

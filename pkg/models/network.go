@@ -191,7 +191,7 @@ func (s Network) WSEndpoints() []string {
 // CChainEndpoint returns the C-Chain endpoint for the network
 func (s Network) CChainEndpoint() string {
 	baseEndpoint := s.Endpoint()
-	return fmt.Sprintf("%s/ext/bc/C/rpc", baseEndpoint)
+	return fmt.Sprintf("%s/v1/bc/C/rpc", baseEndpoint)
 }
 
 // CChainWSEndpoint returns the C-Chain WebSocket endpoint for the network
@@ -235,10 +235,10 @@ func GetNetworkFromSidecarNetworkName(name string) Network {
 
 // GetRPCEndpoint returns the RPC endpoint for a given base endpoint and blockchain ID
 func GetRPCEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/ext/bc/%s/rpc", baseEndpoint, blockchainID)
+	return fmt.Sprintf("%s/v1/bc/%s/rpc", baseEndpoint, blockchainID)
 }
 
 // GetWSEndpoint returns the WebSocket endpoint for a given base endpoint and blockchain ID
 func GetWSEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/ext/bc/%s/ws", baseEndpoint, blockchainID)
+	return fmt.Sprintf("%s/v1/bc/%s/ws", baseEndpoint, blockchainID)
 }
