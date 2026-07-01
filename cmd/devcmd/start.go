@@ -299,7 +299,7 @@ func startDevNode(*cobra.Command, []string) error {
 	ux.Logger.PrintToUser("luxd started (PID: %d)", cmd.Process.Pid)
 
 	// Wait for health with explicit timeout (60 seconds for all chains to bootstrap)
-	healthURL := fmt.Sprintf("http://localhost:%d/ext/health", port)
+	healthURL := fmt.Sprintf("http://localhost:%d/v1/health", port)
 	healthTimeout := 60 * time.Second
 	healthCtx, healthCancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer healthCancel()
@@ -321,7 +321,7 @@ func startDevNode(*cobra.Command, []string) error {
 				continue
 			}
 			// Additional check: verify C-Chain is responding
-			cchainURL := fmt.Sprintf("http://localhost:%d/ext/bc/C/rpc", port)
+			cchainURL := fmt.Sprintf("http://localhost:%d/v1/bc/C/rpc", port)
 			cResp, cErr := http.Post(cchainURL, "application/json",
 				strings.NewReader(`{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}`))
 			if cErr != nil {
@@ -340,15 +340,15 @@ healthy:
 	ux.Logger.PrintToUser("Dev node ready!")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Endpoints:")
-	ux.Logger.PrintToUser("  C-Chain RPC:  http://localhost:%d/ext/bc/C/rpc", port)
-	ux.Logger.PrintToUser("  C-Chain WS:   ws://localhost:%d/ext/bc/C/ws", port)
-	ux.Logger.PrintToUser("  P-Chain:      http://localhost:%d/ext/bc/P", port)
-	ux.Logger.PrintToUser("  X-Chain:      http://localhost:%d/ext/bc/X", port)
-	ux.Logger.PrintToUser("  T-Chain:      http://localhost:%d/ext/bc/T", port)
+	ux.Logger.PrintToUser("  C-Chain RPC:  http://localhost:%d/v1/bc/C/rpc", port)
+	ux.Logger.PrintToUser("  C-Chain WS:   ws://localhost:%d/v1/bc/C/ws", port)
+	ux.Logger.PrintToUser("  P-Chain:      http://localhost:%d/v1/bc/P", port)
+	ux.Logger.PrintToUser("  X-Chain:      http://localhost:%d/v1/bc/X", port)
+	ux.Logger.PrintToUser("  T-Chain:      http://localhost:%d/v1/bc/T", port)
 	if dchain {
-		ux.Logger.PrintToUser("  D-Chain:      http://localhost:%d/ext/bc/D", port)
+		ux.Logger.PrintToUser("  D-Chain:      http://localhost:%d/v1/bc/D", port)
 	}
-	ux.Logger.PrintToUser("  Health:       http://localhost:%d/ext/health", port)
+	ux.Logger.PrintToUser("  Health:       http://localhost:%d/v1/health", port)
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Features:")
 	ux.Logger.PrintToUser("  • K=1 consensus (instant finality)")

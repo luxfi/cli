@@ -261,7 +261,7 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 		fmt.Fprintf(&buf, "%s Custom VM information %s\n", nodeSeparator, nodeSeparator)
 		for _, nodeInfo := range status.ClusterInfo.NodeInfos {
 			for blockchainID := range status.ClusterInfo.CustomChains {
-				fmt.Fprintf(&buf, "Endpoint at %s for blockchain %q: %s/ext/bc/%s/rpc\n", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
+				fmt.Fprintf(&buf, "Endpoint at %s for blockchain %q: %s/v1/bc/%s/rpc\n", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
 			}
 		}
 	}
@@ -275,7 +275,7 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 
 func getNodeVersion(uri string) (string, map[string]string, error) {
 	// uri is http://ip:port
-	url := fmt.Sprintf("%s/ext/info", uri)
+	url := fmt.Sprintf("%s/v1/info", uri)
 	reqBody := []byte(`{"jsonrpc":"2.0", "id":1, "method":"info.getNodeVersion", "params":{}}`)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
@@ -320,7 +320,7 @@ func getNodeVersion(uri string) (string, map[string]string, error) {
 
 func getCChainHeight(uri string) (string, error) {
 	// uri is http://ip:port
-	url := fmt.Sprintf("%s/ext/bc/C/rpc", uri)
+	url := fmt.Sprintf("%s/v1/bc/C/rpc", uri)
 	reqBody := []byte(`{"jsonrpc":"2.0", "id":1, "method":"eth_blockNumber", "params":[]}`)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))

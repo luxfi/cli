@@ -67,7 +67,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		validatorManagerAddress := sc.Networks["Local Network"].ValidatorManagerAddress
 		gomega.Expect(validatorManagerAddress).ShouldNot(gomega.BeEmpty())
-		uri := fmt.Sprintf("%s/ext/bc/%s/rpc", localClusterUris[0], sc.Networks["Local Network"].BlockchainID)
+		uri := fmt.Sprintf("%s/v1/bc/%s/rpc", localClusterUris[0], sc.Networks["Local Network"].BlockchainID)
 		valType := validatorManagerSDK.GetValidatorManagerType(uri, crypto.HexToAddress(validatorManagerAddress))
 		expectedValType := validatormanagertypes.ValidatorManagementTypeFromString(validatormanagertypes.ProofOfAuthority)
 		gomega.Expect(valType).Should(gomega.Equal(expectedValType))
@@ -101,7 +101,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		validatorManagerAddress := sc.Networks["Local Network"].ValidatorManagerAddress
 		gomega.Expect(validatorManagerAddress).ShouldNot(gomega.BeEmpty())
-		uri := fmt.Sprintf("%s/ext/bc/%s/rpc", localClusterUris[0], sc.Networks["Local Network"].BlockchainID)
+		uri := fmt.Sprintf("%s/v1/bc/%s/rpc", localClusterUris[0], sc.Networks["Local Network"].BlockchainID)
 		valType := validatorManagerSDK.GetValidatorManagerType(uri, crypto.HexToAddress(validatorManagerAddress))
 		expectedValType := validatormanagertypes.ValidatorManagementTypeFromString(validatormanagertypes.UndefinedValidatorManagement)
 		gomega.Expect(valType).Should(gomega.Equal(expectedValType))

@@ -154,7 +154,7 @@ curl -X POST --data '{
     "jsonrpc":"2.0",
     "id":1,
     "method":"info.getNodeID"
-}' -H 'content-type:application/json' http://127.0.0.1:9630/ext/info
+}' -H 'content-type:application/json' http://127.0.0.1:9630/v1/info
 
 # Check if node is running
 ps aux | grep luxd
@@ -195,7 +195,7 @@ curl -X POST --data '{
     "jsonrpc":"2.0",
     "id":1,
     "method":"info.peers"
-}' -H 'content-type:application/json' http://127.0.0.1:9630/ext/info
+}' -H 'content-type:application/json' http://127.0.0.1:9630/v1/info
 
 # Check logs for errors
 grep ERROR ~/.luxd/logs/main.log

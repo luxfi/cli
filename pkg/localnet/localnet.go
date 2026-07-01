@@ -450,13 +450,13 @@ func PrintEndpoints(app *application.Lux, printFn func(string, ...interface{}), 
 	if err != nil {
 		// Fall back to default
 		printFn("Blockchain: %s", blockchainName)
-		printFn("RPC Endpoint: http://localhost:9650/ext/bc/%s/rpc", blockchainName)
+		printFn("RPC Endpoint: http://localhost:9650/v1/bc/%s/rpc", blockchainName)
 		return nil
 	}
 
 	printFn("Blockchain: %s", blockchainName)
 	for i, uri := range uris {
-		printFn("Node %d RPC: %s/ext/bc/%s/rpc", i+1, uri, blockchainName)
+		printFn("Node %d RPC: %s/v1/bc/%s/rpc", i+1, uri, blockchainName)
 	}
 	return nil
 }
@@ -779,7 +779,7 @@ func getPortBaseForNetwork(netType string) int {
 // checkEndpointHealth checks if an HTTP endpoint is reachable
 func checkEndpointHealth(endpoint string) bool {
 	client := &http.Client{Timeout: 2 * time.Second}
-	resp, err := client.Get(endpoint + "/ext/health")
+	resp, err := client.Get(endpoint + "/v1/health")
 	if err != nil {
 		return false
 	}

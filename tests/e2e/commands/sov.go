@@ -228,7 +228,7 @@ func InitValidatorManager(
 		"--endpoint",
 		endpoint,
 		"--rpc",
-		fmt.Sprintf("%s/ext/bc/%s/rpc", endpoint, blockchainID),
+		fmt.Sprintf("%s/v1/bc/%s/rpc", endpoint, blockchainID),
 		"--genesis-key",
 		"--"+constants.SkipUpdateFlag,
 	)

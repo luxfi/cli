@@ -168,7 +168,7 @@ func stackUp(*cobra.Command, []string) error {
 			manifest.Chains = append(manifest.Chains, ChainInfo{
 				Index:    i,
 				RPCHTTP:  fmt.Sprintf("http://127.0.0.1:%d", httpPort),
-				RPCWS:    fmt.Sprintf("ws://127.0.0.1:%d/ext/bc/C/ws", httpPort),
+				RPCWS:    fmt.Sprintf("ws://127.0.0.1:%d/v1/bc/C/ws", httpPort),
 				StakingP: stakingPort,
 				PID:      pid,
 			})
@@ -220,7 +220,7 @@ func stackUp(*cobra.Command, []string) error {
 		manifest.Chains = append(manifest.Chains, ChainInfo{
 			Index:    i,
 			RPCHTTP:  fmt.Sprintf("http://127.0.0.1:%d", httpPort),
-			RPCWS:    fmt.Sprintf("ws://127.0.0.1:%d/ext/bc/C/ws", httpPort),
+			RPCWS:    fmt.Sprintf("ws://127.0.0.1:%d/v1/bc/C/ws", httpPort),
 			StakingP: stakingPort,
 			PID:      pid,
 		})
@@ -773,7 +773,7 @@ func writeChainsManifest(baseDir string, m *ChainsManifest) error {
 // --- health check ---
 
 func waitForHealth(httpPort int) error {
-	healthURL := fmt.Sprintf("http://127.0.0.1:%d/ext/health", httpPort)
+	healthURL := fmt.Sprintf("http://127.0.0.1:%d/v1/health", httpPort)
 	ctx, cancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer cancel()
 
@@ -882,7 +882,7 @@ func printStackSummary(cfg *StackConfig) {
 			port := PortForApp(app.PortBase, i)
 			name := chainInstanceName(app.Name, i)
 			if app.Name == "luxd" {
-				ux.Logger.PrintToUser("  %s  http://127.0.0.1:%d/ext/health", name, port)
+				ux.Logger.PrintToUser("  %s  http://127.0.0.1:%d/v1/health", name, port)
 			} else {
 				ux.Logger.PrintToUser("  %s  http://127.0.0.1:%d", name, port)
 			}

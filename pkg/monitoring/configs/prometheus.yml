@@ -35,7 +35,7 @@ scrape_configs:
     static_configs:
       - targets: ["prometheus:9090"]
   - job_name: 'luxd'
-    metrics_path: '/ext/metrics'
+    metrics_path: '/v1/metrics'
     static_configs:
       - targets: [{{ .LuxdPorts }}]
   - job_name: 'luxd-machine'

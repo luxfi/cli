@@ -22,7 +22,7 @@ func NewCmd() *cobra.Command {
 		Short: "Stop a sovereign-L1 node by identity (not by PID file)",
 		Long: `Stops the luxd node for <network>/<env> by:
 
-  1. Probing http://127.0.0.1:<httpPort>/ext/info → info.getNetworkID
+  1. Probing http://127.0.0.1:<httpPort>/v1/info → info.getNetworkID
   2. Verifying the response equals the expected networkID from chain.yaml
   3. Looking up the PID listening on httpPort via lsof
   4. SIGTERM → wait drain → SIGKILL if still up

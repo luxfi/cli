@@ -449,7 +449,7 @@ scrape_configs:
   - job_name: 'lux-node'
     static_configs:
       - targets: ['localhost:9630']
-    metrics_path: '/ext/metrics'
+    metrics_path: '/v1/metrics'
 EOF
 
 # Start Prometheus

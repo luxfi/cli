@@ -43,7 +43,7 @@ Connects to the Z-Chain RPC endpoint to call the verifier contract.`,
 		},
 	}
 
-	cmd.Flags().String("rpc", "http://localhost:9630/ext/bc/Z/rpc", "Z-Chain RPC endpoint")
+	cmd.Flags().String("rpc", "http://localhost:9630/v1/bc/Z/rpc", "Z-Chain RPC endpoint")
 	cmd.Flags().String("proof", "", "Proof file path (required)")
 	cmd.Flags().String("vk", "", "Verification key file path (required)")
 	cmd.Flags().String("inputs", "", "Public inputs file path (required)")
@@ -71,7 +71,7 @@ Connects to the Z-Chain RPC endpoint to call the verifier contract.`,
 		},
 	}
 
-	cmd.Flags().String("rpc", "http://localhost:9630/ext/bc/Z/rpc", "Z-Chain RPC endpoint")
+	cmd.Flags().String("rpc", "http://localhost:9630/v1/bc/Z/rpc", "Z-Chain RPC endpoint")
 	cmd.Flags().String("proof", "", "Proof file path (required)")
 	cmd.Flags().String("vk", "", "Verification key file path (required)")
 	cmd.Flags().String("inputs", "", "Public inputs file path (required)")

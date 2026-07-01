@@ -79,7 +79,7 @@ func (c *KChainRPCClient) call(ctx context.Context, method string, params interf
 		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.endpoint+"/ext/kchain/rpc", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", c.endpoint+"/v1/kchain/rpc", bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}

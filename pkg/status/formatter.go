@@ -197,13 +197,13 @@ func (f *StatusFormatter) FormatNetworkStatus(result *StatusResult) {
 				// P-chain and X-chain don't use /rpc suffix, EVM chains do
 				switch chain.Alias {
 				case "p":
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/P", baseURL)
+					rpcEndpoint = fmt.Sprintf("%s/v1/bc/P", baseURL)
 				case "x":
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/X", baseURL)
+					rpcEndpoint = fmt.Sprintf("%s/v1/bc/X", baseURL)
 				case "c", "a", "b", "d", "g", "k", "q", "t", "z":
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, strings.ToUpper(chain.Alias))
+					rpcEndpoint = fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, strings.ToUpper(chain.Alias))
 				default:
-					rpcEndpoint = fmt.Sprintf("%s/ext/bc/%s/rpc", baseURL, chain.Alias)
+					rpcEndpoint = fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, chain.Alias)
 				}
 
 				fmt.Fprintf(f.writer, "%-5s  %-10s  %-10d %-20s  %-6s  %dms      %-8s  %s\n",

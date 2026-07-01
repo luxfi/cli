@@ -39,7 +39,7 @@ func ResolveSpec(s *Spec, env string) (*Profile, error) {
 		HTTPPort:          e.HTTPPort,
 		StakingPort:       e.StakingPort,
 		RPCUrl:            e.RPCUrl,
-		LocalRPCUrl:       fmt.Sprintf("http://127.0.0.1:%d/ext/bc/C/rpc", e.HTTPPort),
+		LocalRPCUrl:       fmt.Sprintf("http://127.0.0.1:%d/v1/bc/C/rpc", e.HTTPPort),
 		LogLevel:          "info",
 	}
 	if s.Runtime.LogLevel != "" {
