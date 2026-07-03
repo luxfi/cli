@@ -20,7 +20,7 @@ import (
 
 	"github.com/luxfi/crypto/mlkem"
 	"github.com/luxfi/crypto/threshold"
-	_ "github.com/luxfi/crypto/threshold/bls" // register BLS scheme
+	_ "github.com/luxfi/threshold/scheme/bls" // register BLS scheme
 )
 
 // BackendKChain is the K-Chain distributed secrets backend type.
