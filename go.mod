@@ -335,6 +335,7 @@ require (
 	github.com/luxfi/net v0.0.5
 	github.com/luxfi/proto v1.3.4
 	github.com/luxfi/rpc v1.1.0
+	github.com/luxfi/threshold v1.12.1
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/tui v0.1.0
 	github.com/luxfi/utils v1.2.0
