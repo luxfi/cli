@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/crypto/secp256k1"
+	"github.com/luxfi/light"
 )
 
 // Environment variable names for key loading. Brand prefix dropped — these
@@ -47,8 +48,9 @@ const (
 	EnvLightMnemonic = "LIGHT_MNEMONIC"
 
 	// LightMnemonic is the default mnemonic for local development networks.
-	// Intentionally public: "light light light light light light light light light light light energy"
-	LightMnemonic = "light light light light light light light light light light light energy"
+	// Intentionally public. Single source of truth: github.com/luxfi/light.Mnemonic
+	// — this is a backward-compat re-export; do not re-declare the literal here.
+	LightMnemonic = light.Mnemonic
 )
 
 // getEnv returns the value of the named environment variable.
