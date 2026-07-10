@@ -17,7 +17,9 @@ const (
 	localnetNetworkID  = uint32(1337)
 	localnetValidators = 3
 	localEVMChainID    = 1337
-	lightMnemonic      = "light light light light light light light light light light light energy"
+	// lightMnemonic re-exports the single source of truth (key.LightMnemonic
+	// → github.com/luxfi/light.Mnemonic); do not re-declare the literal.
+	lightMnemonic = key.LightMnemonic
 )
 
 // StartLocal starts a 3-node localnet on K8s via the operator.
