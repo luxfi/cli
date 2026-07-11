@@ -14,7 +14,7 @@ env:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     steps:
       - uses: actions/checkout@v5
 
@@ -43,7 +43,7 @@ jobs:
 
   test-cli:
     name: Test CLI
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     steps:
       - uses: actions/checkout@v5
 
@@ -75,7 +75,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     needs: [lint]
     strategy:
       matrix:
@@ -107,7 +107,7 @@ jobs:
 
   integration-test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     needs: [build, test-cli]
     steps:
       - uses: actions/checkout@v5
@@ -133,7 +133,7 @@ jobs:
 
   security:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     continue-on-error: true
     steps:
       - uses: actions/checkout@v5
@@ -156,7 +156,7 @@ jobs:
 
   coverage:
     name: Code Coverage
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     needs: [test-cli]
     steps:
       - uses: actions/checkout@v5
