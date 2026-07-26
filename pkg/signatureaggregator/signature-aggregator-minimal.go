@@ -104,6 +104,6 @@ func CreateSignatureAggregatorInstance(app *application.Lux, chainID string, net
 
 // SignMessage sends a message to the signature aggregator for signing.
 // This wraps the SDK's warp.SignMessage function for convenience.
-func SignMessage(logger luxlog.Logger, endpoint string, message, justification, signingChainID string, quorumPercentage uint64) (*warp.Message, error) {
+func SignMessage(logger luxlog.Logger, endpoint string, message, justification, signingChainID string, quorumPercentage uint64) (*warp.Envelope, error) {
 	return sdkwarp.SignMessage(logger, endpoint, message, justification, signingChainID, quorumPercentage)
 }
