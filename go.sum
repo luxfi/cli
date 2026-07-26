@@ -494,7 +494,7 @@ github.com/luxfi/filesystem v0.0.1 h1:VZ6xMFKaAPBW/ddlMsDnI2G0VU1lV5rYaVcW5d+KwE
 github.com/luxfi/filesystem v0.0.1/go.mod h1:OQVSU6XNwqrr1AI+MqkID2taHUclx7NYmmr3svgttec=
 github.com/luxfi/formatting v1.0.1 h1:ZnE1rAdEUds9yAegdVdGDOBGN6hLMPOv6E03Fp8IEYo=
 github.com/luxfi/formatting v1.0.1/go.mod h1:mYzNf5DJOiqSSKUPzNj5dKy4tstFbN3pZlkI5716eKc=
-github.com/luxfi/genesis v1.13.14 h1:CauxugSR1NP6Zhng+6BvBvXjTnbMwQrfGILg5a9LbR0=
+github.com/luxfi/genesis v1.13.14 h1:Jv7Lg/eivNgMjgLi8GGfDZuZtSsPW3jGWECeYeK0HFM=
 github.com/luxfi/genesis v1.13.14/go.mod h1:qUa+AcTWwxv0x+CJochBsRNOMbmEBjw07HJKZLhs5c0=
 github.com/luxfi/geth v1.16.99 h1:LDN2D5r3EEukdYv4ha2zBkfp80konzIRSfe9HCK2RZ4=
 github.com/luxfi/geth v1.16.99/go.mod h1:LsvsAVkpXl/gfVfbl+rXrwcZEjvMxcy0pyP16hmsPzw=
@@ -512,7 +512,7 @@ github.com/luxfi/ids v1.2.15 h1:omE+E4+0Poj9DzM11ejSFgteaSQ3KDHi5g54iH6jcxI=
 github.com/luxfi/ids v1.2.15/go.mod h1:Fj73K5xcblvdE0SxU/ip+jE8VqNdu+80548su5KJ7xI=
 github.com/luxfi/keychain v1.0.2 h1:uQgmjs37/VBIALEiYrrszTpxvtqr07/YvS9TnmxGafs=
 github.com/luxfi/keychain v1.0.2/go.mod h1:q/4ULgZBlstKkwzOzG/0T6y73BDPgnkrcibbJyTvmbU=
-github.com/luxfi/keys v1.2.0 h1:3TAcr4twyMpwQp7J29ZRtIa5vzAoDrnXnLcPKVHJWmw=
+github.com/luxfi/keys v1.2.0 h1:x6O1biVayzwPwG5Api3U+9UMMBGwIXvBiBajcGS1UhQ=
 github.com/luxfi/keys v1.2.0/go.mod h1:SjsAaxo6sGmSp9OaHXUiVCqsknO8iPspN6jMOoEAMb8=
 github.com/luxfi/kms v1.11.7 h1:E25z8SCNTGOVvzzg5tj6pwJQ2K3FrE/nuy0KAfF+0zs=
 github.com/luxfi/kms v1.11.7/go.mod h1:XhLUVqN4RBv6j4Bj3MNgTZmHCnm74jH7RqqK0b9xbzw=
