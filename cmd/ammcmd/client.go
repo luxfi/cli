@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/go-bip39"
-	"github.com/luxfi/keys"
+	"github.com/luxfi/kms/pkg/mnemonic"
 )
 
 // ABI strings for contract interactions
@@ -213,8 +213,8 @@ func (a *AMM) LoadWallet() error {
 //  2. PRIVATE_KEY env var (hex)
 //  3. MNEMONIC env var (BIP-39)
 //  4. KMS_ADDR + KMS_ENV + KMS_MNEMONIC_PATH (native ZAP) — uses the
-//     canonical luxfi/kms keys.LoadMnemonicFromKMS so every
-//     Lux-derived service resolves keys the same way.
+//     canonical kms/pkg/mnemonic loader so every Lux-derived service
+//     resolves keys the same way.
 func (a *AMM) LoadWalletWithKey(privateKey string) error {
 	var key *ecdsa.PrivateKey
 	var err error
@@ -238,19 +238,25 @@ func (a *AMM) LoadWalletWithKey(privateKey string) error {
 	}
 
 	// Priority 3 + 4: MNEMONIC env (3) or KMS via ZAP (4). The shared
-	// luxfi/keys.LoadMnemonic handles the env-vs-KMS split itself, so
-	// we get one canonical flow. Trust at the network boundary
-	// (NetworkPolicy + ZAP wire) — no application-layer identity.
+	// kms/pkg/mnemonic.Load handles the env-vs-KMS split itself, so we
+	// get one canonical flow. The loader lives in kms rather than keys
+	// because keys must not import kms — kms already imports keys for
+	// ServiceIdentity, and the back edge would close a cycle.
+	//
+	// identity is nil: the CLI dials as an operator over the ZAP wire
+	// with trust enforced at the network boundary, not by a signed
+	// application-layer envelope.
 	if key == nil {
-		mnemonic, mErr := keys.LoadMnemonic(context.Background(),
+		phrase, mErr := mnemonic.Load(context.Background(),
 			os.Getenv("KMS_ADDR"),
 			os.Getenv("KMS_ENV"),
-			envOr("KMS_MNEMONIC_PATH", "/mnemonic"))
+			envOr("KMS_MNEMONIC_PATH", "/mnemonic"),
+			nil)
 		if mErr != nil {
 			return fmt.Errorf("no wallet credentials provided: use --private-key, PRIVATE_KEY, MNEMONIC env, or KMS_ADDR+KMS_ENV+KMS_MNEMONIC_PATH (%w)", mErr)
 		}
 
-		seed := bip39.NewSeed(mnemonic, "")
+		seed := bip39.NewSeed(phrase, "")
 		// Derive m/44'/60'/0'/0/0 (standard Ethereum path)
 		key, err = deriveKey(seed, "m/44'/60'/0'/0/0")
 		if err != nil {
@@ -636,7 +642,6 @@ func deriveKey(seed []byte, _ string) (*ecdsa.PrivateKey, error) {
 	return ecPrivKey.ToECDSA(), nil
 }
 
-
 // envOr returns the value of env var `name` if set + non-empty, else def.
 func envOr(name, def string) string {
 	if v := strings.TrimSpace(os.Getenv(name)); v != "" {
@@ -644,4 +649,3 @@ func envOr(name, def string) string {
 	}
 	return def
 }
-
