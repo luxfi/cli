@@ -274,7 +274,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		}
 
 		// check running version
-		// remove string suffix starting with /ext
+		// remove string suffix starting with /v1
 		nodeURI := strings.Split(rpcs[0], "/v1")[0]
 		vmid, err := cliutils.VMID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -318,7 +318,7 @@ var _ = ginkgo.Describe("[Upgrade local network non SOV]", ginkgo.Ordered, func(
 		}
 
 		// check running version
-		// remove string suffix starting with /ext from rpc url to get node uri
+		// remove string suffix starting with /v1 from rpc url to get node uri
 		nodeURI := strings.Split(rpcs[0], "/v1")[0]
 		vmid, err := cliutils.VMID(chainName)
 		gomega.Expect(err).Should(gomega.BeNil())
