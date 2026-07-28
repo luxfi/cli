@@ -19,7 +19,6 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/coreth/plugin/evm/atomic"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
@@ -488,7 +487,7 @@ func fetchCChainUTXOs(ctx context.Context, baseURL, sourceChain string, addrs []
 			return nil, err
 		}
 		utxoObj := &utxo.UTXO{}
-		if _, err := atomic.Codec.Unmarshal(raw, utxoObj); err != nil {
+		if err := decodeAtomicUTXO(raw, utxoObj); err != nil {
 			return nil, err
 		}
 		utxos = append(utxos, utxoObj)
