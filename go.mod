@@ -192,7 +192,7 @@ require (
 	github.com/luxfi/crypto/ipa v1.2.4 // indirect
 	github.com/luxfi/gpu v1.1.0 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
-	github.com/luxfi/kms v1.12.10 // indirect
+	github.com/luxfi/keys v1.4.1 // indirect
 	github.com/luxfi/lattice/v7 v7.1.4 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/math/safe v0.0.1 // indirect
@@ -322,7 +322,6 @@ require (
 	github.com/luxfi/ai v0.2.0
 	github.com/luxfi/api v1.1.1
 	github.com/luxfi/constants v1.6.2
-	github.com/luxfi/coreth v1.23.3
 	github.com/luxfi/corona v0.10.4
 	github.com/luxfi/database v1.21.1
 	github.com/luxfi/fhe v1.11.1
@@ -331,7 +330,7 @@ require (
 	github.com/luxfi/genesis v1.16.2
 	github.com/luxfi/go-bip32 v1.1.0
 	github.com/luxfi/go-bip39 v1.2.0
-	github.com/luxfi/keys v1.4.1
+	github.com/luxfi/kms v1.12.10
 	github.com/luxfi/light v1.0.0
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.5.1
