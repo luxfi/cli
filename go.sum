@@ -532,7 +532,7 @@ github.com/luxfi/node v1.26.25-0.20260513030709-7f00b94dbae1 h1:y/yw2Kk52/pFeE20
 github.com/luxfi/node v1.26.25-0.20260513030709-7f00b94dbae1/go.mod h1:QBYuwCLH1nQeoWaEqbO28X0RUMsyV6Lb/kQ/gAx5mRI=
 github.com/luxfi/p2p v1.19.2 h1:uqZq7ofmEDbXlTkv1QThtci01Q+dmDkNmAPeORIyP8E=
 github.com/luxfi/p2p v1.19.2/go.mod h1:tI9Bt1R0ouvVtJvXG4e20GlGeV4AR230k4mFF9Vglzk=
-github.com/luxfi/pq v1.0.3 h1:pFlQm1+5FuKTDUh2y/23bXWkN4I2Rc5iuxJypwDFFMs=
+github.com/luxfi/pq v1.0.3 h1:ksw1dmfTR0dqqNMRS7BjGcprCO2Fhc+3Iiq2/NMuONw=
 github.com/luxfi/pq v1.0.3/go.mod h1:8bppZcRElfrVt0n3nYCZW3iX1TvhvzNbdjNdK1irgIE=
 github.com/luxfi/precompile v0.5.16 h1:tIY7/yK856lggOvv/5vVC0Cr7gRUs6Wi7MhibIszsng=
 github.com/luxfi/precompile v0.5.16/go.mod h1:r2nImBshkpIfl3n0+Zas0uxfJ3c7JB0E0qpJkBtSV/s=
