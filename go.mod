@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/ledger v1.2.1
 	github.com/luxfi/lpm v1.10.1 // indirect
 	github.com/luxfi/netrunner v1.20.3
-	github.com/luxfi/sdk v1.18.5
+	github.com/luxfi/sdk v1.18.6
 	github.com/luxfi/vm v1.3.1
 	github.com/luxfi/warp v1.24.1
 	github.com/manifoldco/promptui v0.9.0
@@ -193,6 +193,7 @@ require (
 	github.com/luxfi/accel v1.2.4 // indirect
 	github.com/luxfi/age v1.6.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
+	github.com/luxfi/bft v0.1.5 // indirect
 	github.com/luxfi/cache v1.3.1 // indirect
 	github.com/luxfi/codec v1.2.1 // indirect
 	github.com/luxfi/compress v0.1.1 // indirect
@@ -356,7 +357,7 @@ require (
 	github.com/luxfi/math v1.5.1
 	github.com/luxfi/net v0.1.1
 	github.com/luxfi/node v1.36.15
-	github.com/luxfi/proto v1.4.6
+	github.com/luxfi/proto v1.4.7
 	github.com/luxfi/rpc v1.1.0
 	github.com/luxfi/threshold v1.12.3
 	github.com/luxfi/tls v1.1.1
