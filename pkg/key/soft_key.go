@@ -23,7 +23,6 @@ import (
 	"github.com/luxfi/go-bip39"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
-	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
@@ -476,7 +475,7 @@ func (m *SoftKey) Sign(pTx *txs.Tx, signers [][]ids.ShortID) error {
 		}
 	}
 
-	return pTx.Sign(pwallet.Codec, privsigners)
+	return pTx.Sign(privsigners)
 }
 
 func (m *SoftKey) Match(owners *secp256k1fx.OutputOwners, time uint64) ([]uint32, []ids.ShortID, bool) {

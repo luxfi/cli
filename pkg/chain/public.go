@@ -314,7 +314,7 @@ func (d *PublicDeployer) DeployChain(
 		return ids.Empty, err
 	}
 	ux.Logger.PrintToUser("DeployNet: calling createNetTx...")
-	chainID, err := d.createChainTx(controlKeys, threshold, wallet)
+	chainID, err := d.createNetworkTx(controlKeys, threshold, wallet)
 	if err != nil {
 		ux.Logger.PrintToUser("DeployNet: createNetTx error: %v", err)
 		return ids.Empty, err
@@ -361,7 +361,7 @@ func (d *PublicDeployer) DeployBlockchain(
 	}
 
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign CreateNetwork transaction on the ledger device *** ")
 	}
 
 	tx, err := d.createBlockchainTx(chainAuthKeys, chain, vmID, chainID, genesis, wallet)
@@ -691,13 +691,13 @@ func (*PublicDeployer) signTx(
 	return nil
 }
 
-func (d *PublicDeployer) createChainTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
-	ux.Logger.PrintToUser("createChainTx: starting with control keys: %v", controlKeys)
+func (d *PublicDeployer) createNetworkTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
+	ux.Logger.PrintToUser("createNetworkTx: starting with control keys: %v", controlKeys)
 	addrs, err := address.ParseToIDs(controlKeys)
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failure parsing control keys: %w", err)
 	}
-	ux.Logger.PrintToUser("createChainTx: parsed addresses: %v", addrs)
+	ux.Logger.PrintToUser("createNetworkTx: parsed addresses: %v", addrs)
 	owners := &secp256k1fx.OutputOwners{
 		Addrs:     addrs,
 		Threshold: threshold,
@@ -705,7 +705,7 @@ func (d *PublicDeployer) createChainTx(controlKeys []string, threshold uint32, w
 	}
 	opts := []common.Option{}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign CreateNetwork transaction on the ledger device *** ")
 	}
 	ux.Logger.PrintToUser("createNetworkTx: calling IssueCreateNetworkTx...")
 	tx, err := wallet.P().IssueCreateNetworkTx(owners, opts...)
