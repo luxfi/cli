@@ -213,7 +213,6 @@ require (
 	github.com/luxfi/metric v1.8.1 // indirect
 	github.com/luxfi/mlwe v0.3.0 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
-	github.com/luxfi/node v1.36.15 // indirect
 	github.com/luxfi/p2p v1.22.1 // indirect
 	github.com/luxfi/pq v1.1.0 // indirect
 	github.com/luxfi/precompile v0.19.3 // indirect
@@ -356,6 +355,7 @@ require (
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.5.1
 	github.com/luxfi/net v0.1.1
+	github.com/luxfi/node v1.36.15
 	github.com/luxfi/proto v1.4.6
 	github.com/luxfi/rpc v1.1.0
 	github.com/luxfi/threshold v1.12.3
