@@ -15,10 +15,12 @@ import (
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/address"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/sdk/platformvm"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
@@ -33,6 +35,7 @@ var (
 	stake              uint64
 	duration           time.Duration
 	delegationFee      uint32
+	rewardAddress      string
 )
 
 // lux primary addValidator
@@ -64,6 +67,7 @@ from its own clock, so --duration measures from when the tx is accepted.`,
 	cmd.Flags().Uint64Var(&stake, "stake", 0, "amount to stake, in nLUX")
 	cmd.Flags().DurationVar(&duration, "duration", 0, "how long the validator stays in the set")
 	cmd.Flags().Uint32Var(&delegationFee, "delegation-fee", 20_000, "share of delegation rewards the validator keeps, out of 1,000,000")
+	cmd.Flags().StringVar(&rewardAddress, "reward-address", "", "P-Chain address to own the staking reward (default: the paying key)")
 	return cmd
 }
 
@@ -99,6 +103,11 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("--proof-of-possession does not prove ownership of --public-key: %w", err)
 	}
 
+	rewardsOwner, err := rewardOwner(rewardAddress)
+	if err != nil {
+		return err
+	}
+
 	// The chain is the authority on its own staking floor; a table compiled in
 	// here would be a second answer that drifts.
 	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
@@ -122,7 +131,7 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		blsKey,
 		stake,
 		time.Now().Add(duration),
-		nil, // rewards owner: the paying wallet's first address
+		rewardsOwner, // nil falls back to the paying wallet's first address
 		delegationFee,
 	)
 	if err != nil {
@@ -131,4 +140,22 @@ func addValidator(_ *cobra.Command, _ []string) error {
 	ux.Logger.PrintToUser("%s registered on %s", nodeID, network.Name())
 	ux.Logger.PrintToUser("  txID: %s", txID)
 	return nil
+}
+
+// rewardOwner resolves --reward-address into the owner of the staking reward.
+//
+// Who funds the bond and who earns from it are different questions. They
+// coincide by default, and an operator staking on someone else's behalf has to
+// be able to say so — otherwise the reward silently accrues to whoever paid.
+// An empty address means "unstated", which the caller passes through as nil so
+// the wallet's own first address owns the reward.
+func rewardOwner(addr string) (*secp256k1fx.OutputOwners, error) {
+	if addr == "" {
+		return nil, nil
+	}
+	addrs, err := address.ParseToIDs([]string{addr})
+	if err != nil {
+		return nil, fmt.Errorf("--reward-address %q: %w", addr, err)
+	}
+	return &secp256k1fx.OutputOwners{Threshold: 1, Addrs: addrs}, nil
 }
