@@ -9,19 +9,12 @@ import (
 
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/proto/p/txs"
-	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 )
 
 // SaveToDisk saves a given tx to the specified path.
 func SaveToDisk(tx *txs.Tx, txPath string, forceOverwrite bool) error {
-	// Serialize the signed tx
-	txBytes, err := pwallet.Codec.Marshal(txs.CodecVersion, tx)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal signed tx: %w", err)
-	}
-
 	// Get the encoded (in hex + checksum) signed tx
-	txStr, err := formatting.Encode(formatting.Hex, txBytes)
+	txStr, err := formatting.Encode(formatting.Hex, tx.Bytes())
 	if err != nil {
 		return fmt.Errorf("couldn't encode signed tx: %w", err)
 	}
@@ -51,12 +44,9 @@ func LoadFromDisk(txPath string) (*txs.Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't decode signed tx: %w", err)
 	}
-	var tx txs.Tx
-	if _, err := pwallet.Codec.Unmarshal(txBytes, &tx); err != nil {
-		return nil, fmt.Errorf("error unmarshaling signed tx: %w", err)
+	tx, err := txs.Parse(txBytes)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing signed tx: %w", err)
 	}
-	if err := tx.Initialize(pwallet.Codec); err != nil {
-		return nil, fmt.Errorf("error initializing signed tx: %w", err)
-	}
-	return &tx, nil
+	return tx, nil
 }

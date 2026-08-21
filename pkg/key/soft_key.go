@@ -23,7 +23,6 @@ import (
 	"github.com/luxfi/go-bip39"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
-	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
@@ -476,7 +475,7 @@ func (m *SoftKey) Sign(pTx *txs.Tx, signers [][]ids.ShortID) error {
 		}
 	}
 
-	return pTx.Sign(pwallet.Codec, privsigners)
+	return pTx.Sign(privsigners)
 }
 
 func (m *SoftKey) Match(owners *secp256k1fx.OutputOwners, time uint64) ([]uint32, []ids.ShortID, bool) {
@@ -511,17 +510,9 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 
 	// Priority 2: MNEMONIC / MNEMONIC
 	if mnemonic := getEnv(EnvMnemonic); mnemonic != "" {
-		// MNEMONIC_ACCOUNT (or KEY_INDEX) selects BIP-44 address index.
-		// Derivation: m/44'/9000'/0'/0/{account} for P/X-Chain
-		//             m/44'/60'/0'/0/{account}   for C-Chain/EVM
-		// Default: 0
-		accountIndex := uint32(0)
-		if idxStr := getKeyIndex(); idxStr != "" {
-			idx, err := strconv.ParseUint(idxStr, 10, 32)
-			if err != nil {
-				return nil, fmt.Errorf("invalid MNEMONIC_ACCOUNT=%q: must be 0-99", idxStr)
-			}
-			accountIndex = uint32(idx)
+		accountIndex, err := EnvAccount()
+		if err != nil {
+			return nil, err
 		}
 		return NewSoftFromMnemonicWithAccount(networkID, mnemonic, accountIndex)
 	}
@@ -557,10 +548,31 @@ func GetOrCreateLocalKey(networkID uint32) (*SoftKey, error) {
 	return newKey, nil
 }
 
-// NewSoftFromMnemonic creates a SoftKey from a BIP39 mnemonic phrase.
-// Uses Lux P/X-Chain BIP44 derivation path: m/44'/9000'/0'/0/0
+// EnvAccount returns the BIP-44 address index the environment selects, via
+// MNEMONIC_ACCOUNT or KEY_INDEX. Derivation is m/44'/9000'/0'/0/{account} for
+// P/X-Chain and m/44'/60'/0'/0/{account} for C-Chain. Unset means account 0.
+// Every mnemonic-derived key reads the index here, so one export moves the
+// whole CLI to the same account.
+func EnvAccount() (uint32, error) {
+	idxStr := getKeyIndex()
+	if idxStr == "" {
+		return 0, nil
+	}
+	idx, err := strconv.ParseUint(idxStr, 10, 32)
+	if err != nil {
+		return 0, fmt.Errorf("invalid MNEMONIC_ACCOUNT=%q: must be 0-99", idxStr)
+	}
+	return uint32(idx), nil
+}
+
+// NewSoftFromMnemonic creates a SoftKey from a BIP39 mnemonic phrase, at the
+// account index the environment selects.
 func NewSoftFromMnemonic(networkID uint32, mnemonic string) (*SoftKey, error) {
-	return NewSoftFromMnemonicWithAccount(networkID, mnemonic, 0)
+	accountIndex, err := EnvAccount()
+	if err != nil {
+		return nil, err
+	}
+	return NewSoftFromMnemonicWithAccount(networkID, mnemonic, accountIndex)
 }
 
 // NewSoftFromBytes creates a SoftKey from raw private key bytes.
