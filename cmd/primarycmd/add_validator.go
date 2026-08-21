@@ -5,23 +5,22 @@
 package primarycmd
 
 import (
-	"errors"
+	"context"
+	"encoding/json"
 	"fmt"
-	"math"
 	"time"
 
-	"github.com/luxfi/cli/cmd/networkcmd"
-	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/cobrautils"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/networkoptions"
-	cliprompts "github.com/luxfi/cli/pkg/prompts"
 	"github.com/luxfi/cli/pkg/ux"
+	"github.com/luxfi/address"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/models"
-	sdkprompts "github.com/luxfi/sdk/prompts"
+	"github.com/luxfi/proto/p/signer"
+	"github.com/luxfi/sdk/platformvm"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/spf13/cobra"
 )
 
@@ -31,96 +30,48 @@ var (
 	useLedger          bool
 	ledgerAddresses    []string
 	nodeIDStr          string
-	weight             uint64
-	delegationFee      uint32
-	startTimeStr       string
-	duration           time.Duration
 	publicKey          string
 	pop                string
-	// ErrMutuallyExlusiveKeyLedger indicates --key and --ledger options cannot be used together.
-	ErrMutuallyExlusiveKeyLedger = errors.New("--key and --ledger,--ledger-addrs are mutually exclusive")
-	ErrStoredKeyOnMainnet        = errors.New("--key is not available for mainnet operations")
+	stake              uint64
+	duration           time.Duration
+	delegationFee      uint32
+	rewardAddress      string
 )
-
-type jsonProofOfPossession struct {
-	PublicKey         string `json:"publicKey"`
-	ProofOfPossession string `json:"proofOfPossession"`
-}
 
 // lux primary addValidator
 func newAddValidatorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "addValidator",
-		Short: "Add a validator to Primary Network",
-		Long: `The primary addValidator command adds a node as a validator 
-in the Primary Network`,
+		Short: "Register a validator on the primary network",
+		Long: `Issues an AddPermissionlessValidatorTx for a node identity.
+
+Create the identity first — it prints every value this command needs:
+
+  lux key staker ~/.luxd/staking
+  lux primary addValidator --mainnet \
+      --node-id NodeID-... --public-key 0x... --proof-of-possession 0x... \
+      --stake 2000000000 --duration 336h
+
+The stake is in nLUX (1 LUX = 1e9 nLUX) and the chain reads the start time
+from its own clock, so --duration measures from when the tx is accepted.`,
 		RunE: addValidator,
 		Args: cobrautils.ExactArgs(0),
 	}
-	// Network flags are registered globally, not at command level to avoid conflicts
-	// networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.NonLocalSupportedNetworkOptions)
-	cmd.Flags().StringVarP(&keyName, "key", "k", "", "select the key to use [testnet only]")
-	cmd.Flags().StringVar(&nodeIDStr, "nodeID", "", "set the NodeID of the validator to add")
-	cmd.Flags().Uint64Var(&weight, "weight", 0, "set the staking weight of the validator to add")
-	cmd.Flags().StringVar(&startTimeStr, "start-time", "", "UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format")
-	cmd.Flags().DurationVar(&duration, "staking-period", 0, "how long this validator will be staking")
-	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "use ledger instead of key (always true on mainnet, defaults to false on testnet)")
-	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "use the given ledger addresses")
-	cmd.Flags().StringVar(&publicKey, "public-key", "", "set the BLS public key of the validator to add")
-	cmd.Flags().StringVar(&pop, "proof-of-possession", "", "set the BLS proof of possession of the validator to add")
-	cmd.Flags().Uint32Var(&delegationFee, "delegation-fee", 0, "set the delegation fee (20 000 is equivalent to 2%)")
+	networkoptions.AddNetworkFlagsToCmd(cmd, &globalNetworkFlags, false, networkoptions.NonLocalSupportedNetworkOptions)
+	cmd.Flags().StringVarP(&keyName, "key", "k", "", "name of the stored key that pays and owns the rewards")
+	cmd.Flags().BoolVarP(&useLedger, "ledger", "g", false, "sign with a ledger device instead of a stored key")
+	cmd.Flags().StringSliceVar(&ledgerAddresses, "ledger-addrs", []string{}, "ledger addresses to search")
+	cmd.Flags().StringVar(&nodeIDStr, "node-id", "", "NodeID of the validator")
+	cmd.Flags().StringVar(&publicKey, "public-key", "", "BLS public key of the validator")
+	cmd.Flags().StringVar(&pop, "proof-of-possession", "", "BLS proof of possession of the validator")
+	cmd.Flags().Uint64Var(&stake, "stake", 0, "amount to stake, in nLUX")
+	cmd.Flags().DurationVar(&duration, "duration", 0, "how long the validator stays in the set")
+	cmd.Flags().Uint32Var(&delegationFee, "delegation-fee", 20_000, "share of delegation rewards the validator keeps, out of 1,000,000")
+	cmd.Flags().StringVar(&rewardAddress, "reward-address", "", "P-Chain address to own the staking reward (default: the paying key)")
 	return cmd
 }
 
-func promptProofOfPossession() (jsonProofOfPossession, error) {
-	if publicKey != "" {
-		err := cliprompts.ValidateHexa(publicKey)
-		if err != nil {
-			ux.Logger.PrintToUser("Format error in given public key: %s", err)
-			publicKey = ""
-		}
-	}
-	if pop != "" {
-		err := cliprompts.ValidateHexa(pop)
-		if err != nil {
-			ux.Logger.PrintToUser("Format error in given proof of possession: %s", err)
-			pop = ""
-		}
-	}
-	if publicKey == "" || pop == "" {
-		ux.Logger.PrintToUser("Next, we need the public key and proof of possession of the node's BLS")
-		ux.Logger.PrintToUser("SSH into the node and call info.getNodeID API to get the node's BLS info")
-		ux.Logger.PrintToUser("Check https://docs.lux.network/api-reference/info-api#infogetnodeid for instructions on calling info.getNodeID API")
-	}
-	var err error
-	if publicKey == "" {
-		txt := "What is the public key of the node's BLS?"
-		// Create a CLI prompter to use CaptureValidatedString
-		cliPrompter := cliprompts.NewPrompter()
-		publicKey, err = cliPrompter.CaptureValidatedString(txt, cliprompts.ValidateHexa)
-		if err != nil {
-			return jsonProofOfPossession{}, err
-		}
-	}
-	if pop == "" {
-		txt := "What is the proof of possession of the node's BLS?"
-		// Create a CLI prompter to use CaptureValidatedString
-		cliPrompter := cliprompts.NewPrompter()
-		pop, err = cliPrompter.CaptureValidatedString(txt, cliprompts.ValidateHexa)
-		if err != nil {
-			return jsonProofOfPossession{}, err
-		}
-	}
-	return jsonProofOfPossession{PublicKey: publicKey, ProofOfPossession: pop}, nil
-}
-
 func addValidator(_ *cobra.Command, _ []string) error {
-	var (
-		nodeID ids.NodeID
-		start  time.Time
-		err    error
-	)
-
 	network, err := networkoptions.GetNetworkFromCmdLineFlags(
 		app,
 		"",
@@ -134,151 +85,77 @@ func addValidator(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if len(ledgerAddresses) > 0 {
-		useLedger = true
+	nodeID, err := ids.NodeIDFromString(nodeIDStr)
+	if err != nil {
+		return fmt.Errorf("--node-id: %w", err)
 	}
-
-	if useLedger && keyName != "" {
-		return ErrMutuallyExlusiveKeyLedger
-	}
-
-	switch network.Kind() {
-	case models.Testnet:
-		if !useLedger && keyName == "" {
-			useLedger, keyName, err = sdkprompts.GetKeyOrLedger(app.Prompt, constants.PayTxsFeesMsg, app.GetKeyDir(), false)
-			if err != nil {
-				return err
-			}
-		}
-	case models.Mainnet:
-		// Lux POA network: allow key-based mainnet operations
-		if keyName == "" && !useLedger {
-			useLedger = true
-		}
-	default:
-		return errors.New("unsupported network")
-	}
-
-	if nodeIDStr == "" {
-		nodeID, err = networkcmd.PromptNodeID("add as Primary Network Validator")
-		if err != nil {
-			return err
-		}
-	} else {
-		nodeID, err = ids.NodeIDFromString(nodeIDStr)
-		if err != nil {
-			return err
-		}
-	}
-
+	// The BLS key travels as the pair the node's info API and `lux key staker`
+	// both print, so it round-trips through the same JSON either one emits.
+	blsKey := &signer.ProofOfPossession{}
+	blob, err := json.Marshal(map[string]string{"publicKey": publicKey, "proofOfPossession": pop})
 	if err != nil {
 		return err
 	}
-	if weight == 0 {
-		if err != nil {
-			return err
-		}
+	if err := json.Unmarshal(blob, blsKey); err != nil {
+		return fmt.Errorf("--public-key/--proof-of-possession: %w", err)
 	}
-	if weight < uint64(1000000000000) {
-		return fmt.Errorf("illegal weight, must be greater than or equal to %d: %d", uint64(1000000000000), weight)
+	if err := blsKey.Verify(); err != nil {
+		return fmt.Errorf("--proof-of-possession does not prove ownership of --public-key: %w", err)
 	}
 
-	// Estimate fee based on network type and transaction complexity
-	fee := estimateAddValidatorFee(network)
-	kc, err := keychain.GetKeychain(app, false, useLedger, ledgerAddresses, keyName, network, fee)
+	rewardsOwner, err := rewardOwner(rewardAddress)
 	if err != nil {
 		return err
 	}
 
-	// For primary network validators, we don't need proof of possession for now
-	// but keeping the prompt for future compatibility
-	_, err = promptProofOfPossession()
+	// The chain is the authority on its own staking floor; a table compiled in
+	// here would be a second answer that drifts.
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultConfirmTxTimeout)
+	defer cancel()
+	minStake, _, err := platformvm.NewClient(network.Endpoint()).GetMinStake(ctx, constants.PrimaryNetworkID)
+	if err != nil {
+		return fmt.Errorf("reading the staking floor from %s: %w", network.Endpoint(), err)
+	}
+	if stake < minStake {
+		return fmt.Errorf("--stake %d nLUX is below %s's minimum of %d nLUX", stake, network.Name(), minStake)
+	}
+
+	kc, err := keychain.GetKeychain(app, false, useLedger, ledgerAddresses, keyName, network, stake)
 	if err != nil {
 		return err
 	}
 
-	if err != nil {
-		return err
-	}
 	deployer := chain.NewPublicDeployer(app, useLedger, kc.Keychain, network)
-	if delegationFee == 0 {
-		delegationFee, err = getDelegationFeeOption(app, network)
-		if err != nil {
-			return err
-		}
-	} else {
-		defaultFee := network.GenesisParams().MinDelegationFee
-		if delegationFee < defaultFee {
-			return fmt.Errorf("delegation fee has to be larger than %d", defaultFee)
-		}
-	}
-	// Validators validate networks (not chains). Under the sovereign-L1 model,
-	// a primary-network add doesn't reference any chain — pass ids.Empty for
-	// the legacy chainID slot. Rewards owner defaults to the wallet's first
-	// address inside AddValidator when nil. delegationShares is the fraction
-	// (out of 1,000,000) the validator takes from delegation rewards.
-	_, _, _, err = deployer.AddValidator(
-		nil,                  // controlKeys (unused for primary-network adds)
-		nil,                  // chainAuthKeysStrs (unused for primary-network adds)
-		ids.Empty,            // legacy chainID (unused)
+	txID, err := deployer.AddValidator(
 		nodeID,
-		weight,
-		start,
-		duration,
-		nil,                  // rewardsOwner: default to first wallet addr
-		delegationFee,        // delegation shares
-	)
-	return err
-}
-
-func getDelegationFeeOption(app *application.Lux, network models.Network) (uint32, error) {
-	ux.Logger.PrintToUser("What would you like to set the delegation fee to?")
-	defaultFee := network.GenesisParams().MinDelegationFee
-	defaultOption := fmt.Sprintf("Default Delegation Fee (%d%%)", defaultFee/10000)
-	delegationFeePrompt := "Delegation Fee"
-	feeOption, err := app.Prompt.CaptureList(
-		delegationFeePrompt,
-		[]string{defaultOption, "Custom"},
+		blsKey,
+		stake,
+		time.Now().Add(duration),
+		rewardsOwner, // nil falls back to the paying wallet's first address
+		delegationFee,
 	)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	if feeOption != defaultOption {
-		ux.Logger.PrintToUser("Note that 20 000 is equivalent to 2%%")
-		delegationFee, err := app.Prompt.CapturePositiveInt(
-			delegationFeePrompt,
-			[]sdkprompts.Comparator{
-				{
-					Label: "Min Delegation Fee",
-					Type:  sdkprompts.MoreThanEq,
-					Value: uint64(defaultFee),
-				},
-			},
-		)
-		if err != nil {
-			return 0, err
-		}
-		if delegationFee > 0 && delegationFee <= math.MaxUint32 {
-			return uint32(delegationFee), nil
-		}
-		return 0, fmt.Errorf("invalid delegation fee")
-	}
-	return defaultFee, nil
+	ux.Logger.PrintToUser("%s registered on %s", nodeID, network.Name())
+	ux.Logger.PrintToUser("  txID: %s", txID)
+	return nil
 }
 
-func estimateAddValidatorFee(network models.Network) uint64 {
-	const baseFee = 1_000_000 // 0.001 LUX base fee
-	switch network.Kind() {
-	case models.Mainnet:
-		if keyName == "" && !useLedger {
-			useLedger = true
-		}
-		return baseFee * 2 // Higher fee for mainnet
-	case models.Testnet:
-		return baseFee
-	case models.Local:
-		return 0 // No fee for local networks
-	default:
-		return baseFee
+// rewardOwner resolves --reward-address into the owner of the staking reward.
+//
+// Who funds the bond and who earns from it are different questions. They
+// coincide by default, and an operator staking on someone else's behalf has to
+// be able to say so — otherwise the reward silently accrues to whoever paid.
+// An empty address means "unstated", which the caller passes through as nil so
+// the wallet's own first address owns the reward.
+func rewardOwner(addr string) (*secp256k1fx.OutputOwners, error) {
+	if addr == "" {
+		return nil, nil
 	}
+	addrs, err := address.ParseToIDs([]string{addr})
+	if err != nil {
+		return nil, fmt.Errorf("--reward-address %q: %w", addr, err)
+	}
+	return &secp256k1fx.OutputOwners{Threshold: 1, Addrs: addrs}, nil
 }

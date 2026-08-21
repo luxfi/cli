@@ -16,6 +16,7 @@ var app *application.Lux
 // NewCmd creates the key command suite.
 // Commands:
 //   - lux key create <name>     - Generate new key set from mnemonic
+//   - lux key staker <dir>      - Create a node identity (staking cert + BLS key)
 //   - lux key list              - List all key sets
 //   - lux key show <name>       - Show key set details and addresses
 //   - lux key delete <name>     - Delete a key set
@@ -77,6 +78,7 @@ Examples:
 	cmd.AddCommand(newDeriveCmd())
 	cmd.AddCommand(newGenesisCmd())
 	cmd.AddCommand(newExportSignerCmd())
+	cmd.AddCommand(newStakerCmd())
 
 	// Session management
 	cmd.AddCommand(newLockCmd())

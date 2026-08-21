@@ -14,6 +14,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/sdk/platformvm"
 	lux "github.com/luxfi/utxo"
@@ -61,46 +62,33 @@ func NewPublicDeployer(app *application.Lux, usingLedger bool, kc keychain.Keych
 	}
 }
 
-// AddValidator adds a primary-network validator. Under the
-// "validators validate networks, chains live on networks" model, a sovereign
-// L1 IS a primary network at its own networkID — so adding a validator to
-// any network (mainnet, testnet, devnet, or a sovereign L1) goes through
-// AddValidatorTx, not the deprecated AddChainValidatorTx.
+// AddValidator registers a validator on the primary network by
+// AddPermissionlessValidatorTx. Under the "validators validate networks,
+// chains live on networks" model a sovereign L1 IS a primary network at its
+// own networkID, so this one path serves mainnet, testnet, devnet and any L1.
 //
-// rewardsOwner names where stake rewards are sent; nil falls back to the
-// first wallet address. delegationShares is the fraction (out of 1,000,000)
-// the validator takes from delegation rewards.
-//
-// The legacy chainID, controlKeys, and chainAuthKeysStrs parameters are
-// retained for source-level compatibility with older call sites — under the
-// new model they are not used (primary-network adds are not chain-owner
-// authorized).
+// pop is the node's BLS proof of possession; the primary network refuses a
+// registration without one. end is when the validator leaves the set — the
+// chain reads the start from its own timestamp, so there is nothing to
+// schedule. rewardsOwner names where stake and delegation rewards land; nil
+// falls back to the first wallet address. delegationShares is the fraction
+// out of 1,000,000 the validator keeps from delegation rewards.
 func (d *PublicDeployer) AddValidator(
-	_ []string, // legacy controlKeys (unused for primary-network adds)
-	_ []string, // legacy chainAuthKeysStrs (unused for primary-network adds)
-	_ ids.ID, // legacy chainID argument (AddValidatorTx doesn't reference a chain)
 	nodeID ids.NodeID,
-	weight uint64,
-	startTime time.Time,
-	duration time.Duration,
+	pop *signer.ProofOfPossession,
+	stake uint64,
+	end time.Time,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	delegationShares uint32,
-) (bool, *txs.Tx, []string, error) {
+) (ids.ID, error) {
 	wallet, err := d.loadWallet()
 	if err != nil {
-		return false, nil, nil, err
+		return ids.Empty, err
 	}
-	validator := &txs.Validator{
-		NodeID: nodeID,
-		Start:  uint64(startTime.Unix()),               //nolint:gosec // G115: Unix time is positive
-		End:    uint64(startTime.Add(duration).Unix()), //nolint:gosec // G115: Unix time is positive
-		Wght:   weight,
-	}
-	// Default rewards owner: first wallet address with threshold 1.
 	if rewardsOwner == nil {
 		walletAddrs := d.kc.Addresses().List()
 		if len(walletAddrs) == 0 {
-			return false, nil, nil, fmt.Errorf("wallet has no addresses to use as rewards owner")
+			return ids.Empty, errors.New("wallet has no address to own the rewards")
 		}
 		rewardsOwner = &secp256k1fx.OutputOwners{
 			Threshold: 1,
@@ -108,20 +96,27 @@ func (d *PublicDeployer) AddValidator(
 		}
 	}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign AddValidator transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign the AddValidator transaction on the ledger device *** ")
 	}
-
-	tx, err := d.createAddValidatorTx(validator, rewardsOwner, delegationShares, wallet)
+	tx, err := wallet.P().IssueAddPermissionlessValidatorTx(
+		&txs.ChainValidator{
+			Validator: txs.Validator{
+				NodeID: nodeID,
+				End:    uint64(end.Unix()), //nolint:gosec // G115: Unix time is positive
+				Wght:   stake,
+			},
+			Chain: constants.PrimaryNetworkID,
+		},
+		pop,
+		wallet.P().Builder().Context().UTXOAssetID,
+		rewardsOwner,
+		rewardsOwner,
+		delegationShares,
+	)
 	if err != nil {
-		return false, nil, nil, err
+		return ids.Empty, err
 	}
-
-	id, err := d.Commit(tx)
-	if err != nil {
-		return false, nil, nil, err
-	}
-	ux.Logger.PrintToUser("Transaction successful, transaction ID: %s", id)
-	return true, nil, nil, nil
+	return tx.ID(), nil
 }
 
 // CreateAssetTx creates a new asset on the X-Chain.
@@ -314,7 +309,7 @@ func (d *PublicDeployer) DeployChain(
 		return ids.Empty, err
 	}
 	ux.Logger.PrintToUser("DeployNet: calling createNetTx...")
-	chainID, err := d.createChainTx(controlKeys, threshold, wallet)
+	chainID, err := d.createNetworkTx(controlKeys, threshold, wallet)
 	if err != nil {
 		ux.Logger.PrintToUser("DeployNet: createNetTx error: %v", err)
 		return ids.Empty, err
@@ -361,7 +356,7 @@ func (d *PublicDeployer) DeployBlockchain(
 	}
 
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign CreateNetwork transaction on the ledger device *** ")
 	}
 
 	tx, err := d.createBlockchainTx(chainAuthKeys, chain, vmID, chainID, genesis, wallet)
@@ -542,31 +537,6 @@ func (d *PublicDeployer) createBlockchainTx(
 	return &tx, nil
 }
 
-func (d *PublicDeployer) createAddValidatorTx(
-	validator *txs.Validator,
-	rewardsOwner *secp256k1fx.OutputOwners,
-	delegationShares uint32,
-	wallet primary.Wallet,
-) (*txs.Tx, error) {
-	// AddValidatorTx is a primary-network tx — no chain-auth options needed.
-	// The builder synthesizes StakeOuts from validator.Wght via its UTXO spend
-	// logic, so callers only supply the validator definition, rewards owner,
-	// and delegation shares.
-	unsignedTx, err := wallet.P().Builder().NewAddValidatorTx(
-		validator,
-		rewardsOwner,
-		delegationShares,
-	)
-	if err != nil {
-		return nil, err
-	}
-	tx := txs.Tx{Unsigned: unsignedTx}
-	// sign with current wallet
-	if err := wallet.P().Signer().Sign(context.Background(), &tx); err != nil {
-		return nil, err
-	}
-	return &tx, nil
-}
 
 func (d *PublicDeployer) createRemoveValidatorTX(
 	chainAuthKeys []ids.ShortID,
@@ -691,13 +661,13 @@ func (*PublicDeployer) signTx(
 	return nil
 }
 
-func (d *PublicDeployer) createChainTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
-	ux.Logger.PrintToUser("createChainTx: starting with control keys: %v", controlKeys)
+func (d *PublicDeployer) createNetworkTx(controlKeys []string, threshold uint32, wallet primary.Wallet) (ids.ID, error) {
+	ux.Logger.PrintToUser("createNetworkTx: starting with control keys: %v", controlKeys)
 	addrs, err := address.ParseToIDs(controlKeys)
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failure parsing control keys: %w", err)
 	}
-	ux.Logger.PrintToUser("createChainTx: parsed addresses: %v", addrs)
+	ux.Logger.PrintToUser("createNetworkTx: parsed addresses: %v", addrs)
 	owners := &secp256k1fx.OutputOwners{
 		Addrs:     addrs,
 		Threshold: threshold,
@@ -705,7 +675,7 @@ func (d *PublicDeployer) createChainTx(controlKeys []string, threshold uint32, w
 	}
 	opts := []common.Option{}
 	if d.usingLedger {
-		ux.Logger.PrintToUser("*** Please sign CreateChain transaction on the ledger device *** ")
+		ux.Logger.PrintToUser("*** Please sign CreateNetwork transaction on the ledger device *** ")
 	}
 	ux.Logger.PrintToUser("createNetworkTx: calling IssueCreateNetworkTx...")
 	tx, err := wallet.P().IssueCreateNetworkTx(owners, opts...)
