@@ -2,70 +2,6 @@
 
 _Generated from the command tree by `make docs` — do not edit by hand._
 
-<a id="lux"></a>
-## lux
-
-Lux CLI - Developer toolchain for blockchain development and deployment.
-
-The Lux CLI provides a complete toolkit for creating, testing, and deploying
-blockchains on the Lux network. It supports local development, testnet
-deployment, and mainnet operations with a unified command structure.
-
-COMMAND OVERVIEW:
-
-  network     Manage local network runtime (start/stop/status/clean)
-  chain       Blockchain lifecycle (create/deploy/import/export)
-  key         Key and wallet management
-  validator   Validator operations
-  config      CLI configuration
-
-ARCHITECTURE:
-
-  L1 (Sovereign)  - Independent validator set, own tokenomics
-  L2 (Rollup)     - Based on L1 sequencing (Lux, Ethereum, etc.)
-  L3 (App Chain)  - Built on L2 for application-specific use
-
-SEQUENCING OPTIONS:
-
-  lux       100ms blocks, lowest cost (default)
-  ethereum  12s blocks, highest security
-  op        OP Stack compatible
-
-NETWORK TYPES:
-
-  --mainnet   Production network (3 validators, port 9630)
-  --testnet   Test network (3 validators, port 9640)
-  --devnet    Development network (3 validators, port 9650)
-  --dev       Single-node dev mode with K=1 consensus
-
-QUICK START:
-
-  # Start a local development network
-  lux network start --devnet
-
-  # Create a new blockchain
-  lux chain create mychain
-
-  # Deploy to local network
-  lux chain deploy mychain
-
-  # Check status
-  lux network status
-  lux chain list
-
-For detailed command help, use: lux <command> --help
-
-**Flags:**
-```
-      --config string       config file (default is $HOME/.lux/cli.json)
-      --debug               Show debug output (debug level logs)
-      --log-level string    log level for the application (default "ERROR")
-      --non-interactive     Disable prompts; fail if required values are missing (also enabled when stdin is not a TTY or CI=1)
-      --quiet               Show only errors (quiet mode)
-      --skip-update-check   skip check for new versions
-      --verbose             Show verbose output (info level logs)
-```
-
 <a id="lux-ai"></a>
 ## lux ai
 
@@ -85,12 +21,13 @@ ENVIRONMENT:
   LUX_AI_API_KEY    API key for gateway authentication
 
 **Usage:**
+
 ```bash
 lux ai
 ```
 
 <a id="lux-ai-agent"></a>
-## lux ai agent
+### lux ai agent
 
 Run an AI agent that executes a task using the connected AI endpoint.
 
@@ -102,17 +39,19 @@ Examples:
   lux ai agent --model qwen3-8b "Analyze the validator set"
 
 **Usage:**
+
 ```bash
 lux ai agent [task] [flags]
 ```
 
 **Flags:**
+
 ```
       --model string   Model to use (default "qwen3-8b")
 ```
 
 <a id="lux-ai-chat"></a>
-## lux ai chat
+### lux ai chat
 
 Send a chat message to the AI model and print the response.
 
@@ -122,18 +61,20 @@ Examples:
   lux ai chat --system "You are a blockchain expert" "What is BFT?"
 
 **Usage:**
+
 ```bash
 lux ai chat [message] [flags]
 ```
 
 **Flags:**
+
 ```
       --model string    Model to use (default "qwen3-8b")
       --system string   System prompt
 ```
 
 <a id="lux-ai-complete"></a>
-## lux ai complete
+### lux ai complete
 
 Generate a text completion from a prompt.
 
@@ -142,18 +83,20 @@ Examples:
   lux ai complete --model zen-coder-1.5b --max-tokens 256 "func main() {"
 
 **Usage:**
+
 ```bash
 lux ai complete [prompt] [flags]
 ```
 
 **Flags:**
+
 ```
       --max-tokens int   Maximum tokens to generate (0 = model default)
       --model string     Model to use (default "qwen3-8b")
 ```
 
 <a id="lux-ai-models"></a>
-## lux ai models
+### lux ai models
 
 List all models available on the connected AI endpoint.
 
@@ -162,6 +105,7 @@ Examples:
   LUX_AI_ENDPOINT=https://api.hanzo.ai lux ai models
 
 **Usage:**
+
 ```bash
 lux ai models
 ```
@@ -189,11 +133,13 @@ Example usage:
   lux amm balance --network zoo --private-key 0x...
 
 **Usage:**
+
 ```bash
 lux amm
 ```
 
 **Flags:**
+
 ```
       --network string       Network: lux, zoo, or lux-testnet (default "zoo")
       --private-key string   Private key (hex) for wallet access
@@ -201,7 +147,7 @@ lux amm
 ```
 
 <a id="lux-amm-balance"></a>
-## lux amm balance
+### lux amm balance
 
 Display native token and ERC20 token balances.
 
@@ -210,17 +156,19 @@ Examples:
   lux amm balance --network zoo --token 0x...
 
 **Usage:**
+
 ```bash
 lux amm balance [flags]
 ```
 
 **Flags:**
+
 ```
       --token string   ERC20 token address to check
 ```
 
 <a id="lux-amm-pools"></a>
-## lux amm pools
+### lux amm pools
 
 List all liquidity pools on the AMM.
 
@@ -228,12 +176,13 @@ Examples:
   lux amm pools --network zoo
 
 **Usage:**
+
 ```bash
 lux amm pools
 ```
 
 <a id="lux-amm-quote"></a>
-## lux amm quote
+### lux amm quote
 
 Get a quote for swapping tokens without executing.
 Tries V2 pools first, then V3 if no V2 pool exists.
@@ -243,11 +192,13 @@ Examples:
   lux amm quote --network zoo --from 0x... --to 0x... --amount 100 --v3
 
 **Usage:**
+
 ```bash
 lux amm quote [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float   Amount to quote
       --from string    Token address to swap from
@@ -256,7 +207,7 @@ lux amm quote [flags]
 ```
 
 <a id="lux-amm-status"></a>
-## lux amm status
+### lux amm status
 
 Show AMM contract status and network info.
 
@@ -264,12 +215,13 @@ Examples:
   lux amm status --network zoo
 
 **Usage:**
+
 ```bash
 lux amm status
 ```
 
 <a id="lux-amm-swap"></a>
-## lux amm swap
+### lux amm swap
 
 Swap tokens using Uniswap V2/V3 style AMM.
 Tries V2 pools first, then V3 if no V2 pool exists.
@@ -281,11 +233,13 @@ Examples:
   lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --dry-run
 
 **Usage:**
+
 ```bash
 lux amm swap [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float     Amount to swap
       --dry-run          Only show quote, don't execute
@@ -296,7 +250,7 @@ lux amm swap [flags]
 ```
 
 <a id="lux-amm-tokens"></a>
-## lux amm tokens
+### lux amm tokens
 
 Get information about ERC20 tokens.
 
@@ -304,6 +258,7 @@ Examples:
   lux amm tokens --network zoo 0x...
 
 **Usage:**
+
 ```bash
 lux amm tokens [address...]
 ```
@@ -384,12 +339,13 @@ NOTES:
   - Network must be running before deployment
 
 **Usage:**
+
 ```bash
 lux chain
 ```
 
 <a id="lux-chain-create"></a>
-## lux chain create
+### lux chain create
 
 Create a new blockchain configuration for deployment.
 
@@ -499,11 +455,13 @@ NOTES:
   - Genesis can be customized after creation
 
 **Usage:**
+
 ```bash
 lux chain create [chainName] [flags]
 ```
 
 **Flags:**
+
 ```
       --airdrop-address string   Address to airdrop tokens to
       --airdrop-amount string    Amount to airdrop in wei
@@ -528,16 +486,18 @@ lux chain create [chainName] [flags]
 ```
 
 <a id="lux-chain-delete"></a>
-## lux chain delete
+### lux chain delete
 
 Delete a blockchain configuration
 
 **Usage:**
+
 ```bash
 lux chain delete [chainName] [flags]
 ```
 
 **Flags:**
+
 ```
       --custom    Target custom network
   -d, --devnet    Target devnet
@@ -547,7 +507,7 @@ lux chain delete [chainName] [flags]
 ```
 
 <a id="lux-chain-deploy"></a>
-## lux chain deploy
+### lux chain deploy
 
 Deploy a configured blockchain to the network.
 
@@ -651,11 +611,13 @@ NOTES:
   - Use 'lux network status' to see deployed chain endpoints
 
 **Usage:**
+
 ```bash
 lux chain deploy [chainName] [flags]
 ```
 
 **Flags:**
+
 ```
   -d, --devnet                Deploy to devnet
       --key string            Key name for remote network deployment (from ~/.lux/keys/)
@@ -667,16 +629,18 @@ lux chain deploy [chainName] [flags]
 ```
 
 <a id="lux-chain-describe"></a>
-## lux chain describe
+### lux chain describe
 
 Show detailed information about a blockchain
 
 **Usage:**
+
 ```bash
 lux chain describe [chainName] [flags]
 ```
 
 **Flags:**
+
 ```
       --custom    Target custom network
   -d, --devnet    Target devnet
@@ -685,7 +649,7 @@ lux chain describe [chainName] [flags]
 ```
 
 <a id="lux-chain-import"></a>
-## lux chain import
+### lux chain import
 
 Import blocks from an RLP-encoded file to a running chain.
 
@@ -784,11 +748,13 @@ NOTES:
   - Use 'lux chain export' to create RLP files from running chains
 
 **Usage:**
+
 ```bash
 lux chain import <chain> <path> [flags]
 ```
 
 **Flags:**
+
 ```
       --custom       Target custom network
   -d, --devnet       Target devnet
@@ -798,7 +764,7 @@ lux chain import <chain> <path> [flags]
 ```
 
 <a id="lux-chain-launch"></a>
-## lux chain launch
+### lux chain launch
 
 Launch a complete blockchain ecosystem from a single chain.yaml configuration.
 
@@ -847,11 +813,13 @@ NOTES:
   - All secrets are referenced via KMS, never stored in manifests
 
 **Usage:**
+
 ```bash
 lux chain launch <chain.yaml> [flags]
 ```
 
 **Flags:**
+
 ```
       --apply            Apply generated manifests to the cluster via kubectl
       --dry-run          Generate manifests without applying
@@ -861,7 +829,7 @@ lux chain launch <chain.yaml> [flags]
 ```
 
 <a id="lux-chain-list"></a>
-## lux chain list
+### lux chain list
 
 List all configured blockchains with their details.
 
@@ -901,11 +869,13 @@ NOTES:
   - Use 'lux network status' to see endpoints of deployed chains
 
 **Usage:**
+
 ```bash
 lux chain list [flags]
 ```
 
 **Flags:**
+
 ```
       --custom    Target custom network
   -d, --devnet    Target devnet
@@ -914,18 +884,19 @@ lux chain list [flags]
 ```
 
 <a id="lux-chain-upgrade"></a>
-## lux chain upgrade
+### lux chain upgrade
 
 The blockchain upgrade command suite provides a collection of tools for
 updating your developmental and deployed Blockchains.
 
 **Usage:**
+
 ```bash
 lux chain upgrade
 ```
 
 <a id="lux-chain-upgrade-apply"></a>
-## lux chain upgrade apply
+#### lux chain upgrade apply
 
 Apply generated upgrade bytes to running Blockchain nodes to trigger a network upgrade.
 
@@ -954,11 +925,13 @@ Examples:
   lux blockchain upgrade apply mychain --mainnet --print
 
 **Usage:**
+
 ```bash
 lux chain upgrade apply [blockchainName] [flags]
 ```
 
 **Flags:**
+
 ```
       --config                         Create upgrade config for future chain deployments (same as generate)
   -f, --force                          Skip confirmation prompts (e.g., for timestamps in the past)
@@ -970,7 +943,7 @@ lux chain upgrade apply [blockchainName] [flags]
 ```
 
 <a id="lux-chain-upgrade-export"></a>
-## lux chain upgrade export
+#### lux chain upgrade export
 
 Export the upgrade bytes file to a location of choice on disk.
 
@@ -985,18 +958,20 @@ Examples:
   lux blockchain upgrade export mychain --output ./upgrade.json --force
 
 **Usage:**
+
 ```bash
 lux chain upgrade export [blockchainName] [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --force           Overwrite existing file without confirmation
   -o, --output string   Output file path for upgrade bytes (required in non-interactive mode)
 ```
 
 <a id="lux-chain-upgrade-generate"></a>
-## lux chain upgrade generate
+#### lux chain upgrade generate
 
 The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain.
 It guides the user through the process using an interactive wizard.
@@ -1018,42 +993,47 @@ Examples:
   lux blockchain upgrade import mychain --upgrade-filepath ./upgrade.json
 
 **Usage:**
+
 ```bash
 lux chain upgrade generate [blockchainName] [flags]
 ```
 
 **Flags:**
+
 ```
   -y, --yes   Skip initial warning confirmation prompt
 ```
 
 <a id="lux-chain-upgrade-import"></a>
-## lux chain upgrade import
+#### lux chain upgrade import
 
 Import the upgrade bytes file into the local environment
 
 **Usage:**
+
 ```bash
 lux chain upgrade import [blockchainName] [flags]
 ```
 
 **Flags:**
+
 ```
       --upgrade-filepath string   Import upgrade bytes file into local environment
 ```
 
 <a id="lux-chain-upgrade-print"></a>
-## lux chain upgrade print
+#### lux chain upgrade print
 
 Print the upgrade.json file content
 
 **Usage:**
+
 ```bash
 lux chain upgrade print [blockchainName]
 ```
 
 <a id="lux-chain-upgrade-vm"></a>
-## lux chain upgrade vm
+#### lux chain upgrade vm
 
 The blockchain upgrade vm command enables the user to upgrade their Blockchain's VM binary. The command
 can upgrade both local Blockchains and publicly deployed Blockchains on Testnet and Mainnet.
@@ -1062,11 +1042,13 @@ The command walks the user through an interactive wizard. The user can skip the 
 command line flags.
 
 **Usage:**
+
 ```bash
 lux chain upgrade vm [blockchainName] [flags]
 ```
 
 **Flags:**
+
 ```
       --binary string       Upgrade to custom binary
       --config              upgrade config for future chain deployments
@@ -1085,12 +1067,13 @@ lux chain upgrade vm [blockchainName] [flags]
 Customize configuration for Lux CLI
 
 **Usage:**
+
 ```bash
 lux config
 ```
 
 <a id="lux-config-lint"></a>
-## lux config lint
+### lux config lint
 
 Validate a luxd configuration file for errors.
 
@@ -1106,16 +1089,18 @@ Example:
   lux config lint myconfig.json
 
 **Usage:**
+
 ```bash
 lux config lint <config-file.json>
 ```
 
 <a id="lux-config-metrics"></a>
-## lux config metrics
+### lux config metrics
 
 set user metrics collection preferences
 
 **Usage:**
+
 ```bash
 lux config metrics [enable | disable]
 ```
@@ -1127,23 +1112,25 @@ The contract command suite provides a collection of tools for deploying
 and interacting with smart contracts on Lux networks.
 
 **Usage:**
+
 ```bash
 lux contract
 ```
 
 <a id="lux-contract-deploy"></a>
-## lux contract deploy
+### lux contract deploy
 
 The contract command suite provides a collection of tools for deploying
 smart contracts on Lux networks.
 
 **Usage:**
+
 ```bash
 lux contract deploy
 ```
 
 <a id="lux-contract-deploy-erc20"></a>
-## lux contract deploy erc20
+#### lux contract deploy erc20
 
 Deploy an ERC20 token into a given Network and Blockchain.
 
@@ -1164,11 +1151,13 @@ Examples:
     --funded 0xYourAddress --blockchain-id <ID> --testnet
 
 **Usage:**
+
 ```bash
 lux contract deploy erc20 [flags]
 ```
 
 **Flags:**
+
 ```
       --blockchain string      deploy the ERC20 contract into the given CLI blockchain
       --blockchain-id string   deploy the ERC20 contract into the given blockchain ID/Alias
@@ -1183,7 +1172,7 @@ lux contract deploy erc20 [flags]
 ```
 
 <a id="lux-contract-deploy-l2"></a>
-## lux contract deploy l2
+#### lux contract deploy l2
 
 Deploy the canonical lux/standard contract stack (Safe + Bridge + Exchange +
 sToken + WLUX/BridgedETH/BridgedBTC) to one or more L2 chains.
@@ -1203,11 +1192,13 @@ Mainnet broadcast (--confirm with --env mainnet) is gated behind
 --i-know-this-is-real-money.
 
 **Usage:**
+
 ```bash
 lux contract deploy l2 [flags]
 ```
 
 **Flags:**
+
 ```
       --brand string                restrict to a single brand (default: all in inventory)
       --confirm                     broadcast instead of dry-run
@@ -1225,16 +1216,18 @@ lux contract deploy l2 [flags]
 ```
 
 <a id="lux-contract-initValidatorManager"></a>
-## lux contract initValidatorManager
+### lux contract initValidatorManager
 
 Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager
 
 **Usage:**
+
 ```bash
 lux contract initValidatorManager blockchainName [flags]
 ```
 
 **Flags:**
+
 ```
       --genesis-key                            use genesis allocated key as contract deployer
       --key string                             CLI stored key to use as contract deployer
@@ -1256,6 +1249,7 @@ Scans $LUX_NETWORK_PATH (default ~/work/{lux,zoo,hanzo,pars,osage,adnexus}/unive
 for chain.yaml files and prints every (network, env) tuple they declare.
 
 **Usage:**
+
 ```bash
 lux ctx
 ```
@@ -1279,11 +1273,13 @@ Examples:
   lux cycle hanzo/testnet --skip-snap
 
 **Usage:**
+
 ```bash
 lux cycle <network>/<env> [flags]
 ```
 
 **Flags:**
+
 ```
       --mnemonic string    BIP44 mnemonic for the deployer (defaults to $LUX_MNEMONIC)
       --node-path string   path to luxd binary
@@ -1311,12 +1307,13 @@ Features:
   • Test accounts pre-funded in genesis
 
 **Usage:**
+
 ```bash
 lux dev
 ```
 
 <a id="lux-dev-stack"></a>
-## lux dev stack
+### lux dev stack
 
 Manage a multi-app local development stack.
 
@@ -1333,22 +1330,24 @@ Examples:
   lux dev stack logs explorer     # Tail explorer logs
 
 **Usage:**
+
 ```bash
 lux dev stack
 ```
 
 <a id="lux-dev-stack-down"></a>
-## lux dev stack down
+#### lux dev stack down
 
 Gracefully stop all running stack processes. Sends SIGTERM, waits 10s, then SIGKILL.
 
 **Usage:**
+
 ```bash
 lux dev stack down
 ```
 
 <a id="lux-dev-stack-logs"></a>
-## lux dev stack logs
+#### lux dev stack logs
 
 Tail the log file for a stack application.
 
@@ -1356,22 +1355,24 @@ The app name can be a base name (e.g., "explorer") which tails instance 0,
 or a full instance name (e.g., "explorer-1") for a specific chain instance.
 
 **Usage:**
+
 ```bash
 lux dev stack logs <app>
 ```
 
 <a id="lux-dev-stack-status"></a>
-## lux dev stack status
+#### lux dev stack status
 
 Display a table of all stack processes with PID, port, state, and uptime.
 
 **Usage:**
+
 ```bash
 lux dev stack status
 ```
 
 <a id="lux-dev-stack-up"></a>
-## lux dev stack up
+#### lux dev stack up
 
 Start all enabled apps in the dev stack.
 
@@ -1380,18 +1381,20 @@ apps are launched. Port deconfliction for multi-chain: chain i gets
 ports at port_base + 100*i.
 
 **Usage:**
+
 ```bash
 lux dev stack up [flags]
 ```
 
 **Flags:**
+
 ```
       --chains int      number of luxd nodes (overrides stack.yaml)
       --config string   path to stack.yaml (default: ~/.lux/dev/stack.yaml)
 ```
 
 <a id="lux-dev-start"></a>
-## lux dev start
+### lux dev start
 
 Start a single-node Lux development network.
 
@@ -1424,11 +1427,13 @@ Examples:
   lux dev start --build-tags dchain # Start the D-Chain-enabled (dexvm) node
 
 **Usage:**
+
 ```bash
 lux dev start [flags]
 ```
 
 **Flags:**
+
 ```
       --automine string       auto-mine interval (e.g., '1s', '500ms'); empty = mine as blocks arrive
       --build-tags string     luxd build-tag selector; 'dchain' launches the D-Chain-enabled (dexvm) node
@@ -1443,13 +1448,14 @@ lux dev start [flags]
 ```
 
 <a id="lux-dev-stop"></a>
-## lux dev stop
+### lux dev stop
 
 Stops the dev node that `lux dev start` writes to its default
 data-dir (~/.lux/devnet). For sovereign-L1 nodes booted via
 `lux up <brand>/<env>`, use `lux down <brand>/<env>` instead.
 
 **Usage:**
+
 ```bash
 lux dev stop
 ```
@@ -1474,139 +1480,152 @@ Example usage:
   lux dex perp open                # Open perpetual position
 
 **Usage:**
+
 ```bash
 lux dex
 ```
 
 <a id="lux-dex-account"></a>
-## lux dex account
+### lux dex account
 
 Commands for managing your DEX trading account, deposits, and withdrawals
 
 <a id="lux-dex-account-balance"></a>
-## lux dex account balance
+#### lux dex account balance
 
 View account balances
 
 **Usage:**
+
 ```bash
 lux dex account balance
 ```
 
 <a id="lux-dex-account-deposit"></a>
-## lux dex account deposit
+#### lux dex account deposit
 
 Deposit funds to trading account
 
 **Usage:**
+
 ```bash
 lux dex account deposit [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float   Amount to deposit
       --token string   Token to deposit
 ```
 
 <a id="lux-dex-account-history"></a>
-## lux dex account history
+#### lux dex account history
 
 View transaction history
 
 **Usage:**
+
 ```bash
 lux dex account history
 ```
 
 <a id="lux-dex-account-withdraw"></a>
-## lux dex account withdraw
+#### lux dex account withdraw
 
 Withdraw funds from trading account
 
 **Usage:**
+
 ```bash
 lux dex account withdraw [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float   Amount to withdraw
       --token string   Token to withdraw
 ```
 
 <a id="lux-dex-market"></a>
-## lux dex market
+### lux dex market
 
 Commands for listing, creating, and managing trading markets
 
 <a id="lux-dex-market-create"></a>
-## lux dex market create
+#### lux dex market create
 
 Create a new spot or perpetual market with specified parameters
 
 **Usage:**
+
 ```bash
 lux dex market create
 ```
 
 <a id="lux-dex-market-info"></a>
-## lux dex market info
+#### lux dex market info
 
 Display detailed information about a specific market including orderbook depth, recent trades, and statistics
 
 **Usage:**
+
 ```bash
 lux dex market info [symbol]
 ```
 
 <a id="lux-dex-market-list"></a>
-## lux dex market list
+#### lux dex market list
 
 Display all spot and perpetual markets with current prices and volume
 
 **Usage:**
+
 ```bash
 lux dex market list
 ```
 
 <a id="lux-dex-order"></a>
-## lux dex order
+### lux dex order
 
 Commands for placing, cancelling, and viewing orders
 
 <a id="lux-dex-order-cancel"></a>
-## lux dex order cancel
+#### lux dex order cancel
 
 Cancel an order
 
 **Usage:**
+
 ```bash
 lux dex order cancel [order-id]
 ```
 
 <a id="lux-dex-order-history"></a>
-## lux dex order history
+#### lux dex order history
 
 View order history
 
 **Usage:**
+
 ```bash
 lux dex order history
 ```
 
 <a id="lux-dex-order-list"></a>
-## lux dex order list
+#### lux dex order list
 
 List open orders
 
 **Usage:**
+
 ```bash
 lux dex order list
 ```
 
 <a id="lux-dex-order-place"></a>
-## lux dex order place
+#### lux dex order place
 
 Place a limit or market order on a trading pair.
 
@@ -1615,11 +1634,13 @@ Examples:
   lux dex order place --market BTC/USDT --side sell --type market --amount 0.5
 
 **Usage:**
+
 ```bash
 lux dex order place [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float    Order amount
       --market string   Trading pair symbol (e.g., LUX/USDT)
@@ -1630,7 +1651,7 @@ lux dex order place [flags]
 ```
 
 <a id="lux-dex-perp"></a>
-## lux dex perp
+### lux dex perp
 
 Commands for trading perpetual futures contracts.
 
@@ -1643,42 +1664,46 @@ Features:
 Similar to Hyperliquid and GMX perpetual trading.
 
 <a id="lux-dex-perp-close"></a>
-## lux dex perp close
+#### lux dex perp close
 
 Close a perpetual position
 
 **Usage:**
+
 ```bash
 lux dex perp close [market] [flags]
 ```
 
 **Flags:**
+
 ```
       --percent float   Percentage of position to close (0-100) (default 100)
 ```
 
 <a id="lux-dex-perp-funding"></a>
-## lux dex perp funding
+#### lux dex perp funding
 
 View funding rate information
 
 **Usage:**
+
 ```bash
 lux dex perp funding
 ```
 
 <a id="lux-dex-perp-markets"></a>
-## lux dex perp markets
+#### lux dex perp markets
 
 List perpetual markets
 
 **Usage:**
+
 ```bash
 lux dex perp markets
 ```
 
 <a id="lux-dex-perp-open"></a>
-## lux dex perp open
+#### lux dex perp open
 
 Open a new perpetual futures position.
 
@@ -1687,11 +1712,13 @@ Examples:
   lux dex perp open --market ETH-PERP --side short --size 1 --leverage 5 --margin isolated
 
 **Usage:**
+
 ```bash
 lux dex perp open [flags]
 ```
 
 **Flags:**
+
 ```
       --leverage uint16   Leverage multiplier (1-100) (default 10)
       --margin string     Margin mode: cross or isolated (default "cross")
@@ -1701,48 +1728,52 @@ lux dex perp open [flags]
 ```
 
 <a id="lux-dex-perp-pnl"></a>
-## lux dex perp pnl
+#### lux dex perp pnl
 
 View profit/loss summary
 
 **Usage:**
+
 ```bash
 lux dex perp pnl
 ```
 
 <a id="lux-dex-perp-positions"></a>
-## lux dex perp positions
+#### lux dex perp positions
 
 List open positions
 
 **Usage:**
+
 ```bash
 lux dex perp positions
 ```
 
 <a id="lux-dex-pool"></a>
-## lux dex pool
+### lux dex pool
 
 Commands for creating, managing, and interacting with AMM liquidity pools
 
 <a id="lux-dex-pool-add"></a>
-## lux dex pool add
+#### lux dex pool add
 
 Add liquidity to a pool
 
 **Usage:**
+
 ```bash
 lux dex pool add [pool-id] [flags]
 ```
 
 **Flags:**
+
 ```
       --amount0 float   Amount of token0 to add
       --amount1 float   Amount of token1 to add
 ```
 
 <a id="lux-dex-pool-create"></a>
-## lux dex pool create
+#### lux dex pool create
 
 Create a new AMM liquidity pool.
 
@@ -1755,11 +1786,13 @@ Examples:
   lux dex pool create --token0 LUX --token1 USDT --amount0 1000 --amount1 10000 --type constant-product --fee 30
 
 **Usage:**
+
 ```bash
 lux dex pool create [flags]
 ```
 
 **Flags:**
+
 ```
       --amount0 float   Initial amount of token0
       --amount1 float   Initial amount of token1
@@ -1770,32 +1803,35 @@ lux dex pool create [flags]
 ```
 
 <a id="lux-dex-pool-list"></a>
-## lux dex pool list
+#### lux dex pool list
 
 List all liquidity pools
 
 **Usage:**
+
 ```bash
 lux dex pool list
 ```
 
 <a id="lux-dex-pool-remove"></a>
-## lux dex pool remove
+#### lux dex pool remove
 
 Remove liquidity from a pool
 
 **Usage:**
+
 ```bash
 lux dex pool remove [pool-id] [flags]
 ```
 
 **Flags:**
+
 ```
       --percent float   Percentage of liquidity to remove (0-100)
 ```
 
 <a id="lux-dex-pool-swap"></a>
-## lux dex pool swap
+#### lux dex pool swap
 
 Swap tokens using the best available route through AMM pools.
 
@@ -1803,11 +1839,13 @@ Examples:
   lux dex pool swap --from LUX --to USDT --amount 100 --slippage 0.5
 
 **Usage:**
+
 ```bash
 lux dex pool swap [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float     Amount to swap
       --from string      Token to swap from
@@ -1816,7 +1854,7 @@ lux dex pool swap [flags]
 ```
 
 <a id="lux-dex-status"></a>
-## lux dex status
+### lux dex status
 
 Display DEX network status including:
   - Connected nodes
@@ -1825,6 +1863,7 @@ Display DEX network status including:
   - Network health
 
 **Usage:**
+
 ```bash
 lux dex status
 ```
@@ -1848,6 +1887,7 @@ Examples:
   lux down lux/devnet
 
 **Usage:**
+
 ```bash
 lux down <network>/<env>
 ```
@@ -1876,11 +1916,13 @@ ENDPOINTS:
   http://localhost:8090/health                 Health check
 
 **Usage:**
+
 ```bash
 lux explore [flags]
 ```
 
 **Flags:**
+
 ```
       --chain string   Chain to index (cchain, xchain, pchain, or chain name) (default "cchain")
       --data string    Data directory (default: ~/.lux/explorer/)
@@ -1890,21 +1932,23 @@ lux explore [flags]
 ```
 
 <a id="lux-explore-status"></a>
-## lux explore status
+### lux explore status
 
 Show explorer status
 
 **Usage:**
+
 ```bash
 lux explore status
 ```
 
 <a id="lux-explore-stop"></a>
-## lux explore stop
+### lux explore stop
 
 Stop the running explorer
 
 **Usage:**
+
 ```bash
 lux explore stop
 ```
@@ -1926,12 +1970,13 @@ SCHEMES:
   CKKS    - Approximate fixed-point arithmetic
 
 **Usage:**
+
 ```bash
 lux fhe
 ```
 
 <a id="lux-fhe-decrypt"></a>
-## lux fhe decrypt
+### lux fhe decrypt
 
 Decrypt a hex-encoded ciphertext using the FHE secret key.
 
@@ -1939,18 +1984,20 @@ Examples:
   lux fhe decrypt --key ./keys/secret.key --input <hex>
 
 **Usage:**
+
 ```bash
 lux fhe decrypt [flags]
 ```
 
 **Flags:**
+
 ```
       --input string   Hex-encoded ciphertext
       --key string     Path to secret key file
 ```
 
 <a id="lux-fhe-encrypt"></a>
-## lux fhe encrypt
+### lux fhe encrypt
 
 Encrypt a boolean value using an FHE secret key.
 Outputs hex-encoded ciphertext to stdout.
@@ -1960,18 +2007,20 @@ Examples:
   lux fhe encrypt --key ./keys/secret.key --value false
 
 **Usage:**
+
 ```bash
 lux fhe encrypt [flags]
 ```
 
 **Flags:**
+
 ```
       --key string   Path to secret key file
       --value        Boolean value to encrypt
 ```
 
 <a id="lux-fhe-eval"></a>
-## lux fhe eval
+### lux fhe eval
 
 Evaluate a boolean operation on FHE-encrypted data without decrypting.
 
@@ -1983,17 +2032,19 @@ Examples:
   lux fhe eval --op AND --inputs ct1.hex,ct2.hex --bsk ./keys/bootstrap.key
 
 **Usage:**
+
 ```bash
 lux fhe eval [flags]
 ```
 
 **Flags:**
+
 ```
       --op string   Boolean gate (AND, OR, XOR, NAND, NOR, XNOR, NOT) (default "AND")
 ```
 
 <a id="lux-fhe-keygen"></a>
-## lux fhe keygen
+### lux fhe keygen
 
 Generate a Fully Homomorphic Encryption key pair.
 
@@ -2005,11 +2056,13 @@ Examples:
   lux fhe keygen --scheme PN11QP54 --output ./keys/
 
 **Usage:**
+
 ```bash
 lux fhe keygen [flags]
 ```
 
 **Flags:**
+
 ```
       --output string   Output directory for keys (default: current dir)
       --scheme string   Parameter set (PN10QP27, PN11QP54, STD128, STD128Q) (default "PN10QP27")
@@ -2028,12 +2081,13 @@ GPU acceleration is used for:
   - Lattice cryptography operations
 
 **Usage:**
+
 ```bash
 lux gpu
 ```
 
 <a id="lux-gpu-status"></a>
-## lux gpu status
+### lux gpu status
 
 Show the current GPU acceleration status including:
   - GPU availability on this system
@@ -2043,11 +2097,13 @@ Show the current GPU acceleration status including:
   - Default configuration settings
 
 **Usage:**
+
 ```bash
 lux gpu status [flags]
 ```
 
 **Flags:**
+
 ```
       --json   output status in JSON format
 ```
@@ -2072,6 +2128,7 @@ Examples:
   lux info lux/devnet
 
 **Usage:**
+
 ```bash
 lux info <name>/<env>
 ```
@@ -2112,12 +2169,13 @@ Examples:
   lux key kchain sign mykey "data"       # Threshold sign data
 
 **Usage:**
+
 ```bash
 lux key
 ```
 
 <a id="lux-key-backend"></a>
-## lux key backend
+### lux key backend
 
 Manage key storage backends for cryptographic keys.
 
@@ -2137,22 +2195,24 @@ Examples:
   lux key backend info          # Show current backend info
 
 **Usage:**
+
 ```bash
 lux key backend
 ```
 
 <a id="lux-key-backend-info"></a>
-## lux key backend info
+#### lux key backend info
 
 Display detailed information about the current default key storage backend.
 
 **Usage:**
+
 ```bash
 lux key backend info
 ```
 
 <a id="lux-key-backend-list"></a>
-## lux key backend list
+#### lux key backend list
 
 List all key storage backends and their availability status.
 
@@ -2160,12 +2220,13 @@ Backends marked as 'available' can be used on this system.
 Some backends require specific hardware or services to be present.
 
 **Usage:**
+
 ```bash
 lux key backend list
 ```
 
 <a id="lux-key-backend-set"></a>
-## lux key backend set
+#### lux key backend set
 
 Set the default key storage backend.
 
@@ -2176,12 +2237,13 @@ Valid backend types:
   software, keychain, secret-service, yubikey, zymbit, walletconnect, ledger, env
 
 **Usage:**
+
 ```bash
 lux key backend set <type>
 ```
 
 <a id="lux-key-create"></a>
-## lux key create
+### lux key create
 
 Create a new key set with all cryptographic key types.
 
@@ -2200,11 +2262,13 @@ Examples:
   lux key create mainnet-key-01 --phrase "$MNEMONIC" --account 1  # Derive account 1
 
 **Usage:**
+
 ```bash
 lux key create <name> [flags]
 ```
 
 **Flags:**
+
 ```
       --account uint32   Account index for HD derivation (0-based)
   -m, --mnemonic         Import from existing mnemonic (prompts for input)
@@ -2212,7 +2276,7 @@ lux key create <name> [flags]
 ```
 
 <a id="lux-key-delete"></a>
-## lux key delete
+### lux key delete
 
 Delete a key set from ~/.lux/keys/
 
@@ -2224,17 +2288,19 @@ Example:
   lux key delete validator1 --force  # Skip confirmation
 
 **Usage:**
+
 ```bash
 lux key delete <name> [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --force   Skip confirmation prompt
 ```
 
 <a id="lux-key-derive"></a>
-## lux key derive
+### lux key derive
 
 Derive multiple key sets from a single mnemonic phrase.
 
@@ -2259,11 +2325,13 @@ Examples:
   lux key derive -n 1 --show --export
 
 **Usage:**
+
 ```bash
 lux key derive [flags]
 ```
 
 **Flags:**
+
 ```
   -n, --count int        Number of keys to derive (default 5)
       --export           Show private keys in output (DANGER - keep secret!)
@@ -2274,7 +2342,7 @@ lux key derive [flags]
 ```
 
 <a id="lux-key-export"></a>
-## lux key export
+### lux key export
 
 Export key set data.
 
@@ -2288,18 +2356,20 @@ Examples:
   lux key export validator1 -o keys.json       # Export to file
 
 **Usage:**
+
 ```bash
 lux key export <name> [flags]
 ```
 
 **Flags:**
+
 ```
       --mnemonic        Export mnemonic phrase (DANGEROUS!)
   -o, --output string   Output file (default: stdout)
 ```
 
 <a id="lux-key-export-signer"></a>
-## lux key export-signer
+### lux key export-signer
 
 Export BLS signer keys derived from MNEMONIC for use as luxd
 staking signer keys. Each key is written as a raw 32-byte file.
@@ -2318,11 +2388,13 @@ Examples:
   #   ...
 
 **Usage:**
+
 ```bash
 lux key export-signer [flags]
 ```
 
 **Flags:**
+
 ```
   -n, --count int       Number of signer keys to export (default 5)
   -o, --output string   Output directory (required)
@@ -2330,7 +2402,7 @@ lux key export-signer [flags]
 ```
 
 <a id="lux-key-generate"></a>
-## lux key generate
+### lux key generate
 
 Generate multiple key sets with indexed names.
 
@@ -2343,11 +2415,13 @@ Examples:
   lux key generate -n 3 --start 5          # Creates key-5, key-6, key-7
 
 **Usage:**
+
 ```bash
 lux key generate [flags]
 ```
 
 **Flags:**
+
 ```
   -n, --count int       Number of key sets to generate (default 1)
   -p, --prefix string   Prefix for key names (default "key")
@@ -2355,7 +2429,7 @@ lux key generate [flags]
 ```
 
 <a id="lux-key-genesis"></a>
-## lux key genesis
+### lux key genesis
 
 Generate a genesis.json file with P-Chain and X-Chain allocations.
 
@@ -2393,11 +2467,13 @@ Examples:
   lux key genesis --p-chain key1,key2 --x-chain key3 -o genesis.json
 
 **Usage:**
+
 ```bash
 lux key genesis [flags]
 ```
 
 **Flags:**
+
 ```
       --amount uint              Amount per key in nLUX (default 1B LUX) (default 1000000000000000000)
       --c-chain-genesis string   Path to existing genesis to preserve C-Chain config
@@ -2416,7 +2492,7 @@ lux key genesis [flags]
 ```
 
 <a id="lux-key-import"></a>
-## lux key import
+### lux key import
 
 Import a key set by recovering from a mnemonic phrase.
 
@@ -2426,12 +2502,13 @@ Example:
   lux key import validator1
 
 **Usage:**
+
 ```bash
 lux key import <name>
 ```
 
 <a id="lux-key-kchain"></a>
-## lux key kchain
+### lux key kchain
 
 K-Chain provides distributed key management using threshold cryptography.
 
@@ -2455,27 +2532,30 @@ Examples:
   lux key kchain algorithms                # List supported algorithms
 
 **Usage:**
+
 ```bash
 lux key kchain
 ```
 
 **Flags:**
+
 ```
       --endpoint string   K-Chain RPC endpoint (default "http://localhost:9630")
 ```
 
 <a id="lux-key-kchain-algorithms"></a>
-## lux key kchain algorithms
+#### lux key kchain algorithms
 
 List all cryptographic algorithms supported by K-Chain.
 
 **Usage:**
+
 ```bash
 lux key kchain algorithms
 ```
 
 <a id="lux-key-kchain-create"></a>
-## lux key kchain create
+#### lux key kchain create
 
 Create a new key and distribute it across K-Chain validators.
 
@@ -2484,11 +2564,13 @@ Examples:
   lux key kchain create mykey -a ml-kem-768 -t 3 -n 5
 
 **Usage:**
+
 ```bash
 lux key kchain create <key-name> [flags]
 ```
 
 **Flags:**
+
 ```
   -a, --algorithm string   Key algorithm (default "ml-kem-768")
   -n, --shares int         Total shares (default 5)
@@ -2496,7 +2578,7 @@ lux key kchain create <key-name> [flags]
 ```
 
 <a id="lux-key-kchain-decrypt"></a>
-## lux key kchain decrypt
+#### lux key kchain decrypt
 
 Decrypt data using threshold key reconstruction.
 
@@ -2507,12 +2589,13 @@ Examples:
   lux key kchain decrypt mykey <ciphertext>
 
 **Usage:**
+
 ```bash
 lux key kchain decrypt <key-name> <ciphertext>
 ```
 
 <a id="lux-key-kchain-delete"></a>
-## lux key kchain delete
+#### lux key kchain delete
 
 Delete a key and securely wipe all shares from validators.
 
@@ -2521,17 +2604,19 @@ Examples:
   lux key kchain delete mykey --force
 
 **Usage:**
+
 ```bash
 lux key kchain delete <key-name> [flags]
 ```
 
 **Flags:**
+
 ```
       --force   Force deletion even if shares exist
 ```
 
 <a id="lux-key-kchain-distribute"></a>
-## lux key kchain distribute
+#### lux key kchain distribute
 
 Distribute a key across K-Chain validators using Shamir Secret Sharing.
 
@@ -2544,11 +2629,13 @@ Examples:
   lux key kchain distribute mykey --validators v1:9630,v2:9631,v3:9632
 
 **Usage:**
+
 ```bash
 lux key kchain distribute <key-name> [flags]
 ```
 
 **Flags:**
+
 ```
   -n, --shares int           Total number of shares to create (default 5)
   -t, --threshold int        Number of shares required to reconstruct (default 3)
@@ -2556,7 +2643,7 @@ lux key kchain distribute <key-name> [flags]
 ```
 
 <a id="lux-key-kchain-encrypt"></a>
-## lux key kchain encrypt
+#### lux key kchain encrypt
 
 Encrypt data using the key's ML-KEM public key.
 
@@ -2568,17 +2655,19 @@ Examples:
   lux key kchain encrypt mykey --algorithm ml-kem-768 "data"
 
 **Usage:**
+
 ```bash
 lux key kchain encrypt <key-name> <plaintext> [flags]
 ```
 
 **Flags:**
+
 ```
   -a, --algorithm string   Encryption algorithm (default "ml-kem-768")
 ```
 
 <a id="lux-key-kchain-gather"></a>
-## lux key kchain gather
+#### lux key kchain gather
 
 Gather threshold shares from validators to reconstruct a key.
 
@@ -2589,27 +2678,30 @@ Examples:
   lux key kchain gather mykey
 
 **Usage:**
+
 ```bash
 lux key kchain gather <key-name>
 ```
 
 <a id="lux-key-kchain-list"></a>
-## lux key kchain list
+#### lux key kchain list
 
 List all keys stored in K-Chain.
 
 **Usage:**
+
 ```bash
 lux key kchain list [flags]
 ```
 
 **Flags:**
+
 ```
   -a, --algorithm string   Filter by algorithm
 ```
 
 <a id="lux-key-kchain-reshare"></a>
-## lux key kchain reshare
+#### lux key kchain reshare
 
 Perform proactive secret resharing to rotate key shares.
 
@@ -2621,11 +2713,13 @@ Examples:
   lux key kchain reshare mykey -t 4 -n 7   # Change to 4-of-7
 
 **Usage:**
+
 ```bash
 lux key kchain reshare <key-name> [flags]
 ```
 
 **Flags:**
+
 ```
   -n, --shares int           New total shares (0 = keep current)
   -t, --threshold int        New threshold (0 = keep current)
@@ -2633,22 +2727,24 @@ lux key kchain reshare <key-name> [flags]
 ```
 
 <a id="lux-key-kchain-show"></a>
-## lux key kchain show
+#### lux key kchain show
 
 Show detailed information about a distributed key.
 
 **Usage:**
+
 ```bash
 lux key kchain show <key-name> [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --format string   Public key format (pem, der, raw) (default "pem")
 ```
 
 <a id="lux-key-kchain-sign"></a>
-## lux key kchain sign
+#### lux key kchain sign
 
 Sign data using threshold signatures without reconstructing the key.
 
@@ -2661,28 +2757,31 @@ Examples:
   lux key kchain sign mykey --algorithm bls-threshold "data"
 
 **Usage:**
+
 ```bash
 lux key kchain sign <key-name> <data> [flags]
 ```
 
 **Flags:**
+
 ```
   -a, --algorithm string   Signing algorithm (default "bls-threshold")
       --hex                Interpret data as hex-encoded
 ```
 
 <a id="lux-key-kchain-status"></a>
-## lux key kchain status
+#### lux key kchain status
 
 Check the health and status of the K-Chain distributed key management service.
 
 **Usage:**
+
 ```bash
 lux key kchain status
 ```
 
 <a id="lux-key-kchain-verify"></a>
-## lux key kchain verify
+#### lux key kchain verify
 
 Verify a signature against the key's public key.
 
@@ -2690,17 +2789,19 @@ Examples:
   lux key kchain verify mykey "message" <signature>
 
 **Usage:**
+
 ```bash
 lux key kchain verify <key-name> <data> <signature> [flags]
 ```
 
 **Flags:**
+
 ```
   -a, --algorithm string   Signature algorithm (default "bls-threshold")
 ```
 
 <a id="lux-key-list"></a>
-## lux key list
+### lux key list
 
 List all key sets stored in ~/.lux/keys/
 
@@ -2711,12 +2812,13 @@ Example:
   lux key ls
 
 **Usage:**
+
 ```bash
 lux key list
 ```
 
 <a id="lux-key-lock"></a>
-## lux key lock
+### lux key lock
 
 Lock a key to clear it from the memory session.
 
@@ -2728,17 +2830,19 @@ Examples:
   lux key lock --all         # Lock all keys
 
 **Usage:**
+
 ```bash
 lux key lock [name] [flags]
 ```
 
 **Flags:**
+
 ```
   -a, --all   Lock all keys
 ```
 
 <a id="lux-key-migrate"></a>
-## lux key migrate
+### lux key migrate
 
 Migrate legacy plaintext key files to encrypted keystore.enc format.
 
@@ -2754,11 +2858,13 @@ Examples:
   lux key migrate node0 --secure     # Migrate and securely delete originals
 
 **Usage:**
+
 ```bash
 lux key migrate [name...] [flags]
 ```
 
 **Flags:**
+
 ```
       --all      Migrate all keys with plaintext files
       --force    Overwrite existing keystore.enc files
@@ -2766,7 +2872,7 @@ lux key migrate [name...] [flags]
 ```
 
 <a id="lux-key-ring"></a>
-## lux key ring
+### lux key ring
 
 Ring signatures allow signing messages such that the signature can be
 verified as coming from someone in a group (the "ring"), without revealing
@@ -2786,12 +2892,13 @@ Examples:
   lux key ring schemes
 
 **Usage:**
+
 ```bash
 lux key ring
 ```
 
 <a id="lux-key-ring-generate"></a>
-## lux key ring generate
+#### lux key ring generate
 
 Generate random public keys to use as decoys in a ring signature.
 
@@ -2803,18 +2910,20 @@ Examples:
   lux key ring generate --size 10 --scheme lattice
 
 **Usage:**
+
 ```bash
 lux key ring generate [flags]
 ```
 
 **Flags:**
+
 ```
       --scheme string   Signature scheme (lsag, lattice) (default "lsag")
   -n, --size int        Number of keys to generate (default 5)
 ```
 
 <a id="lux-key-ring-keyimage"></a>
-## lux key ring keyimage
+#### lux key ring keyimage
 
 Show the key image for a key. Key images are deterministic identifiers
 derived from the private key that enable linkability - two signatures from
@@ -2827,27 +2936,30 @@ Examples:
   lux key ring keyimage mykey --scheme lattice
 
 **Usage:**
+
 ```bash
 lux key ring keyimage <key-name> [flags]
 ```
 
 **Flags:**
+
 ```
       --scheme string   Signature scheme (lsag, lattice) (default "lsag")
 ```
 
 <a id="lux-key-ring-schemes"></a>
-## lux key ring schemes
+#### lux key ring schemes
 
 List all supported ring signature schemes and their properties.
 
 **Usage:**
+
 ```bash
 lux key ring schemes
 ```
 
 <a id="lux-key-ring-sign"></a>
-## lux key ring sign
+#### lux key ring sign
 
 Create a ring signature for a message using your key and a ring of public keys.
 
@@ -2860,11 +2972,13 @@ Examples:
   lux key ring sign mykey "data" --ring key1,key2,key3 --scheme lattice
 
 **Usage:**
+
 ```bash
 lux key ring sign <key-name> <message> [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --file string     Read message from file
   -o, --output string   Write signature to file
@@ -2873,7 +2987,7 @@ lux key ring sign <key-name> <message> [flags]
 ```
 
 <a id="lux-key-ring-verify"></a>
-## lux key ring verify
+#### lux key ring verify
 
 Verify a ring signature against a message and ring of public keys.
 
@@ -2882,11 +2996,13 @@ Examples:
   lux key ring verify --file message.txt --signature-file sig.txt --ring key1,key2,key3
 
 **Usage:**
+
 ```bash
 lux key ring verify <message> [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --file string             Read message from file
       --ring strings            Ring member key names (comma-separated)
@@ -2896,7 +3012,7 @@ lux key ring verify <message> [flags]
 ```
 
 <a id="lux-key-show"></a>
-## lux key show
+### lux key show
 
 Show public keys and addresses for a key set.
 
@@ -2913,17 +3029,19 @@ Example:
   lux key show validator1 --export
 
 **Usage:**
+
 ```bash
 lux key show <name> [flags]
 ```
 
 **Flags:**
+
 ```
       --export   Export private keys (DANGER - keep secret!)
 ```
 
 <a id="lux-key-staker"></a>
-## lux key staker
+### lux key staker
 
 Writes staker.crt, staker.key and signer.key into <dir> and prints the
 NodeID, BLS public key and proof of possession.
@@ -2936,12 +3054,13 @@ Point luxd at the directory, then register the printed values:
       --stake 2 --duration 336h
 
 **Usage:**
+
 ```bash
 lux key staker <dir>
 ```
 
 <a id="lux-key-unlock"></a>
-## lux key unlock
+### lux key unlock
 
 Unlock a key by providing the password.
 
@@ -2963,11 +3082,13 @@ Examples:
   KEY_SESSION_TIMEOUT=5m lux key unlock validator1  # 5 minute session
 
 **Usage:**
+
 ```bash
 lux key unlock <name> [flags]
 ```
 
 **Flags:**
+
 ```
   -p, --password string   Password for the key
 ```
@@ -3014,12 +3135,12 @@ Available subcommands:
   secret  - Secret management operations
 
 <a id="lux-kms-key"></a>
-## lux kms key
+### lux kms key
 
 Commands for managing cryptographic keys.
 
 <a id="lux-kms-key-create"></a>
-## lux kms key create
+#### lux kms key create
 
 Create a new cryptographic key.
 
@@ -3039,11 +3160,13 @@ Examples:
   lux kms key create --name signing --type ecdsa-p256 --usage sign-verify
 
 **Usage:**
+
 ```bash
 lux kms key create [flags]
 ```
 
 **Flags:**
+
 ```
       --description string   Key description
       --name string          Key name (required)
@@ -3053,32 +3176,34 @@ lux kms key create [flags]
 ```
 
 <a id="lux-kms-key-delete"></a>
-## lux kms key delete
+#### lux kms key delete
 
 Delete a key
 
 **Usage:**
+
 ```bash
 lux kms key delete [keyID]
 ```
 
 <a id="lux-kms-key-list"></a>
-## lux kms key list
+#### lux kms key list
 
 List all keys
 
 **Usage:**
+
 ```bash
 lux kms key list
 ```
 
 <a id="lux-kms-secret"></a>
-## lux kms secret
+### lux kms secret
 
 Commands for managing encrypted secrets.
 
 <a id="lux-kms-secret-create"></a>
-## lux kms secret create
+#### lux kms secret create
 
 Create a new encrypted secret.
 
@@ -3087,11 +3212,13 @@ Examples:
   lux kms secret create --name DB_PASSWORD --value "secret" --env production
 
 **Usage:**
+
 ```bash
 lux kms secret create [flags]
 ```
 
 **Flags:**
+
 ```
       --env string     Environment (dev, staging, prod)
       --name string    Secret name (required)
@@ -3100,32 +3227,34 @@ lux kms secret create [flags]
 ```
 
 <a id="lux-kms-secret-get"></a>
-## lux kms secret get
+#### lux kms secret get
 
 Get a secret value
 
 **Usage:**
+
 ```bash
 lux kms secret get [secretName]
 ```
 
 <a id="lux-kms-secret-list"></a>
-## lux kms secret list
+#### lux kms secret list
 
 List all secrets
 
 **Usage:**
+
 ```bash
 lux kms secret list
 ```
 
 <a id="lux-kms-server"></a>
-## lux kms server
+### lux kms server
 
 Commands for starting and managing the KMS server.
 
 <a id="lux-kms-server-start"></a>
-## lux kms server start
+#### lux kms server start
 
 Start the KMS HTTP API server.
 
@@ -3146,11 +3275,13 @@ Examples:
   lux kms server start --api-key your-secret-key
 
 **Usage:**
+
 ```bash
 lux kms server start [flags]
 ```
 
 **Flags:**
+
 ```
       --addr string       Server listen address (default ":8200")
       --api-key string    API key for authentication
@@ -3185,6 +3316,7 @@ EXAMPLES:
   lux link luxd /path/to/luxd
 
 **Usage:**
+
 ```bash
 lux link [binary] [path]
 ```
@@ -3244,7 +3376,7 @@ Available subcommands:
   sign     - Threshold signing operations
 
 <a id="lux-mpc-backup"></a>
-## lux mpc backup
+### lux mpc backup
 
 Backup and restore MPC node data.
 
@@ -3280,7 +3412,7 @@ Examples:
   lux mpc backup restore my-backup-20250125 --destination s3://my-bucket/backups
 
 <a id="lux-mpc-backup-create"></a>
-## lux mpc backup create
+#### lux mpc backup create
 
 Create a backup of MPC node data.
 
@@ -3294,11 +3426,13 @@ Backups are compressed with zstd by default and can be encrypted
 with age encryption for secure storage.
 
 **Usage:**
+
 ```bash
 lux mpc backup create [flags]
 ```
 
 **Flags:**
+
 ```
       --age-recipient strings   Age recipient public key(s)
       --compression string      Compression algorithm (zstd, gzip, none) (default "zstd")
@@ -3308,37 +3442,41 @@ lux mpc backup create [flags]
 ```
 
 <a id="lux-mpc-backup-delete"></a>
-## lux mpc backup delete
+#### lux mpc backup delete
 
 Delete a backup
 
 **Usage:**
+
 ```bash
 lux mpc backup delete <backup-name> [flags]
 ```
 
 **Flags:**
+
 ```
   -d, --destination string   Storage destination (default: ~/.lux/mpc/backups)
 ```
 
 <a id="lux-mpc-backup-list"></a>
-## lux mpc backup list
+#### lux mpc backup list
 
 List available backups
 
 **Usage:**
+
 ```bash
 lux mpc backup list [flags]
 ```
 
 **Flags:**
+
 ```
   -d, --destination string   Storage destination (default: ~/.lux/mpc/backups)
 ```
 
 <a id="lux-mpc-backup-restore"></a>
-## lux mpc backup restore
+#### lux mpc backup restore
 
 Restore MPC node data from a backup.
 
@@ -3346,11 +3484,13 @@ This will stop the MPC node if running, restore the data,
 and optionally restart the node.
 
 **Usage:**
+
 ```bash
 lux mpc backup restore <backup-name> [flags]
 ```
 
 **Flags:**
+
 ```
       --age-identity strings   Age identity file(s) for decryption
   -d, --destination string     Storage destination (default: ~/.lux/mpc/backups)
@@ -3358,23 +3498,25 @@ lux mpc backup restore <backup-name> [flags]
 ```
 
 <a id="lux-mpc-backup-verify"></a>
-## lux mpc backup verify
+#### lux mpc backup verify
 
 Download and verify backup integrity without restoring.
 
 **Usage:**
+
 ```bash
 lux mpc backup verify <backup-name> [flags]
 ```
 
 **Flags:**
+
 ```
       --age-identity strings   Age identity file(s) for decryption
   -d, --destination string     Storage destination (default: ~/.lux/mpc/backups)
 ```
 
 <a id="lux-mpc-deploy"></a>
-## lux mpc deploy
+### lux mpc deploy
 
 Deploy MPC nodes to cloud providers for production use.
 
@@ -3412,7 +3554,7 @@ Examples:
   lux mpc deploy destroy mpc-devnet-xxx
 
 <a id="lux-mpc-deploy-create"></a>
-## lux mpc deploy create
+#### lux mpc deploy create
 
 Deploy an initialized MPC network to cloud infrastructure.
 
@@ -3420,11 +3562,13 @@ The network must be initialized first with 'lux mpc node init'.
 Each node will be deployed to a separate cloud instance.
 
 **Usage:**
+
 ```bash
 lux mpc deploy create <network-name> [flags]
 ```
 
 **Flags:**
+
 ```
       --aws-profile string            AWS profile name
       --aws-vpc string                AWS VPC ID
@@ -3440,7 +3584,7 @@ lux mpc deploy create <network-name> [flags]
 ```
 
 <a id="lux-mpc-deploy-destroy"></a>
-## lux mpc deploy destroy
+#### lux mpc deploy destroy
 
 Terminate all cloud instances and clean up resources.
 
@@ -3448,27 +3592,30 @@ WARNING: This will delete all deployed instances!
 Make sure you have backups of key shards before destroying.
 
 **Usage:**
+
 ```bash
 lux mpc deploy destroy <network-name> [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --force   Skip confirmation
 ```
 
 <a id="lux-mpc-deploy-list"></a>
-## lux mpc deploy list
+#### lux mpc deploy list
 
 List deployments
 
 **Usage:**
+
 ```bash
 lux mpc deploy list
 ```
 
 <a id="lux-mpc-deploy-ssh"></a>
-## lux mpc deploy ssh
+#### lux mpc deploy ssh
 
 Open an SSH session to a deployed MPC node.
 
@@ -3476,22 +3623,24 @@ Examples:
   lux mpc deploy ssh mpc-devnet-xxx mpc-node-1
 
 **Usage:**
+
 ```bash
 lux mpc deploy ssh <network-name> <node-name>
 ```
 
 <a id="lux-mpc-deploy-status"></a>
-## lux mpc deploy status
+#### lux mpc deploy status
 
 Show deployment status
 
 **Usage:**
+
 ```bash
 lux mpc deploy status <network-name>
 ```
 
 <a id="lux-mpc-node"></a>
-## lux mpc node
+### lux mpc node
 
 Commands for managing MPC node lifecycle.
 
@@ -3515,7 +3664,7 @@ Examples:
   lux mpc node clean
 
 <a id="lux-mpc-node-clean"></a>
-## lux mpc node clean
+#### lux mpc node clean
 
 Stop all nodes and remove network data.
 
@@ -3530,17 +3679,19 @@ Examples:
   lux mpc node clean --force
 
 **Usage:**
+
 ```bash
 lux mpc node clean [network-name] [flags]
 ```
 
 **Flags:**
+
 ```
   -f, --force   Skip confirmation
 ```
 
 <a id="lux-mpc-node-init"></a>
-## lux mpc node init
+#### lux mpc node init
 
 Initialize a new MPC network with the specified threshold configuration.
 
@@ -3555,11 +3706,13 @@ Examples:
   lux mpc node init --threshold 3 --nodes 5 --mainnet
 
 **Usage:**
+
 ```bash
 lux mpc node init [flags]
 ```
 
 **Flags:**
+
 ```
       --devnet          Initialize devnet MPC network (default)
       --mainnet         Initialize mainnet MPC network
@@ -3569,17 +3722,18 @@ lux mpc node init [flags]
 ```
 
 <a id="lux-mpc-node-list"></a>
-## lux mpc node list
+#### lux mpc node list
 
 List all initialized MPC networks.
 
 **Usage:**
+
 ```bash
 lux mpc node list
 ```
 
 <a id="lux-mpc-node-start"></a>
-## lux mpc node start
+#### lux mpc node start
 
 Start all MPC nodes in a network.
 
@@ -3593,11 +3747,13 @@ Examples:
   lux mpc node start mpc-devnet-abc123
 
 **Usage:**
+
 ```bash
 lux mpc node start [network-name] [flags]
 ```
 
 **Flags:**
+
 ```
       --devnet    Start devnet MPC network
       --mainnet   Start mainnet MPC network
@@ -3605,7 +3761,7 @@ lux mpc node start [network-name] [flags]
 ```
 
 <a id="lux-mpc-node-status"></a>
-## lux mpc node status
+#### lux mpc node status
 
 Display status of all MPC nodes in a network.
 
@@ -3619,12 +3775,13 @@ Examples:
   lux mpc node status mpc-devnet-abc123
 
 **Usage:**
+
 ```bash
 lux mpc node status [network-name]
 ```
 
 <a id="lux-mpc-node-stop"></a>
-## lux mpc node stop
+#### lux mpc node stop
 
 Stop all MPC nodes in a network.
 
@@ -3638,12 +3795,13 @@ Examples:
   lux mpc node stop mpc-devnet-abc123
 
 **Usage:**
+
 ```bash
 lux mpc node stop [network-name]
 ```
 
 <a id="lux-mpc-sign"></a>
-## lux mpc sign
+### lux mpc sign
 
 Commands for threshold signing operations.
 
@@ -3658,37 +3816,40 @@ Examples:
   lux mpc sign status <request-id>
 
 <a id="lux-mpc-sign-approve"></a>
-## lux mpc sign approve
+#### lux mpc sign approve
 
 Approve a signing request
 
 **Usage:**
+
 ```bash
 lux mpc sign approve <request-id>
 ```
 
 <a id="lux-mpc-sign-request"></a>
-## lux mpc sign request
+#### lux mpc sign request
 
 Initiate a signing request
 
 **Usage:**
+
 ```bash
 lux mpc sign request
 ```
 
 <a id="lux-mpc-sign-status"></a>
-## lux mpc sign status
+#### lux mpc sign status
 
 Check signing status
 
 **Usage:**
+
 ```bash
 lux mpc sign status <request-id>
 ```
 
 <a id="lux-mpc-wallet"></a>
-## lux mpc wallet
+### lux mpc wallet
 
 Commands for managing MPC wallets and their key shares.
 
@@ -3703,41 +3864,45 @@ Examples:
   lux mpc wallet show <wallet-id>
 
 <a id="lux-mpc-wallet-create"></a>
-## lux mpc wallet create
+#### lux mpc wallet create
 
 Create a new wallet
 
 **Usage:**
+
 ```bash
 lux mpc wallet create
 ```
 
 <a id="lux-mpc-wallet-export"></a>
-## lux mpc wallet export
+#### lux mpc wallet export
 
 Export wallet public key
 
 **Usage:**
+
 ```bash
 lux mpc wallet export <wallet-id>
 ```
 
 <a id="lux-mpc-wallet-list"></a>
-## lux mpc wallet list
+#### lux mpc wallet list
 
 List wallets
 
 **Usage:**
+
 ```bash
 lux mpc wallet list
 ```
 
 <a id="lux-mpc-wallet-show"></a>
-## lux mpc wallet show
+#### lux mpc wallet show
 
 Show wallet details
 
 **Usage:**
+
 ```bash
 lux mpc wallet show <wallet-id>
 ```
@@ -3750,12 +3915,13 @@ Commands for managing the Lux network runner.
 The netrunner is used for local network testing and development.
 
 **Usage:**
+
 ```bash
 lux netrunner
 ```
 
 <a id="lux-netrunner-link"></a>
-## lux netrunner link
+### lux netrunner link
 
 Link netrunner binary for the CLI to use.
 
@@ -3770,11 +3936,13 @@ EXAMPLES:
   lux netrunner link /path/to/netrunner
 
 **Usage:**
+
 ```bash
 lux netrunner link [path] [flags]
 ```
 
 **Flags:**
+
 ```
       --auto   auto-detect netrunner from standard locations
 ```
@@ -3830,12 +3998,13 @@ NOTES:
   - Use 'lux network clean' to wipe runtime data but keep chain configs
 
 **Usage:**
+
 ```bash
 lux network
 ```
 
 <a id="lux-network-bootstrap"></a>
-## lux network bootstrap
+### lux network bootstrap
 
 The bootstrap command downloads and installs a network snapshot from a remote source.
 It supports downloading split archives (parts) in parallel and reassembling them.
@@ -3844,11 +4013,13 @@ This is useful for quickly syncing a new node by starting from a recent snapshot
 instead of syncing from genesis.
 
 **Usage:**
+
 ```bash
 lux network bootstrap [flags]
 ```
 
 **Flags:**
+
 ```
       --network-type string    network type to bootstrap (mainnet, testnet) (default "mainnet")
       --snapshot-name string   specific snapshot name to download (optional)
@@ -3856,7 +4027,7 @@ lux network bootstrap [flags]
 ```
 
 <a id="lux-network-clean"></a>
-## lux network clean
+### lux network clean
 
 The network clean command stops the network and deletes runtime data.
 
@@ -3928,11 +4099,13 @@ NOTE: Chain configurations are explicitly preserved. To delete a chain
 configuration, use: lux chain delete <chainName>
 
 **Usage:**
+
 ```bash
 lux network clean [flags]
 ```
 
 **Flags:**
+
 ```
       --all                clean all: logs, backups, and stale runs
       --backups            clean up old .backup.* directories
@@ -3945,7 +4118,7 @@ lux network clean [flags]
 ```
 
 <a id="lux-network-describe"></a>
-## lux network describe
+### lux network describe
 
 Show detailed information about a network including:
 - Genesis configuration
@@ -3956,12 +4129,13 @@ Show detailed information about a network including:
 Network must be one of: mainnet, testnet, devnet, local
 
 **Usage:**
+
 ```bash
 lux network describe <network>
 ```
 
 <a id="lux-network-monitor"></a>
-## lux network monitor
+### lux network monitor
 
 The monitor command shows real-time network status updates.
 
@@ -3991,11 +4165,13 @@ EXAMPLES:
   lux network monitor --format chains
 
 **Usage:**
+
 ```bash
 lux network monitor [flags]
 ```
 
 **Flags:**
+
 ```
       --compact         use compact output format
       --format string   output format (full, summary, chains, nodes) (default "full")
@@ -4004,7 +4180,7 @@ lux network monitor [flags]
 ```
 
 <a id="lux-network-send"></a>
-## lux network send
+### lux network send
 
 Send funds on the C-Chain of the running local network.
 
@@ -4024,11 +4200,13 @@ Notes:
   - Source/dest flags are accepted but only C->C is supported right now
 
 **Usage:**
+
 ```bash
 lux network send [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float    Amount to send in LUX (required)
       --dest string     Destination chain (only C supported) (default "C")
@@ -4038,7 +4216,7 @@ lux network send [flags]
 ```
 
 <a id="lux-network-snapshot"></a>
-## lux network snapshot
+### lux network snapshot
 
 The snapshot command allows you to save, load, list, and delete snapshots of your local network state.
 
@@ -4057,12 +4235,13 @@ Examples:
   lux network snapshot list
 
 **Usage:**
+
 ```bash
 lux network snapshot
 ```
 
 <a id="lux-network-snapshot-advanced"></a>
-## lux network snapshot advanced
+#### lux network snapshot advanced
 
 Advanced snapshot commands for coordinated multi-node snapshots.
 
@@ -4079,29 +4258,32 @@ Examples:
   lux network snapshot advanced squash mainnet 1
 
 **Usage:**
+
 ```bash
 lux network snapshot advanced
 ```
 
 <a id="lux-network-snapshot-advanced-create"></a>
-## lux network snapshot advanced create
+##### lux network snapshot advanced create
 
 Create a coordinated snapshot of all nodes in the network.
 If --incremental is set, tries to create an incremental backup from the last checkpoint.
 Otherwise creates a full base snapshot.
 
 **Usage:**
+
 ```bash
 lux network snapshot advanced create <name> [flags]
 ```
 
 **Flags:**
+
 ```
       --incremental   Create incremental snapshot if possible
 ```
 
 <a id="lux-network-snapshot-advanced-download"></a>
-## lux network snapshot advanced download
+##### lux network snapshot advanced download
 
 Download a snapshot from GitHub releases.
 
@@ -4112,33 +4294,36 @@ Note: This is a planned feature. For now, manually download snapshot
 chunks and use 'lux network snapshot advanced restore' to restore.
 
 **Usage:**
+
 ```bash
 lux network snapshot advanced download <name>
 ```
 
 <a id="lux-network-snapshot-advanced-restore"></a>
-## lux network snapshot advanced restore
+##### lux network snapshot advanced restore
 
 Restore network from advanced snapshot
 
 **Usage:**
+
 ```bash
 lux network snapshot advanced restore <name>
 ```
 
 <a id="lux-network-snapshot-advanced-squash"></a>
-## lux network snapshot advanced squash
+##### lux network snapshot advanced squash
 
 Squashes all incremental snapshots for a specific chain into the base snapshot.
 This creates a new base snapshot and removes the incrementals, saving space.
 
 **Usage:**
+
 ```bash
 lux network snapshot advanced squash <network> <chain-id> <snapshot-name>
 ```
 
 <a id="lux-network-snapshot-advanced-upload"></a>
-## lux network snapshot advanced upload
+##### lux network snapshot advanced upload
 
 Upload a snapshot to GitHub releases.
 
@@ -4149,12 +4334,13 @@ Note: This is a planned feature. For now, manually upload the snapshot
 chunks from ~/.lux/snapshots/<name>/.
 
 **Usage:**
+
 ```bash
 lux network snapshot advanced upload <name>
 ```
 
 <a id="lux-network-snapshot-delete"></a>
-## lux network snapshot delete
+#### lux network snapshot delete
 
 The snapshot delete command removes a saved snapshot from disk.
 
@@ -4162,12 +4348,13 @@ Example:
   lux network snapshot delete my-test-state
 
 **Usage:**
+
 ```bash
 lux network snapshot delete <name>
 ```
 
 <a id="lux-network-snapshot-list"></a>
-## lux network snapshot list
+#### lux network snapshot list
 
 The snapshot list command displays all saved snapshots with their metadata.
 
@@ -4175,12 +4362,13 @@ Example:
   lux network snapshot list
 
 **Usage:**
+
 ```bash
 lux network snapshot list
 ```
 
 <a id="lux-network-snapshot-load"></a>
-## lux network snapshot load
+#### lux network snapshot load
 
 The snapshot load command loads a previously saved snapshot.
 
@@ -4191,17 +4379,19 @@ Example:
   lux network snapshot load my-test-state
 
 **Usage:**
+
 ```bash
 lux network snapshot load <name> [flags]
 ```
 
 **Flags:**
+
 ```
       --network-type string   network type to load snapshot into (mainnet, testnet, devnet, custom)
 ```
 
 <a id="lux-network-snapshot-save"></a>
-## lux network snapshot save
+#### lux network snapshot save
 
 The snapshot save command saves the current network state to a named snapshot.
 
@@ -4216,18 +4406,20 @@ Example:
   lux network snapshot save my-backup --incremental    # Incremental backup (smaller, faster)
 
 **Usage:**
+
 ```bash
 lux network snapshot save <name> [flags]
 ```
 
 **Flags:**
+
 ```
       --incremental           create incremental backup (smaller, faster if previous backup exists)
       --network-type string   network type to snapshot (mainnet, testnet, devnet, custom)
 ```
 
 <a id="lux-network-start"></a>
-## lux network start
+### lux network start
 
 The network start command starts a local, multi-node Lux network.
 
@@ -4308,11 +4500,13 @@ TYPICAL WORKFLOW:
   4. Stop network:     lux network stop
 
 **Usage:**
+
 ```bash
 lux network start [flags]
 ```
 
 **Flags:**
+
 ```
       --archive-path string        path to BadgerDB archive database (enables dual-database mode)
       --archive-shared             enable shared read-only access to archive database
@@ -4338,7 +4532,7 @@ lux network start [flags]
 ```
 
 <a id="lux-network-status"></a>
-## lux network status
+### lux network status
 
 The improved network status command shows detailed information about running networks.
 
@@ -4381,11 +4575,13 @@ OUTPUT FORMAT:
   c      evm   218        2026-01-06 14:27:01   yes     16ms
 
 **Usage:**
+
 ```bash
 lux network status [flags]
 ```
 
 **Flags:**
+
 ```
       --compact         use compact output format
       --format string   output format (full, summary, chains, nodes) (default "full")
@@ -4394,7 +4590,7 @@ lux network status [flags]
 ```
 
 <a id="lux-network-stop"></a>
-## lux network stop
+### lux network stop
 
 The network stop command gracefully shuts down the running network and saves state.
 
@@ -4455,11 +4651,13 @@ SNAPSHOT vs CLEAN:
   lux network clean   - Deletes runtime data, preserves chain configs
 
 **Usage:**
+
 ```bash
 lux network stop [flags]
 ```
 
 **Flags:**
+
 ```
       --cleanup                clean up old log files and stale run directories
       --devnet                 stop devnet network (network-id=3)
@@ -4514,12 +4712,13 @@ EXAMPLES:
   lux node rollback --mainnet
 
 **Usage:**
+
 ```bash
 lux node
 ```
 
 <a id="lux-node-deploy"></a>
-## lux node deploy
+### lux node deploy
 
 Deploys the luxd Helm chart to Kubernetes using helm upgrade --install.
 
@@ -4541,11 +4740,13 @@ EXAMPLES:
   lux node deploy --mainnet --dry-run
 
 **Usage:**
+
 ```bash
 lux node deploy [flags]
 ```
 
 **Flags:**
+
 ```
       --chart-path string   path to Helm chart (default: auto-detect)
       --context string      kubeconfig context to use
@@ -4560,7 +4761,7 @@ lux node deploy [flags]
 ```
 
 <a id="lux-node-join"></a>
-## lux node join
+### lux node join
 
 Run this on any box and it joins the pool; the operator schedules a
 compact validator onto it and rebalances the fleet. Drain a box and its
@@ -4578,11 +4779,13 @@ node label (lux.cloud/validator|archive=true) the NodeFleet schedules against �
 see operator/spec/examples/nodefleet-lab.yaml.
 
 **Usage:**
+
 ```bash
 lux node join [flags]
 ```
 
 **Flags:**
+
 ```
       --init            make THIS box the pool's control plane (k3s server)
       --name string     node name (default: hostname)
@@ -4593,7 +4796,7 @@ lux node join [flags]
 ```
 
 <a id="lux-node-link"></a>
-## lux node link
+### lux node link
 
 Link luxd binary for the CLI to use.
 
@@ -4616,17 +4819,19 @@ EXAMPLES:
   lux node link /path/to/luxd
 
 **Usage:**
+
 ```bash
 lux node link [path] [flags]
 ```
 
 **Flags:**
+
 ```
       --auto   auto-detect luxd from standard locations
 ```
 
 <a id="lux-node-logs"></a>
-## lux node logs
+### lux node logs
 
 Streams logs from a specific luxd pod in the StatefulSet.
 
@@ -4639,11 +4844,13 @@ EXAMPLES:
   lux node logs --testnet --tail 100
 
 **Usage:**
+
 ```bash
 lux node logs [pod-name] [flags]
 ```
 
 **Flags:**
+
 ```
       --context string     kubeconfig context to use
       --devnet             target lux-devnet namespace
@@ -4655,7 +4862,7 @@ lux node logs [pod-name] [flags]
 ```
 
 <a id="lux-node-rollback"></a>
-## lux node rollback
+### lux node rollback
 
 Reverts the luxd StatefulSet to its previous ControllerRevision.
 
@@ -4671,11 +4878,13 @@ EXAMPLES:
   lux node rollback --testnet --timeout 10m
 
 **Usage:**
+
 ```bash
 lux node rollback [flags]
 ```
 
 **Flags:**
+
 ```
       --context string     kubeconfig context to use
       --devnet             target lux-devnet namespace
@@ -4687,7 +4896,7 @@ lux node rollback [flags]
 ```
 
 <a id="lux-node-status"></a>
-## lux node status
+### lux node status
 
 Displays the current state of the luxd Kubernetes deployment.
 
@@ -4703,11 +4912,13 @@ EXAMPLES:
   lux node status --namespace my-custom-ns
 
 **Usage:**
+
 ```bash
 lux node status [flags]
 ```
 
 **Flags:**
+
 ```
       --context string     kubeconfig context to use
       --devnet             target lux-devnet namespace
@@ -4717,7 +4928,7 @@ lux node status [flags]
 ```
 
 <a id="lux-node-upgrade"></a>
-## lux node upgrade
+### lux node upgrade
 
 Performs a partition-based rolling upgrade of the luxd StatefulSet.
 
@@ -4740,11 +4951,13 @@ EXAMPLES:
   lux node upgrade --devnet --image ghcr.io/luxfi/node:v1.23.5 --dry-run
 
 **Usage:**
+
 ```bash
 lux node upgrade [flags]
 ```
 
 **Flags:**
+
 ```
       --context string            kubeconfig context to use
       --devnet                    target lux-devnet namespace
@@ -4766,12 +4979,13 @@ The primary command suite provides a collection of tools for interacting with th
 Primary Network
 
 **Usage:**
+
 ```bash
 lux primary
 ```
 
 <a id="lux-primary-addValidator"></a>
-## lux primary addValidator
+### lux primary addValidator
 
 Issues an AddPermissionlessValidatorTx for a node identity.
 
@@ -4786,11 +5000,13 @@ The stake is in nLUX (1 LUX = 1e9 nLUX) and the chain reads the start time
 from its own clock, so --duration measures from when the tx is accepted.
 
 **Usage:**
+
 ```bash
 lux primary addValidator [flags]
 ```
 
 **Flags:**
+
 ```
       --cluster string               operate on the given cluster
       --delegation-fee uint32        share of delegation rewards the validator keeps, out of 1,000,000 (default 20000)
@@ -4810,11 +5026,12 @@ lux primary addValidator [flags]
 ```
 
 <a id="lux-primary-describe"></a>
-## lux primary describe
+### lux primary describe
 
 The chain describe command prints details of the primary network configuration to the console.
 
 **Usage:**
+
 ```bash
 lux primary describe
 ```
@@ -4826,6 +5043,7 @@ Probes the resolved httpPort for every (network, env) tuple in the
 registry and reports up/down + networkID match.
 
 **Usage:**
+
 ```bash
 lux ps
 ```
@@ -4849,16 +5067,18 @@ Examples:
 
 
 <a id="lux-rpc-call"></a>
-## lux rpc call
+### lux rpc call
 
 Make a JSON-RPC call to the specified endpoint with the given method and parameters
 
 **Usage:**
+
 ```bash
 lux rpc call [flags]
 ```
 
 **Flags:**
+
 ```
       --endpoint string   RPC endpoint URL (default "http://localhost:9630/v1/bc/P")
       --method string     RPC method to call (required)
@@ -4867,7 +5087,7 @@ lux rpc call [flags]
 ```
 
 <a id="lux-rpc-transfer"></a>
-## lux rpc transfer
+### lux rpc transfer
 
 Transfer LUX between the P and X chains by atomic export/import.
 
@@ -4879,11 +5099,13 @@ Example:
 
 
 **Usage:**
+
 ```bash
 lux rpc transfer [flags]
 ```
 
 **Flags:**
+
 ```
       --amount float        Amount to transfer in LUX
       --from string         Key name to use (default: MNEMONIC account 0)
@@ -4912,12 +5134,13 @@ KEY PROPERTIES:
   - Compatible with QuasarCert attestations
 
 **Usage:**
+
 ```bash
 lux rt
 ```
 
 <a id="lux-rt-keygen"></a>
-## lux rt keygen
+### lux rt keygen
 
 Generate t-of-n threshold key shares for Corona signing.
 
@@ -4926,11 +5149,13 @@ Examples:
   lux rt keygen --threshold 2 --parties 3
 
 **Usage:**
+
 ```bash
 lux rt keygen [flags]
 ```
 
 **Flags:**
+
 ```
       --output string   Output directory for key shares (default: current dir)
       --parties int     Total number of parties (n)
@@ -4938,7 +5163,7 @@ lux rt keygen [flags]
 ```
 
 <a id="lux-rt-reshare"></a>
-## lux rt reshare
+### lux rt reshare
 
 Reshare existing key shares to a new committee configuration.
 
@@ -4949,11 +5174,13 @@ Examples:
   lux rt reshare --old-shares ./old/ --new-threshold 3 --new-parties 7
 
 **Usage:**
+
 ```bash
 lux rt reshare [flags]
 ```
 
 **Flags:**
+
 ```
       --new-parties int     New total number of parties
       --new-threshold int   New signing threshold
@@ -4961,7 +5188,7 @@ lux rt reshare [flags]
 ```
 
 <a id="lux-rt-sign"></a>
-## lux rt sign
+### lux rt sign
 
 Initiate a Corona threshold signing session.
 
@@ -4975,18 +5202,20 @@ Examples:
   lux rt sign --tx-file unsigned.tx --share ./shares/share-0.json
 
 **Usage:**
+
 ```bash
 lux rt sign [flags]
 ```
 
 **Flags:**
+
 ```
       --message string   Message to sign (hex or string)
       --share string     Path to key share file
 ```
 
 <a id="lux-rt-verify"></a>
-## lux rt verify
+### lux rt verify
 
 Verify a Corona threshold signature against the group public key.
 
@@ -4994,11 +5223,13 @@ Examples:
   lux rt verify --signature sig.json --message "hello" --group-key group.json
 
 **Usage:**
+
 ```bash
 lux rt verify [flags]
 ```
 
 **Flags:**
+
 ```
       --group-key string   Path to group key file
       --message string     Message that was signed
@@ -5031,12 +5262,13 @@ EXAMPLES:
   lux self use v1.22.5
 
 **Usage:**
+
 ```bash
 lux self
 ```
 
 <a id="lux-self-install"></a>
-## lux self install
+### lux self install
 
 Install a specific version of the Lux CLI.
 
@@ -5053,12 +5285,13 @@ EXAMPLES:
   lux self install v1.22.5
 
 **Usage:**
+
 ```bash
 lux self install [version]
 ```
 
 <a id="lux-self-link"></a>
-## lux self link
+### lux self link
 
 Link the currently running CLI binary to ~/.lux/bin/lux.
 
@@ -5071,12 +5304,13 @@ EXAMPLES:
   lux self link
 
 **Usage:**
+
 ```bash
 lux self link
 ```
 
 <a id="lux-self-list"></a>
-## lux self list
+### lux self list
 
 List all installed versions of the Lux CLI.
 
@@ -5087,12 +5321,13 @@ EXAMPLES:
   lux self list
 
 **Usage:**
+
 ```bash
 lux self list
 ```
 
 <a id="lux-self-use"></a>
-## lux self use
+### lux self use
 
 Switch to a specific installed version of the Lux CLI.
 
@@ -5109,6 +5344,7 @@ EXAMPLES:
   lux self use dev
 
 **Usage:**
+
 ```bash
 lux self use <version>
 ```
@@ -5127,11 +5363,13 @@ Examples:
   lux snap lux/mainnet --tag pre-merge
 
 **Usage:**
+
 ```bash
 lux snap <network>/<env> [flags]
 ```
 
 **Flags:**
+
 ```
       --live         allow snapshot while node is still up (unsafe)
       --tag string   override the trailing token in the snapshot name (default: with-contracts)
@@ -5180,11 +5418,13 @@ INCREMENTAL BACKUPS:
   Use --full to force a complete backup.
 
 **Usage:**
+
 ```bash
 lux snapshot [flags]
 ```
 
 **Flags:**
+
 ```
       --devnet        snapshot devnet network
       --full          create full backup instead of incremental
@@ -5194,7 +5434,7 @@ lux snapshot [flags]
 ```
 
 <a id="lux-snapshot-clean"></a>
-## lux snapshot clean
+### lux snapshot clean
 
 Clean up old snapshots, large log files, and stale run directories.
 
@@ -5215,28 +5455,31 @@ EXAMPLES:
   lux snapshot clean
 
 **Usage:**
+
 ```bash
 lux snapshot clean [flags]
 ```
 
 **Flags:**
+
 ```
       --dry-run    show what would be cleaned without deleting
       --keep int   number of recent snapshots to keep (default 3)
 ```
 
 <a id="lux-snapshot-list"></a>
-## lux snapshot list
+### lux snapshot list
 
 List available snapshots
 
 **Usage:**
+
 ```bash
 lux snapshot list
 ```
 
 <a id="lux-snapshot-restore"></a>
-## lux snapshot restore
+### lux snapshot restore
 
 Restore a network from a previously created snapshot.
 
@@ -5252,11 +5495,13 @@ EXAMPLES:
   lux snapshot restore mainnet-2026-01-19 --mainnet
 
 **Usage:**
+
 ```bash
 lux snapshot restore [name] [flags]
 ```
 
 **Flags:**
+
 ```
       --devnet    restore to devnet
       --mainnet   restore to mainnet
@@ -5307,11 +5552,13 @@ OUTPUT FORMAT:
   c      evm   218        2026-01-06 14:27:01   yes     16ms
 
 **Usage:**
+
 ```bash
 lux status [flags]
 ```
 
 **Flags:**
+
 ```
       --compact         use compact output format
       --format string   output format (full, summary, chains, nodes) (default "full")
@@ -5344,11 +5591,13 @@ Examples:
   lux tui --endpoint http://localhost:9640
 
 **Usage:**
+
 ```bash
 lux tui [flags]
 ```
 
 **Flags:**
+
 ```
       --endpoint string   Lux node API endpoint (default: http://127.0.0.1:9630)
 ```
@@ -5371,11 +5620,13 @@ Examples:
 Stop with: lux down <network>/<env>
 
 **Usage:**
+
 ```bash
 lux up <network>/<env> [flags]
 ```
 
 **Flags:**
+
 ```
       --automine string    auto-mine interval (e.g., '1s'); empty = instant
       --clean              remove data-dir before boot (fresh genesis)
@@ -5388,11 +5639,13 @@ lux up <network>/<env> [flags]
 Check if an update is available, and prompt the user to install it
 
 **Usage:**
+
 ```bash
 lux update [flags]
 ```
 
 **Flags:**
+
 ```
   -c, --confirm   Assume yes for installation
 ```
@@ -5407,22 +5660,25 @@ Validator's balance is used to pay for continuous fee to the P-Chain. When this 
 the validator will be considered inactive and will no longer participate in validating the L1
 
 **Usage:**
+
 ```bash
 lux validator
 ```
 
 <a id="lux-validator-getBalance"></a>
-## lux validator getBalance
+### lux validator getBalance
 
 This command gets the remaining validator P-Chain balance that is available to pay
 P-Chain continuous fee
 
 **Usage:**
+
 ```bash
 lux validator getBalance [flags]
 ```
 
 **Flags:**
+
 ```
       --l1 string              name of L1
       --node-id string         node ID of the validator
@@ -5430,16 +5686,18 @@ lux validator getBalance [flags]
 ```
 
 <a id="lux-validator-increaseBalance"></a>
-## lux validator increaseBalance
+### lux validator increaseBalance
 
 This command increases the validator P-Chain balance
 
 **Usage:**
+
 ```bash
 lux validator increaseBalance [flags]
 ```
 
 **Flags:**
+
 ```
       --balance float          amount of LUX to increase validator's balance by
   -k, --key string             select the key to use [testnet/devnet deploy only]
@@ -5449,11 +5707,12 @@ lux validator increaseBalance [flags]
 ```
 
 <a id="lux-validator-list"></a>
-## lux validator list
+### lux validator list
 
 This command gets a list of the validators of the L1
 
 **Usage:**
+
 ```bash
 lux validator list [blockchainName]
 ```
@@ -5473,12 +5732,13 @@ Examples:
   lux vm reload
 
 **Usage:**
+
 ```bash
 lux vm
 ```
 
 <a id="lux-vm-install"></a>
-## lux vm install
+### lux vm install
 
 Install a VM plugin from GitHub releases.
 
@@ -5493,17 +5753,19 @@ Examples:
   lux vm install myuser/myvm         # Install from any org
 
 **Usage:**
+
 ```bash
 lux vm install <org/name>[@version] [flags]
 ```
 
 **Flags:**
+
 ```
   -v, --version string   Version to install (default: latest)
 ```
 
 <a id="lux-vm-link"></a>
-## lux vm link
+### lux vm link
 
 Link a local VM binary to the plugins directory for development.
 
@@ -5520,17 +5782,19 @@ Examples:
   lux vm link myuser/myvm /path/to/myvm/build/myvm
 
 **Usage:**
+
 ```bash
 lux vm link <org/name> <path> [flags]
 ```
 
 **Flags:**
+
 ```
   -v, --version string   Version label (default: v0.0.0-local)
 ```
 
 <a id="lux-vm-reload"></a>
-## lux vm reload
+### lux vm reload
 
 Reload VMs on network nodes by calling admin.loadVMs.
 
@@ -5541,18 +5805,20 @@ Examples:
   lux vm reload --endpoint http://127.0.0.1:9630
 
 **Usage:**
+
 ```bash
 lux vm reload [flags]
 ```
 
 **Flags:**
+
 ```
   -e, --endpoint string    Node endpoint to call admin.loadVMs on (default "http://127.0.0.1:9630")
   -t, --timeout duration   Timeout for the reload request (default 30s)
 ```
 
 <a id="lux-vm-status"></a>
-## lux vm status
+### lux vm status
 
 Show all linked VMs in the plugins directory.
 
@@ -5563,17 +5829,19 @@ Examples:
   lux vm status --json
 
 **Usage:**
+
 ```bash
 lux vm status [flags]
 ```
 
 **Flags:**
+
 ```
       --json   Output in JSON format
 ```
 
 <a id="lux-vm-unlink"></a>
-## lux vm unlink
+### lux vm unlink
 
 Remove a VM symlink from the plugins directory.
 
@@ -5584,6 +5852,7 @@ Examples:
   lux vm unlink "Lux EVM"
 
 **Usage:**
+
 ```bash
 lux vm unlink <vm-name>
 ```
@@ -5603,12 +5872,13 @@ Commands:
   relay     Start message relayer
 
 **Usage:**
+
 ```bash
 lux warp
 ```
 
 <a id="lux-warp-create"></a>
-## lux warp create
+### lux warp create
 
 Create a new Warp message to send between chains.
 
@@ -5616,11 +5886,13 @@ Example:
   lux warp create --source 0xAA --dest 0xBB --payload "Hello from chain A"
 
 **Usage:**
+
 ```bash
 lux warp create [flags]
 ```
 
 **Flags:**
+
 ```
   -d, --dest string      Destination chain ID (hex)
   -p, --payload string   Message payload
@@ -5628,7 +5900,7 @@ lux warp create [flags]
 ```
 
 <a id="lux-warp-relay"></a>
-## lux warp relay
+### lux warp relay
 
 Start a Warp message relayer to bridge messages between chains.
 
@@ -5636,12 +5908,13 @@ The relayer monitors source chains for new messages and delivers them
 to destination chains after signature verification.
 
 **Usage:**
+
 ```bash
 lux warp relay
 ```
 
 <a id="lux-warp-sign"></a>
-## lux warp sign
+### lux warp sign
 
 Sign a cross-chain message with your validator key.
 
@@ -5649,18 +5922,20 @@ Example:
   lux warp sign --message <hex> --key ~/.lux/staking/signer.key
 
 **Usage:**
+
 ```bash
 lux warp sign [flags]
 ```
 
 **Flags:**
+
 ```
   -k, --key string       Path to signing key
   -m, --message string   Message to sign (hex)
 ```
 
 <a id="lux-warp-verify"></a>
-## lux warp verify
+### lux warp verify
 
 Verify a Warp message signature against the validator set.
 
@@ -5668,11 +5943,13 @@ Example:
   lux warp verify --message <hex> --signature <hex>
 
 **Usage:**
+
 ```bash
 lux warp verify [flags]
 ```
 
 **Flags:**
+
 ```
   -m, --message string     Message to verify (hex)
   -s, --signature string   Signature to verify (hex)
@@ -5708,7 +5985,7 @@ USAGE:
   lux zk srs info          Show SRS metadata
 
 <a id="lux-zk-ceremony"></a>
-## lux zk ceremony
+### lux zk ceremony
 
 Manage powers-of-tau ceremonies for generating trusted SRS
 (Structured Reference Strings) used in Groth16 and PLONK proof systems.
@@ -5718,18 +5995,20 @@ If not found, build it with:
   cd ~/work/lux/node && go build -o /usr/local/bin/ceremony ./cmd/ceremony/
 
 <a id="lux-zk-ceremony-contribute"></a>
-## lux zk ceremony contribute
+#### lux zk ceremony contribute
 
 Apply a random contribution to the ceremony state. Generates
 cryptographically secure random scalars (tau, alpha, beta) and mixes them
 into the SRS. The random values are zeroed from memory after use.
 
 **Usage:**
+
 ```bash
 lux zk ceremony contribute [flags]
 ```
 
 **Flags:**
+
 ```
       --input string         Input ceremony file (required)
       --output string        Output ceremony file (required)
@@ -5737,35 +6016,39 @@ lux zk ceremony contribute [flags]
 ```
 
 <a id="lux-zk-ceremony-export"></a>
-## lux zk ceremony export
+#### lux zk ceremony export
 
 Export the SRS (Structured Reference String) from a completed and
 verified ceremony. The ceremony is verified before export. Output is
 uncompressed binary (G1: 64 bytes, G2: 128 bytes per point).
 
 **Usage:**
+
 ```bash
 lux zk ceremony export [flags]
 ```
 
 **Flags:**
+
 ```
       --input string    Ceremony file to export (required)
       --output string   Output SRS binary file (required)
 ```
 
 <a id="lux-zk-ceremony-init"></a>
-## lux zk ceremony init
+#### lux zk ceremony init
 
 Create a new ceremony state file with initial powers of the BN254
 generators. This is the starting point before any contributions.
 
 **Usage:**
+
 ```bash
 lux zk ceremony init [flags]
 ```
 
 **Flags:**
+
 ```
       --circuit string     Circuit name (required)
       --output string      Output file path (required)
@@ -5774,22 +6057,24 @@ lux zk ceremony init [flags]
 ```
 
 <a id="lux-zk-ceremony-status"></a>
-## lux zk ceremony status
+#### lux zk ceremony status
 
 Display the current state of a ceremony file including circuit info, contributions, and participant hashes.
 
 **Usage:**
+
 ```bash
 lux zk ceremony status [flags]
 ```
 
 **Flags:**
+
 ```
       --input string   Ceremony file to inspect (required)
 ```
 
 <a id="lux-zk-ceremony-verify"></a>
-## lux zk ceremony verify
+#### lux zk ceremony verify
 
 Check the consistency of a ceremony state file by verifying:
 - TauG1/TauG2 form consistent geometric sequences (pairing checks)
@@ -5799,17 +6084,19 @@ Check the consistency of a ceremony state file by verifying:
 - No points at infinity
 
 **Usage:**
+
 ```bash
 lux zk ceremony verify [flags]
 ```
 
 **Flags:**
+
 ```
       --input string   Ceremony file to verify (required)
 ```
 
 <a id="lux-zk-prove"></a>
-## lux zk prove
+### lux zk prove
 
 Generate zero-knowledge proofs using the Lux SRS.
 
@@ -5818,7 +6105,7 @@ The resulting proof can be verified on-chain via the Z-Chain verifier precompile
 or off-chain using 'lux zk verify'.
 
 <a id="lux-zk-prove-groth16"></a>
-## lux zk prove groth16
+#### lux zk prove groth16
 
 Generate a Groth16 proof from a circuit, witness, and SRS.
 
@@ -5826,11 +6113,13 @@ The proving key is derived from the SRS generated by the ceremony.
 The witness contains both public inputs and private values.
 
 **Usage:**
+
 ```bash
 lux zk prove groth16 [flags]
 ```
 
 **Flags:**
+
 ```
       --circuit string   Compiled circuit file path (required)
       --output string    Output proof file path (required)
@@ -5839,7 +6128,7 @@ lux zk prove groth16 [flags]
 ```
 
 <a id="lux-zk-prove-plonk"></a>
-## lux zk prove plonk
+#### lux zk prove plonk
 
 Generate a PLONK proof from a circuit, witness, and SRS.
 
@@ -5847,11 +6136,13 @@ PLONK uses a universal SRS that works with any circuit of bounded size,
 unlike Groth16 which requires a circuit-specific trusted setup.
 
 **Usage:**
+
 ```bash
 lux zk prove plonk [flags]
 ```
 
 **Flags:**
+
 ```
       --circuit string   Compiled circuit file path (required)
       --output string    Output proof file path (required)
@@ -5860,7 +6151,7 @@ lux zk prove plonk [flags]
 ```
 
 <a id="lux-zk-srs"></a>
-## lux zk srs
+### lux zk srs
 
 Manage Structured Reference Strings (SRS) for ZK proof systems.
 
@@ -5869,55 +6160,61 @@ for both proof generation and verification. The official Lux SRS
 is published on the Z-Chain.
 
 <a id="lux-zk-srs-download"></a>
-## lux zk srs download
+#### lux zk srs download
 
 Download the official SRS binary from the Z-Chain. The file is
 verified after download using the ceremony binary.
 
 **Usage:**
+
 ```bash
 lux zk srs download [flags]
 ```
 
 **Flags:**
+
 ```
       --output string   Output file path (default: ~/.lux/zk/srs.bin)
       --url string      SRS download URL (default "https://api.lux.network/mainnet/v1/bc/Z/srs")
 ```
 
 <a id="lux-zk-srs-info"></a>
-## lux zk srs info
+#### lux zk srs info
 
 Display metadata about an SRS file including the number of powers, file size, and SHA-256 hash.
 
 **Usage:**
+
 ```bash
 lux zk srs info [flags]
 ```
 
 **Flags:**
+
 ```
       --input string   SRS file path (required)
 ```
 
 <a id="lux-zk-srs-verify"></a>
-## lux zk srs verify
+#### lux zk srs verify
 
 Verify the integrity of a downloaded SRS file by checking its
 structure and computing its SHA-256 hash.
 
 **Usage:**
+
 ```bash
 lux zk srs verify [flags]
 ```
 
 **Flags:**
+
 ```
       --input string   SRS file path (required)
 ```
 
 <a id="lux-zk-verify"></a>
-## lux zk verify
+### lux zk verify
 
 Verify zero-knowledge proofs by calling Z-Chain precompiled contracts.
 
@@ -5926,7 +6223,7 @@ precompiled contracts at fixed addresses. This command submits the proof and
 public inputs to the verifier precompile and returns the result.
 
 <a id="lux-zk-verify-groth16"></a>
-## lux zk verify groth16
+#### lux zk verify groth16
 
 Verify a Groth16 proof against the Z-Chain Groth16 verifier precompile.
 
@@ -5934,11 +6231,13 @@ Requires the proof file, verification key, and public inputs.
 Connects to the Z-Chain RPC endpoint to call the verifier contract.
 
 **Usage:**
+
 ```bash
 lux zk verify groth16 [flags]
 ```
 
 **Flags:**
+
 ```
       --inputs string   Public inputs file path (required)
       --proof string    Proof file path (required)
@@ -5947,7 +6246,7 @@ lux zk verify groth16 [flags]
 ```
 
 <a id="lux-zk-verify-plonk"></a>
-## lux zk verify plonk
+#### lux zk verify plonk
 
 Verify a PLONK proof against the Z-Chain PLONK verifier precompile.
 
@@ -5955,11 +6254,13 @@ Requires the proof file, verification key, and public inputs.
 Connects to the Z-Chain RPC endpoint to call the verifier contract.
 
 **Usage:**
+
 ```bash
 lux zk verify plonk [flags]
 ```
 
 **Flags:**
+
 ```
       --inputs string   Public inputs file path (required)
       --proof string    Proof file path (required)
