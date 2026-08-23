@@ -61,34 +61,29 @@ func StartLocal() error {
 	ux.Logger.PrintToUser("")
 
 	home, _ := os.UserHomeDir()
+	operatorDir := filepath.Join(home, "work", "lux", "operator")
 
-	// Apply operator CRDs + deployment
+	// The localnet CRs live in their own namespace; the operator (deployed by
+	// config/default into its own namespace) watches cluster-wide. AlreadyExists
+	// is the expected steady state, so this is the one apply whose error is fine.
+	_ = kubectl(ctx, "create", "namespace", "lux-system")
+
+	// Operator CRDs — canonical home is spec/crd/bases/<group>.
 	ux.Logger.PrintToUser("-> Operator CRDs")
-	operatorDir := filepath.Join(home, "work", "lux", "operator", "k8s")
-	crds, _ := filepath.Glob(filepath.Join(operatorDir, "crds", "*.yaml"))
-	for _, crd := range crds {
-		kubectl(ctx, "apply", "-f", crd)
+	if err := kubectl(ctx, "apply", "-f", filepath.Join(operatorDir, "spec", "crd", "bases", "lux.cloud")); err != nil {
+		return err
 	}
 
+	// Operator RBAC + Deployment — canonical home is the config/default kustomize.
 	ux.Logger.PrintToUser("-> Operator RBAC + Deployment")
-	kubectl(ctx, "apply",
-		"-f", filepath.Join(operatorDir, "rbac", "serviceaccount.yaml"),
-		"-f", filepath.Join(operatorDir, "rbac", "clusterrole.yaml"),
-		"-f", filepath.Join(operatorDir, "rbac", "clusterrolebinding.yaml"),
-		"-f", filepath.Join(operatorDir, "deployment.yaml"))
-
-	// Apply network CR for localnet
-	ux.Logger.PrintToUser("-> LuxNetwork (3 validators, network ID %d)", localnetNetworkID)
-	networkCR := filepath.Join(operatorDir, "networks", "devnet.yaml")
-	if _, err := os.Stat(networkCR); err == nil {
-		kubectl(ctx, "apply", "-f", networkCR)
+	if err := kubectl(ctx, "apply", "-k", filepath.Join(operatorDir, "config", "default")); err != nil {
+		return err
 	}
 
-	// Apply platform services if they exist
-	platformCR := filepath.Join(operatorDir, "platforms", "devnet.yaml")
-	if _, err := os.Stat(platformCR); err == nil {
-		ux.Logger.PrintToUser("-> Platform services")
-		kubectl(ctx, "apply", "-f", platformCR)
+	// LuxNetwork CR for the localnet.
+	ux.Logger.PrintToUser("-> LuxNetwork (%d validators, network ID %d)", localnetValidators, localnetNetworkID)
+	if err := kubectl(ctx, "apply", "-f", filepath.Join(operatorDir, "spec", "examples", "luxnetwork-devnet.yaml")); err != nil {
+		return err
 	}
 
 	ux.Logger.PrintToUser("")
@@ -108,10 +103,13 @@ func checkK8s(ctx string) error {
 	return cmd.Run()
 }
 
-func kubectl(ctx string, args ...string) {
+func kubectl(ctx string, args ...string) error {
 	fullArgs := append([]string{"--context", ctx}, args...)
 	cmd := exec.Command("kubectl", fullArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("kubectl %v: %w", args, err)
+	}
+	return nil
 }
