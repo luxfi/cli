@@ -14,9 +14,13 @@ import (
 )
 
 const (
+	// Primary network ID and C-Chain EVM chain ID are DISTINCT on purpose: a
+	// wallet or tool must never conflate "which primary network" (1337) with
+	// "which EVM chain" (31337). Matches genesis/configs/local — network.json
+	// networkID 1337, cchain.json chainId 31337.
 	localnetNetworkID  = uint32(1337)
+	localCChainID      = 31337
 	localnetValidators = 3
-	localEVMChainID    = 1337
 	// lightMnemonic re-exports the single source of truth (key.LightMnemonic
 	// → github.com/luxfi/light.Mnemonic); do not re-declare the literal.
 	lightMnemonic = key.LightMnemonic
@@ -44,11 +48,16 @@ func StartLocal() error {
 	}
 	ux.Logger.PrintToUser("K8s context: %s", ctx)
 
-	// Show funded accounts
+	// The two IDs a builder needs, stated once and kept distinct.
+	ux.Logger.PrintToUser("")
+	ux.Logger.PrintToUser("Primary network ID: %d   ·   C-Chain EVM chain ID: %d", localnetNetworkID, localCChainID)
+
+	// Show funded accounts (P/X addresses are network-scoped, so key derivation
+	// takes the primary networkID; the C-Chain 0x address is chain-agnostic).
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Funded Accounts (light mnemonic):")
 	for i := 0; i < localnetValidators; i++ {
-		sf, err := key.NewSoftFromMnemonicWithAccount(localEVMChainID, lightMnemonic, uint32(i))
+		sf, err := key.NewSoftFromMnemonicWithAccount(localnetNetworkID, lightMnemonic, uint32(i))
 		if err != nil {
 			continue
 		}
