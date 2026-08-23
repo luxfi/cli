@@ -55,7 +55,7 @@ func writeMDXDir(root *cobra.Command, dir string) error {
 			continue
 		}
 		var b strings.Builder
-		fmt.Fprintf(&b, "---\ntitle: lux %s\ndescription: %s\n---\n\n", c.Name(), oneline(c.Short))
+		fmt.Fprintf(&b, "---\ntitle: \"lux %s\"\ndescription: \"%s\"\n---\n\n", c.Name(), oneline(c.Short))
 		fmt.Fprintf(&b, "{/* Generated from the command tree — edit the command's Long/Short, not this file. */}\n\n")
 		render(c, &b, true)
 		if err := os.WriteFile(filepath.Join(dir, c.Name()+".mdx"), []byte(b.String()), 0o644); err != nil {
