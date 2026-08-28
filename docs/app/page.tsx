@@ -167,7 +167,7 @@ lux --version`}</code>
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-fd-muted-foreground">
-              © 2025 Lux Partners. MIT License.
+              © 2025 Lux Industries Inc. MIT License.
             </p>
             <div className="flex gap-6">
               <Link href="https://github.com/luxfi/cli" className="text-sm text-fd-muted-foreground hover:text-fd-foreground">
