@@ -121,8 +121,8 @@ vuln-check:
 # Generate documentation
 .PHONY: docs
 docs:
-	@echo "Generating documentation..."
-	go doc -all > docs.txt
+	@echo "Generating CLI reference from the command tree..."
+	GOWORK=off go run ./tools/docgen cmd/commands.md
 
 # Show help
 .PHONY: help
