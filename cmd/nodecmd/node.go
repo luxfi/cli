@@ -21,6 +21,7 @@ func NewCmd(injectedApp *application.Lux) *cobra.Command {
 
 LOCAL COMMANDS:
   link        Symlink a luxd binary to ~/.lux/bin/luxd
+  join        Join this box to the node pool (run a validator anywhere)
 
 KUBERNETES COMMANDS (via Helm chart):
   deploy      Deploy/update luxd via Helm (single source of truth)
@@ -60,6 +61,7 @@ EXAMPLES:
 
 	// Local commands
 	cmd.AddCommand(newLinkCmd())
+	cmd.AddCommand(newJoinCmd())
 
 	// K8s commands
 	deployCmdObj := newDeployCmd()

@@ -1,834 +1,902 @@
-<a id="lux-blockchain"></a>
-## lux blockchain
+# Lux CLI reference
 
-The blockchain command suite provides a collection of tools for developing
-and deploying Blockchains.
+_Generated from the command tree by `make docs` — do not edit by hand._
 
-To get started, use the blockchain create command wizard to walk through the
-configuration of your very first Blockchain. Then, go ahead and deploy it
-with the blockchain deploy command. You can use the rest of the commands to
-manage your Blockchain configurations and live deployments.
+<a id="lux-ai"></a>
+## lux ai
 
-**Usage:**
-```bash
-lux blockchain [subcommand] [flags]
-```
+The ai command provides tools for interacting with the Lux AI network,
+including chat completion, model listing, and agent execution.
 
-**Subcommands:**
+Connects to a local lux-ai node or the Hanzo AI gateway (api.hanzo.ai).
 
-- [`addValidator`](#lux-blockchain-addvalidator): The blockchain addValidator command adds a node as a validator to
-an L1 of the user provided deployed network. If the network is proof of
-authority, the owner of the validator manager contract must sign the
-transaction. If the network is proof of stake, the node must stake the L1's
-staking token. Both processes will issue a RegisterL1ValidatorTx on the P-Chain.
+ENDPOINTS:
 
-This command currently only works on Blockchains deployed to either the Testnet
-Testnet or Mainnet.
-- [`changeOwner`](#lux-blockchain-changeowner): The blockchain changeOwner changes the owner of the deployed Blockchain.
-- [`changeWeight`](#lux-blockchain-changeweight): The blockchain changeWeight command changes the weight of a L1 Validator.
+  Local:    http://localhost:9090 (default, via lux ai serve)
+  Gateway:  https://api.hanzo.ai/v1
 
-The L1 has to be a Proof of Authority L1.
-- [`configure`](#lux-blockchain-configure): Luxd nodes support several different configuration files.
-Each network (a Chain or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
-Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for evm options).
-A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
-This command allows you to set all those files.
-- [`create`](#lux-blockchain-create): The blockchain create command builds a new genesis file to configure your Blockchain.
-By default, the command runs an interactive wizard. It walks you through
-all the steps you need to create your first Blockchain.
+ENVIRONMENT:
 
-The tool supports deploying EVM, and custom VMs. You
-can create a custom, user-generated genesis with a custom VM by providing
-the path to your genesis and VM binaries with the --genesis and --vm flags.
-
-By default, running the command with a blockchainName that already exists
-causes the command to fail. If you'd like to overwrite an existing
-configuration, pass the -f flag.
-- [`delete`](#lux-blockchain-delete): The blockchain delete command deletes an existing blockchain configuration.
-- [`deploy`](#lux-blockchain-deploy): The blockchain deploy command deploys your Blockchain configuration locally, to Testnet, or to Mainnet.
-
-At the end of the call, the command prints the RPC URL you can use to interact with the Chain.
-
-Lux-CLI only supports deploying an individual Blockchain once per network. Subsequent
-attempts to deploy the same Blockchain to the same network (local, Testnet, Mainnet) aren't
-allowed. If you'd like to redeploy a Blockchain locally for testing, you must first call
-lux network clean to reset all deployed chain state. Subsequent local deploys
-redeploy the chain with fresh state. You can deploy the same Blockchain to multiple networks,
-so you can take your locally tested Blockchain and deploy it on Testnet or Mainnet.
-- [`describe`](#lux-blockchain-describe): The blockchain describe command prints the details of a Blockchain configuration to the console.
-By default, the command prints a summary of the configuration. By providing the --genesis
-flag, the command instead prints out the raw genesis file.
-- [`export`](#lux-blockchain-export): The blockchain export command write the details of an existing Blockchain deploy to a file.
-
-The command prompts for an output path. You can also provide one with
-the --output flag.
-- [`import`](#lux-blockchain-import): Import blockchain configurations into lux-cli.
-
-This command suite supports importing from a file created on another computer,
-or importing from blockchains running public networks
-(e.g. created manually or with the deprecated chain-cli)
-- [`join`](#lux-blockchain-join): The blockchain join command configures your validator node to begin validating a new Blockchain.
-
-To complete this process, you must have access to the machine running your validator. If the
-CLI is running on the same machine as your validator, it can generate or update your node's
-config file automatically. Alternatively, the command can print the necessary instructions
-to update your node manually. To complete the validation process, the Blockchain's admins must add
-the NodeID of your validator to the Blockchain's allow list by calling addValidator with your
-NodeID.
-
-After you update your validator's config, you need to restart your validator manually. If
-you provide the --luxd-config flag, this command attempts to edit the config file
-at that path.
-
-This command currently only supports Blockchains deployed on the Testnet and Mainnet.
-- [`list`](#lux-blockchain-list): The blockchain list command prints the names of all created Blockchain configurations. Without any flags,
-it prints some general, static information about the Blockchain. With the --deployed flag, the command
-shows additional information including the VMID, BlockchainID and ChainID.
-- [`publish`](#lux-blockchain-publish): The blockchain publish command publishes the Blockchain's VM to a repository.
-- [`removeValidator`](#lux-blockchain-removevalidator): The blockchain removeValidator command stops a whitelisted blockchain network validator from
-validating your deployed Blockchain.
-
-To remove the validator from the Chain's allow list, provide the validator's unique NodeID. You can bypass
-these prompts by providing the values with flags.
-- [`stats`](#lux-blockchain-stats): The blockchain stats command prints validator statistics for the given Blockchain.
-- [`upgrade`](#lux-blockchain-upgrade): The blockchain upgrade command suite provides a collection of tools for
-updating your developmental and deployed Blockchains.
-- [`validators`](#lux-blockchain-validators): The blockchain validators command lists the validators of a blockchain and provides
-several statistics about them.
-- [`vmid`](#lux-blockchain-vmid): The blockchain vmid command prints the virtual machine ID (VMID) for the given Blockchain.
-
-**Flags:**
-
-```bash
--h, --help             help for blockchain
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-blockchain-addvalidator"></a>
-### addValidator
-
-The blockchain addValidator command adds a node as a validator to
-an L1 of the user provided deployed network. If the network is proof of
-authority, the owner of the validator manager contract must sign the
-transaction. If the network is proof of stake, the node must stake the L1's
-staking token. Both processes will issue a RegisterL1ValidatorTx on the P-Chain.
-
-This command currently only works on Blockchains deployed to either the Testnet
-Testnet or Mainnet.
+  LUX_AI_ENDPOINT   Override the default AI endpoint
+  LUX_AI_API_KEY    API key for gateway authentication
 
 **Usage:**
+
 ```bash
-lux blockchain addValidator [subcommand] [flags]
+lux ai
+```
+
+<a id="lux-ai-agent"></a>
+### lux ai agent
+
+Run an AI agent that executes a task using the connected AI endpoint.
+
+The agent sends the task as a system-prompted chat request with
+tool-use capabilities when supported by the model.
+
+Examples:
+  lux ai agent "Deploy a new EVM chain on devnet"
+  lux ai agent --model qwen3-8b "Analyze the validator set"
+
+**Usage:**
+
+```bash
+lux ai agent [task] [flags]
 ```
 
 **Flags:**
 
-```bash
---aggregator-allow-private-peers        allow the signature aggregator to connect to peers with private IP (default true)
---aggregator-extra-endpoints strings    endpoints for extra nodes that are needed in signature aggregation
---aggregator-log-level string           log level to use with signature aggregator (default "Debug")
---aggregator-log-to-stdout              use stdout for signature aggregator logs
---balance float                         set the LUX balance of the validator that will be used for continuous fee on P-Chain
---blockchain-genesis-key                use genesis allocated key to pay fees for completing the validator's registration (blockchain gas token)
---blockchain-key string                 CLI stored key to use to pay fees for completing the validator's registration (blockchain gas token)
---blockchain-private-key string         private key to use to pay fees for completing the validator's registration (blockchain gas token)
---bls-proof-of-possession string        set the BLS proof of possession of the validator to add
---bls-public-key string                 set the BLS public key of the validator to add
---cluster string                        operate on the given cluster
---create-local-validator                create additional local validator and add it to existing running local node
---default-duration                      (for Chains, not L1s) set duration so as to validate until primary validator ends its period
---default-start-time                    (for Chains, not L1s) use default start time for chain validator (5 minutes later for testnet & mainnet, 30 seconds later for devnet)
---default-validator-params              (for Chains, not L1s) use default weight/start/duration params for chain validator
---delegation-fee uint16                 (PoS only) delegation fee (in bips) (default 100)
---devnet                                operate on a devnet network
---disable-owner string                  P-Chain address that will able to disable the validator with a P-Chain transaction
---endpoint string                       use the given endpoint for network operations
--e, --treasury                          use treasury key [testnet/devnet only]
--f, --testnet                              testnet                         operate on testnet (alias to testnet
--h, --help                              help for addValidator
--k, --key string                        select the key to use [testnet/devnet only]
--g, --ledger                            use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
---ledger-addrs strings                  use the given ledger addresses
--l, --local                             operate on a local network
--m, --mainnet                           operate on mainnet
---node-endpoint string                  gather node id/bls from publicly available luxd apis on the given endpoint
---node-id string                        node-id of the validator to add
---output-tx-path string                 (for Chains, not L1s) file path of the add validator tx
---partial-sync                          set primary network partial sync for new validators (default true)
---remaining-balance-owner string        P-Chain address that will receive any leftover LUX from the validator when it is removed from Chain
---rpc string                            connect to validator manager at the given rpc endpoint
---stake-amount uint                     (PoS only) amount of tokens to stake
---staking-period duration               how long this validator will be staking
---start-time string                     (for Chains, not L1s) UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
---chain-auth-keys strings              (for Chains, not L1s) control keys that will be used to authenticate add validator tx
--t, --testnet                           testnet                         operate on testnet (alias to testnet)
---wait-for-tx-acceptance                (for Chains, not L1s) just issue the add validator tx, without waiting for its acceptance (default true)
---weight uint                           set the staking weight of the validator to add (default 20)
---config string                         config file (default is $HOME/.lux-cli/config.json)
---log-level string                      log level for the application (default "ERROR")
---skip-update-check                     skip check for new versions
+```
+      --model string   Model to use (default "qwen3-8b")
 ```
 
-<a id="lux-blockchain-changeowner"></a>
-### changeOwner
+<a id="lux-ai-chat"></a>
+### lux ai chat
 
-The blockchain changeOwner changes the owner of the deployed Blockchain.
+Send a chat message to the AI model and print the response.
+
+Examples:
+  lux ai chat "What is the Lux network?"
+  lux ai chat --model qwen3-8b "Explain post-quantum cryptography"
+  lux ai chat --system "You are a blockchain expert" "What is BFT?"
 
 **Usage:**
+
 ```bash
-lux blockchain changeOwner [subcommand] [flags]
+lux ai chat [message] [flags]
 ```
 
 **Flags:**
 
-```bash
---auth-keys strings        control keys that will be used to authenticate transfer blockchain ownership tx
---cluster string           operate on the given cluster
---control-keys strings     addresses that may make blockchain changes
---devnet                   operate on a devnet network
---endpoint string          use the given endpoint for network operations
--e, --treasury             use treasury key [testnet/devnet]
--f, --testnet                 testnet            operate on testnet (alias to testnet
--h, --help                 help for changeOwner
--k, --key string           select the key to use [testnet/devnet]
--g, --ledger               use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
---ledger-addrs strings     use the given ledger addresses
--l, --local                operate on a local network
--m, --mainnet              operate on mainnet
---output-tx-path string    file path of the transfer blockchain ownership tx
--s, --same-control-key     use the fee-paying key as control key
--t, --testnet              testnet            operate on testnet (alias to testnet)
---threshold uint32         required number of control key signatures to make blockchain changes
---config string            config file (default is $HOME/.lux-cli/config.json)
---log-level string         log level for the application (default "ERROR")
---skip-update-check        skip check for new versions
+```
+      --model string    Model to use (default "qwen3-8b")
+      --system string   System prompt
 ```
 
-<a id="lux-blockchain-changeweight"></a>
-### changeWeight
+<a id="lux-ai-complete"></a>
+### lux ai complete
 
-The blockchain changeWeight command changes the weight of a L1 Validator.
+Generate a text completion from a prompt.
 
-The L1 has to be a Proof of Authority L1.
+Examples:
+  lux ai complete "The Lux blockchain uses"
+  lux ai complete --model zen-coder-1.5b --max-tokens 256 "func main() {"
 
 **Usage:**
+
 ```bash
-lux blockchain changeWeight [subcommand] [flags]
+lux ai complete [prompt] [flags]
 ```
 
 **Flags:**
 
-```bash
---cluster string          operate on the given cluster
---devnet                  operate on a devnet network
---endpoint string         use the given endpoint for network operations
--e, --treasury            use treasury key [testnet/devnet only]
--f, --testnet                testnet           operate on testnet (alias to testnet
--h, --help                help for changeWeight
--k, --key string          select the key to use [testnet/devnet only]
--g, --ledger              use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
---ledger-addrs strings    use the given ledger addresses
--l, --local               operate on a local network
--m, --mainnet             operate on mainnet
---node-endpoint string    gather node id/bls from publicly available luxd apis on the given endpoint
---node-id string          node-id of the validator
--t, --testnet             testnet           operate on testnet (alias to testnet)
---weight uint             set the new staking weight of the validator
---config string           config file (default is $HOME/.lux-cli/config.json)
---log-level string        log level for the application (default "ERROR")
---skip-update-check       skip check for new versions
+```
+      --max-tokens int   Maximum tokens to generate (0 = model default)
+      --model string     Model to use (default "qwen3-8b")
 ```
 
-<a id="lux-blockchain-configure"></a>
-### configure
+<a id="lux-ai-models"></a>
+### lux ai models
 
-Luxd nodes support several different configuration files.
-Each network (a Chain or an L1) has their own config which applies to all blockchains/VMs in the network (see https://build.lux.network/docs/nodes/configure/lux-l1-configs)
-Each blockchain within the network can have its own chain config (see https://build.lux.network/docs/nodes/chain-configs/c-chain https://github.com/luxfi/evm/blob/master/plugin/evm/config/config.go for evm options).
-A chain can also have special requirements for the Luxd node configuration itself (see https://build.lux.network/docs/nodes/configure/configs-flags).
-This command allows you to set all those files.
+List all models available on the connected AI endpoint.
+
+Examples:
+  lux ai models
+  LUX_AI_ENDPOINT=https://api.hanzo.ai lux ai models
 
 **Usage:**
+
 ```bash
-lux blockchain configure [subcommand] [flags]
+lux ai models
+```
+
+<a id="lux-amm"></a>
+## lux amm
+
+Commands for trading on Lux Exchange AMM pools.
+
+Supported networks:
+  - lux (Lux Mainnet C-Chain, chain ID 96369)
+  - zoo (Zoo Mainnet, chain ID 200200)
+  - lux-testnet (Lux Testnet, chain ID 96368)
+
+Wallet access via:
+  - MNEMONIC environment variable (BIP39 mnemonic)
+  - PRIVATE_KEY environment variable (hex private key)
+  - --private-key flag (hex private key)
+
+Example usage:
+  lux amm balance --network zoo
+  lux amm swap --network zoo --from LUX --to USDT --amount 100
+  lux amm pools --network zoo
+  lux amm quote --network zoo --from LUX --to USDT --amount 100
+  lux amm balance --network zoo --private-key 0x...
+
+**Usage:**
+
+```bash
+lux amm
 ```
 
 **Flags:**
 
-```bash
---chain-config string             path to the chain configuration
--h, --help                        help for configure
---node-config string              path to luxd node configuration
---per-node-chain-config string    path to per node chain configuration for local network
---chain-config string            path to the chain configuration
---config string                   config file (default is $HOME/.lux-cli/config.json)
---log-level string                log level for the application (default "ERROR")
---skip-update-check               skip check for new versions
+```
+      --network string       Network: lux, zoo, or lux-testnet (default "zoo")
+      --private-key string   Private key (hex) for wallet access
+      --rpc string           Custom RPC endpoint (overrides network default)
 ```
 
-<a id="lux-blockchain-create"></a>
-### create
+<a id="lux-amm-balance"></a>
+### lux amm balance
 
-The blockchain create command builds a new genesis file to configure your Blockchain.
-By default, the command runs an interactive wizard. It walks you through
-all the steps you need to create your first Blockchain.
+Display native token and ERC20 token balances.
 
-The tool supports deploying EVM, and custom VMs. You
-can create a custom, user-generated genesis with a custom VM by providing
-the path to your genesis and VM binaries with the --genesis and --vm flags.
-
-By default, running the command with a blockchainName that already exists
-causes the command to fail. If you'd like to overwrite an existing
-configuration, pass the -f flag.
+Examples:
+  lux amm balance --network zoo
+  lux amm balance --network zoo --token 0x...
 
 **Usage:**
+
 ```bash
-lux blockchain create [subcommand] [flags]
+lux amm balance [flags]
 ```
 
 **Flags:**
 
-```bash
---custom                            use a custom VM template
---custom-vm-branch string           custom vm branch or commit
---custom-vm-build-script string     custom vm build-script
---custom-vm-path string             file path of custom vm to use
---custom-vm-repo-url string         custom vm repository url
---debug                             enable blockchain debugging (default true)
---evm                               use the EVM as the base template
---evm-chain-id uint                 chain ID to use with EVM
---evm-defaults                      deprecation notice: use '--production-defaults'
---evm-token string                  token symbol to use with EVM
---external-gas-token                use a gas token from another blockchain
--f, --force                         overwrite the existing configuration if one exists
---from-github-repo                  generate custom VM binary from github repository
---genesis string                    file path of genesis to use
--h, --help                          help for create
---warp                               interoperate with other blockchains using Warp
---warp-registry-at-genesis           setup Warp registry smart contract on genesis [experimental]
---latest                            use latest EVM released version, takes precedence over --vm-version
---pre-release                       use latest EVM pre-released version, takes precedence over --vm-version
---production-defaults               use default production settings for your blockchain
---proof-of-authority                use proof of authority(PoA) for validator management
---proof-of-stake                    use proof of stake(PoS) for validator management
---proxy-contract-owner string       EVM address that controls ProxyAdmin for TransparentProxy of ValidatorManager contract
---reward-basis-points uint          (PoS only) reward basis points for PoS Reward Calculator (default 100)
---sovereign                         set to false if creating non-sovereign blockchain (default true)
---teleporter                        interoperate with other blockchains using Warp
---test-defaults                     use default test settings for your blockchain
---validator-manager-owner string    EVM address that controls Validator Manager Owner
---vm string                         file path of custom vm to use. alias to custom-vm-path
---vm-version string                 version of EVM template to use
---warp                              generate a vm with warp support (needed for Warp) (default true)
---config string                     config file (default is $HOME/.lux-cli/config.json)
---log-level string                  log level for the application (default "ERROR")
---skip-update-check                 skip check for new versions
+```
+      --token string   ERC20 token address to check
 ```
 
-<a id="lux-blockchain-delete"></a>
-### delete
+<a id="lux-amm-pools"></a>
+### lux amm pools
 
-The blockchain delete command deletes an existing blockchain configuration.
+List all liquidity pools on the AMM.
+
+Examples:
+  lux amm pools --network zoo
 
 **Usage:**
+
 ```bash
-lux blockchain delete [subcommand] [flags]
+lux amm pools
+```
+
+<a id="lux-amm-quote"></a>
+### lux amm quote
+
+Get a quote for swapping tokens without executing.
+Tries V2 pools first, then V3 if no V2 pool exists.
+
+Examples:
+  lux amm quote --network zoo --from 0x... --to 0x... --amount 100
+  lux amm quote --network zoo --from 0x... --to 0x... --amount 100 --v3
+
+**Usage:**
+
+```bash
+lux amm quote [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help             help for delete
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --amount float   Amount to quote
+      --from string    Token address to swap from
+      --to string      Token address to swap to
+      --v3             Force V3 pool
 ```
 
-<a id="lux-blockchain-deploy"></a>
-### deploy
+<a id="lux-amm-status"></a>
+### lux amm status
 
-The blockchain deploy command deploys your Blockchain configuration to Local Network, to Testnet, DevNet or to Mainnet.
+Show AMM contract status and network info.
 
-At the end of the call, the command prints the RPC URL you can use to interact with the L1 / Chain.
-
-When deploying an L1, Lux-CLI lets you use your local machine as a bootstrap validator, so you don't need to run separate Lux nodes.
-This is controlled by the --use-local-machine flag (enabled by default on Local Network).
-
-If --use-local-machine is set to true:
-- Lux-CLI will call CreateChainTx, CreateChainTx, ConvertChainToL1Tx, followed by syncing the local machine bootstrap validator to the L1 and initialize
-  Validator Manager Contract on the L1
-
-If using your own Lux Nodes as bootstrap validators:
-- Lux-CLI will call CreateChainTx, CreateChainTx, ConvertChainToL1Tx
-- You will have to sync your bootstrap validators to the L1
-- Next, Initialize Validator Manager contract on the L1 using lux contract initValidatorManager [L1_Name]
-
-Lux-CLI only supports deploying an individual Blockchain once per network. Subsequent
-attempts to deploy the same Blockchain to the same network (Local Network, Testnet, Mainnet) aren't
-allowed. If you'd like to redeploy a Blockchain locally for testing, you must first call
-lux network clean to reset all deployed chain state. Subsequent local deploys
-redeploy the chain with fresh state. You can deploy the same Blockchain to multiple networks,
-so you can take your locally tested Blockchain and deploy it on Testnet or Mainnet.
+Examples:
+  lux amm status --network zoo
 
 **Usage:**
+
 ```bash
-lux blockchain deploy [subcommand] [flags]
+lux amm status
+```
+
+<a id="lux-amm-swap"></a>
+### lux amm swap
+
+Swap tokens using Uniswap V2/V3 style AMM.
+Tries V2 pools first, then V3 if no V2 pool exists.
+
+Examples:
+  lux amm swap --network zoo --from 0x... --to 0x... --amount 100
+  lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --slippage 1.0
+  lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --v3
+  lux amm swap --network zoo --from 0x... --to 0x... --amount 100 --dry-run
+
+**Usage:**
+
+```bash
+lux amm swap [flags]
 ```
 
 **Flags:**
 
-```bash
- --convert-only              avoid node track, restart and poa manager setup
-  -e, --treasury                   use treasury key [local/devnet deploy only]
-  -h, --help                      help for deploy
-  -k, --key string                select the key to use [testnet/devnet deploy only]
-  -g, --ledger                    use ledger instead of key
-      --ledger-addrs strings      use the given ledger addresses
-      --mainnet-chain-id uint32   use different ChainID for mainnet deployment
-      --output-tx-path string     file path of the blockchain creation tx (for multi-sig signing)
-  -u, --chain-id string          do not create a chain, deploy the blockchain into the given chain id
-      --chain-only               command stops after CreateChainTx and returns ChainID
-
-Network Flags (Select One):
-  --cluster string   operate on the given cluster
-  --devnet           operate on a devnet network
-  --endpoint string  use the given endpoint for network operations
-  --testnet             operate on testnet (alias to `testnet`)
-  --local            operate on a local network
-  --mainnet          operate on mainnet
-  --testnet          operate on testnet (alias to `testnet`)
-
-Bootstrap Validators Flags:
-  --balance float64                  set the LUX balance of each bootstrap validator that will be used for continuous fee on P-Chain (setting balance=1 equals to 1 LUX for each bootstrap validator)
-  --bootstrap-endpoints stringSlice  take validator node info from the given endpoints
-  --bootstrap-filepath string        JSON file path that provides details about bootstrap validators
-  --change-owner-address string      address that will receive change if node is no longer L1 validator
-  --generate-node-id                 set to true to generate Node IDs for bootstrap validators when none are set up. Use these Node IDs to set up your Lux Nodes.
-  --num-bootstrap-validators int     number of bootstrap validators to set up in sovereign L1 validator)
-
-Local Machine Flags (Use Local Machine as Bootstrap Validator):
-  --luxd-path string              use this luxd binary path
-  --luxd-version string           use this version of luxd (ex: v1.17.12)
-  --http-port uintSlice                  http port for node(s)
-  --partial-sync                         set primary network partial sync for new validators
-  --staking-cert-key-path stringSlice    path to provided staking cert key for node(s)
-  --staking-port uintSlice               staking port for node(s)
-  --staking-signer-key-path stringSlice  path to provided staking signer key for node(s)
-  --staking-tls-key-path stringSlice     path to provided staking TLS key for node(s)
-  --use-local-machine                    use local machine as a blockchain validator
-
-Local Network Flags:
-  --luxd-path string     use this luxd binary path
-  --luxd-version string  use this version of luxd (ex: v1.17.12)
-  --num-nodes uint32            number of nodes to be created on local network deploy
-
-Non Chain-Only-Validators (Non-SOV) Flags:
-  --auth-keys stringSlice     control keys that will be used to authenticate chain creation
-  --control-keys stringSlice  addresses that may make blockchain changes
-  --same-control-key          use the fee-paying key as control key
-  --threshold uint32          required number of control key signatures to make blockchain changes
-
-Warp Flags:
-  --cchain-funding-key string                          key to be used to fund relayer account on cchain
-  --cchain-warp-key string                              key to be used to pay for Warp deploys on C-Chain
-  --warp-key string                                     key to be used to pay for Warp deploys
-  --warp-version string                                 Warp version to deploy
-  --relay-cchain                                       relay C-Chain as source and destination
-  --relayer-allow-private-ips                          allow relayer to connec to private ips
-  --relayer-amount float64                             automatically fund relayer fee payments with the given amount
-  --relayer-key string                                 key to be used by default both for rewards and to pay fees
-  --relayer-log-level string                           log level to be used for relayer logs
-  --relayer-path string                                relayer binary to use
-  --relayer-version string                             relayer version to deploy
-  --skip-warp-deploy                                    Skip automatic Warp deploy
-  --skip-relayer                                       skip relayer deploy
-  --teleporter-messenger-contract-address-path string  path to an Warp Messenger contract address file
-  --teleporter-messenger-deployer-address-path string  path to an Warp Messenger deployer address file
-  --teleporter-messenger-deployer-tx-path string       path to an Warp Messenger deployer tx file
-  --teleporter-registry-bytecode-path string           path to an Warp Registry bytecode file
-
-Proof Of Stake Flags:
-  --pos-maximum-stake-amount uint64     maximum stake amount
-  --pos-maximum-stake-multiplier uint8  maximum stake multiplier
-  --pos-minimum-delegation-fee uint16   minimum delegation fee
-  --pos-minimum-stake-amount uint64     minimum stake amount
-  --pos-minimum-stake-duration uint64   minimum stake duration (in seconds)
-  --pos-weight-to-value-factor uint64   weight to value factor
-
-Signature Aggregator Flags:
-  --aggregator-log-level string  log level to use with signature aggregator
-  --aggregator-log-to-stdout     use stdout for signature aggregator logs
+```
+      --amount float     Amount to swap
+      --dry-run          Only show quote, don't execute
+      --from string      Token address to swap from
+      --slippage float   Max slippage tolerance (%) (default 0.5)
+      --to string        Token address to swap to
+      --v3               Force V3 pool
 ```
 
-<a id="lux-blockchain-describe"></a>
-### describe
+<a id="lux-amm-tokens"></a>
+### lux amm tokens
 
-The blockchain describe command prints the details of a Blockchain configuration to the console.
-By default, the command prints a summary of the configuration. By providing the --genesis
-flag, the command instead prints out the raw genesis file.
+Get information about ERC20 tokens.
+
+Examples:
+  lux amm tokens --network zoo 0x...
 
 **Usage:**
+
 ```bash
-lux blockchain describe [subcommand] [flags]
+lux amm tokens [address...]
+```
+
+<a id="lux-chain"></a>
+## lux chain
+
+The chain command provides unified operations for blockchain management.
+
+OVERVIEW:
+
+  The chain command suite handles the complete blockchain lifecycle from
+  configuration creation through deployment and operation. It works with
+  chain configurations stored in ~/.lux/chains/.
+
+CHAIN TYPES:
+
+  L1 (Sovereign)  - Independent validator set, own tokenomics
+  L2 (Rollup)     - Based on L1 sequencing (Lux, Ethereum, etc.)
+  L3 (App Chain)  - Built on L2 for application-specific use
+
+CORE COMMANDS:
+
+  create       Create a new blockchain configuration
+  deploy       Deploy to local network, testnet, or mainnet
+  list         List all configured blockchains
+  describe     Show detailed blockchain information
+  delete       Delete a blockchain configuration
+
+DATA OPERATIONS:
+
+  import       Import blocks from RLP file to running chain
+
+NETWORK FLAGS (for deployment):
+
+  --mainnet, -m    Deploy to mainnet (port 9630)
+  --testnet, -t    Deploy to testnet (port 9640)
+  --devnet, -d     Deploy to devnet (port 9650)
+  --custom         Deploy to custom network
+
+EXAMPLES:
+
+  # Create a new L2 blockchain
+  lux chain create mychain
+
+  # Create a sovereign L1
+  lux chain create mychain --type=l1
+
+  # Deploy to local devnet
+  lux chain deploy mychain --devnet
+
+  # Deploy to testnet
+  lux chain deploy mychain --testnet
+
+  # List all configured chains
+  lux chain list
+
+  # Import historical blocks
+  lux chain import c ~/work/lux/state/rlp/mainnet.rlp --mainnet
+
+  # Delete a chain configuration
+  lux chain delete mychain
+
+TYPICAL WORKFLOW:
+
+  1. Create configuration:  lux chain create mychain
+  2. Start network:         lux network start --devnet
+  3. Deploy chain:          lux chain deploy mychain --devnet
+  4. Verify deployment:     lux chain list
+  5. Check endpoints:       lux network status
+
+NOTES:
+
+  - Chain configurations are stored in ~/.lux/chains/<name>/
+  - Each chain has a genesis.json and sidecar.json
+  - Chains can be deployed to multiple networks (local, testnet, mainnet)
+  - Use 'lux chain delete' to remove configurations
+  - Network must be running before deployment
+
+**Usage:**
+
+```bash
+lux chain
+```
+
+<a id="lux-chain-create"></a>
+### lux chain create
+
+Create a new blockchain configuration for deployment.
+
+OVERVIEW:
+
+  Creates a blockchain configuration with genesis file and metadata.
+  The configuration is stored in ~/.lux/chains/<chainName>/ and can
+  be deployed to any network (local, testnet, mainnet).
+
+CHAIN TYPES:
+
+  l1    Sovereign L1 with independent validation
+  l2    Layer 2 rollup/chain (default)
+  l3    App-specific L3 chain
+
+SEQUENCER OPTIONS (for L2):
+
+  lux       Lux-based rollup, 100ms blocks (default, lowest cost)
+  ethereum  Ethereum-based rollup, 12s blocks (highest security)
+  op        OP Stack compatible
+  external  External/custom sequencer
+
+VM OPTIONS:
+
+  --evm          Use Lux EVM (default)
+  --pars         Use Pars VM (post-quantum messaging)
+  --custom-vm    Use custom VM binary
+  --vm           Path to custom VM binary
+  --vm-version   Specific VM version (default: latest)
+  --latest       Use latest VM version
+
+GENESIS OPTIONS:
+
+  --genesis           Path to custom genesis.json file
+                      If not provided, generates default EVM genesis
+  --evm-chain-id      EVM chain ID (default: 200200)
+  --token-name        Native token name (default: TOKEN)
+  --token-symbol      Native token symbol (default: TKN)
+  --airdrop-address   Address to airdrop tokens to (default: test account)
+  --airdrop-amount    Amount to airdrop in wei (default: 1000000000000000000000000)
+
+NON-INTERACTIVE MODE:
+
+  Non-interactive mode is automatically enabled when:
+    - NON_INTERACTIVE=1 environment variable is set
+    - CI=1 environment variable is set (common in CI/CD pipelines)
+    - stdin is not a TTY (piped input, scripts, etc.)
+
+  In non-interactive mode, sensible defaults are used for optional values.
+  Required values must be provided via flags.
+
+OTHER OPTIONS:
+
+  --force, -f              Overwrite existing configuration
+  --enable-preconfirm      Enable pre-confirmations (<100ms acknowledgment)
+
+EXAMPLES:
+
+  # Create default L2 chain with Lux sequencing
+  lux chain create mychain
+
+  # Create sovereign L1
+  lux chain create mychain --type=l1
+
+  # Create with Ethereum sequencing (12s blocks)
+  lux chain create mychain --sequencer=ethereum
+
+  # Create with custom genesis
+  lux chain create mychain --genesis=~/custom-genesis.json
+
+  # Create L3 on existing L2
+  lux chain create myapp --type=l3
+
+  # Overwrite existing configuration
+  lux chain create mychain --force
+
+  # Create with pre-confirmations enabled
+  lux chain create mychain --enable-preconfirm
+
+  # Non-interactive in CI/CD (env var triggers non-interactive mode)
+  CI=1 lux chain create mychain
+
+  # Non-interactive with custom chain ID
+  NON_INTERACTIVE=1 lux chain create mychain --evm-chain-id=12345
+
+  # Piped input also triggers non-interactive mode
+  echo "" | lux chain create mychain --evm-chain-id=12345
+
+OUTPUT:
+
+  Creates two files in ~/.lux/chains/<chainName>/:
+  - genesis.json    Blockchain genesis configuration
+  - sidecar.json    Metadata (VM type, versions, deployment info)
+
+NEXT STEPS:
+
+  After creating a chain configuration:
+  1. Start a network:     lux network start --devnet
+  2. Deploy the chain:    lux chain deploy mychain --devnet
+  3. Verify deployment:   lux network status
+
+NOTES:
+
+  - Chain names must be unique and ≤32 characters
+  - Reserved names: c, p, x, primary, platform
+  - Default genesis includes funded test account
+  - Genesis can be customized after creation
+
+**Usage:**
+
+```bash
+lux chain create [chainName] [flags]
 ```
 
 **Flags:**
 
-```bash
--g, --genesis          Print the genesis to the console directly instead of the summary
--h, --help             help for describe
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --airdrop-address string   Address to airdrop tokens to
+      --airdrop-amount string    Amount to airdrop in wei
+      --custom                   Target custom network
+      --custom-vm                Use custom VM
+  -d, --devnet                   Target devnet
+      --enable-preconfirm        Enable pre-confirmations
+      --evm                      Use Lux EVM
+      --evm-chain-id uint        EVM chain ID (default: 200200)
+  -f, --force                    Overwrite existing configuration
+      --genesis string           Path to custom genesis file
+      --latest                   Use latest VM version
+  -m, --mainnet                  Target mainnet
+      --pars                     Use Pars VM (post-quantum messaging)
+      --sequencer string         Sequencer: lux, ethereum, op, external (default "lux")
+  -t, --testnet                  Target testnet
+      --token-name string        Native token name (default: TOKEN)
+      --token-symbol string      Native token symbol (default: TKN)
+      --type string              Chain type: l1, l2, l3 (default "l2")
+      --vm string                Path to custom VM binary
+      --vm-version string        VM version to use
 ```
 
-<a id="lux-blockchain-export"></a>
-### export
+<a id="lux-chain-delete"></a>
+### lux chain delete
 
-The blockchain export command write the details of an existing Blockchain deploy to a file.
-
-The command prompts for an output path. You can also provide one with
-the --output flag.
+Delete a blockchain configuration
 
 **Usage:**
+
 ```bash
-lux blockchain export [subcommand] [flags]
+lux chain delete [chainName] [flags]
 ```
 
 **Flags:**
 
-```bash
---custom-vm-branch string          custom vm branch
---custom-vm-build-script string    custom vm build-script
---custom-vm-repo-url string        custom vm repository url
--h, --help                         help for export
--o, --output string                write the export data to the provided file path
---config string                    config file (default is $HOME/.lux-cli/config.json)
---log-level string                 log level for the application (default "ERROR")
---skip-update-check                skip check for new versions
+```
+      --custom    Target custom network
+  -d, --devnet    Target devnet
+  -f, --force     Skip confirmation prompt (required in non-interactive mode)
+  -m, --mainnet   Target mainnet
+  -t, --testnet   Target testnet
 ```
 
-<a id="lux-blockchain-import"></a>
-### import
+<a id="lux-chain-deploy"></a>
+### lux chain deploy
 
-Import blockchain configurations into lux-cli.
+Deploy a configured blockchain to the network.
 
-This command suite supports importing from a file created on another computer,
-or importing from blockchains running public networks
-(e.g. created manually or with the deprecated chain-cli)
+OVERVIEW:
+
+  Deploys a blockchain configuration to a running network. The blockchain
+  must be created first with 'lux chain create'. The target network must
+  be running before deployment.
+
+NETWORK FLAGS (choose one):
+
+  --mainnet, -m    Deploy to mainnet (port 9630, Network ID 1)
+  --testnet, -t    Deploy to testnet (port 9640, Network ID 2)
+  --devnet, -d     Deploy to devnet (port 9650, Network ID 3)
+  --local, -l      Deploy to local/custom network
+
+  Default: --local (deploys to custom/local network)
+
+PREREQUISITES:
+
+  1. Chain must be created:
+     lux chain create mychain
+
+  2. For local networks, network must be running:
+     lux network start --devnet
+
+  3. For remote networks (devnet, testnet, mainnet), a funded key is needed:
+     Set MNEMONIC or PRIVATE_KEY env var, or use --key flag
+
+  4. VM must be installed (for custom VMs):
+     lux vm link "Lux EVM" --path ~/work/lux/evm/build/evm
+
+OPTIONS:
+
+  --node-version   Specific luxd version to use (default: latest)
+  --key            Key name for remote network deployment (from ~/.lux/keys/)
+
+EXAMPLES:
+
+  # Deploy to remote devnet (auto-detects remote endpoint)
+  lux chain deploy mychain --devnet
+
+  # Deploy to remote devnet with specific key
+  lux chain deploy mychain --devnet --key mykey
+
+  # Deploy to local devnet (if local network is running)
+  lux chain deploy mychain --devnet
+
+  # Deploy to testnet
+  lux chain deploy mychain --testnet
+  lux chain deploy mychain -t
+
+  # Deploy to mainnet
+  lux chain deploy mychain --mainnet
+  lux chain deploy mychain -m
+
+  # Deploy with specific node version
+  lux chain deploy mychain --devnet --node-version v1.11.0
+
+DEPLOYMENT PROCESS:
+
+  Local network:
+  1. Validates chain configuration exists
+  2. Verifies local gRPC network is running
+  3. Checks VM plugin is installed
+  4. Creates blockchain via netrunner gRPC
+  5. Updates sidecar with deployment info
+
+  Remote network:
+  1. Validates chain configuration exists
+  2. Probes remote endpoint (e.g., https://api.lux-dev.network)
+  3. Creates chain on P-chain via wallet transaction
+  4. Creates blockchain on P-chain via wallet transaction
+  5. Updates sidecar with deployment info
+
+OUTPUT:
+
+  On success, displays:
+  - Blockchain ID
+  - Chain ID
+  - RPC endpoints
+
+TROUBLESHOOTING:
+
+  "Network not running" → Start network first:
+    lux network start --devnet
+
+  "Chain mychain not found" → Create chain first:
+    lux chain create mychain
+
+  "VM not installed" → Link VM binary:
+    lux vm link "Lux EVM" --path ~/path/to/evm
+
+  "RPC version mismatch" → Chain VM version incompatible with running node
+
+NOTES:
+
+  - Deployment info is saved to the chain's sidecar.json
+  - Same chain can be deployed to multiple networks
+  - Each deployment gets unique blockchain ID
+  - Use 'lux network status' to see deployed chain endpoints
 
 **Usage:**
-```bash
-lux blockchain import [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`file`](#lux-blockchain-import-file): The blockchain import command will import a blockchain configuration from a file or a git repository.
-
-To import from a file, you can optionally provide the path as a command-line argument.
-Alternatively, running the command without any arguments triggers an interactive wizard.
-To import from a repository, go through the wizard. By default, an imported Blockchain doesn't
-overwrite an existing Blockchain with the same name. To allow overwrites, provide the --force
-flag.
-- [`public`](#lux-blockchain-import-public): The blockchain import public command imports a Blockchain configuration from a running network.
-
-By default, an imported Blockchain
-doesn't overwrite an existing Blockchain with the same name. To allow overwrites, provide the --force
-flag.
-
-**Flags:**
 
 ```bash
--h, --help             help for import
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-blockchain-import-file"></a>
-#### import file
-
-The blockchain import command will import a blockchain configuration from a file or a git repository.
-
-To import from a file, you can optionally provide the path as a command-line argument.
-Alternatively, running the command without any arguments triggers an interactive wizard.
-To import from a repository, go through the wizard. By default, an imported Blockchain doesn't
-overwrite an existing Blockchain with the same name. To allow overwrites, provide the --force
-flag.
-
-**Usage:**
-```bash
-lux blockchain import file [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---blockchain string    the blockchain configuration to import from the provided repo
---branch string        the repo branch to use if downloading a new repo
--f, --force            overwrite the existing configuration if one exists
--h, --help             help for file
---repo string          the repo to import (ex: luxfi/plugins-core) or url to download the repo from
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-blockchain-import-public"></a>
-#### import public
-
-The blockchain import public command imports a Blockchain configuration from a running network.
-
-By default, an imported Blockchain
-doesn't overwrite an existing Blockchain with the same name. To allow overwrites, provide the --force
-flag.
-
-**Usage:**
-```bash
-lux blockchain import public [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---blockchain-id string    the blockchain ID
---cluster string          operate on the given cluster
---custom                  use a custom VM template
---devnet                  operate on a devnet network
---endpoint string         use the given endpoint for network operations
---evm                     import a evm
---force                   overwrite the existing configuration if one exists
--f, --testnet                testnet           operate on testnet (alias to testnet
--h, --help                help for public
--l, --local               operate on a local network
--m, --mainnet             operate on mainnet
---node-url string         [optional] URL of an already running validator
--t, --testnet             testnet           operate on testnet (alias to testnet)
---config string           config file (default is $HOME/.lux-cli/config.json)
---log-level string        log level for the application (default "ERROR")
---skip-update-check       skip check for new versions
-```
-
-<a id="lux-blockchain-join"></a>
-### join
-
-The blockchain join command configures your validator node to begin validating a new Blockchain.
-
-To complete this process, you must have access to the machine running your validator. If the
-CLI is running on the same machine as your validator, it can generate or update your node's
-config file automatically. Alternatively, the command can print the necessary instructions
-to update your node manually. To complete the validation process, the Blockchain's admins must add
-the NodeID of your validator to the Blockchain's allow list by calling addValidator with your
-NodeID.
-
-After you update your validator's config, you need to restart your validator manually. If
-you provide the --luxd-config flag, this command attempts to edit the config file
-at that path.
-
-This command currently only supports Blockchains deployed on the Testnet and Mainnet.
-
-**Usage:**
-```bash
-lux blockchain join [subcommand] [flags]
+lux chain deploy [chainName] [flags]
 ```
 
 **Flags:**
 
-```bash
---luxd-config string    file path of the luxd config file
---cluster string               operate on the given cluster
---data-dir string              path of luxd's data dir directory
---devnet                       operate on a devnet network
---endpoint string              use the given endpoint for network operations
---force-write                  if true, skip to prompt to overwrite the config file
--f, --testnet                     testnet                operate on testnet (alias to testnet
--h, --help                     help for join
--k, --key string               select the key to use [testnet only]
--g, --ledger                   use ledger instead of key (always true on mainnet, defaults to false on testnet)
---ledger-addrs strings         use the given ledger addresses
--l, --local                    operate on a local network
--m, --mainnet                  operate on mainnet
---node-id string               set the NodeID of the validator to check
---plugin-dir string            file path of luxd's plugin directory
---print                        if true, print the manual config without prompting
---stake-amount uint            amount of tokens to stake on validator
---staking-period duration      how long validator validates for after start time
---start-time string            start time that validator starts validating
--t, --testnet                  testnet                operate on testnet (alias to testnet)
---config string                config file (default is $HOME/.lux-cli/config.json)
---log-level string             log level for the application (default "ERROR")
---skip-update-check            skip check for new versions
+```
+  -d, --devnet                Deploy to devnet
+      --key string            Key name for remote network deployment (from ~/.lux/keys/)
+  -l, --local                 Deploy to local/custom network
+  -m, --mainnet               Deploy to mainnet
+      --node-version string   Node version to use (default "latest")
+  -t, --testnet               Deploy to testnet
+      --timeout duration      Maximum time to wait for chain deployment (e.g., 60s, 2m) (default 30s)
 ```
 
-<a id="lux-blockchain-list"></a>
-### list
+<a id="lux-chain-describe"></a>
+### lux chain describe
 
-The blockchain list command prints the names of all created Blockchain configurations. Without any flags,
-it prints some general, static information about the Blockchain. With the --deployed flag, the command
-shows additional information including the VMID, BlockchainID and ChainID.
+Show detailed information about a blockchain
 
 **Usage:**
+
 ```bash
-lux blockchain list [subcommand] [flags]
+lux chain describe [chainName] [flags]
 ```
 
 **Flags:**
 
-```bash
---deployed             show additional deploy information
--h, --help             help for list
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --custom    Target custom network
+  -d, --devnet    Target devnet
+  -m, --mainnet   Target mainnet
+  -t, --testnet   Target testnet
 ```
 
-<a id="lux-blockchain-publish"></a>
-### publish
+<a id="lux-chain-import"></a>
+### lux chain import
 
-The blockchain publish command publishes the Blockchain's VM to a repository.
+Import blocks from an RLP-encoded file to a running chain.
+
+OVERVIEW:
+
+  Imports historical blockchain data from RLP files into a running chain.
+  This is useful for bootstrapping chains with existing state or syncing
+  from canonical snapshots.
+
+  Uses the admin_importChain RPC method. The network must be running and
+  the admin API must be enabled (default when started via CLI).
+
+CHAIN IDENTIFIERS:
+
+  c, C         C-Chain (primary EVM chain)
+  <name>       Chain name (looks up blockchain ID from sidecar)
+  <blockchainID>  Direct blockchain ID
+
+NETWORK FLAGS (auto-detects port):
+
+  --mainnet, -m    Import to mainnet chain (port 9630)
+  --testnet, -t    Import to testnet chain (port 9640)
+  --devnet, -d     Import to devnet chain (port 9650)
+
+  Default: auto-detects running network or uses custom (port 9660)
+
+OPTIONS:
+
+  --rpc <url>      Custom RPC endpoint (overrides network flag)
+
+PREREQUISITES:
+
+  1. Network must be running:
+     lux network start --mainnet
+
+  2. RLP file must exist and be readable by the node
+
+EXAMPLES:
+
+  # Import C-Chain mainnet blocks
+  lux chain import c ~/work/lux/state/rlp/lux-mainnet-96369.rlp --mainnet
+
+  # Import to custom chain on devnet
+  lux chain import zoo ~/work/lux/state/rlp/zoo-mainnet-200200.rlp --devnet
+
+  # Import with custom RPC endpoint
+  lux chain import c blocks.rlp --rpc http://localhost:9630/v1/bc/C/rpc
+
+  # Import to blockchain by ID
+  lux chain import 2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt blocks.rlp --mainnet
+
+RLP FILE LOCATIONS:
+
+  Canonical RLP files are stored in:
+    ~/work/lux/state/rlp/<network>/<chain>-<chainid>.rlp
+
+  Examples:
+    ~/work/lux/state/rlp/lux-mainnet/lux-mainnet-96369.rlp
+    ~/work/lux/state/rlp/zoo-mainnet/zoo-mainnet-200200.rlp
+
+IMPORT PROCESS:
+
+  1. Validates file exists
+  2. Detects or connects to RPC endpoint
+  3. Gets current block height
+  4. Calls admin_importChain with file path
+  5. Monitors import progress
+  6. Reports final block height and import rate
+
+OUTPUT:
+
+  Import complete!
+    Blocks imported: 1082780
+    Final height: 1082780
+    Time: 45m12s
+    Rate: 399.2 blocks/sec
+
+TROUBLESHOOTING:
+
+  "Network not running" → Start network first:
+    lux network start --mainnet
+
+  "RPC connection refused" → Check network is running:
+    lux network status
+
+  "File not found" → Use absolute path or verify file exists
+
+  "Import timeout" → Import continues in background, check node logs
+
+NOTES:
+
+  - Import runs asynchronously - RPC may timeout but import continues
+  - Large imports (1M+ blocks) can take 30min - 2hrs depending on hardware
+  - The node must have read access to the RLP file
+  - Genesis config must match the RLP file exactly for successful import
+  - Use 'lux chain export' to create RLP files from running chains
 
 **Usage:**
+
 ```bash
-lux blockchain publish [subcommand] [flags]
+lux chain import <chain> <path> [flags]
 ```
 
 **Flags:**
 
-```bash
---alias string               We publish to a remote repo, but identify the repo locally under a user-provided alias (e.g. myrepo).
---force                      If true, ignores if the blockchain has been published in the past, and attempts a forced publish.
--h, --help                   help for publish
---no-repo-path string        Do not let the tool manage file publishing, but have it only generate the files and put them in the location given by this flag.
---repo-url string            The URL of the repo where we are publishing
---chain-file-path string    Path to the Blockchain description file. If not given, a prompting sequence will be initiated.
---vm-file-path string        Path to the VM description file. If not given, a prompting sequence will be initiated.
---config string              config file (default is $HOME/.lux-cli/config.json)
---log-level string           log level for the application (default "ERROR")
---skip-update-check          skip check for new versions
+```
+      --custom       Target custom network
+  -d, --devnet       Target devnet
+  -m, --mainnet      Target mainnet
+      --rpc string   Custom RPC endpoint (default: auto-detected)
+  -t, --testnet      Target testnet
 ```
 
-<a id="lux-blockchain-removevalidator"></a>
-### removeValidator
+<a id="lux-chain-launch"></a>
+### lux chain launch
 
-The blockchain removeValidator command stops a whitelisted blockchain network validator from
-validating your deployed Blockchain.
+Launch a complete blockchain ecosystem from a single chain.yaml configuration.
 
-To remove the validator from the Chain's allow list, provide the validator's unique NodeID. You can bypass
-these prompts by providing the values with flags.
+OVERVIEW:
+
+  The launch command reads a chain.yaml file and generates Kubernetes CRDs
+  that the lux-operator reconciles into a fully running ecosystem:
+  nodes, indexer, explorer, gateway, exchange, and faucet.
+
+GENERATED RESOURCES:
+
+  LuxNetwork    Validator node fleet (StatefulSet, genesis, staking)
+  LuxIndexer    Blockscout indexer per chain
+  LuxExplorer   Branded explorer frontend
+  LuxGateway    API gateway with rate limiting and CORS
+  Exchange      DEX frontend deployment (branded)
+  Faucet        Testnet/devnet token faucet
+
+EXAMPLES:
+
+  # Generate manifests for all networks (dry run)
+  lux chain launch chain.yaml --dry-run
+
+  # Generate and apply to devnet only
+  lux chain launch chain.yaml --network=devnet --apply
+
+  # Generate only explorer manifests
+  lux chain launch chain.yaml --service=explorer --dry-run
+
+  # Output manifests to custom directory
+  lux chain launch chain.yaml --output=./k8s/generated --dry-run
+
+WORKFLOW:
+
+  1. Create chain.yaml in your project root
+  2. Run: lux chain launch chain.yaml --dry-run
+  3. Review generated manifests
+  4. Run: lux chain launch chain.yaml --network=devnet --apply
+  5. Monitor: kubectl get luxnet,luxidx,luxexp,luxgw -n <namespace>
+
+NOTES:
+
+  - chain.yaml is the single source of truth for the entire ecosystem
+  - Generated CRDs require the lux-operator to be running in the cluster
+  - Ingress uses hanzoai/ingress (never nginx/caddy)
+  - All secrets are referenced via KMS, never stored in manifests
 
 **Usage:**
+
 ```bash
-lux blockchain removeValidator [subcommand] [flags]
+lux chain launch <chain.yaml> [flags]
 ```
 
 **Flags:**
 
-```bash
---aggregator-allow-private-peers        allow the signature aggregator to connect to peers with private IP (default true)
---aggregator-extra-endpoints strings    endpoints for extra nodes that are needed in signature aggregation
---aggregator-log-level string           log level to use with signature aggregator (default "Debug")
---aggregator-log-to-stdout              use stdout for signature aggregator logs
---auth-keys strings                     (for non-SOV blockchain only) control keys that will be used to authenticate the removeValidator tx
---blockchain-genesis-key                use genesis allocated key to pay fees for completing the validator's removal (blockchain gas token)
---blockchain-key string                 CLI stored key to use to pay fees for completing the validator's removal (blockchain gas token)
---blockchain-private-key string         private key to use to pay fees for completing the validator's removal (blockchain gas token)
---cluster string                        operate on the given cluster
---devnet                                operate on a devnet network
---endpoint string                       use the given endpoint for network operations
---force                                 force validator removal even if it's not getting rewarded
--f, --testnet                              testnet                         operate on testnet (alias to testnet
--h, --help                              help for removeValidator
--k, --key string                        select the key to use [testnet deploy only]
--g, --ledger                            use ledger instead of key (always true on mainnet, defaults to false on testnet)
---ledger-addrs strings                  use the given ledger addresses
--l, --local                             operate on a local network
--m, --mainnet                           operate on mainnet
---node-endpoint string                  remove validator that responds to the given endpoint
---node-id string                        node-id of the validator
---output-tx-path string                 (for non-SOV blockchain only) file path of the removeValidator tx
---rpc string                            connect to validator manager at the given rpc endpoint
--t, --testnet                           testnet                         operate on testnet (alias to testnet)
---uptime uint                           validator's uptime in seconds. If not provided, it will be automatically calculated
---config string                         config file (default is $HOME/.lux-cli/config.json)
---log-level string                      log level for the application (default "ERROR")
---skip-update-check                     skip check for new versions
+```
+      --apply            Apply generated manifests to the cluster via kubectl
+      --dry-run          Generate manifests without applying
+      --network string   Target specific network (mainnet, testnet, devnet)
+  -o, --output string    Output directory for generated manifests
+      --service string   Generate only specific service (node, indexer, explorer, gateway, exchange, faucet)
 ```
 
-<a id="lux-blockchain-stats"></a>
-### stats
+<a id="lux-chain-list"></a>
+### lux chain list
 
-The blockchain stats command prints validator statistics for the given Blockchain.
+List all configured blockchains with their details.
+
+OVERVIEW:
+
+  Displays a table of all blockchain configurations stored in ~/.lux/chains/.
+  Shows configuration details and deployment status across networks.
+
+OUTPUT COLUMNS:
+
+  Name        Blockchain configuration name
+  Type        Chain type (L1, L2, L3)
+  Chain ID    EVM chain ID
+  VM          Virtual machine type (EVM, CustomVM)
+  Sequencer   Sequencer type (lux, ethereum, op)
+  Deployed    Whether chain is deployed to any network
+
+EXAMPLES:
+
+  # List all configured chains
+  lux chain list
+
+TYPICAL OUTPUT:
+
+  +----------+------+----------+-----+-----------+----------+
+  | NAME     | TYPE | CHAIN ID | VM  | SEQUENCER | DEPLOYED |
+  +----------+------+----------+-----+-----------+----------+
+  | mychain  | L2   | 200200   | EVM | lux       | Yes      |
+  | testnet  | L1   | 36911    | EVM | lux       | No       |
+  +----------+------+----------+-----+-----------+----------+
+
+NOTES:
+
+  - Only shows chains with valid configurations
+  - "Deployed: Yes" means chain is deployed to at least one network
+  - Use 'lux chain describe <name>' for detailed chain information
+  - Use 'lux network status' to see endpoints of deployed chains
 
 **Usage:**
+
 ```bash
-lux blockchain stats [subcommand] [flags]
+lux chain list [flags]
 ```
 
 **Flags:**
 
-```bash
---cluster string       operate on the given cluster
---devnet               operate on a devnet network
---endpoint string      use the given endpoint for network operations
--f, --testnet             testnet      operate on testnet (alias to testnet
--h, --help             help for stats
--l, --local            operate on a local network
--m, --mainnet          operate on mainnet
--t, --testnet          testnet      operate on testnet (alias to testnet)
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --custom    Target custom network
+  -d, --devnet    Target devnet
+  -m, --mainnet   Target mainnet
+  -t, --testnet   Target testnet
 ```
 
-<a id="lux-blockchain-upgrade"></a>
-### upgrade
+<a id="lux-chain-upgrade"></a>
+### lux chain upgrade
 
 The blockchain upgrade command suite provides a collection of tools for
 updating your developmental and deployed Blockchains.
 
 **Usage:**
-```bash
-lux blockchain upgrade [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`apply`](#lux-blockchain-upgrade-apply): Apply generated upgrade bytes to running Blockchain nodes to trigger a network upgrade.
-
-For public networks (Testnet or Mainnet), to complete this process,
-you must have access to the machine running your validator.
-If the CLI is running on the same machine as your validator, it can manipulate your node's
-configuration automatically. Alternatively, the command can print the necessary instructions
-to upgrade your node manually.
-
-After you update your validator's configuration, you need to restart your validator manually.
-If you provide the --luxd-chain-config-dir flag, this command attempts to write the upgrade file at that path.
-Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#chain-chain-configs for related documentation.
-- [`export`](#lux-blockchain-upgrade-export): Export the upgrade bytes file to a location of choice on disk
-- [`generate`](#lux-blockchain-upgrade-generate): The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain. It
-guides the user through the process using an interactive wizard.
-- [`import`](#lux-blockchain-upgrade-import): Import the upgrade bytes file into the local environment
-- [`print`](#lux-blockchain-upgrade-print): Print the upgrade.json file content
-- [`vm`](#lux-blockchain-upgrade-vm): The blockchain upgrade vm command enables the user to upgrade their Blockchain's VM binary. The command
-can upgrade both local Blockchains and publicly deployed Blockchains on Testnet and Mainnet.
-
-The command walks the user through an interactive wizard. The user can skip the wizard by providing
-command line flags.
-
-**Flags:**
 
 ```bash
--h, --help             help for upgrade
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux chain upgrade
 ```
 
-<a id="lux-blockchain-upgrade-apply"></a>
-#### upgrade apply
+<a id="lux-chain-upgrade-apply"></a>
+#### lux chain upgrade apply
 
 Apply generated upgrade bytes to running Blockchain nodes to trigger a network upgrade.
 
@@ -842,109 +910,130 @@ After you update your validator's configuration, you need to restart your valida
 If you provide the --luxd-chain-config-dir flag, this command attempts to write the upgrade file at that path.
 Refer to https://docs.lux.network/nodes/maintain/chain-config-flags#chain-chain-configs for related documentation.
 
+In non-interactive mode (CI/scripts), use --force to skip confirmation prompts for
+timestamps in the past. The --luxd-chain-config-dir defaults to ~/.luxd/chains and
+will be used without confirmation prompts.
+
+Examples:
+  # Interactive mode
+  lux blockchain upgrade apply mychain --local
+
+  # Non-interactive mode with custom config directory
+  lux blockchain upgrade apply mychain --testnet --luxd-chain-config-dir /path/to/chains --force
+
+  # Print manual instructions (non-interactive friendly)
+  lux blockchain upgrade apply mychain --mainnet --print
+
 **Usage:**
+
 ```bash
-lux blockchain upgrade apply [subcommand] [flags]
+lux chain upgrade apply [blockchainName] [flags]
 ```
 
 **Flags:**
 
-```bash
---luxd-chain-config-dir string    luxd's chain config file directory (default "/home/runner/.luxd/chains")
---config                                 create upgrade config for future chain deployments (same as generate)
---force                                  If true, don't prompt for confirmation of timestamps in the past
---testnet                                   testnet                             apply upgrade existing testnet deployment (alias for `testnet`)
--h, --help                               help for apply
---local                                  local                           apply upgrade existing local deployment
---mainnet                                mainnet                       apply upgrade existing mainnet deployment
---print                                  if true, print the manual config without prompting (for public networks only)
---testnet                                testnet                       apply upgrade existing testnet deployment (alias for `testnet`)
---log-level string                       log level for the application (default "ERROR")
---skip-update-check                      skip check for new versions
+```
+      --config                         Create upgrade config for future chain deployments (same as generate)
+  -f, --force                          Skip confirmation prompts (e.g., for timestamps in the past)
+      --local                          Apply upgrade to existing local deployment
+      --luxd-chain-config-dir string   Luxd chain config directory (e.g., ~/.luxd/chains) (default "/Users/z/.luxd/chains")
+      --mainnet                        Apply upgrade to existing mainnet deployment
+      --print                          Print manual config instructions (for public networks only, non-interactive friendly)
+      --testnet                        Apply upgrade to existing testnet deployment
 ```
 
-<a id="lux-blockchain-upgrade-export"></a>
-#### upgrade export
+<a id="lux-chain-upgrade-export"></a>
+#### lux chain upgrade export
 
-Export the upgrade bytes file to a location of choice on disk
+Export the upgrade bytes file to a location of choice on disk.
+
+In non-interactive mode (CI/scripts), use --output to specify the file path
+and --force to overwrite existing files without confirmation.
+
+Examples:
+  # Interactive mode (prompts for path)
+  lux blockchain upgrade export mychain
+
+  # Non-interactive mode
+  lux blockchain upgrade export mychain --output ./upgrade.json --force
 
 **Usage:**
+
 ```bash
-lux blockchain upgrade export [subcommand] [flags]
+lux chain upgrade export [blockchainName] [flags]
 ```
 
 **Flags:**
 
-```bash
---force                      If true, overwrite a possibly existing file without prompting
--h, --help                   help for export
---upgrade-filepath string    Export upgrade bytes file to location of choice on disk
---config string              config file (default is $HOME/.lux-cli/config.json)
---log-level string           log level for the application (default "ERROR")
---skip-update-check          skip check for new versions
+```
+  -f, --force           Overwrite existing file without confirmation
+  -o, --output string   Output file path for upgrade bytes (required in non-interactive mode)
 ```
 
-<a id="lux-blockchain-upgrade-generate"></a>
-#### upgrade generate
+<a id="lux-chain-upgrade-generate"></a>
+#### lux chain upgrade generate
 
-The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain. It
-guides the user through the process using an interactive wizard.
+The blockchain upgrade generate command builds a new upgrade.json file to customize your Blockchain.
+It guides the user through the process using an interactive wizard.
+
+IMPORTANT: This command requires interactive mode (TTY) due to the complexity of precompile
+configuration. For non-interactive/CI environments, create the upgrade.json file manually
+or use 'lux blockchain upgrade import' to import a pre-created configuration.
+
+Use --yes/-y to skip the initial warning confirmation when running interactively.
+
+Examples:
+  # Interactive mode (wizard)
+  lux blockchain upgrade generate mychain
+
+  # Skip initial warning
+  lux blockchain upgrade generate mychain --yes
+
+  # For CI/non-interactive: import a pre-created upgrade file instead
+  lux blockchain upgrade import mychain --upgrade-filepath ./upgrade.json
 
 **Usage:**
+
 ```bash
-lux blockchain upgrade generate [subcommand] [flags]
+lux chain upgrade generate [blockchainName] [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help             help for generate
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+  -y, --yes   Skip initial warning confirmation prompt
 ```
 
-<a id="lux-blockchain-upgrade-import"></a>
-#### upgrade import
+<a id="lux-chain-upgrade-import"></a>
+#### lux chain upgrade import
 
 Import the upgrade bytes file into the local environment
 
 **Usage:**
+
 ```bash
-lux blockchain upgrade import [subcommand] [flags]
+lux chain upgrade import [blockchainName] [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help                   help for import
---upgrade-filepath string    Import upgrade bytes file into local environment
---config string              config file (default is $HOME/.lux-cli/config.json)
---log-level string           log level for the application (default "ERROR")
---skip-update-check          skip check for new versions
+```
+      --upgrade-filepath string   Import upgrade bytes file into local environment
 ```
 
-<a id="lux-blockchain-upgrade-print"></a>
-#### upgrade print
+<a id="lux-chain-upgrade-print"></a>
+#### lux chain upgrade print
 
 Print the upgrade.json file content
 
 **Usage:**
-```bash
-lux blockchain upgrade print [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
--h, --help             help for print
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux chain upgrade print [blockchainName]
 ```
 
-<a id="lux-blockchain-upgrade-vm"></a>
-#### upgrade vm
+<a id="lux-chain-upgrade-vm"></a>
+#### lux chain upgrade vm
 
 The blockchain upgrade vm command enables the user to upgrade their Blockchain's VM binary. The command
 can upgrade both local Blockchains and publicly deployed Blockchains on Testnet and Mainnet.
@@ -953,2338 +1042,3934 @@ The command walks the user through an interactive wizard. The user can skip the 
 command line flags.
 
 **Usage:**
+
 ```bash
-lux blockchain upgrade vm [subcommand] [flags]
+lux chain upgrade vm [blockchainName] [flags]
 ```
 
 **Flags:**
 
-```bash
---binary string        Upgrade to custom binary
---config               upgrade config for future chain deployments
---testnet                 testnet           upgrade existing testnet deployment (alias for `testnet`)
--h, --help             help for vm
---latest               upgrade to latest version
---local                local         upgrade existing local deployment
---mainnet              mainnet     upgrade existing mainnet deployment
---plugin-dir string    plugin directory to automatically upgrade VM
---print                print instructions for upgrading
---testnet              testnet     upgrade existing testnet deployment (alias for `testnet`)
---version string       Upgrade to custom version
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
 ```
-
-<a id="lux-blockchain-validators"></a>
-### validators
-
-The blockchain validators command lists the validators of a blockchain and provides
-several statistics about them.
-
-**Usage:**
-```bash
-lux blockchain validators [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---cluster string       operate on the given cluster
---devnet               operate on a devnet network
---endpoint string      use the given endpoint for network operations
--f, --testnet             testnet      operate on testnet (alias to testnet
--h, --help             help for validators
--l, --local            operate on a local network
--m, --mainnet          operate on mainnet
--t, --testnet          testnet      operate on testnet (alias to testnet)
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-blockchain-vmid"></a>
-### vmid
-
-The blockchain vmid command prints the virtual machine ID (VMID) for the given Blockchain.
-
-**Usage:**
-```bash
-lux blockchain vmid [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for vmid
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+      --binary string       Upgrade to custom binary
+      --config              upgrade config for future chain deployments
+      --latest              upgrade to latest version
+      --local local         upgrade existing local deployment
+      --mainnet mainnet     upgrade existing mainnet deployment
+      --plugin-dir string   plugin directory to automatically upgrade VM
+      --print               print instructions for upgrading
+      --testnet testnet     upgrade existing testnet deployment (alias for `testnet`)
+      --version string      Upgrade to custom version
 ```
 
 <a id="lux-config"></a>
 ## lux config
 
-Customize configuration for Lux-CLI
+Customize configuration for Lux CLI
 
 **Usage:**
-```bash
-lux config [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`authorize-cloud-access`](#lux-config-authorize-cloud-access): set preferences to authorize access to cloud resources
-- [`metrics`](#lux-config-metrics): set user metrics collection preferences
-- [`migrate`](#lux-config-migrate): migrate command migrates old ~/.lux-cli.json and ~/.lux-cli/config to /.lux-cli/config.json..
-- [`snapshotsAutoSave`](#lux-config-snapshotsautosave): set user preference between auto saving local network snapshots or not
-- [`update`](#lux-config-update): set user preference between update check or not
-
-**Flags:**
 
 ```bash
--h, --help             help for config
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux config
 ```
 
-<a id="lux-config-authorize-cloud-access"></a>
-### authorize-cloud-access
+<a id="lux-config-lint"></a>
+### lux config lint
 
-set preferences to authorize access to cloud resources
+Validate a luxd configuration file for errors.
+
+Reports:
+  - Unknown configuration keys (with typo suggestions)
+  - Invalid value types (e.g., "abc" for a duration)
+  - Deprecated keys (with replacement hints)
+
+Uses the authoritative flag spec from github.com/luxfi/config/spec,
+which is generated from the node's source of truth.
+
+Example:
+  lux config lint myconfig.json
 
 **Usage:**
-```bash
-lux config authorize-cloud-access [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
--h, --help             help for authorize-cloud-access
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux config lint <config-file.json>
 ```
 
 <a id="lux-config-metrics"></a>
-### metrics
+### lux config metrics
 
 set user metrics collection preferences
 
 **Usage:**
-```bash
-lux config metrics [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
--h, --help             help for metrics
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-config-migrate"></a>
-### migrate
-
-migrate command migrates old ~/.lux-cli.json and ~/.lux-cli/config to /.lux-cli/config.json..
-
-**Usage:**
-```bash
-lux config migrate [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for migrate
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-config-snapshotsautosave"></a>
-### snapshotsAutoSave
-
-set user preference between auto saving local network snapshots or not
-
-**Usage:**
-```bash
-lux config snapshotsAutoSave [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for snapshotsAutoSave
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-config-update"></a>
-### update
-
-set user preference between update check or not
-
-**Usage:**
-```bash
-lux config update [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for update
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux config metrics [enable | disable]
 ```
 
 <a id="lux-contract"></a>
 ## lux contract
 
 The contract command suite provides a collection of tools for deploying
-and interacting with smart contracts.
+and interacting with smart contracts on Lux networks.
 
 **Usage:**
-```bash
-lux contract [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`deploy`](#lux-contract-deploy): The contract command suite provides a collection of tools for deploying
-smart contracts.
-- [`initValidatorManager`](#lux-contract-initvalidatormanager): Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager
-
-**Flags:**
 
 ```bash
--h, --help             help for contract
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux contract
 ```
 
 <a id="lux-contract-deploy"></a>
-### deploy
+### lux contract deploy
 
 The contract command suite provides a collection of tools for deploying
-smart contracts.
+smart contracts on Lux networks.
 
 **Usage:**
-```bash
-lux contract deploy [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`erc20`](#lux-contract-deploy-erc20): Deploy an ERC20 token into a given Network and Blockchain
-
-**Flags:**
 
 ```bash
--h, --help             help for deploy
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux contract deploy
 ```
 
 <a id="lux-contract-deploy-erc20"></a>
-#### deploy erc20
+#### lux contract deploy erc20
 
-Deploy an ERC20 token into a given Network and Blockchain
+Deploy an ERC20 token into a given Network and Blockchain.
+
+The command deploys a standard ERC20 token contract with the specified
+symbol, initial supply, and recipient address for the minted tokens.
+
+Examples:
+  # Interactive mode (prompts for missing values)
+  lux contract deploy erc20
+
+  # Non-interactive mode (all flags required)
+  lux contract deploy erc20 --symbol USDC --supply 1000000 \
+    --funded 0x1234...abcd --private-key-file ./key.txt \
+    --c-chain --mainnet
+
+  # Deploy to a specific blockchain
+  lux contract deploy erc20 --symbol LUX --supply 100000000 \
+    --funded 0xYourAddress --blockchain-id <ID> --testnet
 
 **Usage:**
+
 ```bash
-lux contract deploy erc20 [subcommand] [flags]
+lux contract deploy erc20 [flags]
 ```
 
 **Flags:**
 
-```bash
---blockchain string       deploy the ERC20 contract into the given CLI blockchain
---blockchain-id string    deploy the ERC20 contract into the given blockchain ID/Alias
---c-chain                 deploy the ERC20 contract into C-Chain
---cluster string          operate on the given cluster
---devnet                  operate on a devnet network
---endpoint string         use the given endpoint for network operations
--f, --testnet                testnet           operate on testnet (alias to testnet
---funded string           set the funded address
---genesis-key             use genesis allocated key as contract deployer
--h, --help                help for erc20
---key string              CLI stored key to use as contract deployer
--l, --local               operate on a local network
--m, --mainnet             operate on mainnet
---private-key string      private key to use as contract deployer
---rpc string              deploy the contract into the given rpc endpoint
---supply uint             set the token supply
---symbol string           set the token symbol
--t, --testnet             testnet           operate on testnet (alias to testnet)
---config string           config file (default is $HOME/.lux-cli/config.json)
---log-level string        log level for the application (default "ERROR")
---skip-update-check       skip check for new versions
+```
+      --blockchain string      deploy the ERC20 contract into the given CLI blockchain
+      --blockchain-id string   deploy the ERC20 contract into the given blockchain ID/Alias
+      --c-chain                deploy the ERC20 contract into C-Chain
+      --funded string          address to receive the initial token supply (0x...)
+      --genesis-key            use genesis allocated key as contract deployer
+      --key string             CLI stored key to use as contract deployer
+      --private-key string     private key to use as contract deployer
+      --rpc string             RPC endpoint URL (auto-detected if not specified)
+      --supply uint            total token supply to mint
+      --symbol string          token symbol (e.g., USDC, LUX)
 ```
 
-<a id="lux-contract-initvalidatormanager"></a>
-### initValidatorManager
+<a id="lux-contract-deploy-l2"></a>
+#### lux contract deploy l2
+
+Deploy the canonical lux/standard contract stack (Safe + Bridge + Exchange +
+sToken + WLUX/BridgedETH/BridgedBTC) to one or more L2 chains.
+
+The inventory JSON describes which chains exist for a given env and what
+their evmChainId values should be. The command per-brand:
+
+  1. Probes the L2's RPC for eth_chainId and checks it matches inventory.
+  2. Reads the deployments manifest; if WLUX is already deployed (cast code
+     returns non-empty), the deploy is skipped (use --resume to override).
+  3. Invokes forge script with the appropriate identity, RPC, and resume
+     flags.
+  4. Parses forge's broadcast output and writes a manifest at
+     lux/standard/deployments/l2-<env>/<brand>.json.
+
+Mainnet broadcast (--confirm with --env mainnet) is gated behind
+--i-know-this-is-real-money.
+
+**Usage:**
+
+```bash
+lux contract deploy l2 [flags]
+```
+
+**Flags:**
+
+```
+      --brand string                restrict to a single brand (default: all in inventory)
+      --confirm                     broadcast instead of dry-run
+      --deployer-index uint         BIP44 mnemonic index for the deployer key
+      --env string                  mainnet|testnet|devnet
+      --i-know-this-is-real-money   mainnet broadcast safeguard
+      --inventory string            inventory JSON path
+      --kms-fetch string            kms-fetch binary path (default: ~/work/hanzo/kms/cmd/kms-fetch/kms-fetch)
+      --liquid                      after standard succeeds, also deploy lux/liquid
+      --liquid-repo string          lux/liquid repo root (default: ~/work/lux/liquid)
+      --liquid-script string        forge script in lux/liquid (default: script/DeployL2.s.sol)
+      --repo string                 lux/standard repo root (default: ~/work/lux/standard)
+      --resume                      pass --resume to forge to continue a partial broadcast
+      --script string               forge script (default: contracts/script/DeployMultiNetwork.s.sol)
+```
+
+<a id="lux-contract-initValidatorManager"></a>
+### lux contract initValidatorManager
 
 Initializes Proof of Authority(PoA) or Proof of Stake(PoS)Validator Manager contract on a Blockchain and sets up initial validator set on the Blockchain. For more info on Validator Manager, please head to https://github.com/luxfi/warp-contracts/tree/main/contracts/validator-manager
 
 **Usage:**
+
 ```bash
-lux contract initValidatorManager [subcommand] [flags]
+lux contract initValidatorManager blockchainName [flags]
 ```
 
 **Flags:**
 
-```bash
---aggregator-allow-private-peers          allow the signature aggregator to connect to peers with private IP (default true)
---aggregator-extra-endpoints strings      endpoints for extra nodes that are needed in signature aggregation
---aggregator-log-level string             log level to use with signature aggregator (default "Debug")
---aggregator-log-to-stdout                dump signature aggregator logs to stdout
---cluster string                          operate on the given cluster
---devnet                                  operate on a devnet network
---endpoint string                         use the given endpoint for network operations
--f, --testnet                                testnet                           operate on testnet (alias to testnet
---genesis-key                             use genesis allocated key as contract deployer
--h, --help                                help for initValidatorManager
---key string                              CLI stored key to use as contract deployer
--l, --local                               operate on a local network
--m, --mainnet                             operate on mainnet
---pos-maximum-stake-amount uint           (PoS only) maximum stake amount (default 1000)
---pos-maximum-stake-multiplier            uint8     (PoS only )maximum stake multiplier (default 1)
---pos-minimum-delegation-fee uint16       (PoS only) minimum delegation fee (default 1)
---pos-minimum-stake-amount uint           (PoS only) minimum stake amount (default 1)
---pos-minimum-stake-duration uint         (PoS only) minimum stake duration (in seconds) (default 100)
---pos-reward-calculator-address string    (PoS only) initialize the ValidatorManager with reward calculator address
---pos-weight-to-value-factor uint         (PoS only) weight to value factor (default 1)
---private-key string                      private key to use as contract deployer
---rpc string                              deploy the contract into the given rpc endpoint
--t, --testnet                             testnet                           operate on testnet (alias to testnet)
---config string                           config file (default is $HOME/.lux-cli/config.json)
---log-level string                        log level for the application (default "ERROR")
---skip-update-check                       skip check for new versions
+```
+      --genesis-key                            use genesis allocated key as contract deployer
+      --key string                             CLI stored key to use as contract deployer
+      --pos-maximum-stake-amount uint          (PoS only) maximum stake amount (default 1000)
+      --pos-maximum-stake-multiplier uint8     (PoS only )maximum stake multiplier (default 1)
+      --pos-minimum-delegation-fee uint16      (PoS only) minimum delegation fee (default 1)
+      --pos-minimum-stake-amount uint          (PoS only) minimum stake amount (default 1)
+      --pos-minimum-stake-duration uint        (PoS only) minimum stake duration (in seconds) (default 86400)
+      --pos-reward-calculator-address string   (PoS only) initialize the ValidatorManager with reward calculator address
+      --pos-weight-to-value-factor uint        (PoS only) weight to value factor (default 1)
+      --private-key string                     private key to use as contract deployer
+      --rpc string                             blockchain rpc endpoint
 ```
 
-<a id="lux-help"></a>
-## lux help
+<a id="lux-ctx"></a>
+## lux ctx
 
-Help provides help for any command in the application.
-Simply type lux help [path to command] for full details.
+Scans $LUX_NETWORK_PATH (default ~/work/{lux,zoo,hanzo,pars,osage,adnexus}/universe)
+for chain.yaml files and prints every (network, env) tuple they declare.
 
 **Usage:**
-```bash
-lux help [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
--h, --help             help for help
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux ctx
 ```
 
-<a id="lux-warp"></a>
-## lux warp
+<a id="lux-cycle"></a>
+## lux cycle
 
-The messenger command suite provides a collection of tools for interacting
-with Warp messenger contracts.
+Atomically boots the network's L1, deploys the standard contract
+suite, stops the node cleanly, and writes a tar.zst snapshot.
+
+Pipeline:
+  1. lux up    <ref>           (background within this process)
+  2. wait healthy (networkID match + C-chain responding)
+  3. lux deploy <ref>          (forge against the local RPC)
+  4. lux down  <ref>           (SIGTERM + wait drain)
+  5. lux snap  <ref>           (tar.zst the data-dir)
+
+Examples:
+  lux cycle zoo/localnet
+  lux cycle lux/devnet --skip-deploy   # boot, stop, snap only
+  lux cycle hanzo/testnet --skip-snap
 
 **Usage:**
+
 ```bash
-lux warp [subcommand] [flags]
+lux cycle <network>/<env> [flags]
 ```
-
-**Subcommands:**
-
-- [`deploy`](#lux-warp-deploy): Deploys Warp Messenger and Registry into a given L1.
-- [`sendMsg`](#lux-warp-sendmsg): Sends and wait reception for a Warp msg between two blockchains.
 
 **Flags:**
 
-```bash
--h, --help             help for warp
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --mnemonic string    BIP44 mnemonic for the deployer (defaults to $LUX_MNEMONIC)
+      --node-path string   path to luxd binary
+      --skip-deploy        do not run contract deploy stage
+      --skip-snap          do not run snapshot stage
 ```
 
-<a id="lux-warp-deploy"></a>
-### deploy
+<a id="lux-dev"></a>
+## lux dev
 
-Deploys Warp Messenger and Registry into a given L1.
+The dev command provides local development environment tools.
 
-For Local Networks, it also deploys into C-Chain.
+This runs a single-node Lux network with K=1 consensus for instant
+block finality. All chains (C/P/X) are enabled with full validator
+signing capabilities.
+
+Commands:
+  start   - Start local dev node (default port 8545)
+  stop    - Stop the dev node
+
+Features:
+  • K=1 consensus (instant finality, no validator sampling)
+  • Full validator signing for all chains
+  • Compatible with Hardhat/Foundry/Anvil tooling
+  • Test accounts pre-funded in genesis
 
 **Usage:**
-```bash
-lux warp deploy [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---blockchain string                         deploy Warp into the given CLI blockchain
---blockchain-id string                      deploy Warp into the given blockchain ID/Alias
---c-chain                                   deploy Warp into C-Chain
---cchain-key string                         key to be used to pay fees to deploy Warp to C-Chain
---cluster string                            operate on the given cluster
---deploy-messenger                          deploy Warp Messenger (default true)
---deploy-registry                           deploy Warp Registry (default true)
---devnet                                    operate on a devnet network
---endpoint string                           use the given endpoint for network operations
---force-registry-deploy                     deploy Warp Registry even if Messenger has already been deployed
--f, --testnet                                  testnet                             operate on testnet (alias to testnet
---genesis-key                               use genesis allocated key to fund Warp deploy
--h, --help                                  help for deploy
---include-cchain                            deploy Warp also to C-Chain
---key string                                CLI stored key to use to fund Warp deploy
--l, --local                                 operate on a local network
--m, --mainnet                               operate on mainnet
---messenger-contract-address-path string    path to a messenger contract address file
---messenger-deployer-address-path string    path to a messenger deployer address file
---messenger-deployer-tx-path string         path to a messenger deployer tx file
---private-key string                        private key to use to fund Warp deploy
---registry-bytecode-path string             path to a registry bytecode file
---rpc-url string                            use the given RPC URL to connect to the chain
--t, --testnet                               testnet                             operate on testnet (alias to testnet)
---version string                            version to deploy (default "latest")
---config string                             config file (default is $HOME/.lux-cli/config.json)
---log-level string                          log level for the application (default "ERROR")
---skip-update-check                         skip check for new versions
+lux dev
 ```
 
-<a id="lux-warp-sendmsg"></a>
-### sendMsg
+<a id="lux-dev-stack"></a>
+### lux dev stack
 
-Sends and wait reception for a Warp msg between two blockchains.
+Manage a multi-app local development stack.
+
+The stack runs luxd (one or more nodes) plus companion apps:
+explorer, bridge, exchange, safe, dao, wallet, faucet.
+
+Config lives at ~/.lux/dev/stack.yaml and is auto-created on first run.
+
+Examples:
+  lux dev stack up                # Start stack with defaults
+  lux dev stack up --chains 3     # Start 3 luxd nodes + apps
+  lux dev stack down              # Graceful shutdown
+  lux dev stack status            # Show running processes
+  lux dev stack logs explorer     # Tail explorer logs
 
 **Usage:**
-```bash
-lux warp sendMsg [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---cluster string                operate on the given cluster
---dest-rpc string               use the given destination blockchain rpc endpoint
---destination-address string    deliver the message to the given contract destination address
---devnet                        operate on a devnet network
---endpoint string               use the given endpoint for network operations
--f, --testnet                      testnet                 operate on testnet (alias to testnet
---genesis-key                   use genesis allocated key as message originator and to pay source blockchain fees
--h, --help                      help for sendMsg
---hex-encoded                   given message is hex encoded
---key string                    CLI stored key to use as message originator and to pay source blockchain fees
--l, --local                     operate on a local network
--m, --mainnet                   operate on mainnet
---private-key string            private key to use as message originator and to pay source blockchain fees
---source-rpc string             use the given source blockchain rpc endpoint
--t, --testnet                   testnet                 operate on testnet (alias to testnet)
---config string                 config file (default is $HOME/.lux-cli/config.json)
---log-level string              log level for the application (default "ERROR")
---skip-update-check             skip check for new versions
+lux dev stack
 ```
 
-<a id="lux-warp"></a>
-## lux warp
+<a id="lux-dev-stack-down"></a>
+#### lux dev stack down
 
-The warp command suite provides tools to deploy and manage Warp Transfers.
+Gracefully stop all running stack processes. Sends SIGTERM, waits 10s, then SIGKILL.
 
 **Usage:**
-```bash
-lux warp [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`deploy`](#lux-warp-deploy): Deploys a Token Transferrer into a given Network and Chains
-
-**Flags:**
 
 ```bash
--h, --help             help for warp
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux dev stack down
 ```
 
-<a id="lux-warp-deploy"></a>
-### deploy
+<a id="lux-dev-stack-logs"></a>
+#### lux dev stack logs
 
-Deploys a Token Transferrer into a given Network and Chains
+Tail the log file for a stack application.
+
+The app name can be a base name (e.g., "explorer") which tails instance 0,
+or a full instance name (e.g., "explorer-1") for a specific chain instance.
 
 **Usage:**
-```bash
-lux warp deploy [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---c-chain-home                 set the Transferrer's Home Chain into C-Chain
---c-chain-remote               set the Transferrer's Remote Chain into C-Chain
---cluster string               operate on the given cluster
---deploy-erc20-home string     deploy a Transferrer Home for the given Chain's ERC20 Token
---deploy-native-home           deploy a Transferrer Home for the Chain's Native Token
---deploy-native-remote         deploy a Transferrer Remote for the Chain's Native Token
---devnet                       operate on a devnet network
---endpoint string              use the given endpoint for network operations
--f, --testnet                     testnet                  operate on testnet (alias to testnet
--h, --help                     help for deploy
---home-blockchain string       set the Transferrer's Home Chain into the given CLI blockchain
---home-genesis-key             use genesis allocated key to deploy Transferrer Home
---home-key string              CLI stored key to use to deploy Transferrer Home
---home-private-key string      private key to use to deploy Transferrer Home
---home-rpc string              use the given RPC URL to connect to the home blockchain
--l, --local                    operate on a local network
--m, --mainnet                  operate on mainnet
---remote-blockchain string     set the Transferrer's Remote Chain into the given CLI blockchain
---remote-genesis-key           use genesis allocated key to deploy Transferrer Remote
---remote-key string            CLI stored key to use to deploy Transferrer Remote
---remote-private-key string    private key to use to deploy Transferrer Remote
---remote-rpc string            use the given RPC URL to connect to the remote blockchain
---remote-token-decimals        uint8   use the given number of token decimals for the Transferrer Remote [defaults to token home's decimals (18 for a new wrapped native home token)]
---remove-minter-admin          remove the native minter precompile admin found on remote blockchain genesis
--t, --testnet                  testnet                  operate on testnet (alias to testnet)
---use-home string              use the given Transferrer's Home Address
---version string               tag/branch/commit of Lux Warp to be used (defaults to main branch)
---config string                config file (default is $HOME/.lux-cli/config.json)
---log-level string             log level for the application (default "ERROR")
---skip-update-check            skip check for new versions
+lux dev stack logs <app>
 ```
 
-<a id="lux-interchain"></a>
-## lux warp
+<a id="lux-dev-stack-status"></a>
+#### lux dev stack status
 
-The warp command suite provides a collection of tools to
-set and manage interoperability between blockchains.
+Display a table of all stack processes with PID, port, state, and uptime.
 
 **Usage:**
-```bash
-lux interchain [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`messenger`](#lux-interchain-messenger): The messenger command suite provides a collection of tools for interacting
-with Warp messenger contracts.
-- [`relayer`](#lux-interchain-relayer): The relayer command suite provides a collection of tools for deploying
-and configuring an Warp relayers.
-- [`tokenTransferrer`](#lux-interchain-tokentransferrer): The tokenTransfer command suite provides tools to deploy and manage Token Transferrers.
-
-**Flags:**
 
 ```bash
--h, --help             help for interchain
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux dev stack status
 ```
 
-<a id="lux-interchain-messenger"></a>
-### messenger
+<a id="lux-dev-stack-up"></a>
+#### lux dev stack up
 
-The messenger command suite provides a collection of tools for interacting
-with Warp messenger contracts.
+Start all enabled apps in the dev stack.
+
+luxd nodes start first and must pass health checks before companion
+apps are launched. Port deconfliction for multi-chain: chain i gets
+ports at port_base + 100*i.
 
 **Usage:**
+
 ```bash
-lux interchain messenger [subcommand] [flags]
+lux dev stack up [flags]
 ```
-
-**Subcommands:**
-
-- [`deploy`](#lux-interchain-messenger-deploy): Deploys Warp Messenger and Registry into a given L1.
-- [`sendMsg`](#lux-interchain-messenger-sendmsg): Sends and wait reception for a Warp msg between two blockchains.
 
 **Flags:**
 
-```bash
--h, --help             help for messenger
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --chains int      number of luxd nodes (overrides stack.yaml)
+      --config string   path to stack.yaml (default: ~/.lux/dev/stack.yaml)
 ```
 
-<a id="lux-interchain-messenger-deploy"></a>
-#### messenger deploy
+<a id="lux-dev-start"></a>
+### lux dev start
 
-Deploys Warp Messenger and Registry into a given L1.
+Start a single-node Lux development network.
 
-For Local Networks, it also deploys into C-Chain.
+The dev node uses K=1 consensus for instant block finality without
+validator sampling. All chains are enabled with full validator signing:
+  • C-Chain: EVM-compatible smart contracts
+  • P-Chain: Platform staking and validation
+  • X-Chain: UTXO-based asset exchange
+  • T-Chain: Threshold FHE operations
+
+Default port is 8545 (Anvil-compatible) so it works seamlessly with
+Hardhat, Foundry, and other Ethereum tooling.
+
+FHE Support:
+  The T-Chain provides threshold homomorphic encryption for confidential
+  smart contracts. Use FHE precompiles at 0x0200...0080 or the @luxfi/fhe SDK.
+
+DEX / D-Chain:
+  The public default luxd does NOT include the DEX D-Chain. To launch the
+  dchain-tagged luxd (which bakes D-Chain on localnet 1337) pass:
+    lux dev start --build-tags dchain
+  This resolves the dchain-tagged binary and points --plugin-dir at the plugin
+  directory so the EVM plugin subprocess is found deterministically.
+
+Examples:
+  lux dev start                    # Start on default port 8545
+  lux dev start --port 9650        # Start on custom port
+  lux dev start --automine 1s      # Mine blocks every 1 second
+  lux dev start --automine 500ms   # Mine blocks every 500ms
+  lux dev start --build-tags dchain # Start the D-Chain-enabled (dexvm) node
 
 **Usage:**
+
 ```bash
-lux interchain messenger deploy [subcommand] [flags]
+lux dev start [flags]
 ```
 
 **Flags:**
 
-```bash
---blockchain string                         deploy Warp into the given CLI blockchain
---blockchain-id string                      deploy Warp into the given blockchain ID/Alias
---c-chain                                   deploy Warp into C-Chain
---cchain-key string                         key to be used to pay fees to deploy Warp to C-Chain
---cluster string                            operate on the given cluster
---deploy-messenger                          deploy Warp Messenger (default true)
---deploy-registry                           deploy Warp Registry (default true)
---devnet                                    operate on a devnet network
---endpoint string                           use the given endpoint for network operations
---force-registry-deploy                     deploy Warp Registry even if Messenger has already been deployed
--f, --testnet                                  testnet                             operate on testnet (alias to testnet
---genesis-key                               use genesis allocated key to fund Warp deploy
--h, --help                                  help for deploy
---include-cchain                            deploy Warp also to C-Chain
---key string                                CLI stored key to use to fund Warp deploy
--l, --local                                 operate on a local network
--m, --mainnet                               operate on mainnet
---messenger-contract-address-path string    path to a messenger contract address file
---messenger-deployer-address-path string    path to a messenger deployer address file
---messenger-deployer-tx-path string         path to a messenger deployer tx file
---private-key string                        private key to use to fund Warp deploy
---registry-bytecode-path string             path to a registry bytecode file
---rpc-url string                            use the given RPC URL to connect to the chain
--t, --testnet                               testnet                             operate on testnet (alias to testnet)
---version string                            version to deploy (default "latest")
---config string                             config file (default is $HOME/.lux-cli/config.json)
---log-level string                          log level for the application (default "ERROR")
---skip-update-check                         skip check for new versions
+```
+      --automine string       auto-mine interval (e.g., '1s', '500ms'); empty = mine as blocks arrive
+      --build-tags string     luxd build-tag selector; 'dchain' launches the D-Chain-enabled (dexvm) node
+      --clean                 clean state before starting (fresh genesis)
+      --data-dir string       luxd data-dir (default ~/.lux/devnet)
+      --genesis-file string   genesis file path (uses luxd embedded if empty)
+      --log-level string      log level (debug, info, warn, error) (default "info")
+      --network-id uint32     sovereign-L1 networkID (override 1337 default) (default 1337)
+      --node-path string      path to luxd binary (auto-detected if not set)
+      --plugin-dir string     VM plugin directory passed to luxd (default: luxd's own ~/.lux/plugins/current)
+      --port int              HTTP port for RPC (Anvil-compatible default) (default 8545)
 ```
 
-<a id="lux-interchain-messenger-sendmsg"></a>
-#### messenger sendMsg
+<a id="lux-dev-stop"></a>
+### lux dev stop
 
-Sends and wait reception for a Warp msg between two blockchains.
+Stops the dev node that `lux dev start` writes to its default
+data-dir (~/.lux/devnet). For sovereign-L1 nodes booted via
+`lux up <brand>/<env>`, use `lux down <brand>/<env>` instead.
 
 **Usage:**
-```bash
-lux interchain messenger sendMsg [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---cluster string                operate on the given cluster
---dest-rpc string               use the given destination blockchain rpc endpoint
---destination-address string    deliver the message to the given contract destination address
---devnet                        operate on a devnet network
---endpoint string               use the given endpoint for network operations
--f, --testnet                      testnet                 operate on testnet (alias to testnet
---genesis-key                   use genesis allocated key as message originator and to pay source blockchain fees
--h, --help                      help for sendMsg
---hex-encoded                   given message is hex encoded
---key string                    CLI stored key to use as message originator and to pay source blockchain fees
--l, --local                     operate on a local network
--m, --mainnet                   operate on mainnet
---private-key string            private key to use as message originator and to pay source blockchain fees
---source-rpc string             use the given source blockchain rpc endpoint
--t, --testnet                   testnet                 operate on testnet (alias to testnet)
---config string                 config file (default is $HOME/.lux-cli/config.json)
---log-level string              log level for the application (default "ERROR")
---skip-update-check             skip check for new versions
+lux dev stop
 ```
 
-<a id="lux-interchain-relayer"></a>
-### relayer
+<a id="lux-dex"></a>
+## lux dex
 
-The relayer command suite provides a collection of tools for deploying
-and configuring an Warp relayers.
+Commands for interacting with Lux DEX - a high-performance
+decentralized exchange with spot trading, AMM pools, and perpetual futures.
+
+Features:
+  - Central Limit Order Book (CLOB) for spot trading
+  - AMM pools (Constant Product, StableSwap, Concentrated Liquidity)
+  - Perpetual futures with up to 100x leverage
+  - Cross-chain swaps via Warp messaging
+  - 1ms block times for ultra-low latency HFT
+
+Example usage:
+  lux dex market list              # List all markets
+  lux dex order place              # Place an order
+  lux dex pool create              # Create liquidity pool
+  lux dex perp open                # Open perpetual position
 
 **Usage:**
-```bash
-lux interchain relayer [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`deploy`](#lux-interchain-relayer-deploy): Deploys an Warp Relayer for the given Network.
-- [`logs`](#lux-interchain-relayer-logs): Shows pretty formatted AWM relayer logs
-- [`start`](#lux-interchain-relayer-start): Starts AWM relayer on the specified network (Currently only for local network).
-- [`stop`](#lux-interchain-relayer-stop): Stops AWM relayer on the specified network (Currently only for local network, cluster).
-
-**Flags:**
 
 ```bash
--h, --help             help for relayer
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux dex
 ```
 
-<a id="lux-interchain-relayer-deploy"></a>
-#### relayer deploy
+<a id="lux-dex-account"></a>
+### lux dex account
 
-Deploys an Warp Relayer for the given Network.
+Commands for managing your DEX trading account, deposits, and withdrawals
+
+<a id="lux-dex-account-balance"></a>
+#### lux dex account balance
+
+View account balances
 
 **Usage:**
-```bash
-lux interchain relayer deploy [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---allow-private-ips                allow relayer to connec to private ips (default true)
---amount float                     automatically fund l1s fee payments with the given amount
---bin-path string                  use the given relayer binary
---blockchain-funding-key string    key to be used to fund relayer account on all l1s
---blockchains strings              blockchains to relay as source and destination
---cchain                           relay C-Chain as source and destination
---cchain-amount float              automatically fund cchain fee payments with the given amount
---cchain-funding-key string        key to be used to fund relayer account on cchain
---cluster string                   operate on the given cluster
---devnet                           operate on a devnet network
---endpoint string                  use the given endpoint for network operations
--f, --testnet                         testnet                    operate on testnet (alias to testnet
--h, --help                         help for deploy
---key string                       key to be used by default both for rewards and to pay fees
--l, --local                        operate on a local network
---log-level string                 log level to use for relayer logs
--t, --testnet                      testnet                    operate on testnet (alias to testnet)
---version string                   version to deploy (default "latest-prerelease")
---config string                    config file (default is $HOME/.lux-cli/config.json)
---skip-update-check                skip check for new versions
+lux dex account balance
 ```
 
-<a id="lux-interchain-relayer-logs"></a>
-#### relayer logs
+<a id="lux-dex-account-deposit"></a>
+#### lux dex account deposit
 
-Shows pretty formatted AWM relayer logs
+Deposit funds to trading account
 
 **Usage:**
+
 ```bash
-lux interchain relayer logs [subcommand] [flags]
+lux dex account deposit [flags]
 ```
 
 **Flags:**
 
-```bash
---endpoint string      use the given endpoint for network operations
---first uint           output first N log lines
--f, --testnet             testnet      operate on testnet (alias to testnet
--h, --help             help for logs
---last uint            output last N log lines
--l, --local            operate on a local network
---raw                  raw logs output
--t, --testnet          testnet      operate on testnet (alias to testnet)
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --amount float   Amount to deposit
+      --token string   Token to deposit
 ```
 
-<a id="lux-interchain-relayer-start"></a>
-#### relayer start
+<a id="lux-dex-account-history"></a>
+#### lux dex account history
 
-Starts AWM relayer on the specified network (Currently only for local network).
+View transaction history
 
 **Usage:**
-```bash
-lux interchain relayer start [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---bin-path string      use the given relayer binary
---cluster string       operate on the given cluster
---endpoint string      use the given endpoint for network operations
--f, --testnet             testnet      operate on testnet (alias to testnet
--h, --help             help for start
--l, --local            operate on a local network
--t, --testnet          testnet      operate on testnet (alias to testnet)
---version string       version to use (default "latest-prerelease")
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux dex account history
 ```
 
-<a id="lux-interchain-relayer-stop"></a>
-#### relayer stop
+<a id="lux-dex-account-withdraw"></a>
+#### lux dex account withdraw
 
-Stops AWM relayer on the specified network (Currently only for local network, cluster).
+Withdraw funds from trading account
 
 **Usage:**
+
 ```bash
-lux interchain relayer stop [subcommand] [flags]
+lux dex account withdraw [flags]
 ```
 
 **Flags:**
 
-```bash
---cluster string       operate on the given cluster
---endpoint string      use the given endpoint for network operations
--f, --testnet             testnet      operate on testnet (alias to testnet
--h, --help             help for stop
--l, --local            operate on a local network
--t, --testnet          testnet      operate on testnet (alias to testnet)
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --amount float   Amount to withdraw
+      --token string   Token to withdraw
 ```
 
-<a id="lux-interchain-tokentransferrer"></a>
-### tokenTransferrer
+<a id="lux-dex-market"></a>
+### lux dex market
 
-The tokenTransfer command suite provides tools to deploy and manage Token Transferrers.
+Commands for listing, creating, and managing trading markets
+
+<a id="lux-dex-market-create"></a>
+#### lux dex market create
+
+Create a new spot or perpetual market with specified parameters
 
 **Usage:**
-```bash
-lux interchain tokenTransferrer [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`deploy`](#lux-interchain-tokentransferrer-deploy): Deploys a Token Transferrer into a given Network and Chains
-
-**Flags:**
 
 ```bash
--h, --help             help for tokenTransferrer
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux dex market create
 ```
 
-<a id="lux-interchain-tokentransferrer-deploy"></a>
-#### tokenTransferrer deploy
+<a id="lux-dex-market-info"></a>
+#### lux dex market info
 
-Deploys a Token Transferrer into a given Network and Chains
+Display detailed information about a specific market including orderbook depth, recent trades, and statistics
 
 **Usage:**
+
 ```bash
-lux interchain tokenTransferrer deploy [subcommand] [flags]
+lux dex market info [symbol]
+```
+
+<a id="lux-dex-market-list"></a>
+#### lux dex market list
+
+Display all spot and perpetual markets with current prices and volume
+
+**Usage:**
+
+```bash
+lux dex market list
+```
+
+<a id="lux-dex-order"></a>
+### lux dex order
+
+Commands for placing, cancelling, and viewing orders
+
+<a id="lux-dex-order-cancel"></a>
+#### lux dex order cancel
+
+Cancel an order
+
+**Usage:**
+
+```bash
+lux dex order cancel [order-id]
+```
+
+<a id="lux-dex-order-history"></a>
+#### lux dex order history
+
+View order history
+
+**Usage:**
+
+```bash
+lux dex order history
+```
+
+<a id="lux-dex-order-list"></a>
+#### lux dex order list
+
+List open orders
+
+**Usage:**
+
+```bash
+lux dex order list
+```
+
+<a id="lux-dex-order-place"></a>
+#### lux dex order place
+
+Place a limit or market order on a trading pair.
+
+Examples:
+  lux dex order place --market LUX/USDT --side buy --type limit --price 10.50 --amount 100
+  lux dex order place --market BTC/USDT --side sell --type market --amount 0.5
+
+**Usage:**
+
+```bash
+lux dex order place [flags]
 ```
 
 **Flags:**
 
+```
+      --amount float    Order amount
+      --market string   Trading pair symbol (e.g., LUX/USDT)
+      --price float     Limit price (required for limit orders)
+      --side string     Order side: buy or sell
+      --tif string      Time in force: gtc, ioc, fok (default "gtc")
+      --type string     Order type: limit or market (default "limit")
+```
+
+<a id="lux-dex-perp"></a>
+### lux dex perp
+
+Commands for trading perpetual futures contracts.
+
+Features:
+  - Up to 100x leverage
+  - Cross and isolated margin modes
+  - Automatic liquidation protection
+  - 8-hour funding rate intervals
+
+Similar to Hyperliquid and GMX perpetual trading.
+
+<a id="lux-dex-perp-close"></a>
+#### lux dex perp close
+
+Close a perpetual position
+
+**Usage:**
+
 ```bash
---c-chain-home                 set the Transferrer's Home Chain into C-Chain
---c-chain-remote               set the Transferrer's Remote Chain into C-Chain
---cluster string               operate on the given cluster
---deploy-erc20-home string     deploy a Transferrer Home for the given Chain's ERC20 Token
---deploy-native-home           deploy a Transferrer Home for the Chain's Native Token
---deploy-native-remote         deploy a Transferrer Remote for the Chain's Native Token
---devnet                       operate on a devnet network
---endpoint string              use the given endpoint for network operations
--f, --testnet                     testnet                  operate on testnet (alias to testnet
--h, --help                     help for deploy
---home-blockchain string       set the Transferrer's Home Chain into the given CLI blockchain
---home-genesis-key             use genesis allocated key to deploy Transferrer Home
---home-key string              CLI stored key to use to deploy Transferrer Home
---home-private-key string      private key to use to deploy Transferrer Home
---home-rpc string              use the given RPC URL to connect to the home blockchain
--l, --local                    operate on a local network
--m, --mainnet                  operate on mainnet
---remote-blockchain string     set the Transferrer's Remote Chain into the given CLI blockchain
---remote-genesis-key           use genesis allocated key to deploy Transferrer Remote
---remote-key string            CLI stored key to use to deploy Transferrer Remote
---remote-private-key string    private key to use to deploy Transferrer Remote
---remote-rpc string            use the given RPC URL to connect to the remote blockchain
---remote-token-decimals        uint8   use the given number of token decimals for the Transferrer Remote [defaults to token home's decimals (18 for a new wrapped native home token)]
---remove-minter-admin          remove the native minter precompile admin found on remote blockchain genesis
--t, --testnet                  testnet                  operate on testnet (alias to testnet)
---use-home string              use the given Transferrer's Home Address
---version string               tag/branch/commit of Lux Interchain Token Transfer (Warp) to be used (defaults to main branch)
---config string                config file (default is $HOME/.lux-cli/config.json)
---log-level string             log level for the application (default "ERROR")
---skip-update-check            skip check for new versions
+lux dex perp close [market] [flags]
+```
+
+**Flags:**
+
+```
+      --percent float   Percentage of position to close (0-100) (default 100)
+```
+
+<a id="lux-dex-perp-funding"></a>
+#### lux dex perp funding
+
+View funding rate information
+
+**Usage:**
+
+```bash
+lux dex perp funding
+```
+
+<a id="lux-dex-perp-markets"></a>
+#### lux dex perp markets
+
+List perpetual markets
+
+**Usage:**
+
+```bash
+lux dex perp markets
+```
+
+<a id="lux-dex-perp-open"></a>
+#### lux dex perp open
+
+Open a new perpetual futures position.
+
+Examples:
+  lux dex perp open --market BTC-PERP --side long --size 0.1 --leverage 10
+  lux dex perp open --market ETH-PERP --side short --size 1 --leverage 5 --margin isolated
+
+**Usage:**
+
+```bash
+lux dex perp open [flags]
+```
+
+**Flags:**
+
+```
+      --leverage uint16   Leverage multiplier (1-100) (default 10)
+      --margin string     Margin mode: cross or isolated (default "cross")
+      --market string     Perpetual market symbol (e.g., BTC-PERP)
+      --side string       Position side: long or short
+      --size float        Position size in base units
+```
+
+<a id="lux-dex-perp-pnl"></a>
+#### lux dex perp pnl
+
+View profit/loss summary
+
+**Usage:**
+
+```bash
+lux dex perp pnl
+```
+
+<a id="lux-dex-perp-positions"></a>
+#### lux dex perp positions
+
+List open positions
+
+**Usage:**
+
+```bash
+lux dex perp positions
+```
+
+<a id="lux-dex-pool"></a>
+### lux dex pool
+
+Commands for creating, managing, and interacting with AMM liquidity pools
+
+<a id="lux-dex-pool-add"></a>
+#### lux dex pool add
+
+Add liquidity to a pool
+
+**Usage:**
+
+```bash
+lux dex pool add [pool-id] [flags]
+```
+
+**Flags:**
+
+```
+      --amount0 float   Amount of token0 to add
+      --amount1 float   Amount of token1 to add
+```
+
+<a id="lux-dex-pool-create"></a>
+#### lux dex pool create
+
+Create a new AMM liquidity pool.
+
+Pool types:
+  - constant-product: Standard x*y=k AMM (like Uniswap V2)
+  - stableswap: Optimized for stable pairs (like Curve)
+  - concentrated: Concentrated liquidity (like Uniswap V3)
+
+Examples:
+  lux dex pool create --token0 LUX --token1 USDT --amount0 1000 --amount1 10000 --type constant-product --fee 30
+
+**Usage:**
+
+```bash
+lux dex pool create [flags]
+```
+
+**Flags:**
+
+```
+      --amount0 float   Initial amount of token0
+      --amount1 float   Initial amount of token1
+      --fee uint16      Fee in basis points (30 = 0.3%) (default 30)
+      --token0 string   First token symbol
+      --token1 string   Second token symbol
+      --type string     Pool type: constant-product, stableswap, concentrated (default "constant-product")
+```
+
+<a id="lux-dex-pool-list"></a>
+#### lux dex pool list
+
+List all liquidity pools
+
+**Usage:**
+
+```bash
+lux dex pool list
+```
+
+<a id="lux-dex-pool-remove"></a>
+#### lux dex pool remove
+
+Remove liquidity from a pool
+
+**Usage:**
+
+```bash
+lux dex pool remove [pool-id] [flags]
+```
+
+**Flags:**
+
+```
+      --percent float   Percentage of liquidity to remove (0-100)
+```
+
+<a id="lux-dex-pool-swap"></a>
+#### lux dex pool swap
+
+Swap tokens using the best available route through AMM pools.
+
+Examples:
+  lux dex pool swap --from LUX --to USDT --amount 100 --slippage 0.5
+
+**Usage:**
+
+```bash
+lux dex pool swap [flags]
+```
+
+**Flags:**
+
+```
+      --amount float     Amount to swap
+      --from string      Token to swap from
+      --slippage float   Maximum slippage tolerance (%) (default 0.5)
+      --to string        Token to swap to
+```
+
+<a id="lux-dex-status"></a>
+### lux dex status
+
+Display DEX network status including:
+  - Connected nodes
+  - Market statistics
+  - Recent trades
+  - Network health
+
+**Usage:**
+
+```bash
+lux dex status
+```
+
+<a id="lux-down"></a>
+## lux down
+
+Stops the luxd node for <network>/<env> by:
+
+  1. Probing http://127.0.0.1:<httpPort>/v1/info → info.getNetworkID
+  2. Verifying the response equals the expected networkID from chain.yaml
+  3. Looking up the PID listening on httpPort via lsof
+  4. SIGTERM → wait drain → SIGKILL if still up
+
+The (network, env) tuple alone determines what gets stopped. No --data-dir,
+no --pid-file. Refusal-by-default: if the responder's networkID does not
+match, we leave it alone.
+
+Examples:
+  lux down zoo/localnet
+  lux down lux/devnet
+
+**Usage:**
+
+```bash
+lux down <network>/<env>
+```
+
+<a id="lux-explore"></a>
+## lux explore
+
+The explore command starts a local block explorer that indexes
+chain data and serves the explorer API + frontend.
+
+USAGE:
+
+  lux explore                     Start explorer for the running local network
+  lux explore --rpc <url>         Start explorer for a specific RPC endpoint
+  lux explore --chain cchain      Index a specific chain (default: cchain)
+  lux explore --port 8090         API port (default: 8090)
+
+The explorer runs as a background process. Use 'lux explore stop' to stop it.
+Data is stored in ~/.lux/explorer/ and persists across restarts.
+
+ENDPOINTS:
+
+  http://localhost:8090/v1/explorer/stats     Chain statistics
+  http://localhost:8090/v1/explorer/blocks     Block list
+  http://localhost:8090/v1/explorer/search     Search
+  http://localhost:8090/health                 Health check
+
+**Usage:**
+
+```bash
+lux explore [flags]
+```
+
+**Flags:**
+
+```
+      --chain string   Chain to index (cchain, xchain, pchain, or chain name) (default "cchain")
+      --data string    Data directory (default: ~/.lux/explorer/)
+      --open           Open browser after starting (default true)
+      --port int       HTTP port for explorer API (default 8090)
+      --rpc string     RPC endpoint (auto-detected from running network if not set)
+```
+
+<a id="lux-explore-status"></a>
+### lux explore status
+
+Show explorer status
+
+**Usage:**
+
+```bash
+lux explore status
+```
+
+<a id="lux-explore-stop"></a>
+### lux explore stop
+
+Stop the running explorer
+
+**Usage:**
+
+```bash
+lux explore stop
+```
+
+<a id="lux-fhe"></a>
+## lux fhe
+
+The fhe command provides tools for Fully Homomorphic Encryption (FHE)
+on the Lux network, including key generation, encryption, computation
+on encrypted data, and decryption.
+
+These operations integrate with the T-Chain (Threshold chain) for
+on-chain FHE computation via precompiled contracts.
+
+SCHEMES:
+
+  TFHE    - Fast bootstrapping, boolean/small integer circuits
+  BGV     - Batched integer arithmetic
+  CKKS    - Approximate fixed-point arithmetic
+
+**Usage:**
+
+```bash
+lux fhe
+```
+
+<a id="lux-fhe-decrypt"></a>
+### lux fhe decrypt
+
+Decrypt a hex-encoded ciphertext using the FHE secret key.
+
+Examples:
+  lux fhe decrypt --key ./keys/secret.key --input <hex>
+
+**Usage:**
+
+```bash
+lux fhe decrypt [flags]
+```
+
+**Flags:**
+
+```
+      --input string   Hex-encoded ciphertext
+      --key string     Path to secret key file
+```
+
+<a id="lux-fhe-encrypt"></a>
+### lux fhe encrypt
+
+Encrypt a boolean value using an FHE secret key.
+Outputs hex-encoded ciphertext to stdout.
+
+Examples:
+  lux fhe encrypt --key ./keys/secret.key --value true
+  lux fhe encrypt --key ./keys/secret.key --value false
+
+**Usage:**
+
+```bash
+lux fhe encrypt [flags]
+```
+
+**Flags:**
+
+```
+      --key string   Path to secret key file
+      --value        Boolean value to encrypt
+```
+
+<a id="lux-fhe-eval"></a>
+### lux fhe eval
+
+Evaluate a boolean operation on FHE-encrypted data without decrypting.
+
+Requires bootstrap key for homomorphic evaluation.
+
+Supported gates: AND, OR, XOR, NAND, NOR, XNOR, NOT
+
+Examples:
+  lux fhe eval --op AND --inputs ct1.hex,ct2.hex --bsk ./keys/bootstrap.key
+
+**Usage:**
+
+```bash
+lux fhe eval [flags]
+```
+
+**Flags:**
+
+```
+      --op string   Boolean gate (AND, OR, XOR, NAND, NOR, XNOR, NOT) (default "AND")
+```
+
+<a id="lux-fhe-keygen"></a>
+### lux fhe keygen
+
+Generate a Fully Homomorphic Encryption key pair.
+
+Produces a secret key (for decryption), public key (for encryption),
+and bootstrap key (for homomorphic operations).
+
+Examples:
+  lux fhe keygen
+  lux fhe keygen --scheme PN11QP54 --output ./keys/
+
+**Usage:**
+
+```bash
+lux fhe keygen [flags]
+```
+
+**Flags:**
+
+```
+      --output string   Output directory for keys (default: current dir)
+      --scheme string   Parameter set (PN10QP27, PN11QP54, STD128, STD128Q) (default "PN10QP27")
+```
+
+<a id="lux-gpu"></a>
+## lux gpu
+
+The gpu command provides utilities for managing GPU acceleration
+in the Lux node. Use subcommands to check GPU status, availability,
+and configuration.
+
+GPU acceleration is used for:
+  - NTT operations in Corona consensus
+  - FHE operations in ThresholdVM
+  - Lattice cryptography operations
+
+**Usage:**
+
+```bash
+lux gpu
+```
+
+<a id="lux-gpu-status"></a>
+### lux gpu status
+
+Show the current GPU acceleration status including:
+  - GPU availability on this system
+  - Active backend (Metal, CUDA, or CPU)
+  - Platform and architecture information
+  - Available GPU-accelerated features
+  - Default configuration settings
+
+**Usage:**
+
+```bash
+lux gpu status [flags]
+```
+
+**Flags:**
+
+```
+      --json   output status in JSON format
+```
+
+<a id="lux-info"></a>
+## lux info
+
+Resolves <name>/<env> against the registry and prints every field
+of the resulting profile: distinct identifiers (network ID + EVM chain
+ID), ports, paths, snapshot name, service label, RPC endpoints, and
+live state.
+
+The wire identifiers are deliberately distinct:
+  network ID       uint32, validator wire (--network-id, info.getNetworkID)
+  EVM chain ID     uint64, EIP-155 (eth_chainId, MetaMask)
+
+Lux brand keeps them separate (NID 1 / EVM 96369). Sovereign-L1 brand
+forks (Zoo, Hanzo, Pars, Osage, Liquidity) collapse them by convention.
+
+Examples:
+  lux info zoo/mainnet
+  lux info lux/devnet
+
+**Usage:**
+
+```bash
+lux info <name>/<env>
 ```
 
 <a id="lux-key"></a>
 ## lux key
 
-The key command suite provides a collection of tools for creating and managing
-signing keys. You can use these keys to deploy Chains to the Testnet,
-but these keys are NOT suitable to use in production environments. DO NOT use
-these keys on Mainnet.
+The key command suite provides tools for managing all cryptographic keys
+used in the Lux network.
 
-To get started, use the key create command.
+Key types managed:
+- EC (secp256k1): Transaction signing, Ethereum compatibility
+- BLS: Consensus participation, aggregated signatures
+- Ring-sig (LSAG over secp256k1) for privacy
+- ML-DSA: Post-quantum digital signatures (NIST Level 3)
+
+All keys are derived from a single BIP39 mnemonic phrase using HKDF,
+stored in ~/.lux/keys/<name>/ with separate subdirectories for each type.
+
+Examples:
+  lux key create validator1              # Create new key set
+  lux key create validator1 --mnemonic   # Create from existing mnemonic
+  lux key generate -n 5                  # Batch generate 5 key sets (key-0 to key-4)
+  lux key generate -n 10 -p validator    # Generate validator-0 to validator-9
+  lux key derive -n 5                    # Derive 5 keys from MNEMONIC
+  lux key derive -n 5 --show             # Show derived addresses without saving
+  lux key list                           # List all key sets
+  lux key show validator1                # Show public keys and addresses
+  lux key delete validator1              # Delete key set
+  lux key export validator1              # Export mnemonic (DANGER!)
+  lux key lock validator1                # Lock key (clear from memory)
+  lux key lock --all                     # Lock all keys
+  lux key unlock validator1              # Unlock key for use
+  lux key backend list                   # List available backends
+  lux key backend set keychain           # Set default backend
+  lux key kchain status                  # Check K-Chain service
+  lux key kchain create mykey            # Create distributed key
+  lux key kchain sign mykey "data"       # Threshold sign data
 
 **Usage:**
+
 ```bash
-lux key [subcommand] [flags]
+lux key
 ```
 
-**Subcommands:**
+<a id="lux-key-backend"></a>
+### lux key backend
 
-- [`create`](#lux-key-create): The key create command generates a new private key to use for creating and controlling
-test Chains. Keys generated by this command are NOT cryptographically secure enough to
-use in production environments. DO NOT use these keys on Mainnet.
+Manage key storage backends for cryptographic keys.
 
-The command works by generating a secp256 key and storing it with the provided keyName. You
-can use this key in other commands by providing this keyName.
+Available backends:
+  software       - Encrypted file storage (AES-256-GCM + Argon2id)
+  keychain       - macOS Keychain with optional TouchID
+  secret-service - Linux Secret Service (GNOME Keyring, KWallet)
+  yubikey        - Yubikey hardware token
+  zymbit         - Zymbit HSM (Raspberry Pi)
+  walletconnect  - Remote signing via mobile wallet
+  ledger         - Ledger hardware wallet
+  env            - Environment variable storage
 
-If you'd like to import an existing key instead of generating one from scratch, provide the
---file flag.
-- [`delete`](#lux-key-delete): The key delete command deletes an existing signing key.
+Examples:
+  lux key backend list          # List available backends
+  lux key backend set keychain  # Set default backend
+  lux key backend info          # Show current backend info
 
-To delete a key, provide the keyName. The command prompts for confirmation
-before deleting the key. To skip the confirmation, provide the --force flag.
-- [`export`](#lux-key-export): The key export command exports a created signing key. You can use an exported key in other
-applications or import it into another instance of Lux-CLI.
-
-By default, the tool writes the hex encoded key to stdout. If you provide the --output
-flag, the command writes the key to a file of your choosing.
-- [`list`](#lux-key-list): The key list command prints information for all stored signing
-keys or for the ledger addresses associated to certain indices.
-- [`transfer`](#lux-key-transfer): The key transfer command allows to transfer funds between stored keys or ledger addresses.
-
-**Flags:**
+**Usage:**
 
 ```bash
--h, --help             help for key
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux key backend
+```
+
+<a id="lux-key-backend-info"></a>
+#### lux key backend info
+
+Display detailed information about the current default key storage backend.
+
+**Usage:**
+
+```bash
+lux key backend info
+```
+
+<a id="lux-key-backend-list"></a>
+#### lux key backend list
+
+List all key storage backends and their availability status.
+
+Backends marked as 'available' can be used on this system.
+Some backends require specific hardware or services to be present.
+
+**Usage:**
+
+```bash
+lux key backend list
+```
+
+<a id="lux-key-backend-set"></a>
+#### lux key backend set
+
+Set the default key storage backend.
+
+The default backend is used when creating new keys.
+Existing keys remain in their original backend.
+
+Valid backend types:
+  software, keychain, secret-service, yubikey, zymbit, walletconnect, ledger, env
+
+**Usage:**
+
+```bash
+lux key backend set <type>
 ```
 
 <a id="lux-key-create"></a>
-### create
+### lux key create
 
-The key create command generates a new private key to use for creating and controlling
-test Chains. Keys generated by this command are NOT cryptographically secure enough to
-use in production environments. DO NOT use these keys on Mainnet.
+Create a new key set with all cryptographic key types.
 
-The command works by generating a secp256 key and storing it with the provided keyName. You
-can use this key in other commands by providing this keyName.
+Generates a BIP39 mnemonic phrase and derives:
+- EC (secp256k1) key for transactions
+- BLS key for consensus
+- Ring-signature (LSAG) key over secp256k1
+- ML-DSA key for post-quantum signatures
 
-If you'd like to import an existing key instead of generating one from scratch, provide the
---file flag.
+Keys are stored in ~/.lux/keys/<name>/
+
+Examples:
+  lux key create validator1                           # Generate new mnemonic
+  lux key create validator1 --mnemonic                # Prompt for existing mnemonic
+  lux key create validator1 --phrase "word1 word2..." # Use provided mnemonic
+  lux key create mainnet-key-01 --phrase "$MNEMONIC" --account 1  # Derive account 1
 
 **Usage:**
+
 ```bash
-lux key create [subcommand] [flags]
+lux key create <name> [flags]
 ```
 
 **Flags:**
 
-```bash
---file string          import the key from an existing key file
--f, --force            overwrite an existing key with the same name
--h, --help             help for create
---skip-balances        do not query public network balances for an imported key
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --account uint32   Account index for HD derivation (0-based)
+  -m, --mnemonic         Import from existing mnemonic (prompts for input)
+      --phrase string    Mnemonic phrase to import (12 or 24 words)
 ```
 
 <a id="lux-key-delete"></a>
-### delete
+### lux key delete
 
-The key delete command deletes an existing signing key.
+Delete a key set from ~/.lux/keys/
 
-To delete a key, provide the keyName. The command prompts for confirmation
-before deleting the key. To skip the confirmation, provide the --force flag.
+WARNING: This permanently deletes all keys! Make sure you have backed up
+the mnemonic phrase before deleting.
+
+Example:
+  lux key delete validator1
+  lux key delete validator1 --force  # Skip confirmation
 
 **Usage:**
+
 ```bash
-lux key delete [subcommand] [flags]
+lux key delete <name> [flags]
 ```
 
 **Flags:**
 
+```
+  -f, --force   Skip confirmation prompt
+```
+
+<a id="lux-key-derive"></a>
+### lux key derive
+
+Derive multiple key sets from a single mnemonic phrase.
+
+Uses the MNEMONIC environment variable to derive keys deterministically.
+Each key uses Lux P/X-Chain BIP-44 path: m/44'/9000'/0'/0/{index}
+
+This ensures compatibility with MetaMask, cast, and other Ethereum tools.
+The same mnemonic always produces the same keys across all tools.
+
+Examples:
+  # Derive 5 validator keys from mnemonic
+  export MNEMONIC="your 24 words here"
+  lux key derive -n 5 --prefix validator
+
+  # Derive keys starting at index 5
+  lux key derive -n 3 --start 5 --prefix backup
+
+  # Show addresses without saving (for verification)
+  lux key derive -n 5 --show
+
+  # Show addresses with private keys (DANGER)
+  lux key derive -n 1 --show --export
+
+**Usage:**
+
 ```bash
--f, --force            delete the key without confirmation
--h, --help             help for delete
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux key derive [flags]
+```
+
+**Flags:**
+
+```
+  -n, --count int        Number of keys to derive (default 5)
+      --export           Show private keys in output (DANGER - keep secret!)
+      --network string   Network for P/X address HRP: mainnet (P-lux1…) | testnet (P-test1…) | devnet (P-dev1…) | local (P-local1…) | custom (P-custom1…) (default "mainnet")
+  -p, --prefix string    Prefix for key names (default "mainnet-key")
+      --show             Only show addresses, don't save keys
+  -s, --start int        Starting account index
 ```
 
 <a id="lux-key-export"></a>
-### export
+### lux key export
 
-The key export command exports a created signing key. You can use an exported key in other
-applications or import it into another instance of Lux-CLI.
+Export key set data.
 
-By default, the tool writes the hex encoded key to stdout. If you provide the --output
-flag, the command writes the key to a file of your choosing.
+By default, exports public keys. Use --mnemonic to export the seed phrase.
+
+WARNING: Exporting the mnemonic exposes your private keys!
+
+Examples:
+  lux key export validator1                    # Export public keys
+  lux key export validator1 --mnemonic         # Export mnemonic (DANGER!)
+  lux key export validator1 -o keys.json       # Export to file
 
 **Usage:**
+
 ```bash
-lux key export [subcommand] [flags]
+lux key export <name> [flags]
 ```
 
 **Flags:**
 
+```
+      --mnemonic        Export mnemonic phrase (DANGEROUS!)
+  -o, --output string   Output file (default: stdout)
+```
+
+<a id="lux-key-export-signer"></a>
+### lux key export-signer
+
+Export BLS signer keys derived from MNEMONIC for use as luxd
+staking signer keys. Each key is written as a raw 32-byte file.
+
+This is needed when starting luxd nodes manually (outside of netrunner)
+that need to use mnemonic-derived BLS keys for consensus.
+
+Examples:
+  # Export signer keys for accounts 5-9
+  export MNEMONIC="your mnemonic here"
+  lux key export-signer -n 5 --start 5 --output ~/.lux/local-validators
+
+  # This creates:
+  #   ~/.lux/local-validators/node5/signer.key
+  #   ~/.lux/local-validators/node6/signer.key
+  #   ...
+
+**Usage:**
+
 ```bash
--h, --help             help for export
--o, --output string    write the key to the provided file path
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux key export-signer [flags]
+```
+
+**Flags:**
+
+```
+  -n, --count int       Number of signer keys to export (default 5)
+  -o, --output string   Output directory (required)
+  -s, --start int       Starting account index
+```
+
+<a id="lux-key-generate"></a>
+### lux key generate
+
+Generate multiple key sets with indexed names.
+
+Creates keys with names like: prefix-0, prefix-1, prefix-2, etc.
+Each key set contains EC, BLS, ring-sig, and ML-DSA keys.
+
+Examples:
+  lux key generate -n 5                    # Creates key-0 through key-4
+  lux key generate -n 10 --prefix validator # Creates validator-0 through validator-9
+  lux key generate -n 3 --start 5          # Creates key-5, key-6, key-7
+
+**Usage:**
+
+```bash
+lux key generate [flags]
+```
+
+**Flags:**
+
+```
+  -n, --count int       Number of key sets to generate (default 1)
+  -p, --prefix string   Prefix for key names (default "key")
+  -s, --start int       Starting index number
+```
+
+<a id="lux-key-genesis"></a>
+### lux key genesis
+
+Generate a genesis.json file with P-Chain and X-Chain allocations.
+
+Network modes:
+  --mainnet   Use mainnet configuration (Network ID: 1, Chain ID: 96369)
+              - Uses mainnet-key-01 through mainnet-key-11
+              - 5 P-Chain keys (first unlocked, rest 100-year vesting)
+              - 5 X-Chain keys (100-year vesting)
+
+  --testnet   Use testnet configuration (Network ID: 2, Chain ID: 96368)
+              - Uses testnet-key-01 through testnet-key-10
+              - Shorter vesting for testing
+
+  --devnet    Use devnet configuration (Network ID: 3, Chain ID: 96370)
+              - Uses devnet-key-01 through devnet-key-05
+              - No vesting, fully unlocked
+
+  (no flag)   Local development (Network ID: 1337, Chain ID: 1337)
+              - Generates new keys if needed
+              - Single validator, fully unlocked
+
+The command will generate keys if they don't exist (use --generate-keys to force).
+
+Examples:
+  # Generate mainnet genesis using existing mainnet keys
+  lux key genesis --mainnet -o /path/to/genesis.json
+
+  # Generate testnet genesis
+  lux key genesis --testnet -o /path/to/genesis.json
+
+  # Generate devnet genesis with new keys
+  lux key genesis --devnet --generate-keys -o /path/to/genesis.json
+
+  # Custom configuration with manual key selection
+  lux key genesis --p-chain key1,key2 --x-chain key3 -o genesis.json
+
+**Usage:**
+
+```bash
+lux key genesis [flags]
+```
+
+**Flags:**
+
+```
+      --amount uint              Amount per key in nLUX (default 1B LUX) (default 1000000000000000000)
+      --c-chain-genesis string   Path to existing genesis to preserve C-Chain config
+      --devnet                   Generate devnet genesis (Network ID: 3, Chain ID: 96370)
+      --generate-keys            Generate new keys if they don't exist
+      --mainnet                  Generate mainnet genesis (Network ID: 1, Chain ID: 96369)
+      --network-id uint32        Network ID (overrides network preset)
+  -n, --num-keys int             Number of keys to generate (for mainnet/testnet) (default 11)
+  -o, --output string            Output file path (default: ~/.lux/networks/<network>/genesis.json)
+      --p-chain strings          P-Chain allocation keys (overrides network preset)
+      --save                     Save genesis to ~/.lux/networks/<network>/genesis.json
+      --testnet                  Generate testnet genesis (Network ID: 2, Chain ID: 96368)
+      --vesting-percent float    Percentage unlocked per year (overrides network preset)
+      --vesting-years int        Vesting period in years (overrides network preset)
+      --x-chain strings          X-Chain allocation keys (overrides network preset)
+```
+
+<a id="lux-key-import"></a>
+### lux key import
+
+Import a key set by recovering from a mnemonic phrase.
+
+Derives all key types (EC, BLS, ring-sig, ML-DSA) from the mnemonic.
+
+Example:
+  lux key import validator1
+
+**Usage:**
+
+```bash
+lux key import <name>
+```
+
+<a id="lux-key-kchain"></a>
+### lux key kchain
+
+K-Chain provides distributed key management using threshold cryptography.
+
+Keys are split across multiple validators using Shamir Secret Sharing,
+requiring a threshold of shares to reconstruct or sign.
+
+Features:
+  - Distributed key storage across validators
+  - Threshold signing without key reconstruction
+  - Proactive secret resharing
+  - ML-KEM post-quantum encryption
+  - ML-DSA post-quantum signatures
+
+Default port range: 963N (9630-9639)
+
+Examples:
+  lux key kchain status                    # Check K-Chain service status
+  lux key kchain distribute mykey          # Distribute key to validators
+  lux key kchain sign mykey "data"         # Threshold sign data
+  lux key kchain encrypt mykey "plaintext" # Encrypt with ML-KEM
+  lux key kchain algorithms                # List supported algorithms
+
+**Usage:**
+
+```bash
+lux key kchain
+```
+
+**Flags:**
+
+```
+      --endpoint string   K-Chain RPC endpoint (default "http://localhost:9630")
+```
+
+<a id="lux-key-kchain-algorithms"></a>
+#### lux key kchain algorithms
+
+List all cryptographic algorithms supported by K-Chain.
+
+**Usage:**
+
+```bash
+lux key kchain algorithms
+```
+
+<a id="lux-key-kchain-create"></a>
+#### lux key kchain create
+
+Create a new key and distribute it across K-Chain validators.
+
+Examples:
+  lux key kchain create mykey
+  lux key kchain create mykey -a ml-kem-768 -t 3 -n 5
+
+**Usage:**
+
+```bash
+lux key kchain create <key-name> [flags]
+```
+
+**Flags:**
+
+```
+  -a, --algorithm string   Key algorithm (default "ml-kem-768")
+  -n, --shares int         Total shares (default 5)
+  -t, --threshold int      Threshold for reconstruction (default 3)
+```
+
+<a id="lux-key-kchain-decrypt"></a>
+#### lux key kchain decrypt
+
+Decrypt data using threshold key reconstruction.
+
+Requires gathering shares from validators to reconstruct the
+decryption key. The key is immediately cleared after decryption.
+
+Examples:
+  lux key kchain decrypt mykey <ciphertext>
+
+**Usage:**
+
+```bash
+lux key kchain decrypt <key-name> <ciphertext>
+```
+
+<a id="lux-key-kchain-delete"></a>
+#### lux key kchain delete
+
+Delete a key and securely wipe all shares from validators.
+
+Examples:
+  lux key kchain delete mykey
+  lux key kchain delete mykey --force
+
+**Usage:**
+
+```bash
+lux key kchain delete <key-name> [flags]
+```
+
+**Flags:**
+
+```
+      --force   Force deletion even if shares exist
+```
+
+<a id="lux-key-kchain-distribute"></a>
+#### lux key kchain distribute
+
+Distribute a key across K-Chain validators using Shamir Secret Sharing.
+
+The key is split into shares, each stored on a different validator.
+A threshold number of shares is required to reconstruct or sign.
+
+Examples:
+  lux key kchain distribute mykey                    # Use defaults (3-of-5)
+  lux key kchain distribute mykey -t 2 -n 3          # 2-of-3 threshold
+  lux key kchain distribute mykey --validators v1:9630,v2:9631,v3:9632
+
+**Usage:**
+
+```bash
+lux key kchain distribute <key-name> [flags]
+```
+
+**Flags:**
+
+```
+  -n, --shares int           Total number of shares to create (default 5)
+  -t, --threshold int        Number of shares required to reconstruct (default 3)
+      --validators strings   Validator endpoints (host:port)
+```
+
+<a id="lux-key-kchain-encrypt"></a>
+#### lux key kchain encrypt
+
+Encrypt data using the key's ML-KEM public key.
+
+ML-KEM (Module-Lattice Key Encapsulation Mechanism) provides
+post-quantum secure encryption.
+
+Examples:
+  lux key kchain encrypt mykey "secret message"
+  lux key kchain encrypt mykey --algorithm ml-kem-768 "data"
+
+**Usage:**
+
+```bash
+lux key kchain encrypt <key-name> <plaintext> [flags]
+```
+
+**Flags:**
+
+```
+  -a, --algorithm string   Encryption algorithm (default "ml-kem-768")
+```
+
+<a id="lux-key-kchain-gather"></a>
+#### lux key kchain gather
+
+Gather threshold shares from validators to reconstruct a key.
+
+This command contacts validators to retrieve shares and reconstructs
+the original key material. Requires threshold number of responsive validators.
+
+Examples:
+  lux key kchain gather mykey
+
+**Usage:**
+
+```bash
+lux key kchain gather <key-name>
+```
+
+<a id="lux-key-kchain-list"></a>
+#### lux key kchain list
+
+List all keys stored in K-Chain.
+
+**Usage:**
+
+```bash
+lux key kchain list [flags]
+```
+
+**Flags:**
+
+```
+  -a, --algorithm string   Filter by algorithm
+```
+
+<a id="lux-key-kchain-reshare"></a>
+#### lux key kchain reshare
+
+Perform proactive secret resharing to rotate key shares.
+
+This creates new shares without changing the underlying key,
+limiting the window of exposure if any shares are compromised.
+
+Examples:
+  lux key kchain reshare mykey
+  lux key kchain reshare mykey -t 4 -n 7   # Change to 4-of-7
+
+**Usage:**
+
+```bash
+lux key kchain reshare <key-name> [flags]
+```
+
+**Flags:**
+
+```
+  -n, --shares int           New total shares (0 = keep current)
+  -t, --threshold int        New threshold (0 = keep current)
+      --validators strings   New validator set
+```
+
+<a id="lux-key-kchain-show"></a>
+#### lux key kchain show
+
+Show detailed information about a distributed key.
+
+**Usage:**
+
+```bash
+lux key kchain show <key-name> [flags]
+```
+
+**Flags:**
+
+```
+  -f, --format string   Public key format (pem, der, raw) (default "pem")
+```
+
+<a id="lux-key-kchain-sign"></a>
+#### lux key kchain sign
+
+Sign data using threshold signatures without reconstructing the key.
+
+Each validator computes a partial signature using their share.
+Partial signatures are combined to produce the final signature.
+
+Examples:
+  lux key kchain sign mykey "message to sign"
+  lux key kchain sign mykey --hex 48656c6c6f
+  lux key kchain sign mykey --algorithm bls-threshold "data"
+
+**Usage:**
+
+```bash
+lux key kchain sign <key-name> <data> [flags]
+```
+
+**Flags:**
+
+```
+  -a, --algorithm string   Signing algorithm (default "bls-threshold")
+      --hex                Interpret data as hex-encoded
+```
+
+<a id="lux-key-kchain-status"></a>
+#### lux key kchain status
+
+Check the health and status of the K-Chain distributed key management service.
+
+**Usage:**
+
+```bash
+lux key kchain status
+```
+
+<a id="lux-key-kchain-verify"></a>
+#### lux key kchain verify
+
+Verify a signature against the key's public key.
+
+Examples:
+  lux key kchain verify mykey "message" <signature>
+
+**Usage:**
+
+```bash
+lux key kchain verify <key-name> <data> <signature> [flags]
+```
+
+**Flags:**
+
+```
+  -a, --algorithm string   Signature algorithm (default "bls-threshold")
 ```
 
 <a id="lux-key-list"></a>
-### list
+### lux key list
 
-The key list command prints information for all stored signing
-keys or for the ledger addresses associated to certain indices.
+List all key sets stored in ~/.lux/keys/
+
+Shows the name of each key set. Use 'lux key show <name>' for details.
+
+Example:
+  lux key list
+  lux key ls
 
 **Usage:**
+
 ```bash
-lux key list [subcommand] [flags]
+lux key list
+```
+
+<a id="lux-key-lock"></a>
+### lux key lock
+
+Lock a key to clear it from the memory session.
+
+A locked key requires password authentication to use again.
+This is a security measure to protect keys when not in use.
+
+Examples:
+  lux key lock validator1    # Lock a specific key
+  lux key lock --all         # Lock all keys
+
+**Usage:**
+
+```bash
+lux key lock [name] [flags]
 ```
 
 **Flags:**
 
-```bash
--a, --all-networks       list all network addresses
---blockchains strings    blockchains to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)
--c, --cchain             list C-Chain addresses (default true)
---cluster string         operate on the given cluster
---devnet                 operate on a devnet network
---endpoint string        use the given endpoint for network operations
--f, --testnet               testnet          operate on testnet (alias to testnet
--h, --help               help for list
---keys strings           list addresses for the given keys
--g, --ledger             uints          list ledger addresses for the given indices (default [])
--l, --local              operate on a local network
--m, --mainnet            operate on mainnet
---pchain                 list P-Chain addresses (default true)
---chains strings        chains to show information about (p=p-chain, x=x-chain, c=c-chain, and blockchain names) (default p,x,c)
--t, --testnet            testnet          operate on testnet (alias to testnet)
---tokens strings         provide balance information for the given token contract addresses (Evm only) (default [Native])
---use-gwei               use gwei for EVM balances
--n, --use-nano-lux      use nano Lux for balances
---xchain                 list X-Chain addresses (default true)
---config string          config file (default is $HOME/.lux-cli/config.json)
---log-level string       log level for the application (default "ERROR")
---skip-update-check      skip check for new versions
+```
+  -a, --all   Lock all keys
 ```
 
-<a id="lux-key-transfer"></a>
-### transfer
+<a id="lux-key-migrate"></a>
+### lux key migrate
 
-The key transfer command allows to transfer funds between stored keys or ledger addresses.
+Migrate legacy plaintext key files to encrypted keystore.enc format.
+
+This command reads plaintext key files (ec/private.key, bls/secret.key, staker.key)
+and encrypts them using AES-256-GCM with Argon2id key derivation.
+
+After migration, the plaintext originals can be securely deleted with --secure.
+
+Examples:
+  lux key migrate node0              # Migrate single node
+  lux key migrate node0 node1 node2  # Migrate multiple nodes
+  lux key migrate --all              # Migrate all keys with plaintext files
+  lux key migrate node0 --secure     # Migrate and securely delete originals
 
 **Usage:**
+
 ```bash
-lux key transfer [subcommand] [flags]
+lux key migrate [name...] [flags]
 ```
 
 **Flags:**
 
+```
+      --all      Migrate all keys with plaintext files
+      --force    Overwrite existing keystore.enc files
+      --secure   Securely delete plaintext files after migration
+```
+
+<a id="lux-key-ring"></a>
+### lux key ring
+
+Ring signatures allow signing messages such that the signature can be
+verified as coming from someone in a group (the "ring"), without revealing
+which member actually signed. This provides strong anonymity guarantees.
+
+Features:
+  - LSAG (Linkable Spontaneous Anonymous Group) signatures using secp256k1
+  - Lattice-based ring signatures for post-quantum security
+  - Key images for linkability (double-spend detection)
+
+The ring signature uses your ring-signature key (LSAG over secp256k1) from ~/.lux/keys/<name>/rt/
+
+Examples:
+  lux key ring sign mykey "message" --ring key1,key2,key3
+  lux key ring verify "message" --signature <sig> --ring key1,key2,key3
+  lux key ring keyimage mykey
+  lux key ring schemes
+
+**Usage:**
+
 ```bash
--o, --amount float                          amount to send or receive (LUX or TOKEN units)
---c-chain-receiver                          receive at C-Chain
---c-chain-sender                            send from C-Chain
---cluster string                            operate on the given cluster
--a, --destination-addr string               destination address
---destination-key string                    key associated to a destination address
---destination-chain string                 chain where the funds will be sent (token transferrer experimental)
---destination-transferrer-address string    token transferrer address at the destination chain (token transferrer experimental)
---devnet                                    operate on a devnet network
---endpoint string                           use the given endpoint for network operations
--f, --testnet                                  testnet                             operate on testnet (alias to testnet
--h, --help                                  help for transfer
--k, --key string                            key associated to the sender or receiver address
--i, --ledger uint32                         ledger index associated to the sender or receiver address (default 32768)
--l, --local                                 operate on a local network
--m, --mainnet                               operate on mainnet
---origin-chain string                      chain where the funds belong (token transferrer experimental)
---origin-transferrer-address string         token transferrer address at the origin chain (token transferrer experimental)
---p-chain-receiver                          receive at P-Chain
---p-chain-sender                            send from P-Chain
---receiver-blockchain string                receive at the given CLI blockchain
---receiver-blockchain-id string             receive at the given blockchain ID/Alias
---sender-blockchain string                  send from the given CLI blockchain
---sender-blockchain-id string               send from the given blockchain ID/Alias
--t, --testnet                               testnet                             operate on testnet (alias to testnet)
---x-chain-receiver                          receive at X-Chain
---x-chain-sender                            send from X-Chain
---config string                             config file (default is $HOME/.lux-cli/config.json)
---log-level string                          log level for the application (default "ERROR")
---skip-update-check                         skip check for new versions
+lux key ring
+```
+
+<a id="lux-key-ring-generate"></a>
+#### lux key ring generate
+
+Generate random public keys to use as decoys in a ring signature.
+
+In production, you should use real public keys from the network for better
+anonymity. This command is mainly for testing and demonstration.
+
+Examples:
+  lux key ring generate --size 5
+  lux key ring generate --size 10 --scheme lattice
+
+**Usage:**
+
+```bash
+lux key ring generate [flags]
+```
+
+**Flags:**
+
+```
+      --scheme string   Signature scheme (lsag, lattice) (default "lsag")
+  -n, --size int        Number of keys to generate (default 5)
+```
+
+<a id="lux-key-ring-keyimage"></a>
+#### lux key ring keyimage
+
+Show the key image for a key. Key images are deterministic identifiers
+derived from the private key that enable linkability - two signatures from
+the same key will have the same key image.
+
+This is used for double-spend detection in privacy-preserving transactions.
+
+Examples:
+  lux key ring keyimage mykey
+  lux key ring keyimage mykey --scheme lattice
+
+**Usage:**
+
+```bash
+lux key ring keyimage <key-name> [flags]
+```
+
+**Flags:**
+
+```
+      --scheme string   Signature scheme (lsag, lattice) (default "lsag")
+```
+
+<a id="lux-key-ring-schemes"></a>
+#### lux key ring schemes
+
+List all supported ring signature schemes and their properties.
+
+**Usage:**
+
+```bash
+lux key ring schemes
+```
+
+<a id="lux-key-ring-sign"></a>
+#### lux key ring sign
+
+Create a ring signature for a message using your key and a ring of public keys.
+
+Your key must be one of the keys in the ring. The signature proves you're a member
+of the ring without revealing which member you are.
+
+Examples:
+  lux key ring sign mykey "message to sign" --ring key1,key2,key3
+  lux key ring sign mykey --file message.txt --ring key1,key2,key3,key4
+  lux key ring sign mykey "data" --ring key1,key2,key3 --scheme lattice
+
+**Usage:**
+
+```bash
+lux key ring sign <key-name> <message> [flags]
+```
+
+**Flags:**
+
+```
+  -f, --file string     Read message from file
+  -o, --output string   Write signature to file
+      --ring strings    Ring member key names (comma-separated)
+  -s, --scheme string   Signature scheme (lsag, lattice) (default "lsag")
+```
+
+<a id="lux-key-ring-verify"></a>
+#### lux key ring verify
+
+Verify a ring signature against a message and ring of public keys.
+
+Examples:
+  lux key ring verify "message" --signature <sig> --ring key1,key2,key3
+  lux key ring verify --file message.txt --signature-file sig.txt --ring key1,key2,key3
+
+**Usage:**
+
+```bash
+lux key ring verify <message> [flags]
+```
+
+**Flags:**
+
+```
+  -f, --file string             Read message from file
+      --ring strings            Ring member key names (comma-separated)
+      --scheme string           Signature scheme (lsag, lattice) (default "lsag")
+      --signature string        Signature (hex-encoded)
+      --signature-file string   Read signature from file
+```
+
+<a id="lux-key-show"></a>
+### lux key show
+
+Show public keys and addresses for a key set.
+
+Displays:
+- EC (secp256k1) address (Ethereum format)
+- BLS public key (consensus)
+- Ring-signature public key (LSAG over secp256k1)
+- ML-DSA public key (post-quantum)
+
+With --export flag, also displays private keys (DANGER - keep secret!).
+
+Example:
+  lux key show validator1
+  lux key show validator1 --export
+
+**Usage:**
+
+```bash
+lux key show <name> [flags]
+```
+
+**Flags:**
+
+```
+      --export   Export private keys (DANGER - keep secret!)
+```
+
+<a id="lux-key-staker"></a>
+### lux key staker
+
+Writes staker.crt, staker.key and signer.key into <dir> and prints the
+NodeID, BLS public key and proof of possession.
+
+Point luxd at the directory, then register the printed values:
+
+  lux key staker ~/.luxd/staking
+  lux primary addValidator --mainnet \
+      --node-id <NodeID> --public-key <pub> --proof-of-possession <pop> \
+      --stake 2 --duration 336h
+
+**Usage:**
+
+```bash
+lux key staker <dir>
+```
+
+<a id="lux-key-unlock"></a>
+### lux key unlock
+
+Unlock a key by providing the password.
+
+The key remains unlocked for the session duration (default 30 seconds).
+After the timeout without access, the key is automatically locked and
+requires re-authentication. The timeout resets on each key access.
+
+Session timeout can be configured via:
+  KEY_SESSION_TIMEOUT environment variable (e.g., "30s", "5m", "1h")
+
+Password can be provided via:
+  --password flag
+  KEY_PASSWORD environment variable
+  Interactive prompt (most secure)
+
+Examples:
+  lux key unlock validator1                    # Prompts for password
+  lux key unlock validator1 --password secret  # Password via flag (less secure)
+  KEY_SESSION_TIMEOUT=5m lux key unlock validator1  # 5 minute session
+
+**Usage:**
+
+```bash
+lux key unlock <name> [flags]
+```
+
+**Flags:**
+
+```
+  -p, --password string   Password for the key
+```
+
+<a id="lux-kms"></a>
+## lux kms
+
+Key Management Service (KMS) for managing cryptographic keys and secrets.
+
+The KMS provides:
+  - Key generation (AES-256, RSA, ECDSA, Ed25519)
+  - Encryption/decryption operations
+  - Digital signatures
+  - Secret management
+  - MPC wallet integration
+
+QUICK START:
+
+  # Start the KMS server
+  lux kms server start
+
+  # Generate a new key
+  lux kms key create --name mykey --type aes-256-gcm --usage encrypt-decrypt
+
+  # List keys
+  lux kms key list
+
+  # Create a secret
+  lux kms secret create --name API_KEY --value "sk-xxx" --env production
+
+STORAGE:
+
+  KMS data is stored in ~/.lux/kms/ by default.
+  The root encryption key is derived from your system keychain or environment.
+
+API:
+
+  The KMS server exposes a REST API compatible with the kms-go SDK.
+  Default address: http://localhost:8200
+
+Available subcommands:
+  server  - Manage the KMS server
+  key     - Key management operations
+  secret  - Secret management operations
+
+<a id="lux-kms-key"></a>
+### lux kms key
+
+Commands for managing cryptographic keys.
+
+<a id="lux-kms-key-create"></a>
+#### lux kms key create
+
+Create a new cryptographic key.
+
+Supported key types:
+  - aes-256-gcm   : Symmetric encryption (default)
+  - rsa-4096      : RSA asymmetric key
+  - ecdsa-p256    : ECDSA P-256 curve
+  - ecdsa-p384    : ECDSA P-384 curve
+  - ed25519       : EdDSA Ed25519
+
+Usage types:
+  - encrypt-decrypt : For encryption operations
+  - sign-verify     : For digital signatures
+
+Examples:
+  lux kms key create --name mykey --type aes-256-gcm
+  lux kms key create --name signing --type ecdsa-p256 --usage sign-verify
+
+**Usage:**
+
+```bash
+lux kms key create [flags]
+```
+
+**Flags:**
+
+```
+      --description string   Key description
+      --name string          Key name (required)
+      --project string       Project ID
+      --type string          Key type (default "aes-256-gcm")
+      --usage string         Key usage (default "encrypt-decrypt")
+```
+
+<a id="lux-kms-key-delete"></a>
+#### lux kms key delete
+
+Delete a key
+
+**Usage:**
+
+```bash
+lux kms key delete [keyID]
+```
+
+<a id="lux-kms-key-list"></a>
+#### lux kms key list
+
+List all keys
+
+**Usage:**
+
+```bash
+lux kms key list
+```
+
+<a id="lux-kms-secret"></a>
+### lux kms secret
+
+Commands for managing encrypted secrets.
+
+<a id="lux-kms-secret-create"></a>
+#### lux kms secret create
+
+Create a new encrypted secret.
+
+Examples:
+  lux kms secret create --name API_KEY --value "sk-xxx"
+  lux kms secret create --name DB_PASSWORD --value "secret" --env production
+
+**Usage:**
+
+```bash
+lux kms secret create [flags]
+```
+
+**Flags:**
+
+```
+      --env string     Environment (dev, staging, prod)
+      --name string    Secret name (required)
+      --path string    Secret path (default "/")
+      --value string   Secret value (required)
+```
+
+<a id="lux-kms-secret-get"></a>
+#### lux kms secret get
+
+Get a secret value
+
+**Usage:**
+
+```bash
+lux kms secret get [secretName]
+```
+
+<a id="lux-kms-secret-list"></a>
+#### lux kms secret list
+
+List all secrets
+
+**Usage:**
+
+```bash
+lux kms secret list
+```
+
+<a id="lux-kms-server"></a>
+### lux kms server
+
+Commands for starting and managing the KMS server.
+
+<a id="lux-kms-server-start"></a>
+#### lux kms server start
+
+Start the KMS HTTP API server.
+
+The server provides a REST API for key management, encryption, and secret
+operations. It is compatible with the kms-go SDK client.
+
+Examples:
+  # Start with default settings
+  lux kms server start
+
+  # Start on a custom port
+  lux kms server start --addr :9200
+
+  # Start with in-memory storage (for testing)
+  lux kms server start --in-memory
+
+  # Start with API key authentication
+  lux kms server start --api-key your-secret-key
+
+**Usage:**
+
+```bash
+lux kms server start [flags]
+```
+
+**Flags:**
+
+```
+      --addr string       Server listen address (default ":8200")
+      --api-key string    API key for authentication
+      --data-dir string   Data directory (default: ~/.lux/kms)
+      --in-memory         Use in-memory storage (data lost on restart)
+```
+
+<a id="lux-link"></a>
+## lux link
+
+Link Lux binaries for system-wide use.
+
+Creates ~/.lux/bin directory if needed and symlinks binaries.
+Add ~/.lux/bin to your PATH for easy access.
+
+SUPPORTED BINARIES:
+  all        - All binaries (lux, luxd, netrunner)
+  lux        - CLI binary
+  luxd       - Node binary
+  netrunner  - Network runner
+
+EXAMPLES:
+
+  # Link all binaries (auto-detect from workspace)
+  lux link all
+
+  # Link specific binary (auto-detect)
+  lux link luxd
+  lux link netrunner
+
+  # Link specific binary with explicit path
+  lux link luxd /path/to/luxd
+
+**Usage:**
+
+```bash
+lux link [binary] [path]
+```
+
+<a id="lux-mpc"></a>
+## lux mpc
+
+Multi-Party Computation (MPC) management commands.
+
+MPC enables threshold signing for blockchain wallets, where multiple
+parties must cooperate to sign transactions without any single party
+having access to the complete private key.
+
+Each MPC node holds exactly one key shard. For a t-of-n threshold scheme,
+at least t nodes must cooperate to produce a valid signature.
+
+NETWORK TYPES:
+
+  --mainnet   Production MPC network (ports 9700-9799)
+  --testnet   Test MPC network (ports 9710-9809)
+  --devnet    Development MPC network (ports 9720-9819)
+
+QUICK START:
+
+  # Initialize a 3-of-5 MPC network
+  lux mpc node init --threshold 3 --nodes 5 --devnet
+
+  # Start all MPC nodes
+  lux mpc node start
+
+  # Check status
+  lux mpc node status
+
+  # Create a wallet
+  lux mpc wallet create --name "Treasury"
+
+  # Stop the network
+  lux mpc node stop
+
+SECURITY:
+
+  Key shards are stored encrypted in ~/.lux/keys/mpc/
+  Backups are stored in ~/.lux/mpc/backups/ by default
+
+CLOUD DEPLOYMENT:
+
+  Deploy MPC nodes to cloud providers:
+  lux mpc deploy create mpc-devnet-xxx --provider aws --region us-east-1
+  lux mpc deploy status mpc-devnet-xxx
+  lux mpc deploy ssh mpc-devnet-xxx mpc-node-1
+
+Available subcommands:
+  node     - Manage MPC nodes (local)
+  deploy   - Deploy MPC nodes to cloud
+  backup   - Backup and restore node data
+  wallet   - Manage MPC wallets
+  sign     - Threshold signing operations
+
+<a id="lux-mpc-backup"></a>
+### lux mpc backup
+
+Backup and restore MPC node data.
+
+By default, backups are stored locally in ~/.lux/mpc/backups.
+For cloud storage, specify a destination URI.
+
+Supports multiple storage backends:
+  - Local filesystem (default: ~/.lux/mpc/backups)
+  - S3 (AWS, MinIO, Cloudflare R2, etc.)
+  - GCS (Google Cloud Storage)
+  - Azure Blob Storage
+
+Examples:
+  # Backup to default local directory (~/.lux/mpc/backups)
+  lux mpc backup create
+
+  # Backup to S3
+  lux mpc backup create --destination s3://my-bucket/backups
+
+  # Backup to custom local directory
+  lux mpc backup create --destination file:///backups/mpc
+
+  # List local backups (default)
+  lux mpc backup list
+
+  # List S3 backups
+  lux mpc backup list --destination s3://my-bucket/backups
+
+  # Restore from local backup
+  lux mpc backup restore my-backup-20250125
+
+  # Restore from S3
+  lux mpc backup restore my-backup-20250125 --destination s3://my-bucket/backups
+
+<a id="lux-mpc-backup-create"></a>
+#### lux mpc backup create
+
+Create a backup of MPC node data.
+
+The backup includes:
+  - BadgerDB database
+  - Key shares and wallet data
+  - Node configuration
+
+By default, backups are stored in ~/.lux/mpc/backups.
+Backups are compressed with zstd by default and can be encrypted
+with age encryption for secure storage.
+
+**Usage:**
+
+```bash
+lux mpc backup create [flags]
+```
+
+**Flags:**
+
+```
+      --age-recipient strings   Age recipient public key(s)
+      --compression string      Compression algorithm (zstd, gzip, none) (default "zstd")
+  -d, --destination string      Storage destination (default: ~/.lux/mpc/backups)
+      --encrypt                 Encrypt backup with age
+      --incremental             Create incremental backup
+```
+
+<a id="lux-mpc-backup-delete"></a>
+#### lux mpc backup delete
+
+Delete a backup
+
+**Usage:**
+
+```bash
+lux mpc backup delete <backup-name> [flags]
+```
+
+**Flags:**
+
+```
+  -d, --destination string   Storage destination (default: ~/.lux/mpc/backups)
+```
+
+<a id="lux-mpc-backup-list"></a>
+#### lux mpc backup list
+
+List available backups
+
+**Usage:**
+
+```bash
+lux mpc backup list [flags]
+```
+
+**Flags:**
+
+```
+  -d, --destination string   Storage destination (default: ~/.lux/mpc/backups)
+```
+
+<a id="lux-mpc-backup-restore"></a>
+#### lux mpc backup restore
+
+Restore MPC node data from a backup.
+
+This will stop the MPC node if running, restore the data,
+and optionally restart the node.
+
+**Usage:**
+
+```bash
+lux mpc backup restore <backup-name> [flags]
+```
+
+**Flags:**
+
+```
+      --age-identity strings   Age identity file(s) for decryption
+  -d, --destination string     Storage destination (default: ~/.lux/mpc/backups)
+      --target string          Target path (default: original location)
+```
+
+<a id="lux-mpc-backup-verify"></a>
+#### lux mpc backup verify
+
+Download and verify backup integrity without restoring.
+
+**Usage:**
+
+```bash
+lux mpc backup verify <backup-name> [flags]
+```
+
+**Flags:**
+
+```
+      --age-identity strings   Age identity file(s) for decryption
+  -d, --destination string     Storage destination (default: ~/.lux/mpc/backups)
+```
+
+<a id="lux-mpc-deploy"></a>
+### lux mpc deploy
+
+Deploy MPC nodes to cloud providers for production use.
+
+Each MPC node is deployed to a separate server for security.
+Key shards are encrypted and stored securely on each node.
+
+SUPPORTED PROVIDERS:
+
+  aws           Amazon Web Services (EC2)
+  gcp           Google Cloud Platform (Compute Engine)
+  azure         Microsoft Azure (Virtual Machines)
+  digitalocean  DigitalOcean (Droplets)
+
+SECURITY CONSIDERATIONS:
+
+  - Each node should be in a different availability zone/region
+  - Key shards are encrypted with age before storage
+  - SSH access is required for node management
+  - Use private networks where possible
+
+Examples:
+  # Deploy to AWS
+  lux mpc deploy create mpc-devnet-xxx --provider aws --region us-east-1
+
+  # Deploy to DigitalOcean
+  lux mpc deploy create mpc-devnet-xxx --provider digitalocean --region nyc1
+
+  # Check deployment status
+  lux mpc deploy status mpc-devnet-xxx
+
+  # SSH to a specific node
+  lux mpc deploy ssh mpc-devnet-xxx mpc-node-1
+
+  # Destroy deployment
+  lux mpc deploy destroy mpc-devnet-xxx
+
+<a id="lux-mpc-deploy-create"></a>
+#### lux mpc deploy create
+
+Deploy an initialized MPC network to cloud infrastructure.
+
+The network must be initialized first with 'lux mpc node init'.
+Each node will be deployed to a separate cloud instance.
+
+**Usage:**
+
+```bash
+lux mpc deploy create <network-name> [flags]
+```
+
+**Flags:**
+
+```
+      --aws-profile string            AWS profile name
+      --aws-vpc string                AWS VPC ID
+      --azure-resource-group string   Azure resource group
+      --azure-subscription string     Azure subscription ID
+      --gcp-project string            GCP project ID
+      --gcp-zone string               GCP zone
+      --instance-type string          Instance type (default: provider-specific)
+  -p, --provider string               Cloud provider (aws, gcp, azure, digitalocean)
+  -r, --region string                 Cloud region
+      --ssh-key string                Path to SSH private key
+      --ssh-user string               SSH username (default "ubuntu")
+```
+
+<a id="lux-mpc-deploy-destroy"></a>
+#### lux mpc deploy destroy
+
+Terminate all cloud instances and clean up resources.
+
+WARNING: This will delete all deployed instances!
+Make sure you have backups of key shards before destroying.
+
+**Usage:**
+
+```bash
+lux mpc deploy destroy <network-name> [flags]
+```
+
+**Flags:**
+
+```
+  -f, --force   Skip confirmation
+```
+
+<a id="lux-mpc-deploy-list"></a>
+#### lux mpc deploy list
+
+List deployments
+
+**Usage:**
+
+```bash
+lux mpc deploy list
+```
+
+<a id="lux-mpc-deploy-ssh"></a>
+#### lux mpc deploy ssh
+
+Open an SSH session to a deployed MPC node.
+
+Examples:
+  lux mpc deploy ssh mpc-devnet-xxx mpc-node-1
+
+**Usage:**
+
+```bash
+lux mpc deploy ssh <network-name> <node-name>
+```
+
+<a id="lux-mpc-deploy-status"></a>
+#### lux mpc deploy status
+
+Show deployment status
+
+**Usage:**
+
+```bash
+lux mpc deploy status <network-name>
+```
+
+<a id="lux-mpc-node"></a>
+### lux mpc node
+
+Commands for managing MPC node lifecycle.
+
+MPC nodes form a threshold signing network. Each node holds one key shard
+and participates in distributed signing operations.
+
+Examples:
+  # Initialize a new 3-of-5 MPC network
+  lux mpc node init --threshold 3 --nodes 5 --devnet
+
+  # Start all nodes in the network
+  lux mpc node start
+
+  # Check status of all nodes
+  lux mpc node status
+
+  # Stop all nodes
+  lux mpc node stop
+
+  # Clean up (stop and remove data)
+  lux mpc node clean
+
+<a id="lux-mpc-node-clean"></a>
+#### lux mpc node clean
+
+Stop all nodes and remove network data.
+
+WARNING: This will delete all node data including key shards!
+Make sure you have backups before running this command.
+
+Examples:
+  # Clean the default network
+  lux mpc node clean
+
+  # Force clean without confirmation
+  lux mpc node clean --force
+
+**Usage:**
+
+```bash
+lux mpc node clean [network-name] [flags]
+```
+
+**Flags:**
+
+```
+  -f, --force   Skip confirmation
+```
+
+<a id="lux-mpc-node-init"></a>
+#### lux mpc node init
+
+Initialize a new MPC network with the specified threshold configuration.
+
+This creates the network directory structure, generates node configurations,
+and prepares encrypted key storage directories.
+
+Examples:
+  # Create a 2-of-3 devnet MPC network
+  lux mpc node init --threshold 2 --nodes 3 --devnet
+
+  # Create a 3-of-5 mainnet MPC network
+  lux mpc node init --threshold 3 --nodes 5 --mainnet
+
+**Usage:**
+
+```bash
+lux mpc node init [flags]
+```
+
+**Flags:**
+
+```
+      --devnet          Initialize devnet MPC network (default)
+      --mainnet         Initialize mainnet MPC network
+  -n, --nodes int       Total number of nodes (default 3)
+      --testnet         Initialize testnet MPC network
+  -t, --threshold int   Signing threshold (t in t-of-n) (default 2)
+```
+
+<a id="lux-mpc-node-list"></a>
+#### lux mpc node list
+
+List all initialized MPC networks.
+
+**Usage:**
+
+```bash
+lux mpc node list
+```
+
+<a id="lux-mpc-node-start"></a>
+#### lux mpc node start
+
+Start all MPC nodes in a network.
+
+If no network name is specified, starts the most recently created network.
+
+Examples:
+  # Start all nodes in the default network
+  lux mpc node start
+
+  # Start a specific network
+  lux mpc node start mpc-devnet-abc123
+
+**Usage:**
+
+```bash
+lux mpc node start [network-name] [flags]
+```
+
+**Flags:**
+
+```
+      --devnet    Start devnet MPC network
+      --mainnet   Start mainnet MPC network
+      --testnet   Start testnet MPC network
+```
+
+<a id="lux-mpc-node-status"></a>
+#### lux mpc node status
+
+Display status of all MPC nodes in a network.
+
+Shows running status, uptime, endpoints, and health information.
+
+Examples:
+  # Show status of default network
+  lux mpc node status
+
+  # Show status of specific network
+  lux mpc node status mpc-devnet-abc123
+
+**Usage:**
+
+```bash
+lux mpc node status [network-name]
+```
+
+<a id="lux-mpc-node-stop"></a>
+#### lux mpc node stop
+
+Stop all MPC nodes in a network.
+
+This gracefully shuts down nodes and saves state for later restart.
+
+Examples:
+  # Stop the default network
+  lux mpc node stop
+
+  # Stop a specific network
+  lux mpc node stop mpc-devnet-abc123
+
+**Usage:**
+
+```bash
+lux mpc node stop [network-name]
+```
+
+<a id="lux-mpc-sign"></a>
+### lux mpc sign
+
+Commands for threshold signing operations.
+
+Examples:
+  # Initiate a signing request
+  lux mpc sign request --wallet <wallet-id> --message "0x..."
+
+  # Approve a signing request
+  lux mpc sign approve <request-id>
+
+  # Check signing status
+  lux mpc sign status <request-id>
+
+<a id="lux-mpc-sign-approve"></a>
+#### lux mpc sign approve
+
+Approve a signing request
+
+**Usage:**
+
+```bash
+lux mpc sign approve <request-id>
+```
+
+<a id="lux-mpc-sign-request"></a>
+#### lux mpc sign request
+
+Initiate a signing request
+
+**Usage:**
+
+```bash
+lux mpc sign request
+```
+
+<a id="lux-mpc-sign-status"></a>
+#### lux mpc sign status
+
+Check signing status
+
+**Usage:**
+
+```bash
+lux mpc sign status <request-id>
+```
+
+<a id="lux-mpc-wallet"></a>
+### lux mpc wallet
+
+Commands for managing MPC wallets and their key shares.
+
+Examples:
+  # List wallets
+  lux mpc wallet list
+
+  # Create a new wallet
+  lux mpc wallet create --name "Treasury" --threshold 2 --parties 3
+
+  # Show wallet details
+  lux mpc wallet show <wallet-id>
+
+<a id="lux-mpc-wallet-create"></a>
+#### lux mpc wallet create
+
+Create a new wallet
+
+**Usage:**
+
+```bash
+lux mpc wallet create
+```
+
+<a id="lux-mpc-wallet-export"></a>
+#### lux mpc wallet export
+
+Export wallet public key
+
+**Usage:**
+
+```bash
+lux mpc wallet export <wallet-id>
+```
+
+<a id="lux-mpc-wallet-list"></a>
+#### lux mpc wallet list
+
+List wallets
+
+**Usage:**
+
+```bash
+lux mpc wallet list
+```
+
+<a id="lux-mpc-wallet-show"></a>
+#### lux mpc wallet show
+
+Show wallet details
+
+**Usage:**
+
+```bash
+lux mpc wallet show <wallet-id>
+```
+
+<a id="lux-netrunner"></a>
+## lux netrunner
+
+Commands for managing the Lux network runner.
+
+The netrunner is used for local network testing and development.
+
+**Usage:**
+
+```bash
+lux netrunner
+```
+
+<a id="lux-netrunner-link"></a>
+### lux netrunner link
+
+Link netrunner binary for the CLI to use.
+
+Creates ~/.lux/bin directory if needed and symlinks the netrunner binary.
+
+EXAMPLES:
+
+  # Link netrunner (auto-detect from ../netrunner/bin/netrunner)
+  lux netrunner link --auto
+
+  # Link specific path
+  lux netrunner link /path/to/netrunner
+
+**Usage:**
+
+```bash
+lux netrunner link [path] [flags]
+```
+
+**Flags:**
+
+```
+      --auto   auto-detect netrunner from standard locations
 ```
 
 <a id="lux-network"></a>
 ## lux network
 
-The network command suite provides a collection of tools for managing local Blockchain
-deployments.
+The network command manages local network runtime operations.
 
-When you deploy a Blockchain locally, it runs on a local, multi-node Lux network. The
-blockchain deploy command starts this network in the background. This command suite allows you
-to shutdown, restart, and clear that network.
+OVERVIEW:
 
-This network currently supports multiple, concurrently deployed Blockchains.
+  The network command suite controls the lifecycle of local Lux networks
+  used for development and testing. It manages the node processes and runtime
+  state, but does NOT manage blockchain configurations (use 'lux chain' for that).
+
+COMMANDS:
+
+  start     Start a local network (mainnet/testnet/devnet/dev mode)
+  stop      Stop the running network and save a snapshot
+  status    Show network status and endpoints
+  clean     Stop network and delete runtime data (preserves chains)
+  snapshot  Manage network snapshots
+
+NETWORK TYPES:
+
+  mainnet   Production network (3 validators, port 9630)
+  testnet   Test network (3 validators, port 9640)
+  devnet    Development network (3 validators, port 9650)
+  dev       Single-node dev mode with K=1 consensus
+
+TYPICAL WORKFLOW:
+
+  # Start a development network
+  lux network start --devnet
+
+  # Check it's running
+  lux network status
+
+  # Deploy a chain (see 'lux chain --help')
+  lux chain deploy mychain
+
+  # Stop and save state
+  lux network stop
+
+  # Clean everything (preserves chain configs)
+  lux network clean
+
+NOTES:
+
+  - Only one network type can run at a time
+  - Chain configurations are managed separately via 'lux chain'
+  - Runtime data is stored in ~/.lux/networks/<type>
+  - Use 'lux network clean' to wipe runtime data but keep chain configs
 
 **Usage:**
+
 ```bash
-lux network [subcommand] [flags]
+lux network
 ```
 
-**Subcommands:**
+<a id="lux-network-bootstrap"></a>
+### lux network bootstrap
 
-- [`clean`](#lux-network-clean): The network clean command shuts down your local, multi-node network. All deployed Chains
-shutdown and delete their state. You can restart the network by deploying a new Chain
-configuration.
-- [`start`](#lux-network-start): The network start command starts a local, multi-node Lux network on your machine.
+The bootstrap command downloads and installs a network snapshot from a remote source.
+It supports downloading split archives (parts) in parallel and reassembling them.
 
-By default, the command loads the default snapshot. If you provide the --snapshot-name
-flag, the network loads that snapshot instead. The command fails if the local network is
-already running.
-- [`status`](#lux-network-status): The network status command prints whether or not a local Lux
-network is running and some basic stats about the network.
-- [`stop`](#lux-network-stop): The network stop command shuts down your local, multi-node network.
+This is useful for quickly syncing a new node by starting from a recent snapshot
+instead of syncing from genesis.
 
-All deployed Chains shutdown gracefully and save their state. If you provide the
---snapshot-name flag, the network saves its state under this named snapshot. You can
-reload this snapshot with network start --snapshot-name `snapshotName`. Otherwise, the
-network saves to the default snapshot, overwriting any existing state. You can reload the
-default snapshot with network start.
+**Usage:**
+
+```bash
+lux network bootstrap [flags]
+```
 
 **Flags:**
 
-```bash
--h, --help             help for network
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --network-type string    network type to bootstrap (mainnet, testnet) (default "mainnet")
+      --snapshot-name string   specific snapshot name to download (optional)
+      --url string             base URL for the snapshot parts (optional, defaults to official repo)
 ```
 
 <a id="lux-network-clean"></a>
-### clean
+### lux network clean
 
-The network clean command shuts down your local, multi-node network. All deployed Chains
-shutdown and delete their state. You can restart the network by deploying a new Chain
-configuration.
+The network clean command stops the network and deletes runtime data.
+
+⚠️  IMPORTANT - WHAT GETS DELETED:
+
+  Runtime Data (DELETED):
+  - Network snapshots (blockchain state, databases)
+  - Validator state
+  - Log files
+  - Running processes
+
+  Chain Configs (PRESERVED):
+  - Chain configurations in ~/.lux/chains/
+  - Genesis files
+  - Sidecar metadata
+
+BEHAVIOR:
+
+  1. Stops the running network gracefully
+  2. Deletes network runtime data and snapshots
+  3. Removes local deployment info from sidecars
+  4. Preserves chain configurations for redeployment
+
+  After cleaning, you can redeploy your chains to a fresh network:
+    lux network start --devnet
+    lux chain deploy mychain
+
+OPTIONS:
+
+  --reset-plugins    Also delete the plugins directory (removes user-installed VMs)
+
+EXAMPLES:
+
+  # Clean network runtime (most common)
+  lux network clean
+
+  # Clean and also remove custom VM plugins
+  lux network clean --reset-plugins
+
+WHEN TO USE:
+
+  ✓ Network state is corrupted
+  ✓ Want to start fresh but keep chain configs
+  ✓ Testing deployment from scratch
+  ✓ Cleaning up after development session
+
+  ✗ Just want to stop the network (use 'lux network stop')
+  ✗ Want to delete a specific chain (use 'lux chain delete <name>')
+
+CLEAN vs STOP:
+
+  lux network stop     - Saves state for resuming later
+  lux network clean    - Deletes runtime data, preserves chain configs
+  lux chain delete     - Deletes a specific chain configuration
+
+STORAGE CLEANUP:
+
+  The CLI can accumulate significant storage over time:
+  - netrunner-server.log files (can grow to 100GB+)
+  - .backup.* directories from snapshot loads
+  - Stale run directories from previous sessions
+
+  Use --logs, --backups, --stale-runs, or --all to clean these:
+    lux network clean --all              # Clean everything
+    lux network clean --logs             # Clean large logs only
+    lux network clean --all --dry-run    # Preview what would be deleted
+
+NOTE: Chain configurations are explicitly preserved. To delete a chain
+configuration, use: lux chain delete <chainName>
 
 **Usage:**
+
 ```bash
-lux network clean [subcommand] [flags]
+lux network clean [flags]
 ```
 
 **Flags:**
 
+```
+      --all                clean all: logs, backups, and stale runs
+      --backups            clean up old .backup.* directories
+      --dry-run            show what would be deleted without actually deleting
+      --logs               clean up large netrunner-server.log files
+      --max-age-days int   maximum age in days for backups and stale runs (default 7)
+      --max-log-mb int     maximum log file size in MB before cleanup (default 100)
+      --reset-plugins      also reset the plugins directory (removes user-installed VMs)
+      --stale-runs         clean up stale run directories from previous sessions
+```
+
+<a id="lux-network-describe"></a>
+### lux network describe
+
+Show detailed information about a network including:
+- Genesis configuration
+- C-chain allocations and precompiles
+- Initial validators/stakers
+- Network parameters
+
+Network must be one of: mainnet, testnet, devnet, local
+
+**Usage:**
+
 ```bash
--h, --help             help for clean
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux network describe <network>
+```
+
+<a id="lux-network-monitor"></a>
+### lux network monitor
+
+The monitor command shows real-time network status updates.
+
+OVERVIEW:
+
+  Continuously monitors network health, validator nodes, endpoints, and custom chains.
+  Updates display every second by default, showing live statistics.
+
+OPTIONS:
+
+  --interval, -i   Update interval in seconds (default: 1)
+  --format         Output format (full, summary, chains, nodes)
+  --compact        Use compact output format
+
+EXAMPLES:
+
+  # Monitor with default 1-second updates
+  lux network monitor
+
+  # Monitor with 5-second updates
+  lux network monitor --interval 5
+
+  # Monitor with compact format
+  lux network monitor --compact
+
+  # Monitor only chain status
+  lux network monitor --format chains
+
+**Usage:**
+
+```bash
+lux network monitor [flags]
+```
+
+**Flags:**
+
+```
+      --compact         use compact output format
+      --format string   output format (full, summary, chains, nodes) (default "full")
+  -i, --interval int    update interval in seconds (default 1)
+  -o, --output string   output format (text, json) (default "text")
+```
+
+<a id="lux-network-send"></a>
+### lux network send
+
+Send funds on the C-Chain of the running local network.
+
+This command uses a local key (MNEMONIC or --from) to sign a C-Chain
+transfer and submit it to the running network's C-Chain RPC.
+
+Examples:
+  # Send 100 LUX to a C-Chain address (uses MNEMONIC account 0)
+  lux network send --amount 100 --to 0x9011E888251AB053B7bD1cdB598Db4f9DEd94714
+
+  # Send with a specific stored key
+  lux network send --amount 25 --to 0x... --from node1
+
+Notes:
+  - Amount is in LUX (converted to wei)
+  - Requires a running local network (mainnet/testnet/devnet)
+  - Source/dest flags are accepted but only C->C is supported right now
+
+**Usage:**
+
+```bash
+lux network send [flags]
+```
+
+**Flags:**
+
+```
+      --amount float    Amount to send in LUX (required)
+      --dest string     Destination chain (only C supported) (default "C")
+      --from string     Key name to use for signing (default: MNEMONIC account 0)
+      --source string   Source chain (only C supported) (default "C")
+      --to string       Destination address (C-Chain hex address)
+```
+
+<a id="lux-network-snapshot"></a>
+### lux network snapshot
+
+The snapshot command allows you to save, load, list, and delete snapshots of your local network state.
+
+Snapshots capture the entire network state including all node data, databases, and configurations.
+
+Commands:
+  save <name>      - Save current network state as a named snapshot (Legacy)
+  load <name>      - Load a snapshot and restart the network (Legacy)
+  list             - List all available snapshots
+  delete <name>    - Delete a snapshot
+  advanced         - Advanced coordinated snapshots (incremental, squash, etc)
+
+Examples:
+  lux network snapshot save my-test-state
+  lux network snapshot advanced create my-prod-state --incremental
+  lux network snapshot list
+
+**Usage:**
+
+```bash
+lux network snapshot
+```
+
+<a id="lux-network-snapshot-advanced"></a>
+#### lux network snapshot advanced
+
+Advanced snapshot commands for coordinated multi-node snapshots.
+
+Commands:
+  create <name>    - Create advanced snapshot of all nodes (base or incremental)
+  restore <name>   - Restore network from advanced snapshot
+  squash <network> <chain-id> - Squash incrementals into base
+  download <name>  - Download from GitHub (placeholder)
+  upload <name>    - Upload to GitHub (placeholder)
+
+Examples:
+  lux network snapshot advanced create production-backup --incremental
+  lux network snapshot advanced restore production-backup
+  lux network snapshot advanced squash mainnet 1
+
+**Usage:**
+
+```bash
+lux network snapshot advanced
+```
+
+<a id="lux-network-snapshot-advanced-create"></a>
+##### lux network snapshot advanced create
+
+Create a coordinated snapshot of all nodes in the network.
+If --incremental is set, tries to create an incremental backup from the last checkpoint.
+Otherwise creates a full base snapshot.
+
+**Usage:**
+
+```bash
+lux network snapshot advanced create <name> [flags]
+```
+
+**Flags:**
+
+```
+      --incremental   Create incremental snapshot if possible
+```
+
+<a id="lux-network-snapshot-advanced-download"></a>
+##### lux network snapshot advanced download
+
+Download a snapshot from GitHub releases.
+
+This feature will download chunked snapshot files from GitHub releases
+and verify SHA256 hashes before restoring.
+
+Note: This is a planned feature. For now, manually download snapshot
+chunks and use 'lux network snapshot advanced restore' to restore.
+
+**Usage:**
+
+```bash
+lux network snapshot advanced download <name>
+```
+
+<a id="lux-network-snapshot-advanced-restore"></a>
+##### lux network snapshot advanced restore
+
+Restore network from advanced snapshot
+
+**Usage:**
+
+```bash
+lux network snapshot advanced restore <name>
+```
+
+<a id="lux-network-snapshot-advanced-squash"></a>
+##### lux network snapshot advanced squash
+
+Squashes all incremental snapshots for a specific chain into the base snapshot.
+This creates a new base snapshot and removes the incrementals, saving space.
+
+**Usage:**
+
+```bash
+lux network snapshot advanced squash <network> <chain-id> <snapshot-name>
+```
+
+<a id="lux-network-snapshot-advanced-upload"></a>
+##### lux network snapshot advanced upload
+
+Upload a snapshot to GitHub releases.
+
+This feature will upload chunked snapshot files (99MB each) to GitHub
+releases for distribution.
+
+Note: This is a planned feature. For now, manually upload the snapshot
+chunks from ~/.lux/snapshots/<name>/.
+
+**Usage:**
+
+```bash
+lux network snapshot advanced upload <name>
+```
+
+<a id="lux-network-snapshot-delete"></a>
+#### lux network snapshot delete
+
+The snapshot delete command removes a saved snapshot from disk.
+
+Example:
+  lux network snapshot delete my-test-state
+
+**Usage:**
+
+```bash
+lux network snapshot delete <name>
+```
+
+<a id="lux-network-snapshot-list"></a>
+#### lux network snapshot list
+
+The snapshot list command displays all saved snapshots with their metadata.
+
+Example:
+  lux network snapshot list
+
+**Usage:**
+
+```bash
+lux network snapshot list
+```
+
+<a id="lux-network-snapshot-load"></a>
+#### lux network snapshot load
+
+The snapshot load command loads a previously saved snapshot.
+
+If the network is currently running, it will be stopped first. The snapshot
+data will be copied to the active network directory and the network will be restarted.
+
+Example:
+  lux network snapshot load my-test-state
+
+**Usage:**
+
+```bash
+lux network snapshot load <name> [flags]
+```
+
+**Flags:**
+
+```
+      --network-type string   network type to load snapshot into (mainnet, testnet, devnet, custom)
+```
+
+<a id="lux-network-snapshot-save"></a>
+#### lux network snapshot save
+
+The snapshot save command saves the current network state to a named snapshot.
+
+Uses native BadgerDB backup API for reliable, consistent snapshots. Works on both
+running and stopped networks - BadgerDB supports concurrent reads during backup.
+
+Use --incremental to create a smaller incremental backup if a previous backup exists.
+Incremental backups only store changes since the last backup, saving significant space.
+
+Example:
+  lux network snapshot save my-test-state              # Full backup (works while running)
+  lux network snapshot save my-backup --incremental    # Incremental backup (smaller, faster)
+
+**Usage:**
+
+```bash
+lux network snapshot save <name> [flags]
+```
+
+**Flags:**
+
+```
+      --incremental           create incremental backup (smaller, faster if previous backup exists)
+      --network-type string   network type to snapshot (mainnet, testnet, devnet, custom)
 ```
 
 <a id="lux-network-start"></a>
-### start
+### lux network start
 
-The network start command starts a local, multi-node Lux network on your machine.
+The network start command starts a local, multi-node Lux network.
 
-By default, the command loads the default snapshot. If you provide the --snapshot-name
-flag, the network loads that snapshot instead. The command fails if the local network is
-already running.
+NETWORK TYPES (choose one, required):
+
+  --mainnet, -m    Production mainnet with 3 validators (port 9630)
+                   - Network ID: 1
+                   - HTTP API: ports 9630-9638
+                   - Use for mainnet testing and development
+
+  --testnet, -t    Test network with 3 validators (port 9640)
+                   - Network ID: 2
+                   - HTTP API: ports 9640-9648
+                   - Use for testnet deployment testing
+
+  --devnet, -d     Development network with 3 validators (port 9650)
+                   - Network ID: 3
+                   - HTTP API: ports 9650-9658
+                   - Use for rapid local development
+
+  --dev            Dev mode (port 8545) - Anvil/Hardhat compatible
+                   - Single-node: K=1 consensus, instant finality
+                   - Multi-node: --dev --num-validators=3 (turbo profile)
+                   - Primary chains: C/P/X (Contract/Platform/Exchange)
+                   - App chain VMs: A(AI) B(Bridge) D(DEX) G(Graph) I(Identity)
+                             K(Key) O(Oracle) Q(Quantum) R(Relay) T(Threshold) Z(ZK)
+                   - Set MNEMONIC to auto-fund derived accounts
+
+OPTIONS:
+
+  --num-validators    Number of validator nodes (default: 3)
+                      With --dev: 1 = K=1 single-node, >1 = turbo multi-node
+  --node-path         Path to custom luxd binary
+  --node-version      luxd version to use (default: latest)
+  --snapshot-name     Resume from named snapshot
+  --port              Base port for APIs (overrides defaults)
+  --profile           Consensus profile: standard, fast, turbo (default: auto)
+
+EXAMPLES:
+
+  # Start mainnet (3 validators, port 9630)
+  lux network start --mainnet
+  lux network start -m
+
+  # Start testnet with custom validator count
+  lux network start --testnet --num-validators 2
+
+  # Start devnet (most common for development)
+  lux network start --devnet
+
+  # Start single-node dev mode for rapid testing (K=1)
+  lux network start --dev
+
+  # Start 3-validator dev mode with turbo consensus
+  lux network start --dev --num-validators=3
+
+  # 3-node dev with mnemonic-funded accounts
+  export LIGHT_MNEMONIC="light light light light light light light light light light light energy"
+  lux network start --dev --num-validators=3
+
+  # Use custom luxd binary
+  lux network start --devnet --node-path ~/work/lux/node/build/luxd
+
+NOTES:
+
+  - Only one network type can run at a time
+  - Each network type uses different ports to avoid conflicts
+  - Network data is stored in ~/.lux/networks/<type>
+  - Use 'lux network status' to verify the network is running
+  - Use 'lux network stop' to stop and save a snapshot
+  - Admin APIs are enabled by default for chain deployment
+
+TYPICAL WORKFLOW:
+
+  1. Start network:    lux network start --devnet
+  2. Deploy chain:     lux chain deploy mychain
+  3. Test your dapp:   (connect to http://localhost:9650/v1/bc/C/rpc)
+  4. Stop network:     lux network stop
 
 **Usage:**
+
 ```bash
-lux network start [subcommand] [flags]
+lux network start [flags]
 ```
 
 **Flags:**
 
-```bash
---luxd-path string       use this luxd binary path
---luxd-version string    use this version of luxd (ex: v1.17.12) (default "latest-prerelease")
--h, --help                      help for start
---num-nodes uint32              number of nodes to be created on local network (default 2)
---relayer-path string           use this relayer binary path
---relayer-version string        use this relayer version (default "latest-prerelease")
---snapshot-name string          name of snapshot to use to start the network from (default "default")
---config string                 config file (default is $HOME/.lux-cli/config.json)
---log-level string              log level for the application (default "ERROR")
---skip-update-check             skip check for new versions
+```
+      --archive-path string        path to BadgerDB archive database (enables dual-database mode)
+      --archive-shared             enable shared read-only access to archive database
+      --blockchain-id string       blockchain ID for the loaded state
+      --chain-id string            chain ID for the loaded state
+      --chain-state-path string    path to existing chain database to load
+      --db-backend string          database backend to use (pebble, leveldb, or badgerdb)
+      --dev                        single-node dev mode with K=1 consensus
+  -d, --devnet                     start devnet with 3 validators (port 9650)
+      --import-chain-data string   path to import blockchain data from another chain into C-Chain
+      --k8s string                 deploy to Kubernetes cluster (use kubeconfig context name)
+      --k8s-image string           Docker image for K8s deployment (default "ghcr.io/luxfi/node:latest")
+  -l, --local                      start 3-node localnet on K8s (operator-native, light mnemonic)
+  -m, --mainnet                    start mainnet with 3 validators (port 9630)
+      --node-path string           path to local luxd binary (overrides --node-version)
+      --node-version string        use this version of node (ex: v1.17.12) (default "latest")
+      --num-validators int         number of validators to start (default 3)
+      --port int                   base port for node APIs (each node uses 2 ports: HTTP and staking) (default 9630)
+      --profile string             performance profile: standard, fast, turbo (default: per-network)
+      --snapshot-name string       name of snapshot to use to start the network from (default "default-20251225")
+      --state-path string          path to existing state directory (e.g., ~/work/lux/state/chaindata/lux-mainnet-96369)
+  -t, --testnet                    start testnet with 3 validators (port 9640)
 ```
 
 <a id="lux-network-status"></a>
-### status
+### lux network status
 
-The network status command prints whether or not a local Lux
-network is running and some basic stats about the network.
+The improved network status command shows detailed information about running networks.
+
+OVERVIEW:
+
+  Displays network health, validator nodes, endpoints, and custom chains.
+  Uses clean, structured output suitable for scripting and human reading.
+
+FORMAT OPTIONS:
+
+  --format full     Show full detailed status (default)
+  --format summary  Show only network summary
+  --format chains   Show only chain status
+  --format nodes    Show only node status
+  --compact         Use compact output format
+
+EXAMPLES:
+
+  # Show full status
+  lux network status-new
+
+  # Show only chain status
+  lux network status-new --format chains
+
+  # Show compact summary
+  lux network status-new --compact
+
+OUTPUT FORMAT:
+
+  status  mainnet  up   grpc=8369  nodes=5  vms=1  controller=on
+  status  testnet  up   grpc=8368  nodes=5  vms=1  controller=on
+  
+  mainnet nodes
+  node   http                         version       peers  uptime     ok
+  1      http://127.0.0.1:9630        luxd/1.22.75   12     01:22:10   yes
+  
+  mainnet chains (heights)
+  chain  kind  height     block_time           rpc_ok  latency
+  p      p     12345      2026-01-06 14:27:03   yes     18ms
+  c      evm   218        2026-01-06 14:27:01   yes     16ms
 
 **Usage:**
+
 ```bash
-lux network status [subcommand] [flags]
+lux network status [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help             help for status
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+      --compact         use compact output format
+      --format string   output format (full, summary, chains, nodes) (default "full")
+  -o, --output string   output format (text, json, yaml, wide) (default "text")
+      --verbose         show verbose progress information
 ```
 
 <a id="lux-network-stop"></a>
-### stop
+### lux network stop
 
-The network stop command shuts down your local, multi-node network.
+The network stop command gracefully shuts down the running network and saves state.
 
-All deployed Chains shutdown gracefully and save their state. If you provide the
---snapshot-name flag, the network saves its state under this named snapshot. You can
-reload this snapshot with network start --snapshot-name `snapshotName`. Otherwise, the
-network saves to the default snapshot, overwriting any existing state. You can reload the
-default snapshot with network start.
+SNAPSHOT BEHAVIOR:
+
+  By default, the network saves its state to a snapshot when stopping. This includes:
+  - Blockchain state (C-Chain, P-Chain, X-Chain, deployed chains)
+  - Validator state
+  - Database contents
+
+  The snapshot allows you to resume exactly where you left off with:
+    lux network start --<type> --snapshot-name <name>
+
+OPTIONS:
+
+  --mainnet           Stop mainnet network (network-id=1)
+  --testnet           Stop testnet network (network-id=2)
+  --devnet            Stop devnet network (network-id=3)
+  --network-id        Stop network by ID (for custom networks)
+  --snapshot-name     Name for the snapshot (default: default-snapshot)
+  --force             Force stop without confirmation (use with caution)
+
+SAFETY CHECKS:
+
+  If multiple networks are running, you MUST specify which one to stop:
+    lux network stop --devnet
+    lux network stop --testnet
+
+  Stopping mainnet or testnet requires explicit --mainnet/--testnet flag.
+  This prevents accidental disruption of production deployments.
+
+EXAMPLES:
+
+  # Stop the running network (when only one is running)
+  lux network stop
+
+  # Stop specific network type (required when multiple running)
+  lux network stop --devnet
+  lux network stop --testnet
+
+  # Stop with named snapshot
+  lux network stop --devnet --snapshot-name my-snapshot
+
+  # Resume from snapshot later
+  lux network start --devnet --snapshot-name my-snapshot
+
+NOTES:
+
+  - Snapshots preserve ALL network state including deployed chains
+  - Chain configurations (in ~/.lux/chains/) are NOT affected
+  - Use 'lux network clean' to wipe runtime data completely
+  - Only the specified network type is stopped (others remain running)
+  - Use 'lux dev stop' for the dev mode node (separate from network command)
+
+SNAPSHOT vs CLEAN:
+
+  lux network stop    - Saves state for resuming later
+  lux network clean   - Deletes runtime data, preserves chain configs
 
 **Usage:**
+
 ```bash
-lux network stop [subcommand] [flags]
+lux network stop [flags]
 ```
 
 **Flags:**
 
-```bash
---dont-save               do not save snapshot, just stop the network
--h, --help                help for stop
---snapshot-name string    name of snapshot to use to save network state into (default "default")
---config string           config file (default is $HOME/.lux-cli/config.json)
---log-level string        log level for the application (default "ERROR")
---skip-update-check       skip check for new versions
+```
+      --cleanup                clean up old log files and stale run directories
+      --devnet                 stop devnet network (network-id=3)
+      --force                  force stop without confirmation (use with caution for mainnet/testnet)
+      --mainnet                stop mainnet network (network-id=1)
+      --network-id uint32      stop network by ID (for custom networks)
+      --snapshot-name string   name of snapshot to use to save network state into (default "default-20251225")
+      --testnet                stop testnet network (network-id=2)
 ```
 
 <a id="lux-node"></a>
 ## lux node
 
-The node command suite provides a collection of tools for creating and maintaining
-validators on Lux Network.
+Commands for managing luxd nodes — locally and on Kubernetes.
 
-To get started, use the node create command wizard to walk through the
-configuration to make your node a primary validator on Lux public network. You can use the
-rest of the commands to maintain your node and make your node a Chain Validator.
+LOCAL COMMANDS:
+  link        Symlink a luxd binary to ~/.lux/bin/luxd
+  join        Join this box to the node pool (run a validator anywhere)
 
-**Usage:**
-```bash
-lux node [subcommand] [flags]
-```
+KUBERNETES COMMANDS (via Helm chart):
+  deploy      Deploy/update luxd via Helm (single source of truth)
+  upgrade     Rolling upgrade with zero downtime (partition-based)
+  status      Show pod status, images, and health
+  logs        Stream logs from a luxd pod
+  rollback    Revert to previous StatefulSet revision
 
-**Subcommands:**
+The deploy command uses the canonical Helm chart at ~/work/lux/devops/charts/lux/
+(configurable via --chart-path or $CHART_PATH). All other k8s commands use
+the Kubernetes API directly for fast read/write operations.
 
-- [`addDashboard`](#lux-node-adddashboard): (ALPHA Warning) This command is currently in experimental mode.
+All k8s commands require one of --mainnet, --testnet, --devnet, or --namespace.
+Use --context to target a specific kubeconfig context.
 
-The node addDashboard command adds custom dashboard to the Grafana monitoring dashboard for the
-cluster.
-- [`create`](#lux-node-create): (ALPHA Warning) This command is currently in experimental mode.
+EXAMPLES:
+  # Local
+  lux node link --auto
 
-The node create command sets up a validator on a cloud server of your choice.
-The validator will be validating the Lux Primary Network and Chain
-of your choice. By default, the command runs an interactive wizard. It
-walks you through all the steps you need to set up a validator.
-Once this command is completed, you will have to wait for the validator
-to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Chain. You can check the bootstrapping
-status by running lux node status
+  # Deploy via Helm (uses canonical chart + values-{network}.yaml)
+  lux node deploy --mainnet
+  lux node deploy --testnet --set image.tag=luxd-v1.23.15
 
-The created node will be part of group of validators called `clusterName`
-and users can call node commands with `clusterName` so that the command
-will apply to all nodes in the cluster
-- [`destroy`](#lux-node-destroy): (ALPHA Warning) This command is currently in experimental mode.
+  # Zero-downtime upgrade (partition-based, per-pod health checks)
+  lux node upgrade --mainnet --image ghcr.io/luxfi/node:v1.23.6
 
-The node destroy command terminates all running nodes in cloud server and deletes all storage disks.
+  # Check status
+  lux node status --mainnet
 
-If there is a static IP address attached, it will be released.
-- [`devnet`](#lux-node-devnet): (ALPHA Warning) This command is currently in experimental mode.
+  # Stream logs
+  lux node logs --mainnet luxd-0 -f
 
-The node devnet command suite provides a collection of commands related to devnets.
-You can check the updated status by calling lux node status `clusterName`
-- [`export`](#lux-node-export): (ALPHA Warning) This command is currently in experimental mode.
-
-The node export command exports cluster configuration and its nodes config to a text file.
-
-If no file is specified, the configuration is printed to the stdout.
-
-Use --include-secrets to include keys in the export. In this case please keep the file secure as it contains sensitive information.
-
-Exported cluster configuration without secrets can be imported by another user using node import command.
-- [`import`](#lux-node-import): (ALPHA Warning) This command is currently in experimental mode.
-
-The node import command imports cluster configuration and its nodes configuration from a text file
-created from the node export command.
-
-Prior to calling this command, call node whitelist command to have your SSH public key and IP whitelisted by
-the cluster owner. This will enable you to use lux-cli commands to manage the imported cluster.
-
-Please note, that this imported cluster will be considered as EXTERNAL by lux-cli, so some commands
-affecting cloud nodes like node create or node destroy will be not applicable to it.
-- [`list`](#lux-node-list): (ALPHA Warning) This command is currently in experimental mode.
-
-The node list command lists all clusters together with their nodes.
-- [`loadtest`](#lux-node-loadtest): (ALPHA Warning) This command is currently in experimental mode.
-
-The node loadtest command suite starts and stops a load test for an existing devnet cluster.
-- [`local`](#lux-node-local): The node local command suite provides a collection of commands related to local nodes
-- [`refresh-ips`](#lux-node-refresh-ips): (ALPHA Warning) This command is currently in experimental mode.
-
-The node refresh-ips command obtains the current IP for all nodes with dynamic IPs in the cluster,
-and updates the local node information used by CLI commands.
-- [`resize`](#lux-node-resize): (ALPHA Warning) This command is currently in experimental mode.
-
-The node resize command can change the amount of CPU, memory and disk space available for the cluster nodes.
-- [`scp`](#lux-node-scp): (ALPHA Warning) This command is currently in experimental mode.
-
-The node scp command securely copies files to and from nodes. Remote source or destionation can be specified using the following format:
-[clusterName|nodeID|instanceID|IP]:/path/to/file. Regular expressions are supported for the source files like /tmp/*.txt.
-File transfer to the nodes are parallelized. IF source or destination is cluster, the other should be a local file path.
-If both destinations are remote, they must be nodes for the same cluster and not clusters themselves.
-For example:
-$ lux node scp [cluster1|node1]:/tmp/file.txt /tmp/file.txt
-$ lux node scp /tmp/file.txt [cluster1|NodeID-XXXX]:/tmp/file.txt
-$ lux node scp node1:/tmp/file.txt NodeID-XXXX:/tmp/file.txt
-- [`ssh`](#lux-node-ssh): (ALPHA Warning) This command is currently in experimental mode.
-
-The node ssh command execute a given command [cmd] using ssh on all nodes in the cluster if ClusterName is given.
-If no command is given, just prints the ssh command to be used to connect to each node in the cluster.
-For provided NodeID or InstanceID or IP, the command [cmd] will be executed on that node.
-If no [cmd] is provided for the node, it will open ssh shell there.
-- [`status`](#lux-node-status): (ALPHA Warning) This command is currently in experimental mode.
-
-The node status command gets the bootstrap status of all nodes in a cluster with the Primary Network.
-If no cluster is given, defaults to node list behaviour.
-
-To get the bootstrap status of a node with a Blockchain, use --blockchain flag
-- [`sync`](#lux-node-sync): (ALPHA Warning) This command is currently in experimental mode.
-
-The node sync command enables all nodes in a cluster to be bootstrapped to a Blockchain.
-You can check the blockchain bootstrap status by calling lux node status `clusterName` --blockchain `blockchainName`
-- [`update`](#lux-node-update): (ALPHA Warning) This command is currently in experimental mode.
-
-The node update command suite provides a collection of commands for nodes to update
-their luxd or VM config.
-
-You can check the status after update by calling lux node status
-- [`upgrade`](#lux-node-upgrade): (ALPHA Warning) This command is currently in experimental mode.
-
-The node update command suite provides a collection of commands for nodes to update
-their luxd or VM version.
-
-You can check the status after upgrade by calling lux node status
-- [`validate`](#lux-node-validate): (ALPHA Warning) This command is currently in experimental mode.
-
-The node validate command suite provides a collection of commands for nodes to join
-the Primary Network and Chains as validators.
-If any of the commands is run before the nodes are bootstrapped on the Primary Network, the command
-will fail. You can check the bootstrap status by calling lux node status `clusterName`
-- [`whitelist`](#lux-node-whitelist): (ALPHA Warning) The whitelist command suite provides a collection of tools for granting access to the cluster.
-
-	Command adds IP if --ip params provided to cloud security access rules allowing it to access all nodes in the cluster via ssh or http.
-	It also command adds SSH public key to all nodes in the cluster if --ssh params is there.
-	If no params provided it detects current user IP automaticaly and whitelists it
-
-**Flags:**
-
-```bash
--h, --help             help for node
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-adddashboard"></a>
-### addDashboard
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node addDashboard command adds custom dashboard to the Grafana monitoring dashboard for the
-cluster.
+  # Rollback
+  lux node rollback --mainnet
 
 **Usage:**
+
 ```bash
-lux node addDashboard [subcommand] [flags]
+lux node
+```
+
+<a id="lux-node-deploy"></a>
+### lux node deploy
+
+Deploys the luxd Helm chart to Kubernetes using helm upgrade --install.
+
+Uses the canonical Helm chart from ~/work/lux/devops/charts/lux/ as the
+single source of truth. This ensures the CLI creates identical deployments
+to the deploy-all.sh script — same startup.sh, staking keys, bootstrap
+nodes, upgrade-file-content, chain configs, and per-pod services.
+
+CHART DISCOVERY (in order):
+  1. --chart-path flag
+  2. $CHART_PATH environment variable
+  3. ~/work/lux/devops/charts/lux/
+
+EXAMPLES:
+  lux node deploy --mainnet
+  lux node deploy --testnet --set image.tag=luxd-v1.23.15
+  lux node deploy --devnet --replicas 3
+  lux node deploy --mainnet --chart-path /path/to/chart
+  lux node deploy --mainnet --dry-run
+
+**Usage:**
+
+```bash
+lux node deploy [flags]
 ```
 
 **Flags:**
 
-```bash
---add-grafana-dashboard string    path to additional grafana dashboard json file
--h, --help                        help for addDashboard
---chain string                   chain that the dasbhoard is intended for (if any)
---config string                   config file (default is $HOME/.lux-cli/config.json)
---log-level string                log level for the application (default "ERROR")
---skip-update-check               skip check for new versions
+```
+      --chart-path string   path to Helm chart (default: auto-detect)
+      --context string      kubeconfig context to use
+      --devnet              target lux-devnet namespace
+      --dry-run             helm dry-run mode (template only, no apply)
+      --image string        override image tag (shorthand for --set image.tag=TAG)
+      --mainnet             target lux-mainnet namespace
+      --namespace string    k8s namespace (overrides network flags)
+      --replicas int32      override replica count (0 = use chart default)
+      --set stringArray     additional Helm --set overrides (repeatable)
+      --testnet             target lux-testnet namespace
 ```
 
-<a id="lux-node-create"></a>
-### create
+<a id="lux-node-join"></a>
+### lux node join
 
-(ALPHA Warning) This command is currently in experimental mode.
+Run this on any box and it joins the pool; the operator schedules a
+compact validator onto it and rebalances the fleet. Drain a box and its
+validator reschedules onto the others — run a node anywhere, the network spreads.
 
-The node create command sets up a validator on a cloud server of your choice.
-The validator will be validating the Lux Primary Network and Chain
-of your choice. By default, the command runs an interactive wizard. It
-walks you through all the steps you need to set up a validator.
-Once this command is completed, you will have to wait for the validator
-to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Chain. You can check the bootstrapping
-status by running lux node status
+  # First box — become the control plane and hold history:
+  lux node join --init --role archive
 
-The created node will be part of group of validators called `clusterName`
-and users can call node commands with `clusterName` so that the command
-will apply to all nodes in the cluster
+  # Any other box — join and run a compact validator:
+  lux node join --server https://<control>:6443 --token <token>
+
+Off-LAN boxes: put them on one tailnet first (tailscale up, or hanzozt) and pass
+the tailnet IP as --server, so "anywhere" really means anywhere. The role is a
+node label (lux.cloud/validator|archive=true) the NodeFleet schedules against —
+see operator/spec/examples/nodefleet-lab.yaml.
 
 **Usage:**
+
 ```bash
-lux node create [subcommand] [flags]
+lux node join [flags]
 ```
 
 **Flags:**
 
-```bash
---add-grafana-dashboard string              path to additional grafana dashboard json file
---alternative-key-pair-name string          key pair name to use if default one generates conflicts
---authorize-access                          authorize CLI to create cloud resources
---auto-replace-keypair                      automatically replaces key pair to access node if previous key pair is not found
---luxd-version-from-chain string    install latest luxd version, that is compatible with the given chain, on node/s
---aws                                       create node/s in AWS cloud
---aws-profile string                        aws profile to use (default "default")
---aws-volume-iops int                       AWS iops (for gp3, io1, and io2 volume types only) (default 3000)
---aws-volume-size int                       AWS volume size in GB (default 1000)
---aws-volume-throughput int                 AWS throughput in MiB/s (for gp3 volume type only) (default 125)
---aws-volume-type string                    AWS volume type (default "gp3")
---bootstrap-ids                             stringArray                nodeIDs of bootstrap nodes
---bootstrap-ips                             stringArray                IP:port pairs of bootstrap nodes
---cluster string                            operate on the given cluster
---custom-luxd-version string         install given luxd version on node/s
---devnet                                    operate on a devnet network
---enable-monitoring                         set up Prometheus monitoring for created nodes. This option creates a separate monitoring cloud instance and incures additional cost
---endpoint string                           use the given endpoint for network operations
--f, --testnet                                  testnet                             operate on testnet (alias to testnet
---gcp                                       create node/s in GCP cloud
---gcp-credentials string                    use given GCP credentials
---gcp-project string                        use given GCP project
---genesis string                            path to genesis file
---grafana-pkg string                        use grafana pkg instead of apt repo(by default), for example https://dl.grafana.com/oss/release/grafana_10.4.1_amd64.deb
--h, --help                                  help for create
---latest-luxd-pre-release-version    install latest luxd pre-release version on node/s
---latest-luxd-version                install latest luxd release version on node/s
--m, --mainnet                               operate on mainnet
---node-type string                          cloud instance type. Use 'default' to use recommended default instance type
---num-apis                                  ints                            number of API nodes(nodes without stake) to create in the new Devnet
---num-validators                            ints                      number of nodes to create per region(s). Use comma to separate multiple numbers for each region in the same order as --region flag
---partial-sync                              primary network partial sync (default true)
---public-http-port                          allow public access to luxd HTTP port
---region strings                            create node(s) in given region(s). Use comma to separate multiple regions
---ssh-agent-identity string                 use given ssh identity(only for ssh agent). If not set, default will be used
--t, --testnet                               testnet                             operate on testnet (alias to testnet)
---upgrade string                            path to upgrade file
---use-ssh-agent                             use ssh agent(ex: Yubikey) for ssh auth
---use-static-ip                             attach static Public IP on cloud servers (default true)
---config string                             config file (default is $HOME/.lux-cli/config.json)
---log-level string                          log level for the application (default "ERROR")
---skip-update-check                         skip check for new versions
+```
+      --init            make THIS box the pool's control plane (k3s server)
+      --name string     node name (default: hostname)
+      --print           print the k3s command instead of running it
+      --role string     node role: validator (compact) or archive (full history) (default "validator")
+      --server string   control-plane API URL, e.g. https://<ip>:6443 (agent mode)
+      --token string    node token from the control plane (agent mode)
 ```
 
-<a id="lux-node-destroy"></a>
-### destroy
+<a id="lux-node-link"></a>
+### lux node link
 
-(ALPHA Warning) This command is currently in experimental mode.
+Link luxd binary for the CLI to use.
 
-The node destroy command terminates all running nodes in cloud server and deletes all storage disks.
+Creates ~/.lux/bin directory if needed and symlinks the luxd binary.
 
-If there is a static IP address attached, it will be released.
+PRIORITY ORDER for binary lookup:
+  1. Command-line flags (--node-path)
+  2. ~/.lux/bin/luxd (this symlink)
+  3. Environment variable (NODE_PATH)
+  4. Config file settings
+  5. PATH lookup
+  6. Relative paths from CLI location
+
+EXAMPLES:
+
+  # Link luxd (auto-detect from ../node/bin/luxd)
+  lux node link --auto
+
+  # Link specific path
+  lux node link /path/to/luxd
 
 **Usage:**
+
 ```bash
-lux node destroy [subcommand] [flags]
+lux node link [path] [flags]
 ```
 
 **Flags:**
 
-```bash
---all                   destroy all existing clusters created by Lux CLI
---authorize-access      authorize CLI to release cloud resources
--y, --authorize-all     authorize all CLI requests
---authorize-remove      authorize CLI to remove all local files related to cloud nodes
---aws-profile string    aws profile to use (default "default")
--h, --help              help for destroy
---config string         config file (default is $HOME/.lux-cli/config.json)
---log-level string      log level for the application (default "ERROR")
---skip-update-check     skip check for new versions
+```
+      --auto   auto-detect luxd from standard locations
 ```
 
-<a id="lux-node-devnet"></a>
-### devnet
+<a id="lux-node-logs"></a>
+### lux node logs
 
-(ALPHA Warning) This command is currently in experimental mode.
+Streams logs from a specific luxd pod in the StatefulSet.
 
-The node devnet command suite provides a collection of commands related to devnets.
-You can check the updated status by calling lux node status `clusterName`
+If no pod name is given, defaults to luxd-0.
+
+EXAMPLES:
+  lux node logs --mainnet
+  lux node logs --mainnet luxd-2
+  lux node logs --mainnet luxd-0 -f
+  lux node logs --testnet --tail 100
 
 **Usage:**
-```bash
-lux node devnet [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`deploy`](#lux-node-devnet-deploy): (ALPHA Warning) This command is currently in experimental mode.
-
-The node devnet deploy command deploys a chain into a devnet cluster, creating chain and blockchain txs for it.
-It saves the deploy info both locally and remotely.
-- [`wiz`](#lux-node-devnet-wiz): (ALPHA Warning) This command is currently in experimental mode.
-
-The node wiz command creates a devnet and deploys, sync and validate a chain into it. It creates the chain if so needed.
-
-**Flags:**
 
 ```bash
--h, --help             help for devnet
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-devnet-deploy"></a>
-#### devnet deploy
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node devnet deploy command deploys a chain into a devnet cluster, creating chain and blockchain txs for it.
-It saves the deploy info both locally and remotely.
-
-**Usage:**
-```bash
-lux node devnet deploy [subcommand] [flags]
+lux node logs [pod-name] [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help                  help for deploy
---no-checks                 do not check for healthy status or rpc compatibility of nodes against chain
---chain-aliases strings    additional chain aliases to be used for RPC calls in addition to chain blockchain name
---chain-only               only create a chain
---config string             config file (default is $HOME/.lux-cli/config.json)
---log-level string          log level for the application (default "ERROR")
---skip-update-check         skip check for new versions
+```
+      --context string     kubeconfig context to use
+      --devnet             target lux-devnet namespace
+  -f, --follow             follow log output
+      --mainnet            target lux-mainnet namespace
+      --namespace string   k8s namespace (overrides network flags)
+      --tail int           number of recent lines to show (default 200)
+      --testnet            target lux-testnet namespace
 ```
 
-<a id="lux-node-devnet-wiz"></a>
-#### devnet wiz
+<a id="lux-node-rollback"></a>
+### lux node rollback
 
-(ALPHA Warning) This command is currently in experimental mode.
+Reverts the luxd StatefulSet to its previous ControllerRevision.
 
-The node wiz command creates a devnet and deploys, sync and validate a chain into it. It creates the chain if so needed.
+By default rolls back to the immediately previous revision. Use --revision
+to target a specific revision number.
+
+After rollback, performs the same partition-based rolling update to ensure
+zero downtime — pods are updated one at a time with health checks.
+
+EXAMPLES:
+  lux node rollback --mainnet
+  lux node rollback --mainnet --revision 3
+  lux node rollback --testnet --timeout 10m
 
 **Usage:**
+
 ```bash
-lux node devnet wiz [subcommand] [flags]
+lux node rollback [flags]
 ```
 
 **Flags:**
 
-```bash
---add-grafana-dashboard string                         path to additional grafana dashboard json file
---alternative-key-pair-name string                     key pair name to use if default one generates conflicts
---authorize-access                                     authorize CLI to create cloud resources
---auto-replace-keypair                                 automatically replaces key pair to access node if previous key pair is not found
---aws                                                  create node/s in AWS cloud
---aws-profile string                                   aws profile to use (default "default")
---aws-volume-iops int                                  AWS iops (for gp3, io1, and io2 volume types only) (default 3000)
---aws-volume-size int                                  AWS volume size in GB (default 1000)
---aws-volume-throughput int                            AWS throughput in MiB/s (for gp3 volume type only) (default 125)
---aws-volume-type string                               AWS volume type (default "gp3")
---chain-config string                                  path to the chain configuration for chain
---custom-luxd-version string                    install given luxd version on node/s
---custom-chain                                        use a custom VM as the chain virtual machine
---custom-vm-branch string                              custom vm branch or commit
---custom-vm-build-script string                        custom vm build-script
---custom-vm-repo-url string                            custom vm repository url
---default-validator-params                             use default weight/start/duration params for chain validator
---deploy-warp-messenger                                 deploy Interchain Messenger (default true)
---deploy-warp-registry                                  deploy Interchain Registry (default true)
---deploy-teleporter-messenger                          deploy Interchain Messenger (default true)
---deploy-teleporter-registry                           deploy Interchain Registry (default true)
---enable-monitoring                                    set up Prometheus monitoring for created nodes. Please note that this option creates a separate monitoring instance and incures additional cost
---evm-chain-id uint                                    chain ID to use with EVM
---evm-defaults                                         use default production settings with EVM
---evm-production-defaults                              use default production settings for your blockchain
---evm-chain                                           use EVM as the chain virtual machine
---evm-test-defaults                                    use default test settings for your blockchain
---evm-token string                                     token name to use with EVM
---evm-version string                                   version of EVM to use
---force-chain-create                                  overwrite the existing chain configuration if one exists
---gcp                                                  create node/s in GCP cloud
---gcp-credentials string                               use given GCP credentials
---gcp-project string                                   use given GCP project
---grafana-pkg string                                   use grafana pkg instead of apt repo(by default), for example https://dl.grafana.com/oss/release/grafana_10.4.1_amd64.deb
--h, --help                                             help for wiz
---warp                                                  generate an warp-ready vm
---warp-messenger-contract-address-path string           path to an warp messenger contract address file
---warp-messenger-deployer-address-path string           path to an warp messenger deployer address file
---warp-messenger-deployer-tx-path string                path to an warp messenger deployer tx file
---warp-registry-bytecode-path string                    path to an warp registry bytecode file
---warp-version string                                   warp version to deploy (default "latest")
---latest-luxd-pre-release-version               install latest luxd pre-release version on node/s
---latest-luxd-version                           install latest luxd release version on node/s
---latest-evm-version                                   use latest EVM released version
---latest-pre-released-evm-version                      use latest EVM pre-released version
---node-config string                                   path to luxd node configuration for chain
---node-type string                                     cloud instance type. Use 'default' to use recommended default instance type
---num-apis                                             ints                                       number of API nodes(nodes without stake) to create in the new Devnet
---num-validators                                       ints                                 number of nodes to create per region(s). Use comma to separate multiple numbers for each region in the same order as --region flag
---public-http-port                                     allow public access to luxd HTTP port
---region strings                                       create node/s in given region(s). Use comma to separate multiple regions
---relayer                                              run AWM relayer when deploying the vm
---ssh-agent-identity string                            use given ssh identity(only for ssh agent). If not set, default will be used.
---chain-aliases strings                               additional chain aliases to be used for RPC calls in addition to chain blockchain name
---chain-config string                                 path to the chain configuration for chain
---chain-genesis string                                file path of the chain genesis
---teleporter                                           generate an warp-ready vm
---teleporter-messenger-contract-address-path string    path to an warp messenger contract address file
---teleporter-messenger-deployer-address-path string    path to an warp messenger deployer address file
---teleporter-messenger-deployer-tx-path string         path to an warp messenger deployer tx file
---teleporter-registry-bytecode-path string             path to an warp registry bytecode file
---teleporter-version string                            warp version to deploy (default "latest")
---use-ssh-agent                                        use ssh agent for ssh
---use-static-ip                                        attach static Public IP on cloud servers (default true)
---validators strings                                   deploy chain into given comma separated list of validators. defaults to all cluster nodes
---config string                                        config file (default is $HOME/.lux-cli/config.json)
---log-level string                                     log level for the application (default "ERROR")
---skip-update-check                                    skip check for new versions
 ```
-
-<a id="lux-node-export"></a>
-### export
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node export command exports cluster configuration and its nodes config to a text file.
-
-If no file is specified, the configuration is printed to the stdout.
-
-Use --include-secrets to include keys in the export. In this case please keep the file secure as it contains sensitive information.
-
-Exported cluster configuration without secrets can be imported by another user using node import command.
-
-**Usage:**
-```bash
-lux node export [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---file string          specify the file to export the cluster configuration to
---force                overwrite the file if it exists
--h, --help             help for export
---include-secrets      include keys in the export
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-import"></a>
-### import
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node import command imports cluster configuration and its nodes configuration from a text file
-created from the node export command.
-
-Prior to calling this command, call node whitelist command to have your SSH public key and IP whitelisted by
-the cluster owner. This will enable you to use lux-cli commands to manage the imported cluster.
-
-Please note, that this imported cluster will be considered as EXTERNAL by lux-cli, so some commands
-affecting cloud nodes like node create or node destroy will be not applicable to it.
-
-**Usage:**
-```bash
-lux node import [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---file string          specify the file to export the cluster configuration to
--h, --help             help for import
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-list"></a>
-### list
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node list command lists all clusters together with their nodes.
-
-**Usage:**
-```bash
-lux node list [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for list
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-loadtest"></a>
-### loadtest
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node loadtest command suite starts and stops a load test for an existing devnet cluster.
-
-**Usage:**
-```bash
-lux node loadtest [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`start`](#lux-node-loadtest-start): (ALPHA Warning) This command is currently in experimental mode.
-
-The node loadtest command starts load testing for an existing devnet cluster. If the cluster does
-not have an existing load test host, the command creates a separate cloud server and builds the load
-test binary based on the provided load test Git Repo URL and load test binary build command.
-
-The command will then run the load test binary based on the provided load test run command.
-- [`stop`](#lux-node-loadtest-stop): (ALPHA Warning) This command is currently in experimental mode.
-
-The node loadtest stop command stops load testing for an existing devnet cluster and terminates the
-separate cloud server created to host the load test.
-
-**Flags:**
-
-```bash
--h, --help             help for loadtest
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-loadtest-start"></a>
-#### loadtest start
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node loadtest command starts load testing for an existing devnet cluster. If the cluster does
-not have an existing load test host, the command creates a separate cloud server and builds the load
-test binary based on the provided load test Git Repo URL and load test binary build command.
-
-The command will then run the load test binary based on the provided load test run command.
-
-**Usage:**
-```bash
-lux node loadtest start [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---authorize-access              authorize CLI to create cloud resources
---aws                           create loadtest node in AWS cloud
---aws-profile string            aws profile to use (default "default")
---gcp                           create loadtest in GCP cloud
--h, --help                      help for start
---load-test-branch string       load test branch or commit
---load-test-build-cmd string    command to build load test binary
---load-test-cmd string          command to run load test
---load-test-repo string         load test repo url to use
---node-type string              cloud instance type for loadtest script
---region string                 create load test node in a given region
---ssh-agent-identity string     use given ssh identity(only for ssh agent). If not set, default will be used
---use-ssh-agent                 use ssh agent(ex: Yubikey) for ssh auth
---config string                 config file (default is $HOME/.lux-cli/config.json)
---log-level string              log level for the application (default "ERROR")
---skip-update-check             skip check for new versions
-```
-
-<a id="lux-node-loadtest-stop"></a>
-#### loadtest stop
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node loadtest stop command stops load testing for an existing devnet cluster and terminates the
-separate cloud server created to host the load test.
-
-**Usage:**
-```bash
-lux node loadtest stop [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for stop
---load-test strings    stop specified load test node(s). Use comma to separate multiple load test instance names
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-local"></a>
-### local
-
-The node local command suite provides a collection of commands related to local nodes
-
-**Usage:**
-```bash
-lux node local [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`destroy`](#lux-node-local-destroy): Cleanup local node.
-- [`start`](#lux-node-local-start): The node local start command creates Lux nodes on the local machine.
-Once this command is completed, you will have to wait for the Lux node
-to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Chain.
-
-You can check the bootstrapping status by running lux node status local.
-- [`status`](#lux-node-local-status): Get status of local node.
-- [`stop`](#lux-node-local-stop): Stop local node.
-- [`track`](#lux-node-local-track): Track specified blockchain with local node
-- [`validate`](#lux-node-local-validate): Use Lux Node set up on local machine to set up specified L1 by providing the
-RPC URL of the L1.
-
-This command can only be used to validate Proof of Stake L1.
-
-**Flags:**
-
-```bash
--h, --help             help for local
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-local-destroy"></a>
-#### local destroy
-
-Cleanup local node.
-
-**Usage:**
-```bash
-lux node local destroy [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for destroy
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-local-start"></a>
-#### local start
-
-The node local start command creates Lux nodes on the local machine.
-Once this command is completed, you will have to wait for the Lux node
-to finish bootstrapping on the primary network before running further
-commands on it, e.g. validating a Chain.
-
-You can check the bootstrapping status by running lux node status local.
-
-**Usage:**
-```bash
-lux node local start [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---luxd-path string                   use this luxd binary path
---bootstrap-id                              stringArray                 nodeIDs of bootstrap nodes
---bootstrap-ip                              stringArray                 IP:port pairs of bootstrap nodes
---cluster string                            operate on the given cluster
---custom-luxd-version string         install given luxd version on node/s
---devnet                                    operate on a devnet network
---endpoint string                           use the given endpoint for network operations
--f, --testnet                                  testnet                             operate on testnet (alias to testnet
---genesis string                            path to genesis file
--h, --help                                  help for start
---latest-luxd-pre-release-version    install latest luxd pre-release version on node/s (default true)
---latest-luxd-version                install latest luxd release version on node/s
--l, --local                                 operate on a local network
--m, --mainnet                               operate on mainnet
---node-config string                        path to common luxd config settings for all nodes
---num-nodes uint32                          number of Lux nodes to create on local machine (default 1)
---partial-sync                              primary network partial sync (default true)
---staking-cert-key-path string              path to provided staking cert key for node
---staking-signer-key-path string            path to provided staking signer key for node
---staking-tls-key-path string               path to provided staking tls key for node
--t, --testnet                               testnet                             operate on testnet (alias to testnet)
---upgrade string                            path to upgrade file
---config string                             config file (default is $HOME/.lux-cli/config.json)
---log-level string                          log level for the application (default "ERROR")
---skip-update-check                         skip check for new versions
-```
-
-<a id="lux-node-local-status"></a>
-#### local status
-
-Get status of local node.
-
-**Usage:**
-```bash
-lux node local status [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---blockchain string    specify the blockchain the node is syncing with
--h, --help             help for status
---l1 string            specify the blockchain the node is syncing with
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-local-stop"></a>
-#### local stop
-
-Stop local node.
-
-**Usage:**
-```bash
-lux node local stop [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for stop
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-local-track"></a>
-#### local track
-
-Track specified blockchain with local node
-
-**Usage:**
-```bash
-lux node local track [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---luxd-path string                   use this luxd binary path
---custom-luxd-version string         install given luxd version on node/s
--h, --help                                  help for track
---latest-luxd-pre-release-version    install latest luxd pre-release version on node/s (default true)
---latest-luxd-version                install latest luxd release version on node/s
---config string                             config file (default is $HOME/.lux-cli/config.json)
---log-level string                          log level for the application (default "ERROR")
---skip-update-check                         skip check for new versions
-```
-
-<a id="lux-node-local-validate"></a>
-#### local validate
-
-Use Lux Node set up on local machine to set up specified L1 by providing the
-RPC URL of the L1.
-
-This command can only be used to validate Proof of Stake L1.
-
-**Usage:**
-```bash
-lux node local validate [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---aggregator-log-level string       log level to use with signature aggregator (default "Debug")
---aggregator-log-to-stdout          use stdout for signature aggregator logs
---balance float                     amount of LUX to increase validator's balance by
---blockchain string                 specify the blockchain the node is syncing with
---delegation-fee uint16             delegation fee (in bips) (default 100)
---disable-owner string              P-Chain address that will able to disable the validator with a P-Chain transaction
--h, --help                          help for validate
---l1 string                         specify the blockchain the node is syncing with
---minimum-stake-duration uint       minimum stake duration (in seconds) (default 100)
---remaining-balance-owner string    P-Chain address that will receive any leftover LUX from the validator when it is removed from Chain
---rpc string                        connect to validator manager at the given rpc endpoint
---stake-amount uint                 amount of tokens to stake
---config string                     config file (default is $HOME/.lux-cli/config.json)
---log-level string                  log level for the application (default "ERROR")
---skip-update-check                 skip check for new versions
-```
-
-<a id="lux-node-refresh-ips"></a>
-### refresh-ips
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node refresh-ips command obtains the current IP for all nodes with dynamic IPs in the cluster,
-and updates the local node information used by CLI commands.
-
-**Usage:**
-```bash
-lux node refresh-ips [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---aws-profile string    aws profile to use (default "default")
--h, --help              help for refresh-ips
---config string         config file (default is $HOME/.lux-cli/config.json)
---log-level string      log level for the application (default "ERROR")
---skip-update-check     skip check for new versions
-```
-
-<a id="lux-node-resize"></a>
-### resize
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node resize command can change the amount of CPU, memory and disk space available for the cluster nodes.
-
-**Usage:**
-```bash
-lux node resize [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---aws-profile string    aws profile to use (default "default")
---disk-size string      Disk size to resize in Gb (e.g. 1000Gb)
--h, --help              help for resize
---node-type string      Node type to resize (e.g. t3.2xlarge)
---config string         config file (default is $HOME/.lux-cli/config.json)
---log-level string      log level for the application (default "ERROR")
---skip-update-check     skip check for new versions
-```
-
-<a id="lux-node-scp"></a>
-### scp
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node scp command securely copies files to and from nodes. Remote source or destionation can be specified using the following format:
-[clusterName|nodeID|instanceID|IP]:/path/to/file. Regular expressions are supported for the source files like /tmp/*.txt.
-File transfer to the nodes are parallelized. IF source or destination is cluster, the other should be a local file path.
-If both destinations are remote, they must be nodes for the same cluster and not clusters themselves.
-For example:
-$ lux node scp [cluster1|node1]:/tmp/file.txt /tmp/file.txt
-$ lux node scp /tmp/file.txt [cluster1|NodeID-XXXX]:/tmp/file.txt
-$ lux node scp node1:/tmp/file.txt NodeID-XXXX:/tmp/file.txt
-
-**Usage:**
-```bash
-lux node scp [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---compress             use compression for ssh
--h, --help             help for scp
---recursive            copy directories recursively
---with-loadtest        include loadtest node for scp cluster operations
---with-monitor         include monitoring node for scp cluster operations
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-ssh"></a>
-### ssh
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node ssh command execute a given command [cmd] using ssh on all nodes in the cluster if ClusterName is given.
-If no command is given, just prints the ssh command to be used to connect to each node in the cluster.
-For provided NodeID or InstanceID or IP, the command [cmd] will be executed on that node.
-If no [cmd] is provided for the node, it will open ssh shell there.
-
-**Usage:**
-```bash
-lux node ssh [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for ssh
---parallel             run ssh command on all nodes in parallel
---with-loadtest        include loadtest node for ssh cluster operations
---with-monitor         include monitoring node for ssh cluster operations
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+      --context string     kubeconfig context to use
+      --devnet             target lux-devnet namespace
+      --mainnet            target lux-mainnet namespace
+      --namespace string   k8s namespace (overrides network flags)
+      --revision int       target revision number (0 = previous)
+      --testnet            target lux-testnet namespace
+      --timeout duration   max time to wait per pod (default 5m0s)
 ```
 
 <a id="lux-node-status"></a>
-### status
+### lux node status
 
-(ALPHA Warning) This command is currently in experimental mode.
+Displays the current state of the luxd Kubernetes deployment.
 
-The node status command gets the bootstrap status of all nodes in a cluster with the Primary Network.
-If no cluster is given, defaults to node list behaviour.
+Shows:
+  - StatefulSet metadata (replicas, revision, update strategy)
+  - Per-pod status (ready, image, restarts, age)
+  - LoadBalancer external IP
+  - Revision history for rollback
 
-To get the bootstrap status of a node with a Blockchain, use --blockchain flag
+EXAMPLES:
+  lux node status --mainnet
+  lux node status --testnet
+  lux node status --namespace my-custom-ns
 
 **Usage:**
+
 ```bash
-lux node status [subcommand] [flags]
+lux node status [flags]
 ```
 
 **Flags:**
 
-```bash
---blockchain string    specify the blockchain the node is syncing with
--h, --help             help for status
---chain string        specify the blockchain the node is syncing with
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
 ```
-
-<a id="lux-node-sync"></a>
-### sync
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node sync command enables all nodes in a cluster to be bootstrapped to a Blockchain.
-You can check the blockchain bootstrap status by calling lux node status `clusterName` --blockchain `blockchainName`
-
-**Usage:**
-```bash
-lux node sync [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help                  help for sync
---no-checks                 do not check for bootstrapped/healthy status or rpc compatibility of nodes against chain
---chain-aliases strings    chain alias to be used for RPC calls. defaults to chain blockchain ID
---validators strings        sync chain into given comma separated list of validators. defaults to all cluster nodes
---config string             config file (default is $HOME/.lux-cli/config.json)
---log-level string          log level for the application (default "ERROR")
---skip-update-check         skip check for new versions
-```
-
-<a id="lux-node-update"></a>
-### update
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node update command suite provides a collection of commands for nodes to update
-their luxd or VM config.
-
-You can check the status after update by calling lux node status
-
-**Usage:**
-```bash
-lux node update [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`chain`](#lux-node-update-chain): (ALPHA Warning) This command is currently in experimental mode.
-
-The node update chain command updates all nodes in a cluster with latest Chain configuration and VM for custom VM.
-You can check the updated chain bootstrap status by calling lux node status `clusterName` --chain `chainName`
-
-**Flags:**
-
-```bash
--h, --help             help for update
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-update-chain"></a>
-#### update chain
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node update chain command updates all nodes in a cluster with latest Chain configuration and VM for custom VM.
-You can check the updated chain bootstrap status by calling lux node status `clusterName` --chain `chainName`
-
-**Usage:**
-```bash
-lux node update chain [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--h, --help             help for chain
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+      --context string     kubeconfig context to use
+      --devnet             target lux-devnet namespace
+      --mainnet            target lux-mainnet namespace
+      --namespace string   k8s namespace (overrides network flags)
+      --testnet            target lux-testnet namespace
 ```
 
 <a id="lux-node-upgrade"></a>
-### upgrade
+### lux node upgrade
 
-(ALPHA Warning) This command is currently in experimental mode.
+Performs a partition-based rolling upgrade of the luxd StatefulSet.
 
-The node update command suite provides a collection of commands for nodes to update
-their luxd or VM version.
+Upgrades one pod at a time (highest ordinal first), waiting for each pod
+to become ready and stable before proceeding. This ensures C-chain RPC
+clients experience no downtime since a quorum of validators remains
+available throughout the upgrade.
 
-You can check the status after upgrade by calling lux node status
+PROCESS:
+  1. Validates the new image exists and differs from current
+  2. Updates the StatefulSet pod template with new image
+  3. Sets partition = replicas (no pods restart yet)
+  4. Lowers partition one at a time (pod N-1, N-2, ... 0)
+  5. After each pod restart: waits for readiness + stability period
+  6. If any pod fails health check, stops and prints rollback command
+
+EXAMPLES:
+  lux node upgrade --mainnet --image ghcr.io/luxfi/node:v1.23.5
+  lux node upgrade --testnet --image ghcr.io/luxfi/node:v1.23.5 --stability-wait 60s
+  lux node upgrade --devnet --image ghcr.io/luxfi/node:v1.23.5 --dry-run
 
 **Usage:**
+
 ```bash
-lux node upgrade [subcommand] [flags]
+lux node upgrade [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help             help for upgrade
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
 ```
-
-<a id="lux-node-validate"></a>
-### validate
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node validate command suite provides a collection of commands for nodes to join
-the Primary Network and Chains as validators.
-If any of the commands is run before the nodes are bootstrapped on the Primary Network, the command
-will fail. You can check the bootstrap status by calling lux node status `clusterName`
-
-**Usage:**
-```bash
-lux node validate [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`primary`](#lux-node-validate-primary): (ALPHA Warning) This command is currently in experimental mode.
-
-The node validate primary command enables all nodes in a cluster to be validators of Primary
-Network.
-- [`chain`](#lux-node-validate-chain): (ALPHA Warning) This command is currently in experimental mode.
-
-The node validate chain command enables all nodes in a cluster to be validators of a Chain.
-If the command is run before the nodes are Primary Network validators, the command will first
-make the nodes Primary Network validators before making them Chain validators.
-If The command is run before the nodes are bootstrapped on the Primary Network, the command will fail.
-You can check the bootstrap status by calling lux node status `clusterName`
-If The command is run before the nodes are synced to the chain, the command will fail.
-You can check the chain sync status by calling lux node status `clusterName` --chain `chainName`
-
-**Flags:**
-
-```bash
--h, --help             help for validate
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
-```
-
-<a id="lux-node-validate-primary"></a>
-#### validate primary
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node validate primary command enables all nodes in a cluster to be validators of Primary
-Network.
-
-**Usage:**
-```bash
-lux node validate primary [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--e, --treasury               use treasury key [testnet/devnet only]
--h, --help                   help for primary
--k, --key string             select the key to use [testnet only]
--g, --ledger                 use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
---ledger-addrs strings       use the given ledger addresses
---stake-amount uint          how many LUX to stake in the validator
---staking-period duration    how long validator validates for after start time
---start-time string          UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
---config string              config file (default is $HOME/.lux-cli/config.json)
---log-level string           log level for the application (default "ERROR")
---skip-update-check          skip check for new versions
-```
-
-<a id="lux-node-validate-chain"></a>
-#### validate chain
-
-(ALPHA Warning) This command is currently in experimental mode.
-
-The node validate chain command enables all nodes in a cluster to be validators of a Chain.
-If the command is run before the nodes are Primary Network validators, the command will first
-make the nodes Primary Network validators before making them Chain validators.
-If The command is run before the nodes are bootstrapped on the Primary Network, the command will fail.
-You can check the bootstrap status by calling lux node status `clusterName`
-If The command is run before the nodes are synced to the chain, the command will fail.
-You can check the chain sync status by calling lux node status `clusterName` --chain `chainName`
-
-**Usage:**
-```bash
-lux node validate chain [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
---default-validator-params    use default weight/start/duration params for chain validator
--e, --treasury                use treasury key [testnet/devnet only]
--h, --help                    help for chain
--k, --key string              select the key to use [testnet/devnet only]
--g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on testnet/devnet)
---ledger-addrs strings        use the given ledger addresses
---no-checks                   do not check for bootstrapped status or healthy status
---no-validation-checks        do not check if chain is already synced or validated (default true)
---stake-amount uint           how many LUX to stake in the validator
---staking-period duration     how long validator validates for after start time
---start-time string           UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
---validators strings          validate chain for the given comma separated list of validators. defaults to all cluster nodes
---config string               config file (default is $HOME/.lux-cli/config.json)
---log-level string            log level for the application (default "ERROR")
---skip-update-check           skip check for new versions
-```
-
-<a id="lux-node-whitelist"></a>
-### whitelist
-
-(ALPHA Warning) The whitelist command suite provides a collection of tools for granting access to the cluster.
-
-	Command adds IP if --ip params provided to cloud security access rules allowing it to access all nodes in the cluster via ssh or http.
-	It also command adds SSH public key to all nodes in the cluster if --ssh params is there.
-	If no params provided it detects current user IP automaticaly and whitelists it
-
-**Usage:**
-```bash
-lux node whitelist [subcommand] [flags]
-```
-
-**Flags:**
-
-```bash
--y, --current-ip       whitelist current host ip
--h, --help             help for whitelist
---ip string            ip address to whitelist
---ssh string           ssh public key to whitelist
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+      --context string            kubeconfig context to use
+      --devnet                    target lux-devnet namespace
+      --dry-run                   show what would happen without making changes
+      --evm-version string        EVM plugin version to update in init container
+      --force                     proceed even if image is the same
+      --health-timeout duration   max time to wait for a pod to become ready (default 5m0s)
+      --image string              new container image (required)
+      --mainnet                   target lux-mainnet namespace
+      --namespace string          k8s namespace (overrides network flags)
+      --stability-wait duration   wait time after pod ready before proceeding (default 30s)
+      --testnet                   target lux-testnet namespace
 ```
 
 <a id="lux-primary"></a>
@@ -3294,147 +4979,658 @@ The primary command suite provides a collection of tools for interacting with th
 Primary Network
 
 **Usage:**
-```bash
-lux primary [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`addValidator`](#lux-primary-addvalidator): The primary addValidator command adds a node as a validator
-in the Primary Network
-- [`describe`](#lux-primary-describe): The chain describe command prints details of the primary network configuration to the console.
-
-**Flags:**
 
 ```bash
--h, --help             help for primary
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux primary
 ```
 
-<a id="lux-primary-addvalidator"></a>
-### addValidator
+<a id="lux-primary-addValidator"></a>
+### lux primary addValidator
 
-The primary addValidator command adds a node as a validator
-in the Primary Network
+Issues an AddPermissionlessValidatorTx for a node identity.
+
+Create the identity first — it prints every value this command needs:
+
+  lux key staker ~/.luxd/staking
+  lux primary addValidator --mainnet \
+      --node-id NodeID-... --public-key 0x... --proof-of-possession 0x... \
+      --stake 2000000000 --duration 336h
+
+The stake is in nLUX (1 LUX = 1e9 nLUX) and the chain reads the start time
+from its own clock, so --duration measures from when the tx is accepted.
 
 **Usage:**
+
 ```bash
-lux primary addValidator [subcommand] [flags]
+lux primary addValidator [flags]
 ```
 
 **Flags:**
 
-```bash
---cluster string                operate on the given cluster
---delegation-fee uint32         set the delegation fee (20 000 is equivalent to 2%)
---devnet                        operate on a devnet network
---endpoint string               use the given endpoint for network operations
--f, --testnet                      testnet                 operate on testnet (alias to testnet
--h, --help                      help for addValidator
--k, --key string                select the key to use [testnet only]
--g, --ledger                    use ledger instead of key (always true on mainnet, defaults to false on testnet)
---ledger-addrs strings          use the given ledger addresses
--m, --mainnet                   operate on mainnet
---nodeID string                 set the NodeID of the validator to add
---proof-of-possession string    set the BLS proof of possession of the validator to add
---public-key string             set the BLS public key of the validator to add
---staking-period duration       how long this validator will be staking
---start-time string             UTC start time when this validator starts validating, in 'YYYY-MM-DD HH:MM:SS' format
--t, --testnet                   testnet                 operate on testnet (alias to testnet)
---weight uint                   set the staking weight of the validator to add
---config string                 config file (default is $HOME/.lux-cli/config.json)
---log-level string              log level for the application (default "ERROR")
---skip-update-check             skip check for new versions
+```
+      --cluster string               operate on the given cluster
+      --delegation-fee uint32        share of delegation rewards the validator keeps, out of 1,000,000 (default 20000)
+      --devnet                       operate on a devnet network
+      --duration duration            how long the validator stays in the set
+      --endpoint string              use the given endpoint for network operations
+  -k, --key string                   name of the stored key that pays and owns the rewards
+  -g, --ledger                       sign with a ledger device instead of a stored key
+      --ledger-addrs strings         ledger addresses to search
+  -m, --mainnet                      operate on mainnet
+      --node-id string               NodeID of the validator
+      --proof-of-possession string   BLS proof of possession of the validator
+      --public-key string            BLS public key of the validator
+      --reward-address string        P-Chain address to own the staking reward (default: the paying key)
+      --stake uint                   amount to stake, in nLUX
+  -t, --testnet                      operate on testnet
 ```
 
 <a id="lux-primary-describe"></a>
-### describe
+### lux primary describe
 
 The chain describe command prints details of the primary network configuration to the console.
 
 **Usage:**
-```bash
-lux primary describe [subcommand] [flags]
-```
-
-**Flags:**
 
 ```bash
---cluster string       operate on the given cluster
--h, --help             help for describe
--l, --local            operate on a local network
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux primary describe
 ```
 
-<a id="lux-transaction"></a>
-## lux transaction
+<a id="lux-ps"></a>
+## lux ps
 
-The transaction command suite provides all of the utilities required to sign multisig transactions.
+Probes the resolved httpPort for every (network, env) tuple in the
+registry and reports up/down + networkID match.
 
 **Usage:**
-```bash
-lux transaction [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`commit`](#lux-transaction-commit): The transaction commit command commits a transaction by submitting it to the P-Chain.
-- [`sign`](#lux-transaction-sign): The transaction sign command signs a multisig transaction.
-
-**Flags:**
 
 ```bash
--h, --help             help for transaction
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux ps
 ```
 
-<a id="lux-transaction-commit"></a>
-### commit
+<a id="lux-rpc"></a>
+## lux rpc
 
-The transaction commit command commits a transaction by submitting it to the P-Chain.
+Make JSON-RPC calls to a Lux node.
+
+Examples:
+  # Get P-Chain height
+  lux rpc call --method platform.getHeight --endpoint http://localhost:9630/v1/bc/P
+
+  # Get blockchains with params
+  lux rpc call --method platform.getBlockchains --params '{}' --endpoint http://localhost:9630/v1/bc/P
+
+  # Create blockchain
+  lux rpc call --method platform.createBlockchain \
+    --params '{"vmID":"...", "name":"mychain", "genesis":"..."}' \
+    --endpoint http://localhost:9630/v1/bc/P
+
+
+<a id="lux-rpc-call"></a>
+### lux rpc call
+
+Make a JSON-RPC call to the specified endpoint with the given method and parameters
 
 **Usage:**
+
 ```bash
-lux transaction commit [subcommand] [flags]
+lux rpc call [flags]
 ```
 
 **Flags:**
 
-```bash
--h, --help                    help for commit
---input-tx-filepath string    Path to the transaction signed by all signatories
---config string               config file (default is $HOME/.lux-cli/config.json)
---log-level string            log level for the application (default "ERROR")
---skip-update-check           skip check for new versions
+```
+      --endpoint string   RPC endpoint URL (default "http://localhost:9630/v1/bc/P")
+      --method string     RPC method to call (required)
+      --params string     JSON params object (optional)
+      --timeout int       Request timeout in seconds (default 30)
 ```
 
-<a id="lux-transaction-sign"></a>
-### sign
+<a id="lux-rpc-transfer"></a>
+### lux rpc transfer
 
-The transaction sign command signs a multisig transaction.
+Transfer LUX between the P and X chains by atomic export/import.
+
+The C-Chain is an EVM: move value on it with an ordinary EVM transaction
+against /v1/bc/C/rpc, not with this command.
+
+Example:
+  lux rpc transfer --from-chain P --to-chain X --to X-lux1... --amount 10
+
 
 **Usage:**
+
 ```bash
-lux transaction sign [subcommand] [flags]
+lux rpc transfer [flags]
 ```
 
 **Flags:**
 
+```
+      --amount float        Amount to transfer in LUX
+      --from string         Key name to use (default: MNEMONIC account 0)
+      --from-chain string   Source chain: P or X (default "P")
+      --rpc-url string      Base RPC URL (default: RPC_URL or running network endpoint)
+      --to string           Destination bech32 address
+      --to-chain string     Destination chain: P or X (default "X")
+```
+
+<a id="lux-rt"></a>
+## lux rt
+
+The rt (corona) command provides tools for Corona threshold signing,
+a post-quantum threshold signature scheme using Module-LWE.
+
+Corona is part of the triple consensus (BLS + Corona + ML-DSA) used
+by Lux validators. It provides threshold signatures where t-of-n parties
+can cooperatively produce a valid signature without reconstructing the
+full private key.
+
+KEY PROPERTIES:
+
+  - Post-quantum secure (lattice-based)
+  - t-of-n threshold without trusted dealer (via DKG)
+  - Proactive resharing for key rotation
+  - Compatible with QuasarCert attestations
+
+**Usage:**
+
 ```bash
--h, --help                    help for sign
---input-tx-filepath string    Path to the transaction file for signing
--k, --key string              select the key to use [testnet only]
--g, --ledger                  use ledger instead of key (always true on mainnet, defaults to false on testnet)
---ledger-addrs strings        use the given ledger addresses
---config string               config file (default is $HOME/.lux-cli/config.json)
---log-level string            log level for the application (default "ERROR")
---skip-update-check           skip check for new versions
+lux rt
+```
+
+<a id="lux-rt-keygen"></a>
+### lux rt keygen
+
+Generate t-of-n threshold key shares for Corona signing.
+
+Examples:
+  lux rt keygen --threshold 3 --parties 5 --output ./shares/
+  lux rt keygen --threshold 2 --parties 3
+
+**Usage:**
+
+```bash
+lux rt keygen [flags]
+```
+
+**Flags:**
+
+```
+      --output string   Output directory for key shares (default: current dir)
+      --parties int     Total number of parties (n)
+      --threshold int   Signing threshold (t)
+```
+
+<a id="lux-rt-reshare"></a>
+### lux rt reshare
+
+Reshare existing key shares to a new committee configuration.
+
+Proactive resharing allows rotating key shares without changing the
+group public key. Used for committee membership changes.
+
+Examples:
+  lux rt reshare --old-shares ./old/ --new-threshold 3 --new-parties 7
+
+**Usage:**
+
+```bash
+lux rt reshare [flags]
+```
+
+**Flags:**
+
+```
+      --new-parties int     New total number of parties
+      --new-threshold int   New signing threshold
+      --old-shares string   Directory containing old key shares
+```
+
+<a id="lux-rt-sign"></a>
+### lux rt sign
+
+Initiate a Corona threshold signing session.
+
+Requires t-of-n key holders to participate in the 2-round signing protocol:
+  Round 1: Each party broadcasts D matrix + MACs
+  Round 2: Each party broadcasts z share
+  Finalize: Any party aggregates into final signature
+
+Examples:
+  lux rt sign --message "hello" --share ./shares/share-0.json
+  lux rt sign --tx-file unsigned.tx --share ./shares/share-0.json
+
+**Usage:**
+
+```bash
+lux rt sign [flags]
+```
+
+**Flags:**
+
+```
+      --message string   Message to sign (hex or string)
+      --share string     Path to key share file
+```
+
+<a id="lux-rt-verify"></a>
+### lux rt verify
+
+Verify a Corona threshold signature against the group public key.
+
+Examples:
+  lux rt verify --signature sig.json --message "hello" --group-key group.json
+
+**Usage:**
+
+```bash
+lux rt verify [flags]
+```
+
+**Flags:**
+
+```
+      --group-key string   Path to group key file
+      --message string     Message that was signed
+      --signature string   Path to signature file
+```
+
+<a id="lux-self"></a>
+## lux self
+
+Commands for managing the Lux CLI installation.
+
+Similar to nvm for Node.js, this allows you to:
+- Link development builds to ~/.lux/bin/
+- Install specific versions
+- Switch between versions
+- Self-update
+
+EXAMPLES:
+
+  # Link current binary to ~/.lux/bin/lux
+  lux self link
+
+  # Install a specific version
+  lux self install v1.22.5
+
+  # List installed versions
+  lux self list
+
+  # Use a specific version
+  lux self use v1.22.5
+
+**Usage:**
+
+```bash
+lux self
+```
+
+<a id="lux-self-install"></a>
+### lux self install
+
+Install a specific version of the Lux CLI.
+
+Downloads and installs the specified version to ~/.lux/versions/<version>/.
+
+If no version is specified, installs the latest version.
+
+EXAMPLES:
+
+  # Install latest version
+  lux self install
+
+  # Install specific version
+  lux self install v1.22.5
+
+**Usage:**
+
+```bash
+lux self install [version]
+```
+
+<a id="lux-self-link"></a>
+### lux self link
+
+Link the currently running CLI binary to ~/.lux/bin/lux.
+
+This makes the development build available system-wide when ~/.lux/bin
+is in your PATH.
+
+EXAMPLES:
+
+  # Link current binary
+  lux self link
+
+**Usage:**
+
+```bash
+lux self link
+```
+
+<a id="lux-self-list"></a>
+### lux self list
+
+List all installed versions of the Lux CLI.
+
+Shows installed versions and indicates which one is currently active.
+
+EXAMPLES:
+
+  lux self list
+
+**Usage:**
+
+```bash
+lux self list
+```
+
+<a id="lux-self-use"></a>
+### lux self use
+
+Switch to a specific installed version of the Lux CLI.
+
+Updates the ~/.lux/bin/lux symlink to point to the specified version.
+
+Use 'dev' to switch back to your development build.
+
+EXAMPLES:
+
+  # Switch to a specific version
+  lux self use v1.22.5
+
+  # Switch back to development build
+  lux self use dev
+
+**Usage:**
+
+```bash
+lux self use <version>
+```
+
+<a id="lux-snap"></a>
+## lux snap
+
+Snapshots the resolved data-dir to <snapshotDir>/<snapshotName>.tar.zst.
+
+The node should be stopped first (`lux down`) — snapshotting a
+live database produces corrupt archives. Use --live to override the
+safety check.
+
+Examples:
+  lux snap zoo/devnet              # → ~/work/lux/snapshots/200202-zoo-devnet-with-contracts.tar.zst
+  lux snap lux/mainnet --tag pre-merge
+
+**Usage:**
+
+```bash
+lux snap <network>/<env> [flags]
+```
+
+**Flags:**
+
+```
+      --live         allow snapshot while node is still up (unsafe)
+      --tag string   override the trailing token in the snapshot name (default: with-contracts)
+```
+
+<a id="lux-snapshot"></a>
+## lux snapshot
+
+The snapshot command creates native incremental backups of running networks.
+
+This uses BadgerDB's native backup API for:
+  - Incremental backups (only changes since last backup)
+  - Consistent snapshots (atomic database state)
+  - Fast restore times
+  - Smaller backup sizes (zstd compressed)
+
+USAGE:
+
+  # Create snapshot of running network (auto-detects which network)
+  lux snapshot
+
+  # Create snapshot of specific network
+  lux snapshot --mainnet
+  lux snapshot --testnet
+
+  # Create snapshot with custom name
+  lux snapshot --name my-backup
+
+  # Force full backup (not incremental)
+  lux snapshot --full
+
+  # Restore from snapshot
+  lux snapshot restore my-backup
+
+  # List available snapshots
+  lux snapshot list
+
+INCREMENTAL BACKUPS:
+
+  By default, snapshots are incremental - they only include data that changed
+  since the last backup. This makes them much smaller and faster.
+
+  First backup: Full backup (~90MB compressed for fresh network)
+  Subsequent:   Incremental (~1-10MB for typical changes)
+
+  Use --full to force a complete backup.
+
+**Usage:**
+
+```bash
+lux snapshot [flags]
+```
+
+**Flags:**
+
+```
+      --devnet        snapshot devnet network
+      --full          create full backup instead of incremental
+      --mainnet       snapshot mainnet network
+      --name string   snapshot name (default: <network>-<date>)
+      --testnet       snapshot testnet network
+```
+
+<a id="lux-snapshot-clean"></a>
+### lux snapshot clean
+
+Clean up old snapshots, large log files, and stale run directories.
+
+This command frees disk space by removing:
+  - Old backup directories
+  - Large netrunner log files (>100MB)
+  - Stale run directories from previous sessions
+
+EXAMPLES:
+
+  # Preview what would be cleaned
+  lux snapshot clean --dry-run
+
+  # Clean everything, keep last 3 snapshots
+  lux snapshot clean --keep 3
+
+  # Clean all old data
+  lux snapshot clean
+
+**Usage:**
+
+```bash
+lux snapshot clean [flags]
+```
+
+**Flags:**
+
+```
+      --dry-run    show what would be cleaned without deleting
+      --keep int   number of recent snapshots to keep (default 3)
+```
+
+<a id="lux-snapshot-list"></a>
+### lux snapshot list
+
+List available snapshots
+
+**Usage:**
+
+```bash
+lux snapshot list
+```
+
+<a id="lux-snapshot-restore"></a>
+### lux snapshot restore
+
+Restore a network from a previously created snapshot.
+
+The network must be stopped before restoring. After restore, start the
+network with 'lux network start'.
+
+EXAMPLES:
+
+  # Restore from snapshot
+  lux snapshot restore my-backup
+
+  # Restore mainnet snapshot
+  lux snapshot restore mainnet-2026-01-19 --mainnet
+
+**Usage:**
+
+```bash
+lux snapshot restore [name] [flags]
+```
+
+**Flags:**
+
+```
+      --devnet    restore to devnet
+      --mainnet   restore to mainnet
+      --testnet   restore to testnet
+```
+
+<a id="lux-status"></a>
+## lux status
+
+The improved network status command shows detailed information about running networks.
+
+OVERVIEW:
+
+  Displays network health, validator nodes, endpoints, and custom chains.
+  Uses clean, structured output suitable for scripting and human reading.
+
+FORMAT OPTIONS:
+
+  --format full     Show full detailed status (default)
+  --format summary  Show only network summary
+  --format chains   Show only chain status
+  --format nodes    Show only node status
+  --compact         Use compact output format
+
+EXAMPLES:
+
+  # Show full status
+  lux network status-new
+
+  # Show only chain status
+  lux network status-new --format chains
+
+  # Show compact summary
+  lux network status-new --compact
+
+OUTPUT FORMAT:
+
+  status  mainnet  up   grpc=8369  nodes=5  vms=1  controller=on
+  status  testnet  up   grpc=8368  nodes=5  vms=1  controller=on
+  
+  mainnet nodes
+  node   http                         version       peers  uptime     ok
+  1      http://127.0.0.1:9630        luxd/1.22.75   12     01:22:10   yes
+  
+  mainnet chains (heights)
+  chain  kind  height     block_time           rpc_ok  latency
+  p      p     12345      2026-01-06 14:27:03   yes     18ms
+  c      evm   218        2026-01-06 14:27:01   yes     16ms
+
+**Usage:**
+
+```bash
+lux status [flags]
+```
+
+**Flags:**
+
+```
+      --compact         use compact output format
+      --format string   output format (full, summary, chains, nodes) (default "full")
+  -o, --output string   output format (text, json, yaml, wide) (default "text")
+      --verbose         show verbose progress information
+```
+
+<a id="lux-tui"></a>
+## lux tui
+
+Launch the interactive terminal UI for monitoring and managing
+the Lux blockchain stack.
+
+The TUI provides a dashboard with tabs for:
+  - Dashboard:   Network overview and health
+  - Nodes:       Node status and management
+  - Chains:      Chain status and block heights
+  - Validators:  Validator set and uptime
+  - Logs:        Live log streaming
+
+NAVIGATION:
+
+  Tab/Arrow   Navigate between tabs
+  1-5         Jump to tab by number
+  r           Refresh data
+  q           Quit
+
+Examples:
+  lux tui
+  lux tui --endpoint http://localhost:9640
+
+**Usage:**
+
+```bash
+lux tui [flags]
+```
+
+**Flags:**
+
+```
+      --endpoint string   Lux node API endpoint (default: http://127.0.0.1:9630)
+```
+
+<a id="lux-up"></a>
+## lux up
+
+Boots the luxd node for <network>/<env> in K=1 PoA mode.
+
+The (network, env) tuple identifies one L1 instance globally. Every
+parameter — port, networkID, dataDir, genesisFile — is derived from that
+network's chain.yaml under $LUX_NETWORK_PATH. Foreground: `lux up`
+blocks until the node exits or Ctrl-C is pressed.
+
+Examples:
+  lux up zoo/localnet                 # K=1 dev node for Zoo, networkID 200203
+  lux up lux/devnet                   # K=1 dev node for Lux, networkID 3
+  lux up hanzo/testnet --clean        # wipe state then boot
+
+Stop with: lux down <network>/<env>
+
+**Usage:**
+
+```bash
+lux up <network>/<env> [flags]
+```
+
+**Flags:**
+
+```
+      --automine string    auto-mine interval (e.g., '1s'); empty = instant
+      --clean              remove data-dir before boot (fresh genesis)
+      --node-path string   path to luxd binary (auto-detected if empty)
 ```
 
 <a id="lux-update"></a>
@@ -3443,19 +5639,15 @@ lux transaction sign [subcommand] [flags]
 Check if an update is available, and prompt the user to install it
 
 **Usage:**
+
 ```bash
-lux update [subcommand] [flags]
+lux update [flags]
 ```
 
 **Flags:**
 
-```bash
--c, --confirm          Assume yes for installation
--h, --help             help for update
--v, --version          version for update
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+```
+  -c, --confirm   Assume yes for installation
 ```
 
 <a id="lux-validator"></a>
@@ -3464,114 +5656,615 @@ lux update [subcommand] [flags]
 The validator command suite provides a collection of tools for managing validator
 balance on P-Chain.
 
-Validator's balance is used to pay for continuous fee to the P-Chain. When this Balance reaches 0,
+Validator's balance is used to pay for continuous fee to the P-Chain. When this Balance reaches 0, 
 the validator will be considered inactive and will no longer participate in validating the L1
 
 **Usage:**
-```bash
-lux validator [subcommand] [flags]
-```
-
-**Subcommands:**
-
-- [`getBalance`](#lux-validator-getbalance): This command gets the remaining validator P-Chain balance that is available to pay
-P-Chain continuous fee
-- [`increaseBalance`](#lux-validator-increasebalance): This command increases the validator P-Chain balance
-- [`list`](#lux-validator-list): This command gets a list of the validators of the L1
-
-**Flags:**
 
 ```bash
--h, --help             help for validator
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux validator
 ```
 
-<a id="lux-validator-getbalance"></a>
-### getBalance
+<a id="lux-validator-getBalance"></a>
+### lux validator getBalance
 
 This command gets the remaining validator P-Chain balance that is available to pay
 P-Chain continuous fee
 
 **Usage:**
+
 ```bash
-lux validator getBalance [subcommand] [flags]
+lux validator getBalance [flags]
 ```
 
 **Flags:**
 
-```bash
---cluster string          operate on the given cluster
---devnet                  operate on a devnet network
---endpoint string         use the given endpoint for network operations
--f, --testnet                testnet           operate on testnet (alias to testnet
--h, --help                help for getBalance
---l1 string               name of L1
--l, --local               operate on a local network
--m, --mainnet             operate on mainnet
---node-id string          node ID of the validator
--t, --testnet             testnet           operate on testnet (alias to testnet)
---validation-id string    validation ID of the validator
---config string           config file (default is $HOME/.lux-cli/config.json)
---log-level string        log level for the application (default "ERROR")
---skip-update-check       skip check for new versions
+```
+      --l1 string              name of L1
+      --node-id string         node ID of the validator
+      --validation-id string   validation ID of the validator
 ```
 
-<a id="lux-validator-increasebalance"></a>
-### increaseBalance
+<a id="lux-validator-increaseBalance"></a>
+### lux validator increaseBalance
 
 This command increases the validator P-Chain balance
 
 **Usage:**
+
 ```bash
-lux validator increaseBalance [subcommand] [flags]
+lux validator increaseBalance [flags]
 ```
 
 **Flags:**
 
-```bash
---balance float           amount of LUX to increase validator's balance by
---cluster string          operate on the given cluster
---devnet                  operate on a devnet network
---endpoint string         use the given endpoint for network operations
--f, --testnet                testnet           operate on testnet (alias to testnet
--h, --help                help for increaseBalance
--k, --key string          select the key to use [testnet/devnet deploy only]
---l1 string               name of L1 (to increase balance of bootstrap validators only)
--l, --local               operate on a local network
--m, --mainnet             operate on mainnet
---node-id string          node ID of the validator
--t, --testnet             testnet           operate on testnet (alias to testnet)
---validation-id string    validationIDStr of the validator
---config string           config file (default is $HOME/.lux-cli/config.json)
---log-level string        log level for the application (default "ERROR")
---skip-update-check       skip check for new versions
+```
+      --balance float          amount of LUX to increase validator's balance by
+  -k, --key string             select the key to use [testnet/devnet deploy only]
+      --l1 string              name of L1 (to increase balance of bootstrap validators only)
+      --node-id string         node ID of the validator
+      --validation-id string   validationIDStr of the validator
 ```
 
 <a id="lux-validator-list"></a>
-### list
+### lux validator list
 
 This command gets a list of the validators of the L1
 
 **Usage:**
+
 ```bash
-lux validator list [subcommand] [flags]
+lux validator list [blockchainName]
+```
+
+<a id="lux-vm"></a>
+## lux vm
+
+Commands for installing, linking, and managing VM plugins.
+
+VM plugins are stored as symlinks in ~/.lux/plugins/<vmid>.
+The VMID is calculated from the VM name (padded to 32 bytes, CB58 encoded).
+
+Examples:
+  lux vm link lux-evm --path ~/work/lux/evm/build/evm
+  lux vm status
+  lux vm unlink lux-evm
+  lux vm reload
+
+**Usage:**
+
+```bash
+lux vm
+```
+
+<a id="lux-vm-install"></a>
+### lux vm install
+
+Install a VM plugin from GitHub releases.
+
+Downloads the latest (or specified) version from GitHub releases and installs it
+to ~/.lux/plugins/packages/<org>/<name>/<version>/.
+
+Package format: <org>/<name> or <org>/<name>@<version>
+
+Examples:
+  lux vm install luxfi/evm           # Install latest
+  lux vm install luxfi/evm@v1.0.0    # Install specific version
+  lux vm install myuser/myvm         # Install from any org
+
+**Usage:**
+
+```bash
+lux vm install <org/name>[@version] [flags]
 ```
 
 **Flags:**
 
+```
+  -v, --version string   Version to install (default: latest)
+```
+
+<a id="lux-vm-link"></a>
+### lux vm link
+
+Link a local VM binary to the plugins directory for development.
+
+Creates a proper package entry and VMID symlink for a locally built VM binary.
+Use this during development to test local builds with the node.
+
+Package format: <org>/<name> (e.g., luxfi/evm, myuser/myvm)
+
+The binary must exist and be executable.
+
+Examples:
+  lux vm link luxfi/evm ~/work/lux/evm/build/evm
+  lux vm link luxfi/evm ~/work/lux/evm/build/evm --version v1.2.3-dev
+  lux vm link myuser/myvm /path/to/myvm/build/myvm
+
+**Usage:**
+
 ```bash
---cluster string       operate on the given cluster
---devnet               operate on a devnet network
---endpoint string      use the given endpoint for network operations
--f, --testnet             testnet      operate on testnet (alias to testnet
--h, --help             help for list
--l, --local            operate on a local network
--m, --mainnet          operate on mainnet
--t, --testnet          testnet      operate on testnet (alias to testnet)
---config string        config file (default is $HOME/.lux-cli/config.json)
---log-level string     log level for the application (default "ERROR")
---skip-update-check    skip check for new versions
+lux vm link <org/name> <path> [flags]
+```
+
+**Flags:**
+
+```
+  -v, --version string   Version label (default: v0.0.0-local)
+```
+
+<a id="lux-vm-reload"></a>
+### lux vm reload
+
+Reload VMs on network nodes by calling admin.loadVMs.
+
+This triggers the node to scan the plugins directory and load any new VMs.
+
+Examples:
+  lux vm reload
+  lux vm reload --endpoint http://127.0.0.1:9630
+
+**Usage:**
+
+```bash
+lux vm reload [flags]
+```
+
+**Flags:**
+
+```
+  -e, --endpoint string    Node endpoint to call admin.loadVMs on (default "http://127.0.0.1:9630")
+  -t, --timeout duration   Timeout for the reload request (default 30s)
+```
+
+<a id="lux-vm-status"></a>
+### lux vm status
+
+Show all linked VMs in the plugins directory.
+
+Displays VMID, name (if known), target path, and whether the target exists.
+
+Examples:
+  lux vm status
+  lux vm status --json
+
+**Usage:**
+
+```bash
+lux vm status [flags]
+```
+
+**Flags:**
+
+```
+      --json   Output in JSON format
+```
+
+<a id="lux-vm-unlink"></a>
+### lux vm unlink
+
+Remove a VM symlink from the plugins directory.
+
+Removes the symlink at ~/.lux/plugins/<vmid> for the given VM name.
+
+Examples:
+  lux vm unlink lux-evm
+  lux vm unlink "Lux EVM"
+
+**Usage:**
+
+```bash
+lux vm unlink <vm-name>
+```
+
+<a id="lux-warp"></a>
+## lux warp
+
+Warp V2 provides cross-chain messaging with post-quantum safety.
+
+This command provides tools for creating, signing, verifying, and relaying
+cross-chain messages between Lux networks.
+
+Commands:
+  create    Create a new cross-chain message
+  sign      Sign a message with validator key
+  verify    Verify a signed message
+  relay     Start message relayer
+
+**Usage:**
+
+```bash
+lux warp
+```
+
+<a id="lux-warp-create"></a>
+### lux warp create
+
+Create a new Warp message to send between chains.
+
+Example:
+  lux warp create --source 0xAA --dest 0xBB --payload "Hello from chain A"
+
+**Usage:**
+
+```bash
+lux warp create [flags]
+```
+
+**Flags:**
+
+```
+  -d, --dest string      Destination chain ID (hex)
+  -p, --payload string   Message payload
+  -s, --source string    Source chain ID (hex)
+```
+
+<a id="lux-warp-relay"></a>
+### lux warp relay
+
+Start a Warp message relayer to bridge messages between chains.
+
+The relayer monitors source chains for new messages and delivers them
+to destination chains after signature verification.
+
+**Usage:**
+
+```bash
+lux warp relay
+```
+
+<a id="lux-warp-sign"></a>
+### lux warp sign
+
+Sign a cross-chain message with your validator key.
+
+Example:
+  lux warp sign --message <hex> --key ~/.lux/staking/signer.key
+
+**Usage:**
+
+```bash
+lux warp sign [flags]
+```
+
+**Flags:**
+
+```
+  -k, --key string       Path to signing key
+  -m, --message string   Message to sign (hex)
+```
+
+<a id="lux-warp-verify"></a>
+### lux warp verify
+
+Verify a Warp message signature against the validator set.
+
+Example:
+  lux warp verify --message <hex> --signature <hex>
+
+**Usage:**
+
+```bash
+lux warp verify [flags]
+```
+
+**Flags:**
+
+```
+  -m, --message string     Message to verify (hex)
+  -s, --signature string   Signature to verify (hex)
+```
+
+<a id="lux-zk"></a>
+## lux zk
+
+The zk command provides tools for zero-knowledge proof operations
+on the Lux network, including powers-of-tau ceremony management,
+proof generation, proof verification, and SRS (Structured Reference String)
+management.
+
+These operations integrate with the Z-Chain, Lux's dedicated ZK chain,
+for on-chain proof verification via precompiled contracts.
+
+USAGE:
+
+  lux zk ceremony init     Initialize a new powers-of-tau ceremony
+  lux zk ceremony contribute  Add randomness to a ceremony
+  lux zk ceremony verify   Verify ceremony integrity
+  lux zk ceremony export   Export final SRS binary
+  lux zk ceremony status   Show ceremony state
+
+  lux zk prove groth16     Generate a Groth16 proof
+  lux zk prove plonk       Generate a PLONK proof
+
+  lux zk verify groth16    Verify a Groth16 proof
+  lux zk verify plonk      Verify a PLONK proof
+
+  lux zk srs download      Download the official Lux SRS
+  lux zk srs verify        Verify a downloaded SRS
+  lux zk srs info          Show SRS metadata
+
+<a id="lux-zk-ceremony"></a>
+### lux zk ceremony
+
+Manage powers-of-tau ceremonies for generating trusted SRS
+(Structured Reference Strings) used in Groth16 and PLONK proof systems.
+
+The ceremony requires the 'ceremony' binary from the Lux node repo.
+If not found, build it with:
+  cd ~/work/lux/node && go build -o /usr/local/bin/ceremony ./cmd/ceremony/
+
+<a id="lux-zk-ceremony-contribute"></a>
+#### lux zk ceremony contribute
+
+Apply a random contribution to the ceremony state. Generates
+cryptographically secure random scalars (tau, alpha, beta) and mixes them
+into the SRS. The random values are zeroed from memory after use.
+
+**Usage:**
+
+```bash
+lux zk ceremony contribute [flags]
+```
+
+**Flags:**
+
+```
+      --input string         Input ceremony file (required)
+      --output string        Output ceremony file (required)
+      --participant string   Participant name (required)
+```
+
+<a id="lux-zk-ceremony-export"></a>
+#### lux zk ceremony export
+
+Export the SRS (Structured Reference String) from a completed and
+verified ceremony. The ceremony is verified before export. Output is
+uncompressed binary (G1: 64 bytes, G2: 128 bytes per point).
+
+**Usage:**
+
+```bash
+lux zk ceremony export [flags]
+```
+
+**Flags:**
+
+```
+      --input string    Ceremony file to export (required)
+      --output string   Output SRS binary file (required)
+```
+
+<a id="lux-zk-ceremony-init"></a>
+#### lux zk ceremony init
+
+Create a new ceremony state file with initial powers of the BN254
+generators. This is the starting point before any contributions.
+
+**Usage:**
+
+```bash
+lux zk ceremony init [flags]
+```
+
+**Flags:**
+
+```
+      --circuit string     Circuit name (required)
+      --output string      Output file path (required)
+      --participants int   Expected number of participants (default 3)
+      --power int          Power of 2 for constraint count (2^power) (default 20)
+```
+
+<a id="lux-zk-ceremony-status"></a>
+#### lux zk ceremony status
+
+Display the current state of a ceremony file including circuit info, contributions, and participant hashes.
+
+**Usage:**
+
+```bash
+lux zk ceremony status [flags]
+```
+
+**Flags:**
+
+```
+      --input string   Ceremony file to inspect (required)
+```
+
+<a id="lux-zk-ceremony-verify"></a>
+#### lux zk ceremony verify
+
+Check the consistency of a ceremony state file by verifying:
+- TauG1/TauG2 form consistent geometric sequences (pairing checks)
+- AlphaG1/BetaG1 use the same tau ratio
+- BetaG1 and BetaG2 encode the same beta scalar
+- Contribution hash chain integrity
+- No points at infinity
+
+**Usage:**
+
+```bash
+lux zk ceremony verify [flags]
+```
+
+**Flags:**
+
+```
+      --input string   Ceremony file to verify (required)
+```
+
+<a id="lux-zk-prove"></a>
+### lux zk prove
+
+Generate zero-knowledge proofs using the Lux SRS.
+
+Proof generation runs locally using the SRS from the trusted setup ceremony.
+The resulting proof can be verified on-chain via the Z-Chain verifier precompiles
+or off-chain using 'lux zk verify'.
+
+<a id="lux-zk-prove-groth16"></a>
+#### lux zk prove groth16
+
+Generate a Groth16 proof from a circuit, witness, and SRS.
+
+The proving key is derived from the SRS generated by the ceremony.
+The witness contains both public inputs and private values.
+
+**Usage:**
+
+```bash
+lux zk prove groth16 [flags]
+```
+
+**Flags:**
+
+```
+      --circuit string   Compiled circuit file path (required)
+      --output string    Output proof file path (required)
+      --srs string       SRS file path (required)
+      --witness string   Witness file path (required)
+```
+
+<a id="lux-zk-prove-plonk"></a>
+#### lux zk prove plonk
+
+Generate a PLONK proof from a circuit, witness, and SRS.
+
+PLONK uses a universal SRS that works with any circuit of bounded size,
+unlike Groth16 which requires a circuit-specific trusted setup.
+
+**Usage:**
+
+```bash
+lux zk prove plonk [flags]
+```
+
+**Flags:**
+
+```
+      --circuit string   Compiled circuit file path (required)
+      --output string    Output proof file path (required)
+      --srs string       SRS file path (required)
+      --witness string   Witness file path (required)
+```
+
+<a id="lux-zk-srs"></a>
+### lux zk srs
+
+Manage Structured Reference Strings (SRS) for ZK proof systems.
+
+The SRS is the output of the trusted setup ceremony and is required
+for both proof generation and verification. The official Lux SRS
+is published on the Z-Chain.
+
+<a id="lux-zk-srs-download"></a>
+#### lux zk srs download
+
+Download the official SRS binary from the Z-Chain. The file is
+verified after download using the ceremony binary.
+
+**Usage:**
+
+```bash
+lux zk srs download [flags]
+```
+
+**Flags:**
+
+```
+      --output string   Output file path (default: ~/.lux/zk/srs.bin)
+      --url string      SRS download URL (default "https://api.lux.network/mainnet/v1/bc/Z/srs")
+```
+
+<a id="lux-zk-srs-info"></a>
+#### lux zk srs info
+
+Display metadata about an SRS file including the number of powers, file size, and SHA-256 hash.
+
+**Usage:**
+
+```bash
+lux zk srs info [flags]
+```
+
+**Flags:**
+
+```
+      --input string   SRS file path (required)
+```
+
+<a id="lux-zk-srs-verify"></a>
+#### lux zk srs verify
+
+Verify the integrity of a downloaded SRS file by checking its
+structure and computing its SHA-256 hash.
+
+**Usage:**
+
+```bash
+lux zk srs verify [flags]
+```
+
+**Flags:**
+
+```
+      --input string   SRS file path (required)
+```
+
+<a id="lux-zk-verify"></a>
+### lux zk verify
+
+Verify zero-knowledge proofs by calling Z-Chain precompiled contracts.
+
+The Z-Chain provides on-chain verification for Groth16 and PLONK proofs via
+precompiled contracts at fixed addresses. This command submits the proof and
+public inputs to the verifier precompile and returns the result.
+
+<a id="lux-zk-verify-groth16"></a>
+#### lux zk verify groth16
+
+Verify a Groth16 proof against the Z-Chain Groth16 verifier precompile.
+
+Requires the proof file, verification key, and public inputs.
+Connects to the Z-Chain RPC endpoint to call the verifier contract.
+
+**Usage:**
+
+```bash
+lux zk verify groth16 [flags]
+```
+
+**Flags:**
+
+```
+      --inputs string   Public inputs file path (required)
+      --proof string    Proof file path (required)
+      --rpc string      Z-Chain RPC endpoint (default "http://localhost:9630/v1/bc/Z/rpc")
+      --vk string       Verification key file path (required)
+```
+
+<a id="lux-zk-verify-plonk"></a>
+#### lux zk verify plonk
+
+Verify a PLONK proof against the Z-Chain PLONK verifier precompile.
+
+Requires the proof file, verification key, and public inputs.
+Connects to the Z-Chain RPC endpoint to call the verifier contract.
+
+**Usage:**
+
+```bash
+lux zk verify plonk [flags]
+```
+
+**Flags:**
+
+```
+      --inputs string   Public inputs file path (required)
+      --proof string    Proof file path (required)
+      --rpc string      Z-Chain RPC endpoint (default "http://localhost:9630/v1/bc/Z/rpc")
+      --vk string       Verification key file path (required)
 ```
 
