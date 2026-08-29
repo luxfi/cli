@@ -244,7 +244,7 @@ func displayPrecompiles() {
 		Address string
 		Desc    string
 	}{
-		{"LXPool", "LP-9010", "0x0000000000000000000000000000000000009010", "v4 PoolManager AMM core"},
+		{"LXPool", "LP-9999", "0x0000000000000000000000000000000000009999", "v4-shaped receipt settlement"},
 		{"LXOracle", "LP-9011", "0x0000000000000000000000000000000000009011", "Multi-source price aggregation"},
 		{"LXRouter", "LP-9012", "0x0000000000000000000000000000000000009012", "Swap routing"},
 		{"LXHooks", "LP-9013", "0x0000000000000000000000000000000000009013", "Hook contract registry"},
