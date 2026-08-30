@@ -367,6 +367,8 @@ require (
 	github.com/luxfi/zapdb v1.10.1
 	github.com/mattn/go-isatty v0.0.22
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+	github.com/zap-proto/mcp v1.0.5
+	github.com/zap-proto/zip v1.36.22
 	golang.org/x/sys v0.45.0
 	golang.org/x/term v0.43.0
 	k8s.io/api v0.36.1

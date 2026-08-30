@@ -17,6 +17,7 @@ import (
 	"github.com/luxfi/log/level"
 
 	"github.com/luxfi/cli/cmd/backendcmd"
+	"github.com/luxfi/cli/cmd/callcmd"
 	"github.com/luxfi/cli/cmd/chaincmd"
 	"github.com/luxfi/cli/cmd/contractcmd"
 	"github.com/luxfi/cli/cmd/ctxcmd"
@@ -30,6 +31,7 @@ import (
 	"github.com/luxfi/cli/cmd/keycmd"
 	"github.com/luxfi/cli/cmd/kmscmd"
 	"github.com/luxfi/cli/cmd/linkcmd"
+	"github.com/luxfi/cli/cmd/mcpcmd"
 	"github.com/luxfi/cli/cmd/mpccmd"
 	"github.com/luxfi/cli/cmd/netrunnercmd"
 	"github.com/luxfi/cli/cmd/networkcmd"
@@ -157,6 +159,8 @@ For detailed command help, use: lux <command> --help`,
 	rootCmd.AddCommand(cyclecmd.NewCmd()) // lux cycle <name>/<env>
 	rootCmd.AddCommand(infocmd.NewCmd())  // lux info  <name>/<env>
 	rootCmd.AddCommand(pscmd.NewCmd())    // lux ps
+	rootCmd.AddCommand(callcmd.NewCmd())  // lux call — every operation the node publishes
+	rootCmd.AddCommand(mcpcmd.NewCmd())   // lux mcp  — those operations, to an agent
 	rootCmd.AddCommand(ctxcmd.NewCmd())   // lux ctx
 
 	rootCmd.AddCommand(devcmd.NewCmd(app))        // dev (legacy: anvil-compat shortcut for lux/localnet)
