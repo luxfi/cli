@@ -10,9 +10,9 @@ echo "=== Creating Lux Network Snapshots ==="
 
 # Check block counts first
 echo "Checking current block heights..."
-MAINNET_BLOCKS=$(curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' -H 'content-type:application/json;' http://localhost:9630/v1/bc/C/rpc 2>/dev/null | jq -r '.result' | xargs printf "%d")
-TESTNET_BLOCKS=$(curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' -H 'content-type:application/json;' http://localhost:9640/v1/bc/C/rpc 2>/dev/null | jq -r '.result' | xargs printf "%d")
-DEVNET_BLOCKS=$(curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' -H 'content-type:application/json;' http://localhost:9650/v1/bc/C/rpc 2>/dev/null | jq -r '.result' | xargs printf "%d")
+MAINNET_BLOCKS=$(curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' -H 'content-type:application/json;' http://localhost:9630/v1/chain/C/rpc 2>/dev/null | jq -r '.result' | xargs printf "%d")
+TESTNET_BLOCKS=$(curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' -H 'content-type:application/json;' http://localhost:9640/v1/chain/C/rpc 2>/dev/null | jq -r '.result' | xargs printf "%d")
+DEVNET_BLOCKS=$(curl -s -X POST --data '{"jsonrpc":"2.0","id":1,"method":"eth_blockNumber","params":[]}' -H 'content-type:application/json;' http://localhost:9650/v1/chain/C/rpc 2>/dev/null | jq -r '.result' | xargs printf "%d")
 
 echo "Mainnet: $MAINNET_BLOCKS blocks"
 echo "Testnet: $TESTNET_BLOCKS blocks"

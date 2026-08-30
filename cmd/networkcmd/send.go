@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/localnet"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	ethcrypto "github.com/luxfi/crypto"
 	ethcommon "github.com/luxfi/geth/common"
@@ -115,7 +116,7 @@ func runSend(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	rpcURL := fmt.Sprintf("%s/v1/bc/C/rpc", endpoint)
+	rpcURL := route.Chain(endpoint, "C") + "/rpc"
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 

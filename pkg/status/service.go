@@ -18,6 +18,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/constants"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
@@ -167,7 +168,7 @@ func (s *StatusService) probeTrackedEVMs(ctx context.Context, networks []Network
 				// Match by name (case-insensitive) or check the chain ID via RPC
 				if strings.EqualFold(bcName, chainName+"-chain") || strings.Contains(strings.ToLower(bcName), chainName) {
 					// Found a potential L1 chain, probe it
-					rpcURL := fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, bcID)
+					rpcURL := route.Chain(baseURL, bcID) + "/rpc"
 
 					evmStatus := s.probeL1Chain(ctx, chainName, networkType, rpcURL, expectedChainID)
 					if evmStatus != nil {
@@ -186,7 +187,7 @@ func (s *StatusService) probeTrackedEVMs(ctx context.Context, networks []Network
 func (s *StatusService) getBlockchainsFromNode(ctx context.Context, baseURL string) ([]map[string]interface{}, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/v1/bc/P", baseURL)
+	requestURL := route.Chain(baseURL, "P")
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -504,7 +505,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 			},
 		}
 		validatorsJson, _ := json.Marshal(validatorsBody)
-		pChainURL := fmt.Sprintf("%s/v1/bc/P", node.HTTPURL)
+		pChainURL := route.Chain(node.HTTPURL, "P")
 		reqValidators, _ := http.NewRequestWithContext(ctx, "POST", pChainURL, bytes.NewBuffer(validatorsJson))
 		reqValidators.Header.Set("Content-Type", "application/json")
 		if respValidators, err := client.Do(reqValidators); err == nil {
@@ -548,7 +549,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 			"params":  []interface{}{},
 		}
 		cChainJson, _ := json.Marshal(cChainBody)
-		cChainURL := fmt.Sprintf("%s/v1/bc/C/rpc", node.HTTPURL)
+		cChainURL := route.Chain(node.HTTPURL, "C") + "/rpc"
 		reqCChain, _ := http.NewRequestWithContext(ctx, "POST", cChainURL, bytes.NewBuffer(cChainJson))
 		reqCChain.Header.Set("Content-Type", "application/json")
 		if respCChain, err := client.Do(reqCChain); err == nil {
@@ -922,17 +923,17 @@ func (s *StatusService) getChainEndpoints(network Network) ([]EndpointStatus, er
 // EVM chains (C, Q, A, B, T, Z, G, K, D) use /rpc suffix
 func (s *StatusService) getAllNativeChainEndpoints(baseURL string) []EndpointStatus {
 	return []EndpointStatus{
-		{ChainAlias: "p", URL: fmt.Sprintf("%s/v1/bc/P", baseURL)},     // Platform chain (JSON-RPC)
-		{ChainAlias: "x", URL: fmt.Sprintf("%s/v1/bc/X", baseURL)},     // Exchange chain (JSON-RPC)
-		{ChainAlias: "c", URL: fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)}, // Coreth (EVM)
-		{ChainAlias: "q", URL: fmt.Sprintf("%s/v1/bc/Q/rpc", baseURL)}, // Quantum (EVM)
-		{ChainAlias: "a", URL: fmt.Sprintf("%s/v1/bc/A/rpc", baseURL)}, // AI (EVM)
-		{ChainAlias: "b", URL: fmt.Sprintf("%s/v1/bc/B/rpc", baseURL)}, // Bridge (EVM)
-		{ChainAlias: "t", URL: fmt.Sprintf("%s/v1/bc/T/rpc", baseURL)}, // Threshold (EVM)
-		{ChainAlias: "z", URL: fmt.Sprintf("%s/v1/bc/Z/rpc", baseURL)}, // ZK (EVM)
-		{ChainAlias: "g", URL: fmt.Sprintf("%s/v1/bc/G/rpc", baseURL)}, // Graph (EVM)
-		{ChainAlias: "k", URL: fmt.Sprintf("%s/v1/bc/K/rpc", baseURL)}, // KMS (EVM)
-		{ChainAlias: "d", URL: fmt.Sprintf("%s/v1/bc/D/rpc", baseURL)}, // DEX (EVM)
+		{ChainAlias: "p", URL: route.Chain(baseURL, "P")},          // Platform chain (JSON-RPC)
+		{ChainAlias: "x", URL: route.Chain(baseURL, "X")},          // Exchange chain (JSON-RPC)
+		{ChainAlias: "c", URL: route.Chain(baseURL, "C") + "/rpc"}, // Coreth (EVM)
+		{ChainAlias: "q", URL: route.Chain(baseURL, "Q") + "/rpc"}, // Quantum (EVM)
+		{ChainAlias: "a", URL: route.Chain(baseURL, "A") + "/rpc"}, // AI (EVM)
+		{ChainAlias: "b", URL: route.Chain(baseURL, "B") + "/rpc"}, // Bridge (EVM)
+		{ChainAlias: "t", URL: route.Chain(baseURL, "T") + "/rpc"}, // Threshold (EVM)
+		{ChainAlias: "z", URL: route.Chain(baseURL, "Z") + "/rpc"}, // ZK (EVM)
+		{ChainAlias: "g", URL: route.Chain(baseURL, "G") + "/rpc"}, // Graph (EVM)
+		{ChainAlias: "k", URL: route.Chain(baseURL, "K") + "/rpc"}, // KMS (EVM)
+		{ChainAlias: "d", URL: route.Chain(baseURL, "D") + "/rpc"}, // DEX (EVM)
 	}
 }
 
@@ -944,7 +945,7 @@ func (s *StatusService) discoverChainEndpointsFromNode(baseURL string) ([]Endpoi
 	}
 
 	// Build the request URL for platform.getBlockchains
-	requestURL := fmt.Sprintf("%s/v1/bc/P/rpc", baseURL)
+	requestURL := route.Chain(baseURL, "P") + "/rpc"
 
 	// Create JSON-RPC request
 	requestBody := map[string]interface{}{
@@ -992,10 +993,10 @@ func (s *StatusService) discoverChainEndpointsFromNode(baseURL string) ([]Endpoi
 						// Map blockchain ID to chain alias
 						chainAlias := s.mapBlockchainIDToAlias(id)
 						if chainAlias != "" {
-							url := fmt.Sprintf("%s/v1/bc/%s", baseURL, id)
+							url := route.Chain(baseURL, id)
 							// Special case for C-Chain (EVM) which uses /rpc endpoint
 							if chainAlias == "c" {
-								url = fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)
+								url = route.Chain(baseURL, "C") + "/rpc"
 							}
 							endpoints = append(endpoints, EndpointStatus{
 								ChainAlias: chainAlias,
@@ -1054,7 +1055,7 @@ func (s *StatusService) mapBlockchainIDToAlias(blockchainID string) string {
 func (s *StatusService) QueryPChainBalance(ctx context.Context, baseURL, address string) (uint64, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/v1/bc/P", baseURL)
+	requestURL := route.Chain(baseURL, "P")
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -1103,7 +1104,7 @@ func (s *StatusService) QueryPChainBalance(ctx context.Context, baseURL, address
 func (s *StatusService) QueryXChainBalance(ctx context.Context, baseURL, address string) (uint64, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/v1/bc/X", baseURL)
+	requestURL := route.Chain(baseURL, "X")
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -1153,7 +1154,7 @@ func (s *StatusService) QueryXChainBalance(ctx context.Context, baseURL, address
 func (s *StatusService) QueryCChainBalance(ctx context.Context, baseURL, address string) (string, error) {
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	requestURL := fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)
+	requestURL := route.Chain(baseURL, "C") + "/rpc"
 	requestBody := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,

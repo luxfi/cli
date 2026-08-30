@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/geth/common"
@@ -16,7 +17,7 @@ import (
 )
 
 func getCClient(apiEndpoint string, blockchainID string) (*ethclient.Client, error) {
-	cClient, err := ethclient.Dial(fmt.Sprintf("%s/v1/bc/%s/rpc", apiEndpoint, blockchainID))
+	cClient, err := ethclient.Dial(route.Chain(apiEndpoint, blockchainID) + "/rpc")
 	if err != nil {
 		return nil, err
 	}

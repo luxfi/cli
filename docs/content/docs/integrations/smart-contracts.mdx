@@ -36,12 +36,12 @@ Set up RPC connection to your blockchain:
 module.exports = {
   networks: {
     luxLocal: {
-      url: "http://127.0.0.1:9630/v1/bc/C/rpc",
+      url: "http://127.0.0.1:9630/v1/chain/C/rpc",
       chainId: 99999,
       accounts: [process.env.PRIVATE_KEY]
     },
     luxTestnet: {
-      url: "https://api.testnet.lux.network/v1/bc/C/rpc",
+      url: "https://api.testnet.lux.network/v1/chain/C/rpc",
       chainId: 99998,
       accounts: [process.env.PRIVATE_KEY]
     }
@@ -57,8 +57,8 @@ out = "out"
 libs = ["lib"]
 
 [rpc_endpoints]
-lux_local = "http://127.0.0.1:9630/v1/bc/C/rpc"
-lux_testnet = "https://api.testnet.lux.network/v1/bc/C/rpc"
+lux_local = "http://127.0.0.1:9630/v1/chain/C/rpc"
+lux_testnet = "https://api.testnet.lux.network/v1/chain/C/rpc"
 ```
 
 ## Contract Development

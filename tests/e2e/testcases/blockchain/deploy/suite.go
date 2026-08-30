@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	"github.com/luxfi/cli/cmd"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/crypto"
@@ -67,7 +68,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		validatorManagerAddress := sc.Networks["Local Network"].ValidatorManagerAddress
 		gomega.Expect(validatorManagerAddress).ShouldNot(gomega.BeEmpty())
-		uri := fmt.Sprintf("%s/v1/bc/%s/rpc", localClusterUris[0], sc.Networks["Local Network"].BlockchainID)
+		uri := route.Chain(localClusterUris[0], sc.Networks["Local Network"].BlockchainID.String()) + "/rpc"
 		valType := validatorManagerSDK.GetValidatorManagerType(uri, crypto.HexToAddress(validatorManagerAddress))
 		expectedValType := validatormanagertypes.ValidatorManagementTypeFromString(validatormanagertypes.ProofOfAuthority)
 		gomega.Expect(valType).Should(gomega.Equal(expectedValType))
@@ -101,7 +102,7 @@ var _ = ginkgo.Describe("[Blockchain Deploy]", ginkgo.Ordered, func() {
 		gomega.Expect(err).Should(gomega.BeNil())
 		validatorManagerAddress := sc.Networks["Local Network"].ValidatorManagerAddress
 		gomega.Expect(validatorManagerAddress).ShouldNot(gomega.BeEmpty())
-		uri := fmt.Sprintf("%s/v1/bc/%s/rpc", localClusterUris[0], sc.Networks["Local Network"].BlockchainID)
+		uri := route.Chain(localClusterUris[0], sc.Networks["Local Network"].BlockchainID.String()) + "/rpc"
 		valType := validatorManagerSDK.GetValidatorManagerType(uri, crypto.HexToAddress(validatorManagerAddress))
 		expectedValType := validatormanagertypes.ValidatorManagementTypeFromString(validatormanagertypes.UndefinedValidatorManagement)
 		gomega.Expect(valType).Should(gomega.Equal(expectedValType))

@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/constants"
 )
 
@@ -191,7 +192,7 @@ func (s Network) WSEndpoints() []string {
 // CChainEndpoint returns the C-Chain endpoint for the network
 func (s Network) CChainEndpoint() string {
 	baseEndpoint := s.Endpoint()
-	return fmt.Sprintf("%s/v1/bc/C/rpc", baseEndpoint)
+	return route.Chain(baseEndpoint, "C") + "/rpc"
 }
 
 // CChainWSEndpoint returns the C-Chain WebSocket endpoint for the network
@@ -235,10 +236,10 @@ func GetNetworkFromSidecarNetworkName(name string) Network {
 
 // GetRPCEndpoint returns the RPC endpoint for a given base endpoint and blockchain ID
 func GetRPCEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/v1/bc/%s/rpc", baseEndpoint, blockchainID)
+	return route.Chain(baseEndpoint, blockchainID) + "/rpc"
 }
 
 // GetWSEndpoint returns the WebSocket endpoint for a given base endpoint and blockchain ID
 func GetWSEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/v1/bc/%s/ws", baseEndpoint, blockchainID)
+	return route.Chain(baseEndpoint, blockchainID) + "/ws"
 }

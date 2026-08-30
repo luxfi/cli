@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -127,7 +128,7 @@ func runStatus(_ *cobra.Command, _ []string) error {
 		for _, ingress := range svc.Status.LoadBalancer.Ingress {
 			if ingress.IP != "" {
 				ux.Logger.PrintToUser("\nLoadBalancer: %s", ingress.IP)
-				ux.Logger.PrintToUser("  RPC:     http://%s:9630/v1/bc/C/rpc", ingress.IP)
+				ux.Logger.PrintToUser("  RPC:     %s", route.Chain(fmt.Sprintf("http://%s:9630", ingress.IP), "C")+"/rpc")
 				ux.Logger.PrintToUser("  Health:  http://%s:9630/v1/health", ingress.IP)
 			}
 		}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/localnet"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
@@ -168,7 +169,7 @@ func deployL1Local(l1Name string, sc *models.Sidecar) error {
 
 	ux.Logger.PrintToUser("\n✅ L1 deployed successfully!")
 	ux.Logger.PrintToUser("\n🌐 L1 Information:")
-	ux.Logger.PrintToUser("   RPC Endpoint: http://localhost:9630/v1/bc/%s/rpc", sc.BlockchainID)
+	ux.Logger.PrintToUser("   RPC Endpoint: %s", route.Chain("http://localhost:9630", sc.BlockchainID.String())+"/rpc")
 	ux.Logger.PrintToUser("   Chain ID: %s", sc.ChainID)
 	ux.Logger.PrintToUser("   Explorer: http://localhost:4000")
 

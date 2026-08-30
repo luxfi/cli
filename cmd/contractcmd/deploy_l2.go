@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/spf13/cobra"
 )
 
@@ -281,7 +282,7 @@ type brandDeployArgs struct {
 }
 
 func deployBrand(ctx context.Context, a brandDeployArgs) error {
-	rpc := fmt.Sprintf("%s/v1/bc/%s/rpc", a.Gateway, a.Brand)
+	rpc := route.Chain(a.Gateway, a.Brand) + "/rpc"
 	manifest := filepath.Join(a.OutDir, a.Brand+".json")
 	fmt.Printf("\n--- %s @ %s ---\n", a.Brand, rpc)
 
@@ -380,7 +381,7 @@ func deployLiquid(ctx context.Context, a liquidDeployArgs) error {
 	if wlux == "" || leth == "" || lbtc == "" {
 		return fmt.Errorf("missing one of WLUX/BridgedETH/BridgedBTC in manifest")
 	}
-	rpc := fmt.Sprintf("%s/v1/bc/%s/rpc", a.Gateway, a.Brand)
+	rpc := route.Chain(a.Gateway, a.Brand) + "/rpc"
 	args := []string{"script", a.LiquidScript, "--rpc-url", rpc}
 	mn := os.Getenv("LUX_MNEMONIC")
 	if mn != "" {

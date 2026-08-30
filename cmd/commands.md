@@ -263,6 +263,35 @@ Examples:
 lux amm tokens [address...]
 ```
 
+<a id="lux-call"></a>
+## lux call
+
+Asks a node what it can do, and runs one of the answers.
+
+With no arguments it lists every service the node publishes; with a
+service it lists that service's operations; with both it runs one. The
+flags of an operation are the fields of its input, and its help is the
+prose the handler carries — all of it read from the node, none of it
+written here.
+
+Examples:
+  lux call
+  lux call platform
+  lux call platform get-height
+  lux call --at node.lux.svc:9653 platform get-validators --net-id 8675309
+
+**Usage:**
+
+```bash
+lux call [service] [operation] [flags]
+```
+
+**Flags:**
+
+```
+      --at string   the node to ask (a socket path, host:port, or URL) (default "/run/zip/luxd.sock")
+```
+
 <a id="lux-chain"></a>
 ## lux chain
 
@@ -696,7 +725,7 @@ EXAMPLES:
   lux chain import zoo ~/work/lux/state/rlp/zoo-mainnet-200200.rlp --devnet
 
   # Import with custom RPC endpoint
-  lux chain import c blocks.rlp --rpc http://localhost:9630/v1/bc/C/rpc
+  lux chain import c blocks.rlp --rpc http://localhost:9630/v1/chain/C/rpc
 
   # Import to blockchain by ID
   lux chain import 2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt blocks.rlp --mainnet
@@ -3321,6 +3350,36 @@ EXAMPLES:
 lux link [binary] [path]
 ```
 
+<a id="lux-mcp"></a>
+## lux mcp
+
+Relays MCP between an agent on stdio and a node's door on ZAP.
+
+The node's tools ARE its typed operations — one tool per op, named by the
+op — so nothing here enumerates them and nothing here can fall behind
+them. Every frame is passed whole.
+
+Point an MCP client at this command:
+
+  {"command": "lux", "args": ["mcp", "--at", "/run/zip/luxd.sock"]}
+
+Examples:
+  lux mcp
+  lux mcp --at /run/zip/luxd.sock
+  lux mcp --at node.lux.svc:9655
+
+**Usage:**
+
+```bash
+lux mcp [flags]
+```
+
+**Flags:**
+
+```
+      --at string   the node's MCP address (a socket path, or host:port) (default "/run/zip/luxd.sock")
+```
+
 <a id="lux-mpc"></a>
 ## lux mpc
 
@@ -4496,7 +4555,7 @@ TYPICAL WORKFLOW:
 
   1. Start network:    lux network start --devnet
   2. Deploy chain:     lux chain deploy mychain
-  3. Test your dapp:   (connect to http://localhost:9650/v1/bc/C/rpc)
+  3. Test your dapp:   (connect to http://localhost:9650/v1/chain/C/rpc)
   4. Stop network:     lux network stop
 
 **Usage:**
@@ -5055,15 +5114,15 @@ Make JSON-RPC calls to a Lux node.
 
 Examples:
   # Get P-Chain height
-  lux rpc call --method platform.getHeight --endpoint http://localhost:9630/v1/bc/P
+  lux rpc call --method platform.getHeight --endpoint http://localhost:9630/v1/chain/P
 
   # Get blockchains with params
-  lux rpc call --method platform.getBlockchains --params '{}' --endpoint http://localhost:9630/v1/bc/P
+  lux rpc call --method platform.getBlockchains --params '{}' --endpoint http://localhost:9630/v1/chain/P
 
   # Create blockchain
   lux rpc call --method platform.createBlockchain \
     --params '{"vmID":"...", "name":"mychain", "genesis":"..."}' \
-    --endpoint http://localhost:9630/v1/bc/P
+    --endpoint http://localhost:9630/v1/chain/P
 
 
 <a id="lux-rpc-call"></a>
@@ -5080,7 +5139,7 @@ lux rpc call [flags]
 **Flags:**
 
 ```
-      --endpoint string   RPC endpoint URL (default "http://localhost:9630/v1/bc/P")
+      --endpoint string   RPC endpoint URL (default "http://localhost:9630/v1/chain/P")
       --method string     RPC method to call (required)
       --params string     JSON params object (optional)
       --timeout int       Request timeout in seconds (default 30)
@@ -5089,13 +5148,16 @@ lux rpc call [flags]
 <a id="lux-rpc-transfer"></a>
 ### lux rpc transfer
 
-Transfer LUX between the P and X chains by atomic export/import.
+Transfer LUX across chains using atomic export/import.
 
-The C-Chain is an EVM: move value on it with an ordinary EVM transaction
-against /v1/bc/C/rpc, not with this command.
+Supported:
+  - P -> C
+  - X -> C
+  - C -> P
+  - C -> X
 
 Example:
-  lux rpc transfer --from-chain P --to-chain X --to X-lux1... --amount 10
+  lux rpc transfer --from-chain P --to-chain C --to 0x9011... --amount 10
 
 
 **Usage:**
@@ -5109,10 +5171,11 @@ lux rpc transfer [flags]
 ```
       --amount float        Amount to transfer in LUX
       --from string         Key name to use (default: MNEMONIC account 0)
-      --from-chain string   Source chain: P or X (default "P")
+      --from-chain string   Source chain: P, X, or C (default "P")
       --rpc-url string      Base RPC URL (default: RPC_URL or running network endpoint)
-      --to string           Destination bech32 address
-      --to-chain string     Destination chain: P or X (default "X")
+      --to string           Destination address (C-Chain hex for C, bech32 for P/X)
+      --to-chain string     Destination chain: P, X, or C (default "C")
+      --wait                Wait for export acceptance before import (default true)
 ```
 
 <a id="lux-rt"></a>
@@ -6175,7 +6238,7 @@ lux zk srs download [flags]
 
 ```
       --output string   Output file path (default: ~/.lux/zk/srs.bin)
-      --url string      SRS download URL (default "https://api.lux.network/mainnet/v1/bc/Z/srs")
+      --url string      SRS download URL (default "https://api.lux.network/mainnet/v1/chain/Z/srs")
 ```
 
 <a id="lux-zk-srs-info"></a>
@@ -6241,7 +6304,7 @@ lux zk verify groth16 [flags]
 ```
       --inputs string   Public inputs file path (required)
       --proof string    Proof file path (required)
-      --rpc string      Z-Chain RPC endpoint (default "http://localhost:9630/v1/bc/Z/rpc")
+      --rpc string      Z-Chain RPC endpoint (default "http://localhost:9630/v1/chain/Z/rpc")
       --vk string       Verification key file path (required)
 ```
 
@@ -6264,7 +6327,7 @@ lux zk verify plonk [flags]
 ```
       --inputs string   Public inputs file path (required)
       --proof string    Proof file path (required)
-      --rpc string      Z-Chain RPC endpoint (default "http://localhost:9630/v1/bc/Z/rpc")
+      --rpc string      Z-Chain RPC endpoint (default "http://localhost:9630/v1/chain/Z/rpc")
       --vk string       Verification key file path (required)
 ```
 

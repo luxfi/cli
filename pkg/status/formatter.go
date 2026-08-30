@@ -9,6 +9,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/luxfi/cli/pkg/route"
 	"gopkg.in/yaml.v3"
 )
 
@@ -197,13 +198,13 @@ func (f *StatusFormatter) FormatNetworkStatus(result *StatusResult) {
 				// P-chain and X-chain don't use /rpc suffix, EVM chains do
 				switch chain.Alias {
 				case "p":
-					rpcEndpoint = fmt.Sprintf("%s/v1/bc/P", baseURL)
+					rpcEndpoint = route.Chain(baseURL, "P")
 				case "x":
-					rpcEndpoint = fmt.Sprintf("%s/v1/bc/X", baseURL)
+					rpcEndpoint = route.Chain(baseURL, "X")
 				case "c", "a", "b", "d", "g", "k", "q", "t", "z":
-					rpcEndpoint = fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, strings.ToUpper(chain.Alias))
+					rpcEndpoint = route.Chain(baseURL, strings.ToUpper(chain.Alias)) + "/rpc"
 				default:
-					rpcEndpoint = fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, chain.Alias)
+					rpcEndpoint = route.Chain(baseURL, chain.Alias) + "/rpc"
 				}
 
 				fmt.Fprintf(f.writer, "%-5s  %-10s  %-10d %-20s  %-6s  %dms      %-8s  %s\n",

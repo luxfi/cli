@@ -7,10 +7,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"net"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -22,6 +22,7 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	"github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/localnetworkinterface"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/evm/core"
@@ -314,7 +315,9 @@ func getVMDisplayName(vm models.VMType) string {
 // getRemoteEndpoint returns the well-known remote API endpoint for a network type.
 // Returns empty string for local/custom networks that have no remote endpoint.
 func getRemoteEndpoint(network models.Network) string {
-	if ovr := os.Getenv("NODE_ENDPOINT"); ovr != "" { return ovr }
+	if ovr := os.Getenv("NODE_ENDPOINT"); ovr != "" {
+		return ovr
+	}
 	return network.Endpoint()
 }
 
@@ -338,8 +341,8 @@ func probeRemoteEndpoint(endpoint string) bool {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-			DialContext:        dialer.DialContext,
-			ForceAttemptHTTP2:  true,
+			DialContext:       dialer.DialContext,
+			ForceAttemptHTTP2: true,
 		},
 	}
 	resp, err := client.Do(req)
@@ -601,7 +604,7 @@ func deployToRemoteNetwork(chainName string, chainGenesis []byte, sc *models.Sid
 	ux.Logger.PrintToUser("Blockchain deployed successfully!")
 	ux.Logger.PrintToUser("  Chain ID:      %s", chainID.String())
 	ux.Logger.PrintToUser("  Blockchain ID: %s", blockchainID.String())
-	ux.Logger.PrintToUser("  RPC Endpoint:  %s/v1/bc/%s/rpc", endpoint, blockchainID.String())
+	ux.Logger.PrintToUser("  RPC Endpoint:  %s", route.Chain(endpoint, blockchainID.String())+"/rpc")
 	ux.Logger.PrintToUser("")
 
 	// Update sidecar with deployment info

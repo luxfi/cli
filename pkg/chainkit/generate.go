@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/luxfi/cli/pkg/route"
 )
 
 // GenerateResult holds all generated manifests for a network.
@@ -18,15 +20,15 @@ type GenerateResult struct {
 	Namespace string // K8s namespace
 
 	// CRD manifests (consumed by lux-operator)
-	LuxNetwork string // LuxNetwork CR YAML
-	LuxIndexer string // LuxIndexer CR YAML
+	LuxNetwork  string // LuxNetwork CR YAML
+	LuxIndexer  string // LuxIndexer CR YAML
 	LuxExplorer string // LuxExplorer CR YAML
-	LuxGateway string // LuxGateway CR YAML
+	LuxGateway  string // LuxGateway CR YAML
 
 	// Standard K8s manifests (for services without CRDs)
-	Namespace_  string // Namespace YAML
-	Exchange    string // Exchange Deployment YAML (if enabled)
-	Faucet      string // Faucet Deployment YAML (if enabled)
+	Namespace_ string // Namespace YAML
+	Exchange   string // Exchange Deployment YAML (if enabled)
+	Faucet     string // Faucet Deployment YAML (if enabled)
 }
 
 // Generate produces all K8s manifests for a single network from chain.yaml.
@@ -184,6 +186,9 @@ func renderTemplate(name, tpl string, ctx *templateCtx) (string, error) {
 			}
 			return strings.Join(lines, "\n")
 		},
+		// chain is the same composer the Go code uses, so a manifest and a
+		// dialled client cannot disagree about where a chain answers.
+		"chain": route.Chain,
 		"lower": strings.ToLower,
 		"split": strings.Split,
 		"boolDefault": func(b *bool, def bool) bool {
@@ -481,7 +486,7 @@ spec:
             - name: CHAIN_ID
               value: "{{.NetSpec.ChainID}}"
             - name: RPC_URL
-              value: "http://{{.Config.Chain.Slug}}d-0.{{.Config.Chain.Slug}}d:9650/v1/bc/C/rpc"
+              value: "{{chain (printf "http://%sd-0.%sd:9650" .Config.Chain.Slug .Config.Chain.Slug) "C"}}/rpc"
             - name: DRIP_AMOUNT
               value: "{{.Config.Services.Faucet.DripAmount}}"
             - name: RATE_LIMIT

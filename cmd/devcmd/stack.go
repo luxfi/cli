@@ -11,13 +11,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/luxfi/cli/pkg/cobrautils"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
@@ -168,7 +169,7 @@ func stackUp(*cobra.Command, []string) error {
 			manifest.Chains = append(manifest.Chains, ChainInfo{
 				Index:    i,
 				RPCHTTP:  fmt.Sprintf("http://127.0.0.1:%d", httpPort),
-				RPCWS:    fmt.Sprintf("ws://127.0.0.1:%d/v1/bc/C/ws", httpPort),
+				RPCWS:    route.Chain(fmt.Sprintf("ws://127.0.0.1:%d", httpPort), "C") + "/ws",
 				StakingP: stakingPort,
 				PID:      pid,
 			})
@@ -220,7 +221,7 @@ func stackUp(*cobra.Command, []string) error {
 		manifest.Chains = append(manifest.Chains, ChainInfo{
 			Index:    i,
 			RPCHTTP:  fmt.Sprintf("http://127.0.0.1:%d", httpPort),
-			RPCWS:    fmt.Sprintf("ws://127.0.0.1:%d/v1/bc/C/ws", httpPort),
+			RPCWS:    route.Chain(fmt.Sprintf("ws://127.0.0.1:%d", httpPort), "C") + "/ws",
 			StakingP: stakingPort,
 			PID:      pid,
 		})

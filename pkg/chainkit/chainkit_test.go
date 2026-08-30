@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/luxfi/cli/pkg/route"
 )
 
 func writeTempChainYAML(t *testing.T, content string) string {
@@ -247,6 +249,13 @@ func TestGenerate(t *testing.T) {
 	}
 	if !strings.Contains(result.Faucet, "DRIP_AMOUNT") {
 		t.Error("Faucet should contain DRIP_AMOUNT env var")
+	}
+	// The manifest addresses the chain through the same composer the Go code
+	// uses, so a rendered manifest cannot point somewhere a dialled client
+	// does not.
+	wantRPC := `value: "` + route.Chain("http://testd-0.testd:9650", "C") + `/rpc"`
+	if !strings.Contains(result.Faucet, wantRPC) {
+		t.Errorf("Faucet RPC_URL should be %s, got manifest:\n%s", wantRPC, result.Faucet)
 	}
 
 	// Exchange should NOT be generated (disabled)

@@ -17,6 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/chain"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/netrunner/client"
@@ -279,7 +280,7 @@ TYPICAL WORKFLOW:
 
   1. Start network:    lux network start --devnet
   2. Deploy chain:     lux chain deploy mychain
-  3. Test your dapp:   (connect to http://localhost:9650/v1/bc/C/rpc)
+  3. Test your dapp:   (connect to ` + route.Chain("http://localhost:9650", "C") + `/rpc)
   4. Stop network:     lux network stop`,
 
 		RunE:         StartNetwork,

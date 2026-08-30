@@ -11,9 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
 )
+
+// evmBlockchainID is the chain this command deploys.
+const evmBlockchainID = "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
 
 var (
 	evmNetworkID   int
@@ -68,7 +72,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 
 	// Check if data directory exists and has an existing database
 	var existingDB string
-	blockchainID := "2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+	blockchainID := evmBlockchainID
 
 	// Check for existing database in standard locations
 	possibleDBPaths := []string{
@@ -191,7 +195,7 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 	// Create chain configuration if provided
 	if evmChainConfig != "" {
 		chainConfigDst := filepath.Join(evmDataDir, "configs", "chains",
-			"2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB", "config.json")
+			evmBlockchainID, "config.json")
 
 		_ = os.MkdirAll(filepath.Dir(chainConfigDst), 0o750)
 		copyCmd := exec.Command("cp", evmChainConfig, chainConfigDst) //nolint:gosec // G204: Known command
@@ -239,16 +243,18 @@ func deployEVM(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
 
+	rpc := route.Chain(fmt.Sprintf("http://localhost:%d", evmPort), evmBlockchainID) + "/rpc"
+
 	// Create launch script
 	launchScript := filepath.Join(evmDataDir, "launch.sh")
 	script := fmt.Sprintf(`#!/bin/bash
 echo "Starting EVM chain node..."
 echo "   Data directory: %s"
-echo "   RPC endpoint: http://localhost:%d/v1/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc"
+echo "   RPC endpoint: %s"
 echo ""
 
 exec /home/z/work/lux/node/build/luxd --config-file=%s
-`, evmDataDir, evmPort, configPath)
+`, evmDataDir, rpc, configPath)
 
 	if err := os.WriteFile(launchScript, []byte(script), 0o755); err != nil { //nolint:gosec // G306: Launch script needs to be executable
 		return fmt.Errorf("failed to create launch script: %w", err)
@@ -269,7 +275,7 @@ exec /home/z/work/lux/node/build/luxd --config-file=%s
 	fmt.Printf("   %s\n", launchScript)
 
 	fmt.Println("\n📡 Once running, access via:")
-	fmt.Printf("   RPC: http://localhost:%d/v1/bc/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/rpc\n", evmPort)
+	fmt.Printf("   RPC: %s\n", rpc)
 
 	return nil
 }

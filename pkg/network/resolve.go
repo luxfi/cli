@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/luxfi/cli/pkg/route"
 )
 
 // Resolve maps "name/env" to a fully-expanded Profile via the
@@ -39,7 +41,7 @@ func ResolveSpec(s *Spec, env string) (*Profile, error) {
 		HTTPPort:          e.HTTPPort,
 		StakingPort:       e.StakingPort,
 		RPCUrl:            e.RPCUrl,
-		LocalRPCUrl:       fmt.Sprintf("http://127.0.0.1:%d/v1/bc/C/rpc", e.HTTPPort),
+		LocalRPCUrl:       route.Chain(fmt.Sprintf("http://127.0.0.1:%d", e.HTTPPort), "C") + "/rpc",
 		LogLevel:          "info",
 	}
 	if s.Runtime.LogLevel != "" {

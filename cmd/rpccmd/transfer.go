@@ -17,6 +17,7 @@ import (
 	"github.com/luxfi/address"
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/formatting"
@@ -347,7 +348,7 @@ func newCChainRPCBackend(
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to create C context: %w", err)
 	}
-	rpcURL := fmt.Sprintf("%s/v1/bc/C/rpc", baseURL)
+	rpcURL := route.Chain(baseURL, "C") + "/rpc"
 	ethClient, err := ethclient.DialContext(ctx, rpcURL)
 	if err != nil {
 		return nil, nil, nil, err
@@ -420,7 +421,7 @@ func (b *rpcCBackend) GetUTXO(_ context.Context, _ ids.ID, utxoID ids.ID) (*utxo
 }
 
 func (b *rpcCBackend) Balance(ctx context.Context, addr common.Address) (*big.Int, error) {
-	ethClient, err := ethclient.DialContext(ctx, fmt.Sprintf("%s/v1/bc/C/rpc", b.baseURL))
+	ethClient, err := ethclient.DialContext(ctx, route.Chain(b.baseURL, "C")+"/rpc")
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +429,7 @@ func (b *rpcCBackend) Balance(ctx context.Context, addr common.Address) (*big.In
 }
 
 func (b *rpcCBackend) Nonce(ctx context.Context, addr common.Address) (uint64, error) {
-	ethClient, err := ethclient.DialContext(ctx, fmt.Sprintf("%s/v1/bc/C/rpc", b.baseURL))
+	ethClient, err := ethclient.DialContext(ctx, route.Chain(b.baseURL, "C")+"/rpc")
 	if err != nil {
 		return 0, err
 	}
@@ -436,7 +437,7 @@ func (b *rpcCBackend) Nonce(ctx context.Context, addr common.Address) (uint64, e
 }
 
 func fetchCChainUTXOs(ctx context.Context, baseURL, sourceChain string, addrs []string) ([]*utxo.UTXO, error) {
-	endpoint := fmt.Sprintf("%s/v1/bc/C/lux", baseURL)
+	endpoint := route.Chain(baseURL, "C") + "/lux"
 	req := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,
@@ -496,7 +497,7 @@ func fetchCChainUTXOs(ctx context.Context, baseURL, sourceChain string, addrs []
 }
 
 func issueCChainAtomicTx(ctx context.Context, baseURL string, tx *c.Tx) (string, error) {
-	endpoint := fmt.Sprintf("%s/v1/bc/C/lux", baseURL)
+	endpoint := route.Chain(baseURL, "C") + "/lux"
 	encoded, err := formatting.Encode(formatting.Hex, tx.SignedBytes())
 	if err != nil {
 		return "", err
@@ -534,7 +535,7 @@ func issueCChainAtomicTx(ctx context.Context, baseURL string, tx *c.Tx) (string,
 }
 
 func waitAtomicAccepted(ctx context.Context, baseURL, txID string) error {
-	endpoint := fmt.Sprintf("%s/v1/bc/C/lux", baseURL)
+	endpoint := route.Chain(baseURL, "C") + "/lux"
 	req := map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      1,

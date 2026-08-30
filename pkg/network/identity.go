@@ -14,6 +14,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/luxfi/cli/pkg/route"
 )
 
 // Probe asks the local node at p.HTTPPort what its NetworkID is.
@@ -67,7 +69,7 @@ func (p *Profile) WaitHealthy(ctx context.Context, timeout time.Duration) error 
 			return fmt.Errorf("%s: port %d serving foreign networkID %d (expected %d)",
 				p, p.HTTPPort, found, p.NetworkID)
 		}
-		cchain := fmt.Sprintf("http://127.0.0.1:%d/v1/bc/C/rpc", p.HTTPPort)
+		cchain := route.Chain(fmt.Sprintf("http://127.0.0.1:%d", p.HTTPPort), "C") + "/rpc"
 		body := []byte(`{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}`)
 		req, _ := http.NewRequestWithContext(ctx, http.MethodPost, cchain, bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")

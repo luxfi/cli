@@ -11,6 +11,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/chainvalidators"
 	"github.com/luxfi/cli/pkg/key"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/tests/e2e/commands"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/constants"
@@ -28,11 +29,11 @@ import (
 )
 
 const (
-	CLIBinary                = "./bin/lux"
-	keyName                  = "treasury"
-	treasuryEVMAddress       = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
-	treasuryPChainAddress    = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
-	ProxyContractAddress = "0xFEEDC0DE0000000000000000000000000000000"
+	CLIBinary             = "./bin/lux"
+	keyName               = "treasury"
+	treasuryEVMAddress    = "0x9011E888251AB053B7bD1cdB598Db4f9DEd94714"
+	treasuryPChainAddress = "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p"
+	ProxyContractAddress  = "0xFEEDC0DE0000000000000000000000000000000"
 )
 
 var err error
@@ -186,7 +187,7 @@ var _ = ginkgo.Describe("[Validator Manager POA Set Up]", ginkgo.Ordered, func()
 		keyPath := path.Join(utils.GetBaseDir(), constants.KeyDir, fmt.Sprintf("chain_%s_airdrop", utils.BlockchainName)+constants.KeySuffix)
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
 		gomega.Expect(err).Should(gomega.BeNil())
-		rpcURL := fmt.Sprintf("%s/v1/bc/%s/rpc", uris[0], blockchainIDStr)
+		rpcURL := route.Chain(uris[0], blockchainIDStr) + "/rpc"
 		client, err := evm.GetClient(rpcURL)
 		gomega.Expect(err).Should(gomega.BeNil())
 		err = client.WaitForEVMBootstrapped(0)
