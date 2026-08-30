@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/cli/pkg/binutils"
 	keychainwrapper "github.com/luxfi/cli/pkg/keychain"
 	climodels "github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
@@ -859,7 +860,7 @@ func GetFirstEndpoint(clusterInfo *rpcpb.ClusterInfo, chain string) string {
 	for _, nodeInfo := range clusterInfo.NodeInfos {
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
 			if chainInfo.ChainName == chain && nodeInfo.Name == clusterInfo.NodeNames[0] {
-				endpoint = fmt.Sprintf("Endpoint at node %s for blockchain %q with VM ID %q: %s/v1/bc/%s/rpc", nodeInfo.Name, blockchainID, chainInfo.VmId, nodeInfo.GetUri(), blockchainID)
+				endpoint = fmt.Sprintf("Endpoint at node %s for blockchain %q with VM ID %q: %s", nodeInfo.Name, blockchainID, chainInfo.VmId, route.Chain(nodeInfo.GetUri(), blockchainID)+"/rpc")
 			}
 		}
 	}

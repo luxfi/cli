@@ -25,6 +25,7 @@ import (
 	"github.com/luxfi/cli/pkg/docker"
 	"github.com/luxfi/cli/pkg/monitoring"
 	"github.com/luxfi/cli/pkg/remoteconfig"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/utils"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
@@ -888,7 +889,7 @@ func RunSSHGetNodeID(host *models.Host) ([]byte, error) {
 func RunSSHChainSyncStatus(host *models.Host, blockchainID string) ([]byte, error) {
 	// Craft and send the HTTP POST request
 	requestBody := fmt.Sprintf("{\"jsonrpc\":\"2.0\", \"id\":1,\"method\" :\"platform.getBlockchainStatus\", \"params\": {\"blockchainID\":\"%s\"}}", blockchainID)
-	return PostOverSSH(host, "/v1/bc/P", requestBody)
+	return PostOverSSH(host, route.Chain("", "P"), requestBody)
 }
 
 // StreamOverSSH runs provided script path over ssh.

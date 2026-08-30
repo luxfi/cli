@@ -13,12 +13,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/spf13/cobra"
 )
 
-const (
-	defaultSRSURL = "https://api.lux.network/mainnet/v1/bc/Z/srs"
-)
+// defaultSRSURL is where the ceremony publishes the SRS: the Z-Chain's /srs
+// route on the mainnet API.
+var defaultSRSURL = route.Chain("https://api.lux.network/mainnet", "Z") + "/srs"
 
 func newSRSCmd() *cobra.Command {
 	cmd := &cobra.Command{

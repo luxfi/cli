@@ -13,28 +13,30 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/spf13/cobra"
 )
 
 // NewCmd returns the RPC command
 func NewCmd(app *application.Lux) *cobra.Command {
+	pchain := route.Chain("http://localhost:9630", "P")
 	cmd := &cobra.Command{
 		Use:   "rpc",
 		Short: "Make RPC calls to Lux node",
-		Long: `Make JSON-RPC calls to a Lux node.
+		Long: fmt.Sprintf(`Make JSON-RPC calls to a Lux node.
 
 Examples:
   # Get P-Chain height
-  lux rpc call --method platform.getHeight --endpoint http://localhost:9630/v1/bc/P
+  lux rpc call --method platform.getHeight --endpoint %[1]s
 
   # Get blockchains with params
-  lux rpc call --method platform.getBlockchains --params '{}' --endpoint http://localhost:9630/v1/bc/P
+  lux rpc call --method platform.getBlockchains --params '{}' --endpoint %[1]s
 
   # Create blockchain
   lux rpc call --method platform.createBlockchain \
     --params '{"vmID":"...", "name":"mychain", "genesis":"..."}' \
-    --endpoint http://localhost:9630/v1/bc/P
-`,
+    --endpoint %[1]s
+`, pchain),
 		RunE: nil,
 	}
 
@@ -124,7 +126,7 @@ func newCallCmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&method, "method", "", "RPC method to call (required)")
 	cmd.Flags().StringVar(&params, "params", "", "JSON params object (optional)")
-	cmd.Flags().StringVar(&endpoint, "endpoint", "http://localhost:9630/v1/bc/P", "RPC endpoint URL")
+	cmd.Flags().StringVar(&endpoint, "endpoint", route.Chain("http://localhost:9630", "P"), "RPC endpoint URL")
 	cmd.Flags().IntVar(&timeout, "timeout", 30, "Request timeout in seconds")
 
 	_ = cmd.MarkFlagRequired("method")

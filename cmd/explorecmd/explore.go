@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/cli/pkg/application"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/spf13/cobra"
 )
 
@@ -93,7 +94,7 @@ func startExplorer(cmd *cobra.Command, args []string) error {
 	if rpc == "" {
 		rpc = detectRPC(chain)
 		if rpc == "" {
-			return fmt.Errorf("no RPC endpoint specified and no local network detected.\nUse: lux explore --rpc http://localhost:9650/v1/bc/C/rpc")
+			return fmt.Errorf("no RPC endpoint specified and no local network detected.\nUse: lux explore --rpc %s", route.Chain("http://localhost:9650", "C")+"/rpc")
 		}
 	}
 
@@ -209,7 +210,7 @@ func detectRPC(chain string) string {
 	}
 
 	for _, port := range ports {
-		url := fmt.Sprintf("http://localhost:%d/v1/bc/%s/rpc", port, chainPath)
+		url := route.Chain(fmt.Sprintf("http://localhost:%d", port), chainPath) + "/rpc"
 		cmd := exec.Command("curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", url)
 		out, err := cmd.Output()
 		if err == nil && strings.TrimSpace(string(out)) == "200" {

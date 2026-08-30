@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/sdk/models"
 	"github.com/spf13/cobra"
@@ -70,7 +71,7 @@ EXAMPLES:
   lux chain import zoo ~/work/lux/state/rlp/zoo-mainnet-200200.rlp --devnet
 
   # Import with custom RPC endpoint
-  lux chain import c blocks.rlp --rpc http://localhost:9630/v1/bc/C/rpc
+  lux chain import c blocks.rlp --rpc ` + route.Chain("http://localhost:9630", "C") + `/rpc
 
   # Import to blockchain by ID
   lux chain import 2ebCneCbwthjQ1rYT41nhd7M76Hc6YmosMAQrTFhBq8qeqh6tt blocks.rlp --mainnet
@@ -163,12 +164,12 @@ func runChainImport(_ *cobra.Command, args []string) error {
 	}
 
 	if importRPC != "" {
-		baseURL = strings.TrimSuffix(importRPC, "/v1/bc/"+chainPath+"/rpc")
-		baseURL = strings.TrimSuffix(baseURL, "/v1/bc/"+chainPath+"/admin")
+		baseURL = strings.TrimSuffix(importRPC, route.Chain("", chainPath)+"/rpc")
+		baseURL = strings.TrimSuffix(baseURL, route.Chain("", chainPath)+"/admin")
 		baseURL = strings.TrimSuffix(baseURL, "/")
 	}
-	rpcEndpoint := fmt.Sprintf("%s/v1/bc/%s/rpc", baseURL, chainPath)
-	adminEndpoint := fmt.Sprintf("%s/v1/bc/%s/admin", baseURL, chainPath)
+	rpcEndpoint := route.Chain(baseURL, chainPath) + "/rpc"
+	adminEndpoint := route.Chain(baseURL, chainPath) + "/admin"
 
 	ux.Logger.PrintToUser("Importing blocks to %s...", chainDisplay)
 	ux.Logger.PrintToUser("  RLP file: %s", absFilePath)

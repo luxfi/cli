@@ -124,7 +124,7 @@ type Profile struct {
 	LogDir            string // absolute (always <dataDir>/logs)
 	GenesisFile       string // absolute, may be empty (use luxd embedded)
 	RPCUrl            string // remote (production) RPC if applicable
-	LocalRPCUrl       string // http://127.0.0.1:<httpPort>/v1/bc/C/rpc
+	LocalRPCUrl       string // http://127.0.0.1:<httpPort>/v1/chain/C/rpc
 	SnapshotDir       string // absolute
 	SnapshotName      string // expanded
 	ServiceLabel      string // expanded, e.g. ai.lux.zoo.devnet

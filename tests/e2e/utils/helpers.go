@@ -26,6 +26,7 @@ import (
 	"github.com/luxfi/cli/pkg/key"
 	keychainpkg "github.com/luxfi/cli/pkg/keychain"
 	"github.com/luxfi/cli/pkg/models"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/ids"
@@ -40,11 +41,7 @@ import (
 	"github.com/luxfi/utxo/secp256k1fx"
 )
 
-const (
-	expectedRPCComponentsLen = 7
-	blockchainIDPos          = 5
-	evmName                  = "evm"
-)
+const evmName = "evm"
 
 var defaultLocalNetworkNodeIDs = []string{
 	"NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg", "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ",
@@ -350,17 +347,11 @@ func ParseRPCsFromOutput(output string) ([]string, error) {
 		}
 		endIndex := strings.Index(line, "rpc")
 		rpc := line[startIndex : endIndex+3]
-		rpcComponents := strings.Split(rpc, "/")
-		if len(rpcComponents) != expectedRPCComponentsLen {
-			return nil, fmt.Errorf("unexpected number of components in url %q: expected %d got %d",
-				rpc,
-				expectedRPCComponentsLen,
-				len(rpcComponents),
-			)
-		}
-		blockchainID := rpcComponents[blockchainIDPos]
-		_, ok := blockchainIDs[blockchainID]
+		blockchainID, ok := route.Alias(rpc)
 		if !ok {
+			return nil, fmt.Errorf("no chain in url %q", rpc)
+		}
+		if _, seen := blockchainIDs[blockchainID]; !seen {
 			blockchainIDs[blockchainID] = struct{}{}
 			rpcs = append(rpcs, rpc)
 		}
@@ -517,13 +508,8 @@ func ParsePublicDeployOutput(output string, parseType string) (string, error) {
 		}
 		if strings.Contains(line, "RPC URL") && blockchainID == "" {
 			// Extract blockchain ID from RPC URL if not found in separate line
-			rpcURL := strings.TrimSpace(words[2])
-			parts := strings.Split(rpcURL, "/")
-			for i, part := range parts {
-				if part == "bc" && i+1 < len(parts) {
-					blockchainID = parts[i+1]
-					break
-				}
+			if alias, ok := route.Alias(strings.TrimSpace(words[2])); ok {
+				blockchainID = alias
 			}
 		}
 	}

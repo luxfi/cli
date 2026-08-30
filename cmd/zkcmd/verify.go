@@ -6,6 +6,7 @@ package zkcmd
 import (
 	"fmt"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +44,7 @@ Connects to the Z-Chain RPC endpoint to call the verifier contract.`,
 		},
 	}
 
-	cmd.Flags().String("rpc", "http://localhost:9630/v1/bc/Z/rpc", "Z-Chain RPC endpoint")
+	cmd.Flags().String("rpc", route.Chain("http://localhost:9630", "Z")+"/rpc", "Z-Chain RPC endpoint")
 	cmd.Flags().String("proof", "", "Proof file path (required)")
 	cmd.Flags().String("vk", "", "Verification key file path (required)")
 	cmd.Flags().String("inputs", "", "Public inputs file path (required)")
@@ -71,7 +72,7 @@ Connects to the Z-Chain RPC endpoint to call the verifier contract.`,
 		},
 	}
 
-	cmd.Flags().String("rpc", "http://localhost:9630/v1/bc/Z/rpc", "Z-Chain RPC endpoint")
+	cmd.Flags().String("rpc", route.Chain("http://localhost:9630", "Z")+"/rpc", "Z-Chain RPC endpoint")
 	cmd.Flags().String("proof", "", "Proof file path (required)")
 	cmd.Flags().String("vk", "", "Verification key file path (required)")
 	cmd.Flags().String("inputs", "", "Public inputs file path (required)")

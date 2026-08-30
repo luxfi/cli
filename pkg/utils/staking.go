@@ -12,9 +12,9 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
@@ -26,29 +26,17 @@ import (
 	luxtls "github.com/luxfi/tls"
 )
 
-// SplitRPCURI parses an RPC URL like "http://127.0.0.1:9650/v1/bc/C/rpc"
-// into network endpoint ("http://127.0.0.1:9650") and blockchain ID ("C")
+// SplitRPCURI parses a chain's RPC URL, such as the C-Chain's at
+// http://127.0.0.1:9650/v1/chain/C/rpc, into the node endpoint
+// ("http://127.0.0.1:9650") and the chain alias ("C").
 func SplitRPCURI(rpcURL string) (string, string, error) {
 	u, err := url.Parse(rpcURL)
 	if err != nil {
 		return "", "", fmt.Errorf("invalid RPC URL: %w", err)
 	}
 
-	// Extract the path components
-	// Expected format: /v1/bc/<chainID>/rpc
-	path := strings.TrimPrefix(u.Path, "/")
-	parts := strings.Split(path, "/")
-
-	// Find the blockchain ID after "bc/"
-	var blockchainID string
-	for i, part := range parts {
-		if part == "bc" && i+1 < len(parts) {
-			blockchainID = parts[i+1]
-			break
-		}
-	}
-
-	if blockchainID == "" {
+	blockchainID, ok := route.Alias(u.Path)
+	if !ok {
 		return "", "", fmt.Errorf("could not extract blockchain ID from URL: %s", rpcURL)
 	}
 
@@ -210,13 +198,13 @@ func ToMLDSAPublicKey(keyBytes []byte) ([]byte, error) {
 
 // QuantumKeys holds all quantum-safe keys for a validator
 type QuantumKeys struct {
-	BLSSecretKey      []byte
-	BLSPublicKey      []byte
-	BLSPoP            []byte
+	BLSSecretKey     []byte
+	BLSPublicKey     []byte
+	BLSPoP           []byte
 	RingSigSecretKey []byte
 	RingSigPublicKey []byte
-	MLDSASecretKey    []byte
-	MLDSAPublicKey    []byte
+	MLDSASecretKey   []byte
+	MLDSAPublicKey   []byte
 }
 
 // GenerateAllQuantumKeys generates BLS, Corona, and ML-DSA keys for a validator

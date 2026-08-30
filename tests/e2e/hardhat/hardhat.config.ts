@@ -18,7 +18,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
     chain: {
-      //"http://{ip}:{port}/v1/bc/{chainID}/rpc
+      //"http://{ip}:{port}/v1/chain/{chainID}/rpc
       url: rpcUrl,
       chainId: parseInt(chainIdStr, 10),
       // First account: derive from LUX_MNEMONIC index 0 (treasury 0x9011E888251AB053B7bD1cdB598Db4f9DEd94714)

@@ -13,6 +13,7 @@ import (
 
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/netrunner/client"
 	"github.com/luxfi/netrunner/server"
@@ -450,13 +451,13 @@ func PrintEndpoints(app *application.Lux, printFn func(string, ...interface{}), 
 	if err != nil {
 		// Fall back to default
 		printFn("Blockchain: %s", blockchainName)
-		printFn("RPC Endpoint: http://localhost:9650/v1/bc/%s/rpc", blockchainName)
+		printFn("RPC Endpoint: %s", route.Chain("http://localhost:9650", blockchainName)+"/rpc")
 		return nil
 	}
 
 	printFn("Blockchain: %s", blockchainName)
 	for i, uri := range uris {
-		printFn("Node %d RPC: %s/v1/bc/%s/rpc", i+1, uri, blockchainName)
+		printFn("Node %d RPC: %s", i+1, route.Chain(uri, blockchainName)+"/rpc")
 	}
 	return nil
 }

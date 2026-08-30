@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 
+	"github.com/luxfi/cli/pkg/route"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/olekukonko/tablewriter"
@@ -175,7 +176,12 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	for _, nodeName := range clusterInfo.NodeNames {
 		nodeInfo := nodeInfos[nodeName]
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			_ = table.Append([]string{nodeInfo.Name, chainInfo.GetChainName(), fmt.Sprintf("%s/v1/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/v1/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.GetChainName())})
+			_ = table.Append([]string{
+				nodeInfo.Name,
+				chainInfo.GetChainName(),
+				route.Chain(nodeInfo.GetUri(), blockchainID) + "/rpc",
+				route.Chain(nodeInfo.GetUri(), chainInfo.GetChainName()) + "/rpc",
+			})
 		}
 	}
 	_ = table.Render()
@@ -198,78 +204,74 @@ func ConvertToStringWithThousandSeparator(input uint64) string {
 // NativeChainInfo holds info for pretty-printing a native chain
 type NativeChainInfo struct {
 	Letter string // P, C, X, Q, A, B, T, Z, G, K, D
-	Name   string // Platform, Contract, Exchange, etc.
-	Type   string // RPC endpoint type
-	Path   string // URL path suffix
+	Name   string // Platform, EVM, Exchange, etc.
+	Type   string // RPC or WS
+	Under  string // what the chain answers under: nothing at its root, "/rpc", "/ws"
 }
 
-// GetNativeChains returns all native chain definitions for RPC display
+// Address is where this chain answers on the node at uri.
+func (c NativeChainInfo) Address(uri string) string {
+	return route.Chain(uri, c.Letter) + c.Under
+}
+
+// GetNativeChains returns all native chain definitions for RPC display. P and
+// X answer at the chain's root; the EVM chains answer under /rpc.
 func GetNativeChains() []NativeChainInfo {
 	return []NativeChainInfo{
-		{Letter: "P", Name: "Platform", Type: "RPC", Path: "/v1/bc/P"},
-		{Letter: "C", Name: "Contract (EVM)", Type: "RPC", Path: "/v1/bc/C/rpc"},
-		{Letter: "C", Name: "Contract (EVM)", Type: "WS", Path: "/v1/bc/C/ws"},
-		{Letter: "X", Name: "Exchange (DAG)", Type: "RPC", Path: "/v1/bc/X"},
-		{Letter: "Q", Name: "Quantum", Type: "RPC", Path: "/v1/bc/Q/rpc"},
-		{Letter: "A", Name: "AI", Type: "RPC", Path: "/v1/bc/A/rpc"},
-		{Letter: "B", Name: "Bridge", Type: "RPC", Path: "/v1/bc/B/rpc"},
-		{Letter: "T", Name: "Threshold", Type: "RPC", Path: "/v1/bc/T/rpc"},
-		{Letter: "Z", Name: "Zero-knowledge", Type: "RPC", Path: "/v1/bc/Z/rpc"},
-		{Letter: "G", Name: "Graph", Type: "RPC", Path: "/v1/bc/G/rpc"},
-		{Letter: "K", Name: "KMS", Type: "RPC", Path: "/v1/bc/K/rpc"},
-		{Letter: "D", Name: "DEX", Type: "RPC", Path: "/v1/bc/D/rpc"},
+		{Letter: "P", Name: "Platform", Type: "RPC"},
+		{Letter: "C", Name: "EVM", Type: "RPC", Under: "/rpc"},
+		{Letter: "C", Name: "EVM", Type: "WS", Under: "/ws"},
+		{Letter: "X", Name: "Exchange", Type: "RPC"},
+		{Letter: "Q", Name: "Quantum", Type: "RPC", Under: "/rpc"},
+		{Letter: "A", Name: "AI", Type: "RPC", Under: "/rpc"},
+		{Letter: "B", Name: "Bridge", Type: "RPC", Under: "/rpc"},
+		{Letter: "T", Name: "Threshold", Type: "RPC", Under: "/rpc"},
+		{Letter: "Z", Name: "ZK", Type: "RPC", Under: "/rpc"},
+		{Letter: "G", Name: "Graph", Type: "RPC", Under: "/rpc"},
+		{Letter: "K", Name: "KMS", Type: "RPC", Under: "/rpc"},
+		{Letter: "D", Name: "DEX", Type: "RPC", Under: "/rpc"},
 	}
 }
 
-// PrintNativeChainEndpoints prints all native chain RPC endpoints in a formatted table
-func PrintNativeChainEndpoints(baseURL string, portBase int, includeUtility bool) {
-	Logger.PrintToUser("\n╔══════════════════════════════════════════════════════════════════════╗")
-	Logger.PrintToUser("║                        LUX CHAIN ENDPOINTS                           ║")
-	Logger.PrintToUser("╠══════════════════════════════════════════════════════════════════════╣")
-	Logger.PrintToUser("║ Chain   │ Name              │ Type │ Endpoint                        ║")
-	Logger.PrintToUser("╠═════════╪═══════════════════╪══════╪═════════════════════════════════╣")
-
-	chains := GetNativeChains()
-	for _, c := range chains {
-		var url string
-		if baseURL != "" {
-			url = baseURL + c.Path
-		} else {
-			protocol := "http"
-			if c.Type == "WS" {
-				protocol = "ws"
-			}
-			url = fmt.Sprintf("%s://localhost:%d%s", protocol, portBase, c.Path)
-		}
-		Logger.PrintToUser("║ %-7s │ %-17s │ %-4s │ %-31s ║", c.Letter+"-Chain", c.Name, c.Type, url)
-	}
-
-	if includeUtility {
-		Logger.PrintToUser("╠═════════╪═══════════════════╪══════╪═════════════════════════════════╣")
-		Logger.PrintToUser("║ UTILITY │ Health            │ HTTP │ http://localhost:%d/v1/health  ║", portBase)
-		Logger.PrintToUser("║ UTILITY │ Info              │ HTTP │ http://localhost:%d/v1/info    ║", portBase)
-		Logger.PrintToUser("║ UTILITY │ Admin             │ HTTP │ http://localhost:%d/v1/admin   ║", portBase)
-	}
-	Logger.PrintToUser("╚══════════════════════════════════════════════════════════════════════╝")
-}
-
-// PrintCompactChainEndpoints prints chain endpoints in a compact format
+// PrintCompactChainEndpoints prints chain endpoints in a compact format.
+//
+// Labels and addresses are measured rather than hand-padded, so the box stays
+// square whatever the route segment is. It used to be padded by hand against a
+// segment two characters long, and would have come out ragged the moment that
+// changed.
 func PrintCompactChainEndpoints(portBase int) {
+	chains := GetNativeChains()
+
+	// A letter with more than one row needs its type to tell them apart.
+	rows := map[string]int{}
+	for _, c := range chains {
+		rows[c.Letter]++
+	}
+
+	labels := make([]string, len(chains))
+	addresses := make([]string, len(chains))
+	labelWidth, addressWidth := 0, 0
+	for i, c := range chains {
+		label := fmt.Sprintf("%s-Chain (%s)", c.Letter, c.Name)
+		if rows[c.Letter] > 1 {
+			label += " " + c.Type
+		}
+		scheme := "http"
+		if c.Type == "WS" {
+			scheme = "ws"
+		}
+		labels[i] = label + ":"
+		addresses[i] = c.Address(fmt.Sprintf("%s://localhost:%d", scheme, portBase))
+		labelWidth = max(labelWidth, len(labels[i]))
+		addressWidth = max(addressWidth, len(addresses[i]))
+	}
+
 	Logger.PrintToUser("\n📡 Native Chain RPC Endpoints:")
-	Logger.PrintToUser("  ┌─────────────────────────────────────────────────────────────────┐")
-	Logger.PrintToUser("  │ P-Chain (Platform):     http://localhost:%d/v1/bc/P            │", portBase)
-	Logger.PrintToUser("  │ C-Chain (EVM) RPC:      http://localhost:%d/v1/bc/C/rpc        │", portBase)
-	Logger.PrintToUser("  │ C-Chain (EVM) WS:       ws://localhost:%d/v1/bc/C/ws           │", portBase)
-	Logger.PrintToUser("  │ X-Chain (Exchange):     http://localhost:%d/v1/bc/X            │", portBase)
-	Logger.PrintToUser("  │ Q-Chain (Quantum):      http://localhost:%d/v1/bc/Q/rpc        │", portBase)
-	Logger.PrintToUser("  │ A-Chain (AI):           http://localhost:%d/v1/bc/A/rpc        │", portBase)
-	Logger.PrintToUser("  │ B-Chain (Bridge):       http://localhost:%d/v1/bc/B/rpc        │", portBase)
-	Logger.PrintToUser("  │ T-Chain (Threshold):    http://localhost:%d/v1/bc/T/rpc        │", portBase)
-	Logger.PrintToUser("  │ Z-Chain (ZK):           http://localhost:%d/v1/bc/Z/rpc        │", portBase)
-	Logger.PrintToUser("  │ G-Chain (Graph):        http://localhost:%d/v1/bc/G/rpc        │", portBase)
-	Logger.PrintToUser("  │ K-Chain (KMS):          http://localhost:%d/v1/bc/K/rpc        │", portBase)
-	Logger.PrintToUser("  │ D-Chain (DEX):          http://localhost:%d/v1/bc/D/rpc        │", portBase)
-	Logger.PrintToUser("  └─────────────────────────────────────────────────────────────────┘")
+	Logger.PrintToUser("  ┌%s┐", strings.Repeat("─", labelWidth+addressWidth+3))
+	for i := range chains {
+		Logger.PrintToUser("  │ %-*s %-*s │", labelWidth, labels[i], addressWidth, addresses[i])
+	}
+	Logger.PrintToUser("  └%s┘", strings.Repeat("─", labelWidth+addressWidth+3))
 	Logger.PrintToUser("\n🔧 Utility Endpoints:")
 	Logger.PrintToUser("  Health:  http://localhost:%d/v1/health", portBase)
 	Logger.PrintToUser("  Info:    http://localhost:%d/v1/info", portBase)

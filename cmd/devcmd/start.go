@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/spf13/cobra"
@@ -321,7 +322,7 @@ func startDevNode(*cobra.Command, []string) error {
 				continue
 			}
 			// Additional check: verify C-Chain is responding
-			cchainURL := fmt.Sprintf("http://localhost:%d/v1/bc/C/rpc", port)
+			cchainURL := route.Chain(fmt.Sprintf("http://localhost:%d", port), "C") + "/rpc"
 			cResp, cErr := http.Post(cchainURL, "application/json",
 				strings.NewReader(`{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}`))
 			if cErr != nil {
@@ -340,13 +341,15 @@ healthy:
 	ux.Logger.PrintToUser("Dev node ready!")
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Endpoints:")
-	ux.Logger.PrintToUser("  C-Chain RPC:  http://localhost:%d/v1/bc/C/rpc", port)
-	ux.Logger.PrintToUser("  C-Chain WS:   ws://localhost:%d/v1/bc/C/ws", port)
-	ux.Logger.PrintToUser("  P-Chain:      http://localhost:%d/v1/bc/P", port)
-	ux.Logger.PrintToUser("  X-Chain:      http://localhost:%d/v1/bc/X", port)
-	ux.Logger.PrintToUser("  T-Chain:      http://localhost:%d/v1/bc/T", port)
+	uri := fmt.Sprintf("http://localhost:%d", port)
+	ws := fmt.Sprintf("ws://localhost:%d", port)
+	ux.Logger.PrintToUser("  C-Chain RPC:  %s", route.Chain(uri, "C")+"/rpc")
+	ux.Logger.PrintToUser("  C-Chain WS:   %s", route.Chain(ws, "C")+"/ws")
+	ux.Logger.PrintToUser("  P-Chain:      %s", route.Chain(uri, "P"))
+	ux.Logger.PrintToUser("  X-Chain:      %s", route.Chain(uri, "X"))
+	ux.Logger.PrintToUser("  T-Chain:      %s", route.Chain(uri, "T"))
 	if dchain {
-		ux.Logger.PrintToUser("  D-Chain:      http://localhost:%d/v1/bc/D", port)
+		ux.Logger.PrintToUser("  D-Chain:      %s", route.Chain(uri, "D"))
 	}
 	ux.Logger.PrintToUser("  Health:       http://localhost:%d/v1/health", port)
 	ux.Logger.PrintToUser("")

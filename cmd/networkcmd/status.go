@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/luxfi/cli/pkg/binutils"
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/netrunner/server"
 	"github.com/spf13/cobra"
@@ -261,7 +262,7 @@ func getNetworkStatusOutput(networkType string) (string, error) {
 		fmt.Fprintf(&buf, "%s Custom VM information %s\n", nodeSeparator, nodeSeparator)
 		for _, nodeInfo := range status.ClusterInfo.NodeInfos {
 			for blockchainID := range status.ClusterInfo.CustomChains {
-				fmt.Fprintf(&buf, "Endpoint at %s for blockchain %q: %s/v1/bc/%s/rpc\n", nodeInfo.Name, blockchainID, nodeInfo.GetUri(), blockchainID)
+				fmt.Fprintf(&buf, "Endpoint at %s for blockchain %q: %s\n", nodeInfo.Name, blockchainID, route.Chain(nodeInfo.GetUri(), blockchainID)+"/rpc")
 			}
 		}
 	}
@@ -320,7 +321,7 @@ func getNodeVersion(uri string) (string, map[string]string, error) {
 
 func getCChainHeight(uri string) (string, error) {
 	// uri is http://ip:port
-	url := fmt.Sprintf("%s/v1/bc/C/rpc", uri)
+	url := route.Chain(uri, "C") + "/rpc"
 	reqBody := []byte(`{"jsonrpc":"2.0", "id":1, "method":"eth_blockNumber", "params":[]}`)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))

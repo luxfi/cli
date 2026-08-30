@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/luxfi/cli/pkg/route"
 	"github.com/luxfi/cli/tests/e2e/utils"
 	"github.com/luxfi/constants"
 	"github.com/onsi/gomega"
@@ -228,7 +229,7 @@ func InitValidatorManager(
 		"--endpoint",
 		endpoint,
 		"--rpc",
-		fmt.Sprintf("%s/v1/bc/%s/rpc", endpoint, blockchainID),
+		route.Chain(endpoint, blockchainID)+"/rpc",
 		"--genesis-key",
 		"--"+constants.SkipUpdateFlag,
 	)
