@@ -240,7 +240,7 @@ curl -X POST --data '{
     "jsonrpc":"2.0",
     "id":1,
     "method":"health.health"
-}' -H 'content-type:application/json' http://127.0.0.1:9630/v1/health
+}' -H 'content-type:application/json' http://127.0.0.1:9630/v1/health/ops/health
 
 # Using lux CLI
 lux network node health --node-index=0
@@ -414,7 +414,7 @@ lux network start --log-level=debug
 lux network status
 
 # Verify endpoints
-curl http://127.0.0.1:9630/v1/health
+curl http://127.0.0.1:9630/v1/health/ops/health
 
 # Restart network
 lux network stop
