@@ -13,7 +13,7 @@ env:
 
 jobs:
   lint:
-    runs-on: lux-build-amd64
+    runs-on: lux-build-linux-amd64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
