@@ -61,7 +61,7 @@ jobs:
   notify-universe:
     needs: build-amd64
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: lux-build-amd64
+    runs-on: lux-build-linux-amd64
     steps:
       - uses: peter-evans/repository-dispatch@v3
         with:
