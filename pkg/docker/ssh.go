@@ -31,7 +31,6 @@ func ComposeSSHSetupNode(
 	luxdVersion string,
 	luxdBootstrapIDs []string,
 	luxdBootstrapIPs []string,
-	partialSync bool,
 	luxdGenesisFilePath string,
 	luxdUpgradeFilePath string,
 	withMonitoring bool,
@@ -58,7 +57,6 @@ func ComposeSSHSetupNode(
 		LuxdConfigOptions{
 			BootstrapIDs:      luxdBootstrapIDs,
 			BootstrapIPs:      luxdBootstrapIPs,
-			PartialSync:       partialSync,
 			GenesisPath:       luxdGenesisFilePath,
 			UpgradePath:       luxdUpgradeFilePath,
 			AllowPublicAccess: publicAccessToHTTPPort,

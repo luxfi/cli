@@ -19,7 +19,6 @@ type LuxdConfigOptions struct {
 	BootstrapNodes    []string // Endpoint-only bootstrap (NodeID discovered from TLS cert)
 	BootstrapIPs      []string // Deprecated: use BootstrapNodes
 	BootstrapIDs      []string // Deprecated: use BootstrapNodes
-	PartialSync       bool
 	GenesisPath       string
 	UpgradePath       string
 	AllowPublicAccess bool
@@ -34,7 +33,6 @@ func prepareLuxgoConfig(
 	if luxdConfig.AllowPublicAccess || utils.IsE2E() {
 		luxdConf.HTTPHost = "0.0.0.0"
 	}
-	luxdConf.PartialSync = luxdConfig.PartialSync
 	if len(luxdConfig.BootstrapNodes) > 0 {
 		luxdConf.BootstrapNodes = strings.Join(luxdConfig.BootstrapNodes, ",")
 	} else {
