@@ -18,8 +18,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/luxfi/config"
-
 	"github.com/luxfi/cli/pkg/application"
 	"github.com/luxfi/cli/pkg/binutils"
 	"github.com/luxfi/cli/pkg/docker"
@@ -627,17 +625,6 @@ func RunSSHRenderLuxNodeConfig(
 		bootstrapIPs, _ := utils.StringValue(remoteLuxdConf, "bootstrap-ips")
 		luxdConf.BootstrapIDs = bootstrapIDs
 		luxdConf.BootstrapIPs = bootstrapIPs
-		partialSyncI, ok := remoteLuxdConf[config.PartialSyncPrimaryNetworkKey]
-		if !ok {
-			fmt.Println("Key not found in remoteLuxdConf:", config.PartialSyncPrimaryNetworkKey)
-		} else {
-			partialSync, _ := partialSyncI.(string)
-			if partialSync == "true" {
-				luxdConf.PartialSync = true
-			} else {
-				luxdConf.PartialSync = false
-			}
-		}
 	}
 	// ready to render node config
 	nodeConf, err := remoteconfig.RenderLuxNodeConfig(luxdConf)

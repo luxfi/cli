@@ -4,7 +4,6 @@
 	"index-enabled": {{.IndexEnabled}},
 	"proposervm-use-current-height-bool": {{.ProposerVMUseCurrentHeight}},
 	"network-id": "{{if .NetworkID}}{{.NetworkID}}{{else}}testnet{{end}}",
-	"partial-sync-primary-network": "{{ .PartialSync }}",
 {{- if .BootstrapNodes }}
 	"bootstrap-nodes": "{{ .BootstrapNodes }}",
 {{- else }}

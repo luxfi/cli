@@ -28,7 +28,6 @@ type LuxConfigInputs struct {
 	BootstrapNodes             string
 	BootstrapIDs               string
 	BootstrapIPs               string
-	PartialSync                bool
 	GenesisPath                string
 	UpgradePath                string
 	ProposerVMUseCurrentHeight bool
