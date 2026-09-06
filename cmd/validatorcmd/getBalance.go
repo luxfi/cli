@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/validator"
-	sdkutils "github.com/luxfi/utils"
+	sdkutils "github.com/luxfi/util"
 
 	"github.com/spf13/cobra"
 )

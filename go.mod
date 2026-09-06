@@ -228,6 +228,7 @@ require (
 	github.com/luxfi/timer v1.1.1 // indirect
 	github.com/luxfi/trace v1.2.1 // indirect
 	github.com/luxfi/upgrade v1.0.3 // indirect
+	github.com/luxfi/utils v1.3.1 // indirect
 	github.com/luxfi/validators v1.3.3 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
 	github.com/luxfi/zap v1.2.7 // indirect
@@ -365,7 +366,7 @@ require (
 	github.com/luxfi/threshold v1.12.6
 	github.com/luxfi/tls v1.1.1
 	github.com/luxfi/tui v0.1.0
-	github.com/luxfi/utils v1.3.1
+	github.com/luxfi/util v1.3.5
 	github.com/luxfi/utxo v0.5.10
 	github.com/luxfi/zapdb v1.10.6
 	github.com/mattn/go-isatty v0.0.22

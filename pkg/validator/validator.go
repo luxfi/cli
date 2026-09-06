@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/platformvm"
-	"github.com/luxfi/utils"
-	luxdjson "github.com/luxfi/utils/json"
+	"github.com/luxfi/util"
+	luxdjson "github.com/luxfi/util/json"
 
 	"github.com/luxfi/crypto"
 )

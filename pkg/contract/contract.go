@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/sdk/evm"
-	sdkUtils "github.com/luxfi/utils"
+	sdkUtils "github.com/luxfi/util"
 	luxWarp "github.com/luxfi/warp"
 )
 
