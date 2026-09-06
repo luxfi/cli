@@ -780,7 +780,7 @@ func getPortBaseForNetwork(netType string) int {
 // checkEndpointHealth checks if an HTTP endpoint is reachable
 func checkEndpointHealth(endpoint string) bool {
 	client := &http.Client{Timeout: 2 * time.Second}
-	resp, err := client.Get(endpoint + "/v1/health")
+	resp, err := client.Get(route.Liveness(endpoint))
 	if err != nil {
 		return false
 	}

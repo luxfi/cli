@@ -470,7 +470,7 @@ func (s *StatusService) probeNode(ctx context.Context, node Node) (*Node, error)
 	}
 
 	// 5. Check GPU acceleration (via health check or custom endpoint)
-	healthURL := fmt.Sprintf("%s/v1/health", node.HTTPURL)
+	healthURL := route.Health(node.HTTPURL)
 	healthReq, _ := http.NewRequestWithContext(ctx, "GET", healthURL, nil)
 	if healthResp, err := client.Do(healthReq); err == nil {
 		defer healthResp.Body.Close()

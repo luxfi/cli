@@ -46,8 +46,9 @@ func (p *Profile) Probe(ctx context.Context) (matches bool, foundID uint32, err 
 	return r.Result.NetworkID == p.NetworkID, r.Result.NetworkID, nil
 }
 
-// WaitHealthy polls /v1/health and /v1/info until the C-chain
-// responds with the expected NetworkID, or timeout elapses.
+// WaitHealthy polls the node's identity and then its C-chain, returning once
+// the C-chain answers eth_chainId on a node claiming the expected NetworkID,
+// or the timeout elapses.
 func (p *Profile) WaitHealthy(ctx context.Context, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	tick := time.NewTicker(1 * time.Second)
