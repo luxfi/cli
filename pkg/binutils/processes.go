@@ -352,19 +352,20 @@ func KillgRPCServerProcess(app *application.Lux) error {
 
 // KillgRPCServerProcessForNetwork kills a network-specific gRPC server.
 func KillgRPCServerProcessForNetwork(app *application.Lux, networkType string) error {
-	cli, err := NewGRPCClient(WithAvoidRPCVersionCheck(true), WithNetworkType(networkType))
-	if err != nil {
-		return err
-	}
-	defer func() { _ = cli.Close() }()
-	ctx := GetAsyncContext()
-	_, err = cli.Stop(ctx)
-	if err != nil {
-		if server.IsServerError(err, server.ErrNotBootstrapped) {
-			app.Log.Debug("No local network running")
-		} else {
-			app.Log.Debug("failed stopping local network", zap.Error(err))
+	// Ask the server to shut down cleanly. This is best effort: a server that
+	// is wedged or already gone cannot answer, and that must not skip the
+	// signal below, which is the only way left to reap it and its nodes.
+	if cli, err := NewGRPCClient(WithAvoidRPCVersionCheck(true), WithNetworkType(networkType)); err != nil {
+		app.Log.Debug("could not reach local network server", zap.Error(err))
+	} else {
+		if _, err := cli.Stop(GetAsyncContext()); err != nil {
+			if server.IsServerError(err, server.ErrNotBootstrapped) {
+				app.Log.Debug("No local network running")
+			} else {
+				app.Log.Debug("failed stopping local network", zap.Error(err))
+			}
 		}
+		_ = cli.Close()
 	}
 
 	pid, err := GetServerPIDForNetwork(app, networkType)
