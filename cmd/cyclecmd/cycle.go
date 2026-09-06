@@ -98,7 +98,6 @@ func cycle(ref string) error {
 		"--log-dir=" + prof.LogDir,
 		"--log-level=" + prof.LogLevel,
 		"--api-admin-enabled=true",
-		"--api-keystore-enabled=true",
 		"--index-enabled=true",
 		"--track-all-chains=true",
 	}

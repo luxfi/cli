@@ -273,7 +273,7 @@ func PrintCompactChainEndpoints(portBase int) {
 	}
 	Logger.PrintToUser("  └%s┘", strings.Repeat("─", labelWidth+addressWidth+3))
 	Logger.PrintToUser("\n🔧 Utility Endpoints:")
-	Logger.PrintToUser("  Health:  http://localhost:%d/v1/health", portBase)
+	Logger.PrintToUser("  Health:  %s", route.Health(fmt.Sprintf("http://localhost:%d", portBase)))
 	Logger.PrintToUser("  Info:    http://localhost:%d/v1/info", portBase)
 	Logger.PrintToUser("  Admin:   http://localhost:%d/v1/admin", portBase)
 }

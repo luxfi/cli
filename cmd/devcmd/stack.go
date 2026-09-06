@@ -774,7 +774,7 @@ func writeChainsManifest(baseDir string, m *ChainsManifest) error {
 // --- health check ---
 
 func waitForHealth(httpPort int) error {
-	healthURL := fmt.Sprintf("http://127.0.0.1:%d/v1/health", httpPort)
+	healthURL := route.Readiness(fmt.Sprintf("http://127.0.0.1:%d", httpPort))
 	ctx, cancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer cancel()
 
@@ -883,7 +883,7 @@ func printStackSummary(cfg *StackConfig) {
 			port := PortForApp(app.PortBase, i)
 			name := chainInstanceName(app.Name, i)
 			if app.Name == "luxd" {
-				ux.Logger.PrintToUser("  %s  http://127.0.0.1:%d/v1/health", name, port)
+				ux.Logger.PrintToUser("  %s  %s", name, route.Health(fmt.Sprintf("http://127.0.0.1:%d", port)))
 			} else {
 				ux.Logger.PrintToUser("  %s  http://127.0.0.1:%d", name, port)
 			}

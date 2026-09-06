@@ -129,7 +129,7 @@ func runStatus(_ *cobra.Command, _ []string) error {
 			if ingress.IP != "" {
 				ux.Logger.PrintToUser("\nLoadBalancer: %s", ingress.IP)
 				ux.Logger.PrintToUser("  RPC:     %s", route.Chain(fmt.Sprintf("http://%s:9630", ingress.IP), "C")+"/rpc")
-				ux.Logger.PrintToUser("  Health:  http://%s:9630/v1/health", ingress.IP)
+				ux.Logger.PrintToUser("  Health:  %s", route.Health(fmt.Sprintf("http://%s:9630", ingress.IP)))
 			}
 		}
 	}

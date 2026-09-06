@@ -27,7 +27,6 @@ var (
 const (
 	statefulSetName = "luxd"
 	containerName   = "luxd"
-	healthPath      = "/v1/health"
 	defaultHTTPPort = int32(9630)
 )
 

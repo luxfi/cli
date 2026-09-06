@@ -782,7 +782,6 @@ func StartDevMode() error {
 		fmt.Sprintf("--log-dir=%s", logDir),
 		"--log-level=info",
 		"--api-admin-enabled=true",
-		"--api-keystore-enabled=true",
 		"--index-enabled=true",
 		"--db-type=badgerdb",
 	}
@@ -800,7 +799,7 @@ func StartDevMode() error {
 	ux.Logger.PrintToUser("Waiting for node to become healthy...")
 
 	// Wait for health endpoint to respond with explicit timeout
-	healthURL := fmt.Sprintf("http://localhost:%d/v1/health", effectivePortBase)
+	healthURL := route.Readiness(fmt.Sprintf("http://localhost:%d", effectivePortBase))
 	healthTimeout := 90 * time.Second // Dev mode can take longer to initialize all chains
 	healthCtx, healthCancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer healthCancel()

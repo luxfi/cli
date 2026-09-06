@@ -23,7 +23,6 @@ import (
 
 var (
 	port        int
-	automine    string
 	nodePath    string
 	logLevel    string
 	cleanState  bool
@@ -35,6 +34,21 @@ var (
 )
 
 const nodeBinaryName = "luxd"
+
+// devDataDir is where the dev node keeps its state — the caller's --data-dir,
+// or the anvil-compat default. start and stop resolve it the same way, so stop
+// looks where start wrote.
+func devDataDir() string {
+	if dataDir != "" {
+		return dataDir
+	}
+	return filepath.Join(os.Getenv("HOME"), constants.BaseDirName, constants.DevDir)
+}
+
+// devPIDFile is the node's address for `lux dev stop`.
+func devPIDFile() string {
+	return filepath.Join(devDataDir(), "luxd.pid")
+}
 
 // dchainBuildTag is the build tag that selects a luxd built WITH the D-Chain
 // (dexvm) linked in. The public default luxd is built without it; passing
@@ -99,8 +113,6 @@ DEX / D-Chain:
 Examples:
   lux dev start                    # Start on default port 8545
   lux dev start --port 9650        # Start on custom port
-  lux dev start --automine 1s      # Mine blocks every 1 second
-  lux dev start --automine 500ms   # Mine blocks every 500ms
   lux dev start --build-tags dchain # Start the D-Chain-enabled (dexvm) node`,
 		RunE:         startDevNode,
 		Args:         cobra.ExactArgs(0),
@@ -108,7 +120,6 @@ Examples:
 	}
 
 	cmd.Flags().IntVar(&port, "port", 8545, "HTTP port for RPC (Anvil-compatible default)")
-	cmd.Flags().StringVar(&automine, "automine", "", "auto-mine interval (e.g., '1s', '500ms'); empty = mine as blocks arrive")
 	cmd.Flags().StringVar(&nodePath, "node-path", "", "path to luxd binary (auto-detected if not set)")
 	cmd.Flags().StringVar(&logLevel, "log-level", "info", "log level (debug, info, warn, error)")
 	cmd.Flags().BoolVar(&cleanState, "clean", false, "clean state before starting (fresh genesis)")
@@ -203,9 +214,7 @@ func startDevNode(*cobra.Command, []string) error {
 
 	// Data directories - use constants for consistent paths
 	baseDir := filepath.Join(os.Getenv("HOME"), constants.BaseDirName)
-	if dataDir == "" {
-		dataDir = filepath.Join(baseDir, constants.DevDir)
-	}
+	dataDir = devDataDir()
 	dbDir := filepath.Join(dataDir, "db")
 	logDir := filepath.Join(dataDir, "logs")
 
@@ -238,7 +247,9 @@ func startDevNode(*cobra.Command, []string) error {
 
 	// Build luxd command. luxd has no `--dev` shortcut, so we spell out the
 	// K=1, no-bootstrap, no-sybil-protection profile explicitly. --automine
-	// supplies single-validator-quorum consensus and instant finality.
+	// supplies single-validator-quorum consensus and instant finality. Block
+	// cadence is not set here: it is the C-Chain's own enable-automining, read
+	// by the block builder from the chain config dir.
 	// Chain config dir - luxd's --chain-config-dir points here.
 	// Uses ~/.lux/chains/ for all chain configs (genesis, config.json, etc.)
 	chainConfigDir := filepath.Join(baseDir, constants.ChainsDir)
@@ -257,7 +268,6 @@ func startDevNode(*cobra.Command, []string) error {
 		fmt.Sprintf("--log-level=%s", logLevel),
 		fmt.Sprintf("--chain-config-dir=%s", chainConfigDir),
 		"--api-admin-enabled=true",
-		"--api-keystore-enabled=true",
 		"--index-enabled=true",
 		"--track-all-chains=true",
 	}
@@ -269,20 +279,6 @@ func startDevNode(*cobra.Command, []string) error {
 		ux.Logger.PrintToUser("Plugin dir: %s", effPluginDir)
 	}
 
-	// Add automine configuration if specified
-	if automine != "" {
-		// Parse to validate the duration format
-		duration, err := time.ParseDuration(automine)
-		if err != nil {
-			return fmt.Errorf("invalid --automine value '%s': %w", automine, err)
-		}
-		// luxd expects milliseconds for automining interval
-		args = append(args, fmt.Sprintf("--automine-interval=%d", duration.Milliseconds()))
-		ux.Logger.PrintToUser("Automine: %s interval", automine)
-	} else {
-		ux.Logger.PrintToUser("Automine: instant (as blocks arrive)")
-	}
-
 	cmd := exec.Command(localNodePath, args...) //nolint:gosec // G204: Running our own node binary
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -292,7 +288,7 @@ func startDevNode(*cobra.Command, []string) error {
 	}
 
 	// Save PID file for later use by 'lux dev stop' and network detection
-	pidFile := filepath.Join(dataDir, "luxd.pid")
+	pidFile := devPIDFile()
 	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0o644); err != nil { //nolint:gosec // G306: PID file needs to be readable
 		ux.Logger.PrintToUser("Warning: failed to save PID file: %v", err)
 	}
@@ -300,7 +296,7 @@ func startDevNode(*cobra.Command, []string) error {
 	ux.Logger.PrintToUser("luxd started (PID: %d)", cmd.Process.Pid)
 
 	// Wait for health with explicit timeout (60 seconds for all chains to bootstrap)
-	healthURL := fmt.Sprintf("http://localhost:%d/v1/health", port)
+	nodeURL := fmt.Sprintf("http://localhost:%d", port)
 	healthTimeout := 60 * time.Second
 	healthCtx, healthCancel := context.WithTimeout(context.Background(), healthTimeout)
 	defer healthCancel()
@@ -313,7 +309,7 @@ func startDevNode(*cobra.Command, []string) error {
 		case <-healthCtx.Done():
 			return fmt.Errorf("timeout waiting for node to become healthy after %s: %w", healthTimeout, healthCtx.Err())
 		case <-ticker.C:
-			resp, err := http.Get(healthURL)
+			resp, err := http.Get(route.Readiness(nodeURL))
 			if err != nil {
 				continue // Network not ready yet
 			}
@@ -351,7 +347,7 @@ healthy:
 	if dchain {
 		ux.Logger.PrintToUser("  D-Chain:      %s", route.Chain(uri, "D"))
 	}
-	ux.Logger.PrintToUser("  Health:       http://localhost:%d/v1/health", port)
+	ux.Logger.PrintToUser("  Health:       %s", route.Health(nodeURL))
 	ux.Logger.PrintToUser("")
 	ux.Logger.PrintToUser("Features:")
 	ux.Logger.PrintToUser("  • K=1 consensus (instant finality)")
