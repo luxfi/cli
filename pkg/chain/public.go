@@ -7,10 +7,10 @@ package chain
 import (
 	"context"
 	"crypto/tls"
-	"net"
-	"net/http"
 	"errors"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -33,7 +33,6 @@ import (
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/utils"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -449,15 +448,6 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	}
 	ux.Logger.PrintToUser("loadWallet: using API endpoint %s", api)
 
-	// Create empty EVMKeychain if kc does not implement it
-	var evmKc c.EVMKeychain
-	if ekc, ok := d.kc.(c.EVMKeychain); ok {
-		evmKc = ekc
-	} else {
-		// Create a minimal EVMKeychain implementation
-		evmKc = &emptyEVMKeychain{}
-	}
-
 	// Build the set of P-Chain transactions to fetch (e.g., chain creation txs)
 	// This is needed so the wallet knows about chain owners when creating blockchain txs
 	pChainTxsToFetch := set.Set[ids.ID]{}
@@ -479,7 +469,6 @@ func (d *PublicDeployer) loadWallet(preloadTxs ...ids.ID) (primary.Wallet, error
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:              api,
 		LUXKeychain:      keychainwrapper.WrapCryptoKeychain(d.kc),
-		EVMKeychain:      evmKc,
 		PChainTxsToFetch: pChainTxsToFetch,
 	})
 	if err != nil {
@@ -536,7 +525,6 @@ func (d *PublicDeployer) createBlockchainTx(
 	}
 	return &tx, nil
 }
-
 
 func (d *PublicDeployer) createRemoveValidatorTX(
 	chainAuthKeys []ids.ShortID,

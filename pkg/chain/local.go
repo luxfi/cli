@@ -24,12 +24,9 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	walletkeychain "github.com/luxfi/keychain"
-	"github.com/luxfi/math/set"
 	"github.com/luxfi/netrunner/client"
 	anrnetwork "github.com/luxfi/netrunner/network"
 	"github.com/luxfi/netrunner/rpcpb"
@@ -41,7 +38,6 @@ import (
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/platformvm"
-	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/primary"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -100,18 +96,6 @@ func NewRecoverableDeploymentError(chainName string, cause error, suggestion str
 		Recoverable:    true,
 		Suggestion:     suggestion,
 	}
-}
-
-// emptyEVMKeychain is a minimal implementation of c.EVMKeychain for
-// cases where EVM-runtime account keys are not needed.
-type emptyEVMKeychain struct{}
-
-func (*emptyEVMKeychain) GetByEVM(_ common.Address) (walletkeychain.Signer, bool) {
-	return nil, false
-}
-
-func (*emptyEVMKeychain) EVMAddresses() set.Set[common.Address] {
-	return set.NewSet[common.Address](0)
 }
 
 // LocalDeployer handles local chain deployment.
@@ -268,18 +252,9 @@ func IssueTransformChainTx(
 ) (ids.ID, ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	// Create empty EVMKeychain if kc does not implement it
-	var evmKc c.EVMKeychain
-	if ekc, ok := kc.(c.EVMKeychain); ok {
-		evmKc = ekc
-	} else {
-		// Create a minimal EVMKeychain implementation
-		evmKc = &emptyEVMKeychain{}
-	}
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
-		EVMKeychain: evmKc,
 	})
 	if err != nil {
 		return ids.Empty, ids.Empty, err
@@ -337,20 +312,11 @@ func IssueAddPermissionlessValidatorTx(
 ) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	// Create empty EVMKeychain if kc does not implement it
-	var evmKc c.EVMKeychain
-	if ekc, ok := kc.(c.EVMKeychain); ok {
-		evmKc = ekc
-	} else {
-		// Create a minimal EVMKeychain implementation
-		evmKc = &emptyEVMKeychain{}
-	}
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
 	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
-		EVMKeychain: evmKc,
 	})
 	if err != nil {
 		return ids.Empty, err
@@ -1020,20 +986,11 @@ func GetLocallyDeployedChains() (map[string]struct{}, error) {
 func IssueRemoveChainValidatorTx(kc keychain.Keychain, chainID ids.ID, nodeID ids.NodeID) (ids.ID, error) {
 	ctx := context.Background()
 	api := constants.LocalAPIEndpoint
-	// Create empty EVMKeychain if kc does not implement it
-	var evmKc c.EVMKeychain
-	if ekc, ok := kc.(c.EVMKeychain); ok {
-		evmKc = ekc
-	} else {
-		// Create a minimal EVMKeychain implementation
-		evmKc = &emptyEVMKeychain{}
-	}
 	// Use P-Chain only wallet since our X-Chain uses exchangevm which doesn't
 	// support standard XVM API methods.
 	wallet, err := primary.MakePChainWallet(ctx, &primary.WalletConfig{
 		URI:         api,
 		LUXKeychain: keychainwrapper.WrapCryptoKeychain(kc),
-		EVMKeychain: evmKc,
 	})
 	if err != nil {
 		return ids.Empty, err
