@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/constants"
 	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/utils"
+	sdkutils "github.com/luxfi/util"
 )
 
 // NetworkOption represents a network type option.

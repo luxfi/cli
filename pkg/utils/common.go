@@ -32,7 +32,7 @@ import (
 	"github.com/luxfi/proto/p/txs"
 	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/platformvm"
-	"github.com/luxfi/utils"
+	"github.com/luxfi/util"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"golang.org/x/mod/semver"

@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/cli/pkg/ux"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/utils"
+	sdkutils "github.com/luxfi/util"
 )
 
 const (
