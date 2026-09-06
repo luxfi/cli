@@ -416,20 +416,13 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 	defer func() { _ = cli.Close() }()
 
-	// Build node config - auto-detect deployed chains for tracking
-	trackChains := ""
+	// Track every chain in P-chain state, so a chain deployed later comes up
+	// without restarting the nodes. luxd reads this as the track-all-chains
+	// bool; track-chains takes chain IDs and would pin the set at boot.
 	netIDs, trackErr := chain.GetLocallyDeployedNetIDs(app)
 	if trackErr == nil && len(netIDs) > 0 {
-		trackChains = strings.Join(netIDs, ",")
-		ux.Logger.PrintToUser("Auto-tracking %d deployed chain(s): %s", len(netIDs), trackChains)
-	}
-
-	// Use "all" to auto-track all chains including newly deployed ones
-	// This enables hot-loading of new chains without node restarts
-	trackChainsValue := "all"
-	if len(netIDs) > 0 {
-		// If specific chains are configured, show them but still track all
-		ux.Logger.PrintToUser("Found %d previously deployed chain(s)", len(netIDs))
+		ux.Logger.PrintToUser("Tracking all chains, including %d already deployed: %s",
+			len(netIDs), strings.Join(netIDs, ","))
 	}
 
 	// Use port base from config, default 9630 for mainnet, 9640 for testnet
@@ -459,7 +452,7 @@ func startPublicNetwork(cfg networkConfig) error {
 		"api-admin-enabled": true,
 		"enable-automining": true,
 		"index-enabled": true,
-		"track-chains": %q,
+		"track-all-chains": true,
 		"log-level": "error",
 		"log-display-level": "error",
 
@@ -487,7 +480,7 @@ func startPublicNetwork(cfg networkConfig) error {
 		"network-health-max-time-since-msg-sent": "5s",
 		"network-health-max-time-since-msg-received": "5s",
 		"network-outbound-connection-timeout": "500ms"
-	}`, cfg.networkID, importChainDataConfig, trackChainsValue,
+	}`, cfg.networkID, importChainDataConfig,
 		prof.ConsensusFrontierPollFreq,
 		prof.HealthCheckFrequency,
 		prof.HealthCheckAveragerHalflife,
@@ -559,9 +552,11 @@ func startPublicNetwork(cfg networkConfig) error {
 	}
 	opts = append(opts, client.WithPluginDir(pluginDir))
 
-	// Use a longer timeout for network start (nodes need time to bootstrap)
-	// 2 minutes is enough for 3 nodes on local machine
-	startCtx, startCancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	// Every chain in P-chain state is created and bootstrapped before the
+	// network reports healthy, so this budget scales with the number of
+	// chains, not just the three nodes. Ten minutes is a ceiling that still
+	// fails rather than hanging; a local run reaches healthy well inside it.
+	startCtx, startCancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer startCancel()
 
 	ux.Logger.PrintToUser("Starting network with genesis from luxfi/genesis package...")
@@ -573,10 +568,14 @@ func startPublicNetwork(cfg networkConfig) error {
 		// Check if network is already bootstrapped (backend was started previously)
 		errStr := err.Error()
 		if !server.IsServerError(err, server.ErrAlreadyBootstrapped) && !strings.Contains(errStr, "already bootstrapped") {
+			// The backend and its nodes can be running even when this call
+			// does not return in time, so record them before giving up.
+			saveNetworkState(cfg, effectivePortBase)
 			return fmt.Errorf("failed to start network: %w", err)
 		}
 		ux.Logger.PrintToUser("Network has already been started. Continuing with existing network...")
 	}
+	saveNetworkState(cfg, effectivePortBase)
 
 	ux.Logger.PrintToUser("Waiting for all validators to become healthy...")
 	clusterInfo, err := chain.WaitForHealthy(startCtx, cli)
@@ -610,11 +609,19 @@ func startPublicNetwork(cfg networkConfig) error {
 	ux.Logger.PrintToUser("\n📁 Data directory: %s", rootDataDir)
 	ux.Logger.PrintToUser("✅ Network is ready for use!")
 
-	// Save network state for deploy commands to find the running network
-	grpcPorts := binutils.GetGRPCPorts(cfg.networkName)
-	networkState := application.CreateNetworkStateWithGRPC(cfg.networkName, cfg.networkID, effectivePortBase, grpcPorts.Server, grpcPorts.Gateway)
+	ux.Logger.PrintToUser("gRPC server: localhost:%d", binutils.GetGRPCPorts(cfg.networkName).Server)
 
-	// Derive and store validator addresses
+	return nil
+}
+
+// saveNetworkState records what was started so status, send, stop and clean
+// can find it. Called as soon as the backend is up rather than after the
+// network reports healthy: nodes that are still bootstrapping are running
+// processes, and a network nothing is tracking cannot be stopped.
+func saveNetworkState(cfg networkConfig, portBase int) {
+	grpcPorts := binutils.GetGRPCPorts(cfg.networkName)
+	networkState := application.CreateNetworkStateWithGRPC(cfg.networkName, cfg.networkID, portBase, grpcPorts.Server, grpcPorts.Gateway)
+
 	validators := deriveValidatorAddresses(cfg.networkID, numValidators)
 	networkState.Validators = validators
 	if len(validators) > 0 {
@@ -629,9 +636,6 @@ func startPublicNetwork(cfg networkConfig) error {
 	if err := app.SaveNetworkState(networkState); err != nil {
 		ux.Logger.PrintToUser("Warning: failed to save network state: %v", err)
 	}
-	ux.Logger.PrintToUser("gRPC server: localhost:%d", grpcPorts.Server)
-
-	return nil
 }
 
 // StartMainnet starts a mainnet network with configurable validator nodes
