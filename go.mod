@@ -1,6 +1,6 @@
 module github.com/luxfi/cli
 
-go 1.26.5
+go 1.26.8
 
 // All dependencies use proper tagged versions for reproducibility
 
@@ -289,7 +289,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zap-proto/fiber/v3 v3.2.1 // indirect
 	github.com/zap-proto/go v1.3.0 // indirect
-	github.com/zap-proto/http v0.3.5 // indirect
+	github.com/zap-proto/http v0.3.9 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	go.mongodb.org/mongo-driver v1.17.9 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -355,7 +355,7 @@ require (
 	github.com/luxfi/genesis v1.16.19
 	github.com/luxfi/go-bip32 v1.1.0
 	github.com/luxfi/go-bip39 v1.2.0
-	github.com/luxfi/kms v1.12.10
+	github.com/luxfi/kms v1.12.26
 	github.com/luxfi/light v1.0.0
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/math v1.5.1
