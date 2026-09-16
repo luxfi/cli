@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-amd64:
-    runs-on: [self-hosted, linux, linux-amd64]
+    runs-on: [linux-amd64]
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
