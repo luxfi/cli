@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-amd64:
-    runs-on: [self-hosted, linux, amd64]
+    runs-on: [self-hosted, linux, linux-amd64]
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -61,7 +61,7 @@ jobs:
   notify-universe:
     needs: build-amd64
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: lux-build-linux-amd64
+    runs-on: linux-amd64
     steps:
       - uses: peter-evans/repository-dispatch@v3
         with:
