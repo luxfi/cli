@@ -8,6 +8,7 @@
     "export": "TURBOPACK=0 next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit --incremental false",
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
@@ -31,7 +32,7 @@
     "postcss": "^8.4.49",
     "rehype-pretty-code": "^0.14.1",
     "shiki": "^1.27.2",
-    "typescript": "^5.7.2"
+    "typescript": "7.0.2"
   },
   "packageManager": "pnpm@10.12.4"
 }
